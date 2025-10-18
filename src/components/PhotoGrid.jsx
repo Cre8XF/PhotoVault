@@ -1,0 +1,127 @@
+// ============================================================================
+// COMPONENT: PhotoGrid.jsx – viser bilder i grid og lar brukeren slette dem
+// ============================================================================
+import React, { useState } from "react";
+import PhotoModal from "./PhotoModal";
+import { ImageOff, Trash2 } from "lucide-react";
+import { deletePhoto } from "../firebase";
+
+const PhotoGrid = ({
+  photos = [],
+  title,
+  onPhotoClick,
+  refreshPhotos,
+  compact = false,
+  filterUnassigned = false,
+}) => {
+  // Hvis filterUnassigned er true → vis kun bilder uten album
+  const list = filterUnassigned ? photos.filter((p) => !p.albumId) : photos;
+  const [photoModal, setPhotoModal] = useState({ open: false, index: 0 });
+  const [loading, setLoading] = useState(false);
+
+  // 🔹 Håndter sletting
+  const handleDelete = async (photo) => {
+    const confirmed = window.confirm("Vil du slette dette bildet?");
+    if (!confirmed) return;
+
+    setLoading(true);
+    try {
+      await deletePhoto(photo.id, photo.storagePath);
+      if (refreshPhotos) await refreshPhotos();
+      if (typeof window.refreshAlbumList === "function") window.refreshAlbumList();
+      console.log("🗑️ Bilde slettet:", photo.id);
+    } catch (err) {
+      console.error("Feil ved sletting:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!list || list.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+        <ImageOff className="w-10 h-10 mb-2 opacity-60" />
+        <p className="text-sm">Ingen bilder å vise</p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {title && (
+        <h2 className="text-xl font-semibold text-gray-100 mb-4 capitalize">
+          {title}
+        </h2>
+      )}
+
+      <div
+        className={`${
+          compact
+            ? "grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8"
+            : "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+        } gap-4`}
+      >
+        {list.map((photo, i) => (
+          <div key={photo.id} className="relative group overflow-hidden rounded-xl">
+            <img
+              src={photo.url}
+              alt={photo.title || ""}
+              className={`w-full ${
+                compact ? "h-40" : "h-56"
+              } object-contain bg-black rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20 cursor-pointer`}
+              onClick={() =>
+                onPhotoClick
+                  ? onPhotoClick(photo.url)
+                  : setPhotoModal({ open: true, index: i })
+              }
+              loading="lazy"
+            />
+
+            {/* Slett knapp */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(photo);
+              }}
+              title="Slett bilde"
+              disabled={loading}
+              className={`absolute top-2 right-2 p-1.5 rounded-full ${
+                loading
+                  ? "bg-gray-500 cursor-not-allowed"
+                  : "bg-black/50 hover:bg-red-600/70"
+              } text-white opacity-0 group-hover:opacity-100 transition`}
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+
+            {/* Bildetittel eller "Sett som cover" */}
+            {onPhotoClick ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition">
+                <span className="text-white text-sm font-medium">
+                  Sett som cover
+                </span>
+              </div>
+            ) : (
+              photo.title && (
+                <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs py-1 px-2 truncate opacity-0 group-hover:opacity-100 transition">
+                  {photo.title}
+                </div>
+              )
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Lysboks (PhotoModal) */}
+      {!onPhotoClick && photoModal.open && (
+        <PhotoModal
+          photos={list}
+          currentIndex={photoModal.index}
+          onClose={() => setPhotoModal({ open: false, index: 0 })}
+        />
+      )}
+    </>
+  );
+};
+
+export default PhotoGrid;
