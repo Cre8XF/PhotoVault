@@ -1,8 +1,9 @@
 /* ============================================================================
-   index.css – global styling, glass-effekter og animasjoner for PhotoVault
+   index.css – Twilight Premium Theme v3.0
+   Balansert mørk-til-lys med varme toner og elegante animasjoner
    ============================================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap');
 
 * {
   margin: 0;
@@ -10,68 +11,123 @@
   box-sizing: border-box;
 }
 
+/* ============================================================================
+   ANIMATED TWILIGHT GRADIENT BACKGROUND
+   ============================================================================ */
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-  background: linear-gradient(to bottom right, #0f172a, #4c1d95, #0f172a);
-  color: #f3f4f6;
+  color: #e8e6f0;
   overflow-x: hidden;
+  position: relative;
+
+  /* Animated gradient background - DARK MODE */
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 20%, #4338ca 40%, #6366f1 60%, #8b5cf6 80%, #a78bfa 100%);
+  background-size: 400% 400%;
+  animation: twilightGradient 15s ease infinite;
+}
+
+/* LIGHT MODE - Soft pastel gradient */
+body.light-mode {
+  background: linear-gradient(135deg, #fdf4ff 0%, #f3e8ff 20%, #e9d5ff 40%, #ddd6fe 60%, #c7d2fe 80%, #fae8ff 100%);
+  color: #1f2937;
+}
+
+@keyframes twilightGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Subtle overlay for depth */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(15, 23, 42, 0.3) 100%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 main,
 .home-wrap {
-  padding-bottom: 80px;
+  position: relative;
+  z-index: 1;
+  padding-bottom: 100px;
 }
 
-/* ---------------- Glassmorphism ---------------- */
+/* ============================================================================
+   PREMIUM GLASSMORPHISM
+   ============================================================================ */
 .glass {
   background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Light mode glass */
+body.light-mode .glass {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+.glass:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 12px 40px rgba(139, 92, 246, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+body.light-mode .glass:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: 0 12px 40px rgba(139, 92, 246, 0.2), inset 0 1px 1px rgba(255, 255, 255, 1);
 }
 
 .glass-sm {
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
-  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
-/* ---------------- Tekstfarger ---------------- */
-:root {
-  --text-main: #f3f4f6;
-  --text-muted: #9ca3af;
-  --accent: #8b5cf6;
-  --accent-light: rgba(139, 92, 246, 0.5);
+/* ============================================================================
+   GOLDEN GLOW EFFECTS
+   ============================================================================ */
+.glow-gold {
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
 }
 
-/* ---------------- Scrollbar ---------------- */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--accent-light);
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
+.glow-purple {
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
 }
 
-/* ---------------- Animasjoner ---------------- */
-@keyframes fade-in {
+/* Hover glow for cards */
+.card-glow:hover {
+  box-shadow: 0 0 40px rgba(139, 92, 246, 0.4), 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================================================
+   ENHANCED ANIMATIONS
+   ============================================================================ */
+@keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
@@ -79,38 +135,335 @@ main,
   }
 }
 
-@keyframes slide-in {
+@keyframes scaleIn {
   from {
-    transform: translateX(120%);
     opacity: 0;
+    transform: scale(0.9);
   }
   to {
-    transform: translateX(0);
     opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
   }
 }
 
 .animate-fade-in {
-  animation: fade-in 0.4s ease-out;
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .animate-slide-in {
-  animation: slide-in 0.3s ease-out;
+  animation: slideInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ---------------- Bilder ---------------- */
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Staggered animation for grids */
+.stagger-1 {
+  animation-delay: 0.1s;
+}
+.stagger-2 {
+  animation-delay: 0.2s;
+}
+.stagger-3 {
+  animation-delay: 0.3s;
+}
+.stagger-4 {
+  animation-delay: 0.4s;
+}
+
+/* ============================================================================
+   PREMIUM SCROLLBAR
+   ============================================================================ */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #8b5cf6, #a78bfa);
+  border-radius: 10px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #7c3aed, #8b5cf6);
+}
+
+/* ============================================================================
+   TYPOGRAPHY
+   ============================================================================ */
+h1,
+h2,
+h3 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #f3f4f6;
+}
+
+h1 {
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, #f3f4f6, #c4b5fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.heading-elegant {
+  font-family: 'Playfair Display', serif;
+}
+
+/* ============================================================================
+   BUTTONS & INTERACTIONS
+   ============================================================================ */
+button {
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+  position: relative;
+  overflow: hidden;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Premium button with shimmer effect */
+.btn-premium {
+  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-premium::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.btn-premium:hover::before {
+  left: 100%;
+}
+
+/* ============================================================================
+   IMAGES & MEDIA
+   ============================================================================ */
 img {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 img:hover {
-  transform: scale(1.03);
+  transform: scale(1.05);
+  filter: brightness(1.1);
 }
 
-/* ---------------- Utility ---------------- */
-.text-muted {
-  color: var(--text-muted);
+img[loading='lazy'] {
+  opacity: 0;
+  animation: fadeInUp 0.6s ease-out forwards;
 }
-.text-accent {
-  color: var(--accent);
+
+/* ============================================================================
+   CARDS & CONTAINERS
+   ============================================================================ */
+.card-premium {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  padding: 1.5rem;
+  backdrop-filter: blur(20px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-premium::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), transparent 50%, rgba(251, 191, 36, 0.1));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.card-premium:hover::before {
+  opacity: 1;
+}
+
+.card-premium:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(139, 92, 246, 0.3), 0 0 40px rgba(251, 191, 36, 0.2);
+}
+
+/* ============================================================================
+   LOADING & SKELETON
+   ============================================================================ */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #a78bfa;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.05) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+  border-radius: 12px;
+}
+
+/* ============================================================================
+   FOCUS & SELECTION
+   ============================================================================ */
+*:focus-visible {
+  outline: 2px solid #a78bfa;
+  outline-offset: 3px;
+}
+
+::selection {
+  background: rgba(139, 92, 246, 0.5);
+  color: white;
+}
+
+/* ============================================================================
+   INPUT FIELDS
+   ============================================================================ */
+input,
+select,
+textarea {
+  font-family: inherit;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #f3f4f6;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: #a78bfa;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+}
+
+input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+.text-gradient {
+  background: linear-gradient(135deg, #f3f4f6, #c4b5fd, #fbbf24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.backdrop-blur-heavy {
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+
+.smooth-scroll {
+  scroll-behavior: smooth;
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
+  }
+
+  .glass {
+    border-radius: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.75rem;
+  }
+}
+
+/* ============================================================================
+   REDUCED MOTION
+   ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  body {
+    animation: none;
+  }
 }

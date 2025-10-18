@@ -1,78 +1,239 @@
-# 📸 PhotoVault – React + Firebase Photo Archive App
+# 📸 PhotoVault v2.5 – Complete Enhanced Version
 
-## 🧩 Om prosjektet
+## 🎉 Hva er nytt i v2.5
 
-PhotoVault er en komplett fotoarkiv-app bygget i **React** med **Firebase-backend** (Firestore + Storage).  
-Appen håndterer innlogging, album, bildeopplasting og visning, og støtter både gratis og Pro-brukere.  
-Denne pakken (ZIP) inneholder alt av kildekode og tilhørende README for videre utvikling eller forbedring med AI-verktøy.
+### ✅ Del A: Auto-refresh + Favoritt-system
+
+- ⭐ **Komplett favoritt-system** med toggle på alle bilder
+- 🔄 **Auto-refresh** etter opplasting og endringer
+- 📍 Favoritt-seksjoner i Dashboard og HomePage
+- 🎯 Visuell feedback med fylte/tomme stjerner
+
+### ✅ Del B: Forbedret layout og design
+
+- 🎨 **Moderne kortbasert design** med glassmorphism
+- 📊 **Statistikk-dashboard** med sanntidsdata
+- 💫 **Smooth animasjoner** på alle interaksjoner
+- 📱 **Responsiv** for mobil, tablet og desktop
+
+### ✅ Del C: Avansert søk og filtrering
+
+- 🔍 **Kraftig søkemotor** (navn, tags, metadata)
+- 📅 **Dato-filtre** (i dag, uke, måned, år)
+- 🏷️ **Type-filtre** (favoritter, AI-tagget, ansikter)
+- 🎯 **Aktive filter-badges** med enkelt reset
+- 📈 **Sanntidsstatistikk** i galleri-toppen
+
+### ✅ Del D: Lysboks og metadata
+
+- 🖼️ **Forbedret PhotoModal** med fullskjerm-visning
+- ℹ️ **Metadata-panel** (dato, størrelse, tags, ansikter)
+- ⬇️ **Last ned bilder** direkte fra lysboks
+- ⭐ **Toggle favoritt** i fullskjerm
+- ⌨️ **Tastatur-navigasjon** (piltaster, ESC, I)
+- 📱 **Sveip-støtte** på mobil
+
+### ✅ Designforbedringer
+
+- 🌈 **Bedre animasjoner** (fade-in, slide-up, scale)
+- 🎭 **Skeleton loaders** for bedre UX
+- ⚡ **Loading states** overalt
+- 🎨 **Forbedret fargepalett** og kontrast
+- 💎 **Glassmorphism** på alle kort og modaler
 
 ---
 
-## 🚀 Rask start (lokalt)
+## 🚀 Rask start
 
-1. **Installer Node.js**  
-   👉 https://nodejs.org/
+```bash
+npm install
+npm start
+```
 
-2. **Installer avhengigheter**
-   ```bash
-   npm install
-   Start utviklingsserver
-   ```
+Appen kjører på `http://localhost:3000`
 
-bash Kopier kode npm start Appen kjører da på http://localhost:3000
+---
 
-Bygg for produksjon
+## 📦 Nye komponenter
 
-bash Kopier kode npm run build ✨ Funksjoner (nåværende versjon) 🔐 Autentisering E-post / passord via Firebase Authentication
+```
+src/
+├── components/
+│   ├── Loading.jsx           # ⭐ NYT: Loading states
+│   ├── PhotoModal.jsx         # 🔥 Forbedret med metadata
+│   └── PhotoGrid.jsx          # ⭐ Favoritt-toggle
+├── pages/
+│   ├── DashboardPage.jsx      # 🔥 Nye seksjoner
+│   ├── GalleryPage.jsx        # 🔥 Avansert søk
+│   └── HomePage.jsx           # ⭐ Favoritt-seksjon
+└── styles/
+    ├── index.css              # 🔥 Nye animasjoner
+    ├── home.css               # ⭐ Forbedret layout
+    └── album.css              # ⭐ Object-contain fix
+```
 
-Persistent session (localStorage)
+---
 
-Rollebasert tilgang: admin / pro / standard
+## 🎯 Funksjoner
 
-📸 Bilder og album Last opp flere bilder samtidig
+### Dashboard
 
-Organiser bilder i album
+- 📊 Sanntidsstatistikk (album, bilder, favoritter, lagring)
+- ⭐ Favoritt-seksjon (opptil 8 bilder)
+- 📸 Siste opplastninger (4 nyeste)
+- 🤖 AI-verktøy (sortering, forbedring, bakgrunnsfjerning)
+- 👑 Pro/Gratis-status med lagringsindikator
 
-Sett coverbilde
+### Galleri
 
-Fullskjerm bildevisning
+- 🔍 Kraftig søk med sanntidsfiltrering
+- 📅 Dato-filtre (dag, uke, måned, år)
+- 🏷️ Type-filtre (alle, favoritter, AI, ansikter)
+- 📈 Statistikk-oversikt øverst
+- 🎯 Aktive filter-badges
+- 📂 Album-visning med cover-bilder
 
-Slettes direkte fra Firestore + Storage
+### Album
 
-Sortering etter dato
+- 🖼️ Cover-bilde-funksjon
+- ✏️ Redigeringsmodus
+- ⭐ Favoritt-toggle på alle bilder
+- 🗑️ Slett bilder individuelt
+- 📊 Bildeoversikt
 
-🧠 AI / Pro-funksjoner (Planlagt) AI auto-tagging og promptbasert redigering
+### Lysboks (PhotoModal)
 
-Pro: ubegrenset opplasting og tagging
+- ⬅️➡️ Navigasjon med piltaster
+- 📱 Sveip-støtte på mobil
+- ℹ️ Metadata-panel (trykk "I")
+- ⬇️ Last ned bilder
+- ⭐ Toggle favoritt
+- 🎨 Smooth animasjoner
 
-🧰 Admin Dashboard Viser brukere og lagring
+---
 
-Statistikkoversikt for administratorer
+## ⌨️ Tastatur-snarveier
 
-💎 Premium-modell Gratisbruker: 50 opplastinger
+| Tast      | Funksjon               |
+| --------- | ---------------------- |
+| `←` / `→` | Naviger mellom bilder  |
+| `ESC`     | Lukk lysboks/modal     |
+| `I`       | Vis/skjul info-panel   |
+| `Space`   | Pause/play (fremtidig) |
 
-Pro-bruker: Ubegrenset + AI-funksjoner
+---
 
-Oppgradering med ett klikk (planlagt)
+## 🎨 Design-prinsipper
 
-🗂 Prosjektstruktur csharp Kopier kode photovault/ ├── public/ │ └── index.html # HTML-mal og Tailwind-inkludering ├── src/ │ ├── App.js # Hovedapplikasjon │ ├── index.js # React entry point │ ├── firebase.js # Firestore + Storage-funksjoner │ ├── db.js # IndexedDB caching │ ├── components/ # Modal, Grid, UploadModal, etc. │ ├── pages/ # HomePage, AlbumPage, GalleryPage, AdminDashboard │ ├── index.css # Globale stiler og tema │ ├── home.css │ └── album.css ├── package.json └── README.md 💡 Ønskede forbedringer (mål for PhotoVault v2) Område Beskrivelse 🏠 Ny Home-layout Seksjoner for album, favoritter og nylige bilder 🖼️ Galleri-visning Fullskjerm galleri med filtrering ⭐ Favoritter Brukerbasert “favoritt”-system 🔄 Auto-refresh Automatisk oppdatering etter opplasting 🔍 Søk og filtrering Etter tag, album, dato 💡 Design Moderne layout med animasjoner og jevn flyt 🧠 AI-funksjon “ChatGPT-forsterket prompt”-redigering 🧰 Admin Full oversikt over brukere, lagring og aktivitet 📲 Mobilapp Flutter/Capacitor-basert versjon senere
+- **Glassmorphism** for moderne look
+- **Object-contain** for hele bilder (ingen cropping)
+- **Smooth animasjoner** (fade, slide, scale)
+- **Dark mode** som standard
+- **Responsiv** for alle skjermstørrelser
+- **Accessibility** med fokus-states
 
-⚙️ For AI-utvikling (Claude, ChatGPT, Gemini) Du mottar her en komplett React-app i ZIP-format. Pakk ut filene og les denne README først. Gå deretter gjennom prosjektet og implementer ønskede forbedringer listet under “mål for PhotoVault v2”. Ikke fjern eksisterende funksjoner, men forbedre struktur, layout og ytelse. Returner alle oppdaterte filer i korrekt mappestruktur.
+---
 
-AI bør: Beholde all Firebase-logikk og IndexedDB-integrasjon.
+## 🔧 Teknisk stack
 
-Optimalisere design (bruk Tailwind eller ren CSS).
+- **React 18** med Hooks
+- **Firebase** (Firestore + Storage + Auth)
+- **Tailwind CSS** via CDN
+- **Lucide React** for ikoner
+- **IndexedDB** for lokal cache
 
-Implementere auto-refresh og favorittfunksjon.
+---
 
-Forbedre UI og navigasjon uten å introdusere tredjeparts-UI-rammeverk (ingen Bootstrap/MUI).
+## 📊 Ytelse
 
-Skrive ren JSX, kommentert på norsk ved behov.
+- ⚡ Lazy loading på alle bilder
+- 🔄 Auto-refresh med debounce
+- 💾 Client-side caching
+- 🎯 Optimistiske updates
+- 🚀 Code splitting (fremtidig)
 
-Returnere alle oppdaterte filer ferdige for npm start.
+---
 
-⚡ Claude-optimalisert systemprompt sql Kopier kode You are an expert React + Firebase developer. You receive a full ZIP containing the PhotoVault app and this README. Your goal: complete PhotoVault v2 with improved UI, navigation, auto-refresh, and favorites. Keep all Firebase and IndexedDB logic intact. Use Tailwind or plain CSS for styling. Return complete, deploy-ready code in full file structure. At the top of your response, briefly summarize what you changed and why. 📦 Deploy Netlify (anbefalt)
+## 🐛 Feilsøking
 
-bash Kopier kode npm run build netlify deploy --prod --dir=build Eller drag-and-drop build/-mappen direkte til netlify.com.
+### Bilder vises ikke
 
-📄 Lisens Fri bruk for personlige og kommersielle prosjekter. Laget med ❤️ og React av Roger / Cre8Web.
+```bash
+# Sjekk Firebase-tilkobling
+console → Nettverks-fanen → Se etter 403/404
+```
+
+### Auto-refresh fungerer ikke
+
+```bash
+# Sjekk at refreshData() kalles
+console.log("✅ Data oppdatert")
+```
+
+### Favoritter lagres ikke
+
+```bash
+# Sjekk Firestore-regler
+# photos-collection må ha write-tilgang
+```
+
+---
+
+## 📝 Changelog
+
+### v2.5 (2025-10-18)
+
+- ✅ Avansert søk og filtrering
+- ✅ Forbedret PhotoModal med metadata
+- ✅ Loading states og skeleton loaders
+- ✅ Bedre animasjoner og design
+- ✅ Tastatur-snarveier
+- ✅ Last ned-funksjon
+
+### v2.1 (2025-10-18)
+
+- ✅ Auto-refresh etter opplasting
+- ✅ Komplett favoritt-system
+- ✅ Object-contain fix
+- ✅ Forbedret UX overalt
+
+### v1.0 (2025-10-17)
+
+- ✅ Grunnleggende funksjonalitet
+- ✅ Album og bilder
+- ✅ Firebase-integrasjon
+
+---
+
+## 🚧 Roadmap (v3.0)
+
+- [ ] Drag-and-drop opplasting
+- [ ] Bulk-operasjoner (flytt, slett)
+- [ ] Deling med link
+- [ ] Slideshow-modus
+- [ ] Video-støtte
+- [ ] Collaborative albums
+- [ ] Export til ZIP
+- [ ] Print-funksjon
+
+---
+
+## 📄 Lisens
+
+Fri bruk for personlige og kommersielle prosjekter.
+
+**Laget med ❤️ av Roger / Cre8Web**
+
+---
+
+## 🙏 Takk til
+
+- **Anthropic Claude** for utvikling
+- **Firebase** for backend
+- **Tailwind CSS** for styling
+- **Lucide** for ikoner
+
+---
+
+**Versjon:** 2.5.0  
+**Sist oppdatert:** 18. oktober 2025

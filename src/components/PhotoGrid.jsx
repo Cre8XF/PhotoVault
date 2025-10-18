@@ -1,10 +1,10 @@
 // ============================================================================
-// COMPONENT: PhotoGrid.jsx – viser bilder i grid og lar brukeren slette dem
+// COMPONENT: PhotoGrid.jsx – v2.1 med favoritt-toggle
 // ============================================================================
 import React, { useState } from "react";
 import PhotoModal from "./PhotoModal";
-import { ImageOff, Trash2 } from "lucide-react";
-import { deletePhoto } from "../firebase";
+import { ImageOff, Trash2, Star } from "lucide-react";
+import { deletePhoto, toggleFavorite } from "../firebase";
 
 const PhotoGrid = ({
   photos = [],
@@ -13,8 +13,8 @@ const PhotoGrid = ({
   refreshPhotos,
   compact = false,
   filterUnassigned = false,
+  showFavoriteButton = true,
 }) => {
-  // Hvis filterUnassigned er true → vis kun bilder uten album
   const list = filterUnassigned ? photos.filter((p) => !p.albumId) : photos;
   const [photoModal, setPhotoModal] = useState({ open: false, index: 0 });
   const [loading, setLoading] = useState(false);
@@ -28,12 +28,22 @@ const PhotoGrid = ({
     try {
       await deletePhoto(photo.id, photo.storagePath);
       if (refreshPhotos) await refreshPhotos();
-      if (typeof window.refreshAlbumList === "function") window.refreshAlbumList();
       console.log("🗑️ Bilde slettet:", photo.id);
     } catch (err) {
       console.error("Feil ved sletting:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // ⭐ NYTT: Håndter favoritt-toggle
+  const handleToggleFavorite = async (e, photo) => {
+    e.stopPropagation();
+    try {
+      await toggleFavorite(photo.id, photo.favorite);
+      if (refreshPhotos) await refreshPhotos();
+    } catch (err) {
+      console.error("Feil ved favoritt-toggle:", err);
     }
   };
 
@@ -68,7 +78,7 @@ const PhotoGrid = ({
               alt={photo.title || ""}
               className={`w-full ${
                 compact ? "h-40" : "h-56"
-              } object-contain bg-black rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20 cursor-pointer`}
+              } object-contain bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20 cursor-pointer`}
               onClick={() =>
                 onPhotoClick
                   ? onPhotoClick(photo.url)
@@ -77,22 +87,40 @@ const PhotoGrid = ({
               loading="lazy"
             />
 
-            {/* Slett knapp */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete(photo);
-              }}
-              title="Slett bilde"
-              disabled={loading}
-              className={`absolute top-2 right-2 p-1.5 rounded-full ${
-                loading
-                  ? "bg-gray-500 cursor-not-allowed"
-                  : "bg-black/50 hover:bg-red-600/70"
-              } text-white opacity-0 group-hover:opacity-100 transition`}
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+            {/* Overlay-knapper */}
+            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition">
+              {/* ⭐ Favoritt-knapp */}
+              {showFavoriteButton && (
+                <button
+                  onClick={(e) => handleToggleFavorite(e, photo)}
+                  title={photo.favorite ? "Fjern favoritt" : "Legg til favoritt"}
+                  className={`p-1.5 rounded-full ${
+                    photo.favorite
+                      ? "bg-yellow-500/80 text-white"
+                      : "bg-black/50 text-gray-300 hover:bg-yellow-500/70"
+                  } transition`}
+                >
+                  <Star className="w-4 h-4" fill={photo.favorite ? "currentColor" : "none"} />
+                </button>
+              )}
+
+              {/* 🗑️ Slett-knapp */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(photo);
+                }}
+                title="Slett bilde"
+                disabled={loading}
+                className={`p-1.5 rounded-full ${
+                  loading
+                    ? "bg-gray-500 cursor-not-allowed"
+                    : "bg-black/50 hover:bg-red-600/70 text-white"
+                } transition`}
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
 
             {/* Bildetittel eller "Sett som cover" */}
             {onPhotoClick ? (
@@ -118,6 +146,10 @@ const PhotoGrid = ({
           photos={list}
           currentIndex={photoModal.index}
           onClose={() => setPhotoModal({ open: false, index: 0 })}
+          onToggleFavorite={async (photo) => {
+            await toggleFavorite(photo.id, photo.favorite);
+            if (refreshPhotos) await refreshPhotos();
+          }}
         />
       )}
     </>

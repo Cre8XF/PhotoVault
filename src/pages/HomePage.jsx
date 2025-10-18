@@ -1,5 +1,5 @@
 // ============================================================================
-// PAGE: HomePage.jsx – forbedret og stabil versjon (v2)
+// PAGE: HomePage.jsx – v2.1 med favoritt-seksjon og auto-refresh
 // ============================================================================
 import React, { useMemo, useState, useEffect } from "react";
 import {
@@ -35,6 +35,7 @@ const HomePage = ({
   const [q, setQ] = useState("");
   const [sortKey, setSortKey] = useState("newest");
   const [showUpload, setShowUpload] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // fallback-timestamp for sortering
   useEffect(() => {
@@ -46,11 +47,13 @@ const HomePage = ({
     });
   }, [albums, photos]);
 
+  // ⭐ NYTT: Favoritt-bilder
   const favoritePhotos = useMemo(
     () => (photos || []).filter((p) => p.favorite),
     [photos]
   );
 
+  // 📸 Siste bilder
   const recentPhotos = useMemo(() => {
     return (photos || [])
       .filter((p) => !!p.url)
@@ -61,6 +64,7 @@ const HomePage = ({
       .slice(0, 12);
   }, [photos]);
 
+  // 📂 Filtrerte album
   const filteredAlbums = useMemo(() => {
     const list = (albums || []).slice().sort(sorters[sortKey]);
     if (!q) return list;
@@ -69,6 +73,7 @@ const HomePage = ({
     );
   }, [albums, q, sortKey]);
 
+  // 🖼️ Bilder uten album
   const unassigned = useMemo(
     () => (photos || []).filter((p) => !p.albumId),
     [photos]
@@ -82,6 +87,16 @@ const HomePage = ({
     );
   }, [unassigned, q, sortKey]);
 
+  // 🔄 Refresh-handler
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshData();
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 800);
+    }
+  };
+
   return (
     <div className="home-wrap min-h-screen p-4 md:p-8">
       {/* Header */}
@@ -94,12 +109,17 @@ const HomePage = ({
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={refreshData}
-            className="px-3 py-2 rounded-lg glass-sm flex items-center gap-2"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className={`px-3 py-2 rounded-lg glass-sm flex items-center gap-2 ${
+              isRefreshing ? "opacity-50 cursor-not-allowed" : ""
+            }`}
             title="Oppdater"
           >
-            <RefreshCw className="w-4 h-4" />
-            <span className="hidden md:inline">Oppdater</span>
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            <span className="hidden md:inline">
+              {isRefreshing ? "Oppdaterer..." : "Oppdater"}
+            </span>
           </button>
           <button
             onClick={() => setShowUpload(true)}
@@ -116,43 +136,43 @@ const HomePage = ({
       <div className="home-toolbar">
         <div className="glass rounded-2xl p-2 flex items-center gap-2">
           <button
-            className={`px-3 py-2 rounded-lg flex items-center gap-2 ${
-              tab === "albums" ? "bg-white shadow" : ""
+            className={`px-3 py-2 rounded-lg flex items-center gap-2 transition ${
+              tab === "albums" ? "bg-white/20 shadow" : ""
             }`}
             onClick={() => setTab("albums")}
           >
             <Folder className="w-4 h-4" /> Album
           </button>
           <button
-            className={`px-3 py-2 rounded-lg flex items-center gap-2 ${
-              tab === "unassigned" ? "bg-white shadow" : ""
+            className={`px-3 py-2 rounded-lg flex items-center gap-2 transition ${
+              tab === "unassigned" ? "bg-white/20 shadow" : ""
             }`}
             onClick={() => setTab("unassigned")}
           >
-            <ImageIcon className="w-4 h-4" /> Bilder uten album
+            <ImageIcon className="w-4 h-4" /> Løse bilder
           </button>
         </div>
 
         <div className="glass rounded-2xl p-2 flex items-center gap-2">
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/70">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10">
             <Search className="w-4 h-4" />
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Søk i navn..."
-              className="bg-transparent outline-none text-sm text-gray-800"
+              placeholder="Søk..."
+              className="bg-transparent outline-none text-sm w-24 md:w-32"
             />
           </div>
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/70">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10">
             <Filter className="w-4 h-4" />
             <select
               value={sortKey}
               onChange={(e) => setSortKey(e.target.value)}
-              className="bg-transparent outline-none text-sm text-gray-800"
+              className="bg-transparent outline-none text-sm"
             >
               <option value="newest">Nyeste</option>
               <option value="oldest">Eldste</option>
-              <option value="name">Navn A–Å</option>
+              <option value="name">Navn</option>
             </select>
           </div>
         </div>
@@ -160,11 +180,15 @@ const HomePage = ({
 
       {/* Seksjoner */}
       <div className="home-sections mt-4">
-        {!!favoritePhotos.length && (
-          <div className="glass rounded-2xl p-4">
+        {/* ⭐ NYTT: Favoritter */}
+        {favoritePhotos.length > 0 && (
+          <div className="glass rounded-2xl p-4 mb-4">
             <div className="flex items-center gap-2 mb-3">
-              <Star className="w-4 h-4" />
+              <Star className="w-4 h-4 text-yellow-400" fill="currentColor" />
               <h2 className="font-semibold">Favoritter</h2>
+              <span className="text-xs text-gray-400">
+                ({favoritePhotos.length})
+              </span>
             </div>
             <div className="fav-row">
               {favoritePhotos.map((p) => (
@@ -172,15 +196,20 @@ const HomePage = ({
                   key={p.id}
                   src={p.url}
                   alt={p.name || ""}
-                  className="rounded-xl h-32 w-full object-cover"
+                  className="rounded-xl h-32 w-full object-contain bg-gray-900 cursor-pointer hover:scale-105 transition"
                   loading="lazy"
+                  onClick={() => {
+                    // Vis lightbox eller detaljer
+                    console.log("Åpne favoritt:", p.name);
+                  }}
                 />
               ))}
             </div>
           </div>
         )}
 
-        {!!recentPhotos.length && (
+        {/* Sist opplastet */}
+        {recentPhotos.length > 0 && (
           <div className="glass rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-3">
               <UploadCloud className="w-4 h-4" />
@@ -192,7 +221,7 @@ const HomePage = ({
                   key={p.id}
                   src={p.url}
                   alt={p.name || ""}
-                  className="rounded-xl h-28 w-full object-cover"
+                  className="rounded-xl h-28 w-full object-contain bg-gray-900"
                   loading="lazy"
                 />
               ))}
@@ -200,8 +229,9 @@ const HomePage = ({
           </div>
         )}
 
+        {/* Album eller løse bilder */}
         {tab === "albums" ? (
-          <div className="glass rounded-2xl p-4">
+          <div className="glass rounded-2xl p-4 mt-4">
             <div className="flex items-center gap-2 mb-3">
               <Folder className="w-4 h-4" />
               <h2 className="font-semibold">Album</h2>
@@ -223,13 +253,17 @@ const HomePage = ({
             )}
           </div>
         ) : (
-          <div className="glass rounded-2xl p-4">
+          <div className="glass rounded-2xl p-4 mt-4">
             <div className="flex items-center gap-2 mb-3">
               <ImageIcon className="w-4 h-4" />
               <h2 className="font-semibold">Bilder uten album</h2>
             </div>
             {filteredUnassigned.length ? (
-              <PhotoGrid photos={filteredUnassigned} compact />
+              <PhotoGrid 
+                photos={filteredUnassigned} 
+                compact 
+                refreshPhotos={refreshData}
+              />
             ) : (
               <div className="empty-state">Ingen løse bilder funnet.</div>
             )}

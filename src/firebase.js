@@ -1,6 +1,5 @@
 // ============================================================================
-// firebase.js – komplett integrasjon (v2) for PhotoVault
-// Firestore + Storage med støtte for cover-bilde og gamle data
+// firebase.js – komplett integrasjon (v2.1) med favoritt-toggle
 // ============================================================================
 import { initializeApp } from "firebase/app";
 import {
@@ -51,7 +50,6 @@ export async function getAlbumsByUser(userId) {
     const snap = await getDocs(q);
     return snap.docs.map((d) => {
       const data = d.data();
-      // fallback for gamle dokumenter
       if (!data.createdAt) data.createdAt = new Date().toISOString();
       if (!data.updatedAt) data.updatedAt = data.createdAt;
       if (!("photoCount" in data)) data.photoCount = 0;
@@ -78,7 +76,7 @@ export async function addAlbum(data) {
   return refDoc.id;
 }
 
-// 🔹 Oppdater album (navn, beskrivelse, cover, antall bilder osv.)
+// 🔹 Oppdater album
 export async function updateAlbum(albumId, updates) {
   try {
     const refDoc = doc(db, "albums", albumId);
@@ -92,7 +90,7 @@ export async function updateAlbum(albumId, updates) {
   }
 }
 
-// 🔹 Sett cover-bilde manuelt
+// 🔹 Sett cover-bilde
 export async function setAlbumCover(albumId, photoUrl) {
   try {
     const refDoc = doc(db, "albums", albumId);
@@ -133,7 +131,10 @@ export async function addPhoto(data) {
     updatedAt: now,
     favorite: data.favorite || false,
   };
+  
+  // ✅ La Firestore generere ID automatisk
   const refDoc = await addDoc(collection(db, "photos"), payload);
+  console.log(`📸 Bilde lagret: ${refDoc.id}`);
   return refDoc.id;
 }
 
@@ -147,6 +148,26 @@ export async function updatePhoto(photoId, updates) {
     });
   } catch (err) {
     console.error("🔥 updatePhoto:", err);
+  }
+}
+
+// ⭐ NYTT: Toggle favoritt-status
+export async function toggleFavorite(photoId, currentStatus) {
+  try {
+    const refDoc = doc(db, "photos", photoId);
+    const newStatus = !currentStatus;
+    
+    await updateDoc(refDoc, {
+      favorite: newStatus,
+      updatedAt: new Date().toISOString(),
+    });
+    
+    console.log(`⭐ Favoritt oppdatert: ${photoId} → ${newStatus}`);
+    return newStatus;
+  } catch (err) {
+    console.error("🔥 toggleFavorite error:", err);
+    console.error("PhotoId:", photoId, "CurrentStatus:", currentStatus);
+    throw err;
   }
 }
 

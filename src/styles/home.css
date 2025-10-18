@@ -1,212 +1,282 @@
 /* ============================================================================
-   home.css – forbedret versjon for PhotoVault HomePage (v2)
+   home.css – Twilight Theme v3.0 med Masonry Layout
    ============================================================================ */
 
 :root {
   --glass-bg: rgba(255, 255, 255, 0.08);
-  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-border: rgba(255, 255, 255, 0.18);
   --text-main: #f3f4f6;
-  --text-muted: #9ca3af;
-  --shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
-  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.15);
-  --accent: #60a5fa;
+  --text-muted: #c4b5fd;
+  --shadow: 0 20px 60px rgba(139, 92, 246, 0.3);
+  --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.2);
+  --accent: #a78bfa;
+  --gold: #fbbf24;
 }
 
-/* ---------------- Wrapper og layout ---------------- */
+/* ============================================================================
+   HOME WRAPPER
+   ============================================================================ */
 .home-wrap {
   color: var(--text-main);
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  animation: fade-in 0.4s ease;
+  gap: 32px;
+  animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  padding-bottom: 100px;
 }
 
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ---------------- Toolbar ---------------- */
+/* ============================================================================
+   TOOLBAR
+   ============================================================================ */
 .home-toolbar {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 12px;
+  gap: 16px;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 @media (max-width: 768px) {
   .home-toolbar {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 }
 
-.glass {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(14px);
-  box-shadow: var(--shadow-sm);
-  transition: background 0.3s ease;
-}
-
-.glass:hover {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-/* ---------------- Seksjoner ---------------- */
+/* ============================================================================
+   SECTIONS
+   ============================================================================ */
 .home-sections {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 32px;
 }
 
-/* ---------------- Radvisning for favoritter / nylig ---------------- */
+/* ============================================================================
+   FAVORITT & RECENT ROWS (Horizontal Scroll)
+   ============================================================================ */
 .fav-row,
 .recent-row {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: minmax(140px, 220px);
-  gap: 14px;
+  grid-auto-columns: minmax(160px, 240px);
+  gap: 20px;
   overflow-x: auto;
-  padding: 4px 0 8px;
+  padding: 8px 0 16px;
   scroll-behavior: smooth;
+  scrollbar-width: thin;
+}
+
+.fav-row::-webkit-scrollbar,
+.recent-row::-webkit-scrollbar {
+  height: 6px;
+}
+
+.fav-row::-webkit-scrollbar-track,
+.recent-row::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.fav-row::-webkit-scrollbar-thumb,
+.recent-row::-webkit-scrollbar-thumb {
+  background: rgba(167, 139, 250, 0.5);
+  border-radius: 10px;
 }
 
 .fav-row img,
 .recent-row img {
   border-radius: 16px;
   box-shadow: var(--shadow-sm);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  loading: lazy;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .fav-row img:hover,
 .recent-row img:hover {
-  transform: scale(1.05);
-  box-shadow: var(--shadow);
+  transform: scale(1.08) translateY(-4px);
+  box-shadow: 
+    var(--shadow),
+    0 0 30px rgba(251, 191, 36, 0.3);
+  border-color: rgba(251, 191, 36, 0.5);
 }
 
-/* ---------------- Albumgrid ---------------- */
+/* ============================================================================
+   MASONRY ALBUM GRID
+   ============================================================================ */
 .album-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
+  grid-auto-rows: 10px;
 }
 
 .album-card {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 18px;
+  border-radius: 20px;
   overflow: hidden;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
-  transition: transform 0.2s ease, box-shadow 0.25s ease;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  animation: scaleIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  animation-fill-mode: both;
 }
 
+/* Staggered animation */
+.album-card:nth-child(1) { animation-delay: 0.05s; }
+.album-card:nth-child(2) { animation-delay: 0.1s; }
+.album-card:nth-child(3) { animation-delay: 0.15s; }
+.album-card:nth-child(4) { animation-delay: 0.2s; }
+.album-card:nth-child(5) { animation-delay: 0.25s; }
+.album-card:nth-child(6) { animation-delay: 0.3s; }
+
+/* 3D Tilt Effect on Hover */
 .album-card:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: var(--shadow);
+  transform: translateY(-8px) scale(1.03) rotateX(2deg);
+  box-shadow: 
+    var(--shadow),
+    0 0 40px rgba(167, 139, 250, 0.4);
+  border-color: rgba(167, 139, 250, 0.5);
 }
 
-/* Legg til diskret cover-indikator */
+/* Golden glow indicator */
 .album-card::after {
-  content: '🖼️';
+  content: '📸';
   position: absolute;
-  top: 8px;
-  right: 10px;
+  top: 12px;
+  right: 12px;
+  font-size: 1.2rem;
   opacity: 0;
-  font-size: 1.1rem;
-  transition: opacity 0.3s;
+  transition: all 0.3s;
+  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.8));
 }
 
 .album-card:hover::after {
-  opacity: 0.8;
+  opacity: 1;
+  transform: scale(1.2);
 }
 
+/* Album Thumbnail */
 .album-thumb {
   aspect-ratio: 16/10;
   width: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
   opacity: 0;
-  animation: fade-in 0.5s forwards;
+  animation: fadeInUp 0.6s ease-out forwards;
   border-bottom: 1px solid var(--glass-border);
+  background: linear-gradient(135deg, #1e1b4b, #312e81);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ---------------- Meta og tekst ---------------- */
+.album-card:hover .album-thumb {
+  transform: scale(1.05);
+}
+
+/* Album Meta */
 .album-meta {
-  padding: 12px 14px;
+  padding: 16px 18px;
   display: grid;
-  gap: 6px;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .album-title {
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.3;
   color: var(--text-main);
-  font-size: 1rem;
+  font-size: 1.05rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .album-sub {
   color: var(--text-muted);
   font-size: 0.9rem;
+  opacity: 0.9;
 }
 
-/* ---------------- Empty state ---------------- */
+/* ============================================================================
+   EMPTY STATE
+   ============================================================================ */
 .empty-state {
   text-align: center;
   color: var(--text-muted);
-  padding: 60px 16px;
-  font-size: 0.95rem;
+  padding: 80px 24px;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
 }
 
-/* ---------------- Responsivitet ---------------- */
+/* ============================================================================
+   LOADING OVERLAY
+   ============================================================================ */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 27, 75, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-center;
+  z-index: 2000;
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.spinner-twilight {
+  width: 56px;
+  height: 56px;
+  border: 5px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--accent);
+  border-bottom-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
 @media (max-width: 1024px) {
   .album-grid {
-    gap: 16px;
+    gap: 20px;
   }
 }
 
 @media (max-width: 768px) {
   .album-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
   }
+  
   .fav-row,
   .recent-row {
-    grid-auto-columns: minmax(120px, 180px);
+    grid-auto-columns: minmax(140px, 200px);
+    gap: 16px;
+  }
+  
+  .home-sections {
+    gap: 24px;
   }
 }
 
-/* ---------------- Lasting-overlay ---------------- */
-.loading-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-  backdrop-filter: blur(4px);
-}
-
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid rgba(255, 255, 255, 0.2);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.9s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+@media (max-width: 480px) {
+  .album-grid {
+    gap: 12px;
+  }
+  
+  .album-meta {
+    padding: 12px 14px;
+  }
+  
+  .album-title {
+    font-size: 0.95rem;
   }
 }
