@@ -1,4 +1,20 @@
-/Backup
-/build
-/env.local
-/node_modules
+# 🔒 Miljøvariabler og konfigurasjon
+.env
+.env.local
+.env.production
+.env.development
+.env.*.local
+
+# 🔑 Nøkler og sensitive JSON-filer
+*.json
+/private/
+photovault-*.json
+
+# 🏗️ Bygg og avhengigheter
+/node_modules/
+/build/
+/Backup/
+
+# ⚙️ Systemfiler
+.DS_Store
+Thumbs.db
