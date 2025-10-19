@@ -1,11 +1,13 @@
 // ============================================================================
-// PAGE: SearchPage.jsx – v4.1 med PhotoGridOptimized
+// PAGE: SearchPage.jsx – v4.2 med i18n
 // ============================================================================
 import React, { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, X, Calendar, Tag, Star, Users, Folder, SlidersHorizontal } from "lucide-react";
 import PhotoGridOptimized from "../components/PhotoGridOptimized";
 
 const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData }) => {
+  const { t } = useTranslation(['common', 'albums']);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilters, setActiveFilters] = useState({
     favorites: false,
@@ -63,10 +65,10 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
   }, [photos, searchQuery, activeFilters]);
 
   const popularSearches = [
-    { label: 'I dag', action: () => setActiveFilters({ ...activeFilters, dateRange: 'today' }) },
-    { label: 'Siste uke', action: () => setActiveFilters({ ...activeFilters, dateRange: 'week' }) },
-    { label: 'Med ansikter', action: () => setActiveFilters({ ...activeFilters, withFaces: true }) },
-    { label: 'Favoritter', action: () => setActiveFilters({ ...activeFilters, favorites: true }) },
+    { label: t('albums:dateRanges.today'), action: () => setActiveFilters({ ...activeFilters, dateRange: 'today' }) },
+    { label: t('albums:dateRanges.lastWeek'), action: () => setActiveFilters({ ...activeFilters, dateRange: 'week' }) },
+    { label: t('albums:filters.withFaces'), action: () => setActiveFilters({ ...activeFilters, withFaces: true }) },
+    { label: t('common:favorites'), action: () => setActiveFilters({ ...activeFilters, favorites: true }) },
   ];
 
   const clearFilters = () => {
@@ -85,7 +87,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
   return (
     <div className="min-h-screen p-6 md:p-10 pb-24 animate-fade-in">
       {/* Header */}
-      <h1 className="text-3xl font-bold mb-6">Søk</h1>
+      <h1 className="text-3xl font-bold mb-6">{t('common:search')}</h1>
 
       {/* Søkefelt */}
       <div className="glass rounded-2xl p-4 mb-6">
@@ -93,7 +95,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
           <Search className="w-5 h-5 opacity-50" />
           <input
             type="text"
-            placeholder="Søk i bilder..."
+            placeholder={t('albums:searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="flex-1 bg-transparent outline-none text-lg"
@@ -116,7 +118,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
           className="glass px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-white/15 transition"
         >
           <SlidersHorizontal className="w-4 h-4" />
-          <span>Filtre</span>
+          <span>{t('albums:filters.title')}</span>
           {activeFilterCount > 0 && (
             <span className="bg-purple-600 text-white text-xs px-2 py-0.5 rounded-full">
               {activeFilterCount}
@@ -129,7 +131,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
             onClick={clearFilters}
             className="text-sm text-purple-400 hover:text-purple-300 transition"
           >
-            Nullstill filtre
+            {t('albums:filters.reset')}
           </button>
         )}
       </div>
@@ -141,7 +143,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Calendar className="w-4 h-4 text-purple-400" />
-              <span className="font-medium">Dato</span>
+              <span className="font-medium">{t('albums:filters.date')}</span>
             </div>
             <div className="flex flex-wrap gap-2">
               {['today', 'week', 'month', 'year'].map((range) => (
@@ -154,10 +156,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
                       : 'glass hover:bg-white/10'
                   }`}
                 >
-                  {range === 'today' && 'I dag'}
-                  {range === 'week' && 'Siste uke'}
-                  {range === 'month' && 'Siste måned'}
-                  {range === 'year' && 'Siste år'}
+                  {t(`albums:dateRanges.${range}`)}
                 </button>
               ))}
             </div>
@@ -167,7 +166,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Tag className="w-4 h-4 text-purple-400" />
-              <span className="font-medium">Tagger</span>
+              <span className="font-medium">{t('albums:filters.tags')}</span>
             </div>
             <button
               onClick={() => setActiveFilters({ ...activeFilters, withTags: !activeFilters.withTags })}
@@ -177,7 +176,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
                   : 'glass hover:bg-white/10'
               }`}
             >
-              Med AI-tagger
+              {t('albums:filters.withAITags')}
             </button>
           </div>
 
@@ -185,7 +184,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Star className="w-4 h-4 text-purple-400" />
-              <span className="font-medium">Favoritter</span>
+              <span className="font-medium">{t('common:favorites')}</span>
             </div>
             <button
               onClick={() => setActiveFilters({ ...activeFilters, favorites: !activeFilters.favorites })}
@@ -195,7 +194,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
                   : 'glass hover:bg-white/10'
               }`}
             >
-              Kun favoritter
+              {t('albums:filters.favoritesOnly')}
             </button>
           </div>
 
@@ -203,7 +202,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Users className="w-4 h-4 text-purple-400" />
-              <span className="font-medium">Ansikter</span>
+              <span className="font-medium">{t('albums:filters.faces')}</span>
             </div>
             <button
               onClick={() => setActiveFilters({ ...activeFilters, withFaces: !activeFilters.withFaces })}
@@ -213,7 +212,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
                   : 'glass hover:bg-white/10'
               }`}
             >
-              Med ansikter
+              {t('albums:filters.withFaces')}
             </button>
           </div>
 
@@ -221,14 +220,14 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Folder className="w-4 h-4 text-purple-400" />
-              <span className="font-medium">Album</span>
+              <span className="font-medium">{t('common:album')}</span>
             </div>
             <select
               value={activeFilters.albumId || ''}
               onChange={(e) => setActiveFilters({ ...activeFilters, albumId: e.target.value || null })}
               className="w-full glass px-3 py-2 rounded-lg text-sm outline-none"
             >
-              <option value="">Alle album</option>
+              <option value="">{t('albums:filters.allAlbums')}</option>
               {albums.map((album) => (
                 <option key={album.id} value={album.id}>
                   {album.name}
@@ -242,7 +241,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
       {/* Populære søk */}
       {!searchQuery && activeFilterCount === 0 && (
         <div className="mb-6">
-          <h3 className="text-sm font-medium opacity-70 mb-3">Populære søk</h3>
+          <h3 className="text-sm font-medium opacity-70 mb-3">{t('albums:popularSearches')}</h3>
           <div className="flex flex-wrap gap-2">
             {popularSearches.map((search, i) => (
               <button
@@ -261,10 +260,10 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
       <div>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">
-            {searchQuery || activeFilterCount > 0 ? 'Søkeresultater' : 'Alle bilder'}
+            {searchQuery || activeFilterCount > 0 ? t('albums:searchResults') : t('albums:allPhotos', { count: filteredPhotos.length })}
           </h2>
           <p className="opacity-70">
-            {filteredPhotos.length} {filteredPhotos.length === 1 ? 'bilde' : 'bilder'}
+            {t('common:photoCount', { count: filteredPhotos.length })}
           </p>
         </div>
 
@@ -280,11 +279,11 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
         ) : (
           <div className="text-center py-20">
             <Search className="w-20 h-20 mx-auto mb-4 opacity-30" />
-            <h3 className="text-xl font-semibold mb-2">Ingen bilder funnet</h3>
+            <h3 className="text-xl font-semibold mb-2">{t('albums:noPhotosFound')}</h3>
             <p className="opacity-70">
               {searchQuery || activeFilterCount > 0
-                ? 'Prøv et annet søk eller juster filtrene'
-                : 'Last opp bilder for å komme i gang'
+                ? t('albums:tryDifferentSearch')
+                : t('albums:uploadToStart')
               }
             </p>
           </div>

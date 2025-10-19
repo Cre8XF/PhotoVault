@@ -1,0 +1,70 @@
+{
+  "app": {
+    "name": "PhotoVault",
+    "version": "v5.0 - FASE 3.5"
+  },
+  "navigation": {
+    "home": "Hjem",
+    "albums": "Album",
+    "search": "Søk",
+    "more": "Mer",
+    "back": "Tilbake",
+    "close": "Lukk",
+    "save": "Lagre",
+    "cancel": "Avbryt",
+    "delete": "Slett",
+    "edit": "Rediger",
+    "next": "Neste",
+    "previous": "Forrige",
+    "done": "Ferdig"
+  },
+  "actions": {
+    "upload": "Last opp",
+    "download": "Last ned",
+    "share": "Del",
+    "favorite": "Favoritt",
+    "unfavorite": "Fjern favoritt",
+    "confirm": "Bekreft",
+    "retry": "Prøv igjen",
+    "refresh": "Oppdater",
+    "loading": "Laster...",
+    "saving": "Lagrer...",
+    "uploading": "Laster opp...",
+    "deleting": "Sletter..."
+  },
+  "units": {
+    "bytes": "Bytes",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "photo": "bilde",
+    "photo_plural": "bilder",
+    "album_one": "album",
+    "album_other": "album",
+    "minute": "minutt",
+    "minute_plural": "minutter",
+    "hour": "time",
+    "hour_plural": "timer"
+  },
+  "storage": {
+    "title": "Lagring",
+    "used": "brukt",
+    "total": "totalt",
+    "available": "tilgjengelig",
+    "percentUsed": "{{percent}}% brukt"
+  },
+  "notifications": {
+    "success": "Vellykket!",
+    "error": "Feil",
+    "warning": "Advarsel",
+    "info": "Info"
+  },
+  "errors": {
+    "general": "Noe gikk galt",
+    "network": "Nettverksfeil",
+    "unauthorized": "Ikke autorisert",
+    "notFound": "Ikke funnet",
+    "serverError": "Serverfeil",
+    "tryAgain": "Vennligst prøv igjen"
+  }
+}

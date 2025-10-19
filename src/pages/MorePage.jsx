@@ -1,7 +1,8 @@
 // ============================================================================
-// PAGE: MorePage.jsx – v4.0 Erstatter ProfilePage
+// PAGE: MorePage.jsx – v5.5 FASE 3.5: Med i18n
 // ============================================================================
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   User,
   Settings,
@@ -25,8 +26,11 @@ import {
   Copy,
   CheckCircle,
   Crown,
-  ChevronRight
+  ChevronRight,
+  Lock,
+  Languages
 } from "lucide-react";
+import { useSecurityContext } from "../contexts/SecurityContext";
 
 const MorePage = ({ 
   user, 
@@ -39,7 +43,11 @@ const MorePage = ({
   onLogout,
   onNavigate 
 }) => {
+  const { t, i18n } = useTranslation(['translation', 'common', 'albums']);
   const [expandedSection, setExpandedSection] = useState(null);
+  
+  // Security context
+  const { pinEnabled, biometricEnabled } = useSecurityContext();
 
   const storagePercent = Math.round((storageUsed / storageLimit) * 100);
   const isPro = user?.isPro || false;
@@ -48,13 +56,22 @@ const MorePage = ({
   const formatBytes = (bytes) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = [
+      t('common:units.bytes'),
+      t('common:units.kb'),
+      t('common:units.mb'),
+      t('common:units.gb')
+    ];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   };
 
   const toggleSection = (section) => {
     setExpandedSection(expandedSection === section ? null : section);
+  };
+
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
   };
 
   return (
@@ -68,7 +85,7 @@ const MorePage = ({
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h2 className="text-xl font-bold">
-                {user?.displayName || user?.email?.split('@')[0] || 'Bruker'}
+                {user?.displayName || user?.email?.split('@')[0] || t('profile.user')}
               </h2>
               {isAdmin && (
                 <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
@@ -90,30 +107,59 @@ const MorePage = ({
         <div className="flex gap-6 text-sm">
           <div>
             <p className="font-semibold">{albums.length}</p>
-            <p className="opacity-70">Album</p>
+            <p className="opacity-70">{t('albums:albums.title')}</p>
           </div>
           <div>
             <p className="font-semibold">{photos.length}</p>
-            <p className="opacity-70">Bilder</p>
+            <p className="opacity-70">{t('profile.photoCount')}</p>
           </div>
           <div>
             <p className="font-semibold">{photos.filter(p => p.favorite).length}</p>
-            <p className="opacity-70">Favoritter</p>
+            <p className="opacity-70">{t('albums:albums.favorites')}</p>
           </div>
         </div>
       </div>
+
+      {/* Sikkerhet status */}
+      {(pinEnabled || biometricEnabled) && (
+        <div className="glass rounded-2xl p-4 mb-6 border-2 border-purple-500/30">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-purple-600/30 rounded-lg">
+              <Shield className="w-5 h-5 text-purple-400" />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-sm">{t('settings.security')}</p>
+              <div className="flex gap-2 text-xs opacity-70 mt-1">
+                {pinEnabled && (
+                  <span className="flex items-center gap-1">
+                    <Lock className="w-3 h-3" />
+                    PIN
+                  </span>
+                )}
+                {biometricEnabled && (
+                  <span className="flex items-center gap-1">
+                    <Scan className="w-3 h-3" />
+                    Biometri
+                  </span>
+                )}
+              </div>
+            </div>
+            <CheckCircle className="w-5 h-5 text-green-400" />
+          </div>
+        </div>
+      )}
 
       {/* Lagring */}
       <section className="glass rounded-2xl p-6 mb-6">
         <div className="flex items-center gap-2 mb-4">
           <HardDrive className="w-5 h-5 text-purple-400" />
-          <h3 className="font-semibold text-lg">Lagring</h3>
+          <h3 className="font-semibold text-lg">{t('common:storage.title')}</h3>
         </div>
 
         <div className="space-y-3">
           <div className="flex justify-between text-sm">
-            <span>{formatBytes(storageUsed)} brukt</span>
-            <span className="opacity-70">{formatBytes(storageLimit)} totalt</span>
+            <span>{formatBytes(storageUsed)} {t('common:storage.used')}</span>
+            <span className="opacity-70">{formatBytes(storageLimit)} {t('common:storage.total')}</span>
           </div>
           
           <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
@@ -127,15 +173,36 @@ const MorePage = ({
             />
           </div>
 
-          <p className="text-xs opacity-70">{storagePercent}% brukt</p>
+          <p className="text-xs opacity-70">{t('common:storage.percentUsed', { percent: storagePercent })}</p>
 
           {!isPro && (
             <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 rounded-xl font-semibold transition flex items-center justify-center gap-2">
               <Star className="w-5 h-5" />
-              Oppgrader til Pro
+              {t('subscription.upgrade')}
             </button>
           )}
         </div>
+      </section>
+
+      {/* Språk (NY SEKSJON) */}
+      <section className="glass rounded-2xl p-6 mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Languages className="w-5 h-5 text-purple-400" />
+          <h3 className="font-semibold text-lg">{t('language.title')}</h3>
+        </div>
+
+        <select
+          value={i18n.language}
+          onChange={(e) => changeLanguage(e.target.value)}
+          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+        >
+          <option value="no">🇳🇴 Norsk</option>
+          <option value="en">🇬🇧 English</option>
+        </select>
+        
+        <p className="text-xs opacity-70 mt-2">
+          {t('language.select')}
+        </p>
       </section>
 
       {/* AI-funksjoner */}
@@ -143,7 +210,7 @@ const MorePage = ({
         <div className="flex items-center justify-between mb-4 cursor-pointer" onClick={() => toggleSection('ai')}>
           <div className="flex items-center gap-2">
             <Wand2 className="w-5 h-5 text-purple-400" />
-            <h3 className="font-semibold text-lg">AI-funksjoner</h3>
+            <h3 className="font-semibold text-lg">{t('aiFunctions.title')}</h3>
           </div>
           <ChevronRight className={`w-5 h-5 transition-transform ${expandedSection === 'ai' ? 'rotate-90' : ''}`} />
         </div>
@@ -155,8 +222,8 @@ const MorePage = ({
                 <Scan className="w-5 h-5" />
               </div>
               <div className="flex-1">
-                <p className="font-medium">Auto-sortering</p>
-                <p className="text-xs opacity-70">Organiser bilder automatisk</p>
+                <p className="font-medium">{t('aiFunctions.autoSort')}</p>
+                <p className="text-xs opacity-70">{t('aiFunctions.autoSortDesc')}</p>
               </div>
             </button>
 
@@ -165,8 +232,8 @@ const MorePage = ({
                 <ImagePlus className="w-5 h-5" />
               </div>
               <div className="flex-1">
-                <p className="font-medium">Bildeforbedring</p>
-                <p className="text-xs opacity-70">AI-forbedring av kvalitet</p>
+                <p className="font-medium">{t('aiFunctions.imageEnhancement')}</p>
+                <p className="text-xs opacity-70">{t('aiFunctions.imageEnhancementDesc')}</p>
               </div>
             </button>
 
@@ -175,8 +242,8 @@ const MorePage = ({
                 <Users className="w-5 h-5" />
               </div>
               <div className="flex-1">
-                <p className="font-medium">Ansiktsgjenkjenning</p>
-                <p className="text-xs opacity-70">Grupper bilder etter person</p>
+                <p className="font-medium">{t('aiFunctions.faceRecognition')}</p>
+                <p className="text-xs opacity-70">{t('aiFunctions.faceRecognitionDesc')}</p>
               </div>
             </button>
 
@@ -185,8 +252,8 @@ const MorePage = ({
                 <Sparkles className="w-5 h-5" />
               </div>
               <div className="flex-1">
-                <p className="font-medium">Smart tagging</p>
-                <p className="text-xs opacity-70">Automatisk AI-tagger</p>
+                <p className="font-medium">{t('aiFunctions.smartTagging')}</p>
+                <p className="text-xs opacity-70">{t('aiFunctions.smartTaggingDesc')}</p>
               </div>
             </button>
 
@@ -195,8 +262,8 @@ const MorePage = ({
                 <Copy className="w-5 h-5" />
               </div>
               <div className="flex-1">
-                <p className="font-medium">Duplikat-deteksjon</p>
-                <p className="text-xs opacity-70">Finn og fjern duplikater</p>
+                <p className="font-medium">{t('aiFunctions.duplicateDetection')}</p>
+                <p className="text-xs opacity-70">{t('aiFunctions.duplicateDetectionDesc')}</p>
               </div>
             </button>
           </div>
@@ -208,25 +275,37 @@ const MorePage = ({
         <div className="flex items-center justify-between mb-4 cursor-pointer" onClick={() => toggleSection('settings')}>
           <div className="flex items-center gap-2">
             <Settings className="w-5 h-5 text-purple-400" />
-            <h3 className="font-semibold text-lg">Innstillinger</h3>
+            <h3 className="font-semibold text-lg">{t('settings.title')}</h3>
           </div>
           <ChevronRight className={`w-5 h-5 transition-transform ${expandedSection === 'settings' ? 'rotate-90' : ''}`} />
         </div>
 
         {expandedSection === 'settings' && (
           <div className="space-y-2 mt-4">
-            <button className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
-              <Shield className="w-5 h-5" />
+            {/* Sikkerhet & PIN-kode */}
+            <button 
+              onClick={() => onNavigate('security')}
+              className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left"
+            >
+              <Shield className="w-5 h-5 text-purple-400" />
               <div className="flex-1">
-                <p className="font-medium">Sikkerhet & PIN-kode</p>
-                <p className="text-xs opacity-70">Konfigurer app-lås</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium">{t('settings.security')}</p>
+                  {(pinEnabled || biometricEnabled) && (
+                    <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
+                      {t('common:navigation.enabled', { defaultValue: 'Aktivert' })}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs opacity-70">{t('settings.security')}</p>
               </div>
+              <ChevronRight className="w-5 h-5 opacity-50" />
             </button>
 
             <div className="glass p-4 rounded-xl flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Palette className="w-5 h-5" />
-                <p className="font-medium">Tema</p>
+                <p className="font-medium">{t('theme.title')}</p>
               </div>
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
@@ -243,17 +322,9 @@ const MorePage = ({
             </div>
 
             <button className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
-              <Globe className="w-5 h-5" />
-              <div className="flex-1">
-                <p className="font-medium">Språk</p>
-                <p className="text-xs opacity-70">Norsk</p>
-              </div>
-            </button>
-
-            <button className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
               <Bell className="w-5 h-5" />
               <div className="flex-1">
-                <p className="font-medium">Notifikasjoner</p>
+                <p className="font-medium">{t('settings.notifications')}</p>
                 <p className="text-xs opacity-70">Push-varsler</p>
               </div>
             </button>
@@ -265,20 +336,20 @@ const MorePage = ({
       <section className="glass rounded-2xl p-6 mb-6">
         <div className="flex items-center gap-2 mb-4">
           <User className="w-5 h-5 text-purple-400" />
-          <h3 className="font-semibold text-lg">Konto</h3>
+          <h3 className="font-semibold text-lg">{t('account.title')}</h3>
         </div>
 
         <div className="space-y-2">
           <button className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
             <User className="w-5 h-5" />
-            <p className="font-medium">Min profil</p>
+            <p className="font-medium">{t('account.profile')}</p>
           </button>
 
           <button className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
             <CreditCard className="w-5 h-5" />
             <div className="flex-1">
-              <p className="font-medium">Abonnement</p>
-              <p className="text-xs opacity-70">{isPro ? 'Pro' : 'Gratis'}</p>
+              <p className="font-medium">{t('account.subscription')}</p>
+              <p className="text-xs opacity-70">{isPro ? t('subscription.pro') : t('subscription.free')}</p>
             </div>
           </button>
 
@@ -287,12 +358,12 @@ const MorePage = ({
             className="w-full glass p-4 rounded-xl hover:bg-red-500/20 transition flex items-center gap-3 text-left text-red-400"
           >
             <LogOut className="w-5 h-5" />
-            <p className="font-medium">Logg ut</p>
+            <p className="font-medium">{t('account.logout')}</p>
           </button>
 
           <button className="w-full glass p-4 rounded-xl hover:bg-red-500/20 transition flex items-center gap-3 text-left text-red-400">
             <Trash2 className="w-5 h-5" />
-            <p className="font-medium">Slett konto</p>
+            <p className="font-medium">{t('account.deleteAccount')}</p>
           </button>
         </div>
       </section>
@@ -301,31 +372,31 @@ const MorePage = ({
       <section className="glass rounded-2xl p-6 mb-6">
         <div className="flex items-center gap-2 mb-4">
           <Info className="w-5 h-5 text-purple-400" />
-          <h3 className="font-semibold text-lg">Informasjon</h3>
+          <h3 className="font-semibold text-lg">{t('info.title')}</h3>
         </div>
 
         <div className="space-y-2">
           <button className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
             <HelpCircle className="w-5 h-5" />
-            <p className="font-medium">Hjelp og support</p>
+            <p className="font-medium">{t('info.help')}</p>
           </button>
 
           <button className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
             <FileText className="w-5 h-5" />
-            <p className="font-medium">Privacy policy</p>
+            <p className="font-medium">{t('info.privacy')}</p>
           </button>
 
           <button className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
             <FileText className="w-5 h-5" />
-            <p className="font-medium">Terms of service</p>
+            <p className="font-medium">{t('info.terms')}</p>
           </button>
 
           <div className="glass p-4 rounded-xl flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Info className="w-5 h-5" />
-              <p className="font-medium">Om PhotoVault</p>
+              <p className="font-medium">{t('info.about')}</p>
             </div>
-            <span className="text-xs opacity-70">v3.1</span>
+            <span className="text-xs opacity-70">{t('common:app.version')}</span>
           </div>
         </div>
       </section>
@@ -335,7 +406,7 @@ const MorePage = ({
         <section className="glass rounded-2xl p-6 mb-6 border-2 border-purple-500/30">
           <div className="flex items-center gap-2 mb-4">
             <Crown className="w-5 h-5 text-yellow-400" />
-            <h3 className="font-semibold text-lg">Admin</h3>
+            <h3 className="font-semibold text-lg">{t('admin.title')}</h3>
           </div>
 
           <div className="space-y-2">
@@ -344,12 +415,12 @@ const MorePage = ({
               className="w-full bg-purple-600/20 hover:bg-purple-600/30 p-4 rounded-xl transition flex items-center gap-3 text-left"
             >
               <Users className="w-5 h-5" />
-              <p className="font-medium">Brukeradministrasjon</p>
+              <p className="font-medium">{t('admin.userManagement')}</p>
             </button>
 
             <button className="w-full bg-purple-600/20 hover:bg-purple-600/30 p-4 rounded-xl transition flex items-center gap-3 text-left">
               <HardDrive className="w-5 h-5" />
-              <p className="font-medium">Database-verktøy</p>
+              <p className="font-medium">{t('admin.databaseTools')}</p>
             </button>
           </div>
         </section>

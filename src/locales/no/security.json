@@ -1,0 +1,127 @@
+{
+  "security": {
+    "title": "Sikkerhet",
+    "subtitle": "Beskytt dine bilder",
+    "enabled": "Sikkerhet aktivert",
+    "disabled": "Sikkerhet deaktivert"
+  },
+  "pin": {
+    "title": "PIN-kode",
+    "description": "Lås appen med PIN-kode",
+    "enable": "Aktiver PIN-kode",
+    "disable": "Deaktiver PIN-kode",
+    "change": "Endre PIN-kode",
+    "create": "Opprett PIN-kode",
+    "enterNew": "Skriv inn ny PIN ({{min}}-{{max}} siffer)",
+    "enterCurrent": "Skriv inn nåværende PIN",
+    "confirmNew": "Bekreft PIN-kode",
+    "status": {
+      "enabled": "Aktivert",
+      "disabled": "Deaktivert"
+    },
+    "strength": {
+      "label": "PIN-styrke",
+      "weak": "Svak",
+      "medium": "Middels",
+      "strong": "Sterk"
+    },
+    "tips": {
+      "title": "Tips for sikker PIN:",
+      "items": [
+        "Bruk minst 5 siffer",
+        "Unngå enkle mønstre (1234, 1111)",
+        "Bruk unike kombinasjoner"
+      ]
+    },
+    "errors": {
+      "required": "PIN er påkrevd",
+      "tooShort": "PIN må være minst {{min}} siffer",
+      "tooLong": "PIN kan maks være {{max}} siffer",
+      "onlyNumbers": "PIN kan kun inneholde tall",
+      "tooWeak": "PIN er for svak. Velg en annen kombinasjon",
+      "mismatch": "PIN-kodene stemmer ikke overens",
+      "invalid": "Ugyldig PIN",
+      "wrongPin": "Feil PIN. {{attempts}} forsøk igjen.",
+      "wrongPinSingle": "Feil PIN. {{attempts}} forsøk igjen.",
+      "locked": "For mange forsøk. Prøv igjen om {{minutes}} min.",
+      "currentInvalid": "Ugyldig nåværende PIN"
+    },
+    "confirm": {
+      "disable": "Er du sikker på at du vil deaktivere PIN-kode? Dette vil også deaktivere biometrisk autentisering."
+    }
+  },
+  "biometric": {
+    "title": "Biometrisk autentisering",
+    "description": "Lås opp med {{type}}",
+    "enable": "Aktiver biometri",
+    "disable": "Deaktiver biometri",
+    "unlock": "Lås opp med {{type}}",
+    "requiresPin": "Krever PIN-kode",
+    "requiresPinDesc": "Du må aktivere PIN-kode først før du kan bruke biometrisk autentisering.",
+    "notAvailable": "Biometrisk autentisering ikke tilgjengelig",
+    "types": {
+      "fingerprint": "fingeravtrykk",
+      "face": "ansiktsgjenkjenning",
+      "unknown": "biometri"
+    },
+    "displayNames": {
+      "fingerprint": "Fingeravtrykk",
+      "face": "Ansiktsgjenkjenning",
+      "unknown": "Biometrisk"
+    },
+    "errors": {
+      "notSupported": "Biometrisk autentisering ikke støttet",
+      "notAvailable": "Biometrisk autentisering ikke tilgjengelig",
+      "failed": "Biometrisk autentisering feilet",
+      "cancelled": "Autentisering avbrutt",
+      "pinRequired": "PIN må aktiveres først"
+    },
+    "prompts": {
+      "enable": "Aktiver biometrisk autentisering",
+      "unlock": "Lås opp PhotoVault"
+    }
+  },
+  "autoLock": {
+    "title": "Auto-lås",
+    "description": "Lås automatisk etter inaktivitet",
+    "enable": "Aktiver auto-lås",
+    "disable": "Deaktiver auto-lås",
+    "timeout": "Lås etter (minutter)",
+    "timeoutOptions": {
+      "1": "1 minutt",
+      "2": "2 minutter",
+      "5": "5 minutter",
+      "10": "10 minutter",
+      "15": "15 minutter",
+      "30": "30 minutter"
+    }
+  },
+  "lockOnBackground": {
+    "title": "Lås ved bakgrunn",
+    "description": "Lås når appen går i bakgrunnen"
+  },
+  "privateAlbums": {
+    "title": "Private album",
+    "description": "Ekstra beskyttede album",
+    "makePrivate": "Gjør album privat",
+    "makePublic": "Gjør album offentlig",
+    "isPrivate": "Dette albumet er privat"
+  },
+  "lockScreen": {
+    "title": "PhotoVault",
+    "subtitle": "Skriv inn PIN-kode",
+    "enterPin": "Skriv inn PIN for å låse opp",
+    "verifying": "Verifiserer...",
+    "unlocking": "Låser opp..."
+  },
+  "info": {
+    "title": "Om sikkerhet",
+    "description": "Hvordan PhotoVault beskytter dine bilder",
+    "items": [
+      "PIN-koden lagres kryptert lokalt på enheten din",
+      "Biometrisk data lagres aldri - kun systemets API brukes",
+      "Private album får ekstra kryptering",
+      "Etter {{maxAttempts}} feil forsøk låses appen i {{lockTime}} minutter"
+    ]
+  }
+}

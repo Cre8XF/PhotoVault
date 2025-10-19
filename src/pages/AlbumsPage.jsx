@@ -1,7 +1,8 @@
 // ============================================================================
-// PAGE: AlbumsPage.jsx – v4.1 med LazyImage
+// PAGE: AlbumsPage.jsx – v4.2 med i18n
 // ============================================================================
 import React, { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Folder, Image, Star, Calendar, FolderOpen, Grid, List, ChevronDown } from "lucide-react";
 import AlbumCard from "../components/AlbumCard";
 import LazyImage from "../components/LazyImage";
@@ -14,6 +15,7 @@ const AlbumsPage = ({
   onPhotoClick,
   toggleFavorite 
 }) => {
+  const { t } = useTranslation(['common', 'albums']);
   const [viewMode, setViewMode] = useState("all");
   const [gridView, setGridView] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -41,12 +43,12 @@ const AlbumsPage = ({
   }, [photos, viewMode]);
 
   const viewOptions = [
-    { value: 'all', label: 'Alt', icon: Grid },
-    { value: 'albums', label: 'Kun album', icon: Folder },
-    { value: 'allPhotos', label: 'Alle bilder', icon: Image },
-    { value: 'favorites', label: 'Favoritter', icon: Star },
-    { value: 'unassigned', label: 'Uten album', icon: FolderOpen },
-    { value: 'byDate', label: 'Etter dato', icon: Calendar },
+    { value: 'all', label: t('albums:view.all'), icon: Grid },
+    { value: 'albums', label: t('albums:view.albumsOnly'), icon: Folder },
+    { value: 'allPhotos', label: t('albums:view.allPhotos'), icon: Image },
+    { value: 'favorites', label: t('common:favorites'), icon: Star },
+    { value: 'unassigned', label: t('albums:view.unassigned'), icon: FolderOpen },
+    { value: 'byDate', label: t('albums:view.byDate'), icon: Calendar },
   ];
 
   const currentView = viewOptions.find(opt => opt.value === viewMode);
@@ -55,7 +57,7 @@ const AlbumsPage = ({
     <div className="min-h-screen p-6 md:p-10 pb-24 animate-fade-in">
       {/* Header med dropdown */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Album</h1>
+        <h1 className="text-3xl font-bold">{t('common:albums')}</h1>
         
         <div className="flex gap-3">
           {/* View mode dropdown */}
@@ -65,7 +67,7 @@ const AlbumsPage = ({
               className="glass px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-white/15 transition"
             >
               <currentView.icon className="w-4 h-4" />
-              <span className="hidden sm:inline">Vis: {currentView.label}</span>
+              <span className="hidden sm:inline">{t('albums:view.show')}: {currentView.label}</span>
               <ChevronDown className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
             </button>
 
@@ -98,7 +100,7 @@ const AlbumsPage = ({
             <button
               onClick={() => setGridView(!gridView)}
               className="glass p-2 rounded-xl hover:bg-white/15 transition"
-              title={gridView ? "Bytt til liste" : "Bytt til rutenett"}
+              title={gridView ? t('albums:view.switchToList') : t('albums:view.switchToGrid')}
             >
               {gridView ? <List className="w-5 h-5" /> : <Grid className="w-5 h-5" />}
             </button>
@@ -115,13 +117,13 @@ const AlbumsPage = ({
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
                   <Image className="w-5 h-5 text-purple-400" />
-                  Alle bilder ({stats.totalPhotos})
+                  {t('albums:allPhotos', { count: stats.totalPhotos })}
                 </h2>
                 <button
                   onClick={() => setViewMode('allPhotos')}
                   className="text-sm text-purple-400 hover:text-purple-300 transition"
                 >
-                  Se alle →
+                  {t('common:seeAll')} →
                 </button>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -145,14 +147,15 @@ const AlbumsPage = ({
             <section>
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <Folder className="w-5 h-5 text-purple-400" />
-                Mine album ({stats.totalAlbums})
+                {t('albums:myAlbums', { count: stats.totalAlbums })}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {albums.map((album, i) => (
                   <AlbumCard
                     key={album.id}
                     album={album}
-                    onClick={() => onAlbumClick(album)}
+                    photos={photos}
+                    onOpen={() => onAlbumClick(album)}
                     className={`animate-scale-in stagger-${(i % 6) + 1}`}
                   />
                 ))}
@@ -166,13 +169,13 @@ const AlbumsPage = ({
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
                   <FolderOpen className="w-5 h-5 text-amber-400" />
-                  Bilder uten album ({stats.unassigned})
+                  {t('albums:unassignedPhotos', { count: stats.unassigned })}
                 </h2>
                 <button
                   onClick={() => setViewMode('unassigned')}
                   className="text-sm text-amber-400 hover:text-amber-300 transition"
                 >
-                  Organiser →
+                  {t('albums:organize')} →
                 </button>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -195,8 +198,8 @@ const AlbumsPage = ({
           {stats.totalAlbums === 0 && stats.totalPhotos === 0 && (
             <div className="text-center py-20">
               <Folder className="w-20 h-20 mx-auto mb-4 opacity-30" />
-              <h3 className="text-xl font-semibold mb-2">Ingen album ennå</h3>
-              <p className="opacity-70 mb-6">Last opp bilder for å komme i gang</p>
+              <h3 className="text-xl font-semibold mb-2">{t('albums:noAlbumsYet')}</h3>
+              <p className="opacity-70 mb-6">{t('albums:uploadToStart')}</p>
             </div>
           )}
         </div>
@@ -209,15 +212,16 @@ const AlbumsPage = ({
             <AlbumCard
               key={album.id}
               album={album}
-              onClick={() => onAlbumClick(album)}
+              photos={photos}
+              onOpen={() => onAlbumClick(album)}
               className={`animate-scale-in stagger-${(i % 6) + 1}`}
             />
           ))}
           {albums.length === 0 && (
             <div className="col-span-full text-center py-20">
               <Folder className="w-20 h-20 mx-auto mb-4 opacity-30" />
-              <h3 className="text-xl font-semibold mb-2">Ingen album</h3>
-              <p className="opacity-70">Opprett et album for å organisere bilder</p>
+              <h3 className="text-xl font-semibold mb-2">{t('albums:noAlbums')}</h3>
+              <p className="opacity-70">{t('albums:createAlbumToOrganize')}</p>
             </div>
           )}
         </div>
@@ -228,7 +232,7 @@ const AlbumsPage = ({
         <div>
           <div className="flex justify-between items-center mb-6">
             <p className="opacity-70">
-              {filteredPhotos.length} {filteredPhotos.length === 1 ? 'bilde' : 'bilder'}
+              {t('common:photoCount', { count: filteredPhotos.length })}
             </p>
           </div>
 
@@ -258,7 +262,7 @@ const AlbumsPage = ({
                   />
                   {!gridView && (
                     <div className="flex-1">
-                      <p className="font-medium">{photo.name || 'Uten navn'}</p>
+                      <p className="font-medium">{photo.name || t('common:noName')}</p>
                       <p className="text-sm opacity-70">
                         {new Date(photo.createdAt).toLocaleDateString('no-NO')}
                       </p>
@@ -276,12 +280,12 @@ const AlbumsPage = ({
           ) : (
             <div className="text-center py-20">
               <currentView.icon className="w-20 h-20 mx-auto mb-4 opacity-30" />
-              <h3 className="text-xl font-semibold mb-2">Ingen bilder</h3>
+              <h3 className="text-xl font-semibold mb-2">{t('albums:noPhotos')}</h3>
               <p className="opacity-70">
-                {viewMode === 'favorites' && 'Du har ingen favoritter ennå'}
-                {viewMode === 'unassigned' && 'Alle bilder er organisert i album'}
-                {viewMode === 'allPhotos' && 'Last opp bilder for å komme i gang'}
-                {viewMode === 'byDate' && 'Ingen bilder funnet'}
+                {viewMode === 'favorites' && t('albums:noFavoritesYet')}
+                {viewMode === 'unassigned' && t('albums:allPhotosOrganized')}
+                {viewMode === 'allPhotos' && t('albums:uploadToStart')}
+                {viewMode === 'byDate' && t('albums:noPhotosFound')}
               </p>
             </div>
           )}

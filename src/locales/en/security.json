@@ -1,0 +1,127 @@
+{
+  "security": {
+    "title": "Security",
+    "subtitle": "Protect your photos",
+    "enabled": "Security enabled",
+    "disabled": "Security disabled"
+  },
+  "pin": {
+    "title": "PIN Code",
+    "description": "Lock the app with PIN code",
+    "enable": "Enable PIN code",
+    "disable": "Disable PIN code",
+    "change": "Change PIN code",
+    "create": "Create PIN code",
+    "enterNew": "Enter new PIN ({{min}}-{{max}} digits)",
+    "enterCurrent": "Enter current PIN",
+    "confirmNew": "Confirm PIN code",
+    "status": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "strength": {
+      "label": "PIN strength",
+      "weak": "Weak",
+      "medium": "Medium",
+      "strong": "Strong"
+    },
+    "tips": {
+      "title": "Tips for secure PIN:",
+      "items": [
+        "Use at least 5 digits",
+        "Avoid simple patterns (1234, 1111)",
+        "Use unique combinations"
+      ]
+    },
+    "errors": {
+      "required": "PIN is required",
+      "tooShort": "PIN must be at least {{min}} digits",
+      "tooLong": "PIN can be max {{max}} digits",
+      "onlyNumbers": "PIN can only contain numbers",
+      "tooWeak": "PIN is too weak. Choose a different combination",
+      "mismatch": "PIN codes do not match",
+      "invalid": "Invalid PIN",
+      "wrongPin": "Wrong PIN. {{attempts}} attempts left.",
+      "wrongPinSingle": "Wrong PIN. {{attempts}} attempt left.",
+      "locked": "Too many attempts. Try again in {{minutes}} min.",
+      "currentInvalid": "Invalid current PIN"
+    },
+    "confirm": {
+      "disable": "Are you sure you want to disable PIN code? This will also disable biometric authentication."
+    }
+  },
+  "biometric": {
+    "title": "Biometric Authentication",
+    "description": "Unlock with {{type}}",
+    "enable": "Enable biometrics",
+    "disable": "Disable biometrics",
+    "unlock": "Unlock with {{type}}",
+    "requiresPin": "Requires PIN code",
+    "requiresPinDesc": "You must enable PIN code first before you can use biometric authentication.",
+    "notAvailable": "Biometric authentication not available",
+    "types": {
+      "fingerprint": "fingerprint",
+      "face": "face recognition",
+      "unknown": "biometrics"
+    },
+    "displayNames": {
+      "fingerprint": "Fingerprint",
+      "face": "Face Recognition",
+      "unknown": "Biometric"
+    },
+    "errors": {
+      "notSupported": "Biometric authentication not supported",
+      "notAvailable": "Biometric authentication not available",
+      "failed": "Biometric authentication failed",
+      "cancelled": "Authentication cancelled",
+      "pinRequired": "PIN must be enabled first"
+    },
+    "prompts": {
+      "enable": "Enable biometric authentication",
+      "unlock": "Unlock PhotoVault"
+    }
+  },
+  "autoLock": {
+    "title": "Auto-lock",
+    "description": "Lock automatically after inactivity",
+    "enable": "Enable auto-lock",
+    "disable": "Disable auto-lock",
+    "timeout": "Lock after (minutes)",
+    "timeoutOptions": {
+      "1": "1 minute",
+      "2": "2 minutes",
+      "5": "5 minutes",
+      "10": "10 minutes",
+      "15": "15 minutes",
+      "30": "30 minutes"
+    }
+  },
+  "lockOnBackground": {
+    "title": "Lock on background",
+    "description": "Lock when app goes to background"
+  },
+  "privateAlbums": {
+    "title": "Private albums",
+    "description": "Extra protected albums",
+    "makePrivate": "Make album private",
+    "makePublic": "Make album public",
+    "isPrivate": "This album is private"
+  },
+  "lockScreen": {
+    "title": "PhotoVault",
+    "subtitle": "Enter PIN code",
+    "enterPin": "Enter PIN to unlock",
+    "verifying": "Verifying...",
+    "unlocking": "Unlocking..."
+  },
+  "info": {
+    "title": "About security",
+    "description": "How PhotoVault protects your photos",
+    "items": [
+      "PIN code is stored encrypted locally on your device",
+      "Biometric data is never stored - only the system's API is used",
+      "Private albums get extra encryption",
+      "After {{maxAttempts}} failed attempts the app locks for {{lockTime}} minutes"
+    ]
+  }
+}

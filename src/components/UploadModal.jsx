@@ -1,10 +1,12 @@
 // ============================================================================
-// components/UploadModal.jsx – v4.1 med AI auto-tagging
+// components/UploadModal.jsx – v4.2 med i18n
 // ============================================================================
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { X, Upload, FolderOpen, Sparkles } from "lucide-react";
 
 const UploadModal = ({ albums, onClose, onUpload }) => {
+  const { t } = useTranslation(['common', 'albums']);
   const [files, setFiles] = useState([]);
   const [selectedAlbum, setSelectedAlbum] = useState("");
   const [aiTagging, setAiTagging] = useState(
@@ -51,7 +53,7 @@ const UploadModal = ({ albums, onClose, onUpload }) => {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Upload className="w-7 h-7 text-purple-400" />
-            Last opp bilder
+            {t('common:uploadPhotos')}
           </h2>
           <button
             onClick={onClose}
@@ -71,10 +73,10 @@ const UploadModal = ({ albums, onClose, onUpload }) => {
         >
           <Upload className="w-16 h-16 mx-auto mb-4 opacity-50" />
           <p className="text-lg mb-2">
-            Dra og slipp bilder her, eller klikk for å velge
+            {t('albums:upload.dragDrop')}
           </p>
           <p className="text-sm opacity-70">
-            Støtter JPG, PNG, GIF, WebP
+            {t('albums:upload.supportedFormats')}
           </p>
           <input
             id="file-input"
@@ -91,7 +93,7 @@ const UploadModal = ({ albums, onClose, onUpload }) => {
         {files.length > 0 && (
           <div className="mb-6">
             <p className="text-sm opacity-70 mb-2">
-              {files.length} {files.length === 1 ? "fil" : "filer"} valgt
+              {t('albums:upload.filesSelected', { count: files.length })}
             </p>
             <div className="max-h-40 overflow-y-auto space-y-2">
               {files.map((file, index) => (
@@ -113,7 +115,7 @@ const UploadModal = ({ albums, onClose, onUpload }) => {
         <div className="mb-6">
           <label className="block text-sm font-medium mb-2 flex items-center gap-2">
             <FolderOpen className="w-4 h-4" />
-            Velg album (valgfritt)
+            {t('albums:upload.selectAlbum')}
           </label>
           <select
             value={selectedAlbum}
@@ -121,7 +123,7 @@ const UploadModal = ({ albums, onClose, onUpload }) => {
             className="w-full glass px-4 py-3 rounded-xl outline-none border border-white/10 focus:border-purple-400 transition"
             disabled={uploading}
           >
-            <option value="">Uten album</option>
+            <option value="">{t('albums:upload.noAlbum')}</option>
             {albums.map((album) => (
               <option key={album.id} value={album.id}>
                 {album.name}
@@ -139,13 +141,13 @@ const UploadModal = ({ albums, onClose, onUpload }) => {
               </div>
               <div>
                 <p className="font-medium flex items-center gap-2">
-                  AI Auto-tagging
+                  {t('common:aiAutoTagging')}
                   <span className="text-xs bg-purple-600/30 px-2 py-0.5 rounded-full">
                     Beta
                   </span>
                 </p>
                 <p className="text-xs opacity-70">
-                  Analyser bilder automatisk med AI ved opplasting
+                  {t('albums:upload.autoAnalyze')}
                 </p>
               </div>
             </div>
@@ -165,7 +167,7 @@ const UploadModal = ({ albums, onClose, onUpload }) => {
           </div>
           {aiTagging && (
             <div className="mt-3 text-xs opacity-70">
-              ℹ️ Gratis tier: 1000 bilder/måned. Se AI-innstillinger for mer info.
+              ℹ️ {t('albums:upload.freeTier')}
             </div>
           )}
         </div>
@@ -177,7 +179,7 @@ const UploadModal = ({ albums, onClose, onUpload }) => {
             disabled={uploading}
             className="flex-1 glass px-6 py-3 rounded-xl hover:bg-white/15 transition disabled:opacity-50"
           >
-            Avbryt
+            {t('albums:cancel')}
           </button>
           <button
             onClick={handleUpload}
@@ -187,12 +189,12 @@ const UploadModal = ({ albums, onClose, onUpload }) => {
             {uploading ? (
               <>
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Laster opp...
+                {t('albums:upload.uploading')}
               </>
             ) : (
               <>
                 <Upload className="w-5 h-5" />
-                Last opp {files.length > 0 && `(${files.length})`}
+                {t('albums:upload.uploadButton', { count: files.length })}
               </>
             )}
           </button>

@@ -1,0 +1,99 @@
+{
+  "profile": {
+    "title": "Profile",
+    "user": "User",
+    "email": "Email",
+    "displayName": "Display name",
+    "photoCount": "Photos",
+    "albumCount": "Albums",
+    "favoriteCount": "Favorites",
+    "stats": "Statistics"
+  },
+  "settings": {
+    "title": "Settings",
+    "general": "General",
+    "security": "Security",
+    "appearance": "Appearance",
+    "language": "Language",
+    "notifications": "Notifications",
+    "privacy": "Privacy",
+    "account": "Account",
+    "about": "About",
+    "help": "Help",
+    "support": "Support"
+  },
+  "theme": {
+    "title": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "auto": "Automatic"
+  },
+  "language": {
+    "title": "Language",
+    "norwegian": "Norsk",
+    "english": "English",
+    "swedish": "Svenska",
+    "danish": "Dansk",
+    "select": "Select language"
+  },
+  "account": {
+    "title": "Account",
+    "profile": "My profile",
+    "subscription": "Subscription",
+    "storage": "Storage",
+    "logout": "Log out",
+    "deleteAccount": "Delete account",
+    "confirmLogout": "Confirm logout",
+    "confirmLogoutMessage": "Are you sure you want to log out?",
+    "loggedOut": "You are now logged out"
+  },
+  "subscription": {
+    "title": "Subscription",
+    "free": "Free",
+    "pro": "Pro",
+    "upgrade": "Upgrade to Pro",
+    "manage": "Manage subscription",
+    "features": "Features",
+    "storage": "{{size}} storage",
+    "unlimitedStorage": "Unlimited storage"
+  },
+  "aiFunctions": {
+    "title": "AI Functions",
+    "autoSort": "Auto-sorting",
+    "autoSortDesc": "Organize photos automatically",
+    "imageEnhancement": "Image enhancement",
+    "imageEnhancementDesc": "AI-powered quality improvement",
+    "faceRecognition": "Face recognition",
+    "faceRecognitionDesc": "Group photos by person",
+    "smartTagging": "Smart tagging",
+    "smartTaggingDesc": "Automatic AI tags",
+    "duplicateDetection": "Duplicate detection",
+    "duplicateDetectionDesc": "Find and remove duplicates"
+  },
+  "info": {
+    "title": "Information",
+    "help": "Help and support",
+    "privacy": "Privacy policy",
+    "terms": "Terms of service",
+    "about": "About PhotoVault",
+    "version": "Version"
+  },
+  "admin": {
+    "title": "Admin",
+    "userManagement": "User management",
+    "databaseTools": "Database tools",
+    "analytics": "Analytics",
+    "settings": "Admin settings"
+  },
+  "search": {
+    "title": "Search",
+    "placeholder": "Search in photos...",
+    "noResults": "No results",
+    "searching": "Searching...",
+    "filters": "Filters",
+    "date": "Date",
+    "album": "Album",
+    "tags": "Tags",
+    "location": "Location"
+  }
+}

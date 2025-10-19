@@ -1,10 +1,12 @@
 // ============================================================================
-// COMPONENT: PhotoModal.jsx – v3.1 med forbedret knapp-synlighet
+// COMPONENT: PhotoModal.jsx – v3.2 med i18n
 // ============================================================================
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { X, ArrowLeft, ArrowRight, Download, Info, Star, Calendar, Tag } from "lucide-react";
 
 const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
+  const { t } = useTranslation(['common']);
   const [index, setIndex] = useState(currentIndex);
   const [showInfo, setShowInfo] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -64,9 +66,9 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
 
   // Formater dato
   const formatDate = (dateStr) => {
-    if (!dateStr) return "Ukjent";
+    if (!dateStr) return t('common:unknown');
     const d = new Date(dateStr);
-    return d.toLocaleDateString("no-NO", {
+    return d.toLocaleDateString('no-NO', {
       day: "2-digit",
       month: "long",
       year: "numeric",
@@ -90,7 +92,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
             {index + 1} / {photos.length}
           </div>
 
-          {/* Action buttons med bedre synlighet */}
+          {/* Action buttons */}
           <div className="flex items-center gap-2">
             {onToggleFavorite && (
               <button
@@ -103,7 +105,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
                     ? "bg-yellow-500/90 hover:bg-yellow-600"
                     : "bg-white/20 hover:bg-white/30"
                 }`}
-                title={photo.favorite ? "Fjern favoritt" : "Legg til favoritt"}
+                title={photo.favorite ? t('common:removeFavorite') : t('common:addToFavorites')}
               >
                 <Star
                   className="w-5 h-5"
@@ -120,7 +122,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
               className={`backdrop-blur-md text-white p-2.5 rounded-lg transition shadow-lg ${
                 showInfo ? "bg-purple-600/90" : "bg-white/20 hover:bg-white/30"
               }`}
-              title="Vis info (I)"
+              title={t('common:showInfo')}
             >
               <Info className="w-5 h-5" />
             </button>
@@ -131,7 +133,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
                 handleDownload();
               }}
               className="bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-2.5 rounded-lg transition shadow-lg"
-              title="Last ned"
+              title={t('common:download')}
             >
               <Download className="w-5 h-5" />
             </button>
@@ -139,7 +141,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
             <button
               onClick={onClose}
               className="bg-red-600/90 backdrop-blur-md hover:bg-red-700 text-white p-2.5 rounded-lg transition shadow-lg"
-              title="Lukk (ESC)"
+              title={t('common:close')}
             >
               <X className="w-5 h-5" />
             </button>
@@ -147,7 +149,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
         </div>
       </div>
 
-      {/* Navigasjonsknapper med bedre synlighet */}
+      {/* Navigasjonsknapper */}
       {photos.length > 1 && (
         <>
           <button
@@ -156,7 +158,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
               e.stopPropagation();
               prevPhoto();
             }}
-            title="Forrige (←)"
+            title={t('common:previous')}
           >
             <ArrowLeft className="w-6 h-6" />
           </button>
@@ -167,7 +169,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
               e.stopPropagation();
               nextPhoto();
             }}
-            title="Neste (→)"
+            title={t('common:next')}
           >
             <ArrowRight className="w-6 h-6" />
           </button>
@@ -202,21 +204,21 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
           onClick={(e) => e.stopPropagation()}
         >
           <h3 className="text-lg font-semibold mb-4 text-white">
-            Bildeinformasjon
+            {t('common:photoInfo')}
           </h3>
 
           <div className="space-y-4 text-sm">
             {/* Navn */}
             <div>
-              <p className="text-gray-400 mb-1">Navn</p>
-              <p className="text-white font-medium">{photo.name || "Uten navn"}</p>
+              <p className="text-gray-400 mb-1">{t('common:name')}</p>
+              <p className="text-white font-medium">{photo.name || t('common:noName')}</p>
             </div>
 
             {/* Dato */}
             <div className="flex items-start gap-2">
               <Calendar className="w-4 h-4 text-gray-400 mt-0.5" />
               <div>
-                <p className="text-gray-400 mb-1">Lastet opp</p>
+                <p className="text-gray-400 mb-1">{t('common:uploaded')}</p>
                 <p className="text-white">{formatDate(photo.createdAt)}</p>
               </div>
             </div>
@@ -224,7 +226,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
             {/* Størrelse */}
             {photo.size && (
               <div>
-                <p className="text-gray-400 mb-1">Størrelse</p>
+                <p className="text-gray-400 mb-1">{t('common:size')}</p>
                 <p className="text-white">
                   {(photo.size / 1024 / 1024).toFixed(2)} MB
                 </p>
@@ -233,16 +235,16 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
 
             {/* Favoritt */}
             <div>
-              <p className="text-gray-400 mb-1">Status</p>
+              <p className="text-gray-400 mb-1">{t('common:status')}</p>
               <div className="flex items-center gap-2">
                 {photo.favorite && (
                   <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded text-xs flex items-center gap-1">
                     <Star className="w-3 h-3" fill="currentColor" />
-                    Favoritt
+                    {t('common:favorite')}
                   </span>
                 )}
                 {!photo.favorite && (
-                  <span className="text-gray-500 text-xs">Ikke favoritt</span>
+                  <span className="text-gray-500 text-xs">{t('common:notFavorite')}</span>
                 )}
               </div>
             </div>
@@ -252,7 +254,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Tag className="w-4 h-4 text-gray-400" />
-                  <p className="text-gray-400">AI-tagger</p>
+                  <p className="text-gray-400">{t('common:aiTags')}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {photo.aiTags.map((tag, i) => (
@@ -270,23 +272,23 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
             {/* Ansikter */}
             {photo.faces > 0 && (
               <div>
-                <p className="text-gray-400 mb-1">Ansikter gjenkjent</p>
+                <p className="text-gray-400 mb-1">{t('common:facesDetected')}</p>
                 <p className="text-white">👤 {photo.faces}</p>
               </div>
             )}
 
             {/* URL (for debugging) */}
             <div>
-              <p className="text-gray-400 mb-1">Filsti</p>
+              <p className="text-gray-400 mb-1">{t('common:filePath')}</p>
               <p className="text-white text-xs break-all opacity-60">
-                {photo.storagePath || "Ukjent"}
+                {photo.storagePath || t('common:unknown')}
               </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Bildetittel nederst med bedre synlighet */}
+      {/* Bildetittel nederst */}
       {photo.name && !showInfo && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md text-gray-900 px-6 py-3 rounded-lg font-medium shadow-lg">
           {photo.name}

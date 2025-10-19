@@ -1,0 +1,70 @@
+{
+  "app": {
+    "name": "PhotoVault",
+    "version": "v5.0 - PHASE 3.5"
+  },
+  "navigation": {
+    "home": "Home",
+    "albums": "Albums",
+    "search": "Search",
+    "more": "More",
+    "back": "Back",
+    "close": "Close",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "next": "Next",
+    "previous": "Previous",
+    "done": "Done"
+  },
+  "actions": {
+    "upload": "Upload",
+    "download": "Download",
+    "share": "Share",
+    "favorite": "Favorite",
+    "unfavorite": "Remove favorite",
+    "confirm": "Confirm",
+    "retry": "Retry",
+    "refresh": "Refresh",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "uploading": "Uploading...",
+    "deleting": "Deleting..."
+  },
+  "units": {
+    "bytes": "Bytes",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "photo": "photo",
+    "photo_plural": "photos",
+    "album_one": "album",
+    "album_other": "albums",
+    "minute": "minute",
+    "minute_plural": "minutes",
+    "hour": "hour",
+    "hour_plural": "hours"
+  },
+  "storage": {
+    "title": "Storage",
+    "used": "used",
+    "total": "total",
+    "available": "available",
+    "percentUsed": "{{percent}}% used"
+  },
+  "notifications": {
+    "success": "Success!",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info"
+  },
+  "errors": {
+    "general": "Something went wrong",
+    "network": "Network error",
+    "unauthorized": "Unauthorized",
+    "notFound": "Not found",
+    "serverError": "Server error",
+    "tryAgain": "Please try again"
+  }
+}

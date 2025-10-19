@@ -1,0 +1,70 @@
+{
+  "albums": {
+    "title": "Album",
+    "myAlbums": "Mine album",
+    "allPhotos": "Alle bilder",
+    "favorites": "Favoritter",
+    "recent": "Nylige",
+    "noAlbums": "Ingen album ennå",
+    "noPhotos": "Ingen bilder",
+    "createFirst": "Opprett ditt første album",
+    "photoCount": "{{count}} bilde",
+    "photoCount_plural": "{{count}} bilder"
+  },
+  "album": {
+    "create": "Opprett album",
+    "edit": "Rediger album",
+    "delete": "Slett album",
+    "name": "Albumnavn",
+    "description": "Beskrivelse",
+    "cover": "Forsidebilde",
+    "created": "Opprettet",
+    "updated": "Oppdatert",
+    "empty": "Tomt album",
+    "addPhotos": "Legg til bilder"
+  },
+  "photo": {
+    "upload": "Last opp bilder",
+    "delete": "Slett bilde",
+    "favorite": "Legg til i favoritter",
+    "unfavorite": "Fjern fra favoritter",
+    "download": "Last ned",
+    "share": "Del",
+    "info": "Info",
+    "edit": "Rediger",
+    "tags": "Tagger",
+    "date": "Dato",
+    "size": "Størrelse",
+    "resolution": "Oppløsning"
+  },
+  "upload": {
+    "title": "Last opp bilder",
+    "selectFiles": "Velg filer",
+    "dropHere": "Slipp filer her",
+    "selectAlbum": "Velg album",
+    "noAlbum": "Uten album",
+    "aiTagging": "AI-tagging",
+    "aiTaggingDesc": "Automatisk tagger bilder med AI",
+    "uploading": "Laster opp {{current}} av {{total}}...",
+    "success": "{{count}} bilde lastet opp",
+    "success_plural": "{{count}} bilder lastet opp",
+    "error": "Feil ved opplasting"
+  },
+  "delete": {
+    "confirmAlbum": "Slett album",
+    "confirmAlbumMessage": "Er du sikker på at du vil slette \"{{name}}\"? {{photoCount}} vil bli flyttet til \"Uten album\".",
+    "confirmAlbumEmpty": "Albumet er tomt.",
+    "confirmPhoto": "Slett bilde",
+    "confirmPhotoMessage": "Er du sikker på at du vil slette dette bildet? Dette kan ikke angres.",
+    "success": "Slettet",
+    "error": "Feil ved sletting"
+  },
+  "notifications": {
+    "albumCreated": "Album opprettet",
+    "albumUpdated": "Album oppdatert",
+    "albumDeleted": "Album slettet",
+    "photoDeleted": "Bilde slettet",
+    "addedToFavorites": "Lagt til i favoritter",
+    "removedFromFavorites": "Fjernet fra favoritter"
+  }
+}

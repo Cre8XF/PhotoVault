@@ -1,5 +1,5 @@
 // ============================================================================
-// APP.js – v4.0 med ny navigasjonsstruktur
+// APP.js – v5.0 FASE 3: Sikkerhet & Privacy
 // ============================================================================
 import React, { useState, useEffect, useMemo } from "react";
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
@@ -12,6 +12,7 @@ import SearchPage from "./pages/SearchPage";
 import MorePage from "./pages/MorePage";
 import AlbumPage from "./pages/AlbumPage";
 import AdminDashboard from "./pages/AdminDashboard";
+import SecuritySettings from "./pages/SecuritySettings"; // NEW
 
 // Components
 import UploadModal from "./components/UploadModal";
@@ -20,6 +21,7 @@ import AlbumModal from "./components/AlbumModal";
 import ConfirmModal from "./components/ConfirmModal";
 import Notification from "./components/Notification";
 import Particles from "./components/Particles";
+import PINLockScreen from "./components/PINLockScreen"; // NEW
 
 // Icons
 import { Home, FolderOpen, Plus, Search, Menu } from "lucide-react";
@@ -35,16 +37,23 @@ import {
   updatePhoto,
 } from "./firebase";
 
-function App() {
+// Security Context (NEW)
+import { SecurityProvider, useSecurityContext } from "./contexts/SecurityContext";
+
+// Main App Component (wrapped in SecurityProvider)
+function AppContent() {
   // Auth
   const auth = getAuth();
+  
+  // Security context
+  const { isLocked, pinEnabled } = useSecurityContext();
   
   // Auth state
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   
   // Navigation state
-  const [currentPage, setCurrentPage] = useState("home"); // home, albums, search, more, album, admin
+  const [currentPage, setCurrentPage] = useState("home"); // home, albums, search, more, album, admin, security
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   
   // Data state
@@ -272,6 +281,11 @@ function App() {
     return <LoginPage />;
   }
 
+  // Show PIN lock screen if locked (NEW)
+  if (isLocked && pinEnabled) {
+    return <PINLockScreen />;
+  }
+
   const isAdmin = userProfile?.role === "admin";
 
   return (
@@ -324,6 +338,12 @@ function App() {
           />
         )}
 
+        {currentPage === "security" && (
+          <SecuritySettings
+            onBack={() => setCurrentPage("more")}
+          />
+        )}
+
         {currentPage === "album" && selectedAlbum && (
           <AlbumPage
             album={selectedAlbum}
@@ -350,7 +370,7 @@ function App() {
       </main>
 
       {/* Bottom navigation */}
-      {currentPage !== "album" && currentPage !== "admin" && (
+      {currentPage !== "album" && currentPage !== "admin" && currentPage !== "security" && (
         <nav className="fixed bottom-0 left-0 right-0 bg-gray-900/80 backdrop-blur-xl border-t border-white/10 z-50">
           <div className="flex justify-around items-center py-3 px-2">
             {/* Home */}
@@ -465,6 +485,15 @@ function App() {
         />
       )}
     </div>
+  );
+}
+
+// Main App with SecurityProvider wrapper
+function App() {
+  return (
+    <SecurityProvider>
+      <AppContent />
+    </SecurityProvider>
   );
 }
 

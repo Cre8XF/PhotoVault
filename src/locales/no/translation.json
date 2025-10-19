@@ -1,0 +1,99 @@
+{
+  "profile": {
+    "title": "Profil",
+    "user": "Bruker",
+    "email": "E-post",
+    "displayName": "Visningsnavn",
+    "photoCount": "Bilder",
+    "albumCount": "Album",
+    "favoriteCount": "Favoritter",
+    "stats": "Statistikk"
+  },
+  "settings": {
+    "title": "Innstillinger",
+    "general": "Generelt",
+    "security": "Sikkerhet",
+    "appearance": "Utseende",
+    "language": "Språk",
+    "notifications": "Notifikasjoner",
+    "privacy": "Personvern",
+    "account": "Konto",
+    "about": "Om",
+    "help": "Hjelp",
+    "support": "Support"
+  },
+  "theme": {
+    "title": "Tema",
+    "light": "Lys",
+    "dark": "Mørk",
+    "auto": "Automatisk"
+  },
+  "language": {
+    "title": "Språk",
+    "norwegian": "Norsk",
+    "english": "English",
+    "swedish": "Svenska",
+    "danish": "Dansk",
+    "select": "Velg språk"
+  },
+  "account": {
+    "title": "Konto",
+    "profile": "Min profil",
+    "subscription": "Abonnement",
+    "storage": "Lagring",
+    "logout": "Logg ut",
+    "deleteAccount": "Slett konto",
+    "confirmLogout": "Bekreft utlogging",
+    "confirmLogoutMessage": "Er du sikker på at du vil logge ut?",
+    "loggedOut": "Du er nå logget ut"
+  },
+  "subscription": {
+    "title": "Abonnement",
+    "free": "Gratis",
+    "pro": "Pro",
+    "upgrade": "Oppgrader til Pro",
+    "manage": "Administrer abonnement",
+    "features": "Funksjoner",
+    "storage": "{{size}} lagring",
+    "unlimitedStorage": "Ubegrenset lagring"
+  },
+  "aiFunctions": {
+    "title": "AI-funksjoner",
+    "autoSort": "Auto-sortering",
+    "autoSortDesc": "Organiser bilder automatisk",
+    "imageEnhancement": "Bildeforbedring",
+    "imageEnhancementDesc": "AI-forbedring av kvalitet",
+    "faceRecognition": "Ansiktsgjenkjenning",
+    "faceRecognitionDesc": "Grupper bilder etter person",
+    "smartTagging": "Smart tagging",
+    "smartTaggingDesc": "Automatisk AI-tagger",
+    "duplicateDetection": "Duplikat-deteksjon",
+    "duplicateDetectionDesc": "Finn og fjern duplikater"
+  },
+  "info": {
+    "title": "Informasjon",
+    "help": "Hjelp og support",
+    "privacy": "Privacy policy",
+    "terms": "Terms of service",
+    "about": "Om PhotoVault",
+    "version": "Versjon"
+  },
+  "admin": {
+    "title": "Admin",
+    "userManagement": "Brukeradministrasjon",
+    "databaseTools": "Database-verktøy",
+    "analytics": "Analyser",
+    "settings": "Admin-innstillinger"
+  },
+  "search": {
+    "title": "Søk",
+    "placeholder": "Søk i bilder...",
+    "noResults": "Ingen resultater",
+    "searching": "Søker...",
+    "filters": "Filtre",
+    "date": "Dato",
+    "album": "Album",
+    "tags": "Tagger",
+    "location": "Lokasjon"
+  }
+}
