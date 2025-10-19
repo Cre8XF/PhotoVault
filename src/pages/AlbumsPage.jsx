@@ -1,9 +1,10 @@
 // ============================================================================
-// PAGE: AlbumsPage.jsx – v4.0 Redesign med dropdown-filter
+// PAGE: AlbumsPage.jsx – v4.1 med LazyImage
 // ============================================================================
 import React, { useState, useMemo } from "react";
 import { Folder, Image, Star, Calendar, FolderOpen, Grid, List, ChevronDown } from "lucide-react";
 import AlbumCard from "../components/AlbumCard";
+import LazyImage from "../components/LazyImage";
 
 const AlbumsPage = ({ 
   albums, 
@@ -13,11 +14,10 @@ const AlbumsPage = ({
   onPhotoClick,
   toggleFavorite 
 }) => {
-  const [viewMode, setViewMode] = useState("all"); // all, albums, allPhotos, favorites, unassigned, byDate
+  const [viewMode, setViewMode] = useState("all");
   const [gridView, setGridView] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
 
-  // Statistikk
   const stats = useMemo(() => ({
     totalPhotos: photos.length,
     totalAlbums: albums.length,
@@ -25,7 +25,6 @@ const AlbumsPage = ({
     unassigned: photos.filter(p => !p.albumId).length,
   }), [photos, albums]);
 
-  // Filtrer bilder basert på viewMode
   const filteredPhotos = useMemo(() => {
     switch(viewMode) {
       case 'allPhotos':
@@ -41,7 +40,6 @@ const AlbumsPage = ({
     }
   }, [photos, viewMode]);
 
-  // Dropdown-alternativer
   const viewOptions = [
     { value: 'all', label: 'Alt', icon: Grid },
     { value: 'albums', label: 'Kun album', icon: Folder },
@@ -95,7 +93,7 @@ const AlbumsPage = ({
             )}
           </div>
 
-          {/* Grid/List toggle (kun for photo views) */}
+          {/* Grid/List toggle */}
           {['allPhotos', 'favorites', 'unassigned', 'byDate'].includes(viewMode) && (
             <button
               onClick={() => setGridView(!gridView)}
@@ -128,13 +126,14 @@ const AlbumsPage = ({
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {photos.slice(0, 4).map((photo) => (
-                  <img
+                  <LazyImage
                     key={photo.id}
                     src={photo.url}
+                    thumbnail={photo.thumbnailSmall}
+                    photoId={photo.id}
                     alt={photo.name || ''}
                     onClick={() => onPhotoClick && onPhotoClick(photo)}
                     className="w-full h-32 object-contain bg-gray-900 rounded-xl cursor-pointer hover:scale-105 transition border border-white/10"
-                    loading="lazy"
                   />
                 ))}
               </div>
@@ -178,13 +177,14 @@ const AlbumsPage = ({
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {photos.filter(p => !p.albumId).slice(0, 4).map((photo) => (
-                  <img
+                  <LazyImage
                     key={photo.id}
                     src={photo.url}
+                    thumbnail={photo.thumbnailSmall}
+                    photoId={photo.id}
                     alt={photo.name || ''}
                     onClick={() => onPhotoClick && onPhotoClick(photo)}
                     className="w-full h-32 object-contain bg-gray-900 rounded-xl cursor-pointer hover:scale-105 transition border border-white/10"
-                    loading="lazy"
                   />
                 ))}
               </div>
@@ -246,14 +246,15 @@ const AlbumsPage = ({
                     : "glass p-4 rounded-xl flex items-center gap-4 cursor-pointer hover:bg-white/10 transition"
                   }
                 >
-                  <img
+                  <LazyImage
                     src={photo.url}
+                    thumbnail={photo.thumbnailSmall}
+                    photoId={photo.id}
                     alt={photo.name || ''}
                     className={gridView
                       ? "w-full h-40 object-contain bg-gray-900 rounded-xl transition-transform group-hover:scale-105 border border-white/10"
                       : "w-20 h-20 object-contain bg-gray-900 rounded-lg border border-white/10"
                     }
-                    loading="lazy"
                   />
                   {!gridView && (
                     <div className="flex-1">

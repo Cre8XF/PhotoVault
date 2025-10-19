@@ -1,11 +1,11 @@
 // ============================================================================
-// PAGE: HomeDashboard.jsx – v4.0 Ny Hjem-side
+// PAGE: HomeDashboard.jsx – v4.1 med LazyImage
 // ============================================================================
 import React, { useMemo } from "react";
 import { Star, Clock, Sparkles, Calendar, Users, FolderOpen, Wand2, ImagePlus, Scan } from "lucide-react";
+import LazyImage from "../components/LazyImage";
 
 const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData }) => {
-  // Statistikk
   const stats = useMemo(() => ({
     total: photos.length,
     favorites: photos.filter(p => p.favorite).length,
@@ -17,13 +17,11 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData }
     withFaces: photos.filter(p => p.faces > 0).length,
   }), [photos]);
 
-  // Favoritter (max 8)
   const favoritePhotos = useMemo(
     () => photos.filter(p => p.favorite).slice(0, 8),
     [photos]
   );
 
-  // Siste opplastninger (12 bilder)
   const recentPhotos = useMemo(
     () => [...photos]
       .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
@@ -31,7 +29,6 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData }
     [photos]
   );
 
-  // Smart albums
   const smartAlbums = [
     {
       id: 'last30days',
@@ -98,11 +95,12 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData }
                 className={`relative group cursor-pointer animate-scale-in stagger-${(i % 4) + 1}`}
                 onClick={() => onNavigate('search')}
               >
-                <img
+                <LazyImage
                   src={photo.url}
+                  thumbnail={photo.thumbnailSmall}
+                  photoId={photo.id}
                   alt={photo.name || ''}
                   className="w-full h-40 object-contain bg-gray-900 rounded-xl transition-transform duration-300 group-hover:scale-105 border border-white/10"
-                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
                 <Star
@@ -138,11 +136,12 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData }
                   className="flex-shrink-0 w-48 cursor-pointer group"
                   onClick={() => onNavigate('albums')}
                 >
-                  <img
+                  <LazyImage
                     src={photo.url}
+                    thumbnail={photo.thumbnailSmall}
+                    photoId={photo.id}
                     alt={photo.name || ''}
                     className="w-full h-48 object-contain bg-gray-900 rounded-xl transition-transform duration-300 group-hover:scale-105 border border-white/10"
-                    loading="lazy"
                   />
                   {photo.name && (
                     <p className="mt-2 text-sm truncate opacity-70">{photo.name}</p>

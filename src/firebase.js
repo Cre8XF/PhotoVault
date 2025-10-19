@@ -217,6 +217,20 @@ export async function uploadPhoto(file, userId, albumId = "root") {
   }
 }
 
+// Etter uploadPhoto funksjonen:
+export async function uploadThumbnail(blob, userId, photoId, size = "small") {
+  try {
+    const storagePath = `users/${userId}/thumbnails/${photoId}_${size}.jpg`;
+    const storageRef = ref(storage, storagePath);
+    await uploadBytes(storageRef, blob);
+    const downloadURL = await getDownloadURL(storageRef);
+    return { downloadURL, storagePath };
+  } catch (error) {
+    console.error("🔥 uploadThumbnail:", error);
+    throw new Error(error.message);
+  }
+}
+
 // ============================================================================
 // 📦 Eksporter Firebase-objekter
 // ============================================================================

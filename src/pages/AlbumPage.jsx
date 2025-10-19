@@ -1,20 +1,19 @@
 // ============================================================================
-// PAGE: AlbumPage.jsx – v2.1 fikset bildevisning
+// PAGE: AlbumPage.jsx – v2.2 med PhotoGridOptimized
 // ============================================================================
 import React, { useEffect, useState, useMemo } from "react";
 import { ArrowLeft, Trash2, Edit3, Check } from "lucide-react";
 import { deletePhoto, setAlbumCover } from "../firebase";
-import PhotoGrid from "../components/PhotoGrid";
+import PhotoGridOptimized from "../components/PhotoGridOptimized";
+import LazyImage from "../components/LazyImage";
 
 const AlbumPage = ({ album, user, photos, onBack, refreshData, colors }) => {
   const [editMode, setEditMode] = useState(false);
 
-  // Filtrer bilder som tilhører dette albumet
   const albumPhotos = useMemo(() => {
     return photos.filter((p) => p.albumId === album.id);
   }, [photos, album.id]);
 
-  // Slett bilde
   const handleDelete = async (photo) => {
     if (window.confirm("Vil du slette dette bildet permanent?")) {
       await deletePhoto(photo.id, photo.storagePath);
@@ -22,7 +21,6 @@ const AlbumPage = ({ album, user, photos, onBack, refreshData, colors }) => {
     }
   };
 
-  // Sett valgt bilde som album-cover
   const handleSetCover = async (photo) => {
     if (
       window.confirm(
@@ -31,16 +29,13 @@ const AlbumPage = ({ album, user, photos, onBack, refreshData, colors }) => {
     ) {
       await setAlbumCover(album.id, photo.url);
 
-      // Oppdater global kopi
       if (window.albums && Array.isArray(window.albums)) {
         const index = window.albums.findIndex((a) => a.id === album.id);
         if (index !== -1) window.albums[index].cover = photo.url;
       }
 
-      // Oppdater lokalt
       album.cover = photo.url;
 
-      // Hent nye data
       if (typeof refreshData === "function") {
         await new Promise((r) => setTimeout(r, 400));
         await refreshData();
@@ -86,8 +81,9 @@ const AlbumPage = ({ album, user, photos, onBack, refreshData, colors }) => {
       {/* Cover-bilde */}
       {album.cover && (
         <div className="mb-6 rounded-2xl overflow-hidden border border-white/10">
-          <img
+          <LazyImage
             src={album.cover}
+            thumbnail={album.coverThumbnail || album.cover}
             alt="Album cover"
             className="w-full h-64 object-contain bg-gray-900"
           />
@@ -103,17 +99,17 @@ const AlbumPage = ({ album, user, photos, onBack, refreshData, colors }) => {
           </p>
         </div>
       ) : editMode ? (
-        // Redigeringsmodus - vis grid med cover-valg
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {albumPhotos.map((photo) => (
             <div key={photo.id} className="relative group">
-              <img
+              <LazyImage
                 src={photo.url}
+                thumbnail={photo.thumbnailSmall}
+                photoId={photo.id}
                 alt={photo.name || ""}
                 className="w-full h-48 object-contain bg-gray-900 rounded-xl border border-gray-700 transition-transform group-hover:scale-105"
               />
 
-              {/* Overlay i redigeringsmodus */}
               <div
                 className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 rounded-xl opacity-0 group-hover:opacity-100 transition cursor-pointer"
                 onClick={() => handleSetCover(photo)}
@@ -123,7 +119,6 @@ const AlbumPage = ({ album, user, photos, onBack, refreshData, colors }) => {
                 </span>
               </div>
 
-              {/* Sletteknapp */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -138,11 +133,12 @@ const AlbumPage = ({ album, user, photos, onBack, refreshData, colors }) => {
           ))}
         </div>
       ) : (
-        // Normal visning
-        <PhotoGrid
+        <PhotoGridOptimized
           photos={albumPhotos}
           refreshPhotos={refreshData}
           showFavoriteButton={true}
+          enableInfiniteScroll={albumPhotos.length > 50}
+          itemsPerPage={20}
         />
       )}
     </div>

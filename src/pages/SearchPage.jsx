@@ -1,10 +1,11 @@
 // ============================================================================
-// PAGE: SearchPage.jsx – v4.0 Dedikert søk med filtre
+// PAGE: SearchPage.jsx – v4.1 med PhotoGridOptimized
 // ============================================================================
 import React, { useState, useMemo } from "react";
 import { Search, X, Calendar, Tag, Star, Users, Folder, SlidersHorizontal } from "lucide-react";
+import PhotoGridOptimized from "../components/PhotoGridOptimized";
 
-const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite }) => {
+const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilters, setActiveFilters] = useState({
     favorites: false,
@@ -15,11 +16,9 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite }) => {
   });
   const [showFilters, setShowFilters] = useState(false);
 
-  // Søk og filtrer bilder
   const filteredPhotos = useMemo(() => {
     let results = photos;
 
-    // Tekstsøk
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       results = results.filter(photo => {
@@ -29,27 +28,22 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite }) => {
       });
     }
 
-    // Filtrer favoritter
     if (activeFilters.favorites) {
       results = results.filter(p => p.favorite);
     }
 
-    // Filtrer ansikter
     if (activeFilters.withFaces) {
       results = results.filter(p => p.faces > 0);
     }
 
-    // Filtrer AI-tagger
     if (activeFilters.withTags) {
       results = results.filter(p => p.aiTags && p.aiTags.length > 0);
     }
 
-    // Filtrer album
     if (activeFilters.albumId) {
       results = results.filter(p => p.albumId === activeFilters.albumId);
     }
 
-    // Filtrer dato
     if (activeFilters.dateRange) {
       const now = Date.now();
       const ranges = {
@@ -68,7 +62,6 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite }) => {
     return results;
   }, [photos, searchQuery, activeFilters]);
 
-  // Populære søk (shortcuts)
   const popularSearches = [
     { label: 'I dag', action: () => setActiveFilters({ ...activeFilters, dateRange: 'today' }) },
     { label: 'Siste uke', action: () => setActiveFilters({ ...activeFilters, dateRange: 'week' }) },
@@ -148,17 +141,17 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite }) => {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Calendar className="w-4 h-4 text-purple-400" />
-              <h3 className="font-semibold">Dato</h3>
+              <span className="font-medium">Dato</span>
             </div>
             <div className="flex flex-wrap gap-2">
               {['today', 'week', 'month', 'year'].map((range) => (
                 <button
                   key={range}
-                  onClick={() => setActiveFilters({ ...activeFilters, dateRange: activeFilters.dateRange === range ? null : range })}
-                  className={`px-4 py-2 rounded-lg text-sm transition ${
+                  onClick={() => setActiveFilters({ ...activeFilters, dateRange: range })}
+                  className={`px-3 py-1.5 rounded-lg text-sm transition ${
                     activeFilters.dateRange === range
                       ? 'bg-purple-600 text-white'
-                      : 'bg-white/10 hover:bg-white/20'
+                      : 'glass hover:bg-white/10'
                   }`}
                 >
                   {range === 'today' && 'I dag'}
@@ -170,16 +163,70 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite }) => {
             </div>
           </div>
 
+          {/* Tagger */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Tag className="w-4 h-4 text-purple-400" />
+              <span className="font-medium">Tagger</span>
+            </div>
+            <button
+              onClick={() => setActiveFilters({ ...activeFilters, withTags: !activeFilters.withTags })}
+              className={`px-3 py-1.5 rounded-lg text-sm transition ${
+                activeFilters.withTags
+                  ? 'bg-purple-600 text-white'
+                  : 'glass hover:bg-white/10'
+              }`}
+            >
+              Med AI-tagger
+            </button>
+          </div>
+
+          {/* Favoritter */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Star className="w-4 h-4 text-purple-400" />
+              <span className="font-medium">Favoritter</span>
+            </div>
+            <button
+              onClick={() => setActiveFilters({ ...activeFilters, favorites: !activeFilters.favorites })}
+              className={`px-3 py-1.5 rounded-lg text-sm transition ${
+                activeFilters.favorites
+                  ? 'bg-purple-600 text-white'
+                  : 'glass hover:bg-white/10'
+              }`}
+            >
+              Kun favoritter
+            </button>
+          </div>
+
+          {/* Ansikter */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Users className="w-4 h-4 text-purple-400" />
+              <span className="font-medium">Ansikter</span>
+            </div>
+            <button
+              onClick={() => setActiveFilters({ ...activeFilters, withFaces: !activeFilters.withFaces })}
+              className={`px-3 py-1.5 rounded-lg text-sm transition ${
+                activeFilters.withFaces
+                  ? 'bg-purple-600 text-white'
+                  : 'glass hover:bg-white/10'
+              }`}
+            >
+              Med ansikter
+            </button>
+          </div>
+
           {/* Album */}
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Folder className="w-4 h-4 text-purple-400" />
-              <h3 className="font-semibold">Album</h3>
+              <span className="font-medium">Album</span>
             </div>
             <select
               value={activeFilters.albumId || ''}
               onChange={(e) => setActiveFilters({ ...activeFilters, albumId: e.target.value || null })}
-              className="w-full glass px-4 py-2 rounded-lg outline-none"
+              className="w-full glass px-3 py-2 rounded-lg text-sm outline-none"
             >
               <option value="">Alle album</option>
               {albums.map((album) => (
@@ -189,61 +236,19 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite }) => {
               ))}
             </select>
           </div>
-
-          {/* Quick filters */}
-          <div>
-            <h3 className="font-semibold mb-3">Hurtigfiltre</h3>
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setActiveFilters({ ...activeFilters, favorites: !activeFilters.favorites })}
-                className={`px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition ${
-                  activeFilters.favorites
-                    ? 'bg-yellow-500 text-white'
-                    : 'bg-white/10 hover:bg-white/20'
-                }`}
-              >
-                <Star className="w-4 h-4" />
-                Favoritter
-              </button>
-
-              <button
-                onClick={() => setActiveFilters({ ...activeFilters, withFaces: !activeFilters.withFaces })}
-                className={`px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition ${
-                  activeFilters.withFaces
-                    ? 'bg-pink-500 text-white'
-                    : 'bg-white/10 hover:bg-white/20'
-                }`}
-              >
-                <Users className="w-4 h-4" />
-                Med ansikter
-              </button>
-
-              <button
-                onClick={() => setActiveFilters({ ...activeFilters, withTags: !activeFilters.withTags })}
-                className={`px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition ${
-                  activeFilters.withTags
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-white/10 hover:bg-white/20'
-                }`}
-              >
-                <Tag className="w-4 h-4" />
-                Med AI-tagger
-              </button>
-            </div>
-          </div>
         </div>
       )}
 
-      {/* Populære søk (kun når tomt) */}
+      {/* Populære søk */}
       {!searchQuery && activeFilterCount === 0 && (
         <div className="mb-6">
-          <h3 className="font-semibold mb-3 opacity-70">Populære søk</h3>
+          <h3 className="text-sm font-medium opacity-70 mb-3">Populære søk</h3>
           <div className="flex flex-wrap gap-2">
             {popularSearches.map((search, i) => (
               <button
                 key={i}
                 onClick={search.action}
-                className="glass px-4 py-2 rounded-xl text-sm hover:bg-white/15 transition"
+                className="glass px-4 py-2 rounded-xl hover:bg-white/10 transition text-sm"
               >
                 {search.label}
               </button>
@@ -264,34 +269,14 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite }) => {
         </div>
 
         {filteredPhotos.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {filteredPhotos.map((photo) => (
-              <div
-                key={photo.id}
-                onClick={() => onPhotoClick && onPhotoClick(photo)}
-                className="relative group cursor-pointer"
-              >
-                <img
-                  src={photo.url}
-                  alt={photo.name || ''}
-                  className="w-full h-40 object-contain bg-gray-900 rounded-xl transition-transform group-hover:scale-105 border border-white/10"
-                  loading="lazy"
-                />
-                {photo.favorite && (
-                  <Star
-                    className="absolute top-2 right-2 w-5 h-5 text-yellow-400"
-                    fill="currentColor"
-                  />
-                )}
-                {photo.aiTags && photo.aiTags.length > 0 && (
-                  <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm px-2 py-1 rounded text-xs">
-                    <Tag className="w-3 h-3 inline mr-1" />
-                    {photo.aiTags.length}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+          <PhotoGridOptimized
+            photos={filteredPhotos}
+            refreshPhotos={refreshData}
+            enableInfiniteScroll={filteredPhotos.length > 50}
+            itemsPerPage={20}
+            compact={false}
+            showFavoriteButton={true}
+          />
         ) : (
           <div className="text-center py-20">
             <Search className="w-20 h-20 mx-auto mb-4 opacity-30" />
