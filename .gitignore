@@ -5,9 +5,10 @@
 .env.development
 .env.*.local
 
-# 🔑 Nøkler og sensitive JSON-filer
-*.json
+# 🔑 Nøkler og sensitive JSON-filer (men behold prosjektfiler)
+# Ignorer kun nøkler eller private kataloger, ikke package.json
 /private/
+service-account.json
 photovault-*.json
 
 # 🏗️ Bygg og avhengigheter
