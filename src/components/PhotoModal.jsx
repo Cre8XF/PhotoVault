@@ -1,5 +1,5 @@
 // ============================================================================
-// COMPONENT: PhotoModal.jsx – v2.5 Enhanced med metadata og forbedringer
+// COMPONENT: PhotoModal.jsx – v3.1 med forbedret knapp-synlighet
 // ============================================================================
 import React, { useEffect, useRef, useState } from "react";
 import { X, ArrowLeft, ArrowRight, Download, Info, Star, Calendar, Tag } from "lucide-react";
@@ -82,15 +82,15 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Topbar */}
-      <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/80 to-transparent p-4 z-10">
+      {/* Topbar med forbedret synlighet */}
+      <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/90 via-black/60 to-transparent p-4 z-10">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           {/* Teller */}
-          <div className="bg-black/50 backdrop-blur-md text-white text-sm px-3 py-1.5 rounded-lg">
+          <div className="bg-white/90 backdrop-blur-md text-gray-900 text-sm font-semibold px-4 py-2 rounded-lg shadow-lg">
             {index + 1} / {photos.length}
           </div>
 
-          {/* Action buttons */}
+          {/* Action buttons med bedre synlighet */}
           <div className="flex items-center gap-2">
             {onToggleFavorite && (
               <button
@@ -98,7 +98,11 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
                   e.stopPropagation();
                   onToggleFavorite(photo);
                 }}
-                className="bg-black/50 backdrop-blur-md hover:bg-black/70 text-white p-2 rounded-lg transition"
+                className={`backdrop-blur-md text-white p-2.5 rounded-lg transition shadow-lg ${
+                  photo.favorite
+                    ? "bg-yellow-500/90 hover:bg-yellow-600"
+                    : "bg-white/20 hover:bg-white/30"
+                }`}
                 title={photo.favorite ? "Fjern favoritt" : "Legg til favoritt"}
               >
                 <Star
@@ -113,8 +117,8 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
                 e.stopPropagation();
                 setShowInfo(!showInfo);
               }}
-              className={`bg-black/50 backdrop-blur-md hover:bg-black/70 text-white p-2 rounded-lg transition ${
-                showInfo ? "bg-purple-600/80" : ""
+              className={`backdrop-blur-md text-white p-2.5 rounded-lg transition shadow-lg ${
+                showInfo ? "bg-purple-600/90" : "bg-white/20 hover:bg-white/30"
               }`}
               title="Vis info (I)"
             >
@@ -126,7 +130,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
                 e.stopPropagation();
                 handleDownload();
               }}
-              className="bg-black/50 backdrop-blur-md hover:bg-black/70 text-white p-2 rounded-lg transition"
+              className="bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-2.5 rounded-lg transition shadow-lg"
               title="Last ned"
             >
               <Download className="w-5 h-5" />
@@ -134,7 +138,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
 
             <button
               onClick={onClose}
-              className="bg-black/50 backdrop-blur-md hover:bg-red-600/70 text-white p-2 rounded-lg transition"
+              className="bg-red-600/90 backdrop-blur-md hover:bg-red-700 text-white p-2.5 rounded-lg transition shadow-lg"
               title="Lukk (ESC)"
             >
               <X className="w-5 h-5" />
@@ -143,11 +147,11 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
         </div>
       </div>
 
-      {/* Navigasjonsknapper */}
+      {/* Navigasjonsknapper med bedre synlighet */}
       {photos.length > 1 && (
         <>
           <button
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 backdrop-blur-md hover:bg-black/70 text-white p-3 rounded-full transition z-10"
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-4 rounded-full transition shadow-2xl z-10 border-2 border-white/30"
             onClick={(e) => {
               e.stopPropagation();
               prevPhoto();
@@ -158,7 +162,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
           </button>
 
           <button
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 backdrop-blur-md hover:bg-black/70 text-white p-3 rounded-full transition z-10"
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-4 rounded-full transition shadow-2xl z-10 border-2 border-white/30"
             onClick={(e) => {
               e.stopPropagation();
               nextPhoto();
@@ -194,7 +198,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
       {/* Info-panel */}
       {showInfo && (
         <div
-          className="absolute right-4 top-20 bottom-4 w-80 bg-black/80 backdrop-blur-xl rounded-2xl p-6 overflow-y-auto animate-slide-in"
+          className="absolute right-4 top-20 bottom-4 w-80 bg-gray-900/95 backdrop-blur-xl rounded-2xl p-6 overflow-y-auto animate-slide-in shadow-2xl border border-white/10"
           onClick={(e) => e.stopPropagation()}
         >
           <h3 className="text-lg font-semibold mb-4 text-white">
@@ -282,9 +286,9 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
         </div>
       )}
 
-      {/* Bildetittel nederst */}
+      {/* Bildetittel nederst med bedre synlighet */}
       {photo.name && !showInfo && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-md text-white px-4 py-2 rounded-lg">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md text-gray-900 px-6 py-3 rounded-lg font-medium shadow-lg">
           {photo.name}
         </div>
       )}

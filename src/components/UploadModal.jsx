@@ -1,188 +1,200 @@
+// ============================================================================
+// components/UploadModal.jsx – v4.1 med AI auto-tagging
+// ============================================================================
 import React, { useState } from "react";
-import { X } from "lucide-react";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { addAlbum, addPhoto } from "../firebase";
+import { X, Upload, FolderOpen, Sparkles } from "lucide-react";
 
-const UploadModal = ({
-  user,
-  albums,
-  onClose,
-  onUploadComplete,
-  colors,
-}) => {
-  const [selectedFiles, setSelectedFiles] = useState([]);
+const UploadModal = ({ albums, onClose, onUpload }) => {
+  const [files, setFiles] = useState([]);
   const [selectedAlbum, setSelectedAlbum] = useState("");
-  const [newAlbumName, setNewAlbumName] = useState("");
+  const [aiTagging, setAiTagging] = useState(
+    localStorage.getItem('aiAutoTag') !== 'false'
+  );
   const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const handleFileChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    setFiles(selectedFiles);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    const imageFiles = droppedFiles.filter((file) =>
+      file.type.startsWith("image/")
+    );
+    setFiles(imageFiles);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
 
   const handleUpload = async () => {
-    if (!selectedFiles.length) {
-      alert("Velg minst ett bilde før du laster opp.");
-      return;
-    }
+    if (files.length === 0) return;
 
+    setUploading(true);
     try {
-      setUploading(true);
-      setUploadProgress(0);
-
-      const storage = getStorage();
-
-      let albumId = selectedAlbum || null;
-      if (newAlbumName.trim()) {
-        albumId = await addAlbum({
-          name: newAlbumName.trim(),
-          userId: user.uid,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        });
-        console.log("📁 Nytt album opprettet:", albumId);
-      }
-
-      let completed = 0;
-      for (const file of selectedFiles) {
-        const albumPath = albumId ? `albums/${albumId}` : "unassigned";
-        const storagePath = `users/${user.uid}/${albumPath}/${file.name}`;
-        const fileRef = ref(storage, storagePath);
-
-        const snapshot = await uploadBytes(fileRef, file);
-        const downloadURL = await getDownloadURL(snapshot.ref);
-
-        const photoData = {
-          userId: user.uid,
-          albumId,
-          name: file.name.replace(/\.[^/.]+$/, ""),
-          url: downloadURL,
-          storagePath,
-          size: file.size || 0,
-          type: file.type || "image/jpeg",
-          favorite: false,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-
-        const docId = await addPhoto(photoData);
-        console.log(`✅ Bilde lagret med ID: ${docId}`);
-
-        completed++;
-        setUploadProgress(Math.round((completed / selectedFiles.length) * 100));
-      }
-
-      console.log(`✅ ${completed} bilder lastet opp`);
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      if (typeof onUploadComplete === "function") {
-        await onUploadComplete();
-      }
-
-    } catch (err) {
-      console.error("🔥 Feil ved opplasting:", err);
-      alert("Kunne ikke laste opp bilder: " + (err?.message || ""));
+      await onUpload(files, selectedAlbum || null, aiTagging);
+      onClose();
+    } catch (error) {
+      console.error("Upload error:", error);
     } finally {
       setUploading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 p-4">
-      <div
-        className={`w-full max-w-md ${colors.cardBg} ${colors.glass} p-6 rounded-2xl`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex justify-between items-center mb-4">
-          <h2 className={`text-xl font-semibold ${colors.text}`}>
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="glass rounded-2xl max-w-2xl w-full p-6 md:p-8 animate-scale-in">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <Upload className="w-7 h-7 text-purple-400" />
             Last opp bilder
           </h2>
           <button
             onClick={onClose}
+            className="p-2 hover:bg-white/10 rounded-lg transition"
             disabled={uploading}
-            className="text-gray-400 hover:text-gray-200 transition"
           >
-            <X className="w-5 h-5" />
+            <X className="w-6 h-6" />
           </button>
         </div>
 
-        <div className="mb-4">
-          <label className={`${colors.textSecondary} text-sm block mb-2`}>
-            Velg bilder
-          </label>
+        {/* Drag & Drop Area */}
+        <div
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          className="border-2 border-dashed border-white/20 rounded-xl p-12 text-center mb-6 hover:border-purple-400 transition cursor-pointer"
+          onClick={() => document.getElementById("file-input").click()}
+        >
+          <Upload className="w-16 h-16 mx-auto mb-4 opacity-50" />
+          <p className="text-lg mb-2">
+            Dra og slipp bilder her, eller klikk for å velge
+          </p>
+          <p className="text-sm opacity-70">
+            Støtter JPG, PNG, GIF, WebP
+          </p>
           <input
+            id="file-input"
             type="file"
             multiple
             accept="image/*"
-            onChange={(e) => setSelectedFiles([...e.target.files])}
-            className="w-full p-2 rounded-lg border border-purple-500/50 bg-transparent text-sm"
+            onChange={handleFileChange}
+            className="hidden"
             disabled={uploading}
           />
-          {selectedFiles.length > 0 && (
-            <p className="text-xs text-gray-400 mt-1">
-              {selectedFiles.length} fil(er) valgt
-            </p>
-          )}
         </div>
 
-        <div className="mb-4">
-          <label className={`${colors.textSecondary} text-sm block mb-2`}>
-            Velg eksisterende album (valgfritt)
+        {/* Selected Files */}
+        {files.length > 0 && (
+          <div className="mb-6">
+            <p className="text-sm opacity-70 mb-2">
+              {files.length} {files.length === 1 ? "fil" : "filer"} valgt
+            </p>
+            <div className="max-h-40 overflow-y-auto space-y-2">
+              {files.map((file, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between bg-white/5 p-3 rounded-lg"
+                >
+                  <span className="text-sm truncate">{file.name}</span>
+                  <span className="text-xs opacity-70 ml-2">
+                    {(file.size / 1024 / 1024).toFixed(2)} MB
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Album Selection */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+            <FolderOpen className="w-4 h-4" />
+            Velg album (valgfritt)
           </label>
           <select
             value={selectedAlbum}
             onChange={(e) => setSelectedAlbum(e.target.value)}
-            className="w-full p-2 rounded-lg border border-purple-500/50 bg-transparent"
+            className="w-full glass px-4 py-3 rounded-xl outline-none border border-white/10 focus:border-purple-400 transition"
             disabled={uploading}
           >
             <option value="">Uten album</option>
-            {albums.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name}
+            {albums.map((album) => (
+              <option key={album.id} value={album.id}>
+                {album.name}
               </option>
             ))}
           </select>
         </div>
 
-        <div className="mb-4">
-          <label className={`${colors.textSecondary} text-sm block mb-2`}>
-            Opprett nytt album (valgfritt)
-          </label>
-          <input
-            type="text"
-            placeholder="F.eks. Sommer 2024"
-            value={newAlbumName}
-            onChange={(e) => setNewAlbumName(e.target.value)}
-            className="w-full p-2 rounded-lg border border-purple-500/50 bg-transparent"
-            disabled={uploading}
-          />
+        {/* AI Tagging Toggle */}
+        <div className="mb-6 bg-purple-500/10 border border-purple-500/20 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-600/30 rounded-lg">
+                <Sparkles className="w-5 h-5 text-purple-400" />
+              </div>
+              <div>
+                <p className="font-medium flex items-center gap-2">
+                  AI Auto-tagging
+                  <span className="text-xs bg-purple-600/30 px-2 py-0.5 rounded-full">
+                    Beta
+                  </span>
+                </p>
+                <p className="text-xs opacity-70">
+                  Analyser bilder automatisk med AI ved opplasting
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setAiTagging(!aiTagging)}
+              disabled={uploading}
+              className={`relative w-14 h-7 rounded-full transition ${
+                aiTagging ? 'bg-purple-600' : 'bg-gray-600'
+              }`}
+            >
+              <div
+                className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
+                  aiTagging ? 'translate-x-7' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+          {aiTagging && (
+            <div className="mt-3 text-xs opacity-70">
+              ℹ️ Gratis tier: 1000 bilder/måned. Se AI-innstillinger for mer info.
+            </div>
+          )}
         </div>
 
-        {uploading && (
-          <div className="mb-4">
-            <div className="flex justify-between text-sm mb-1">
-              <span className={colors.textSecondary}>Laster opp...</span>
-              <span className={colors.textSecondary}>{uploadProgress}%</span>
-            </div>
-            <div className="w-full h-2 bg-gray-700/50 rounded-full overflow-hidden">
-              <div
-                className="h-2 bg-purple-500 rounded-full transition-all duration-300"
-                style={{ width: `${uploadProgress}%` }}
-              />
-            </div>
-          </div>
-        )}
-
-        <div className="flex justify-end gap-2 mt-6">
+        {/* Actions */}
+        <div className="flex gap-3">
           <button
             onClick={onClose}
             disabled={uploading}
-            className="px-4 py-2 rounded-xl bg-gray-700 hover:bg-gray-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 glass px-6 py-3 rounded-xl hover:bg-white/15 transition disabled:opacity-50"
           >
             Avbryt
           </button>
           <button
             onClick={handleUpload}
-            disabled={uploading || selectedFiles.length === 0}
-            className={`px-4 py-2 rounded-xl ${colors.buttonPrimary} disabled:opacity-50 disabled:cursor-not-allowed`}
+            disabled={files.length === 0 || uploading}
+            className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-6 py-3 rounded-xl font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {uploading ? `Laster opp... ${uploadProgress}%` : "Last opp"}
+            {uploading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Laster opp...
+              </>
+            ) : (
+              <>
+                <Upload className="w-5 h-5" />
+                Last opp {files.length > 0 && `(${files.length})`}
+              </>
+            )}
           </button>
         </div>
       </div>

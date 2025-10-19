@@ -1,5 +1,5 @@
 /* ============================================================================
-   home.css – Twilight Theme v3.0 med Masonry Layout
+   home.css – Twilight Theme v3.1 med Light Mode Support
    ============================================================================ */
 
 :root {
@@ -11,6 +11,20 @@
   --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.2);
   --accent: #a78bfa;
   --gold: #fbbf24;
+}
+
+/* ============================================================================
+   LIGHT MODE VARIABLES
+   ============================================================================ */
+body.light-mode {
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(139, 92, 246, 0.15);
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  --shadow: 0 12px 40px rgba(139, 92, 246, 0.15);
+  --shadow-sm: 0 4px 20px rgba(139, 92, 246, 0.08);
+  --accent: #8b5cf6;
+  --gold: #f59e0b;
 }
 
 /* ============================================================================
@@ -78,10 +92,20 @@
   border-radius: 10px;
 }
 
+body.light-mode .fav-row::-webkit-scrollbar-track,
+body.light-mode .recent-row::-webkit-scrollbar-track {
+  background: rgba(139, 92, 246, 0.05);
+}
+
 .fav-row::-webkit-scrollbar-thumb,
 .recent-row::-webkit-scrollbar-thumb {
   background: rgba(167, 139, 250, 0.5);
   border-radius: 10px;
+}
+
+body.light-mode .fav-row::-webkit-scrollbar-thumb,
+body.light-mode .recent-row::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.4);
 }
 
 .fav-row img,
@@ -90,6 +114,13 @@
   box-shadow: var(--shadow-sm);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #1f2937;
+}
+
+body.light-mode .fav-row img,
+body.light-mode .recent-row img {
+  background: #f8fafc;
+  border-color: #e2e8f0;
 }
 
 .fav-row img:hover,
@@ -99,6 +130,14 @@
     var(--shadow),
     0 0 30px rgba(251, 191, 36, 0.3);
   border-color: rgba(251, 191, 36, 0.5);
+}
+
+body.light-mode .fav-row img:hover,
+body.light-mode .recent-row img:hover {
+  box-shadow: 
+    0 8px 32px rgba(139, 92, 246, 0.2),
+    0 0 20px rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.4);
 }
 
 /* ============================================================================
@@ -135,10 +174,12 @@
 /* 3D Tilt Effect on Hover */
 .album-card:hover {
   transform: translateY(-8px) scale(1.03) rotateX(2deg);
-  box-shadow: 
-    var(--shadow),
-    0 0 40px rgba(167, 139, 250, 0.4);
-  border-color: rgba(167, 139, 250, 0.5);
+  box-shadow: var(--shadow);
+  border-color: var(--accent);
+}
+
+body.light-mode .album-card:hover {
+  box-shadow: 0 12px 40px rgba(139, 92, 246, 0.2);
 }
 
 /* Golden glow indicator */
@@ -171,6 +212,10 @@
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+body.light-mode .album-thumb {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+}
+
 .album-card:hover .album-thumb {
   transform: scale(1.05);
 }
@@ -183,12 +228,20 @@
   background: rgba(255, 255, 255, 0.05);
 }
 
+body.light-mode .album-meta {
+  background: rgba(139, 92, 246, 0.03);
+}
+
 .album-title {
   font-weight: 600;
   line-height: 1.3;
   color: var(--text-main);
   font-size: 1.05rem;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+body.light-mode .album-title {
+  text-shadow: none;
 }
 
 .album-sub {
@@ -210,6 +263,11 @@
   border: 1px dashed rgba(255, 255, 255, 0.2);
 }
 
+body.light-mode .empty-state {
+  background: rgba(139, 92, 246, 0.05);
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
 /* ============================================================================
    LOADING OVERLAY
    ============================================================================ */
@@ -225,6 +283,10 @@
   animation: fadeInUp 0.3s ease-out;
 }
 
+body.light-mode .loading-overlay {
+  background: rgba(255, 255, 255, 0.9);
+}
+
 .spinner-twilight {
   width: 56px;
   height: 56px;
@@ -233,6 +295,12 @@
   border-bottom-color: var(--gold);
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+
+body.light-mode .spinner-twilight {
+  border-color: rgba(139, 92, 246, 0.2);
+  border-top-color: #8b5cf6;
+  border-bottom-color: #f59e0b;
 }
 
 @keyframes spin {

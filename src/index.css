@@ -1,5 +1,5 @@
 /* ============================================================================
-   index.css – Twilight Premium Theme v3.0
+   index.css – Twilight Premium Theme v3.1 med forbedret Light Mode
    Balansert mørk-til-lys med varme toner og elegante animasjoner
    ============================================================================ */
 
@@ -31,7 +31,7 @@ body {
 
 /* LIGHT MODE - Soft pastel gradient */
 body.light-mode {
-  background: linear-gradient(135deg, #fdf4ff 0%, #f3e8ff 20%, #e9d5ff 40%, #ddd6fe 60%, #c7d2fe 80%, #fae8ff 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #fdf4ff 20%, #f3e8ff 40%, #e9d5ff 60%, #ddd6fe 80%, #fae8ff 100%);
   color: #1f2937;
 }
 
@@ -57,11 +57,57 @@ body::before {
   z-index: 0;
 }
 
+body.light-mode::before {
+  background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(233, 213, 255, 0.2) 100%);
+}
+
 main,
 .home-wrap {
   position: relative;
   z-index: 1;
   padding-bottom: 100px;
+}
+
+/* ============================================================================
+   LIGHT MODE - IMAGE BACKGROUNDS
+   ============================================================================ */
+body.light-mode img {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+body.light-mode .album-thumb {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
+}
+
+body.light-mode .bg-gray-900,
+body.light-mode .bg-gray-800 {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* ============================================================================
+   LIGHT MODE - TEXT COLORS
+   ============================================================================ */
+body.light-mode h1,
+body.light-mode h2,
+body.light-mode h3 {
+  color: #1f2937 !important;
+}
+
+body.light-mode .text-gray-100,
+body.light-mode .text-white {
+  color: #1f2937 !important;
+}
+
+body.light-mode .text-gray-400,
+body.light-mode .text-gray-500,
+body.light-mode .text-gray-300 {
+  color: #6b7280 !important;
+}
+
+body.light-mode .text-gray-200 {
+  color: #4b5563 !important;
 }
 
 /* ============================================================================
@@ -79,9 +125,9 @@ main,
 
 /* Light mode glass */
 body.light-mode .glass {
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(139, 92, 246, 0.2);
-  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(139, 92, 246, 0.15);
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.9);
 }
 
 .glass:hover {
@@ -92,9 +138,9 @@ body.light-mode .glass {
 }
 
 body.light-mode .glass:hover {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(139, 92, 246, 0.4);
-  box-shadow: 0 12px 40px rgba(139, 92, 246, 0.2), inset 0 1px 1px rgba(255, 255, 255, 1);
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.15), inset 0 1px 1px rgba(255, 255, 255, 1);
 }
 
 .glass-sm {
@@ -103,6 +149,55 @@ body.light-mode .glass:hover {
   backdrop-filter: blur(16px);
   border-radius: 16px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+body.light-mode .glass-sm {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(139, 92, 246, 0.1);
+  box-shadow: 0 2px 12px rgba(139, 92, 246, 0.08);
+}
+
+/* ============================================================================
+   LIGHT MODE - CARDS
+   ============================================================================ */
+body.light-mode .card-premium {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(139, 92, 246, 0.15);
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.08);
+}
+
+body.light-mode .card-premium:hover {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 40px rgba(139, 92, 246, 0.15);
+}
+
+/* ============================================================================
+   LIGHT MODE - BUTTONS
+   ============================================================================ */
+body.light-mode .bg-white\/10 {
+  background: rgba(139, 92, 246, 0.08) !important;
+}
+
+body.light-mode .bg-white\/20 {
+  background: rgba(139, 92, 246, 0.15) !important;
+}
+
+body.light-mode .bg-black\/50,
+body.light-mode .bg-black\/60 {
+  background: rgba(139, 92, 246, 0.15) !important;
+}
+
+body.light-mode .hover\:bg-white\/20:hover {
+  background: rgba(139, 92, 246, 0.2) !important;
+}
+
+/* ============================================================================
+   LIGHT MODE - BORDERS
+   ============================================================================ */
+body.light-mode .border-white\/10,
+body.light-mode .border-gray-700,
+body.light-mode .border-gray-800 {
+  border-color: rgba(139, 92, 246, 0.15) !important;
 }
 
 /* ============================================================================
@@ -119,6 +214,10 @@ body.light-mode .glass:hover {
 /* Hover glow for cards */
 .card-glow:hover {
   box-shadow: 0 0 40px rgba(139, 92, 246, 0.4), 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+body.light-mode .card-glow:hover {
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.2), 0 8px 32px rgba(139, 92, 246, 0.15);
 }
 
 /* ============================================================================
@@ -219,10 +318,19 @@ body.light-mode .glass:hover {
   border-radius: 10px;
 }
 
+body.light-mode ::-webkit-scrollbar-track {
+  background: rgba(139, 92, 246, 0.05);
+}
+
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #8b5cf6, #a78bfa);
   border-radius: 10px;
   border: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+body.light-mode ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #8b5cf6, #a78bfa);
+  border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -243,6 +351,13 @@ h3 {
 h1 {
   font-size: 2.5rem;
   background: linear-gradient(135deg, #f3f4f6, #c4b5fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+body.light-mode h1 {
+  background: linear-gradient(135deg, #1f2937, #8b5cf6);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -311,6 +426,10 @@ img:hover {
   filter: brightness(1.1);
 }
 
+body.light-mode img:hover {
+  filter: brightness(0.95);
+}
+
 img[loading='lazy'] {
   opacity: 0;
   animation: fadeInUp 0.6s ease-out forwards;
@@ -361,6 +480,11 @@ img[loading='lazy'] {
   animation: spin 0.8s linear infinite;
 }
 
+body.light-mode .spinner {
+  border-color: rgba(139, 92, 246, 0.2);
+  border-top-color: #8b5cf6;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -374,6 +498,10 @@ img[loading='lazy'] {
   border-radius: 12px;
 }
 
+body.light-mode .skeleton {
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.05) 25%, rgba(139, 92, 246, 0.15) 50%, rgba(139, 92, 246, 0.05) 75%);
+}
+
 /* ============================================================================
    FOCUS & SELECTION
    ============================================================================ */
@@ -382,9 +510,18 @@ img[loading='lazy'] {
   outline-offset: 3px;
 }
 
+body.light-mode *:focus-visible {
+  outline-color: #8b5cf6;
+}
+
 ::selection {
   background: rgba(139, 92, 246, 0.5);
   color: white;
+}
+
+body.light-mode ::selection {
+  background: rgba(139, 92, 246, 0.3);
+  color: #1f2937;
 }
 
 /* ============================================================================
@@ -400,6 +537,14 @@ textarea {
   color: #f3f4f6;
 }
 
+body.light-mode input,
+body.light-mode select,
+body.light-mode textarea {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  color: #1f2937;
+}
+
 input:focus,
 select:focus,
 textarea:focus {
@@ -409,8 +554,20 @@ textarea:focus {
   box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
 }
 
+body.light-mode input:focus,
+body.light-mode select:focus,
+body.light-mode textarea:focus {
+  background: #ffffff;
+  border-color: #8b5cf6;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.2);
+}
+
 input::placeholder {
   color: rgba(255, 255, 255, 0.4);
+}
+
+body.light-mode input::placeholder {
+  color: rgba(107, 114, 128, 0.6);
 }
 
 /* ============================================================================
@@ -418,6 +575,13 @@ input::placeholder {
    ============================================================================ */
 .text-gradient {
   background: linear-gradient(135deg, #f3f4f6, #c4b5fd, #fbbf24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+body.light-mode .text-gradient {
+  background: linear-gradient(135deg, #1f2937, #8b5cf6, #d946ef);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
