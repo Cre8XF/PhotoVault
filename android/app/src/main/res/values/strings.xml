@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">PhotoVault</string>
+    <string name="title_activity_main">PhotoVault</string>
+    <string name="package_name">com.cre8web.photovault</string>
+    <string name="custom_url_scheme">com.cre8web.photovault</string>
+</resources>

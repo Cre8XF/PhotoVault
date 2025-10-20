@@ -3,24 +3,52 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "firebase": "^12.4.0",
+    "@capacitor/android": "^6.1.0",
+    "@capacitor/app": "^6.0.1",
+    "@capacitor/camera": "^6.1.2",
+    "@capacitor/core": "^6.1.0",
+    "@capacitor/filesystem": "^6.0.3",
+    "@capacitor/haptics": "^6.0.1",
+    "@capacitor/ios": "^6.1.0",
+    "@capacitor/keyboard": "^6.0.1",
+    "@capacitor/share": "^6.0.3",
+    "@capacitor/splash-screen": "^6.0.3",
+    "@capacitor/status-bar": "^6.0.1",
+    "@capacitor/toast": "^6.0.3",
+    "browser-image-compression": "^2.0.2",
+    "capacitor-native-biometric": "^4.2.2",
+    "firebase": "^11.0.0",
     "i18next": "^25.6.0",
     "i18next-browser-languagedetector": "^8.2.0",
-    "lucide-react": "^0.263.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "idb": "^7.1.1",
+    "lucide-react": "^0.546.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-i18next": "^16.1.0",
-    "react-scripts": "5.0.1"
+    "react-router-dom": "^6.27.0",
+    "react-scripts": "5.0.1",
+    "react-window": "^2.2.1"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "cap:init": "cap init PhotoVault com.cre8web.photovault",
+    "cap:add:ios": "cap add ios",
+    "cap:add:android": "cap add android",
+    "cap:sync": "cap sync",
+    "cap:copy": "cap copy",
+    "cap:open:ios": "cap open ios",
+    "cap:open:android": "cap open android",
+    "build:mobile": "npm run build && cap sync",
+    "ios:build": "npm run build && cap sync ios && cap open ios",
+    "android:build": "npm run build && cap sync android && cap open android"
   },
   "eslintConfig": {
     "extends": [
-      "react-app"
+      "react-app",
+      "react-app/jest"
     ]
   },
   "browserslist": {
@@ -34,5 +62,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.3",
+    "typescript": "^4.9.5"
   }
 }

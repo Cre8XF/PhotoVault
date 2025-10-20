@@ -40,6 +40,18 @@ import {
 // Security Context (NEW)
 import { SecurityProvider, useSecurityContext } from "./contexts/SecurityContext";
 
+import { ToastProvider } from './contexts/ToastContext';
+
+function App() {
+  return (
+    <ToastProvider>
+      <SecurityProvider>
+        <AppContent />
+      </SecurityProvider>
+    </ToastProvider>
+  );
+}
+
 // Main App Component (wrapped in SecurityProvider)
 function AppContent() {
   // Auth
@@ -102,6 +114,38 @@ function AppContent() {
       localStorage.setItem("theme", "light");
     }
   }, [isDarkMode]);
+
+  // Global drag & drop
+  useEffect(() => {
+    if (!user) return;
+
+    const handleGlobalDrop = (e) => {
+      e.preventDefault();
+      const files = Array.from(e.dataTransfer.files);
+      const imageFiles = files.filter(f => f.type.startsWith("image/"));
+      
+      if (imageFiles.length > 0 && !uploadModalOpen) {
+        setUploadModalOpen(true);
+        // Small delay to ensure modal is mounted
+        setTimeout(() => {
+          const event = new CustomEvent('externalFileDrop', { detail: imageFiles });
+          window.dispatchEvent(event);
+        }, 100);
+      }
+    };
+
+    const handleGlobalDragOver = (e) => {
+      e.preventDefault();
+    };
+
+    window.addEventListener('drop', handleGlobalDrop);
+    window.addEventListener('dragover', handleGlobalDragOver);
+
+    return () => {
+      window.removeEventListener('drop', handleGlobalDrop);
+      window.removeEventListener('dragover', handleGlobalDragOver);
+    };
+  }, [user, uploadModalOpen]);
 
   // Refresh data
   const refreshData = async (uid = user?.uid) => {
@@ -202,6 +246,20 @@ function AppContent() {
     } catch (err) {
       console.error("Album save error:", err);
       setNotification({ message: "Feil ved lagring av album", type: "error" });
+    }
+  };
+
+  // Handle create album from upload modal (returns album ID)
+  const handleCreateAlbumFromUpload = async (albumData) => {
+    try {
+      const albumId = await addAlbum({ ...albumData, userId: user.uid });
+      await refreshData();
+      setNotification({ message: "Album opprettet", type: "success" });
+      return albumId;
+    } catch (err) {
+      console.error("Album creation error:", err);
+      setNotification({ message: "Feil ved opprettelse av album", type: "error" });
+      throw err;
     }
   };
 
@@ -442,6 +500,7 @@ function AppContent() {
           albums={albums}
           onClose={() => setUploadModalOpen(false)}
           onUpload={handleUpload}
+          onCreateAlbum={handleCreateAlbumFromUpload}
         />
       )}
 
@@ -485,15 +544,6 @@ function AppContent() {
         />
       )}
     </div>
-  );
-}
-
-// Main App with SecurityProvider wrapper
-function App() {
-  return (
-    <SecurityProvider>
-      <AppContent />
-    </SecurityProvider>
   );
 }
 

@@ -5,6 +5,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
+import './styles-enhanced.css'; // Premium styles
 import App from './App';
 
 // Import i18n configuration (must be before App)

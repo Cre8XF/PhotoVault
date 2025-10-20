@@ -1,7 +1,8 @@
 // ============================================================================
-// firebase.js – komplett integrasjon (v2.1) med favoritt-toggle
+// firebase.js – komplett integrasjon (v2.3) med Authentication
 // ============================================================================
 import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 import {
   getFirestore,
   collection,
@@ -38,6 +39,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
+const auth = getAuth(app);
 
 // ============================================================================
 // 📁 Firestore-funksjoner
@@ -72,7 +74,7 @@ export async function addAlbum(data) {
     cover: data.cover || "",
   };
   const refDoc = await addDoc(collection(db, "albums"), payload);
-  console.log(`📁 Album opprettet: ${payload.name}`);
+  console.log(`📂 Album opprettet: ${payload.name}`);
   return refDoc.id;
 }
 
@@ -84,7 +86,7 @@ export async function updateAlbum(albumId, updates) {
       ...updates,
       updatedAt: new Date().toISOString(),
     });
-    console.log(`📁 Album oppdatert (${albumId})`);
+    console.log(`📝 Album oppdatert (${albumId})`);
   } catch (err) {
     console.error("🔥 updateAlbum:", err);
   }
@@ -131,7 +133,7 @@ export async function addPhoto(data) {
     updatedAt: now,
     favorite: data.favorite || false,
   };
-  
+
   // ✅ La Firestore generere ID automatisk
   const refDoc = await addDoc(collection(db, "photos"), payload);
   console.log(`📸 Bilde lagret: ${refDoc.id}`);
@@ -151,17 +153,17 @@ export async function updatePhoto(photoId, updates) {
   }
 }
 
-// ⭐ NYTT: Toggle favoritt-status
+// ⭐ Toggle favoritt-status
 export async function toggleFavorite(photoId, currentStatus) {
   try {
     const refDoc = doc(db, "photos", photoId);
     const newStatus = !currentStatus;
-    
+
     await updateDoc(refDoc, {
       favorite: newStatus,
       updatedAt: new Date().toISOString(),
     });
-    
+
     console.log(`⭐ Favoritt oppdatert: ${photoId} → ${newStatus}`);
     return newStatus;
   } catch (err) {
@@ -201,23 +203,78 @@ export async function updateAlbumPhotoCount(albumId, newCount) {
 // ☁️ Storage-funksjoner
 // ============================================================================
 
-// 🔹 Last opp bildefil og returner URL + sti
-export async function uploadPhoto(file, userId, albumId = "root") {
+// 🔹 Last opp bildefil komplett (Storage + Firestore)
+export async function uploadPhoto(userId, file, albumId = null, aiTagging = false) {
   try {
+    // 1. Last opp til Storage
     const timestamp = Date.now();
     const safeName = file.name.replace(/\s+/g, "_");
-    const storagePath = `users/${userId}/${albumId}/${timestamp}_${safeName}`;
+    const folderPath = albumId || "unassigned";
+    const storagePath = `users/${userId}/${folderPath}/${timestamp}_${safeName}`;
     const storageRef = ref(storage, storagePath);
+    
     await uploadBytes(storageRef, file);
     const downloadURL = await getDownloadURL(storageRef);
-    return { downloadURL, storagePath };
+
+    console.log(`📸 Bilde lastet opp til Storage: ${safeName}`);
+
+    // 2. Forbered metadata
+    const photoData = {
+      name: file.name,
+      url: downloadURL,
+      userId: userId,
+      albumId: albumId,
+      storagePath: storagePath,
+      size: file.size,
+      type: file.type,
+      favorite: false,
+      aiTags: [],
+      faces: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    // 3. AI-tagging (hvis aktivert)
+    if (aiTagging) {
+      try {
+        // TODO: Implementer AI-analyse her
+        // const analysis = await analyzeImage(downloadURL);
+        // photoData.aiTags = analysis.labels || [];
+        // photoData.faces = analysis.faces || 0;
+        console.log("🤖 AI-tagging er aktivert (kommer snart)");
+      } catch (aiError) {
+        console.warn("⚠️ AI-analyse feilet:", aiError);
+      }
+    }
+
+    // 4. Lagre metadata i Firestore
+    const photoId = await addPhoto(photoData);
+    console.log(`✅ Bilde lagret i Firestore: ${photoId}`);
+
+    // 5. Oppdater album photoCount (hvis albumId finnes)
+    if (albumId) {
+      try {
+        const albumRef = doc(db, "albums", albumId);
+        const albumSnap = await getDoc(albumRef);
+        if (albumSnap.exists()) {
+          const currentCount = albumSnap.data().photoCount || 0;
+          await updateAlbumPhotoCount(albumId, currentCount + 1);
+          console.log(`📂 Album photoCount oppdatert: ${albumId}`);
+        }
+      } catch (err) {
+        console.warn("⚠️ Kunne ikke oppdatere album count:", err);
+      }
+    }
+
+    return photoId;
+
   } catch (error) {
-    console.error("🔥 uploadPhoto:", error);
-    throw new Error(error.message);
+    console.error("🔥 uploadPhoto error:", error);
+    throw new Error(`Upload feilet: ${error.message}`);
   }
 }
 
-// Etter uploadPhoto funksjonen:
+// 🔹 Last opp thumbnail
 export async function uploadThumbnail(blob, userId, photoId, size = "small") {
   try {
     const storagePath = `users/${userId}/thumbnails/${photoId}_${size}.jpg`;
@@ -234,4 +291,4 @@ export async function uploadThumbnail(blob, userId, photoId, size = "small") {
 // ============================================================================
 // 📦 Eksporter Firebase-objekter
 // ============================================================================
-export { db, storage };
+export { db, storage, auth };
