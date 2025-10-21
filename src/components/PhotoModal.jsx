@@ -100,7 +100,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
                   e.stopPropagation();
                   onToggleFavorite(photo);
                 }}
-                className={`backdrop-blur-md text-white p-2.5 rounded-lg transition shadow-lg ${
+                className={`ripple-effect backdrop-blur-md text-white p-2.5 rounded-lg transition shadow-lg ${
                   photo.favorite
                     ? "bg-yellow-500/90 hover:bg-yellow-600"
                     : "bg-white/20 hover:bg-white/30"
@@ -119,7 +119,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
                 e.stopPropagation();
                 setShowInfo(!showInfo);
               }}
-              className={`backdrop-blur-md text-white p-2.5 rounded-lg transition shadow-lg ${
+              className={`ripple-effect backdrop-blur-md text-white p-2.5 rounded-lg transition shadow-lg ${
                 showInfo ? "bg-purple-600/90" : "bg-white/20 hover:bg-white/30"
               }`}
               title={t('common:showInfo')}
@@ -132,7 +132,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
                 e.stopPropagation();
                 handleDownload();
               }}
-              className="bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-2.5 rounded-lg transition shadow-lg"
+              className="ripple-effect bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-2.5 rounded-lg transition shadow-lg"
               title={t('common:download')}
             >
               <Download className="w-5 h-5" />
@@ -140,7 +140,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
 
             <button
               onClick={onClose}
-              className="bg-red-600/90 backdrop-blur-md hover:bg-red-700 text-white p-2.5 rounded-lg transition shadow-lg"
+              className="ripple-effect bg-red-600/90 backdrop-blur-md hover:bg-red-700 text-white p-2.5 rounded-lg transition shadow-lg"
               title={t('common:close')}
             >
               <X className="w-5 h-5" />
@@ -153,7 +153,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
       {photos.length > 1 && (
         <>
           <button
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-4 rounded-full transition shadow-2xl z-10 border-2 border-white/30"
+            className="ripple-effect absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-4 rounded-full transition shadow-2xl z-10 border-2 border-white/30"
             onClick={(e) => {
               e.stopPropagation();
               prevPhoto();
@@ -164,7 +164,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
           </button>
 
           <button
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-4 rounded-full transition shadow-2xl z-10 border-2 border-white/30"
+            className="ripple-effect absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-4 rounded-full transition shadow-2xl z-10 border-2 border-white/30"
             onClick={(e) => {
               e.stopPropagation();
               nextPhoto();

@@ -429,15 +429,13 @@ function AppContent() {
 
       {/* Bottom navigation */}
       {currentPage !== "album" && currentPage !== "admin" && currentPage !== "security" && (
-        <nav className="fixed bottom-0 left-0 right-0 bg-gray-900/80 backdrop-blur-xl border-t border-white/10 z-50">
-          <div className="flex justify-around items-center py-3 px-2">
+        <nav className="bottom-nav-float">
+          <div className="flex justify-around items-center gap-2">
             {/* Home */}
             <button
               onClick={() => setCurrentPage("home")}
-              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition ${
-                currentPage === "home" 
-                  ? "text-purple-400 bg-white/10" 
-                  : "text-gray-400 hover:text-white"
+              className={`ripple-effect nav-item-premium ${
+                currentPage === "home" ? "active" : ""
               }`}
             >
               <Home className="w-6 h-6" />
@@ -447,10 +445,8 @@ function AppContent() {
             {/* Albums */}
             <button
               onClick={() => setCurrentPage("albums")}
-              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition ${
-                currentPage === "albums" 
-                  ? "text-purple-400 bg-white/10" 
-                  : "text-gray-400 hover:text-white"
+              className={`ripple-effect nav-item-premium ${
+                currentPage === "albums" ? "active" : ""
               }`}
             >
               <FolderOpen className="w-6 h-6" />
@@ -460,7 +456,7 @@ function AppContent() {
             {/* Upload (center FAB) */}
             <button
               onClick={() => setUploadModalOpen(true)}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 p-4 rounded-full shadow-lg transition transform hover:scale-110 -mt-6"
+              className="ripple-effect bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 p-4 rounded-full shadow-lg transition transform hover:scale-110 -mt-6"
             >
               <Plus className="w-7 h-7 text-white" />
             </button>
@@ -468,10 +464,8 @@ function AppContent() {
             {/* Search */}
             <button
               onClick={() => setCurrentPage("search")}
-              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition ${
-                currentPage === "search" 
-                  ? "text-purple-400 bg-white/10" 
-                  : "text-gray-400 hover:text-white"
+              className={`ripple-effect nav-item-premium ${
+                currentPage === "search" ? "active" : ""
               }`}
             >
               <Search className="w-6 h-6" />
@@ -481,10 +475,8 @@ function AppContent() {
             {/* More */}
             <button
               onClick={() => setCurrentPage("more")}
-              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition ${
-                currentPage === "more" 
-                  ? "text-purple-400 bg-white/10" 
-                  : "text-gray-400 hover:text-white"
+              className={`ripple-effect nav-item-premium ${
+                currentPage === "more" ? "active" : ""
               }`}
             >
               <Menu className="w-6 h-6" />

@@ -1,14 +1,11 @@
 // ============================================================================
-// PAGE: HomeDashboard.jsx – v4.2 med i18n
+// PAGE: HomeDashboard.jsx – v4.1 med LazyImage
 // ============================================================================
 import React, { useMemo } from "react";
-import { useTranslation } from "react-i18next";
 import { Star, Clock, Sparkles, Calendar, Users, FolderOpen, Wand2, ImagePlus, Scan } from "lucide-react";
 import LazyImage from "../components/LazyImage";
 
-const HomeDashboard = ({ albums, photos, user, onNavigate, refreshData }) => {
-  const { t } = useTranslation(['common', 'albums']);
-
+const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData }) => {
   const stats = useMemo(() => ({
     total: photos.length,
     favorites: photos.filter(p => p.favorite).length,
@@ -36,7 +33,7 @@ const HomeDashboard = ({ albums, photos, user, onNavigate, refreshData }) => {
     {
       id: 'last30days',
       icon: Calendar,
-      name: t('albums:smart.last30days'),
+      name: 'Siste 30 dager',
       count: photos.filter(p => {
         const daysDiff = Math.floor((Date.now() - new Date(p.createdAt)) / (1000 * 60 * 60 * 24));
         return daysDiff <= 30;
@@ -46,14 +43,14 @@ const HomeDashboard = ({ albums, photos, user, onNavigate, refreshData }) => {
     {
       id: 'withFaces',
       icon: Users,
-      name: t('albums:smart.withFaces'),
+      name: 'Med ansikter',
       count: stats.withFaces,
       color: 'from-pink-500 to-rose-500'
     },
     {
       id: 'unassigned',
       icon: FolderOpen,
-      name: t('albums:smart.unassigned'),
+      name: 'Uten album',
       count: stats.unassigned,
       color: 'from-amber-500 to-orange-500'
     }
@@ -66,12 +63,12 @@ const HomeDashboard = ({ albums, photos, user, onNavigate, refreshData }) => {
         <div className="flex items-center gap-3 mb-2">
           <Sparkles className="w-7 h-7 text-yellow-400 animate-float" />
           <h1 className="text-3xl md:text-4xl font-bold">
-            {t('common:welcome', { name: user?.displayName || user?.email?.split('@')[0] || t('common:user') })} 👋
+            Hei, {user?.displayName || user?.email?.split('@')[0] || 'der'}! 👋
           </h1>
         </div>
         {stats.recent > 0 && (
           <p className="text-lg opacity-80">
-            {t('common:newPhotosSince', { count: stats.recent })}
+            {stats.recent} {stats.recent === 1 ? 'nytt bilde' : 'nye bilder'} siden i går
           </p>
         )}
       </section>
@@ -82,13 +79,13 @@ const HomeDashboard = ({ albums, photos, user, onNavigate, refreshData }) => {
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold flex items-center gap-2">
               <Star className="w-6 h-6 text-yellow-400" fill="currentColor" />
-              {t('common:favorites')}
+              Favoritter
             </h2>
             <button
               onClick={() => onNavigate('search')}
-              className="text-sm text-purple-400 hover:text-purple-300 transition"
+              className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition"
             >
-              {t('common:seeAll', { count: stats.favorites })} →
+              Se alle ({stats.favorites}) →
             </button>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -122,18 +119,18 @@ const HomeDashboard = ({ albums, photos, user, onNavigate, refreshData }) => {
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold flex items-center gap-2">
               <Clock className="w-6 h-6 text-purple-400" />
-              {t('common:recentUploads')}
+              Siste opplastninger
             </h2>
             <button
               onClick={() => onNavigate('albums')}
-              className="text-sm text-purple-400 hover:text-purple-300 transition"
+              className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition"
             >
-              {t('common:seeAll')} →
+              Se alle →
             </button>
           </div>
           <div className="overflow-x-auto">
             <div className="flex gap-4 pb-4">
-              {recentPhotos.map((photo) => (
+              {recentPhotos.map((photo, i) => (
                 <div
                   key={photo.id}
                   className="flex-shrink-0 w-48 cursor-pointer group"
@@ -160,21 +157,21 @@ const HomeDashboard = ({ albums, photos, user, onNavigate, refreshData }) => {
       <section className="mb-10">
         <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
           <Sparkles className="w-6 h-6 text-purple-400" />
-          {t('albums:smart.title')}
+          Smarte album
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {smartAlbums.map((album) => (
             <button
               key={album.id}
               onClick={() => onNavigate('search')}
-              className="glass p-6 rounded-2xl text-left hover:scale-105 transition-transform group"
+              className="ripple-effect glass p-6 rounded-2xl text-left hover:scale-105 transition-transform group"
             >
               <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${album.color} mb-3`}>
                 <album.icon className="w-6 h-6 text-white" />
               </div>
               <h3 className="font-semibold text-lg mb-1">{album.name}</h3>
               <p className="text-sm opacity-70">
-                {t('common:photoCount', { count: album.count })}
+                {album.count} {album.count === 1 ? 'bilde' : 'bilder'}
               </p>
             </button>
           ))}
@@ -185,39 +182,39 @@ const HomeDashboard = ({ albums, photos, user, onNavigate, refreshData }) => {
       <section className="mb-10">
         <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
           <Wand2 className="w-6 h-6 text-purple-400" />
-          {t('common:aiTools')}
+          AI-verktøy
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          <button className="glass p-4 rounded-xl hover:bg-white/15 transition flex items-center gap-3">
+          <button className="ripple-effect glass p-4 rounded-xl hover:bg-white/15 transition flex items-center gap-3">
             <div className="p-2 bg-purple-600/30 rounded-lg">
               <Scan className="w-5 h-5" />
             </div>
             <div className="text-left">
-              <p className="font-semibold text-sm">{t('common:autoSort')}</p>
-              <p className="text-xs opacity-70">{t('common:organizePhotos')}</p>
+              <p className="font-semibold text-sm">Auto-sorter</p>
+              <p className="text-xs opacity-70">Organiser bilder</p>
             </div>
           </button>
 
-          <button className="glass p-4 rounded-xl hover:bg-white/15 transition flex items-center gap-3">
+          <button className="ripple-effect glass p-4 rounded-xl hover:bg-white/15 transition flex items-center gap-3">
             <div className="p-2 bg-blue-600/30 rounded-lg">
               <ImagePlus className="w-5 h-5" />
             </div>
             <div className="text-left">
-              <p className="font-semibold text-sm">{t('common:enhance')}</p>
-              <p className="text-xs opacity-70">{t('common:aiEnhancement')}</p>
+              <p className="font-semibold text-sm">Forbedre</p>
+              <p className="text-xs opacity-70">AI-forbedring</p>
             </div>
           </button>
 
           <button
             onClick={() => onNavigate('more')}
-            className="glass p-4 rounded-xl hover:bg-white/15 transition flex items-center gap-3"
+            className="ripple-effect glass p-4 rounded-xl hover:bg-white/15 transition flex items-center gap-3"
           >
             <div className="p-2 bg-pink-600/30 rounded-lg">
               <Wand2 className="w-5 h-5" />
             </div>
             <div className="text-left">
-              <p className="font-semibold text-sm">{t('common:moreAI')}</p>
-              <p className="text-xs opacity-70">{t('common:seeAllTools')}</p>
+              <p className="font-semibold text-sm">Mer AI</p>
+              <p className="text-xs opacity-70">Se alle verktøy</p>
             </div>
           </button>
         </div>
@@ -225,23 +222,23 @@ const HomeDashboard = ({ albums, photos, user, onNavigate, refreshData }) => {
 
       {/* Quick stats */}
       <section className="glass p-6 rounded-2xl">
-        <h3 className="font-semibold mb-4 opacity-70">{t('common:quickOverview')}</h3>
+        <h3 className="font-semibold mb-4 opacity-70">Rask oversikt</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
             <p className="text-2xl font-bold">{albums.length}</p>
-            <p className="text-sm opacity-70">{t('common:albums')}</p>
+            <p className="text-sm opacity-70">Album</p>
           </div>
           <div>
             <p className="text-2xl font-bold">{stats.total}</p>
-            <p className="text-sm opacity-70">{t('common:photos')}</p>
+            <p className="text-sm opacity-70">Bilder</p>
           </div>
           <div>
             <p className="text-2xl font-bold">{stats.favorites}</p>
-            <p className="text-sm opacity-70">{t('common:favorites')}</p>
+            <p className="text-sm opacity-70">Favoritter</p>
           </div>
           <div>
             <p className="text-2xl font-bold">{stats.unassigned}</p>
-            <p className="text-sm opacity-70">{t('common:unsorted')}</p>
+            <p className="text-sm opacity-70">Usortert</p>
           </div>
         </div>
       </section>

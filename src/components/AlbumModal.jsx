@@ -53,7 +53,7 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-200 transition"
+            className="ripple-effect text-gray-400 hover:text-gray-200 transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -111,14 +111,14 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 rounded-xl bg-gray-700/60 hover:bg-gray-600/70 
+              className="ripple-effect px-5 py-2 rounded-xl bg-gray-700/60 hover:bg-gray-600/70 
                          text-gray-200 text-sm font-semibold transition-colors"
             >
               {t('albums:cancel')}
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 
+              className="ripple-effect px-5 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 
                          hover:from-purple-600 hover:to-pink-600 text-white text-sm font-semibold transition-colors"
             >
               {editingAlbum ? t('albums:saveChanges') : t('albums:createAlbum')}

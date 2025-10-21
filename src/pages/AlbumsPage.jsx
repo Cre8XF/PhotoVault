@@ -64,7 +64,7 @@ const AlbumsPage = ({
           <div className="relative">
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="glass px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-white/15 transition"
+              className="ripple-effect glass px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-white/15 transition"
             >
               <currentView.icon className="w-4 h-4" />
               <span className="hidden sm:inline">{t('albums:view.show')}: {currentView.label}</span>
@@ -80,7 +80,7 @@ const AlbumsPage = ({
                       setViewMode(option.value);
                       setShowDropdown(false);
                     }}
-                    className={`w-full px-4 py-3 flex items-center gap-3 hover:bg-white/10 transition ${
+                    className={`ripple-effect w-full px-4 py-3 flex items-center gap-3 hover:bg-white/10 transition ${
                       viewMode === option.value ? 'bg-white/10' : ''
                     }`}
                   >
@@ -99,7 +99,7 @@ const AlbumsPage = ({
           {['allPhotos', 'favorites', 'unassigned', 'byDate'].includes(viewMode) && (
             <button
               onClick={() => setGridView(!gridView)}
-              className="glass p-2 rounded-xl hover:bg-white/15 transition"
+              className="ripple-effect glass p-2 rounded-xl hover:bg-white/15 transition"
               title={gridView ? t('albums:view.switchToList') : t('albums:view.switchToGrid')}
             >
               {gridView ? <List className="w-5 h-5" /> : <Grid className="w-5 h-5" />}
@@ -121,7 +121,7 @@ const AlbumsPage = ({
                 </h2>
                 <button
                   onClick={() => setViewMode('allPhotos')}
-                  className="text-sm text-purple-400 hover:text-purple-300 transition"
+                  className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition"
                 >
                   {t('common:seeAll')} →
                 </button>
@@ -173,7 +173,7 @@ const AlbumsPage = ({
                 </h2>
                 <button
                   onClick={() => setViewMode('unassigned')}
-                  className="text-sm text-amber-400 hover:text-amber-300 transition"
+                  className="ripple-effect text-sm text-amber-400 hover:text-amber-300 transition"
                 >
                   {t('albums:organize')} →
                 </button>

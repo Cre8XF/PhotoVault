@@ -32,14 +32,14 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel }) => {
         <div className="flex justify-end gap-3">
           <button
             onClick={onCancel}
-            className="px-5 py-2 rounded-xl bg-gray-700/60 hover:bg-gray-600/70 
+            className="ripple-effect px-5 py-2 rounded-xl bg-gray-700/60 hover:bg-gray-600/70 
                        text-gray-200 text-sm font-semibold transition-colors"
           >
             Avbryt
           </button>
           <button
             onClick={onConfirm}
-            className="px-5 py-2 rounded-xl bg-red-600/80 hover:bg-red-700 
+            className="ripple-effect px-5 py-2 rounded-xl bg-red-600/80 hover:bg-red-700 
                        text-white text-sm font-semibold transition-colors"
           >
             Ja, slett

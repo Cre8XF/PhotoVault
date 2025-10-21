@@ -45,7 +45,7 @@ const AlbumCard = ({ album, photos = [], onOpen }) => {
 
   return (
     <div
-      className="album-card glass cursor-pointer"
+      className="ripple-effect album-card glass cursor-pointer"
       onClick={() => onOpen && onOpen(album)}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}

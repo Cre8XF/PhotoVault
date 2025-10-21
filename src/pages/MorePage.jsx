@@ -176,7 +176,7 @@ const MorePage = ({
           <p className="text-xs opacity-70">{t('common:storage.percentUsed', { percent: storagePercent })}</p>
 
           {!isPro && (
-            <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 rounded-xl font-semibold transition flex items-center justify-center gap-2">
+            <button className="ripple-effect w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 rounded-xl font-semibold transition flex items-center justify-center gap-2">
               <Star className="w-5 h-5" />
               {t('subscription.upgrade')}
             </button>
@@ -217,7 +217,7 @@ const MorePage = ({
 
         {expandedSection === 'ai' && (
           <div className="space-y-2 mt-4">
-            <button className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
+            <button className="ripple-effect w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
               <div className="p-2 bg-purple-600/30 rounded-lg">
                 <Scan className="w-5 h-5" />
               </div>
@@ -227,7 +227,7 @@ const MorePage = ({
               </div>
             </button>
 
-            <button className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
+            <button className="ripple-effect w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
               <div className="p-2 bg-blue-600/30 rounded-lg">
                 <ImagePlus className="w-5 h-5" />
               </div>
@@ -237,7 +237,7 @@ const MorePage = ({
               </div>
             </button>
 
-            <button className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
+            <button className="ripple-effect w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
               <div className="p-2 bg-pink-600/30 rounded-lg">
                 <Users className="w-5 h-5" />
               </div>
@@ -247,7 +247,7 @@ const MorePage = ({
               </div>
             </button>
 
-            <button className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
+            <button className="ripple-effect w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
               <div className="p-2 bg-green-600/30 rounded-lg">
                 <Sparkles className="w-5 h-5" />
               </div>
@@ -257,7 +257,7 @@ const MorePage = ({
               </div>
             </button>
 
-            <button className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
+            <button className="ripple-effect w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
               <div className="p-2 bg-yellow-600/30 rounded-lg">
                 <Copy className="w-5 h-5" />
               </div>
@@ -285,7 +285,7 @@ const MorePage = ({
             {/* Sikkerhet & PIN-kode */}
             <button 
               onClick={() => onNavigate('security')}
-              className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left"
+              className="ripple-effect w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left"
             >
               <Shield className="w-5 h-5 text-purple-400" />
               <div className="flex-1">
@@ -321,7 +321,7 @@ const MorePage = ({
               </button>
             </div>
 
-            <button className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
+            <button className="ripple-effect w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
               <Bell className="w-5 h-5" />
               <div className="flex-1">
                 <p className="font-medium">{t('settings.notifications')}</p>
@@ -340,12 +340,12 @@ const MorePage = ({
         </div>
 
         <div className="space-y-2">
-          <button className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
+          <button className="ripple-effect w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
             <User className="w-5 h-5" />
             <p className="font-medium">{t('account.profile')}</p>
           </button>
 
-          <button className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
+          <button className="ripple-effect w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
             <CreditCard className="w-5 h-5" />
             <div className="flex-1">
               <p className="font-medium">{t('account.subscription')}</p>
@@ -355,13 +355,13 @@ const MorePage = ({
 
           <button
             onClick={onLogout}
-            className="w-full glass p-4 rounded-xl hover:bg-red-500/20 transition flex items-center gap-3 text-left text-red-400"
+            className="ripple-effect w-full glass p-4 rounded-xl hover:bg-red-500/20 transition flex items-center gap-3 text-left text-red-400"
           >
             <LogOut className="w-5 h-5" />
             <p className="font-medium">{t('account.logout')}</p>
           </button>
 
-          <button className="w-full glass p-4 rounded-xl hover:bg-red-500/20 transition flex items-center gap-3 text-left text-red-400">
+          <button className="ripple-effect w-full glass p-4 rounded-xl hover:bg-red-500/20 transition flex items-center gap-3 text-left text-red-400">
             <Trash2 className="w-5 h-5" />
             <p className="font-medium">{t('account.deleteAccount')}</p>
           </button>
@@ -376,17 +376,17 @@ const MorePage = ({
         </div>
 
         <div className="space-y-2">
-          <button className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
+          <button className="ripple-effect w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
             <HelpCircle className="w-5 h-5" />
             <p className="font-medium">{t('info.help')}</p>
           </button>
 
-          <button className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
+          <button className="ripple-effect w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
             <FileText className="w-5 h-5" />
             <p className="font-medium">{t('info.privacy')}</p>
           </button>
 
-          <button className="w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
+          <button className="ripple-effect w-full glass p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-left">
             <FileText className="w-5 h-5" />
             <p className="font-medium">{t('info.terms')}</p>
           </button>
@@ -412,13 +412,13 @@ const MorePage = ({
           <div className="space-y-2">
             <button
               onClick={() => onNavigate('admin')}
-              className="w-full bg-purple-600/20 hover:bg-purple-600/30 p-4 rounded-xl transition flex items-center gap-3 text-left"
+              className="ripple-effect w-full bg-purple-600/20 hover:bg-purple-600/30 p-4 rounded-xl transition flex items-center gap-3 text-left"
             >
               <Users className="w-5 h-5" />
               <p className="font-medium">{t('admin.userManagement')}</p>
             </button>
 
-            <button className="w-full bg-purple-600/20 hover:bg-purple-600/30 p-4 rounded-xl transition flex items-center gap-3 text-left">
+            <button className="ripple-effect w-full bg-purple-600/20 hover:bg-purple-600/30 p-4 rounded-xl transition flex items-center gap-3 text-left">
               <HardDrive className="w-5 h-5" />
               <p className="font-medium">{t('admin.databaseTools')}</p>
             </button>

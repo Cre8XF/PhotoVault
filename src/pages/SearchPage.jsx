@@ -103,7 +103,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="p-1 hover:bg-white/10 rounded-lg transition"
+              className="ripple-effect p-1 hover:bg-white/10 rounded-lg transition"
             >
               <X className="w-5 h-5" />
             </button>
@@ -115,7 +115,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
       <div className="flex justify-between items-center mb-4">
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="glass px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-white/15 transition"
+          className="ripple-effect glass px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-white/15 transition"
         >
           <SlidersHorizontal className="w-4 h-4" />
           <span>{t('albums:filters.title')}</span>
@@ -129,7 +129,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
         {activeFilterCount > 0 && (
           <button
             onClick={clearFilters}
-            className="text-sm text-purple-400 hover:text-purple-300 transition"
+            className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition"
           >
             {t('albums:filters.reset')}
           </button>
@@ -150,7 +150,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
                 <button
                   key={range}
                   onClick={() => setActiveFilters({ ...activeFilters, dateRange: range })}
-                  className={`px-3 py-1.5 rounded-lg text-sm transition ${
+                  className={`ripple-effect px-3 py-1.5 rounded-lg text-sm transition ${
                     activeFilters.dateRange === range
                       ? 'bg-purple-600 text-white'
                       : 'glass hover:bg-white/10'
@@ -170,7 +170,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
             </div>
             <button
               onClick={() => setActiveFilters({ ...activeFilters, withTags: !activeFilters.withTags })}
-              className={`px-3 py-1.5 rounded-lg text-sm transition ${
+              className={`ripple-effect px-3 py-1.5 rounded-lg text-sm transition ${
                 activeFilters.withTags
                   ? 'bg-purple-600 text-white'
                   : 'glass hover:bg-white/10'
@@ -188,7 +188,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
             </div>
             <button
               onClick={() => setActiveFilters({ ...activeFilters, favorites: !activeFilters.favorites })}
-              className={`px-3 py-1.5 rounded-lg text-sm transition ${
+              className={`ripple-effect px-3 py-1.5 rounded-lg text-sm transition ${
                 activeFilters.favorites
                   ? 'bg-purple-600 text-white'
                   : 'glass hover:bg-white/10'
@@ -206,7 +206,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
             </div>
             <button
               onClick={() => setActiveFilters({ ...activeFilters, withFaces: !activeFilters.withFaces })}
-              className={`px-3 py-1.5 rounded-lg text-sm transition ${
+              className={`ripple-effect px-3 py-1.5 rounded-lg text-sm transition ${
                 activeFilters.withFaces
                   ? 'bg-purple-600 text-white'
                   : 'glass hover:bg-white/10'
@@ -247,7 +247,7 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
               <button
                 key={i}
                 onClick={search.action}
-                className="glass px-4 py-2 rounded-xl hover:bg-white/10 transition text-sm"
+                className="ripple-effect glass px-4 py-2 rounded-xl hover:bg-white/10 transition text-sm"
               >
                 {search.label}
               </button>

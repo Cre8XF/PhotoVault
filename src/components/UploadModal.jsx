@@ -181,7 +181,7 @@ const UploadModal = ({
           <h2 className="text-2xl font-bold text-white">Last opp bilder</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            className="ripple-effect p-2 hover:bg-white/10 rounded-lg transition-colors"
           >
             <X className="w-6 h-6 text-gray-400" />
           </button>
@@ -194,7 +194,7 @@ const UploadModal = ({
             <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={handleNativeCamera}
-                className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl hover:scale-105 transition-transform"
+                className="ripple-effect flex flex-col items-center justify-center p-6 bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl hover:scale-105 transition-transform"
               >
                 <Camera className="w-12 h-12 text-white mb-3" />
                 <span className="text-white font-medium">Ta bilde</span>
@@ -202,7 +202,7 @@ const UploadModal = ({
 
               <button
                 onClick={handleNativeGallery}
-                className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl hover:scale-105 transition-transform"
+                className="ripple-effect flex flex-col items-center justify-center p-6 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl hover:scale-105 transition-transform"
               >
                 <ImageIcon className="w-12 h-12 text-white mb-3" />
                 <span className="text-white font-medium">Velg fra galleri</span>
@@ -231,7 +231,7 @@ const UploadModal = ({
                 <p className="text-gray-400 mb-4">eller</p>
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium"
+                  className="ripple-effect px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium"
                 >
                   Velg filer
                 </button>
@@ -284,7 +284,7 @@ const UploadModal = ({
                     />
                     <button
                       onClick={() => removeFile(index)}
-                      className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="ripple-effect absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -302,14 +302,14 @@ const UploadModal = ({
         <div className="flex items-center justify-between p-6 border-t border-white/10 bg-[var(--bg-primary)]">
           <button
             onClick={onClose}
-            className="px-6 py-3 text-gray-400 hover:text-white transition-colors"
+            className="ripple-effect px-6 py-3 text-gray-400 hover:text-white transition-colors"
           >
             Avbryt
           </button>
           <button
             onClick={handleUpload}
             disabled={selectedFiles.length === 0 || uploading}
-            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-medium"
+            className="ripple-effect px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-medium"
           >
             {uploading ? "Laster opp..." : `Last opp ${selectedFiles.length} bilder`}
           </button>
