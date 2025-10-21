@@ -53,146 +53,158 @@ const AlbumsPage = ({
 
   const currentView = viewOptions.find(opt => opt.value === viewMode);
 
-  return (
-    <div className="min-h-screen p-6 md:p-10 pb-24 animate-fade-in">
-      {/* Header med dropdown */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">{t('common:albums')}</h1>
-        
-        <div className="flex gap-3">
-          {/* View mode dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setShowDropdown(!showDropdown)}
-              className="ripple-effect glass px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-white/15 transition"
-            >
-              <currentView.icon className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('albums:view.show')}: {currentView.label}</span>
-              <ChevronDown className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
-            </button>
+ return (
+  <div className="min-h-screen p-6 md:p-10 pb-24 animate-fade-in">
+    {/* Header med dropdown */}
+    <div className="flex justify-between items-center mb-6">
+      <h1 className="text-3xl font-bold">{t('common:albums')}</h1>
 
-            {showDropdown && (
-              <div className="absolute right-0 mt-2 w-48 glass rounded-xl overflow-hidden shadow-2xl z-10 border border-white/20">
-                {viewOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => {
-                      setViewMode(option.value);
-                      setShowDropdown(false);
-                    }}
-                    className={`ripple-effect w-full px-4 py-3 flex items-center gap-3 hover:bg-white/10 transition ${
-                      viewMode === option.value ? 'bg-white/10' : ''
-                    }`}
-                  >
-                    <option.icon className="w-4 h-4" />
-                    <span>{option.label}</span>
-                    {viewMode === option.value && (
-                      <span className="ml-auto text-purple-400">✓</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+      <div className="flex gap-3">
+        {/* View mode dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setShowDropdown(!showDropdown)}
+            className="ripple-effect glass px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-white/15 transition"
+          >
+            <currentView.icon className="w-4 h-4" />
+            <span className="hidden sm:inline">{t('albums:view.show')}: {currentView.label}</span>
+            <ChevronDown className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+          </button>
 
-          {/* Grid/List toggle */}
-          {['allPhotos', 'favorites', 'unassigned', 'byDate'].includes(viewMode) && (
-            <button
-              onClick={() => setGridView(!gridView)}
-              className="ripple-effect glass p-2 rounded-xl hover:bg-white/15 transition"
-              title={gridView ? t('albums:view.switchToList') : t('albums:view.switchToGrid')}
-            >
-              {gridView ? <List className="w-5 h-5" /> : <Grid className="w-5 h-5" />}
-            </button>
+          {showDropdown && (
+            <div className="absolute right-0 mt-2 w-48 glass rounded-xl overflow-hidden shadow-2xl z-10 border border-white/20">
+              {viewOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => {
+                    setViewMode(option.value);
+                    setShowDropdown(false);
+                  }}
+                  className={`ripple-effect w-full px-4 py-3 flex items-center gap-3 hover:bg-white/10 transition ${
+                    viewMode === option.value ? 'bg-white/10' : ''
+                  }`}
+                >
+                  <option.icon className="w-4 h-4" />
+                  <span>{option.label}</span>
+                  {viewMode === option.value && (
+                    <span className="ml-auto text-purple-400">✓</span>
+                  )}
+                </button>
+              ))}
+            </div>
           )}
         </div>
-      </div>
 
-      {/* Content based on viewMode */}
-      {viewMode === 'all' && (
-        <div className="space-y-10">
-          {/* Alle bilder preview */}
-          {stats.totalPhotos > 0 && (
-            <section>
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <Image className="w-5 h-5 text-purple-400" />
-                  {t('albums:allPhotos', { count: stats.totalPhotos })}
-                </h2>
-                <button
-                  onClick={() => setViewMode('allPhotos')}
-                  className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition"
+        {/* Grid/List toggle */}
+        {['allPhotos', 'favorites', 'unassigned', 'byDate'].includes(viewMode) && (
+          <button
+            onClick={() => setGridView(!gridView)}
+            className="ripple-effect glass p-2 rounded-xl hover:bg-white/15 transition"
+            title={gridView ? t('albums:view.switchToList') : t('albums:view.switchToGrid')}
+          >
+            {gridView ? <List className="w-5 h-5" /> : <Grid className="w-5 h-5" />}
+          </button>
+        )}
+      </div>
+    </div>
+
+    {/* Content based on viewMode */}
+    {viewMode === 'all' && (
+      <div className="space-y-10">
+        {/* Alle bilder preview */}
+        {stats.totalPhotos > 0 && (
+          <section>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Image className="w-5 h-5 text-purple-400" />
+                {t('albums:allPhotos', { count: stats.totalPhotos })}
+              </h2>
+              <button
+                onClick={() => setViewMode('allPhotos')}
+                className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition"
+              >
+                {t('common:seeAll')} →
+              </button>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {photos.slice(0, 4).map((photo) => (
+                <div
+                  key={photo.id}
+                  className="ripple-effect rounded-xl border border-white/10 overflow-hidden"
+                  onClick={() => onPhotoClick && onPhotoClick(photo)}
                 >
-                  {t('common:seeAll')} →
-                </button>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {photos.slice(0, 4).map((photo) => (
                   <LazyImage
-                    key={photo.id}
                     src={photo.url}
                     thumbnail={photo.thumbnailSmall}
                     photoId={photo.id}
                     alt={photo.name || ''}
-                    onClick={() => onPhotoClick && onPhotoClick(photo)}
-                    className="w-full h-32 object-contain bg-gray-900 rounded-xl cursor-pointer hover:scale-105 transition border border-white/10"
+                    className="w-full h-32 object-contain bg-gray-900 cursor-pointer hover:scale-105 transition"
                   />
-                ))}
-              </div>
-            </section>
-          )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
-          {/* Mine album */}
-          {stats.totalAlbums > 0 && (
-            <section>
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Folder className="w-5 h-5 text-purple-400" />
-                {t('albums:myAlbums', { count: stats.totalAlbums })}
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {albums.map((album, i) => (
+        {/* Mine album */}
+        {stats.totalAlbums > 0 && (
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Folder className="w-5 h-5 text-purple-400" />
+              {t('albums:myAlbums', { count: stats.totalAlbums })}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {albums.map((album, i) => (
+                <div
+                  key={album.id}
+                  className={`ripple-effect animate-scale-in stagger-${(i % 6) + 1}`}
+                  onClick={() => onAlbumClick(album)}
+                >
                   <AlbumCard
-                    key={album.id}
                     album={album}
                     photos={photos}
                     onOpen={() => onAlbumClick(album)}
-                    className={`animate-scale-in stagger-${(i % 6) + 1}`}
                   />
-                ))}
-              </div>
-            </section>
-          )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
-          {/* Bilder uten album */}
-          {stats.unassigned > 0 && (
-            <section>
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <FolderOpen className="w-5 h-5 text-amber-400" />
-                  {t('albums:unassignedPhotos', { count: stats.unassigned })}
-                </h2>
-                <button
-                  onClick={() => setViewMode('unassigned')}
-                  className="ripple-effect text-sm text-amber-400 hover:text-amber-300 transition"
+        {/* Bilder uten album */}
+        {stats.unassigned > 0 && (
+          <section>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <FolderOpen className="w-5 h-5 text-amber-400" />
+                {t('albums:unassignedPhotos', { count: stats.unassigned })}
+              </h2>
+              <button
+                onClick={() => setViewMode('unassigned')}
+                className="ripple-effect text-sm text-amber-400 hover:text-amber-300 transition"
+              >
+                {t('albums:organize')} →
+              </button>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {photos.filter(p => !p.albumId).slice(0, 4).map((photo) => (
+                <div
+                  key={photo.id}
+                  className="ripple-effect rounded-xl border border-white/10 overflow-hidden"
+                  onClick={() => onPhotoClick && onPhotoClick(photo)}
                 >
-                  {t('albums:organize')} →
-                </button>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {photos.filter(p => !p.albumId).slice(0, 4).map((photo) => (
                   <LazyImage
-                    key={photo.id}
                     src={photo.url}
                     thumbnail={photo.thumbnailSmall}
                     photoId={photo.id}
                     alt={photo.name || ''}
-                    onClick={() => onPhotoClick && onPhotoClick(photo)}
-                    className="w-full h-32 object-contain bg-gray-900 rounded-xl cursor-pointer hover:scale-105 transition border border-white/10"
+                    className="w-full h-32 object-contain bg-gray-900 cursor-pointer hover:scale-105 transition"
                   />
-                ))}
-              </div>
-            </section>
-          )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
           {/* Empty state */}
           {stats.totalAlbums === 0 && stats.totalPhotos === 0 && (

@@ -147,7 +147,7 @@ const LoginPage = ({ onLogin }) => {
           <button
             onClick={handleBiometricLogin}
             disabled={loading}
-            className="w-full mb-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+            className="ripple-effect w-full mb-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-3"
           >
             <Fingerprint className="w-5 h-5" />
             <span>Login with {getBiometricTypeText(biometricType)}</span>
@@ -199,7 +199,7 @@ const LoginPage = ({ onLogin }) => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                className="ripple-effect absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
@@ -235,7 +235,7 @@ const LoginPage = ({ onLogin }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium hover:shadow-lg transition-all disabled:opacity-50"
+            className="ripple-effect w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium hover:shadow-lg transition-all disabled:opacity-50"
           >
             {loading ? "Please wait..." : isLogin ? "Login" : "Create Account"}
           </button>
@@ -250,7 +250,7 @@ const LoginPage = ({ onLogin }) => {
               setPassword("");
               setConfirmPassword("");
             }}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="ripple-effect text-gray-400 hover:text-white transition-colors"
           >
             {isLogin ? (
               <>

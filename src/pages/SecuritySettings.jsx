@@ -237,7 +237,7 @@ const SecuritySettings = ({ onBack }) => {
           <div className="flex items-center gap-4 mb-8">
             <button
               onClick={resetPINSetup}
-              className="p-2 hover:bg-white/10 rounded-xl transition"
+              className="ripple-effect p-2 hover:bg-white/10 rounded-xl transition"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
@@ -356,7 +356,7 @@ const SecuritySettings = ({ onBack }) => {
           <div className="flex items-center gap-4 mb-8">
             <button
               onClick={resetChangePIN}
-              className="p-2 hover:bg-white/10 rounded-xl transition"
+              className="ripple-effect p-2 hover:bg-white/10 rounded-xl transition"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
@@ -450,7 +450,7 @@ const SecuritySettings = ({ onBack }) => {
               (changePINStep === 1 && currentPIN.length < 4) ||
               (changePINStep === 2 && newPIN.length < 4) ||
               (changePINStep === 3 && confirmPIN.length < 4)}
-            className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl font-semibold transition disabled:opacity-50"
+            className="ripple-effect w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl font-semibold transition disabled:opacity-50"
           >
             {loading ? 'Laster...' : changePINStep < 3 ? 'Neste' : 'Fullfør'}
           </button>
@@ -515,7 +515,7 @@ const SecuritySettings = ({ onBack }) => {
             {!pinEnabled ? (
               <button
                 onClick={() => setShowPINSetup(true)}
-                className="w-full py-3 bg-purple-600/20 hover:bg-purple-600/30 rounded-xl transition text-left px-4 font-medium"
+                className="ripple-effect w-full py-3 bg-purple-600/20 hover:bg-purple-600/30 rounded-xl transition text-left px-4 font-medium"
               >
                 Aktiver PIN-kode
               </button>
@@ -523,13 +523,13 @@ const SecuritySettings = ({ onBack }) => {
               <>
                 <button
                   onClick={() => setShowChangePIN(true)}
-                  className="w-full py-3 glass hover:bg-white/10 rounded-xl transition text-left px-4"
+                  className="ripple-effect w-full py-3 glass hover:bg-white/10 rounded-xl transition text-left px-4"
                 >
                   Endre PIN-kode
                 </button>
                 <button
                   onClick={handleDisablePIN}
-                  className="w-full py-3 glass hover:bg-red-500/20 rounded-xl transition text-left px-4 text-red-400"
+                  className="ripple-effect w-full py-3 glass hover:bg-red-500/20 rounded-xl transition text-left px-4 text-red-400"
                 >
                   Deaktiver PIN-kode
                 </button>

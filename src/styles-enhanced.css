@@ -265,8 +265,11 @@ body.light-mode .text-gradient {
    1. MICRO-INTERACTIONS & RIPPLE EFFECT
    ============================================================================ */
 .ripple-effect {
-  position: relative;
   overflow: hidden;
+}
+button.ripple-effect:not(.absolute),
+a.ripple-effect:not(.absolute) {
+  position: relative;
 }
 
 .ripple-effect::after {
@@ -906,4 +909,34 @@ body.light-mode .modal-content-enhanced {
   .card-gradient-border {
     padding: 3px;
   }
+}
+/* ============================================================================
+   UPLOAD MODAL ADJUSTMENTS
+   ============================================================================ */
+/* ============================================================================
+   UPLOAD MODAL ADJUSTMENTS (Oppdatert i styles-enhanced.css)
+   ============================================================================ */
+.upload-modal-dropzone {
+  min-height: 180px; /* Redusert fra 220px */
+  max-height: 280px; /* Redusert fra 340px */
+  transition: all 0.3s ease;
+}
+
+.upload-modal-dropzone:hover {
+  background: rgba(139, 92, 246, 0.05);
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+.upload-modal-albumlist {
+  /* Beholdt for å sikre at albumlisten ruller dersom den er veldig lang */
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.upload-modal-albumlist::-webkit-scrollbar {
+  width: 8px;
+}
+.upload-modal-albumlist::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.4);
+  border-radius: 4px;
 }

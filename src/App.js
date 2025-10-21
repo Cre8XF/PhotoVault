@@ -3,6 +3,8 @@
 // ============================================================================
 import React, { useState, useEffect, useMemo } from "react";
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
+import { uploadMultiplePhotos } from "./firebase-upload";
+
 
 // Pages
 import LoginPage from "./pages/LoginPage";
@@ -210,25 +212,26 @@ function AppContent() {
   };
 
   // Handle upload
-  const handleUpload = async (files, albumId, aiTagging) => {
-    try {
-      setUploadModalOpen(false);
-      setNotification({ message: "Laster opp bilder...", type: "info" });
-      
-      for (const file of files) {
-        await uploadPhoto(user.uid, file, albumId, aiTagging);
-      }
-      
-      await refreshData();
-      setNotification({ 
-        message: `${files.length} ${files.length === 1 ? 'bilde' : 'bilder'} lastet opp`, 
-        type: "success" 
-      });
-    } catch (err) {
-      console.error("Upload error:", err);
-      setNotification({ message: "Feil ved opplasting", type: "error" });
-    }
-  };
+ const handleUpload = async (selectedFiles, albumId) => {
+  try {
+    const uploadedPhotos = await uploadMultiplePhotos(
+      selectedFiles,
+      user.uid,
+      albumId,
+      (progress) => console.log(`Upload: ${progress}%`)
+    );
+    await refreshData();
+    setNotification({
+      message: `${uploadedPhotos.length} bilder lastet opp`,
+      type: "success"
+    });
+    return uploadedPhotos;
+  } catch (error) {
+    console.error("Upload error:", error);
+    setNotification({ message: "Feil ved opplasting", type: "error" });
+  }
+};
+
 
   // Handle create/edit album
   const handleAlbumSave = async (albumData) => {
@@ -487,14 +490,16 @@ function AppContent() {
       )}
 
       {/* Modals */}
-      {uploadModalOpen && (
-        <UploadModal
-          albums={albums}
-          onClose={() => setUploadModalOpen(false)}
-          onUpload={handleUpload}
-          onCreateAlbum={handleCreateAlbumFromUpload}
-        />
-      )}
+     {uploadModalOpen && (
+  <UploadModal
+    isOpen={uploadModalOpen}
+    albums={albums}
+    onClose={() => setUploadModalOpen(false)}
+    onUpload={handleUpload}
+    onCreateAlbum={handleCreateAlbumFromUpload}
+  />
+)}
+
 
       {albumModalOpen && (
         <AlbumModal

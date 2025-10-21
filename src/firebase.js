@@ -111,11 +111,20 @@ export async function getPhotosByUser(userId) {
   try {
     const q = query(collection(db, "photos"), where("userId", "==", userId));
     const snap = await getDocs(q);
+
     return snap.docs.map((d) => {
       const data = d.data();
+
+      // 🔧 Konverter Firestore Timestamp til ISO-streng
+      if (data.createdAt?.toDate)
+        data.createdAt = data.createdAt.toDate().toISOString();
+      if (data.updatedAt?.toDate)
+        data.updatedAt = data.updatedAt.toDate().toISOString();
+
       if (!data.createdAt) data.createdAt = new Date().toISOString();
       if (!data.updatedAt) data.updatedAt = data.createdAt;
       if (!("favorite" in data)) data.favorite = false;
+
       return { id: d.id, ...data };
     });
   } catch (err) {
@@ -152,6 +161,7 @@ export async function updatePhoto(photoId, updates) {
     console.error("🔥 updatePhoto:", err);
   }
 }
+
 
 // ⭐ Toggle favoritt-status
 export async function toggleFavorite(photoId, currentStatus) {
