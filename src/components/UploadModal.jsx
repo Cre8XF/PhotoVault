@@ -2,8 +2,9 @@
 // COMPONENT: UploadModal.jsx – OPPGRADERT VERSJON
 // Løser problemer med avkuttet albumliste og dropzone-størrelse.
 // ============================================================================
+
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { X, Upload, Camera, Image as ImageIcon } from "lucide-react";
+import { X, Upload, Camera, Image as ImageIcon, Zap, Sparkles } from "lucide-react";
 import {
   isNativePlatform,
   takePicture,
@@ -17,31 +18,33 @@ import { useTranslation } from "react-i18next";
 
 // Hjelpefunksjon for å formatere filstørrelse (Lagt til UX-forbedring)
 const formatFileSize = (bytes) => {
-  if (bytes === 0) return '0 Bytes';
+  if (bytes === 0) return "0 Bytes";
   const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 };
 
 const UploadModal = ({
   isOpen,
   onClose,
   onUpload,
+  onCreateAlbum, // ny prop
   albums = [],
-  selectedAlbum = null
+  selectedAlbum = null,
 }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
-  // Initialiserer selectedAlbumId basert på prop
-  const [selectedAlbumId, setSelectedAlbumId] = useState(selectedAlbum || ""); 
+  const [selectedAlbumId, setSelectedAlbumId] = useState(selectedAlbum || "");
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [permissions, setPermissions] = useState({ camera: "prompt", photos: "prompt" });
   const fileInputRef = useRef(null);
-  const modalRef = useRef(null); // Ref for modalen for å håndtere fokus
+  const modalRef = useRef(null);
   const isNative = isNativePlatform();
   const { t } = useTranslation(["common", "upload"]);
   const [showAlbums, setShowAlbums] = useState(false);
+  const [autoCompress, setAutoCompress] = useState(false);
+  const [aiTagging, setAiTagging] = useState(false);
 
   // Sjekker tillatelser ved lasting
   useEffect(() => {
@@ -215,7 +218,8 @@ const UploadModal = ({
         {/* ============================================================= */}
         {/* CONTENT AREA - Denne ruller, med justert max-høyde */}
         {/* ============================================================= */}
-        <div className="p-6 space-y-6 overflow-y-auto max-h-[55vh]"> {/* Redusert max-h for å gi plass til Albumvelger under */}
+       <div className="p-6 space-y-6 overflow-y-visible max-h-none">
+
 
           {isNative && (
             <div className="grid grid-cols-2 gap-4">
@@ -307,17 +311,18 @@ const UploadModal = ({
           <div className="px-6 pt-4 pb-4 space-y-3 border-t border-white/10"> 
             
             {/* Nytt album-knapp */}
-            <button
-              onClick={() => {
-                const name = prompt(t("upload:newAlbumPrompt"));
-                if (name) {
-                  onUpload([], { name, createdAt: new Date().toISOString() }, true);
-                }
-              }}
-              className="ripple-effect w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium py-3 rounded-lg transition-transform hover:scale-[1.02]"
-            >
-              {t("upload:newAlbum")}
-            </button>
+           <button
+  onClick={() => {
+    const name = prompt(t("upload:newAlbumPrompt"));
+    if (name && onCreateAlbum) {
+      onCreateAlbum(name);
+    }
+  }}
+  className="ripple-effect w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium py-3 rounded-lg transition-transform hover:scale-[1.02]"
+>
+  {t("upload:newAlbum")}
+</button>
+
 
             <label className="block text-white font-medium mb-1">
               {t("upload:chooseAlbum")}
@@ -371,6 +376,63 @@ const UploadModal = ({
             </div>
           </div>
         )}
+
+        {/* Auto-komprimering */}
+<div className="mt-4 bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+  <div className="flex items-center justify-between">
+    <div className="flex items-center gap-3">
+      <div className="p-2 bg-blue-600/30 rounded-lg">
+        <Zap className="w-5 h-5 text-blue-400" />
+      </div>
+      <div>
+        <p className="font-medium">{t("upload:autoCompress")}</p>
+        <p className="text-xs text-gray-400">{t("upload:autoCompressDesc")}</p>
+      </div>
+    </div>
+    <button
+      onClick={() => setAutoCompress(!autoCompress)}
+      className={`relative w-14 h-7 rounded-full transition ${
+        autoCompress ? "bg-blue-600" : "bg-gray-600"
+      }`}
+    >
+      <div
+        className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
+          autoCompress ? "translate-x-7" : "translate-x-0"
+        }`}
+      />
+    </button>
+  </div>
+</div>
+
+{/* AI Auto-tagging */}
+<div className="mt-4 bg-purple-500/10 border border-purple-500/20 rounded-xl p-4">
+  <div className="flex items-center justify-between">
+    <div className="flex items-center gap-3">
+      <div className="p-2 bg-purple-600/30 rounded-lg">
+        <Sparkles className="w-5 h-5 text-purple-400" />
+      </div>
+      <div>
+        <p className="font-medium flex items-center gap-2">
+          {t("upload:aiAutoTagging")} <span className="text-xs bg-purple-600/30 px-2 py-0.5 rounded-full">Beta</span>
+        </p>
+        <p className="text-xs text-gray-400">{t("upload:aiAutoTaggingDesc")}</p>
+      </div>
+    </div>
+    <button
+      onClick={() => setAiTagging(!aiTagging)}
+      className={`relative w-14 h-7 rounded-full transition ${
+        aiTagging ? "bg-purple-600" : "bg-gray-600"
+      }`}
+    >
+      <div
+        className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
+          aiTagging ? "translate-x-7" : "translate-x-0"
+        }`}
+      />
+    </button>
+  </div>
+</div>
+
 
         {/* Footer (Den faste bunnen) */}
         <div className="flex items-center justify-between p-6 border-t border-white/10 bg-[var(--bg-primary)]">

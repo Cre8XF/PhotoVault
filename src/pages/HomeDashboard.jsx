@@ -2,6 +2,9 @@
 // PAGE: HomeDashboard.jsx – v4.1 med LazyImage + i18n
 // ============================================================================
 import React, { useMemo } from "react";
+import { addAlbum } from "../firebase";
+import UploadModal from "../components/UploadModal";
+import { useState } from "react";
 import {
   Star,
   Clock,
@@ -18,6 +21,9 @@ import { useTranslation } from "react-i18next";
 
 const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData }) => {
   const { t } = useTranslation(["common", "home"]);
+  const [isUploadOpen, setUploadOpen] = useState(false);   // ← manglet
+  const handleUpload = () => {};                           // ← placeholder (hindrer feil)
+
 
   const stats = useMemo(
     () => ({
@@ -76,6 +82,26 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData }
       color: "from-amber-500 to-orange-500"
     }
   ];
+  const handleCreateAlbum = async (name) => {
+const newAlbum = {
+  id: Date.now().toString(),
+  name: String(name).trim(), // ← tvinger konvertering til tekst
+  title: name,  // ← legg til dette for å matche Firestore-felt
+  createdAt: new Date().toISOString(),
+  coverUrl: "",
+  photoCount: 0,
+  userId: user?.uid || "guest",
+};
+
+
+  try {
+    await addAlbum(newAlbum);
+    await refreshData(); // oppdater listen etterpå
+  } catch (error) {
+    console.error("Feil ved oppretting av nytt album:", error);
+    alert("Kunne ikke opprette album. Prøv igjen.");
+  }
+};
 
   return (
     <div className="min-h-screen p-6 md:p-10 animate-fade-in">
@@ -252,6 +278,15 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData }
         </div>
       </section>
 
+      <button
+  onClick={() => setUploadOpen(true)}
+  className="ripple-effect glass p-4 rounded-xl hover:bg-white/15 transition flex items-center gap-3 mt-6"
+>
+  <ImagePlus className="w-5 h-5 text-purple-400" />
+  <span>Last opp bilder / Opprett nytt album</span>
+</button>
+
+
       {/* Quick stats */}
       <section className="glass p-6 rounded-2xl">
         <h3 className="font-semibold mb-4 opacity-70">{t("home:quickOverview")}</h3>
@@ -274,7 +309,17 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData }
           </div>
         </div>
       </section>
+      {/* Upload Modal */}
+<UploadModal
+  isOpen={isUploadOpen}
+  onClose={() => setUploadOpen(false)}
+  onUpload={handleUpload}
+  onCreateAlbum={handleCreateAlbum}
+  albums={albums}
+/>
+
     </div>
+    
   );
 };
 

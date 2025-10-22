@@ -696,8 +696,10 @@ body.light-mode .modal-backdrop-enhanced {
 
   max-width: 600px;
   width: calc(100% - 40px);
-  max-height: 90vh;
-  overflow-y: auto;
+  max-height: 90vh; /* gir naturlig høydebegrensning */
+  overflow-y: auto; /* aktiverer scroll ved behov */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 92, 246, 0.4) transparent; /* lilla scroll */
 
   background: rgba(30, 27, 75, 0.98);
   backdrop-filter: blur(30px);
@@ -709,6 +711,9 @@ body.light-mode .modal-backdrop-enhanced {
 
   animation: modalZoomIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   z-index: 9999;
+}
+.modal-content-enhanced {
+  padding-bottom: 80px;
 }
 
 body.light-mode .modal-content-enhanced {
@@ -939,4 +944,36 @@ body.light-mode .modal-content-enhanced {
 .upload-modal-albumlist::-webkit-scrollbar-thumb {
   background: rgba(139, 92, 246, 0.4);
   border-radius: 4px;
+}
+/* Album dropdown fix */
+select,
+option {
+  background-color: #1e1b4b !important;
+  color: #f3f4f6 !important;
+}
+
+body.light-mode select,
+body.light-mode option {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+}
+/* Album dropdown visual fix */
+.upload-modal-albumlist,
+.upload-modal-albumlist div {
+  background-color: rgba(30, 27, 75, 0.98) !important; /* mørk blå-lilla */
+  color: #f3f4f6 !important;
+}
+
+.upload-modal-albumlist div:hover {
+  background-color: rgba(139, 92, 246, 0.3) !important;
+}
+
+body.light-mode .upload-modal-albumlist,
+body.light-mode .upload-modal-albumlist div {
+  background-color: #f9fafb !important;
+  color: #1f2937 !important;
+}
+
+body.light-mode .upload-modal-albumlist div:hover {
+  background-color: rgba(139, 92, 246, 0.1) !important;
 }

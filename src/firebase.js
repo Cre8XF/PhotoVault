@@ -67,16 +67,18 @@ export async function getAlbumsByUser(userId) {
 export async function addAlbum(data) {
   const now = new Date().toISOString();
   const payload = {
-    ...data,
+    name: data.name || data.title || "Uten navn",   // ← sikrer navn
     createdAt: data.createdAt || now,
     updatedAt: now,
     photoCount: 0,
     cover: data.cover || "",
+    userId: data.userId || "",
   };
   const refDoc = await addDoc(collection(db, "albums"), payload);
   console.log(`📂 Album opprettet: ${payload.name}`);
   return refDoc.id;
 }
+
 
 // 🔹 Oppdater album
 export async function updateAlbum(albumId, updates) {
