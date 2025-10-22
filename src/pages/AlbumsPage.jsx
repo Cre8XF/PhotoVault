@@ -1,308 +1,67 @@
 // ============================================================================
-// PAGE: AlbumsPage.jsx – v4.2 med i18n
+// PAGE: AlbumsPage.jsx – med støtte for flervalg og flytt til album
 // ============================================================================
 import React, { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Folder, Image, Star, Calendar, FolderOpen, Grid, List, ChevronDown } from "lucide-react";
+import { Folder, Image, Star, Calendar, Move } from "lucide-react";
 import AlbumCard from "../components/AlbumCard";
 import LazyImage from "../components/LazyImage";
+import PhotoGridOptimized from "../components/PhotoGridOptimized";
+import MoveModal from "../components/MoveModal";
 
-const AlbumsPage = ({ 
-  albums, 
-  photos, 
-  onNavigate, 
-  onAlbumClick,
-  onPhotoClick,
-  toggleFavorite 
-}) => {
-  const { t } = useTranslation(['common', 'albums']);
-  const [viewMode, setViewMode] = useState("all");
-  const [gridView, setGridView] = useState(true);
-  const [showDropdown, setShowDropdown] = useState(false);
+const AlbumsPage = ({ albums, photos, onAlbumClick, onPhotoClick }) => {
+  const { t } = useTranslation(["common", "albums"]);
+  const [viewMode, setViewMode] = useState("albums");
+  const [selectedPhotos, setSelectedPhotos] = useState([]);
+  const [isMoveOpen, setMoveOpen] = useState(false);
 
-  const stats = useMemo(() => ({
-    totalPhotos: photos.length,
-    totalAlbums: albums.length,
-    favorites: photos.filter(p => p.favorite).length,
-    unassigned: photos.filter(p => !p.albumId).length,
-  }), [photos, albums]);
+  const albumPhotos = useMemo(() => photos.filter((p) => !p.albumId), [photos]);
 
-  const filteredPhotos = useMemo(() => {
-    switch(viewMode) {
-      case 'allPhotos':
-        return photos;
-      case 'favorites':
-        return photos.filter(p => p.favorite);
-      case 'unassigned':
-        return photos.filter(p => !p.albumId);
-      case 'byDate':
-        return [...photos].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      default:
-        return [];
-    }
-  }, [photos, viewMode]);
-
-  const viewOptions = [
-    { value: 'all', label: t('albums:view.all'), icon: Grid },
-    { value: 'albums', label: t('albums:view.albumsOnly'), icon: Folder },
-    { value: 'allPhotos', label: t('albums:view.allPhotos'), icon: Image },
-    { value: 'favorites', label: t('common:favorites'), icon: Star },
-    { value: 'unassigned', label: t('albums:view.unassigned'), icon: FolderOpen },
-    { value: 'byDate', label: t('albums:view.byDate'), icon: Calendar },
-  ];
-
-  const currentView = viewOptions.find(opt => opt.value === viewMode);
-
- return (
-  <div className="min-h-screen p-6 md:p-10 pb-24 animate-fade-in">
-    {/* Header med dropdown */}
-    <div className="flex justify-between items-center mb-6">
-      <h1 className="text-3xl font-bold">{t('common:albums')}</h1>
-
-      <div className="flex gap-3">
-        {/* View mode dropdown */}
-        <div className="relative">
+  return (
+    <div className="min-h-screen p-6 md:p-10 pb-24">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">{t("common:albums")}</h1>
+        {selectedPhotos.length > 0 && (
           <button
-            onClick={() => setShowDropdown(!showDropdown)}
-            className="ripple-effect glass px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-white/15 transition"
+            onClick={() => setMoveOpen(true)}
+            className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
           >
-            <currentView.icon className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('albums:view.show')}: {currentView.label}</span>
-            <ChevronDown className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
-          </button>
-
-          {showDropdown && (
-            <div className="absolute right-0 mt-2 w-48 glass rounded-xl overflow-hidden shadow-2xl z-10 border border-white/20">
-              {viewOptions.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => {
-                    setViewMode(option.value);
-                    setShowDropdown(false);
-                  }}
-                  className={`ripple-effect w-full px-4 py-3 flex items-center gap-3 hover:bg-white/10 transition ${
-                    viewMode === option.value ? 'bg-white/10' : ''
-                  }`}
-                >
-                  <option.icon className="w-4 h-4" />
-                  <span>{option.label}</span>
-                  {viewMode === option.value && (
-                    <span className="ml-auto text-purple-400">✓</span>
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Grid/List toggle */}
-        {['allPhotos', 'favorites', 'unassigned', 'byDate'].includes(viewMode) && (
-          <button
-            onClick={() => setGridView(!gridView)}
-            className="ripple-effect glass p-2 rounded-xl hover:bg-white/15 transition"
-            title={gridView ? t('albums:view.switchToList') : t('albums:view.switchToGrid')}
-          >
-            {gridView ? <List className="w-5 h-5" /> : <Grid className="w-5 h-5" />}
+            <Move size={18} /> Flytt til album
           </button>
         )}
       </div>
-    </div>
 
-    {/* Content based on viewMode */}
-    {viewMode === 'all' && (
-      <div className="space-y-10">
-        {/* Alle bilder preview */}
-        {stats.totalPhotos > 0 && (
-          <section>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <Image className="w-5 h-5 text-purple-400" />
-                {t('albums:allPhotos', { count: stats.totalPhotos })}
-              </h2>
-              <button
-                onClick={() => setViewMode('allPhotos')}
-                className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition"
-              >
-                {t('common:seeAll')} →
-              </button>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {photos.slice(0, 4).map((photo) => (
-                <div
-                  key={photo.id}
-                  className="ripple-effect rounded-xl border border-white/10 overflow-hidden"
-                  onClick={() => onPhotoClick && onPhotoClick(photo)}
-                >
-                  <LazyImage
-                    src={photo.url}
-                    thumbnail={photo.thumbnailSmall}
-                    photoId={photo.id}
-                    alt={photo.name || ''}
-                    className="w-full h-32 object-contain bg-gray-900 cursor-pointer hover:scale-105 transition"
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Mine album */}
-        {stats.totalAlbums > 0 && (
-          <section>
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Folder className="w-5 h-5 text-purple-400" />
-              {t('albums:myAlbums', { count: stats.totalAlbums })}
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {albums.map((album, i) => (
-                <div
-                  key={album.id}
-                  className={`ripple-effect animate-scale-in stagger-${(i % 6) + 1}`}
-                  onClick={() => onAlbumClick(album)}
-                >
-                  <AlbumCard
-                    album={album}
-                    photos={photos}
-                    onOpen={() => onAlbumClick(album)}
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Bilder uten album */}
-        {stats.unassigned > 0 && (
-          <section>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <FolderOpen className="w-5 h-5 text-amber-400" />
-                {t('albums:unassignedPhotos', { count: stats.unassigned })}
-              </h2>
-              <button
-                onClick={() => setViewMode('unassigned')}
-                className="ripple-effect text-sm text-amber-400 hover:text-amber-300 transition"
-              >
-                {t('albums:organize')} →
-              </button>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {photos.filter(p => !p.albumId).slice(0, 4).map((photo) => (
-                <div
-                  key={photo.id}
-                  className="ripple-effect rounded-xl border border-white/10 overflow-hidden"
-                  onClick={() => onPhotoClick && onPhotoClick(photo)}
-                >
-                  <LazyImage
-                    src={photo.url}
-                    thumbnail={photo.thumbnailSmall}
-                    photoId={photo.id}
-                    alt={photo.name || ''}
-                    className="w-full h-32 object-contain bg-gray-900 cursor-pointer hover:scale-105 transition"
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-          {/* Empty state */}
-          {stats.totalAlbums === 0 && stats.totalPhotos === 0 && (
-            <div className="text-center py-20">
-              <Folder className="w-20 h-20 mx-auto mb-4 opacity-30" />
-              <h3 className="text-xl font-semibold mb-2">{t('albums:noAlbumsYet')}</h3>
-              <p className="opacity-70 mb-6">{t('albums:uploadToStart')}</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Kun album */}
-      {viewMode === 'albums' && (
+      {viewMode === "albums" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {albums.map((album, i) => (
+          {albums.map((album) => (
             <AlbumCard
               key={album.id}
               album={album}
               photos={photos}
               onOpen={() => onAlbumClick(album)}
-              className={`animate-scale-in stagger-${(i % 6) + 1}`}
             />
           ))}
-          {albums.length === 0 && (
-            <div className="col-span-full text-center py-20">
-              <Folder className="w-20 h-20 mx-auto mb-4 opacity-30" />
-              <h3 className="text-xl font-semibold mb-2">{t('albums:noAlbums')}</h3>
-              <p className="opacity-70">{t('albums:createAlbumToOrganize')}</p>
-            </div>
-          )}
         </div>
       )}
 
-      {/* Alle bilder / Favoritter / Uten album / Etter dato */}
-      {['allPhotos', 'favorites', 'unassigned', 'byDate'].includes(viewMode) && (
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <p className="opacity-70">
-              {t('common:photoCount', { count: filteredPhotos.length })}
-            </p>
-          </div>
-
-          {filteredPhotos.length > 0 ? (
-            <div className={gridView 
-              ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
-              : "space-y-4"
-            }>
-              {filteredPhotos.map((photo) => (
-                <div
-                  key={photo.id}
-                  onClick={() => onPhotoClick && onPhotoClick(photo)}
-                  className={gridView 
-                    ? "relative group cursor-pointer"
-                    : "glass p-4 rounded-xl flex items-center gap-4 cursor-pointer hover:bg-white/10 transition"
-                  }
-                >
-                  <LazyImage
-                    src={photo.url}
-                    thumbnail={photo.thumbnailSmall}
-                    photoId={photo.id}
-                    alt={photo.name || ''}
-                    className={gridView
-                      ? "w-full h-40 object-contain bg-gray-900 rounded-xl transition-transform group-hover:scale-105 border border-white/10"
-                      : "w-20 h-20 object-contain bg-gray-900 rounded-lg border border-white/10"
-                    }
-                  />
-                  {!gridView && (
-                    <div className="flex-1">
-                      <p className="font-medium">{photo.name || t('common:noName')}</p>
-                      <p className="text-sm opacity-70">
-                        {new Date(photo.createdAt).toLocaleDateString('no-NO')}
-                      </p>
-                    </div>
-                  )}
-                  {photo.favorite && (
-                    <Star
-                      className={gridView ? "absolute top-2 right-2 w-5 h-5 text-yellow-400" : "w-5 h-5 text-yellow-400"}
-                      fill="currentColor"
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-20">
-              <currentView.icon className="w-20 h-20 mx-auto mb-4 opacity-30" />
-              <h3 className="text-xl font-semibold mb-2">{t('albums:noPhotos')}</h3>
-              <p className="opacity-70">
-                {viewMode === 'favorites' && t('albums:noFavoritesYet')}
-                {viewMode === 'unassigned' && t('albums:allPhotosOrganized')}
-                {viewMode === 'allPhotos' && t('albums:uploadToStart')}
-                {viewMode === 'byDate' && t('albums:noPhotosFound')}
-              </p>
-            </div>
-          )}
-        </div>
+      {viewMode === "photos" && (
+        <PhotoGridOptimized
+          photos={albumPhotos}
+          onPhotoClick={onPhotoClick}
+          selectedPhotos={selectedPhotos}
+          setSelectedPhotos={setSelectedPhotos}
+        />
       )}
+
+      <MoveModal
+        isOpen={isMoveOpen}
+        onClose={() => setMoveOpen(false)}
+        albums={albums}
+        onConfirm={(albumId) => {
+          console.log("Flytt", selectedPhotos, "til", albumId);
+          setSelectedPhotos([]);
+        }}
+      />
     </div>
   );
 };

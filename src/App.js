@@ -1,10 +1,8 @@
 // ============================================================================
-// APP.js – v5.0 FASE 3: Sikkerhet & Privacy
+// APP.js – v5.1 med korrekt Firebase-integrasjon
 // ============================================================================
 import React, { useState, useEffect, useMemo } from "react";
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
-import { uploadMultiplePhotos } from "./firebase-upload";
-
 
 // Pages
 import LoginPage from "./pages/LoginPage";
@@ -14,7 +12,7 @@ import SearchPage from "./pages/SearchPage";
 import MorePage from "./pages/MorePage";
 import AlbumPage from "./pages/AlbumPage";
 import AdminDashboard from "./pages/AdminDashboard";
-import SecuritySettings from "./pages/SecuritySettings"; // NEW
+import SecuritySettings from "./pages/SecuritySettings";
 
 // Components
 import UploadModal from "./components/UploadModal";
@@ -23,7 +21,7 @@ import AlbumModal from "./components/AlbumModal";
 import ConfirmModal from "./components/ConfirmModal";
 import Notification from "./components/Notification";
 import Particles from "./components/Particles";
-import PINLockScreen from "./components/PINLockScreen"; // NEW
+import PINLockScreen from "./components/PINLockScreen";
 
 // Icons
 import { Home, FolderOpen, Plus, Search, Menu } from "lucide-react";
@@ -39,9 +37,8 @@ import {
   updatePhoto,
 } from "./firebase";
 
-// Security Context (NEW)
+// Security Context
 import { SecurityProvider, useSecurityContext } from "./contexts/SecurityContext";
-
 import { ToastProvider } from './contexts/ToastContext';
 
 function App() {
@@ -67,7 +64,7 @@ function AppContent() {
   const [loading, setLoading] = useState(true);
   
   // Navigation state
-  const [currentPage, setCurrentPage] = useState("home"); // home, albums, search, more, album, admin, security
+  const [currentPage, setCurrentPage] = useState("home");
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   
   // Data state
@@ -128,7 +125,6 @@ function AppContent() {
       
       if (imageFiles.length > 0 && !uploadModalOpen) {
         setUploadModalOpen(true);
-        // Small delay to ensure modal is mounted
         setTimeout(() => {
           const event = new CustomEvent('externalFileDrop', { detail: imageFiles });
           window.dispatchEvent(event);
@@ -211,27 +207,38 @@ function AppContent() {
     }
   };
 
-  // Handle upload
- const handleUpload = async (selectedFiles, albumId) => {
-  try {
-    const uploadedPhotos = await uploadMultiplePhotos(
-      selectedFiles,
-      user.uid,
-      albumId,
-      (progress) => console.log(`Upload: ${progress}%`)
-    );
-    await refreshData();
-    setNotification({
-      message: `${uploadedPhotos.length} bilder lastet opp`,
-      type: "success"
-    });
-    return uploadedPhotos;
-  } catch (error) {
-    console.error("Upload error:", error);
-    setNotification({ message: "Feil ved opplasting", type: "error" });
-  }
-};
+  // ✅ Handle upload - kaller uploadPhoto fra firebase.js
+  const handleUpload = async (selectedFiles, albumId, aiTagging = false) => {
+    if (!user) {
+      setNotification({ message: "Du må være innlogget", type: "error" });
+      return;
+    }
 
+    try {
+      let successCount = 0;
+      
+      for (const fileObj of selectedFiles) {
+        await uploadPhoto(user.uid, fileObj.file, albumId, aiTagging);
+        successCount++;
+      }
+
+      await refreshData();
+      
+      const message = aiTagging 
+        ? `${successCount} bilder lastet opp med AI-tagging`
+        : `${successCount} bilder lastet opp`;
+      
+      setNotification({ message, type: "success" });
+      
+    } catch (error) {
+      console.error("Upload error:", error);
+      setNotification({ 
+        message: `Feil ved opplasting: ${error.message}`, 
+        type: "error" 
+      });
+      throw error;
+    }
+  };
 
   // Handle create/edit album
   const handleAlbumSave = async (albumData) => {
@@ -253,9 +260,18 @@ function AppContent() {
   };
 
   // Handle create album from upload modal (returns album ID)
-  const handleCreateAlbumFromUpload = async (albumData) => {
+  const handleCreateAlbumFromUpload = async (albumName) => {
     try {
-      const albumId = await addAlbum({ ...albumData, userId: user.uid });
+      const albumData = {
+        name: String(albumName).trim(),
+        title: String(albumName).trim(),
+        userId: user.uid,
+        createdAt: new Date().toISOString(),
+        photoCount: 0,
+        cover: ""
+      };
+      
+      const albumId = await addAlbum(albumData);
       await refreshData();
       setNotification({ message: "Album opprettet", type: "success" });
       return albumId;
@@ -342,7 +358,7 @@ function AppContent() {
     return <LoginPage />;
   }
 
-  // Show PIN lock screen if locked (NEW)
+  // Show PIN lock screen if locked
   if (isLocked && pinEnabled) {
     return <PINLockScreen />;
   }
@@ -408,18 +424,14 @@ function AppContent() {
         {currentPage === "album" && selectedAlbum && (
           <AlbumPage
             album={selectedAlbum}
-            photos={photos.filter(p => p.albumId === selectedAlbum.id)}
+            user={userProfile || user}
+            photos={photos}
             onBack={() => {
               setCurrentPage("albums");
               setSelectedAlbum(null);
             }}
-            onPhotoClick={handlePhotoClick}
-            onEditAlbum={() => {
-              setEditingAlbum(selectedAlbum);
-              setAlbumModalOpen(true);
-            }}
-            onDeleteAlbum={() => handleDeleteAlbum(selectedAlbum)}
-            toggleFavorite={toggleFavorite}
+            refreshData={refreshData}
+            colors={{}}
           />
         )}
 
@@ -490,16 +502,15 @@ function AppContent() {
       )}
 
       {/* Modals */}
-     {uploadModalOpen && (
-  <UploadModal
-    isOpen={uploadModalOpen}
-    albums={albums}
-    onClose={() => setUploadModalOpen(false)}
-    onUpload={handleUpload}
-    onCreateAlbum={handleCreateAlbumFromUpload}
-  />
-)}
-
+      {uploadModalOpen && (
+        <UploadModal
+          isOpen={uploadModalOpen}
+          albums={albums}
+          onClose={() => setUploadModalOpen(false)}
+          onUpload={handleUpload}
+          onCreateAlbum={handleCreateAlbumFromUpload}
+        />
+      )}
 
       {albumModalOpen && (
         <AlbumModal

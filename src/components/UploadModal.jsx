@@ -366,7 +366,7 @@ const UploadModal = ({
         </div>
 
         {/* Album selection */}
-        {albums.length > 0 && (
+        {true && (  /* always show album section */
           <div className="px-6 pt-4 pb-4 space-y-3 border-t border-white/10"> 
             <button
               onClick={() => {
