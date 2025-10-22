@@ -1,5 +1,5 @@
 // ============================================================================
-// firebase.js – komplett integrasjon (v2.3) med Authentication
+// firebase.js – komplett integrasjon (v3.0) med AI-fase
 // ============================================================================
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
@@ -67,7 +67,7 @@ export async function getAlbumsByUser(userId) {
 export async function addAlbum(data) {
   const now = new Date().toISOString();
   const payload = {
-    name: data.name || data.title || "Uten navn",   // ← sikrer navn
+    name: data.name || data.title || "Uten navn",
     createdAt: data.createdAt || now,
     updatedAt: now,
     photoCount: 0,
@@ -78,7 +78,6 @@ export async function addAlbum(data) {
   console.log(`📂 Album opprettet: ${payload.name}`);
   return refDoc.id;
 }
-
 
 // 🔹 Oppdater album
 export async function updateAlbum(albumId, updates) {
@@ -126,6 +125,11 @@ export async function getPhotosByUser(userId) {
       if (!data.createdAt) data.createdAt = new Date().toISOString();
       if (!data.updatedAt) data.updatedAt = data.createdAt;
       if (!("favorite" in data)) data.favorite = false;
+      
+      // AI-felt defaults
+      if (!data.aiTags) data.aiTags = [];
+      if (!("faces" in data)) data.faces = 0;
+      if (!("aiAnalyzed" in data)) data.aiAnalyzed = false;
 
       return { id: d.id, ...data };
     });
@@ -143,9 +147,21 @@ export async function addPhoto(data) {
     createdAt: data.createdAt || now,
     updatedAt: now,
     favorite: data.favorite || false,
+    
+    // AI-defaults
+    aiTags: data.aiTags || [],
+    faces: data.faces || 0,
+    category: data.category || null,
+    aiAnalyzed: data.aiAnalyzed || false,
+    analyzedAt: data.analyzedAt || null,
+    enhanced: data.enhanced || false,
+    enhancedUrl: data.enhancedUrl || null,
+    enhancedAt: data.enhancedAt || null,
+    bgRemoved: data.bgRemoved || false,
+    noBgUrl: data.noBgUrl || null,
+    bgRemovedAt: data.bgRemovedAt || null,
   };
 
-  // ✅ La Firestore generere ID automatisk
   const refDoc = await addDoc(collection(db, "photos"), payload);
   console.log(`📸 Bilde lagret: ${refDoc.id}`);
   return refDoc.id;
@@ -163,7 +179,6 @@ export async function updatePhoto(photoId, updates) {
     console.error("🔥 updatePhoto:", err);
   }
 }
-
 
 // ⭐ Toggle favoritt-status
 export async function toggleFavorite(photoId, currentStatus) {
@@ -215,7 +230,7 @@ export async function updateAlbumPhotoCount(albumId, newCount) {
 // ☁️ Storage-funksjoner
 // ============================================================================
 
-// 🔹 Last opp bildefil komplett (Storage + Firestore)
+// 🔹 Last opp bildefil komplett (Storage + Firestore) med AI-støtte
 export async function uploadPhoto(userId, file, albumId = null, aiTagging = false) {
   try {
     // 1. Last opp til Storage
@@ -240,22 +255,51 @@ export async function uploadPhoto(userId, file, albumId = null, aiTagging = fals
       size: file.size,
       type: file.type,
       favorite: false,
+      
+      // AI-felt (Fase 4.0)
       aiTags: [],
       faces: 0,
+      category: null,
+      aiAnalyzed: false,
+      analyzedAt: null,
+      enhanced: false,
+      enhancedUrl: null,
+      enhancedAt: null,
+      bgRemoved: false,
+      noBgUrl: null,
+      bgRemovedAt: null,
+      
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
 
-    // 3. AI-tagging (hvis aktivert)
+    // 3. AI-tagging (hvis aktivert) - Fase 4.1
     if (aiTagging) {
       try {
-        // TODO: Implementer AI-analyse her
-        // const analysis = await analyzeImage(downloadURL);
-        // photoData.aiTags = analysis.labels || [];
-        // photoData.faces = analysis.faces || 0;
-        console.log("🤖 AI-tagging er aktivert (kommer snart)");
+        console.log("🤖 Starter AI-analyse...");
+        
+        // Import gjøres her for å unngå circular dependency
+        const { analyzeImage } = await import('./utils/googleVision');
+        
+        const analysis = await analyzeImage(downloadURL, {
+          detectLabels: true,
+          detectFaces: true,
+          detectSafeSearch: true,
+          maxLabels: 10
+        });
+        
+        // Oppdater photoData med AI-resultater
+        photoData.aiTags = analysis.labels.map(l => l.name);
+        photoData.faces = analysis.faces;
+        photoData.category = analysis.category || null;
+        photoData.aiAnalyzed = true;
+        photoData.analyzedAt = new Date().toISOString();
+        
+        console.log(`✅ AI-analyse fullført: ${photoData.aiTags.length} tags, ${photoData.faces} ansikter`);
+        
       } catch (aiError) {
-        console.warn("⚠️ AI-analyse feilet:", aiError);
+        console.warn("⚠️ AI-analyse feilet:", aiError.message);
+        // Fortsett med opplasting selv om AI feiler
       }
     }
 

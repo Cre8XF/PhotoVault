@@ -95,5 +95,11 @@
     "album": "Album",
     "tags": "Tagger",
     "location": "Lokasjon"
-  }
+  },
+ "ai": {
+  "autoTagging": "AI Auto-tagging",
+  "autoTaggingDesc": "Analyser automatisk med Google Vision AI",
+  "successWithAI": "{{count}} bilder lastet opp og AI-analysert!",
+  "analyzing": "Analyserer med AI..."
+}
 }

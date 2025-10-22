@@ -41,5 +41,7 @@
   "aiTags": "AI tags",
   "facesDetected": "Faces detected",
   "filePath": "File path",
-  "unknown": "Unknown"
+  "unknown": "Unknown",
+  "aiAnalyzed": "AI analyzed",
+  "category": "Category"
 }

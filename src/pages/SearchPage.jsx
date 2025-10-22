@@ -1,9 +1,9 @@
 // ============================================================================
-// PAGE: SearchPage.jsx – v4.2 med i18n
+// PAGE: SearchPage.jsx – v5.0 med AI-søk (Fase 4.1)
 // ============================================================================
 import React, { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Search, X, Calendar, Tag, Star, Users, Folder, SlidersHorizontal } from "lucide-react";
+import { Search, X, Calendar, Tag, Star, Users, Folder, SlidersHorizontal, Sparkles } from "lucide-react";
 import PhotoGridOptimized from "../components/PhotoGridOptimized";
 
 const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData }) => {
@@ -13,20 +13,49 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
     favorites: false,
     withFaces: false,
     withTags: false,
+    aiAnalyzed: false,  // ✨ Nytt filter (Fase 4.1)
     dateRange: null,
     albumId: null,
+    category: null,     // ✨ Nytt filter (Fase 4.1)
   });
   const [showFilters, setShowFilters] = useState(false);
+
+  // ✨ Finn unike kategorier fra bilder (Fase 4.1)
+  const categories = useMemo(() => {
+    const cats = new Set();
+    photos.forEach(p => {
+      if (p.category) cats.add(p.category);
+    });
+    return Array.from(cats).sort();
+  }, [photos]);
+
+  // ✨ Finn populære AI-tags (Fase 4.1)
+  const popularTags = useMemo(() => {
+    const tagCount = {};
+    photos.forEach(p => {
+      if (p.aiTags) {
+        p.aiTags.forEach(tag => {
+          tagCount[tag] = (tagCount[tag] || 0) + 1;
+        });
+      }
+    });
+    return Object.entries(tagCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([tag, count]) => ({ tag, count }));
+  }, [photos]);
 
   const filteredPhotos = useMemo(() => {
     let results = photos;
 
+    // ✨ Søk i både navn og AI-tags (Fase 4.1)
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       results = results.filter(photo => {
         const nameMatch = photo.name?.toLowerCase().includes(query);
         const tagsMatch = photo.aiTags?.some(tag => tag.toLowerCase().includes(query));
-        return nameMatch || tagsMatch;
+        const categoryMatch = photo.category?.toLowerCase().includes(query);
+        return nameMatch || tagsMatch || categoryMatch;
       });
     }
 
@@ -40,6 +69,16 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
 
     if (activeFilters.withTags) {
       results = results.filter(p => p.aiTags && p.aiTags.length > 0);
+    }
+
+    // ✨ Filter: Kun AI-analysert (Fase 4.1)
+    if (activeFilters.aiAnalyzed) {
+      results = results.filter(p => p.aiAnalyzed);
+    }
+
+    // ✨ Filter: Kategori (Fase 4.1)
+    if (activeFilters.category) {
+      results = results.filter(p => p.category === activeFilters.category);
     }
 
     if (activeFilters.albumId) {
@@ -76,8 +115,10 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
       favorites: false,
       withFaces: false,
       withTags: false,
+      aiAnalyzed: false,
       dateRange: null,
       albumId: null,
+      category: null,
     });
     setSearchQuery("");
   };
@@ -111,6 +152,28 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
         </div>
       </div>
 
+      {/* ✨ Populære AI-tags (Fase 4.1) */}
+      {!searchQuery && activeFilterCount === 0 && popularTags.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-sm font-medium opacity-70 mb-3 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-purple-400" />
+            Populære AI-tags
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {popularTags.map(({ tag, count }) => (
+              <button
+                key={tag}
+                onClick={() => setSearchQuery(tag)}
+                className="ripple-effect glass px-4 py-2 rounded-xl hover:bg-purple-500/20 transition text-sm flex items-center gap-2"
+              >
+                <span>{tag}</span>
+                <span className="text-xs opacity-60">({count})</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Filter toggle */}
       <div className="flex justify-between items-center mb-4">
         <button
@@ -139,6 +202,74 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
       {/* Filtre */}
       {showFilters && (
         <div className="glass rounded-2xl p-6 mb-6 space-y-6 animate-scale-in">
+          {/* ✨ AI-filtre (Fase 4.1) */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="w-4 h-4 text-purple-400" />
+              <span className="font-medium">AI-funksjoner</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setActiveFilters({ ...activeFilters, aiAnalyzed: !activeFilters.aiAnalyzed })}
+                className={`ripple-effect px-3 py-1.5 rounded-lg text-sm transition ${
+                  activeFilters.aiAnalyzed
+                    ? 'bg-purple-600 text-white'
+                    : 'glass hover:bg-white/10'
+                }`}
+              >
+                Kun AI-analysert
+              </button>
+              <button
+                onClick={() => setActiveFilters({ ...activeFilters, withTags: !activeFilters.withTags })}
+                className={`ripple-effect px-3 py-1.5 rounded-lg text-sm transition ${
+                  activeFilters.withTags
+                    ? 'bg-purple-600 text-white'
+                    : 'glass hover:bg-white/10'
+                }`}
+              >
+                Med AI-tagger
+              </button>
+              <button
+                onClick={() => setActiveFilters({ ...activeFilters, withFaces: !activeFilters.withFaces })}
+                className={`ripple-effect px-3 py-1.5 rounded-lg text-sm transition ${
+                  activeFilters.withFaces
+                    ? 'bg-purple-600 text-white'
+                    : 'glass hover:bg-white/10'
+                }`}
+              >
+                {t('albums:filters.withFaces')}
+              </button>
+            </div>
+          </div>
+
+          {/* ✨ Kategorier (Fase 4.1) */}
+          {categories.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Tag className="w-4 h-4 text-purple-400" />
+                <span className="font-medium">Kategorier</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveFilters({ 
+                      ...activeFilters, 
+                      category: activeFilters.category === cat ? null : cat 
+                    })}
+                    className={`ripple-effect px-3 py-1.5 rounded-lg text-sm transition capitalize ${
+                      activeFilters.category === cat
+                        ? 'bg-purple-600 text-white'
+                        : 'glass hover:bg-white/10'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Dato */}
           <div>
             <div className="flex items-center gap-2 mb-3">
@@ -162,24 +293,6 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
             </div>
           </div>
 
-          {/* Tagger */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <Tag className="w-4 h-4 text-purple-400" />
-              <span className="font-medium">{t('albums:filters.tags')}</span>
-            </div>
-            <button
-              onClick={() => setActiveFilters({ ...activeFilters, withTags: !activeFilters.withTags })}
-              className={`ripple-effect px-3 py-1.5 rounded-lg text-sm transition ${
-                activeFilters.withTags
-                  ? 'bg-purple-600 text-white'
-                  : 'glass hover:bg-white/10'
-              }`}
-            >
-              {t('albums:filters.withAITags')}
-            </button>
-          </div>
-
           {/* Favoritter */}
           <div>
             <div className="flex items-center gap-2 mb-3">
@@ -195,24 +308,6 @@ const SearchPage = ({ photos, albums, onPhotoClick, toggleFavorite, refreshData 
               }`}
             >
               {t('albums:filters.favoritesOnly')}
-            </button>
-          </div>
-
-          {/* Ansikter */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <Users className="w-4 h-4 text-purple-400" />
-              <span className="font-medium">{t('albums:filters.faces')}</span>
-            </div>
-            <button
-              onClick={() => setActiveFilters({ ...activeFilters, withFaces: !activeFilters.withFaces })}
-              className={`ripple-effect px-3 py-1.5 rounded-lg text-sm transition ${
-                activeFilters.withFaces
-                  ? 'bg-purple-600 text-white'
-                  : 'glass hover:bg-white/10'
-              }`}
-            >
-              {t('albums:filters.withFaces')}
             </button>
           </div>
 

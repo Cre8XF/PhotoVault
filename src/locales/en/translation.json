@@ -95,5 +95,11 @@
     "album": "Album",
     "tags": "Tags",
     "location": "Location"
-  }
+  },
+  "ai": {
+  "aiTags": "AI tags",
+  "facesDetected": "Faces detected",
+  "aiAnalyzed": "AI analyzed",
+  "category": "Category"
+}
 }

@@ -41,5 +41,7 @@
   "aiTags": "AI-tagger",
   "facesDetected": "Ansikter gjenkjent",
   "filePath": "Filsti",
-  "unknown": "Ukjent"
+  "unknown": "Ukjent",
+  "aiAnalyzed": "AI-analysert",
+  "category": "Kategori"
 }
