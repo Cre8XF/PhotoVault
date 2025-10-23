@@ -14,6 +14,26 @@ import { auth } from "../firebase";
 import { getFirestore, doc, updateDoc } from "firebase/firestore";
 import UploadModal from "../components/UploadModal";
 import MoveModal from "../components/MoveModal";
+import PhotoModal from "../components/PhotoModal";
+
+
+function getCategoryIcon(category) {
+  const icons = {
+    people: "👥",
+    nature: "🌳",
+    food: "🍽️",
+    animals: "🐾",
+    indoor: "🏠",
+    travel: "✈️",
+    architecture: "🏛️",
+    event: "🎉",
+    sport: "⚽",
+    art: "🎨",
+    other: "📷",
+  };
+  return icons[category] || icons.other;
+}
+
 
 const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) => {
   const [editMode, setEditMode] = useState(false);
@@ -145,6 +165,8 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
       (typeof p === 'string' ? p : p.id) === photo.id
     );
   };
+  const [photoModal, setPhotoModal] = useState({ open: false, index: 0 });
+
 
   return (
     <div className="album-page p-4 md:p-8 min-h-screen">
@@ -204,90 +226,127 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
         </div>
       )}
 
-      {/* Bilder */}
-      {albumPhotos.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {albumPhotos.map((photo) => (
-            <div 
-              key={photo.id} 
-              className={`relative group cursor-pointer ${
-                isPhotoSelected(photo) ? 'ring-4 ring-purple-500' : ''
-              }`}
-              onClick={() => editMode && togglePhotoSelection(photo)}
-            >
-              <img
-                src={photo.url}
-                alt={photo.name}
-                className="rounded-xl w-full h-48 object-cover border border-white/10 transition-transform hover:scale-105"
-              />
-              
-              {/* Cover-indikator */}
-              {album.cover === photo.url && (
-                <div className="absolute top-2 left-2 bg-yellow-500 text-black px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
-                  <ImageIcon className="w-3 h-3" />
-                  Forside
-                </div>
-              )}
+  {/* Bilder */}
+{albumPhotos.length > 0 && (
+  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    {albumPhotos.map((photo, index) => (
+      <div
+        key={photo.id}
+        className={`relative group cursor-pointer ${
+          isPhotoSelected(photo) ? "ring-4 ring-purple-500" : ""
+        }`}
+        onClick={() => {
+          if (editMode) {
+            togglePhotoSelection(photo); // redigeringsmodus
+          } else {
+            setPhotoModal({ open: true, index }); // vis PhotoModal
+          }
+        }}
+      >
+       <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-black/10 flex items-center justify-center">
+  <img
+    src={photo.url}
+    alt={photo.name}
+    className="max-h-full max-w-full object-contain border border-white/10 transition-transform hover:scale-105 rounded-xl"
+  />
+</div>
 
-              {/* Valgt-indikator */}
-              {isPhotoSelected(photo) && (
-                <div className="absolute top-2 right-2 bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center">
-                  <Check className="w-4 h-4" />
-                </div>
-              )}
 
-              {/* Rediger-knapper */}
-              {editMode && !isPhotoSelected(photo) && (
-                <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleSetCover(photo);
-                    }}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-full transition shadow-lg"
-                    title="Sett som forside"
-                  >
-                    <ImageIcon className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(photo);
-                    }}
-                    className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition shadow-lg"
-                    title="Slett bilde"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-
-              {/* Bildenavn */}
-              {photo.name && (
-                <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-2 rounded-b-xl truncate opacity-0 group-hover:opacity-100 transition">
-                  {photo.name}
-                </div>
-              )}
-            </div>
-          ))}
+        {/* AI-indikatorer */}
+        <div className="absolute top-2 left-2 flex flex-col gap-1">
+          {photo.aiAnalyzed && (
+            <span className="px-2 py-1 bg-purple-600/80 backdrop-blur rounded-full text-[10px] font-bold flex items-center gap-1 shadow">
+              🤖 AI
+            </span>
+          )}
+          {photo.faces > 0 && (
+            <span className="px-2 py-1 bg-pink-500/80 backdrop-blur rounded-full text-[10px] font-bold shadow">
+              👤 {photo.faces}
+            </span>
+          )}
+          {photo.category && (
+            <span className="px-2 py-1 bg-blue-500/80 backdrop-blur rounded-full text-[10px] shadow">
+              {getCategoryIcon(photo.category)}
+            </span>
+          )}
         </div>
-      )}
 
-      {/* Modaler */}
-      <UploadModal
-        isOpen={isUploadOpen}
-        onClose={() => setUploadOpen(false)}
-        onUpload={handleUpload}
-        onCreateAlbum={handleCreateAlbum}
-        albums={albums}
-        selectedAlbum={album.id}
-      />
-      <MoveModal
-        isOpen={isMoveOpen}
-        onClose={() => setMoveOpen(false)}
-        albums={albums}
-        onConfirm={handleMovePhotos}
-      />
+        {/* Cover-indikator */}
+        {album.cover === photo.url && (
+          <div className="absolute top-2 left-2 bg-yellow-500 text-black px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
+            <ImageIcon className="w-3 h-3" />
+            Forside
+          </div>
+        )}
+
+        {/* Valgt-indikator */}
+        {isPhotoSelected(photo) && (
+          <div className="absolute top-2 right-2 bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center">
+            <Check className="w-4 h-4" />
+          </div>
+        )}
+
+        {/* Rediger-knapper */}
+        {editMode && !isPhotoSelected(photo) && (
+          <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSetCover(photo);
+              }}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-full transition shadow-lg"
+              title="Sett som forside"
+            >
+              <ImageIcon className="w-4 h-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(photo);
+              }}
+              className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition shadow-lg"
+              title="Slett bilde"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Bildenavn */}
+        {photo.name && (
+          <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-2 rounded-b-xl truncate opacity-0 group-hover:opacity-100 transition">
+            {photo.name}
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
+)}
+
+{/* PhotoModal */}
+{photoModal.open && (
+  <PhotoModal
+    photos={albumPhotos}
+    currentIndex={photoModal.index}
+    onClose={() => setPhotoModal({ open: false, index: 0 })}
+  />
+)}
+
+{/* Modaler */}
+<UploadModal
+  isOpen={isUploadOpen}
+  onClose={() => setUploadOpen(false)}
+  onUpload={handleUpload}
+  onCreateAlbum={handleCreateAlbum}
+  albums={albums}
+  selectedAlbum={album.id}
+/>
+<MoveModal
+  isOpen={isMoveOpen}
+  onClose={() => setMoveOpen(false)}
+  albums={albums}
+  onConfirm={handleMovePhotos}
+/>
     </div>
   );
 };

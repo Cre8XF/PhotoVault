@@ -1,18 +1,5 @@
 /* ============================================================================
-   index.css – Twilight Premium Theme v3.1 med forbedret Light Mode
-   Balansert mørk-til-lys med varme toner og elegante animasjoner
-   ============================================================================ */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap');
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-/* ============================================================================
-   ANIMATED TWILIGHT GRADIENT BACKGROUND
+   ANIMATED TWILIGHT GRADIENT BACKGROUND – refined version
    ============================================================================ */
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -24,9 +11,17 @@ body {
   position: relative;
 
   /* Animated gradient background - DARK MODE */
-  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 20%, #4338ca 40%, #6366f1 60%, #8b5cf6 80%, #a78bfa 100%);
+  background: linear-gradient(
+    135deg,
+    #1e1b4b 0%,
+    /* mørk base */ #312e81 20%,
+    /* dyp indigo */ #4338ca 40%,
+    /* sterk blåfiolett */ #6366f1 60%,
+    /* lilla-blå */ #7c62f5 80%,
+    /* mykere lys lilla */ #9b8dfb 100% /* dus høylys */
+  );
   background-size: 400% 400%;
-  animation: twilightGradient 15s ease infinite;
+  animation: twilightGradient 20s ease infinite;
 }
 
 /* LIGHT MODE - Soft pastel gradient */
@@ -35,6 +30,7 @@ body.light-mode {
   color: #1f2937;
 }
 
+/* Gradient animation */
 @keyframes twilightGradient {
   0% {
     background-position: 0% 50%;

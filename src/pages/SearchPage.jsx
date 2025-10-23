@@ -359,21 +359,25 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => 
               </div>
             </div>
           )}
-
-          {/* Handling */}
-          <div className="flex justify-between">
-            <div className="text-sm opacity-60">
-              Aktive filtre: <b>{activeFilterCount}</b>
-            </div>
-            <button
-              onClick={clearFilters}
-              className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20"
-            >
-              Nullstill filtre
-            </button>
-          </div>
         </div>
       )}
+
+          {/* Handling */}
+<div className="flex justify-between">
+  <div className="text-sm opacity-60">
+    Aktive filtre: <b>{activeFilterCount}</b>
+  </div>
+  <button
+    onClick={() => {
+      clearFilters();       // nullstiller filtrene
+      setSearchQuery('');   // legger til denne linjen
+    }}
+    className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20"
+  >
+    Nullstill filtre
+  </button>
+</div>
+
 
       {/* Resultater */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -428,5 +432,6 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => 
     </div>
   );
 };
+
 
 export default SearchPage;
