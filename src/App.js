@@ -532,17 +532,18 @@ function AppContent() {
         />
       )}
 
-      {confirmModal && (
-        <ConfirmModal
-          title={confirmModal.title}
-          message={confirmModal.message}
-          onConfirm={() => {
-            confirmModal.onConfirm();
-            setConfirmModal(null);
-          }}
-          onCancel={() => setConfirmModal(null)}
-        />
-      )}
+     {confirmModal && (
+  <ConfirmModal
+    isOpen={true}
+    title={confirmModal.title}
+    message={confirmModal.message}
+    onConfirm={confirmModal.onConfirm}
+    onClose={() => setConfirmModal(null)}
+    confirmLabel="Logg ut"
+    cancelLabel="Avbryt"
+  />
+)}
+
 
       {notification && (
         <Notification

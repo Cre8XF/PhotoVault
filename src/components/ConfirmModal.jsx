@@ -1,48 +1,56 @@
 // ============================================================================
-// COMPONENT: ConfirmModal.jsx – bekreftelsesdialog for sletting og advarsler
+// COMPONENT: ConfirmModal.jsx – elegant bekreftelsesdialog uten inline-style
 // ============================================================================
 import React from "react";
 import { AlertTriangle } from "lucide-react";
 
-const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel }) => {
+const ConfirmModal = ({
+  isOpen,
+  title = "Bekreft handling",
+  message = "Er du sikker på at du vil fortsette?",
+  confirmLabel = "Bekreft",
+  cancelLabel = "Avbryt",
+  onConfirm,
+  onClose,
+}) => {
   if (!isOpen) return null;
 
   return (
     <div
-      className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
-      onClick={onCancel}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in"
+      onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-sm bg-gradient-to-b from-gray-800/90 to-gray-900/90
-                   rounded-2xl p-6 shadow-2xl border border-gray-700/50 backdrop-blur-xl"
+        className="relative w-full max-w-sm p-6 rounded-2xl shadow-2xl border border-white/10
+                   bg-gradient-to-b from-gray-800/90 to-gray-900/90 text-gray-100 animate-scale-in"
       >
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
-          <AlertTriangle className="text-yellow-400 w-6 h-6" />
-          <h2 className="text-xl font-semibold text-white">{title || "Bekreft handling"}</h2>
+          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-yellow-500/20">
+            <AlertTriangle className="w-6 h-6 text-yellow-400" />
+          </div>
+          <h2 className="text-lg font-semibold">{title}</h2>
         </div>
 
         {/* Body */}
-        <p className="text-gray-300 mb-6 text-sm leading-relaxed">
-          {message || "Er du sikker på at du vil fortsette?"}
-        </p>
+        <p className="text-gray-300 text-sm leading-relaxed mb-6">{message}</p>
 
         {/* Buttons */}
         <div className="flex justify-end gap-3">
           <button
-            onClick={onCancel}
-            className="ripple-effect px-5 py-2 rounded-xl bg-gray-700/60 hover:bg-gray-600/70 
-                       text-gray-200 text-sm font-semibold transition-colors"
+            onClick={onClose}
+            className="ripple-effect px-5 py-2 rounded-xl bg-gray-700/70 hover:bg-gray-600/80
+                       text-gray-200 text-sm font-semibold transition-all duration-150"
           >
-            Avbryt
+            {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
-            className="ripple-effect px-5 py-2 rounded-xl bg-red-600/80 hover:bg-red-700 
-                       text-white text-sm font-semibold transition-colors"
+            className="ripple-effect px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 
+                       text-white text-sm font-semibold shadow-sm transition-all duration-150"
           >
-            Ja, slett
+            {confirmLabel}
           </button>
         </div>
       </div>

@@ -1,10 +1,10 @@
 // ============================================================================
-// PAGE: HomeDashboard.jsx – v4.1 med LazyImage + i18n
+// PAGE: HomeDashboard.jsx – v4.1 med LazyImage + i18n + FIKSET ALBUM-OPPRETTING
 // ============================================================================
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { addAlbum } from "../firebase";
+import { auth } from "../firebase";
 import UploadModal from "../components/UploadModal";
-import { useState } from "react";
 import {
   Star,
   Clock,
@@ -19,11 +19,9 @@ import {
 import LazyImage from "../components/LazyImage";
 import { useTranslation } from "react-i18next";
 
-const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData }) => {
+const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, onUpload }) => {
   const { t } = useTranslation(["common", "home"]);
-  const [isUploadOpen, setUploadOpen] = useState(false);   // ← manglet
-  const handleUpload = () => {};                           // ← placeholder (hindrer feil)
-
+  const [isUploadOpen, setUploadOpen] = useState(false);
 
   const stats = useMemo(
     () => ({
@@ -82,26 +80,29 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData }
       color: "from-amber-500 to-orange-500"
     }
   ];
-  const handleCreateAlbum = async (name) => {
-const newAlbum = {
-  id: Date.now().toString(),
-  name: String(name).trim(), // ← tvinger konvertering til tekst
-  title: name,  // ← legg til dette for å matche Firestore-felt
-  createdAt: new Date().toISOString(),
-  coverUrl: "",
-  photoCount: 0,
-  userId: user?.uid || "guest",
-};
 
+  const handleCreateAlbum = async (name, userId) => {
+    try {
+      if (!userId) {
+        const currentUser = auth.currentUser;
+        if (!currentUser) throw new Error("Bruker ikke innlogget");
+        userId = currentUser.uid;
+      }
 
-  try {
-    await addAlbum(newAlbum);
-    await refreshData(); // oppdater listen etterpå
-  } catch (error) {
-    console.error("Feil ved oppretting av nytt album:", error);
-    alert("Kunne ikke opprette album. Prøv igjen.");
-  }
-};
+      const newAlbum = {
+        name: String(name).trim(),
+        userId: userId,
+      };
+
+      const albumId = await addAlbum(newAlbum);
+      console.log("✅ Album opprettet:", albumId);
+      
+      if (refreshData) await refreshData();
+    } catch (error) {
+      console.error("Feil ved oppretting av album:", error);
+      alert("Kunne ikke opprette album. Prøv igjen.");
+    }
+  };
 
   return (
     <div className="min-h-screen p-6 md:p-10 animate-fade-in">
@@ -279,13 +280,12 @@ const newAlbum = {
       </section>
 
       <button
-  onClick={() => setUploadOpen(true)}
-  className="ripple-effect glass p-4 rounded-xl hover:bg-white/15 transition flex items-center gap-3 mt-6"
->
-  <ImagePlus className="w-5 h-5 text-purple-400" />
-  <span>Last opp bilder / Opprett nytt album</span>
-</button>
-
+        onClick={() => setUploadOpen(true)}
+        className="ripple-effect glass p-4 rounded-xl hover:bg-white/15 transition flex items-center gap-3 mt-6"
+      >
+        <ImagePlus className="w-5 h-5 text-purple-400" />
+        <span>Last opp bilder / Opprett nytt album</span>
+      </button>
 
       {/* Quick stats */}
       <section className="glass p-6 rounded-2xl">
@@ -309,17 +309,16 @@ const newAlbum = {
           </div>
         </div>
       </section>
-      {/* Upload Modal */}
-<UploadModal
-  isOpen={isUploadOpen}
-  onClose={() => setUploadOpen(false)}
-  onUpload={handleUpload}
-  onCreateAlbum={handleCreateAlbum}
-  albums={albums}
-/>
 
+      {/* Upload Modal */}
+      <UploadModal
+        isOpen={isUploadOpen}
+        onClose={() => setUploadOpen(false)}
+        onUpload={onUpload}
+        onCreateAlbum={handleCreateAlbum}
+        albums={albums}
+      />
     </div>
-    
   );
 };
 

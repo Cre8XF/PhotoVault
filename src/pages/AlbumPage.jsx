@@ -1,41 +1,66 @@
 // ============================================================================
-// PAGE: AlbumPage.jsx – med støtte for flervalg og flytt til album
+// PAGE: AlbumPage.jsx – sletting, flytting, forside og opplasting m. ConfirmModal
 // ============================================================================
 import React, { useState, useMemo } from "react";
-import { ArrowLeft, Trash2, Edit3, Check, Move } from "lucide-react";
-import { deletePhoto, setAlbumCover, uploadPhoto, addAlbum } from "../firebase";
+import { ArrowLeft, Trash2, Edit3, Check, Move, Star } from "lucide-react";
+import {
+  deletePhoto,
+  setAlbumCover,
+  uploadPhoto,
+  addAlbum,
+  updateAlbumPhotoCount,
+} from "../firebase";
 import { auth } from "../firebase";
-import PhotoGridOptimized from "../components/PhotoGridOptimized";
-import LazyImage from "../components/LazyImage";
+import { getFirestore, doc, updateDoc } from "firebase/firestore";
 import UploadModal from "../components/UploadModal";
 import MoveModal from "../components/MoveModal";
+import ConfirmModal from "../components/ConfirmModal";
 
 const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) => {
   const [editMode, setEditMode] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState([]);
   const [isMoveOpen, setMoveOpen] = useState(false);
   const [isUploadOpen, setUploadOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [photoToDelete, setPhotoToDelete] = useState(null);
 
   const albumPhotos = useMemo(
     () => photos.filter((p) => p.albumId === album.id),
     [photos, album.id]
   );
 
-  const handleDelete = async (photo) => {
-    if (window.confirm("Vil du slette dette bildet permanent?")) {
-      await deletePhoto(photo.id, photo.storagePath);
-      if (refreshData) await refreshData();
-    }
-  };
-
+  // --- Forside ---
   const handleSetCover = async (photo) => {
-    if (window.confirm(`Vil du bruke "${photo.name}" som forside?`)) {
+    try {
       await setAlbumCover(album.id, photo.url);
-      album.cover = photo.url;
+      console.log(`⭐ Forsidebilde satt til: ${photo.name}`);
       if (refreshData) await refreshData();
+    } catch (error) {
+      console.error("Feil ved oppdatering av forside:", error);
+      alert("Kunne ikke sette forsidebilde. Se konsollen for detaljer.");
     }
   };
 
+  // --- Sletting (via ConfirmModal) ---
+  const requestDelete = (photo) => {
+    setPhotoToDelete(photo);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!photoToDelete) return;
+    try {
+      await deletePhoto(photoToDelete.id, photoToDelete.storagePath);
+      console.log(`🗑️ Slettet bilde: ${photoToDelete.name || photoToDelete.id}`);
+      setPhotoToDelete(null);
+      if (refreshData) await refreshData();
+    } catch (error) {
+      console.error("Feil ved sletting:", error);
+      alert("Kunne ikke slette bildet. Se konsollen for detaljer.");
+    }
+  };
+
+  // --- Opplasting ---
   const handleUpload = async (files, albumId, aiTagging) => {
     const currentUser = auth.currentUser;
     if (!currentUser) {
@@ -52,22 +77,47 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
     }
   };
 
-  const handleCreateAlbum = async (name) => {
-  try {
-    const user = auth.currentUser;
-    if (!user) throw new Error("Bruker ikke innlogget");
+  // --- Opprett nytt album ---
+  const handleCreateAlbum = async (name, userId) => {
+    try {
+      const currentUser = userId || auth.currentUser;
+      if (!currentUser) throw new Error("Bruker ikke innlogget");
+      const newAlbum = { name: name.trim(), userId: currentUser.uid || currentUser };
+      const albumId = await addAlbum(newAlbum);
+      console.log("✅ Album opprettet:", albumId);
+      if (refreshData) await refreshData();
+    } catch (error) {
+      console.error("Feil ved oppretting av album:", error);
+      alert("Kunne ikke opprette album.");
+    }
+  };
 
-    const newAlbum = {
-      name: name.trim(),
-      userId: user.uid,
-    };
+  // --- Flytting ---
+  const handleMovePhotos = async (targetAlbumId) => {
+    try {
+      const db = getFirestore();
+      const updates = selectedPhotos
+        .filter(Boolean)
+        .map(async (photo) => {
+          const photoId = typeof photo === "string" ? photo : photo.id || photo.docId;
+          if (!photoId) return console.warn("Mangler id for:", photo);
+          const photoRef = doc(db, "photos", photoId);
+          await updateDoc(photoRef, { albumId: targetAlbumId });
+        });
 
-    const albumId = await addAlbum(newAlbum);
-    console.log("✅ Album opprettet:", albumId);
-  } catch (error) {
-    console.error("Feil ved oppretting av album:", error);
-  }
-};
+      await Promise.all(updates);
+      const fromCount = albumPhotos.length - selectedPhotos.length;
+      await updateAlbumPhotoCount(album.id, Math.max(0, fromCount));
+      const targetAlbumPhotos = photos.filter((p) => p.albumId === targetAlbumId).length;
+      await updateAlbumPhotoCount(targetAlbumId, targetAlbumPhotos + selectedPhotos.length);
+
+      if (refreshData) await refreshData();
+      setSelectedPhotos([]);
+    } catch (error) {
+      console.error("Feil ved flytting:", error);
+      alert("Kunne ikke flytte bildene.");
+    }
+  };
 
   return (
     <div className="album-page p-4 md:p-8 min-h-screen">
@@ -111,12 +161,35 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
       </div>
 
       {/* Bilder */}
-      <PhotoGridOptimized
-        photos={albumPhotos}
-        onPhotoClick={() => {}}
-        selectedPhotos={selectedPhotos}
-        setSelectedPhotos={setSelectedPhotos}
-      />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {albumPhotos.map((photo) => (
+          <div key={photo.id} className="relative group">
+            <img
+              src={photo.url}
+              alt={photo.name}
+              className="rounded-xl w-full h-48 object-cover"
+            />
+            {editMode && (
+              <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition">
+                <button
+                  onClick={() => handleSetCover(photo)}
+                  className="bg-black/60 hover:bg-yellow-500 text-white p-2 rounded-full"
+                  title="Sett som forside"
+                >
+                  <Star className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => requestDelete(photo)}
+                  className="bg-black/60 hover:bg-red-600 text-white p-2 rounded-full"
+                  title="Slett bilde"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
 
       {/* Modaler */}
       <UploadModal
@@ -131,10 +204,16 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
         isOpen={isMoveOpen}
         onClose={() => setMoveOpen(false)}
         albums={albums}
-        onConfirm={(albumId) => {
-          console.log("Flytt", selectedPhotos, "til", albumId);
-          setSelectedPhotos([]);
-        }}
+        onConfirm={handleMovePhotos}
+      />
+      <ConfirmModal
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Bekreft sletting"
+        message="Er du sikker på at du vil slette dette bildet permanent?"
+        confirmLabel="Slett bilde"
+        cancelLabel="Avbryt"
       />
     </div>
   );
