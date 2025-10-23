@@ -5,6 +5,8 @@ import React, { useState } from "react";
 import PhotoModal from "./PhotoModal";
 import { ImageOff, Trash2, Star } from "lucide-react";
 import { deletePhoto, toggleFavorite } from "../firebase";
+import { setAsCover } from "../firebase";
+
 
 const PhotoGrid = ({
   photos = [],
@@ -122,38 +124,48 @@ const PhotoGrid = ({
               </button>
             </div>
 
-            {/* Bildetittel eller "Sett som cover" */}
-            {onPhotoClick ? (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition">
-                <span className="text-white text-sm font-medium">
-                  Sett som cover
-                </span>
-              </div>
-            ) : (
-              photo.title && (
-                <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs py-1 px-2 truncate opacity-0 group-hover:opacity-100 transition">
-                  {photo.title}
-                </div>
-              )
-            )}
-          </div>
-        ))}
-      </div>
+       {/* Sett som cover eller bildetekst */}
+{editMode ? (
+  <div
+    className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition"
+    onClick={(e) => {
+      e.stopPropagation();
+      if (!photo.albumId) return;
+      setAsCover(photo.id, photo.albumId, photo.url)
+        .then(() => refreshPhotos && refreshPhotos())
+        .catch((err) => console.error("Feil ved sett som cover:", err));
+    }}
+  >
+    <span className="text-white text-sm font-medium cursor-pointer">
+      Sett som cover
+    </span>
+  </div>
+) : (
+  photo.title && (
+    <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs py-1 px-2 truncate opacity-0 group-hover:opacity-100 transition">
+      {photo.title}
+    </div>
+  )
+)}
 
-      {/* Lysboks (PhotoModal) */}
-      {!onPhotoClick && photoModal.open && (
-        <PhotoModal
-          photos={list}
-          currentIndex={photoModal.index}
-          onClose={() => setPhotoModal({ open: false, index: 0 })}
-          onToggleFavorite={async (photo) => {
-            await toggleFavorite(photo.id, photo.favorite);
-            if (refreshPhotos) await refreshPhotos();
-          }}
-        />
-      )}
-    </>
-  );
+</div>  
+))} 
+</div> 
+
+{/* Lysboks (PhotoModal) */}
+{!onPhotoClick && photoModal.open && (
+  <PhotoModal
+    photos={list}
+    currentIndex={photoModal.index}
+    onClose={() => setPhotoModal({ open: false, index: 0 })}
+    onToggleFavorite={async (photo) => {
+      await toggleFavorite(photo.id, photo.favorite);
+      if (refreshPhotos) await refreshPhotos();
+    }}
+  />
+)}
+</>
+);
 };
 
 export default PhotoGrid;

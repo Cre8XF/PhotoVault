@@ -3,6 +3,7 @@
 // ============================================================================
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+
 import {
   getFirestore,
   collection,
@@ -224,6 +225,15 @@ export async function updateAlbumPhotoCount(albumId, newCount) {
   } catch (err) {
     console.error("🔥 updateAlbumPhotoCount:", err);
   }
+}
+export async function setAsCover(photoId, albumId, url) {
+  const albumRef = doc(db, "albums", albumId);
+  await updateDoc(albumRef, { cover: url, updatedAt: new Date().toISOString() });
+}
+
+export async function updatePhotoAlbum(photoId, targetAlbumId) {
+  const photoRef = doc(db, "photos", photoId);
+  await updateDoc(photoRef, { albumId: targetAlbumId });
 }
 
 // ============================================================================
