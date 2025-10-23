@@ -83,13 +83,17 @@ const AlbumCard = ({ album, photos = [], onOpen }) => {
   </div>
 )}
 
-<div className="album-meta mt-2">
+<div className="album-meta mt-2 px-1">
   <div className="album-title font-semibold">{album.name || "Uten navn"}</div>
-  <div className="album-sub text-sm opacity-80">
+  <div
+    className="album-sub text-sm text-gray-300 opacity-80 truncate px-1 pb-1 rounded-b-xl"
+    style={{ lineHeight: "1.3" }}
+  >
     {count} {count === 1 ? "bilde" : "bilder"}
-    {updatedStr ? " • " + updatedStr : ""}
+    {updatedStr ? " · " + updatedStr : ""}
   </div>
 </div>
+
     </div>
   );
 };

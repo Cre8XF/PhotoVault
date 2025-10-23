@@ -1,64 +1,71 @@
 // ============================================================================
 // PAGE: AlbumsPage.jsx – med støtte for flervalg og flytt til album
 // ============================================================================
-import React, { useState, useMemo } from "react";
-import { useTranslation } from "react-i18next";
-import { Folder, Image, Star, Calendar, Move } from "lucide-react";
-import AlbumCard from "../components/AlbumCard";
-import LazyImage from "../components/LazyImage";
-import PhotoGridOptimized from "../components/PhotoGridOptimized";
-import MoveModal from "../components/MoveModal";
+import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Folder, Image, Star, Calendar, Move } from 'lucide-react';
+import AlbumCard from '../components/AlbumCard';
+import LazyImage from '../components/LazyImage';
+import PhotoGridOptimized from '../components/PhotoGridOptimized';
+import MoveModal from '../components/MoveModal';
 
 const AlbumsPage = ({ albums, photos, onAlbumClick, onPhotoClick }) => {
-  const { t } = useTranslation(["common", "albums"]);
-  const [viewMode, setViewMode] = useState("albums");
+  const { t } = useTranslation(['common', 'albums']);
+  const [viewMode, setViewMode] = useState('albums');
   const [selectedPhotos, setSelectedPhotos] = useState([]);
   const [isMoveOpen, setMoveOpen] = useState(false);
 
-  const albumPhotos = useMemo(() => photos.filter((p) => !p.albumId), [photos]);
+  const albumPhotos = useMemo(() => photos.filter(p => !p.albumId), [photos]);
+
+  // Beregning før return
+  const totalAlbums = albums.length;
+  const totalPhotos = albums.reduce((sum, a) => sum + (a.photoCount || 0), 0);
+  const totalSizeMB = (
+  photos.reduce((sum, p) => sum + (p.size || 0), 0) / (1024 * 1024)
+).toFixed(1);
+
 
   return (
     <div className="min-h-screen p-6 md:p-10 pb-24">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">{t("common:albums")}</h1>
+        <h1 className="text-3xl font-bold">{t('common:albums')}</h1>
         {selectedPhotos.length > 0 && (
-          <button
-            onClick={() => setMoveOpen(true)}
-            className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
-          >
+          <button onClick={() => setMoveOpen(true)} className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center gap-2">
             <Move size={18} /> Flytt til album
           </button>
         )}
       </div>
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+          <p className="text-sm text-gray-400">Album</p>
+          <p className="text-2xl font-bold">{totalAlbums}</p>
+        </div>
+        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+          <p className="text-sm text-gray-400">Bilder</p>
+          <p className="text-2xl font-bold">{totalPhotos}</p>
+        </div>
+        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+          <p className="text-sm text-gray-400">Lagring</p>
+          <p className="text-2xl font-bold">{totalSizeMB} MB</p>
+        </div>
+      </div>
 
-      {viewMode === "albums" && (
+      {viewMode === 'albums' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {albums.map((album) => (
-            <AlbumCard
-              key={album.id}
-              album={album}
-              photos={photos}
-              onOpen={() => onAlbumClick(album)}
-            />
+          {albums.map(album => (
+            <AlbumCard key={album.id} album={album} photos={photos} onOpen={() => onAlbumClick(album)} />
           ))}
         </div>
       )}
 
-      {viewMode === "photos" && (
-        <PhotoGridOptimized
-          photos={albumPhotos}
-          onPhotoClick={onPhotoClick}
-          selectedPhotos={selectedPhotos}
-          setSelectedPhotos={setSelectedPhotos}
-        />
-      )}
+      {viewMode === 'photos' && <PhotoGridOptimized photos={albumPhotos} onPhotoClick={onPhotoClick} selectedPhotos={selectedPhotos} setSelectedPhotos={setSelectedPhotos} />}
 
       <MoveModal
         isOpen={isMoveOpen}
         onClose={() => setMoveOpen(false)}
         albums={albums}
-        onConfirm={(albumId) => {
-          console.log("Flytt", selectedPhotos, "til", albumId);
+        onConfirm={albumId => {
+          console.log('Flytt', selectedPhotos, 'til', albumId);
           setSelectedPhotos([]);
         }}
       />
