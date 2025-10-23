@@ -1,13 +1,16 @@
 // ============================================================================
-// COMPONENT: AlbumCard.jsx – Twilight Theme med 3D Tilt Effect
+// COMPONENT: AlbumCard.jsx – Twilight Theme med 3D Tilt Effect og cover-støtte
 // ============================================================================
 import React, { useState } from "react";
 
 const AlbumCard = ({ album, photos = [], onOpen }) => {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   
-  const fallback = photos.find((p) => p.albumId === album.id) || null;
-  const coverUrl = album.cover || (fallback ? fallback.url || fallback.src : "");
+  // Prioriter album.cover, ellers bruk første bilde i albumet
+  const coverUrl = album.cover || 
+    photos.find((p) => p.albumId === album.id)?.url || 
+    "";
+  
   const count = photos.filter((p) => p.albumId === album.id).length;
 
   let updatedStr = "";

@@ -1,12 +1,10 @@
 // ============================================================================
-// COMPONENT: PhotoGrid.jsx – v2.1 med favoritt-toggle
+// COMPONENT: PhotoGrid.jsx – v2.2 med forside-funksjonalitet
 // ============================================================================
 import React, { useState } from "react";
 import PhotoModal from "./PhotoModal";
-import { ImageOff, Trash2, Star } from "lucide-react";
-import { deletePhoto, toggleFavorite } from "../firebase";
-import { setAsCover } from "../firebase";
-
+import { ImageOff, Trash2, Star, Image as ImageIcon } from "lucide-react";
+import { deletePhoto, toggleFavorite, setAlbumCover } from "../firebase";
 
 const PhotoGrid = ({
   photos = [],
@@ -16,6 +14,8 @@ const PhotoGrid = ({
   compact = false,
   filterUnassigned = false,
   showFavoriteButton = true,
+  editMode = false,
+  currentAlbum = null,
 }) => {
   const list = filterUnassigned ? photos.filter((p) => !p.albumId) : photos;
   const [photoModal, setPhotoModal] = useState({ open: false, index: 0 });
@@ -38,7 +38,7 @@ const PhotoGrid = ({
     }
   };
 
-  // ⭐ NYTT: Håndter favoritt-toggle
+  // ⭐ Håndter favoritt-toggle
   const handleToggleFavorite = async (e, photo) => {
     e.stopPropagation();
     try {
@@ -46,6 +46,25 @@ const PhotoGrid = ({
       if (refreshPhotos) await refreshPhotos();
     } catch (err) {
       console.error("Feil ved favoritt-toggle:", err);
+    }
+  };
+
+  // 🖼️ Håndter sett som forside
+  const handleSetCover = async (e, photo) => {
+    e.stopPropagation();
+    
+    if (!photo.albumId) {
+      alert("Dette bildet tilhører ikke et album");
+      return;
+    }
+
+    try {
+      await setAlbumCover(photo.albumId, photo.url);
+      console.log(`🖼️ Forsidebilde satt for album ${photo.albumId}`);
+      if (refreshPhotos) await refreshPhotos();
+    } catch (err) {
+      console.error("Feil ved oppdatering av forside:", err);
+      alert("Kunne ikke sette forsidebilde");
     }
   };
 
@@ -77,7 +96,7 @@ const PhotoGrid = ({
           <div key={photo.id} className="relative group overflow-hidden rounded-xl">
             <img
               src={photo.url}
-              alt={photo.title || ""}
+              alt={photo.title || photo.name || ""}
               className={`w-full ${
                 compact ? "h-40" : "h-56"
               } object-contain bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20 cursor-pointer`}
@@ -89,8 +108,27 @@ const PhotoGrid = ({
               loading="lazy"
             />
 
+            {/* Cover-indikator (vises hvis bildet er albumforside) */}
+            {currentAlbum && currentAlbum.cover === photo.url && (
+              <div className="absolute top-2 left-2 bg-yellow-500 text-black px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
+                <ImageIcon className="w-3 h-3" />
+                Forside
+              </div>
+            )}
+
             {/* Overlay-knapper */}
             <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition">
+              {/* 🖼️ Sett som forside (kun i editMode og hvis bildet har albumId) */}
+              {editMode && photo.albumId && (
+                <button
+                  onClick={(e) => handleSetCover(e, photo)}
+                  title="Sett som albumforside"
+                  className="p-1.5 rounded-full bg-yellow-500/80 hover:bg-yellow-600 text-white transition shadow-lg"
+                >
+                  <ImageIcon className="w-4 h-4" />
+                </button>
+              )}
+
               {/* ⭐ Favoritt-knapp */}
               {showFavoriteButton && (
                 <button
@@ -100,72 +138,56 @@ const PhotoGrid = ({
                     photo.favorite
                       ? "bg-yellow-500/80 text-white"
                       : "bg-black/50 text-gray-300 hover:bg-yellow-500/70"
-                  } transition`}
+                  } transition shadow-lg`}
                 >
                   <Star className="w-4 h-4" fill={photo.favorite ? "currentColor" : "none"} />
                 </button>
               )}
 
               {/* 🗑️ Slett-knapp */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(photo);
-                }}
-                title="Slett bilde"
-                disabled={loading}
-                className={`p-1.5 rounded-full ${
-                  loading
-                    ? "bg-gray-500 cursor-not-allowed"
-                    : "bg-black/50 hover:bg-red-600/70 text-white"
-                } transition`}
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              {editMode && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(photo);
+                  }}
+                  title="Slett bilde"
+                  disabled={loading}
+                  className={`p-1.5 rounded-full ${
+                    loading
+                      ? "bg-gray-500 cursor-not-allowed"
+                      : "bg-black/50 hover:bg-red-600/70 text-white"
+                  } transition shadow-lg`}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
             </div>
 
-       {/* Sett som cover eller bildetekst */}
-{editMode ? (
-  <div
-    className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition"
-    onClick={(e) => {
-      e.stopPropagation();
-      if (!photo.albumId) return;
-      setAsCover(photo.id, photo.albumId, photo.url)
-        .then(() => refreshPhotos && refreshPhotos())
-        .catch((err) => console.error("Feil ved sett som cover:", err));
-    }}
-  >
-    <span className="text-white text-sm font-medium cursor-pointer">
-      Sett som cover
-    </span>
-  </div>
-) : (
-  photo.title && (
-    <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs py-1 px-2 truncate opacity-0 group-hover:opacity-100 transition">
-      {photo.title}
-    </div>
-  )
-)}
+            {/* Bildetekst */}
+            {(photo.title || photo.name) && (
+              <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs py-1 px-2 truncate opacity-0 group-hover:opacity-100 transition">
+                {photo.title || photo.name}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
 
-</div>  
-))} 
-</div> 
-
-{/* Lysboks (PhotoModal) */}
-{!onPhotoClick && photoModal.open && (
-  <PhotoModal
-    photos={list}
-    currentIndex={photoModal.index}
-    onClose={() => setPhotoModal({ open: false, index: 0 })}
-    onToggleFavorite={async (photo) => {
-      await toggleFavorite(photo.id, photo.favorite);
-      if (refreshPhotos) await refreshPhotos();
-    }}
-  />
-)}
-</>
-);
+      {/* Lysboks (PhotoModal) */}
+      {!onPhotoClick && photoModal.open && (
+        <PhotoModal
+          photos={list}
+          currentIndex={photoModal.index}
+          onClose={() => setPhotoModal({ open: false, index: 0 })}
+          onToggleFavorite={async (photo) => {
+            await toggleFavorite(photo.id, photo.favorite);
+            if (refreshPhotos) await refreshPhotos();
+          }}
+        />
+      )}
+    </>
+  );
 };
 
 export default PhotoGrid;

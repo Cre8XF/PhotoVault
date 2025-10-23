@@ -1,5 +1,5 @@
 // ============================================================================
-// firebase.js – komplett integrasjon (v3.0) med AI-fase
+// firebase.js – komplett integrasjon (v3.1) med konsolidert cover-funksjon
 // ============================================================================
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
@@ -94,7 +94,7 @@ export async function updateAlbum(albumId, updates) {
   }
 }
 
-// 🔹 Sett cover-bilde
+// 🔹 Sett cover-bilde (KONSOLIDERT FUNKSJON)
 export async function setAlbumCover(albumId, photoUrl) {
   try {
     const refDoc = doc(db, "albums", albumId);
@@ -105,6 +105,7 @@ export async function setAlbumCover(albumId, photoUrl) {
     console.log(`🖼️ Cover oppdatert for album ${albumId}`);
   } catch (err) {
     console.error("🔥 setAlbumCover:", err);
+    throw err;
   }
 }
 
@@ -226,14 +227,19 @@ export async function updateAlbumPhotoCount(albumId, newCount) {
     console.error("🔥 updateAlbumPhotoCount:", err);
   }
 }
-export async function setAsCover(photoId, albumId, url) {
-  const albumRef = doc(db, "albums", albumId);
-  await updateDoc(albumRef, { cover: url, updatedAt: new Date().toISOString() });
-}
 
+// 🔹 Oppdater hvilket album et bilde tilhører
 export async function updatePhotoAlbum(photoId, targetAlbumId) {
-  const photoRef = doc(db, "photos", photoId);
-  await updateDoc(photoRef, { albumId: targetAlbumId });
+  try {
+    const photoRef = doc(db, "photos", photoId);
+    await updateDoc(photoRef, { 
+      albumId: targetAlbumId,
+      updatedAt: new Date().toISOString()
+    });
+  } catch (err) {
+    console.error("🔥 updatePhotoAlbum:", err);
+    throw err;
+  }
 }
 
 // ============================================================================
