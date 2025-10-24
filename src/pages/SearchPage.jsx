@@ -1,21 +1,17 @@
 // ============================================================================
-// PAGE: SearchPage.jsx – v5.4 med filtrering, sletting, forside og ConfirmModal
+// PAGE: SearchPage.jsx – v5.5 MED FULL I18N
 // ============================================================================
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search as SearchIcon, X, Calendar, Tag, Star, Users, Folder, SlidersHorizontal, Sparkles, Move, Trash2, Edit3, Check } from 'lucide-react';
 import { getFirestore, doc, updateDoc } from 'firebase/firestore';
 import { deletePhoto, setAlbumCover, updateAlbumPhotoCount } from '../firebase';
 import MoveModal from '../components/MoveModal';
 import ConfirmModal from '../components/ConfirmModal';
 
-const DATE_RANGES = [
-  { key: 'today', label: 'I dag' },
-  { key: 'week', label: 'Siste uke' },
-  { key: 'month', label: 'Siste måned' },
-  { key: 'year', label: 'Siste år' }
-];
-
 const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => {
+  const { t } = useTranslation(['search', 'common']);
+
   // Søk og filter
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilters, setActiveFilters] = useState({
@@ -101,12 +97,11 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => 
     if (!photoToDelete) return;
     try {
       await deletePhoto(photoToDelete.id, photoToDelete.storagePath);
-      console.log(`🗑️ Slettet bilde: ${photoToDelete.name || photoToDelete.id}`);
       setPhotoToDelete(null);
       if (refreshData) await refreshData();
     } catch (error) {
       console.error('Feil ved sletting:', error);
-      alert('Kunne ikke slette bildet.');
+      alert(t('search:errors.couldNotDelete', 'Kunne ikke slette bildet.'));
     }
   };
 
@@ -114,7 +109,6 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => 
   const handleSetCover = async photo => {
     try {
       await setAlbumCover(photo.albumId, photo.url);
-      console.log(`⭐ Forsidebilde satt til: ${photo.name}`);
       if (refreshData) await refreshData();
     } catch (error) {
       console.error('Feil ved oppdatering av forside:', error);
@@ -139,12 +133,12 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => 
       setSelectedPhotos([]);
     } catch (e) {
       console.error('Flytt-feil:', e);
-      alert('Kunne ikke flytte bildene. Prøv igjen.');
+      alert(t('search:errors.couldNotMove', 'Kunne ikke flytte bildene. Prøv igjen.'));
     }
   };
 
   // --- Nullstill filtre ---
-  const clearFilters = () =>
+  const clearFilters = () => {
     setActiveFilters({
       favorites: false,
       withFaces: false,
@@ -154,42 +148,48 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => 
       albumId: null,
       category: null
     });
+    setSearchQuery('');
+  };
 
   return (
     <div className="min-h-screen p-6 md:p-10 pb-24 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
-        <h1 className="text-3xl font-bold">Søk</h1>
+        <h1 className="text-3xl font-bold">{t('search:title')}</h1>
         <div className="flex items-center gap-2">
-        <button
-  onClick={() => setEditMode(!editMode)}
-  title="Redigeringsmodus: klikk på bilder for å slette eller sette som forside"
-  className={`ripple-effect px-4 py-2 rounded-xl flex items-center gap-2 transition ${
-    editMode ? "btn-edit-active" : "bg-white/10 hover:bg-white/20"
-  }`}
->
-  {editMode && (
-    <span
-      className="text-sm text-indigo-200 dark:text-indigo-100
-                 bg-indigo-700/30 dark:bg-indigo-500/40
-                 px-3 py-1 rounded-lg ml-2 transition"
-    >
-      Klikk på bilder for å slette eller sette som forside.
-    </span>
-  )}
-  {editMode ? <Check size={18} /> : <Edit3 size={18} />}
-  {editMode ? "Ferdig" : "Rediger"}
-</button>
-
-
-          <button onClick={() => setShowFilters(v => !v)} className="ripple-effect px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 flex items-center gap-2">
-            <SlidersHorizontal size={18} />
-            Filtre
-            {activeFilterCount > 0 && <span className="ml-1 rounded-md px-2 py-0.5 text-sm bg-purple-600">{activeFilterCount}</span>}
+          <button
+            onClick={() => setEditMode(!editMode)}
+            title={t('search:clickToManage')}
+            className={`ripple-effect px-4 py-2 rounded-xl flex items-center gap-2 transition ${
+              editMode ? "btn-edit-active" : "bg-white/10 hover:bg-white/20"
+            }`}
+          >
+            {editMode && (
+              <span className="text-sm text-indigo-200 dark:text-indigo-100 bg-indigo-700/30 dark:bg-indigo-500/40 px-3 py-1 rounded-lg ml-2 transition">
+                {t('search:clickToManage')}
+              </span>
+            )}
+            {editMode ? <Check size={18} /> : <Edit3 size={18} />}
+            {editMode ? t('search:done') : t('search:edit')}
           </button>
+
+          <button 
+            onClick={() => setShowFilters(v => !v)} 
+            className="ripple-effect px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 flex items-center gap-2"
+          >
+            <SlidersHorizontal size={18} />
+            {t('search:filters')}
+            {activeFilterCount > 0 && (
+              <span className="ml-1 rounded-md px-2 py-0.5 text-sm bg-purple-600">{activeFilterCount}</span>
+            )}
+          </button>
+
           {selectedPhotos.length > 0 && (
-            <button onClick={() => setMoveOpen(true)} className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center gap-2">
-              <Move size={18} /> Flytt
+            <button 
+              onClick={() => setMoveOpen(true)} 
+              className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
+            >
+              <Move size={18} /> {t('search:move')}
             </button>
           )}
         </div>
@@ -201,13 +201,16 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => 
           <SearchIcon className="w-5 h-5 opacity-60" />
           <input
             type="text"
-            placeholder="Søk i navn, AI-tags eller kategori"
+            placeholder={t('search:searchIn')}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             className="flex-1 bg-transparent outline-none text-lg"
           />
           {searchQuery && (
-            <button onClick={() => setSearchQuery('')} className="ripple-effect p-1 hover:bg-white/10 rounded-lg transition">
+            <button 
+              onClick={() => setSearchQuery('')} 
+              className="ripple-effect p-1 hover:bg-white/10 rounded-lg transition"
+            >
               <X className="w-5 h-5" />
             </button>
           )}
@@ -221,30 +224,38 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => 
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setActiveFilters(f => ({ ...f, favorites: !f.favorites }))}
-              className={`px-3 py-2 rounded-lg border ${activeFilters.favorites ? 'bg-yellow-600 border-yellow-500' : 'border-white/10'} flex items-center gap-2`}
+              className={`px-3 py-2 rounded-lg border ${
+                activeFilters.favorites ? 'bg-yellow-600 border-yellow-500' : 'border-white/10'
+              } flex items-center gap-2`}
             >
-              <Star size={16} /> Favoritter
+              <Star size={16} /> {t('search:filterOptions.favorites')}
             </button>
 
             <button
               onClick={() => setActiveFilters(f => ({ ...f, withFaces: !f.withFaces }))}
-              className={`px-3 py-2 rounded-lg border ${activeFilters.withFaces ? 'bg-blue-600 border-blue-500' : 'border-white/10'} flex items-center gap-2`}
+              className={`px-3 py-2 rounded-lg border ${
+                activeFilters.withFaces ? 'bg-blue-600 border-blue-500' : 'border-white/10'
+              } flex items-center gap-2`}
             >
-              <Users size={16} /> Med ansikter
+              <Users size={16} /> {t('search:filterOptions.withFaces')}
             </button>
 
             <button
               onClick={() => setActiveFilters(f => ({ ...f, withTags: !f.withTags }))}
-              className={`px-3 py-2 rounded-lg border ${activeFilters.withTags ? 'bg-emerald-600 border-emerald-500' : 'border-white/10'} flex items-center gap-2`}
+              className={`px-3 py-2 rounded-lg border ${
+                activeFilters.withTags ? 'bg-emerald-600 border-emerald-500' : 'border-white/10'
+              } flex items-center gap-2`}
             >
-              <Tag size={16} /> Med AI-tags
+              <Tag size={16} /> {t('search:filterOptions.withTags')}
             </button>
 
             <button
               onClick={() => setActiveFilters(f => ({ ...f, aiAnalyzed: !f.aiAnalyzed }))}
-              className={`px-3 py-2 rounded-lg border ${activeFilters.aiAnalyzed ? 'bg-purple-600 border-purple-500' : 'border-white/10'} flex items-center gap-2`}
+              className={`px-3 py-2 rounded-lg border ${
+                activeFilters.aiAnalyzed ? 'bg-purple-600 border-purple-500' : 'border-white/10'
+              } flex items-center gap-2`}
             >
-              <Sparkles size={16} /> AI-analysert
+              <Sparkles size={16} /> {t('search:filterOptions.aiAnalyzed')}
             </button>
           </div>
 
@@ -258,11 +269,9 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => 
                 onChange={e => setActiveFilters(f => ({ ...f, albumId: e.target.value || null }))}
                 className="flex-1 bg-transparent border border-white/10 rounded-lg px-3 py-2"
               >
-                <option value="">Alle album</option>
+                <option value="">{t('search:filterOptions.allAlbums')}</option>
                 {albums.map(a => (
-                  <option key={a.id} value={a.id}>
-                    {a.name}
-                  </option>
+                  <option key={a.id} value={a.id}>{a.name}</option>
                 ))}
               </select>
             </label>
@@ -275,11 +284,9 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => 
                 onChange={e => setActiveFilters(f => ({ ...f, category: e.target.value || null }))}
                 className="flex-1 bg-transparent border border-white/10 rounded-lg px-3 py-2"
               >
-                <option value="">Alle kategorier</option>
+                <option value="">{t('search:filterOptions.allCategories')}</option>
                 {categories.map(c => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
+                  <option key={c} value={c}>{c}</option>
                 ))}
               </select>
             </label>
@@ -292,12 +299,11 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => 
                 onChange={e => setActiveFilters(f => ({ ...f, dateRange: e.target.value || null }))}
                 className="flex-1 bg-transparent border border-white/10 rounded-lg px-3 py-2"
               >
-                <option value="">Alle datoer</option>
-                {DATE_RANGES.map(r => (
-                  <option key={r.key} value={r.key}>
-                    {r.label}
-                  </option>
-                ))}
+                <option value="">{t('search:filterOptions.allDates')}</option>
+                <option value="today">{t('search:dateRanges.today')}</option>
+                <option value="week">{t('search:dateRanges.week')}</option>
+                <option value="month">{t('search:dateRanges.month')}</option>
+                <option value="year">{t('search:dateRanges.year')}</option>
               </select>
             </label>
           </div>
@@ -305,10 +311,15 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => 
           {/* Populære AI-tags */}
           {popularTags.length > 0 && (
             <div>
-              <div className="text-sm opacity-70 mb-2">Populære AI-tags</div>
+              <div className="text-sm opacity-70 mb-2">{t('search:popularTags')}</div>
               <div className="flex flex-wrap gap-2">
                 {popularTags.map(({ tag, count }) => (
-                  <button key={tag} onClick={() => setSearchQuery(tag)} className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-sm" title={`${count} treff`}>
+                  <button 
+                    key={tag} 
+                    onClick={() => setSearchQuery(tag)} 
+                    className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-sm" 
+                    title={t('search:hits', { count })}
+                  >
                     #{tag}
                   </button>
                 ))}
@@ -319,70 +330,84 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => 
       )}
 
       {/* Handling */}
-      <div className="flex justify-between">
+      <div className="flex justify-between mb-4">
         <div className="text-sm opacity-60">
-          Aktive filtre: <b>{activeFilterCount}</b>
+          {t('search:activeFilters')}: <b>{activeFilterCount}</b>
         </div>
         <button
-          onClick={() => {
-            clearFilters(); // nullstiller filtrene
-            setSearchQuery(''); // legger til denne linjen
-          }}
+          onClick={clearFilters}
           className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20"
         >
-          Nullstill filtre
+          {t('search:resetFilters')}
         </button>
       </div>
 
-   {/* Resultater */}
-<div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-  {filteredPhotos.map((photo) => (
-    <div
-      key={photo.id}
-      className="relative group aspect-[4/5] bg-black/10 rounded-lg flex items-center justify-center overflow-hidden"
-    >
-      <img
-        src={photo.url}
-        alt={photo.name}
-        onClick={() => !editMode && onPhotoClick(photo)}
-        className="max-h-full max-w-full object-contain cursor-pointer transition-transform duration-300 group-hover:scale-[1.03]"
-      />
-      {editMode && (
-        <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition">
-          <button
-            onClick={() => handleSetCover(photo)}
-            className="bg-black/60 hover:bg-yellow-500 text-white p-1.5 rounded-full"
-            title="Sett som forside"
+      {/* Resultater */}
+      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+        {filteredPhotos.map((photo) => (
+          <div
+            key={photo.id}
+            className="relative group aspect-[4/5] bg-black/10 rounded-lg flex items-center justify-center overflow-hidden"
           >
-            <Star className="w-3.5 h-3.5" />
-          </button>
+            <img
+              src={photo.url}
+              alt={photo.name}
+              onClick={() => !editMode && onPhotoClick(photo)}
+              className="max-h-full max-w-full object-contain cursor-pointer transition-transform duration-300 group-hover:scale-[1.03]"
+            />
+            {editMode && (
+              <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition">
+                <button
+                  onClick={() => handleSetCover(photo)}
+                  className="bg-black/60 hover:bg-yellow-500 text-white p-1.5 rounded-full"
+                  title={t('search:setCover')}
+                >
+                  <Star className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => requestDelete(photo)}
+                  className="bg-black/60 hover:bg-red-600 text-white p-1.5 rounded-full"
+                  title={t('search:deletePhoto')}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Tom tilstand */}
+      {filteredPhotos.length === 0 && (
+        <div className="text-center py-20 text-gray-400">
+          <SearchIcon className="w-16 h-16 mx-auto mb-4 opacity-50" />
+          <p>{t('search:noResults')}</p>
           <button
-            onClick={() => requestDelete(photo)}
-            className="bg-black/60 hover:bg-red-600 text-white p-1.5 rounded-full"
-            title="Slett bilde"
+            onClick={clearFilters}
+            className="mt-4 ripple-effect px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition"
           >
-            <Trash2 className="w-3.5 h-3.5" />
+            {t('search:resetFilters')}
           </button>
         </div>
       )}
-    </div>
-  ))}
-</div>
-
-
 
       {/* Flytt-modal */}
-      <MoveModal isOpen={isMoveOpen} onClose={() => setMoveOpen(false)} albums={albums} onConfirm={handleMovePhotos} />
+      <MoveModal 
+        isOpen={isMoveOpen} 
+        onClose={() => setMoveOpen(false)} 
+        albums={albums} 
+        onConfirm={handleMovePhotos} 
+      />
 
       {/* Bekreft sletting */}
       <ConfirmModal
         isOpen={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleConfirmDelete}
-        title="Bekreft sletting"
-        message="Er du sikker på at du vil slette dette bildet permanent?"
-        confirmLabel="Slett bilde"
-        cancelLabel="Avbryt"
+        title={t('search:confirmDelete.title')}
+        message={t('search:confirmDelete.message')}
+        confirmLabel={t('search:confirmDelete.confirm')}
+        cancelLabel={t('search:confirmDelete.cancel')}
       />
     </div>
   );

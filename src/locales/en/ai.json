@@ -1,0 +1,36 @@
+{
+  "settings": {
+    "title": "AI Settings",
+    "apiKeys": "API Keys",
+    "active": "Active",
+    "notConfigured": "Not configured",
+    "setupGuide": "Setup guide",
+    "setupInstructions": "To enable AI features, add API keys in the .env file:",
+    "configuration": "Configuration",
+    "autoTagging": "Auto-tagging on upload",
+    "autoTaggingDesc": "Analyze images automatically with AI when uploaded"
+  },
+  "activity": {
+    "title": "AI Activity",
+    "analyzed": "Analyzed",
+    "enhanced": "Enhanced",
+    "bgRemoved": "Background removed",
+    "totalRequests": "Total requests",
+    "freeTier": "Free tier usage",
+    "needMoreSpace": "Need more space?",
+    "upgradeMessage": "Upgrade to Pro and get 100GB storage and AI features"
+  },
+  "costs": {
+    "title": "Estimated costs",
+    "freeTier": "Free tier",
+    "requests": "{{count}} requests",
+    "paidRequests": "{{count}} paid requests",
+    "remaining": "{{count}} remaining",
+    "totalPerMonth": "Total per month",
+    "exceeded": "You have exceeded the free tier. Consider upgrading to a paid plan or reducing AI usage."
+  },
+  "providers": {
+    "googleVision": "Google Cloud Vision",
+    "picsart": "Picsart API"
+  }
+}

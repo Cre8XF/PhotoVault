@@ -50,13 +50,19 @@ import {
   getFirestore, 
   doc, 
   deleteDoc, 
+  updateDoc, 
   collection, 
   getDocs 
 } from "firebase/firestore";
+
 import { 
   getAuth, 
   deleteUser as deleteAuthUser 
 } from "firebase/auth";
+
+
+import { db } from "../firebase"; // juster sti hvis firebase ligger et annet sted
+
 
 const MorePage = ({ 
   user, 
@@ -186,57 +192,351 @@ const MorePage = ({
   };
 
   // ============================================================================
-  // === AI FUNCTIONS ===
+  // === AI FUNCTIONS - DIRECT API CALLS ===
   // ============================================================================
-  const callAIFunction = async (feature, payload = {}) => {
-    const aiProxyUrl = process.env.REACT_APP_AI_PROXY_URL;
-    const apiKey = process.env.REACT_APP_GEMINI_KEY || 
-                   process.env.REACT_APP_GOOGLE_VISION_KEY;
 
-    if (!aiProxyUrl || !apiKey) {
-      console.warn(`AI function '${feature}' called but API keys not configured`);
-      showNotification("AI-funksjoner krever API-nøkler", "error");
+  // Google Vision API - Bildeanalyse
+  const analyzeImageWithVision = async (imageUrl) => {
+    const visionKey = process.env.REACT_APP_GOOGLE_VISION_KEY;
+    if (!visionKey) return null;
+
+    try {
+      const response = await fetch(
+        `https://vision.googleapis.com/v1/images:annotate?key=${visionKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            requests: [{
+              image: { source: { imageUri: imageUrl } },
+              features: [
+                { type: 'LABEL_DETECTION', maxResults: 10 },
+                { type: 'FACE_DETECTION', maxResults: 5 },
+                { type: 'OBJECT_LOCALIZATION', maxResults: 10 }
+              ]
+            }]
+          })
+        }
+      );
+
+      if (!response.ok) throw new Error(`Vision API: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Vision API error:', error);
       return null;
+    }
+  };
+
+  // OpenAI GPT-4o-mini – Smart AI-operasjoner
+const callOpenAI = async (prompt) => {
+  const openaiKey = process.env.REACT_APP_OPENAI_KEY;
+
+  if (!openaiKey || openaiKey.length < 20) {
+    console.warn("OpenAI API key missing or invalid");
+    return null;
+  }
+
+  try {
+    console.log("Calling OpenAI GPT-4o-mini...");
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${openaiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+        max_tokens: 400,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("OpenAI API error response:", errorText);
+      throw new Error(`OpenAI API: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log("OpenAI API response:", data);
+    return data.choices?.[0]?.message?.content?.trim() || null;
+  } catch (error) {
+    console.error("OpenAI API error:", error);
+    return null;
+  }
+};
+
+
+  // Picsart API - Bildeforbedring
+  const enhanceImageWithPicsart = async (imageUrl) => {
+    const picsartKey = process.env.REACT_APP_PICSART_KEY;
+    if (!picsartKey) return null;
+
+    try {
+      const response = await fetch('https://api.picsart.io/tools/1.0/upscale', {
+        method: 'POST',
+        headers: {
+          'X-Picsart-API-Key': picsartKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          image_url: imageUrl,
+          upscale_factor: 2,
+          format: 'JPG'
+        })
+      });
+
+      if (!response.ok) throw new Error(`Picsart API: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Picsart API error:', error);
+      return null;
+    }
+  };
+
+// ============================================================================
+// === AI FEATURE HANDLERS ===
+// ============================================================================
+
+
+const handleAutoSort = async () => {
+  const openaiKey = process.env.REACT_APP_OPENAI_KEY;
+
+  if (!openaiKey || openaiKey.length < 10) {
+    showNotification("OpenAI API-nøkkel mangler", "error");
+    console.warn("OpenAI key missing or too short");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    console.log("Auto-sorting photos...", photos.length, "photos");
+
+    if (!photos || photos.length === 0) {
+      showNotification("Ingen bilder å sortere", "error");
+      return;
+    }
+
+    // ---- Bygg prompt for GPT-5 ----
+    const photoSummary = photos.slice(0, 20).map(p => ({
+      id: p.id,
+      name: p.name,
+      date: p.createdAt,
+      tags: p.tags || []
+    }));
+
+    const prompt = `Analyser disse bildene og foreslå en smart sortering i kategorier.
+Bilder: ${JSON.stringify(photoSummary)}
+
+Returner kun gyldig JSON med struktur:
+{
+  "categories": [
+    {"name": "Feriebilder", "photoIds": [...], "reason": "Inneholder..."}
+  ]
+}`;
+
+    // ---- Send forespørsel til OpenAI ----
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${openaiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "gpt-5",
+        messages: [
+          { role: "system", content: "Du er en AI-assistent som sorterer bilder etter tema og innhold." },
+          { role: "user", content: prompt }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("OpenAI API error:", errorText);
+      showNotification("Feil ved GPT-sortering", "error");
+      return;
+    }
+
+    // ---- Les og parse resultatet ----
+    const data = await response.json();
+    const message = data.choices?.[0]?.message?.content || "";
+    console.log("GPT-sort result (raw):", message);
+
+    let parsed;
+    try {
+      parsed = JSON.parse(message);
+    } catch (err) {
+      console.warn("Kunne ikke parse JSON fra GPT:", err);
+      showNotification("Ugyldig JSON fra GPT", "error");
+      return;
+    }
+
+    // ---- Oppdater Firestore ----
+    if (parsed?.categories?.length) {
+      for (const cat of parsed.categories) {
+        for (const photoId of cat.photoIds) {
+          try {
+            const ref = doc(db, "photos", photoId);
+            await updateDoc(ref, {
+              category: cat.name,
+              aiSorted: true,
+              aiReason: cat.reason
+            });
+            console.log(`✅ ${photoId} → ${cat.name}`);
+          } catch (err) {
+            console.warn(`⚠️ Feil ved oppdatering av ${photoId}`, err);
+          }
+        }
+      }
+      showNotification("AI-sortering lagret i Firestore", "success");
+    } else {
+      showNotification("Ingen kategorier mottatt fra GPT", "error");
+    }
+
+  } catch (error) {
+    console.error("Error in auto-sort:", error);
+    showNotification("Feil ved auto-sortering", "error");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+  const handleImageEnhancement = async () => {
+    const picsartKey = process.env.REACT_APP_PICSART_KEY;
+    
+    if (!picsartKey || picsartKey.length < 10) {
+      showNotification("Picsart API-nøkkel mangler", "error");
+      return;
     }
 
     try {
       setLoading(true);
-      console.log("AI function called:", feature, payload);
+      console.log("Enhancing images with Picsart...");
 
-      const response = await fetch(aiProxyUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          feature,
-          userId: user.uid,
-          ...payload,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`AI API error: ${response.status}`);
+      // Ta første bilde som eksempel
+      const firstPhoto = photos[0];
+      if (!firstPhoto?.url) {
+        showNotification("Ingen bilder å forbedre", "error");
+        return;
       }
 
-      const data = await response.json();
-      showNotification(`${feature} fullført!`, "success");
-      return data;
+      const result = await enhanceImageWithPicsart(firstPhoto.url);
+      
+      if (result) {
+        console.log("Enhancement result:", result);
+        showNotification("Bildeforbedring fullført!", "success");
+      } else {
+        showNotification("Kunne ikke forbedre bilder", "error");
+      }
     } catch (error) {
-      console.error(`Error in AI function '${feature}':`, error);
-      showNotification(`Feil i ${feature}`, "error");
-      return null;
+      console.error("Error in enhancement:", error);
+      showNotification("Feil ved bildeforbedring", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAutoSort = () => callAIFunction('autoSort', { photos });
-  const handleImageEnhancement = () => callAIFunction('imageEnhancement', { photos });
-  const handleFaceRecognition = () => callAIFunction('faceRecognition', { photos });
-  const handleSmartTagging = () => callAIFunction('smartTagging', { photos });
-  const handleDuplicateDetection = () => callAIFunction('duplicateDetection', { photos });
+  const handleFaceRecognition = async () => {
+    const visionKey = process.env.REACT_APP_GOOGLE_VISION_KEY;
+    
+    if (!visionKey) {
+      showNotification("Google Vision API-nøkkel mangler", "error");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      console.log("Detecting faces in photos...");
+
+      // Analyser første 5 bilder
+      const photosToAnalyze = photos.slice(0, 5);
+      let totalFaces = 0;
+
+      for (const photo of photosToAnalyze) {
+        if (!photo.url) continue;
+        
+        const result = await analyzeImageWithVision(photo.url);
+        const faces = result?.responses?.[0]?.faceAnnotations || [];
+        totalFaces += faces.length;
+        
+        console.log(`Photo ${photo.id}: ${faces.length} faces detected`);
+      }
+
+      showNotification(`Fant ${totalFaces} ansikter i ${photosToAnalyze.length} bilder!`, "success");
+    } catch (error) {
+      console.error("Error in face recognition:", error);
+      showNotification("Feil ved ansiktsgjenkjenning", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSmartTagging = async () => {
+    const visionKey = process.env.REACT_APP_GOOGLE_VISION_KEY;
+    
+    if (!visionKey) {
+      showNotification("Google Vision API-nøkkel mangler", "error");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      console.log("Smart tagging photos...");
+
+      // Analyser første bilde
+      const firstPhoto = photos[0];
+      if (!firstPhoto?.url) {
+        showNotification("Ingen bilder å tagge", "error");
+        return;
+      }
+
+      const result = await analyzeImageWithVision(firstPhoto.url);
+      const labels = result?.responses?.[0]?.labelAnnotations || [];
+      const tags = labels.map(l => l.description);
+
+      console.log("Generated tags:", tags);
+      showNotification(`Genererte ${tags.length} tags!`, "success");
+    } catch (error) {
+      console.error("Error in smart tagging:", error);
+      showNotification("Feil ved smart tagging", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDuplicateDetection = async () => {
+    try {
+      setLoading(true);
+      console.log("Detecting duplicates...");
+
+      // Enkel duplicate detection basert på filnavn og størrelse
+      const duplicates = [];
+      const seen = new Map();
+
+      for (const photo of photos) {
+        const key = `${photo.name}_${photo.size}`;
+        
+        if (seen.has(key)) {
+          duplicates.push({ original: seen.get(key), duplicate: photo });
+        } else {
+          seen.set(key, photo);
+        }
+      }
+
+      console.log("Duplicates found:", duplicates.length);
+      showNotification(`Fant ${duplicates.length} mulige duplikater!`, "success");
+    } catch (error) {
+      console.error("Error in duplicate detection:", error);
+      showNotification("Feil ved duplikat-deteksjon", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ============================================================================
   // === EXPORT FUNCTION ===

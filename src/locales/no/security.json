@@ -15,6 +15,20 @@
     "enterNew": "Skriv inn ny PIN ({{min}}-{{max}} siffer)",
     "enterCurrent": "Skriv inn nåværende PIN",
     "confirmNew": "Bekreft PIN-kode",
+    "setup": {
+      "title": "Opprett PIN-kode",
+      "enterTitle": "Skriv inn ny PIN (4-6 siffer)",
+      "confirmTitle": "Bekreft PIN-kode",
+      "next": "Neste",
+      "finish": "Fullfør",
+      "loading": "Laster..."
+    },
+    "change": {
+      "title": "Endre PIN-kode",
+      "enterCurrent": "Skriv inn nåværende PIN",
+      "enterNew": "Skriv inn ny PIN (4-6 siffer)",
+      "confirmNew": "Bekreft ny PIN"
+    },
     "status": {
       "enabled": "Aktivert",
       "disabled": "Deaktivert"
@@ -44,10 +58,20 @@
       "wrongPin": "Feil PIN. {{attempts}} forsøk igjen.",
       "wrongPinSingle": "Feil PIN. {{attempts}} forsøk igjen.",
       "locked": "For mange forsøk. Prøv igjen om {{minutes}} min.",
-      "currentInvalid": "Ugyldig nåværende PIN"
+      "currentInvalid": "Ugyldig nåværende PIN",
+      "enterCurrent": "Skriv inn nåværende PIN",
+      "newTooWeak": "Ny PIN er for svak"
     },
     "confirm": {
       "disable": "Er du sikker på at du vil deaktivere PIN-kode? Dette vil også deaktivere biometrisk autentisering."
+    },
+    "notifications": {
+      "enabled": "PIN-kode aktivert",
+      "disabled": "PIN-kode deaktivert",
+      "changed": "PIN-kode endret",
+      "couldNotEnable": "Kunne ikke aktivere PIN",
+      "couldNotDisable": "Kunne ikke deaktivere PIN",
+      "couldNotChange": "Kunne ikke endre PIN"
     }
   },
   "biometric": {
@@ -79,6 +103,12 @@
     "prompts": {
       "enable": "Aktiver biometrisk autentisering",
       "unlock": "Lås opp PhotoVault"
+    },
+    "notifications": {
+      "enabled": "{{type}} aktivert",
+      "disabled": "{{type}} deaktivert",
+      "mustEnablePin": "Du må aktivere PIN-kode først",
+      "couldNotEnable": "Kunne ikke aktivere {{type}}"
     }
   },
   "autoLock": {
@@ -87,6 +117,7 @@
     "enable": "Aktiver auto-lås",
     "disable": "Deaktiver auto-lås",
     "timeout": "Lås etter (minutter)",
+    "requiresPin": "Krever PIN-kode",
     "timeoutOptions": {
       "1": "1 minutt",
       "2": "2 minutter",

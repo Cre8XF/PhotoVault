@@ -15,6 +15,20 @@
     "enterNew": "Enter new PIN ({{min}}-{{max}} digits)",
     "enterCurrent": "Enter current PIN",
     "confirmNew": "Confirm PIN code",
+    "setup": {
+      "title": "Create PIN code",
+      "enterTitle": "Enter new PIN (4-6 digits)",
+      "confirmTitle": "Confirm PIN code",
+      "next": "Next",
+      "finish": "Finish",
+      "loading": "Loading..."
+    },
+    "change": {
+      "title": "Change PIN code",
+      "enterCurrent": "Enter current PIN",
+      "enterNew": "Enter new PIN (4-6 digits)",
+      "confirmNew": "Confirm new PIN"
+    },
     "status": {
       "enabled": "Enabled",
       "disabled": "Disabled"
@@ -44,10 +58,20 @@
       "wrongPin": "Wrong PIN. {{attempts}} attempts left.",
       "wrongPinSingle": "Wrong PIN. {{attempts}} attempt left.",
       "locked": "Too many attempts. Try again in {{minutes}} min.",
-      "currentInvalid": "Invalid current PIN"
+      "currentInvalid": "Invalid current PIN",
+      "enterCurrent": "Enter current PIN",
+      "newTooWeak": "New PIN is too weak"
     },
     "confirm": {
       "disable": "Are you sure you want to disable PIN code? This will also disable biometric authentication."
+    },
+    "notifications": {
+      "enabled": "PIN code enabled",
+      "disabled": "PIN code disabled",
+      "changed": "PIN code changed",
+      "couldNotEnable": "Could not enable PIN",
+      "couldNotDisable": "Could not disable PIN",
+      "couldNotChange": "Could not change PIN"
     }
   },
   "biometric": {
@@ -79,6 +103,12 @@
     "prompts": {
       "enable": "Enable biometric authentication",
       "unlock": "Unlock PhotoVault"
+    },
+    "notifications": {
+      "enabled": "{{type}} enabled",
+      "disabled": "{{type}} disabled",
+      "mustEnablePin": "You must enable PIN code first",
+      "couldNotEnable": "Could not enable {{type}}"
     }
   },
   "autoLock": {
@@ -87,6 +117,7 @@
     "enable": "Enable auto-lock",
     "disable": "Disable auto-lock",
     "timeout": "Lock after (minutes)",
+    "requiresPin": "Requires PIN code",
     "timeoutOptions": {
       "1": "1 minute",
       "2": "2 minutes",

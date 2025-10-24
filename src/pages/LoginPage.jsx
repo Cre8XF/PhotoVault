@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Lock, Mail, Eye, EyeOff, Fingerprint } from "lucide-react";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
@@ -13,6 +14,7 @@ import { isNative, triggerHaptic, showToast } from "../utils/nativeUtils";
 import Particles from "../components/Particles";
 
 const LoginPage = ({ onLogin }) => {
+  const { t } = useTranslation('auth');
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -60,11 +62,11 @@ const LoginPage = ({ onLogin }) => {
       );
 
       await triggerHaptic('heavy');
-      await showToast('Logged in successfully');
+      await showToast(t('loggedInSuccess'));
       onLogin();
     } catch (error) {
       console.error("Biometric login error:", error);
-      setError("Biometric authentication failed");
+      setError(t('errors.biometricFailed'));
       await triggerHaptic('medium');
     } finally {
       setLoading(false);
@@ -80,7 +82,7 @@ const LoginPage = ({ onLogin }) => {
     try {
       if (!isLogin) {
         if (password !== confirmPassword) {
-          setError("Passwords do not match");
+          setError(t('errors.passwordMismatch'));
           setLoading(false);
           return;
         }
@@ -91,7 +93,7 @@ const LoginPage = ({ onLogin }) => {
           await setCredentials(email, password);
         }
 
-        await showToast('Account created successfully');
+        await showToast(t('accountCreated'));
       } else {
         await signInWithEmailAndPassword(auth, email, password);
         
@@ -99,7 +101,7 @@ const LoginPage = ({ onLogin }) => {
           await setCredentials(email, password);
         }
 
-        await showToast('Logged in successfully');
+        await showToast(t('loggedInSuccess'));
       }
 
       await triggerHaptic('heavy');
@@ -107,17 +109,17 @@ const LoginPage = ({ onLogin }) => {
     } catch (error) {
       console.error("Auth error:", error);
       
-      let errorMessage = "An error occurred";
+      let errorMessage = t('errors.generic');
       if (error.code === "auth/invalid-email") {
-        errorMessage = "Invalid email address";
+        errorMessage = t('errors.invalidEmail');
       } else if (error.code === "auth/user-not-found") {
-        errorMessage = "User not found";
+        errorMessage = t('errors.userNotFound');
       } else if (error.code === "auth/wrong-password") {
-        errorMessage = "Incorrect password";
+        errorMessage = t('errors.wrongPassword');
       } else if (error.code === "auth/email-already-in-use") {
-        errorMessage = "Email already in use";
+        errorMessage = t('errors.emailInUse');
       } else if (error.code === "auth/weak-password") {
-        errorMessage = "Password should be at least 6 characters";
+        errorMessage = t('errors.weakPassword');
       }
       
       setError(errorMessage);
@@ -138,8 +140,8 @@ const LoginPage = ({ onLogin }) => {
           <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-pink-600 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <Lock className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">PhotoVault</h1>
-          <p className="text-gray-400">Secure. Private. Yours.</p>
+          <h1 className="text-3xl font-bold text-white mb-2">{t('appName')}</h1>
+          <p className="text-gray-400">{t('tagline')}</p>
         </div>
 
         {/* Biometric Login Button */}
@@ -150,7 +152,7 @@ const LoginPage = ({ onLogin }) => {
             className="ripple-effect w-full mb-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-3"
           >
             <Fingerprint className="w-5 h-5" />
-            <span>Login with {getBiometricTypeText(biometricType)}</span>
+            <span>{t('loginWith', { type: getBiometricTypeText(biometricType) })}</span>
           </button>
         )}
 
@@ -160,7 +162,7 @@ const LoginPage = ({ onLogin }) => {
               <div className="w-full border-t border-white/10"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-[var(--bg-secondary)] text-gray-400">or continue with email</span>
+              <span className="px-4 bg-[var(--bg-secondary)] text-gray-400">{t('orContinueWith')}</span>
             </div>
           </div>
         )}
@@ -169,14 +171,14 @@ const LoginPage = ({ onLogin }) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email */}
           <div>
-            <label className="block text-white font-medium mb-2">Email</label>
+            <label className="block text-white font-medium mb-2">{t('email')}</label>
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
+                placeholder={t('emailPlaceholder')}
                 required
                 className="w-full bg-[var(--bg-primary)] text-white pl-12 pr-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
               />
@@ -185,14 +187,14 @@ const LoginPage = ({ onLogin }) => {
 
           {/* Password */}
           <div>
-            <label className="block text-white font-medium mb-2">Password</label>
+            <label className="block text-white font-medium mb-2">{t('password')}</label>
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder={t('passwordPlaceholder')}
                 required
                 className="w-full bg-[var(--bg-primary)] text-white pl-12 pr-12 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
               />
@@ -209,14 +211,14 @@ const LoginPage = ({ onLogin }) => {
           {/* Confirm Password (Register only) */}
           {!isLogin && (
             <div>
-              <label className="block text-white font-medium mb-2">Confirm Password</label>
+              <label className="block text-white font-medium mb-2">{t('confirmPassword')}</label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type={showPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder={t('passwordPlaceholder')}
                   required
                   className="w-full bg-[var(--bg-primary)] text-white pl-12 pr-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
                 />
@@ -237,7 +239,7 @@ const LoginPage = ({ onLogin }) => {
             disabled={loading}
             className="ripple-effect w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium hover:shadow-lg transition-all disabled:opacity-50"
           >
-            {loading ? "Please wait..." : isLogin ? "Login" : "Create Account"}
+            {loading ? t('pleaseWait') : isLogin ? t('login') : t('createAccount')}
           </button>
         </form>
 
@@ -254,11 +256,11 @@ const LoginPage = ({ onLogin }) => {
           >
             {isLogin ? (
               <>
-                Don't have an account? <span className="text-purple-500 font-medium">Sign up</span>
+                {t('noAccount')} <span className="text-purple-500 font-medium">{t('signUp')}</span>
               </>
             ) : (
               <>
-                Already have an account? <span className="text-purple-500 font-medium">Login</span>
+                {t('hasAccount')} <span className="text-purple-500 font-medium">{t('login')}</span>
               </>
             )}
           </button>

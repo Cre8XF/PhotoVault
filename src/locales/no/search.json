@@ -1,0 +1,39 @@
+{
+  "title": "Søk",
+  "placeholder": "Søk i bilder...",
+  "searchIn": "Søk i navn, AI-tags eller kategori",
+  "edit": "Rediger",
+  "done": "Ferdig",
+  "filters": "Filtre",
+  "move": "Flytt",
+  "activeFilters": "Aktive filtre",
+  "resetFilters": "Nullstill filtre",
+  "noResults": "Ingen bilder matcher filteret",
+  "clickToManage": "Klikk på bilder for å slette eller sette som forside",
+  "filterOptions": {
+    "favorites": "Favoritter",
+    "withFaces": "Med ansikter",
+    "withTags": "Med AI-tags",
+    "aiAnalyzed": "AI-analysert",
+    "allAlbums": "Alle album",
+    "allCategories": "Alle kategorier",
+    "allDates": "Alle datoer"
+  },
+  "dateRanges": {
+    "today": "I dag",
+    "week": "Siste uke",
+    "month": "Siste måned",
+    "year": "Siste år"
+  },
+  "popularTags": "Populære AI-tags",
+  "hits": "{{count}} treff",
+  "hits_plural": "{{count}} treff",
+  "setCover": "Sett som forside",
+  "deletePhoto": "Slett bilde",
+  "confirmDelete": {
+    "title": "Bekreft sletting",
+    "message": "Er du sikker på at du vil slette dette bildet permanent?",
+    "confirm": "Slett bilde",
+    "cancel": "Avbryt"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "title": "Admin Panel",
+  "totalUsers": "Total: {{count}} users",
+  "noUsers": "No users found",
+  "table": {
+    "name": "Name",
+    "email": "Email",
+    "albums": "Albums",
+    "photos": "Photos",
+    "proStatus": "Pro status",
+    "actions": "Actions"
+  },
+  "proStatus": {
+    "pro": "PRO",
+    "free": "Free"
+  },
+  "actions": {
+    "delete": "Delete user",
+    "togglePro": "Toggle Pro status"
+  },
+  "notifications": {
+    "proUpdated": "Pro status updated for {{email}}",
+    "userDeleted": "User {{email}} deleted",
+    "couldNotChangePro": "Could not change Pro status",
+    "couldNotDelete": "Could not delete user"
+  },
+  "confirmDelete": "Delete user {{email}}?"
+}

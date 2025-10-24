@@ -1,0 +1,28 @@
+{
+  "title": "Adminpanel",
+  "totalUsers": "Totalt: {{count}} brukere",
+  "noUsers": "Ingen brukere funnet",
+  "table": {
+    "name": "Navn",
+    "email": "E-post",
+    "albums": "Album",
+    "photos": "Bilder",
+    "proStatus": "Pro-status",
+    "actions": "Handling"
+  },
+  "proStatus": {
+    "pro": "PRO",
+    "free": "Gratis"
+  },
+  "actions": {
+    "delete": "Slett bruker",
+    "togglePro": "Endre Pro-status"
+  },
+  "notifications": {
+    "proUpdated": "Pro-status oppdatert for {{email}}",
+    "userDeleted": "Bruker {{email}} er slettet",
+    "couldNotChangePro": "Kunne ikke endre Pro-status",
+    "couldNotDelete": "Kunne ikke slette bruker"
+  },
+  "confirmDelete": "Slett bruker {{email}}?"
+}

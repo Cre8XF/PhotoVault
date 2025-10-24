@@ -1,0 +1,36 @@
+{
+  "settings": {
+    "title": "AI-innstillinger",
+    "apiKeys": "API-nøkler",
+    "active": "Aktiv",
+    "notConfigured": "Ikke konfigurert",
+    "setupGuide": "Oppsettguide",
+    "setupInstructions": "For å aktivere AI-funksjoner, legg til API-nøkler i .env-filen:",
+    "configuration": "Konfigurasjon",
+    "autoTagging": "Auto-tagging ved opplasting",
+    "autoTaggingDesc": "Analyser bilder automatisk med AI når de lastes opp"
+  },
+  "activity": {
+    "title": "AI-aktivitet",
+    "analyzed": "Analysert",
+    "enhanced": "Forbedret",
+    "bgRemoved": "Bakgrunn fjernet",
+    "totalRequests": "Total requests",
+    "freeTier": "Gratis tier bruk",
+    "needMoreSpace": "Trenger mer plass?",
+    "upgradeMessage": "Oppgrader til Pro og få 100GB lagring og AI-funksjoner"
+  },
+  "costs": {
+    "title": "Estimerte kostnader",
+    "freeTier": "Gratis tier",
+    "requests": "{{count}} requests",
+    "paidRequests": "{{count}} betalte requests",
+    "remaining": "{{count}} igjen",
+    "totalPerMonth": "Total per måned",
+    "exceeded": "Du har overskredet gratis tier. Vurder å oppgradere til betalt plan eller redusere AI-bruk."
+  },
+  "providers": {
+    "googleVision": "Google Cloud Vision",
+    "picsart": "Picsart API"
+  }
+}

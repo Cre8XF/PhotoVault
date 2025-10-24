@@ -1,0 +1,39 @@
+{
+  "title": "Search",
+  "placeholder": "Search in photos...",
+  "searchIn": "Search in name, AI tags or category",
+  "edit": "Edit",
+  "done": "Done",
+  "filters": "Filters",
+  "move": "Move",
+  "activeFilters": "Active filters",
+  "resetFilters": "Reset filters",
+  "noResults": "No photos match the filter",
+  "clickToManage": "Click on photos to delete or set as cover",
+  "filterOptions": {
+    "favorites": "Favorites",
+    "withFaces": "With faces",
+    "withTags": "With AI tags",
+    "aiAnalyzed": "AI analyzed",
+    "allAlbums": "All albums",
+    "allCategories": "All categories",
+    "allDates": "All dates"
+  },
+  "dateRanges": {
+    "today": "Today",
+    "week": "Last week",
+    "month": "Last month",
+    "year": "Last year"
+  },
+  "popularTags": "Popular AI tags",
+  "hits": "{{count}} hit",
+  "hits_plural": "{{count}} hits",
+  "setCover": "Set as cover",
+  "deletePhoto": "Delete photo",
+  "confirmDelete": {
+    "title": "Confirm deletion",
+    "message": "Are you sure you want to permanently delete this photo?",
+    "confirm": "Delete photo",
+    "cancel": "Cancel"
+  }
+}

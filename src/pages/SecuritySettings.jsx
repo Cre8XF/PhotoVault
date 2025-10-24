@@ -1,8 +1,8 @@
 // ============================================================================
-// SecuritySettings.jsx - Sikkerhetskonfigurasjon
-// FASE 3 - Sikkerhet & Privacy
+// SecuritySettings.jsx - MED FULL I18N
 // ============================================================================
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Shield,
   Lock,
@@ -22,6 +22,7 @@ import { validatePIN, checkPINStrength } from '../utils/security';
 import { getBiometricIcon, getBiometricDisplayName } from '../utils/biometric';
 
 const SecuritySettings = ({ onBack }) => {
+  const { t } = useTranslation(['security', 'common']);
   const {
     pinEnabled,
     biometricEnabled,
@@ -40,7 +41,7 @@ const SecuritySettings = ({ onBack }) => {
 
   // PIN setup state
   const [showPINSetup, setShowPINSetup] = useState(false);
-  const [pinStep, setPinStep] = useState(1); // 1: enter, 2: confirm
+  const [pinStep, setPinStep] = useState(1);
   const [newPIN, setNewPIN] = useState('');
   const [confirmPIN, setConfirmPIN] = useState('');
   const [showPIN, setShowPIN] = useState(false);
@@ -50,22 +51,20 @@ const SecuritySettings = ({ onBack }) => {
   // Change PIN state
   const [showChangePIN, setShowChangePIN] = useState(false);
   const [currentPIN, setCurrentPIN] = useState('');
-  const [changePINStep, setChangePINStep] = useState(1); // 1: current, 2: new, 3: confirm
+  const [changePINStep, setChangePINStep] = useState(1);
 
   // Biometric state
   const [biometricIcon, setBiometricIcon] = useState('Fingerprint');
-  const [biometricName, setBiometricName] = useState('Biometri');
+  const [biometricName, setBiometricName] = useState('');
 
   // UI state
   const [notification, setNotification] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Load biometric info
   useEffect(() => {
     loadBiometricInfo();
   }, []);
 
-  // Check PIN strength on input
   useEffect(() => {
     if (newPIN) {
       const strength = checkPINStrength(newPIN);
@@ -85,7 +84,6 @@ const SecuritySettings = ({ onBack }) => {
     setTimeout(() => setNotification(null), 3000);
   };
 
-  // Handle PIN setup
   const handlePINSetupNext = () => {
     setPinError('');
 
@@ -97,14 +95,14 @@ const SecuritySettings = ({ onBack }) => {
       }
 
       if (pinStrength.strength === 'weak') {
-        setPinError('PIN er for svak. Velg en sterkere kombinasjon.');
+        setPinError(t('pin.errors.tooWeak'));
         return;
       }
 
       setPinStep(2);
     } else if (pinStep === 2) {
       if (newPIN !== confirmPIN) {
-        setPinError('PIN-kodene stemmer ikke overens');
+        setPinError(t('pin.errors.mismatch'));
         return;
       }
 
@@ -118,16 +116,15 @@ const SecuritySettings = ({ onBack }) => {
     setLoading(false);
 
     if (result.success) {
-      showNotification('PIN-kode aktivert', 'success');
+      showNotification(t('pin.notifications.enabled'), 'success');
       resetPINSetup();
     } else {
-      setPinError(result.error || 'Kunne ikke aktivere PIN');
+      setPinError(result.error || t('pin.notifications.couldNotEnable'));
     }
   };
 
   const handleDisablePIN = async () => {
-    // eslint-disable-next-line no-restricted-globals
-    if (!confirm('Er du sikker på at du vil deaktivere PIN-kode? Dette vil også deaktivere biometrisk autentisering.')) {
+    if (!window.confirm(t('pin.confirm.disable'))) {
       return;
     }
 
@@ -136,19 +133,18 @@ const SecuritySettings = ({ onBack }) => {
     setLoading(false);
 
     if (result.success) {
-      showNotification('PIN-kode deaktivert', 'success');
+      showNotification(t('pin.notifications.disabled'), 'success');
     } else {
-      showNotification(result.error || 'Kunne ikke deaktivere PIN', 'error');
+      showNotification(result.error || t('pin.notifications.couldNotDisable'), 'error');
     }
   };
 
-  // Handle change PIN
   const handleChangePINNext = async () => {
     setPinError('');
 
     if (changePINStep === 1) {
       if (!currentPIN) {
-        setPinError('Skriv inn nåværende PIN');
+        setPinError(t('pin.errors.enterCurrent'));
         return;
       }
       setChangePINStep(2);
@@ -160,14 +156,14 @@ const SecuritySettings = ({ onBack }) => {
       }
 
       if (pinStrength.strength === 'weak') {
-        setPinError('Ny PIN er for svak');
+        setPinError(t('pin.errors.newTooWeak'));
         return;
       }
 
       setChangePINStep(3);
     } else if (changePINStep === 3) {
       if (newPIN !== confirmPIN) {
-        setPinError('PIN-kodene stemmer ikke overens');
+        setPinError(t('pin.errors.mismatch'));
         return;
       }
 
@@ -176,10 +172,10 @@ const SecuritySettings = ({ onBack }) => {
       setLoading(false);
 
       if (result.success) {
-        showNotification('PIN-kode endret', 'success');
+        showNotification(t('pin.notifications.changed'), 'success');
         resetChangePIN();
       } else {
-        setPinError(result.error || 'Kunne ikke endre PIN');
+        setPinError(result.error || t('pin.notifications.couldNotChange'));
       }
     }
   };
@@ -203,14 +199,13 @@ const SecuritySettings = ({ onBack }) => {
     setShowPIN(false);
   };
 
-  // Handle biometric toggle
   const handleBiometricToggle = async () => {
     if (biometricEnabled) {
       disableBiometric();
-      showNotification(`${biometricName} deaktivert`, 'success');
+      showNotification(t('biometric.notifications.disabled', { type: biometricName }), 'success');
     } else {
       if (!pinEnabled) {
-        showNotification('Du må aktivere PIN-kode først', 'error');
+        showNotification(t('biometric.notifications.mustEnablePin'), 'error');
         return;
       }
 
@@ -219,9 +214,9 @@ const SecuritySettings = ({ onBack }) => {
       setLoading(false);
 
       if (result.success) {
-        showNotification(`${biometricName} aktivert`, 'success');
+        showNotification(t('biometric.notifications.enabled', { type: biometricName }), 'success');
       } else {
-        showNotification(result.error || `Kunne ikke aktivere ${biometricName}`, 'error');
+        showNotification(result.error || t('biometric.notifications.couldNotEnable', { type: biometricName }), 'error');
       }
     }
   };
@@ -233,7 +228,6 @@ const SecuritySettings = ({ onBack }) => {
     return (
       <div className="min-h-screen p-6 pb-24">
         <div className="max-w-md mx-auto">
-          {/* Header */}
           <div className="flex items-center gap-4 mb-8">
             <button
               onClick={resetPINSetup}
@@ -241,19 +235,17 @@ const SecuritySettings = ({ onBack }) => {
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
-            <h1 className="text-2xl font-bold">Opprett PIN-kode</h1>
+            <h1 className="text-2xl font-bold">{t('pin.setup.title')}</h1>
           </div>
 
-          {/* Step indicator */}
           <div className="flex gap-2 mb-8">
             <div className={`flex-1 h-1 rounded-full ${pinStep >= 1 ? 'bg-purple-500' : 'bg-white/20'}`} />
             <div className={`flex-1 h-1 rounded-full ${pinStep >= 2 ? 'bg-purple-500' : 'bg-white/20'}`} />
           </div>
 
-          {/* PIN input */}
           <div className="glass rounded-2xl p-6 mb-6">
             <h3 className="font-semibold mb-4">
-              {pinStep === 1 ? 'Skriv inn ny PIN (4-6 siffer)' : 'Bekreft PIN-kode'}
+              {pinStep === 1 ? t('pin.setup.enterTitle') : t('pin.setup.confirmTitle')}
             </h3>
 
             <div className="relative mb-4">
@@ -283,18 +275,16 @@ const SecuritySettings = ({ onBack }) => {
               </button>
             </div>
 
-            {/* PIN strength indicator */}
             {pinStep === 1 && newPIN && (
               <div className="mb-4">
                 <div className="flex items-center justify-between text-sm mb-2">
-                  <span>PIN-styrke</span>
+                  <span>{t('pin.strength.label')}</span>
                   <span className={`font-semibold ${
                     pinStrength.strength === 'strong' ? 'text-green-400' :
                     pinStrength.strength === 'medium' ? 'text-yellow-400' :
                     'text-red-400'
                   }`}>
-                    {pinStrength.strength === 'strong' ? 'Sterk' :
-                     pinStrength.strength === 'medium' ? 'Middels' : 'Svak'}
+                    {t(`pin.strength.${pinStrength.strength}`)}
                   </span>
                 </div>
                 <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
@@ -310,7 +300,6 @@ const SecuritySettings = ({ onBack }) => {
               </div>
             )}
 
-            {/* Error */}
             {pinError && (
               <div className="flex items-start gap-2 text-red-400 text-sm mb-4">
                 <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -318,29 +307,27 @@ const SecuritySettings = ({ onBack }) => {
               </div>
             )}
 
-            {/* Tips */}
             <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-3 text-sm">
               <div className="flex items-start gap-2">
                 <Info className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
                 <div className="text-blue-200">
-                  <p className="font-medium mb-1">Tips for sikker PIN:</p>
+                  <p className="font-medium mb-1">{t('pin.tips.title')}</p>
                   <ul className="space-y-1 text-xs opacity-80">
-                    <li>• Bruk minst 5 siffer</li>
-                    <li>• Unngå enkle mønstre (1234, 1111)</li>
-                    <li>• Bruk unike kombinasjoner</li>
+                    {t('pin.tips.items', { returnObjects: true }).map((tip, i) => (
+                      <li key={i}>• {tip}</li>
+                    ))}
                   </ul>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Actions */}
           <button
             onClick={handlePINSetupNext}
             disabled={loading || (pinStep === 1 ? newPIN.length < 4 : confirmPIN.length < 4)}
             className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl font-semibold transition disabled:opacity-50"
           >
-            {loading ? 'Laster...' : pinStep === 1 ? 'Neste' : 'Fullfør'}
+            {loading ? t('pin.setup.loading') : pinStep === 1 ? t('pin.setup.next') : t('pin.setup.finish')}
           </button>
         </div>
       </div>
@@ -352,7 +339,6 @@ const SecuritySettings = ({ onBack }) => {
     return (
       <div className="min-h-screen p-6 pb-24">
         <div className="max-w-md mx-auto">
-          {/* Header */}
           <div className="flex items-center gap-4 mb-8">
             <button
               onClick={resetChangePIN}
@@ -360,22 +346,20 @@ const SecuritySettings = ({ onBack }) => {
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
-            <h1 className="text-2xl font-bold">Endre PIN-kode</h1>
+            <h1 className="text-2xl font-bold">{t('pin.change.title')}</h1>
           </div>
 
-          {/* Step indicator */}
           <div className="flex gap-2 mb-8">
             <div className={`flex-1 h-1 rounded-full ${changePINStep >= 1 ? 'bg-purple-500' : 'bg-white/20'}`} />
             <div className={`flex-1 h-1 rounded-full ${changePINStep >= 2 ? 'bg-purple-500' : 'bg-white/20'}`} />
             <div className={`flex-1 h-1 rounded-full ${changePINStep >= 3 ? 'bg-purple-500' : 'bg-white/20'}`} />
           </div>
 
-          {/* PIN input */}
           <div className="glass rounded-2xl p-6 mb-6">
             <h3 className="font-semibold mb-4">
-              {changePINStep === 1 ? 'Skriv inn nåværende PIN' :
-               changePINStep === 2 ? 'Skriv inn ny PIN (4-6 siffer)' :
-               'Bekreft ny PIN'}
+              {changePINStep === 1 ? t('pin.change.enterCurrent') :
+               changePINStep === 2 ? t('pin.change.enterNew') :
+               t('pin.change.confirmNew')}
             </h3>
 
             <div className="relative mb-4">
@@ -407,18 +391,16 @@ const SecuritySettings = ({ onBack }) => {
               </button>
             </div>
 
-            {/* PIN strength (step 2 only) */}
             {changePINStep === 2 && newPIN && (
               <div className="mb-4">
                 <div className="flex items-center justify-between text-sm mb-2">
-                  <span>PIN-styrke</span>
+                  <span>{t('pin.strength.label')}</span>
                   <span className={`font-semibold ${
                     pinStrength.strength === 'strong' ? 'text-green-400' :
                     pinStrength.strength === 'medium' ? 'text-yellow-400' :
                     'text-red-400'
                   }`}>
-                    {pinStrength.strength === 'strong' ? 'Sterk' :
-                     pinStrength.strength === 'medium' ? 'Middels' : 'Svak'}
+                    {t(`pin.strength.${pinStrength.strength}`)}
                   </span>
                 </div>
                 <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
@@ -434,7 +416,6 @@ const SecuritySettings = ({ onBack }) => {
               </div>
             )}
 
-            {/* Error */}
             {pinError && (
               <div className="flex items-start gap-2 text-red-400 text-sm">
                 <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -443,7 +424,6 @@ const SecuritySettings = ({ onBack }) => {
             )}
           </div>
 
-          {/* Actions */}
           <button
             onClick={handleChangePINNext}
             disabled={loading || 
@@ -452,7 +432,7 @@ const SecuritySettings = ({ onBack }) => {
               (changePINStep === 3 && confirmPIN.length < 4)}
             className="ripple-effect w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl font-semibold transition disabled:opacity-50"
           >
-            {loading ? 'Laster...' : changePINStep < 3 ? 'Neste' : 'Fullfør'}
+            {loading ? t('pin.setup.loading') : changePINStep < 3 ? t('pin.setup.next') : t('pin.setup.finish')}
           </button>
         </div>
       </div>
@@ -463,7 +443,6 @@ const SecuritySettings = ({ onBack }) => {
   return (
     <div className="min-h-screen p-6 pb-24 animate-fade-in">
       <div className="max-w-2xl mx-auto">
-        {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={onBack}
@@ -472,12 +451,11 @@ const SecuritySettings = ({ onBack }) => {
             <ChevronLeft className="w-6 h-6" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold">Sikkerhet</h1>
-            <p className="text-sm opacity-70">Beskytt dine bilder</p>
+            <h1 className="text-2xl font-bold">{t('security.title')}</h1>
+            <p className="text-sm opacity-70">{t('security.subtitle')}</p>
           </div>
         </div>
 
-        {/* Notification */}
         {notification && (
           <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${
             notification.type === 'success' ? 'bg-green-500/20 border border-green-500/50' :
@@ -501,13 +479,13 @@ const SecuritySettings = ({ onBack }) => {
               <Lock className="w-6 h-6" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-lg">PIN-kode</h3>
-              <p className="text-sm opacity-70">Lås appen med PIN-kode</p>
+              <h3 className="font-semibold text-lg">{t('pin.title')}</h3>
+              <p className="text-sm opacity-70">{t('pin.description')}</p>
             </div>
             <div className={`px-3 py-1 rounded-full text-xs font-medium ${
               pinEnabled ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'
             }`}>
-              {pinEnabled ? 'Aktivert' : 'Deaktivert'}
+              {pinEnabled ? t('pin.status.enabled') : t('pin.status.disabled')}
             </div>
           </div>
 
@@ -517,7 +495,7 @@ const SecuritySettings = ({ onBack }) => {
                 onClick={() => setShowPINSetup(true)}
                 className="ripple-effect w-full py-3 bg-purple-600/20 hover:bg-purple-600/30 rounded-xl transition text-left px-4 font-medium"
               >
-                Aktiver PIN-kode
+                {t('pin.enable')}
               </button>
             ) : (
               <>
@@ -525,13 +503,13 @@ const SecuritySettings = ({ onBack }) => {
                   onClick={() => setShowChangePIN(true)}
                   className="ripple-effect w-full py-3 glass hover:bg-white/10 rounded-xl transition text-left px-4"
                 >
-                  Endre PIN-kode
+                  {t('pin.change')}
                 </button>
                 <button
                   onClick={handleDisablePIN}
                   className="ripple-effect w-full py-3 glass hover:bg-red-500/20 rounded-xl transition text-left px-4 text-red-400"
                 >
-                  Deaktiver PIN-kode
+                  {t('pin.disable')}
                 </button>
               </>
             )}
@@ -548,7 +526,7 @@ const SecuritySettings = ({ onBack }) => {
               <div className="flex-1">
                 <h3 className="font-semibold text-lg">{biometricName}</h3>
                 <p className="text-sm opacity-70">
-                  {pinEnabled ? 'Lås opp med biometri' : 'Krever PIN-kode'}
+                  {pinEnabled ? t('biometric.description', { type: biometricName }) : t('biometric.requiresPin')}
                 </p>
               </div>
               <button
@@ -569,7 +547,7 @@ const SecuritySettings = ({ onBack }) => {
             {!pinEnabled && (
               <div className="flex items-start gap-2 text-yellow-400 text-sm">
                 <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                <p>Du må aktivere PIN-kode først før du kan bruke biometrisk autentisering.</p>
+                <p>{t('biometric.requiresPinDesc')}</p>
               </div>
             )}
           </section>
@@ -582,9 +560,9 @@ const SecuritySettings = ({ onBack }) => {
               <Clock className="w-6 h-6" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-lg">Auto-lås</h3>
+              <h3 className="font-semibold text-lg">{t('autoLock.title')}</h3>
               <p className="text-sm opacity-70">
-                {pinEnabled ? 'Lås automatisk etter inaktivitet' : 'Krever PIN-kode'}
+                {pinEnabled ? t('autoLock.description') : t('autoLock.requiresPin')}
               </p>
             </div>
             <button
@@ -605,19 +583,19 @@ const SecuritySettings = ({ onBack }) => {
           {autoLockEnabled && (
             <div className="mt-4">
               <label className="block text-sm font-medium mb-2">
-                Lås etter (minutter)
+                {t('autoLock.timeout')}
               </label>
               <select
                 value={autoLockTimeout}
                 onChange={(e) => toggleAutoLock(true, Number(e.target.value))}
                 className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                <option value={1}>1 minutt</option>
-                <option value={2}>2 minutter</option>
-                <option value={5}>5 minutter</option>
-                <option value={10}>10 minutter</option>
-                <option value={15}>15 minutter</option>
-                <option value={30}>30 minutter</option>
+                <option value={1}>{t('autoLock.timeoutOptions.1')}</option>
+                <option value={2}>{t('autoLock.timeoutOptions.2')}</option>
+                <option value={5}>{t('autoLock.timeoutOptions.5')}</option>
+                <option value={10}>{t('autoLock.timeoutOptions.10')}</option>
+                <option value={15}>{t('autoLock.timeoutOptions.15')}</option>
+                <option value={30}>{t('autoLock.timeoutOptions.30')}</option>
               </select>
             </div>
           )}
@@ -631,8 +609,8 @@ const SecuritySettings = ({ onBack }) => {
                 <Shield className="w-6 h-6" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold">Lås ved bakgrunn</h3>
-                <p className="text-sm opacity-70">Lås når appen går i bakgrunnen</p>
+                <h3 className="font-semibold">{t('lockOnBackground.title')}</h3>
+                <p className="text-sm opacity-70">{t('lockOnBackground.description')}</p>
               </div>
               <button
                 onClick={() => toggleLockOnBackground(!lockOnBackground)}
@@ -656,13 +634,12 @@ const SecuritySettings = ({ onBack }) => {
             <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
             <div className="text-sm opacity-70">
               <p className="mb-2">
-                <strong>Om sikkerhet:</strong>
+                <strong>{t('info.title')}:</strong>
               </p>
               <ul className="space-y-1 list-disc list-inside">
-                <li>PIN-koden lagres kryptert lokalt på enheten din</li>
-                <li>Biometrisk data lagres aldri - kun systemets API brukes</li>
-                <li>Private album får ekstra kryptering</li>
-                <li>Etter 5 feil forsøk låses appen i 5 minutter</li>
+                {t('info.items', { returnObjects: true }).map((item, i) => (
+                  <li key={i}>{item}</li>
+                ))}
               </ul>
             </div>
           </div>

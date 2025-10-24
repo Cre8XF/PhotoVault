@@ -101,5 +101,71 @@
   "facesDetected": "Faces detected",
   "aiAnalyzed": "AI analyzed",
   "category": "Category"
+},
+"notifications": {
+  "processing": "Processing...",
+  "success": "Completed",
+  "error": "An error occurred",
+  "copied": "Link copied!",
+  "imported": "Data imported!",
+  "exported": "Data exported!",
+  "deleted": "Account deleted",
+  "languageChanged": "Language changed to {{lang}}",
+  "themeChanged": "{{theme}} theme activated",
+  "upgradeUnavailable": "Upgrade is currently unavailable"
+},
+"storage": {
+  "almostFull": "Almost full",
+  "needMoreSpace": "Need more space?",
+  "upgradeHint": "Upgrade to Pro for 100 GB storage and AI features",
+  "used": "used"
+},
+"buttons": {
+  "upgrade": "Upgrade",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "delete": "Delete",
+  "deletePermanent": "Delete permanently",
+  "share": "Share",
+  "export": "Export",
+  "import": "Import",
+  "help": "Help",
+  "close": "Close",
+  "confirmDelete": "Confirm deletion"
+},
+"modals": {
+  "deleteAccountTitle": "Delete account",
+  "deleteAccountMessage": "Are you sure you want to permanently delete your account? All photos, albums and data will be lost and cannot be recovered.",
+  "processing": "Processing..."
+},
+"customization": {
+  "title": "Customization",
+  "themeLight": "Light theme",
+  "themeDark": "Dark theme"
+},
+"searchPage": {
+  "title": "Search",
+  "edit": "Edit",
+  "done": "Done",
+  "filters": "Filters",
+  "move": "Move",
+  "searchPlaceholder": "Search by name, AI tags or category",
+  "favorites": "Favorites",
+  "withFaces": "With faces",
+  "withTags": "With AI tags",
+  "aiAnalyzed": "AI analyzed",
+  "allAlbums": "All albums",
+  "allCategories": "All categories",
+  "allDates": "All dates",
+  "popularTags": "Popular AI tags",
+  "activeFilters": "Active filters",
+  "resetFilters": "Reset filters",
+  "setAsCover": "Set as cover",
+  "deletePhoto": "Delete photo",
+  "confirmDeleteTitle": "Confirm deletion",
+  "confirmDeleteMessage": "Are you sure you want to permanently delete this photo?",
+  "confirmDeleteButton": "Delete photo",
+  "cancel": "Cancel"
 }
+
 }
