@@ -1,0 +1,557 @@
+📊 Prioriteringsanalyse Tier 1 - Høyest impact (kjør først):
+
+HomeDashboard.jsx - Første inntrykk AlbumPage.jsx - Kjerneopplevelse SearchPage.jsx - Kritisk funksjonalitet
+
+Tier 2 - Medium impact: 4. AlbumsPage.jsx - Navigasjon 5. MorePage.jsx - Omfattende, mange funksjoner Tier 3 - Støttefunksjoner: 6. AISettingsPage.jsx - Spesialisert 7. SecuritySettings.jsx - Funksjonell 8. LoginPage.jsx - Enkel, fungerer 9. AdminDashboard.jsx - Admin-only
+
+🎯 TIER 1 PROMPTS 1️⃣ HomeDashboard.jsx - "Premium Welcome Experience" markdownJeg vil modernisere HomeDashboard.jsx til en premium velkomstopplevelse som matcher Google Photos og Apple Photos. Dette er brukernes første møte med appen.
+
+NÅVÆRENDE TILSTAND:
+
+- Enkel grid-layout med statistikk
+- Basic favoritter og nylige bilder
+- Smarte album som statiske kort
+- Minimale animasjoner
+
+ØNSKET RESULTAT:
+
+**HERO SECTION:**
+
+- Gradient animated header med personalisert hilsen
+- Floating particle effects i bakgrunnen
+- Animated counter for statistikk (count-up animation)
+- Personalisert daglig greeting basert på tid ("God morgen", "God kveld")
+- Quick action buttons med glassmorphism og hover effects
+
+**FAVORITTER SECTION:**
+
+- Masonry/Pinterest-style layout i stedet for standard grid
+- Lazy loading med skeleton screens
+- Parallax scroll effect på bilder
+- Smooth hover transitions med scale og shadow
+- "Heart pulse" animation på favoritt-ikonet
+
+**NYLIGE OPPLASTNINGER:**
+
+- Horizontal scroll carousel med momentum scrolling
+- Blur edges for å indikere mer innhold
+- Swipe gesture support (mobile)
+- Animated loading states
+- Photo preview on hover (desktop)
+
+**SMARTE ALBUM:**
+
+- Card flip animations on hover
+- Dynamic gradient backgrounds basert på innhold
+- Count-up animations når tall endres
+- Ripple effect ved klikk
+- Icon animations (pulse, rotate)
+
+**QUICK STATS PANEL:**
+
+- Animated progress bars
+- Sparkline charts for trends
+- Tooltip på hover med detaljer
+- Color-coded categories
+- Smooth number transitions
+
+**AI TOOLS SECTION:**
+
+- Interactive cards med hover states
+- Icon animations (glow, pulse)
+- "Coming soon" badges for fremtidige features
+- Tool usage indicators
+- Quick preview modal
+
+**PERFORMANCE:**
+
+- Virtual scrolling for lange lister
+- Image lazy loading med IntersectionObserver
+- Progressive image loading (blur-up)
+- Memoized calculations
+- Debounced scroll handlers
+
+**MICRO-INTERACTIONS:**
+
+- Button ripple effects
+- Card tilt on mouse move (3D effect)
+- Smooth page transitions
+- Loading skeleton screens
+- Success confetti animation ved upload
+
+**RESPONSIVITET:**
+
+- Fluid typography (clamp)
+- Touch-friendly spacing (mobile)
+- Optimized layouts for tablet
+- Smart grid breakpoints
+- Collapsible sections (mobile)
+
+TEKNISKE KRAV:
+
+- Behold alle eksisterende funksjoner
+- Bruk Framer Motion for animasjoner
+- Implementer IntersectionObserver for lazy loading
+- Optimaliser re-renders med React.memo
+- Bruk CSS Grid og Flexbox smart
+- Behold i18n-støtte
+
+2️⃣ AlbumPage.jsx - "Professional Photo Management" markdownJeg vil transformere AlbumPage.jsx til en profesjonell fotoadministrasjonsopplevelse som matcher Adobe Lightroom og Apple Photos.
+
+NÅVÆRENDE TILSTAND:
+
+- Basic grid layout med filtre
+- Standard toolbar med sortering
+- Enkel statistikk-panel
+- Minimal interaktivitet
+
+ØNSKET RESULTAT:
+
+**HEADER & NAVIGATION:**
+
+- Sticky header med blur backdrop
+- Breadcrumb navigation med smooth transitions
+- Dynamic album title med inline editing
+- Real-time photo count animation
+- Quick action floating button (FAB)
+
+**PHOTO GRID:**
+
+- Masonry layout option (Pinterest-style)
+- Justified layout option (Google Photos-style)
+- Waterfall layout option
+- Dynamic grid sizing med smooth transitions
+- Virtual scrolling for 1000+ photos
+- Infinite scroll med loading indicators
+
+**BULK SELECTION MODE:**
+
+- Magic wand selection (AI-based)
+- Lasso selection tool
+- Shift+click range selection
+- Drag-to-select functionality
+- Selection counter med animated badge
+- Bulk action toolbar (sticky bottom)
+
+**PHOTO HOVER STATES:**
+
+- Smooth zoom preview (Lightbox-style)
+- Metadata overlay (EXIF data)
+- Quick actions menu (edit, share, delete)
+- AI analysis badges (faces, objects, quality)
+- Color-coded category indicators
+- Favorite star animation (heart pulse)
+
+**ADVANCED FILTERS:**
+
+- Multi-select filter chips
+- Date range slider med histogram
+- AI filter: faces, objects, scenes
+- Quality filter: blurry, dark, bright
+- Duplicate detector toggle
+- Custom tag filtering
+- Filter preset saving
+
+**TOOLBAR ENHANCEMENTS:**
+
+- Floating toolbar med auto-hide
+- Smart search med fuzzy matching
+- Voice search integration
+- Sort by: date, name, size, AI score
+- Group by: day, month, year, event
+- View density slider (compact → comfortable → spacious)
+
+**STATISTICS DASHBOARD:**
+
+- Animated donut charts
+- Timeline visualization
+- Top categories breakdown
+- Storage usage by type
+- AI analysis coverage
+- Upload activity heatmap
+
+**PHOTO MODAL:**
+
+- Swipe navigation (mobile/desktop)
+- Keyboard shortcuts (arrow keys, ESC)
+- EXIF data panel
+- AI analysis details
+- Similar photos suggestions
+- Share/download options
+- Full-screen mode
+- Zoom/pan with pinch gesture
+
+**DRAG & DROP:**
+
+- Multi-photo drag support
+- Visual drop zones
+- Ghost preview while dragging
+- Haptic feedback (mobile)
+- Undo/redo functionality
+
+**SMART FEATURES:**
+
+- AI-powered "Best of Album" selection
+- Auto-create highlight video
+- Smart suggestions for album cover
+- Duplicate photo detection
+- Quality scoring visualization
+- Face grouping preview
+
+**PERFORMANCE:**
+
+- Image preloading (next/prev 5 photos)
+- Progressive loading (thumbnails first)
+- Worker thread for AI processing
+- Virtualized lists for 10K+ photos
+- Optimistic UI updates
+- Background sync indicator
+
+**ANIMATIONS:**
+
+- Stagger animation on grid load
+- Photo flip reveal on upload
+- Smooth filter transitions
+- Elastic sort animations
+- Confetti on album completion
+- Smooth scroll to selection
+
+TEKNISKE KRAV:
+
+- React.memo for photo items
+- useCallback for event handlers
+- IntersectionObserver for lazy load
+- RequestIdleCallback for AI processing
+- CSS Grid with auto-fit
+- Transform3d for smooth animations
+
+3️⃣ SearchPage.jsx - "Intelligent Photo Discovery" markdownJeg vil gjøre SearchPage.jsx til en intelligent fotosøkemotor som matcher Google Photos' søkekvalitet.
+
+NÅVÆRENDE TILSTAND:
+
+- Basic text search
+- Simple filter chips
+- Standard grid layout
+- Minimal AI-integrasjon
+
+ØNSKET RESULTAT:
+
+**SEARCH INTERFACE:**
+
+- Instant search med debounce (150ms)
+- Search suggestions dropdown
+- Recent searches history
+- Popular searches trending
+- Voice search button med visual feedback
+- Search by image upload
+- AI-powered natural language queries
+
+**SMART SUGGESTIONS:**
+
+- "People" - faces detected
+- "Places" - location data
+- "Things" - AI objects
+- "Text in photos" - OCR results
+- "Colors" - dominant color search
+- "Similar photos" - visual similarity
+- "Screenshots" - auto-detected
+- "Documents" - auto-detected
+
+**FILTER SIDEBAR:**
+
+- Collapsible sections
+- Multi-select with chips
+- Date range calendar picker
+- File type icons
+- Size range slider
+- Quality filter (AI-based)
+- Location map filter
+- Clear all button
+
+**SEARCH RESULTS:**
+
+- Grouped by relevance
+- Highlighted search terms
+- Relevance score indicators
+- "Show more like this" option
+- Infinite scroll results
+- Result count animation
+- No results illustration
+
+**AI-POWERED FEATURES:**
+
+- Semantic search ("beach sunset")
+- Object detection ("cats", "cars")
+- Scene recognition ("birthday party")
+- Activity detection ("skiing", "cooking")
+- Emotion detection ("happy", "excited")
+- OCR text search
+- Visual similarity search
+
+**ADVANCED SEARCH:**
+
+- Boolean operators (AND, OR, NOT)
+- Wildcard support (\*)
+- Exact phrase matching ("")
+- Field-specific search (name:, tag:, date:)
+- Save search presets
+- Search history with delete option
+
+**RESULT VIEWS:**
+
+- Grid view (default)
+- List view with metadata
+- Map view for geo-tagged photos
+- Timeline view (chronological)
+- Cluster view (by similarity)
+
+**QUICK ACTIONS:**
+
+- Bulk selection from results
+- Quick edit menu
+- Share selected
+- Move to album
+- Add tags
+- Download selected
+- Create slideshow
+
+**SEARCH ANALYTICS:**
+
+- "Trending searches" widget
+- "You might also search" suggestions
+- Search performance metrics
+- Popular tags cloud
+- Recent activity timeline
+
+**PERFORMANCE:**
+
+- Indexed search (Fuse.js or similar)
+- Web Workers for heavy processing
+- Debounced API calls
+- Cached results
+- Progressive result loading
+- Background indexing
+
+**MICRO-INTERACTIONS:**
+
+- Search input focus animation
+- Filter chip animations
+- Result card hover effects
+- Skeleton loading screens
+- Empty state illustrations
+- Success checkmark animations
+
+**MOBILE OPTIMIZATION:**
+
+- Bottom sheet filters
+- Swipe gestures
+- Pull-to-refresh
+- Floating search button
+- Voice search prominent
+- Touch-friendly targets
+
+TEKNISKE KRAV:
+
+- Implement Fuse.js for fuzzy search
+- Use Intersection Observer for infinite scroll
+- Web Workers for AI processing
+- LocalStorage for search history
+- Debounce search input
+- Memoize expensive calculations
+
+🎯 TIER 2 PROMPTS 4️⃣ AlbumsPage.jsx - "Album Overview Excellence" markdownForbedre AlbumsPage.jsx til en visuelt imponerende album-oversikt:
+
+**LAYOUT:**
+
+- Masonry grid for album cards
+- Hover effects med 3D tilt
+- Album preview mosaic (4 photos)
+- Dynamic cover animations
+- Drag-to-reorder albums
+
+**FEATURES:**
+
+- Quick stats per album
+- Recent activity indicators
+- Sharing status badges
+- Storage usage per album
+- AI analysis progress
+- Smart album suggestions
+
+**SORTING:**
+
+- Manual drag-drop ordering
+- Auto-sort by date/size/activity
+- Pinned albums
+- Archived albums section
+- Album groups/categories
+
+**PERFORMANCE:**
+
+- Lazy load album covers
+- Virtual scrolling for 100+ albums
+- Optimistic UI updates
+
+5️⃣ MorePage.jsx - "Comprehensive Settings Hub" markdownTransform MorePage.jsx til en moderne settings hub:
+
+**PROFILE SECTION:**
+
+- Editable profile card
+- Storage visualization (donut chart)
+- Quick stats with sparklines
+- Achievement badges
+- Activity timeline
+
+**AI FEATURES:**
+
+- Interactive demo previews
+- Before/after comparisons
+- Feature usage statistics
+- API key status indicators
+- Cost calculator
+
+**SETTINGS ORGANIZATION:**
+
+- Categorized accordion sections
+- Search settings functionality
+- Recent settings accessed
+- Quick toggles for common actions
+- Keyboard shortcuts guide
+
+**ACCOUNT MANAGEMENT:**
+
+- Subscription status card
+- Usage analytics dashboard
+- Export/import wizard
+- Account deletion flow
+- Security audit log
+
+**VISUAL ENHANCEMENTS:**
+
+- Animated section transitions
+- Icon animations on interact
+- Progress indicators
+- Success/error toasts
+- Confirmation modals
+
+🎯 TIER 3 PROMPTS 6️⃣ AISettingsPage.jsx - "AI Configuration Studio" markdown**ENHANCEMENTS:**
+
+- Visual API key validation
+- Cost calculator with predictions
+- Usage charts and analytics
+- Feature toggle cards
+- Provider comparison table
+- Auto-tagging preview
+- Test AI features button
+
+**UI:**
+
+- Dark glassmorphism cards
+- Animated statistics
+- Color-coded status indicators
+- Inline documentation
+- Copy API key buttons
+
+7️⃣ SecuritySettings.jsx - "Security Center" markdown**IMPROVEMENTS:**
+
+- Visual PIN strength meter
+- Biometric setup wizard
+- Security audit log
+- Device management
+- Session management
+- Two-factor authentication
+- Security recommendations
+
+**UI:**
+
+- Step-by-step wizards
+- Animated security badges
+- Success confirmations
+- Warning dialogs
+
+8️⃣ LoginPage.jsx - "Welcome Experience" markdown**POLISH:**
+
+- Animated background particles
+- Smooth form transitions
+- Social login options
+- Password strength indicator
+- Forgot password flow
+- Email verification UI
+- Welcome animation
+
+9️⃣ AdminDashboard.jsx - "Admin Control Panel" markdown**ENHANCEMENTS:**
+
+- Real-time user statistics
+- Charts and graphs
+- Bulk actions
+- User search/filter
+- Activity logs
+- System health dashboard
+- Database tools
+
+📋 MASTER PLAN - Kjøringsrekkefølge Week 1: Foundation (Tier 1)
+
+Day 1-2: HomeDashboard.jsx
+
+Største visual impact Setter tone for resten
+
+Day 3-4: AlbumPage.jsx
+
+Kjerneopplevelse Mest tid i appen
+
+Day 5: SearchPage.jsx
+
+Kritisk funksjonalitet AI showcase
+
+Week 2: Enhancement (Tier 2)
+
+Day 6-7: MorePage.jsx
+
+Mange funksjoner å polere Settings hub
+
+Day 8: AlbumsPage.jsx
+
+Navigation polish Quick win
+
+Week 3: Refinement (Tier 3)
+
+Day 9: AISettingsPage.jsx Day 10: SecuritySettings.jsx Day 11: LoginPage.jsx Day 12: AdminDashboard.jsx
+
+Week 4: Polish & Testing
+
+Cross-browser testing Performance optimization Accessibility audit Mobile optimization Animation tuning
+
+🎨 COMMON DESIGN SYSTEM For konsistens på tvers av alle pages: markdown**COLORS:**
+
+- Primary: Purple gradient (#8B5CF6 → #EC4899)
+- Success: Green (#10B981)
+- Warning: Yellow (#F59E0B)
+- Error: Red (#EF4444)
+- Glass: rgba(255, 255, 255, 0.05)
+
+**ANIMATIONS:**
+
+- Duration: 200ms (quick), 300ms (normal), 500ms (slow)
+- Easing: cubic-bezier(0.4, 0, 0.2, 1)
+- Stagger: 50ms delay between items
+
+**SPACING:**
+
+- Base: 4px (0.25rem)
+- Scale: 4, 8, 12, 16, 24, 32, 48, 64
+
+**TYPOGRAPHY:**
+
+- Headings: Bold, gradual size scale
+- Body: Regular, 16px base
+- Captions: Light, 14px
+
+**COMPONENTS:**
+
+- Border radius: 12px (cards), 8px (buttons)
+- Shadows: Multi-layer for depth
+- Glassmorphism: backdrop-blur + opacity
+
+🚀 NEXT STEPS
+
+Start med HomeDashboard - største impact Test på mobile etter hver prompt Commit ofte - en feature om gangen Screenshot før/etter for dokumentasjon Performance profiling etter animasjoner User testing etter Week 2

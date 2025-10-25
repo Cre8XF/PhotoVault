@@ -1,5 +1,5 @@
 // ============================================================================
-// PAGE: MorePage.jsx – v7.0 FULL API INTEGRATION
+// PAGE: MorePage.jsx – v7.0 FULL API INTEGRATION WITH i18n
 // ============================================================================
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -61,7 +61,7 @@ import {
 } from "firebase/auth";
 
 
-import { db } from "../firebase"; // juster sti hvis firebase ligger et annet sted
+import { db } from "../firebase";
 
 
 const MorePage = ({ 
@@ -79,7 +79,7 @@ const MorePage = ({
   const [expandedSection, setExpandedSection] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [storageUsed, setStorageUsed] = useState(propStorageUsed || 0);
-  const [storageLimit] = useState(propStorageLimit || 524288000); // 500 MB default
+  const [storageLimit] = useState(propStorageLimit || 524288000);
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
   
@@ -116,7 +116,6 @@ const MorePage = ({
         setStorageUsed(totalBytes);
       } catch (error) {
         console.error("Error calculating storage:", error);
-        // Fallback to prop value
         setStorageUsed(propStorageUsed || 0);
       }
     };
@@ -127,14 +126,9 @@ const MorePage = ({
   const storagePercent = Math.round((storageUsed / storageLimit) * 100);
 
   const formatBytes = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return `0 ${t('common:size')}`;
     const k = 1024;
-    const sizes = [
-      t('common:units.bytes'),
-      t('common:units.kb'),
-      t('common:units.mb'),
-      t('common:units.gb')
-    ];
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   };
@@ -173,19 +167,18 @@ const MorePage = ({
 
     if (!stripePublicKey || !stripeCheckoutUrl) {
       console.warn("Stripe keys not configured");
-      showNotification("Oppgradering er ikke tilgjengelig for øyeblikket", "error");
+      showNotification(t('notifications.upgradeUnavailable'), "error");
       return;
     }
 
     try {
       setLoading(true);
       
-      // Redirect to Stripe Checkout
       const checkoutUrl = `${stripeCheckoutUrl}?client_reference_id=${user.uid}&customer_email=${user.email}`;
       window.location.href = checkoutUrl;
     } catch (error) {
       console.error("Error initiating Stripe checkout:", error);
-      showNotification("Kunne ikke starte betalingsprosess", "error");
+      showNotification(t('more.subscription.upgradeError'), "error");
     } finally {
       setLoading(false);
     }
@@ -195,7 +188,6 @@ const MorePage = ({
   // === AI FUNCTIONS - DIRECT API CALLS ===
   // ============================================================================
 
-  // Google Vision API - Bildeanalyse
   const analyzeImageWithVision = async (imageUrl) => {
     const visionKey = process.env.REACT_APP_GOOGLE_VISION_KEY;
     if (!visionKey) return null;
@@ -227,49 +219,46 @@ const MorePage = ({
     }
   };
 
-  // OpenAI GPT-4o-mini – Smart AI-operasjoner
-const callOpenAI = async (prompt) => {
-  const openaiKey = process.env.REACT_APP_OPENAI_KEY;
+  const callOpenAI = async (prompt) => {
+    const openaiKey = process.env.REACT_APP_OPENAI_KEY;
 
-  if (!openaiKey || openaiKey.length < 20) {
-    console.warn("OpenAI API key missing or invalid");
-    return null;
-  }
-
-  try {
-    console.log("Calling OpenAI GPT-4o-mini...");
-
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${openaiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.7,
-        max_tokens: 400,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("OpenAI API error response:", errorText);
-      throw new Error(`OpenAI API: ${response.status} - ${errorText}`);
+    if (!openaiKey || openaiKey.length < 20) {
+      console.warn("OpenAI API key missing or invalid");
+      return null;
     }
 
-    const data = await response.json();
-    console.log("OpenAI API response:", data);
-    return data.choices?.[0]?.message?.content?.trim() || null;
-  } catch (error) {
-    console.error("OpenAI API error:", error);
-    return null;
-  }
-};
+    try {
+      console.log("Calling OpenAI GPT-4o-mini...");
 
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${openaiKey}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.7,
+          max_tokens: 400,
+        }),
+      });
 
-  // Picsart API - Bildeforbedring
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("OpenAI API error response:", errorText);
+        throw new Error(`OpenAI API: ${response.status} - ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log("OpenAI API response:", data);
+      return data.choices?.[0]?.message?.content?.trim() || null;
+    } catch (error) {
+      console.error("OpenAI API error:", error);
+      return null;
+    }
+  };
+
   const enhanceImageWithPicsart = async (imageUrl) => {
     const picsartKey = process.env.REACT_APP_PICSART_KEY;
     if (!picsartKey) return null;
@@ -296,38 +285,36 @@ const callOpenAI = async (prompt) => {
     }
   };
 
-// ============================================================================
-// === AI FEATURE HANDLERS ===
-// ============================================================================
+  // ============================================================================
+  // === AI FEATURE HANDLERS ===
+  // ============================================================================
 
+  const handleAutoSort = async () => {
+    const openaiKey = process.env.REACT_APP_OPENAI_KEY;
 
-const handleAutoSort = async () => {
-  const openaiKey = process.env.REACT_APP_OPENAI_KEY;
-
-  if (!openaiKey || openaiKey.length < 10) {
-    showNotification("OpenAI API-nøkkel mangler", "error");
-    console.warn("OpenAI key missing or too short");
-    return;
-  }
-
-  try {
-    setLoading(true);
-    console.log("Auto-sorting photos...", photos.length, "photos");
-
-    if (!photos || photos.length === 0) {
-      showNotification("Ingen bilder å sortere", "error");
+    if (!openaiKey || openaiKey.length < 10) {
+      showNotification(t('more.ai.errors.missingKey'), "error");
+      console.warn("OpenAI key missing or too short");
       return;
     }
 
-    // ---- Bygg prompt for GPT-5 ----
-    const photoSummary = photos.slice(0, 20).map(p => ({
-      id: p.id,
-      name: p.name,
-      date: p.createdAt,
-      tags: p.tags || []
-    }));
+    try {
+      setLoading(true);
+      console.log("Auto-sorting photos...", photos.length, "photos");
 
-    const prompt = `Analyser disse bildene og foreslå en smart sortering i kategorier.
+      if (!photos || photos.length === 0) {
+        showNotification(t('more.ai.errors.noPhotos'), "error");
+        return;
+      }
+
+      const photoSummary = photos.slice(0, 20).map(p => ({
+        id: p.id,
+        name: p.name,
+        date: p.createdAt,
+        tags: p.tags || []
+      }));
+
+      const prompt = `Analyser disse bildene og foreslå en smart sortering i kategorier.
 Bilder: ${JSON.stringify(photoSummary)}
 
 Returner kun gyldig JSON med struktur:
@@ -337,80 +324,75 @@ Returner kun gyldig JSON med struktur:
   ]
 }`;
 
-    // ---- Send forespørsel til OpenAI ----
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${openaiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "gpt-5",
-        messages: [
-          { role: "system", content: "Du er en AI-assistent som sorterer bilder etter tema og innhold." },
-          { role: "user", content: prompt }
-        ]
-      })
-    });
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${openaiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "gpt-5",
+          messages: [
+            { role: "system", content: "Du er en AI-assistent som sorterer bilder etter tema og innhold." },
+            { role: "user", content: prompt }
+          ]
+        })
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("OpenAI API error:", errorText);
-      showNotification("Feil ved GPT-sortering", "error");
-      return;
-    }
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("OpenAI API error:", errorText);
+        showNotification(t('more.ai.errors.sortingFailed'), "error");
+        return;
+      }
 
-    // ---- Les og parse resultatet ----
-    const data = await response.json();
-    const message = data.choices?.[0]?.message?.content || "";
-    console.log("GPT-sort result (raw):", message);
+      const data = await response.json();
+      const message = data.choices?.[0]?.message?.content || "";
+      console.log("GPT-sort result (raw):", message);
 
-    let parsed;
-    try {
-      parsed = JSON.parse(message);
-    } catch (err) {
-      console.warn("Kunne ikke parse JSON fra GPT:", err);
-      showNotification("Ugyldig JSON fra GPT", "error");
-      return;
-    }
+      let parsed;
+      try {
+        parsed = JSON.parse(message);
+      } catch (err) {
+        console.warn("Kunne ikke parse JSON fra GPT:", err);
+        showNotification(t('more.ai.errors.invalidJson'), "error");
+        return;
+      }
 
-    // ---- Oppdater Firestore ----
-    if (parsed?.categories?.length) {
-      for (const cat of parsed.categories) {
-        for (const photoId of cat.photoIds) {
-          try {
-            const ref = doc(db, "photos", photoId);
-            await updateDoc(ref, {
-              category: cat.name,
-              aiSorted: true,
-              aiReason: cat.reason
-            });
-            console.log(`✅ ${photoId} → ${cat.name}`);
-          } catch (err) {
-            console.warn(`⚠️ Feil ved oppdatering av ${photoId}`, err);
+      if (parsed?.categories?.length) {
+        for (const cat of parsed.categories) {
+          for (const photoId of cat.photoIds) {
+            try {
+              const ref = doc(db, "photos", photoId);
+              await updateDoc(ref, {
+                category: cat.name,
+                aiSorted: true,
+                aiReason: cat.reason
+              });
+              console.log(`✅ ${photoId} → ${cat.name}`);
+            } catch (err) {
+              console.warn(`⚠️ Feil ved oppdatering av ${photoId}`, err);
+            }
           }
         }
+        showNotification(t('more.ai.notifications.sortingComplete'), "success");
+      } else {
+        showNotification(t('more.ai.errors.noCategories'), "error");
       }
-      showNotification("AI-sortering lagret i Firestore", "success");
-    } else {
-      showNotification("Ingen kategorier mottatt fra GPT", "error");
+
+    } catch (error) {
+      console.error("Error in auto-sort:", error);
+      showNotification(t('more.ai.errors.sortingError'), "error");
+    } finally {
+      setLoading(false);
     }
-
-  } catch (error) {
-    console.error("Error in auto-sort:", error);
-    showNotification("Feil ved auto-sortering", "error");
-  } finally {
-    setLoading(false);
-  }
-};
-
-
+  };
 
   const handleImageEnhancement = async () => {
     const picsartKey = process.env.REACT_APP_PICSART_KEY;
     
     if (!picsartKey || picsartKey.length < 10) {
-      showNotification("Picsart API-nøkkel mangler", "error");
+      showNotification(t('more.ai.errors.missingPicsartKey'), "error");
       return;
     }
 
@@ -418,10 +400,9 @@ Returner kun gyldig JSON med struktur:
       setLoading(true);
       console.log("Enhancing images with Picsart...");
 
-      // Ta første bilde som eksempel
       const firstPhoto = photos[0];
       if (!firstPhoto?.url) {
-        showNotification("Ingen bilder å forbedre", "error");
+        showNotification(t('more.ai.errors.noPhotos'), "error");
         return;
       }
 
@@ -429,13 +410,13 @@ Returner kun gyldig JSON med struktur:
       
       if (result) {
         console.log("Enhancement result:", result);
-        showNotification("Bildeforbedring fullført!", "success");
+        showNotification(t('more.ai.notifications.enhancementComplete'), "success");
       } else {
-        showNotification("Kunne ikke forbedre bilder", "error");
+        showNotification(t('more.ai.errors.enhancementFailed'), "error");
       }
     } catch (error) {
       console.error("Error in enhancement:", error);
-      showNotification("Feil ved bildeforbedring", "error");
+      showNotification(t('more.ai.errors.enhancementError'), "error");
     } finally {
       setLoading(false);
     }
@@ -445,7 +426,7 @@ Returner kun gyldig JSON med struktur:
     const visionKey = process.env.REACT_APP_GOOGLE_VISION_KEY;
     
     if (!visionKey) {
-      showNotification("Google Vision API-nøkkel mangler", "error");
+      showNotification(t('more.ai.errors.missingVisionKey'), "error");
       return;
     }
 
@@ -453,7 +434,6 @@ Returner kun gyldig JSON med struktur:
       setLoading(true);
       console.log("Detecting faces in photos...");
 
-      // Analyser første 5 bilder
       const photosToAnalyze = photos.slice(0, 5);
       let totalFaces = 0;
 
@@ -467,10 +447,10 @@ Returner kun gyldig JSON med struktur:
         console.log(`Photo ${photo.id}: ${faces.length} faces detected`);
       }
 
-      showNotification(`Fant ${totalFaces} ansikter i ${photosToAnalyze.length} bilder!`, "success");
+      showNotification(t('more.ai.notifications.facesDetected', { count: totalFaces, photos: photosToAnalyze.length }), "success");
     } catch (error) {
       console.error("Error in face recognition:", error);
-      showNotification("Feil ved ansiktsgjenkjenning", "error");
+      showNotification(t('more.ai.errors.faceRecognitionError'), "error");
     } finally {
       setLoading(false);
     }
@@ -480,7 +460,7 @@ Returner kun gyldig JSON med struktur:
     const visionKey = process.env.REACT_APP_GOOGLE_VISION_KEY;
     
     if (!visionKey) {
-      showNotification("Google Vision API-nøkkel mangler", "error");
+      showNotification(t('more.ai.errors.missingVisionKey'), "error");
       return;
     }
 
@@ -488,10 +468,9 @@ Returner kun gyldig JSON med struktur:
       setLoading(true);
       console.log("Smart tagging photos...");
 
-      // Analyser første bilde
       const firstPhoto = photos[0];
       if (!firstPhoto?.url) {
-        showNotification("Ingen bilder å tagge", "error");
+        showNotification(t('more.ai.errors.noPhotos'), "error");
         return;
       }
 
@@ -500,10 +479,10 @@ Returner kun gyldig JSON med struktur:
       const tags = labels.map(l => l.description);
 
       console.log("Generated tags:", tags);
-      showNotification(`Genererte ${tags.length} tags!`, "success");
+      showNotification(t('more.ai.notifications.tagsGenerated', { count: tags.length }), "success");
     } catch (error) {
       console.error("Error in smart tagging:", error);
-      showNotification("Feil ved smart tagging", "error");
+      showNotification(t('more.ai.errors.taggingError'), "error");
     } finally {
       setLoading(false);
     }
@@ -514,7 +493,6 @@ Returner kun gyldig JSON med struktur:
       setLoading(true);
       console.log("Detecting duplicates...");
 
-      // Enkel duplicate detection basert på filnavn og størrelse
       const duplicates = [];
       const seen = new Map();
 
@@ -529,10 +507,10 @@ Returner kun gyldig JSON med struktur:
       }
 
       console.log("Duplicates found:", duplicates.length);
-      showNotification(`Fant ${duplicates.length} mulige duplikater!`, "success");
+      showNotification(t('more.ai.notifications.duplicatesFound', { count: duplicates.length }), "success");
     } catch (error) {
       console.error("Error in duplicate detection:", error);
-      showNotification("Feil ved duplikat-deteksjon", "error");
+      showNotification(t('more.ai.errors.duplicateError'), "error");
     } finally {
       setLoading(false);
     }
@@ -546,7 +524,7 @@ Returner kun gyldig JSON med struktur:
 
     if (!exportUrl) {
       console.warn("Export URL not configured");
-      showNotification("Eksport er ikke tilgjengelig", "error");
+      showNotification(t('more.export.unavailable'), "error");
       return;
     }
 
@@ -579,10 +557,10 @@ Returner kun gyldig JSON med struktur:
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
 
-      showNotification("Data eksportert!", "success");
+      showNotification(t('notifications.exported'), "success");
     } catch (error) {
       console.error("Error exporting data:", error);
-      showNotification("Eksport feilet", "error");
+      showNotification(t('more.export.failed'), "error");
     } finally {
       setLoading(false);
     }
@@ -599,7 +577,7 @@ Returner kun gyldig JSON med struktur:
 
     if (!importUrl) {
       console.warn("Import URL not configured");
-      showNotification("Import er ikke tilgjengelig", "error");
+      showNotification(t('more.import.unavailable'), "error");
       return;
     }
 
@@ -624,13 +602,12 @@ Returner kun gyldig JSON med struktur:
       const result = await response.json();
       console.log("Import result:", result);
 
-      showNotification("Data importert!", "success");
+      showNotification(t('notifications.imported'), "success");
       
-      // Reload page to show imported data
       setTimeout(() => window.location.reload(), 1500);
     } catch (error) {
       console.error("Error importing data:", error);
-      showNotification("Import feilet", "error");
+      showNotification(t('more.import.failed'), "error");
     } finally {
       setLoading(false);
     }
@@ -645,10 +622,10 @@ Returner kun gyldig JSON med struktur:
 
     try {
       await navigator.clipboard.writeText(shareLink);
-      showNotification("Lenke kopiert!", "success");
+      showNotification(t('notifications.copied'), "success");
     } catch (error) {
       console.error("Error copying to clipboard:", error);
-      showNotification("Kunne ikke kopiere lenke", "error");
+      showNotification(t('more.share.failed'), "error");
     }
   };
 
@@ -666,7 +643,6 @@ Returner kun gyldig JSON med struktur:
       const db = getFirestore();
       const storage = getStorage();
 
-      // Delete all Firestore data
       const collections = ['photos', 'albums', 'shared', 'favorites'];
       
       for (const collectionName of collections) {
@@ -678,10 +654,8 @@ Returner kun gyldig JSON med struktur:
         );
       }
 
-      // Delete user document
       await deleteDoc(doc(db, 'users', user.uid));
 
-      // Delete Storage files
       try {
         const userStorageRef = storageRef(storage, `users/${user.uid}`);
         const listResult = await listAll(userStorageRef);
@@ -693,21 +667,19 @@ Returner kun gyldig JSON med struktur:
         console.warn("Storage deletion error:", storageError);
       }
 
-      // Delete Auth user
       const currentUser = auth.currentUser;
       if (currentUser) {
         await deleteAuthUser(currentUser);
       }
 
-      showNotification("Konto slettet", "success");
+      showNotification(t('notifications.deleted'), "success");
       
-      // Redirect to home
       setTimeout(() => {
         window.location.href = '/';
       }, 1500);
     } catch (error) {
       console.error("Error deleting account:", error);
-      showNotification("Kunne ikke slette konto", "error");
+      showNotification(t('more.account.deleteError'), "error");
       setShowDeleteConfirm(false);
     } finally {
       setLoading(false);
@@ -737,7 +709,8 @@ Returner kun gyldig JSON med struktur:
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
-    showNotification(`Språk endret til ${lng === 'no' ? 'Norsk' : 'English'}`, "success");
+    const langName = lng === 'no' ? 'Norsk' : 'English';
+    showNotification(t('notifications.languageChanged', { lang: langName }), "success");
   };
 
   // ============================================================================
@@ -764,7 +737,7 @@ Returner kun gyldig JSON med struktur:
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center">
           <div className="glass rounded-2xl p-6 flex items-center gap-3">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500"></div>
-            <span className="font-medium">Behandler...</span>
+            <span className="font-medium">{t('notifications.processing')}</span>
           </div>
         </div>
       )}
@@ -793,7 +766,7 @@ Returner kun gyldig JSON med struktur:
                   {isAdmin && (
                     <span className="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 font-semibold">
                       <Crown className="w-3 h-3" />
-                      Admin
+                      {t('more.admin.badge')}
                     </span>
                   )}
                 </div>
@@ -807,13 +780,13 @@ Returner kun gyldig JSON med struktur:
                 className="ripple-effect bg-white/20 backdrop-blur-xl hover:bg-white/30 text-white px-4 py-2 rounded-xl font-semibold transition flex items-center gap-2 border border-white/30 disabled:opacity-50"
               >
                 <Zap className="w-4 h-4" />
-                Oppgrader
+                {t('subscription.upgrade')}
               </button>
             )}
             {isPro && (
               <div className="bg-yellow-500/20 backdrop-blur-xl border border-yellow-500/30 text-white px-4 py-2 rounded-xl flex items-center gap-2">
                 <Crown className="w-4 h-4 text-yellow-300" />
-                <span className="font-semibold">Pro</span>
+                <span className="font-semibold">{t('subscription.pro')}</span>
               </div>
             )}
           </div>
@@ -822,36 +795,8 @@ Returner kun gyldig JSON med struktur:
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 border border-white/20">
               <div className="flex items-center gap-2 text-white/70 text-xs mb-1">
-                <ImagePlus className="w-3 h-3" />
-                Album
-              </div>
-              <p className="text-2xl font-bold text-white">{stats.totalAlbums}</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 border border-white/20">
-              <div className="flex items-center gap-2 text-white/70 text-xs mb-1">
-                <ImagePlus className="w-3 h-3" />
-                Bilder
-              </div>
-              <p className="text-2xl font-bold text-white">{stats.totalPhotos}</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 border border-white/20">
-              <div className="flex items-center gap-2 text-white/70 text-xs mb-1">
-                <Heart className="w-3 h-3" />
-                Favoritter
-              </div>
-              <p className="text-2xl font-bold text-white">{stats.favorites}</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 border border-white/20">
-              <div className="flex items-center gap-2 text-white/70 text-xs mb-1">
-                <Sparkles className="w-3 h-3" />
-                AI
-              </div>
-              <p className="text-2xl font-bold text-white">{stats.aiAnalyzed}</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 border border-white/20">
-              <div className="flex items-center gap-2 text-white/70 text-xs mb-1">
                 <Clock className="w-3 h-3" />
-                Nye (7d)
+                {t('more.stats.recentUploads')}
               </div>
               <p className="text-2xl font-bold text-white">{stats.recentUploads}</p>
             </div>
@@ -879,7 +824,7 @@ Returner kun gyldig JSON med struktur:
           <div className="p-3 bg-blue-600/20 rounded-xl">
             <Download className="w-6 h-6 text-blue-400" />
           </div>
-          <span className="text-sm font-medium">Eksporter</span>
+          <span className="text-sm font-medium">{t('buttons.export')}</span>
         </button>
         
         <button 
@@ -889,7 +834,7 @@ Returner kun gyldig JSON med struktur:
           <div className="p-3 bg-pink-600/20 rounded-xl">
             <Share2 className="w-6 h-6 text-pink-400" />
           </div>
-          <span className="text-sm font-medium">Del</span>
+          <span className="text-sm font-medium">{t('buttons.share')}</span>
         </button>
         
         <button 
@@ -899,7 +844,7 @@ Returner kun gyldig JSON med struktur:
           <div className="p-3 bg-green-600/20 rounded-xl">
             <HelpCircle className="w-6 h-6 text-green-400" />
           </div>
-          <span className="text-sm font-medium">{t('info.help')}</span>
+          <span className="text-sm font-medium">{t('buttons.help')}</span>
         </button>
       </div>
 
@@ -914,12 +859,12 @@ Returner kun gyldig JSON med struktur:
                 <div className="p-2 bg-purple-600/20 rounded-lg">
                   <HardDrive className="w-5 h-5 text-purple-400" />
                 </div>
-                <h3 className="font-semibold text-lg">{t('common:storage.title')}</h3>
+                <h3 className="font-semibold text-lg">{t('account.storage')}</h3>
               </div>
               {storagePercent > 80 && (
                 <span className="bg-orange-500/20 text-orange-400 text-xs px-2 py-1 rounded-full flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
-                  Nesten fullt
+                  {t('storage.almostFull')}
                 </span>
               )}
             </div>
@@ -928,7 +873,7 @@ Returner kun gyldig JSON med struktur:
               <div className="flex justify-between items-end">
                 <div>
                   <p className="text-3xl font-bold">{formatBytes(storageUsed)}</p>
-                  <p className="text-sm opacity-70 mt-1">av {formatBytes(storageLimit)}</p>
+                  <p className="text-sm opacity-70 mt-1">{t('more.storage.of')} {formatBytes(storageLimit)}</p>
                 </div>
                 <div className="text-right">
                   <p className={`text-2xl font-bold ${
@@ -938,7 +883,7 @@ Returner kun gyldig JSON med struktur:
                   }`}>
                     {storagePercent}%
                   </p>
-                  <p className="text-xs opacity-70">{t('common:storage.used')}</p>
+                  <p className="text-xs opacity-70">{t('storage.used')}</p>
                 </div>
               </div>
               
@@ -960,9 +905,9 @@ Returner kun gyldig JSON med struktur:
                   <div className="flex items-start gap-3">
                     <TrendingUp className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
                     <div className="flex-1">
-                      <p className="font-semibold text-sm mb-1">Trenger mer plass?</p>
+                      <p className="font-semibold text-sm mb-1">{t('storage.needMoreSpace')}</p>
                       <p className="text-xs opacity-70 mb-3">
-                        Oppgrader til Pro og få 100GB lagring og AI-funksjoner
+                        {t('storage.upgradeHint')}
                       </p>
                       <button 
                         onClick={handleUpgradeToPro}
@@ -985,7 +930,7 @@ Returner kun gyldig JSON med struktur:
               <div className="p-2 bg-blue-600/20 rounded-lg">
                 <Globe className="w-5 h-5 text-blue-400" />
               </div>
-              <h3 className="font-semibold text-lg">Tilpasning</h3>
+              <h3 className="font-semibold text-lg">{t('customization.title')}</h3>
             </div>
 
             <div className="space-y-4">
@@ -999,8 +944,8 @@ Returner kun gyldig JSON med struktur:
                   onChange={(e) => changeLanguage(e.target.value)}
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
                 >
-                  <option value="no">🇳🇴 Norsk</option>
-                  <option value="en">🇬🇧 English</option>
+                  <option value="no">🇳🇴 {t('language.norwegian')}</option>
+                  <option value="en">🇬🇧 {t('language.english')}</option>
                 </select>
               </div>
 
@@ -1014,14 +959,15 @@ Returner kun gyldig JSON med struktur:
                   <div>
                     <p className="font-medium">{t('theme.title')}</p>
                     <p className="text-xs opacity-70">
-                      {isDarkMode ? 'Mørkt tema' : 'Lyst tema'}
+                      {isDarkMode ? t('customization.themeDark') : t('customization.themeLight')}
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => {
                     setIsDarkMode(!isDarkMode);
-                    showNotification(`${!isDarkMode ? 'Mørkt' : 'Lyst'} tema aktivert`, "success");
+                    const themeName = !isDarkMode ? t('theme.dark') : t('theme.light');
+                    showNotification(t('notifications.themeChanged', { theme: themeName }), "success");
                   }}
                   className={`relative w-14 h-8 rounded-full transition-all ${
                     isDarkMode ? 'bg-purple-600' : 'bg-gray-400'
@@ -1076,7 +1022,7 @@ Returner kun gyldig JSON med struktur:
                         <CheckCircle className="w-4 h-4 text-green-400" />
                       )}
                     </div>
-                    <p className="text-xs opacity-70">PIN-kode og biometri</p>
+                    <p className="text-xs opacity-70">{t('more.settings.securityDesc')}</p>
                   </div>
                   <ChevronRight className="w-5 h-5 opacity-50" />
                 </button>
@@ -1085,7 +1031,7 @@ Returner kun gyldig JSON med struktur:
                   <Bell className="w-5 h-5 text-blue-400" />
                   <div className="flex-1">
                     <p className="font-medium">{t('settings.notifications')}</p>
-                    <p className="text-xs opacity-70">Push-varsler og e-post</p>
+                    <p className="text-xs opacity-70">{t('more.settings.notificationsDesc')}</p>
                   </div>
                   <ChevronRight className="w-5 h-5 opacity-50" />
                 </button>
@@ -1093,8 +1039,8 @@ Returner kun gyldig JSON med struktur:
                 <label className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10 cursor-pointer">
                   <Upload className="w-5 h-5 text-green-400" />
                   <div className="flex-1">
-                    <p className="font-medium">Importer data</p>
-                    <p className="text-xs opacity-70">Last opp backup-fil</p>
+                    <p className="font-medium">{t('more.import.title')}</p>
+                    <p className="text-xs opacity-70">{t('more.import.description')}</p>
                   </div>
                   <ChevronRight className="w-5 h-5 opacity-50" />
                   <input 
@@ -1124,7 +1070,7 @@ Returner kun gyldig JSON med struktur:
                   </div>
                   <div className="text-left">
                     <h3 className="font-semibold text-lg">{t('aiFunctions.title')}</h3>
-                    <p className="text-xs opacity-70">Smart bildebehandling</p>
+                    <p className="text-xs opacity-70">{t('more.ai.subtitle')}</p>
                   </div>
                 </div>
                 <ChevronRight className={`w-5 h-5 transition-transform duration-300 ${
@@ -1224,7 +1170,7 @@ Returner kun gyldig JSON med struktur:
                 <User className="w-5 h-5 text-gray-400" />
                 <div className="flex-1">
                   <p className="font-medium">{t('account.profile')}</p>
-                  <p className="text-xs opacity-70">Rediger profil og innstillinger</p>
+                  <p className="text-xs opacity-70">{t('more.account.profileDesc')}</p>
                 </div>
                 <ChevronRight className="w-5 h-5 opacity-50" />
               </button>
@@ -1242,7 +1188,7 @@ Returner kun gyldig JSON med struktur:
                       {isPro ? t('subscription.pro') : t('subscription.free')}
                     </span>
                   </div>
-                  <p className="text-xs opacity-70">Administrer abonnement</p>
+                  <p className="text-xs opacity-70">{t('more.account.subscriptionDesc')}</p>
                 </div>
                 <ChevronRight className="w-5 h-5 opacity-50" />
               </button>
@@ -1254,7 +1200,7 @@ Returner kun gyldig JSON med struktur:
                 <LogOut className="w-5 h-5" />
                 <div className="flex-1">
                   <p className="font-medium">{t('account.logout')}</p>
-                  <p className="text-xs opacity-70">Logg ut fra kontoen</p>
+                  <p className="text-xs opacity-70">{t('more.account.logoutDesc')}</p>
                 </div>
               </button>
 
@@ -1266,7 +1212,7 @@ Returner kun gyldig JSON med struktur:
                 <Trash2 className="w-5 h-5" />
                 <div className="flex-1">
                   <p className="font-medium">{t('account.deleteAccount')}</p>
-                  <p className="text-xs opacity-70">Permanent slett konto og data</p>
+                  <p className="text-xs opacity-70">{t('more.account.deleteDesc')}</p>
                 </div>
               </button>
             </div>
@@ -1315,7 +1261,7 @@ Returner kun gyldig JSON med struktur:
                   <p className="font-medium text-sm">{t('info.about')}</p>
                 </div>
                 <span className="text-xs opacity-70 font-mono">
-                  {process.env.REACT_APP_VERSION || 'v7.0'}
+                  {t('info.version')} {process.env.REACT_APP_VERSION || '7.0'}
                 </span>
               </div>
             </div>
@@ -1332,7 +1278,7 @@ Returner kun gyldig JSON med struktur:
             </div>
             <h3 className="font-semibold text-lg">{t('admin.title')}</h3>
             <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full ml-auto">
-              Admin tilgang
+              {t('more.admin.access')}
             </span>
           </div>
 
@@ -1344,7 +1290,7 @@ Returner kun gyldig JSON med struktur:
               <Users className="w-5 h-5 text-yellow-400" />
               <div className="flex-1">
                 <p className="font-medium">{t('admin.userManagement')}</p>
-                <p className="text-xs opacity-70">Administrer brukere</p>
+                <p className="text-xs opacity-70">{t('more.admin.userDesc')}</p>
               </div>
               <ChevronRight className="w-5 h-5 opacity-50" />
             </button>
@@ -1353,7 +1299,7 @@ Returner kun gyldig JSON med struktur:
               <HardDrive className="w-5 h-5 text-yellow-400" />
               <div className="flex-1">
                 <p className="font-medium">{t('admin.databaseTools')}</p>
-                <p className="text-xs opacity-70">Database verktøy</p>
+                <p className="text-xs opacity-70">{t('more.admin.databaseDesc')}</p>
               </div>
               <ChevronRight className="w-5 h-5 opacity-50" />
             </button>
@@ -1369,11 +1315,10 @@ Returner kun gyldig JSON med struktur:
               <div className="p-3 bg-red-600/20 rounded-xl">
                 <AlertCircle className="w-6 h-6 text-red-400" />
               </div>
-              <h3 className="text-xl font-bold">Slett konto</h3>
+              <h3 className="text-xl font-bold">{t('modals.deleteAccountTitle')}</h3>
             </div>
             <p className="opacity-70 mb-6">
-              Er du sikker på at du vil slette kontoen din permanent? Alle bilder, 
-              album og data vil bli slettet og kan ikke gjenopprettes.
+              {t('modals.deleteAccountMessage')}
             </p>
             <div className="flex gap-3">
               <button
@@ -1381,7 +1326,7 @@ Returner kun gyldig JSON med struktur:
                 disabled={loading}
                 className="ripple-effect flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-xl font-semibold transition disabled:opacity-50"
               >
-                Avbryt
+                {t('buttons.cancel')}
               </button>
               <button
                 onClick={deleteAccount}
@@ -1393,7 +1338,7 @@ Returner kun gyldig JSON med struktur:
                 ) : (
                   <>
                     <Trash2 className="w-4 h-4" />
-                    Slett permanent
+                    {t('buttons.deletePermanent')}
                   </>
                 )}
               </button>

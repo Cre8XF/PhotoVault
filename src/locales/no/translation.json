@@ -96,75 +96,141 @@
     "tags": "Tagger",
     "location": "Lokasjon"
   },
- "ai": {
-  "autoTagging": "AI Auto-tagging",
-  "autoTaggingDesc": "Analyser automatisk med Google Vision AI",
-  "successWithAI": "{{count}} bilder lastet opp og AI-analysert!",
-  "analyzing": "Analyserer med AI..."
-},
-"notifications": {
-  "processing": "Behandler...",
-  "success": "Fullført",
-  "error": "Feil oppstod",
-  "copied": "Lenke kopiert!",
-  "imported": "Data importert!",
-  "exported": "Data eksportert!",
-  "deleted": "Konto slettet",
-  "languageChanged": "Språk endret til {{lang}}",
-  "themeChanged": "{{theme}} tema aktivert",
-  "upgradeUnavailable": "Oppgradering er ikke tilgjengelig for øyeblikket"
-},
-"storage": {
-  "almostFull": "Nesten fullt",
-  "needMoreSpace": "Trenger mer plass?",
-  "upgradeHint": "Oppgrader til Pro og få 100 GB lagring og AI-funksjoner",
-  "used": "brukt"
-},
-"buttons": {
-  "upgrade": "Oppgrader",
-  "cancel": "Avbryt",
-  "confirm": "Bekreft",
-  "delete": "Slett",
-  "deletePermanent": "Slett permanent",
-  "share": "Del",
-  "export": "Eksporter",
-  "import": "Importer",
-  "help": "Hjelp",
-  "close": "Lukk",
-  "confirmDelete": "Bekreft sletting"
-},
-"modals": {
-  "deleteAccountTitle": "Slett konto",
-  "deleteAccountMessage": "Er du sikker på at du vil slette kontoen din permanent? Alle bilder, album og data vil bli slettet og kan ikke gjenopprettes.",
-  "processing": "Behandler..."
-},
-"customization": {
-  "title": "Tilpasning",
-  "themeLight": "Lyst tema",
-  "themeDark": "Mørkt tema"
-},
-"searchPage": {
-  "title": "Søk",
-  "edit": "Rediger",
-  "done": "Ferdig",
-  "filters": "Filtre",
-  "move": "Flytt",
-  "searchPlaceholder": "Søk i navn, AI-tags eller kategori",
-  "favorites": "Favoritter",
-  "withFaces": "Med ansikter",
-  "withTags": "Med AI-tags",
-  "aiAnalyzed": "AI-analysert",
-  "allAlbums": "Alle album",
-  "allCategories": "Alle kategorier",
-  "allDates": "Alle datoer",
-  "popularTags": "Populære AI-tags",
-  "activeFilters": "Aktive filtre",
-  "resetFilters": "Nullstill filtre",
-  "setAsCover": "Sett som forside",
-  "deletePhoto": "Slett bilde",
-  "confirmDeleteTitle": "Bekreft sletting",
-  "confirmDeleteMessage": "Er du sikker på at du vil slette dette bildet permanent?",
-  "confirmDeleteButton": "Slett bilde",
-  "cancel": "Avbryt"
-}
+  "ai": {
+    "autoTagging": "AI Auto-tagging",
+    "autoTaggingDesc": "Analyser automatisk med Google Vision AI",
+    "successWithAI": "{{count}} bilder lastet opp og AI-analysert!",
+    "analyzing": "Analyserer med AI..."
+  },
+  "notifications": {
+    "processing": "Behandler...",
+    "success": "Fullført",
+    "error": "Feil oppstod",
+    "copied": "Lenke kopiert!",
+    "imported": "Data importert!",
+    "exported": "Data eksportert!",
+    "deleted": "Konto slettet",
+    "languageChanged": "Språk endret til {{lang}}",
+    "themeChanged": "{{theme}} tema aktivert",
+    "upgradeUnavailable": "Oppgradering er ikke tilgjengelig for øyeblikket"
+  },
+  "storage": {
+    "almostFull": "Nesten fullt",
+    "needMoreSpace": "Trenger mer plass?",
+    "upgradeHint": "Oppgrader til Pro og få 100 GB lagring og AI-funksjoner",
+    "used": "brukt"
+  },
+  "buttons": {
+    "upgrade": "Oppgrader",
+    "cancel": "Avbryt",
+    "confirm": "Bekreft",
+    "delete": "Slett",
+    "deletePermanent": "Slett permanent",
+    "share": "Del",
+    "export": "Eksporter",
+    "import": "Importer",
+    "help": "Hjelp",
+    "close": "Lukk",
+    "confirmDelete": "Bekreft sletting"
+  },
+  "modals": {
+    "deleteAccountTitle": "Slett konto",
+    "deleteAccountMessage": "Er du sikker på at du vil slette kontoen din permanent? Alle bilder, album og data vil bli slettet og kan ikke gjenopprettes.",
+    "processing": "Behandler..."
+  },
+  "customization": {
+    "title": "Tilpasning",
+    "themeLight": "Lyst tema",
+    "themeDark": "Mørkt tema"
+  },
+  "searchPage": {
+    "title": "Søk",
+    "edit": "Rediger",
+    "done": "Ferdig",
+    "filters": "Filtre",
+    "move": "Flytt",
+    "searchPlaceholder": "Søk i navn, AI-tags eller kategori",
+    "favorites": "Favoritter",
+    "withFaces": "Med ansikter",
+    "withTags": "Med AI-tags",
+    "aiAnalyzed": "AI-analysert",
+    "allAlbums": "Alle album",
+    "allCategories": "Alle kategorier",
+    "allDates": "Alle datoer",
+    "popularTags": "Populære AI-tags",
+    "activeFilters": "Aktive filtre",
+    "resetFilters": "Nullstill filtre",
+    "setAsCover": "Sett som forside",
+    "deletePhoto": "Slett bilde",
+    "confirmDeleteTitle": "Bekreft sletting",
+    "confirmDeleteMessage": "Er du sikker på at du vil slette dette bildet permanent?",
+    "confirmDeleteButton": "Slett bilde",
+    "cancel": "Avbryt"
+  },
+  "more": {
+    "admin": {
+      "badge": "Admin",
+      "access": "Admin tilgang",
+      "userDesc": "Administrer brukere",
+      "databaseDesc": "Database verktøy"
+    },
+    "stats": {
+      "recentUploads": "Nye (7d)"
+    },
+    "storage": {
+      "of": "av"
+    },
+    "settings": {
+      "securityDesc": "PIN-kode og biometri",
+      "notificationsDesc": "Push-varsler og e-post"
+    },
+    "ai": {
+      "subtitle": "Smart bildebehandling",
+      "errors": {
+        "missingKey": "OpenAI API-nøkkel mangler",
+        "missingVisionKey": "Google Vision API-nøkkel mangler",
+        "missingPicsartKey": "Picsart API-nøkkel mangler",
+        "noPhotos": "Ingen bilder å sortere",
+        "sortingFailed": "Feil ved GPT-sortering",
+        "invalidJson": "Ugyldig JSON fra GPT",
+        "noCategories": "Ingen kategorier mottatt fra GPT",
+        "sortingError": "Feil ved auto-sortering",
+        "enhancementFailed": "Kunne ikke forbedre bilder",
+        "enhancementError": "Feil ved bildeforbedring",
+        "faceRecognitionError": "Feil ved ansiktsgjenkjenning",
+        "taggingError": "Feil ved smart tagging",
+        "duplicateError": "Feil ved duplikat-deteksjon"
+      },
+      "notifications": {
+        "sortingComplete": "AI-sortering lagret i Firestore",
+        "enhancementComplete": "Bildeforbedring fullført!",
+        "facesDetected": "Fant {{count}} ansikter i {{photos}} bilder!",
+        "tagsGenerated": "Genererte {{count}} tags!",
+        "duplicatesFound": "Fant {{count}} mulige duplikater!"
+      }
+    },
+    "subscription": {
+      "upgradeError": "Kunne ikke starte betalingsprosess"
+    },
+    "export": {
+      "unavailable": "Eksport er ikke tilgjengelig",
+      "failed": "Eksport feilet"
+    },
+    "import": {
+      "title": "Importer data",
+      "description": "Last opp backup-fil",
+      "unavailable": "Import er ikke tilgjengelig",
+      "failed": "Import feilet"
+    },
+    "share": {
+      "failed": "Kunne ikke kopiere lenke"
+    },
+    "account": {
+      "profileDesc": "Rediger profil og innstillinger",
+      "subscriptionDesc": "Administrer abonnement",
+      "logoutDesc": "Logg ut fra kontoen",
+      "deleteDesc": "Permanent slett konto og data",
+      "deleteError": "Kunne ikke slette konto"
+    }
+  }
 }

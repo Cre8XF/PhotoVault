@@ -1,0 +1,112 @@
+.
+📁 src/
+src/
+  📁 android/
+  📁 components/
+  📁 contexts/
+  📁 hooks/
+  📁 ios/
+  📁 locales/
+  📁 pages/
+  📁 styles/
+  📁 utils/
+  📄 App.js
+  📄 db.js
+  📄 firebase.js
+  📄 i18n.js
+  📄 index.css
+  📄 index.js
+  📄 styles-enhanced.css
+src/android/
+    📁 .idea/
+    📁 app/
+src/android/.idea/
+      📁 caches/
+      📄 .gitignore
+      📄 android.iml
+      📄 misc.xml
+      📄 modules.xml
+      📄 vcs.xml
+      📄 workspace.xml
+src/android/.idea/caches/
+        📄 deviceStreaming.xml
+src/android/app/
+      📁 src/
+src/android/app/src/
+        📁 main/
+src/android/app/src/main/
+          📄 AndroidManifest.xml
+src/components/
+    📄 AILogPanel.jsx
+    📄 AIToolsPanel.jsx
+    📄 AlbumCard.jsx
+    📄 AlbumModal.jsx
+    📄 ConfirmModal.jsx
+    📄 EnhancedComponents.jsx
+    📄 LazyImage.jsx
+    📄 Loading.jsx
+    📄 LoginPage.jsx
+    📄 Notification.jsx
+    📄 PINLockScreen.jsx
+    📄 Particles.jsx
+    📄 PhotoGrid.jsx
+    📄 PhotoGridLazy.jsx
+    📄 PhotoGridOptimized.jsx
+    📄 PhotoModal.jsx
+    📄 SmartAlbumsView.jsx
+    📄 UploadModal.jsx
+    📄 UploadModalOptimized.jsx
+src/contexts/
+    📄 SecurityContext.jsx
+    📄 ToastContext.js
+src/hooks/
+    📄 useInfiniteScroll.js
+src/ios/
+    📁 app/
+src/ios/app/
+      📁 app/
+src/ios/app/app/
+        📄 Info.plist
+src/locales/
+    📁 en/
+    📁 no/
+src/locales/en/
+      📄 albums.json
+      📄 common.json
+      📄 security.json
+      📄 translation.json
+src/locales/no/
+      📄 albums.json
+      📄 common.json
+      📄 security.json
+      📄 translation.json
+src/pages/
+    📄 AISettingsPage.jsx
+    📄 AdminDashboard.jsx
+    📄 AlbumPage.jsx
+    📄 AlbumsPage.jsx
+    📄 HomeDashboard.jsx
+    📄 LoginPage.jsx
+    📄 MorePage.jsx
+    📄 SearchPage.jsx
+    📄 SecuritySettings.jsx
+src/styles/
+    📄 album.css
+    📄 home.css
+src/utils/
+    📄 aiEnhance.js
+    📄 aiSort.js
+    📄 biometric.js
+    📄 cacheManager.js
+    📄 googleVision.js
+    📄 imageCompression.js
+    📄 imageOptimization.js
+    📄 nativeBiometric.js
+    📄 nativeCamera.js
+    📄 nativeUtils.js
+    📄 picsart.js
+    📄 picsartAI.js
+    📄 picsartClient.js
+    📄 searchPhotos.js
+    📄 security.js
+    📄 smartAlbums.js

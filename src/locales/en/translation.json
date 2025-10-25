@@ -97,75 +97,140 @@
     "location": "Location"
   },
   "ai": {
-  "aiTags": "AI tags",
-  "facesDetected": "Faces detected",
-  "aiAnalyzed": "AI analyzed",
-  "category": "Category"
-},
-"notifications": {
-  "processing": "Processing...",
-  "success": "Completed",
-  "error": "An error occurred",
-  "copied": "Link copied!",
-  "imported": "Data imported!",
-  "exported": "Data exported!",
-  "deleted": "Account deleted",
-  "languageChanged": "Language changed to {{lang}}",
-  "themeChanged": "{{theme}} theme activated",
-  "upgradeUnavailable": "Upgrade is currently unavailable"
-},
-"storage": {
-  "almostFull": "Almost full",
-  "needMoreSpace": "Need more space?",
-  "upgradeHint": "Upgrade to Pro for 100 GB storage and AI features",
-  "used": "used"
-},
-"buttons": {
-  "upgrade": "Upgrade",
-  "cancel": "Cancel",
-  "confirm": "Confirm",
-  "delete": "Delete",
-  "deletePermanent": "Delete permanently",
-  "share": "Share",
-  "export": "Export",
-  "import": "Import",
-  "help": "Help",
-  "close": "Close",
-  "confirmDelete": "Confirm deletion"
-},
-"modals": {
-  "deleteAccountTitle": "Delete account",
-  "deleteAccountMessage": "Are you sure you want to permanently delete your account? All photos, albums and data will be lost and cannot be recovered.",
-  "processing": "Processing..."
-},
-"customization": {
-  "title": "Customization",
-  "themeLight": "Light theme",
-  "themeDark": "Dark theme"
-},
-"searchPage": {
-  "title": "Search",
-  "edit": "Edit",
-  "done": "Done",
-  "filters": "Filters",
-  "move": "Move",
-  "searchPlaceholder": "Search by name, AI tags or category",
-  "favorites": "Favorites",
-  "withFaces": "With faces",
-  "withTags": "With AI tags",
-  "aiAnalyzed": "AI analyzed",
-  "allAlbums": "All albums",
-  "allCategories": "All categories",
-  "allDates": "All dates",
-  "popularTags": "Popular AI tags",
-  "activeFilters": "Active filters",
-  "resetFilters": "Reset filters",
-  "setAsCover": "Set as cover",
-  "deletePhoto": "Delete photo",
-  "confirmDeleteTitle": "Confirm deletion",
-  "confirmDeleteMessage": "Are you sure you want to permanently delete this photo?",
-  "confirmDeleteButton": "Delete photo",
-  "cancel": "Cancel"
-}
-
+    "aiTags": "AI tags",
+    "facesDetected": "Faces detected",
+    "aiAnalyzed": "AI analyzed",
+    "category": "Category"
+  },
+  "notifications": {
+    "processing": "Processing...",
+    "success": "Completed",
+    "error": "An error occurred",
+    "copied": "Link copied!",
+    "imported": "Data imported!",
+    "exported": "Data exported!",
+    "deleted": "Account deleted",
+    "languageChanged": "Language changed to {{lang}}",
+    "themeChanged": "{{theme}} theme activated",
+    "upgradeUnavailable": "Upgrade is currently unavailable"
+  },
+  "storage": {
+    "almostFull": "Almost full",
+    "needMoreSpace": "Need more space?",
+    "upgradeHint": "Upgrade to Pro for 100 GB storage and AI features",
+    "used": "used"
+  },
+  "buttons": {
+    "upgrade": "Upgrade",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "deletePermanent": "Delete permanently",
+    "share": "Share",
+    "export": "Export",
+    "import": "Import",
+    "help": "Help",
+    "close": "Close",
+    "confirmDelete": "Confirm deletion"
+  },
+  "modals": {
+    "deleteAccountTitle": "Delete account",
+    "deleteAccountMessage": "Are you sure you want to permanently delete your account? All photos, albums and data will be lost and cannot be recovered.",
+    "processing": "Processing..."
+  },
+  "customization": {
+    "title": "Customization",
+    "themeLight": "Light theme",
+    "themeDark": "Dark theme"
+  },
+  "searchPage": {
+    "title": "Search",
+    "edit": "Edit",
+    "done": "Done",
+    "filters": "Filters",
+    "move": "Move",
+    "searchPlaceholder": "Search by name, AI tags or category",
+    "favorites": "Favorites",
+    "withFaces": "With faces",
+    "withTags": "With AI tags",
+    "aiAnalyzed": "AI analyzed",
+    "allAlbums": "All albums",
+    "allCategories": "All categories",
+    "allDates": "All dates",
+    "popularTags": "Popular AI tags",
+    "activeFilters": "Active filters",
+    "resetFilters": "Reset filters",
+    "setAsCover": "Set as cover",
+    "deletePhoto": "Delete photo",
+    "confirmDeleteTitle": "Confirm deletion",
+    "confirmDeleteMessage": "Are you sure you want to permanently delete this photo?",
+    "confirmDeleteButton": "Delete photo",
+    "cancel": "Cancel"
+  },
+  "more": {
+    "admin": {
+      "badge": "Admin",
+      "access": "Admin access",
+      "userDesc": "Manage users",
+      "databaseDesc": "Database tools"
+    },
+    "stats": {
+      "recentUploads": "New (7d)"
+    },
+    "storage": {
+      "of": "of"
+    },
+    "settings": {
+      "securityDesc": "PIN code and biometrics",
+      "notificationsDesc": "Push notifications and email"
+    },
+    "ai": {
+      "subtitle": "Smart image processing",
+      "errors": {
+        "missingKey": "OpenAI API key missing",
+        "missingVisionKey": "Google Vision API key missing",
+        "missingPicsartKey": "Picsart API key missing",
+        "noPhotos": "No photos to process",
+        "sortingFailed": "Error with GPT sorting",
+        "invalidJson": "Invalid JSON from GPT",
+        "noCategories": "No categories received from GPT",
+        "sortingError": "Error during auto-sorting",
+        "enhancementFailed": "Could not enhance images",
+        "enhancementError": "Error during image enhancement",
+        "faceRecognitionError": "Error during face recognition",
+        "taggingError": "Error during smart tagging",
+        "duplicateError": "Error during duplicate detection"
+      },
+      "notifications": {
+        "sortingComplete": "AI sorting saved to Firestore",
+        "enhancementComplete": "Image enhancement completed!",
+        "facesDetected": "Found {{count}} faces in {{photos}} images!",
+        "tagsGenerated": "Generated {{count}} tags!",
+        "duplicatesFound": "Found {{count}} possible duplicates!"
+      }
+    },
+    "subscription": {
+      "upgradeError": "Could not start payment process"
+    },
+    "export": {
+      "unavailable": "Export is not available",
+      "failed": "Export failed"
+    },
+    "import": {
+      "title": "Import data",
+      "description": "Upload backup file",
+      "unavailable": "Import is not available",
+      "failed": "Import failed"
+    },
+    "share": {
+      "failed": "Could not copy link"
+    },
+    "account": {
+      "profileDesc": "Edit profile and settings",
+      "subscriptionDesc": "Manage subscription",
+      "logoutDesc": "Log out from account",
+      "deleteDesc": "Permanently delete account and data",
+      "deleteError": "Could not delete account"
+    }
+  }
 }
