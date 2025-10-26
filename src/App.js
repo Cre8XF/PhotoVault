@@ -1,132 +1,103 @@
 // ============================================================================
-// APP.js – v5.2 med komplett i18n-støtte
+// APP.js – v6.0 Phase 2: Modern Architecture with Zustand & Hooks
 // ============================================================================
-import React, { useState, useEffect, useMemo } from "react";
-import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
+import React from "react";
+import { BrowserRouter } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 
-// Pages
-import LoginPage from "./pages/LoginPage";
-import HomeDashboard from "./pages/HomeDashboard";
-import AlbumsPage from "./pages/AlbumsPage";
-import SearchPage from "./pages/SearchPage";
-import MorePage from "./pages/MorePage";
-import AlbumPage from "./pages/AlbumPage";
-import AdminDashboard from "./pages/AdminDashboard";
-import SecuritySettings from "./pages/SecuritySettings";
+// Contexts
+import { SecurityProvider, useSecurityContext } from "./contexts/SecurityContext";
+import { ToastProvider } from './contexts/ToastContext';
 
 // Components
+import ErrorBoundary from "./components/ErrorBoundary";
+import AppRoutes from "./routes/AppRoutes";
 import UploadModal from "./components/UploadModal";
 import PhotoModal from "./components/PhotoModal";
 import AlbumModal from "./components/AlbumModal";
 import ConfirmModal from "./components/ConfirmModal";
 import Notification from "./components/Notification";
 import Particles from "./components/Particles";
-import PINLockScreen from "./components/PINLockScreen";
+import BottomNavigation from "./components/BottomNavigation";
+
+// Hooks
+import useAuth from "./hooks/useAuth";
+import usePhotoData from "./hooks/usePhotoData";
+import useStore from "./state/store";
 
 // Icons
 import { Home, FolderOpen, Plus, Search, Menu } from "lucide-react";
 
-// Firebase & Utils
-import {
-  addAlbum,
-  getAlbumsByUser,
-  updateAlbum,
-  uploadPhoto,
-  getPhotosByUser,
-  deletePhoto,
-  updatePhoto,
-} from "./firebase";
-
-// Security Context
-import { SecurityProvider, useSecurityContext } from "./contexts/SecurityContext";
-import { ToastProvider } from './contexts/ToastContext';
-
+/**
+ * Main App Component with new architecture
+ */
 function App() {
   return (
-    <ToastProvider>
-      <SecurityProvider>
-        <AppContent />
-      </SecurityProvider>
-    </ToastProvider>
+    <ErrorBoundary>
+      <ToastProvider>
+        <SecurityProvider>
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+        </SecurityProvider>
+      </ToastProvider>
+    </ErrorBoundary>
   );
 }
 
-// Main App Component (wrapped in SecurityProvider)
+/**
+ * App Content Component
+ */
 function AppContent() {
-  // i18n
   const { t } = useTranslation(['common', 'nav']);
 
-  // Auth
-  const auth = getAuth();
+  // Custom hooks
+  const { user, loading } = useAuth();
+  const {
+    albums,
+    handleUpload,
+    handleAlbumSave,
+    handleCreateAlbumFromUpload,
+    toggleFavorite,
+  } = usePhotoData();
 
-  // Security context
-  const { isLocked, pinEnabled } = useSecurityContext();
-  
-  // Auth state
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  
-  // Navigation state
-  const [currentPage, setCurrentPage] = useState("home");
-  const [selectedAlbum, setSelectedAlbum] = useState(null);
-  
-  // Data state
-  const [albums, setAlbums] = useState([]);
-  const [photos, setPhotos] = useState([]);
-  const [userProfile, setUserProfile] = useState(null);
-  
-  // Modal state
-  const [uploadModalOpen, setUploadModalOpen] = useState(false);
-  const [albumModalOpen, setAlbumModalOpen] = useState(false);
-  const [editingAlbum, setEditingAlbum] = useState(null);
-  const [photoModalOpen, setPhotoModalOpen] = useState(false);
-  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
-  const [confirmModal, setConfirmModal] = useState(null);
-  
-  // UI state
-  const [notification, setNotification] = useState(null);
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem("theme");
-    return saved !== "light";
-  });
+  // Zustand store
+  const uploadModalOpen = useStore((state) => state.uploadModalOpen);
+  const albumModalOpen = useStore((state) => state.albumModalOpen);
+  const photoModalOpen = useStore((state) => state.photoModalOpen);
+  const confirmModal = useStore((state) => state.confirmModal);
+  const notification = useStore((state) => state.notification);
+  const editingAlbum = useStore((state) => state.editingAlbum);
+  const photos = useStore((state) => state.photos);
+  const selectedPhotoIndex = useStore((state) => state.selectedPhotoIndex);
+  const isDarkMode = useStore((state) => state.isDarkMode);
+  const currentPage = useStore((state) => state.currentPage);
 
-  // Auth listener
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-      if (currentUser) {
-        refreshData(currentUser.uid);
-      } else {
-        setAlbums([]);
-        setPhotos([]);
-        setUserProfile(null);
-      }
-    });
-    return () => unsubscribe();
-  }, [auth]);
+  const setUploadModalOpen = useStore((state) => state.setUploadModalOpen);
+  const setAlbumModalOpen = useStore((state) => state.setAlbumModalOpen);
+  const setEditingAlbum = useStore((state) => state.setEditingAlbum);
+  const setPhotoModalOpen = useStore((state) => state.setPhotoModalOpen);
+  const setConfirmModal = useStore((state) => state.setConfirmModal);
+  const clearNotification = useStore((state) => state.clearNotification);
+  const setCurrentPage = useStore((state) => state.setCurrentPage);
+  const setTheme = useStore((state) => state.setTheme);
 
-  // Theme effect
-  useEffect(() => {
-    if (isDarkMode) {
-      document.body.classList.remove("light-mode");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.body.classList.add("light-mode");
-      localStorage.setItem("theme", "light");
-    }
-  }, [isDarkMode]);
+  // Apply theme on mount
+  React.useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    const isDark = savedTheme !== "light";
+    setTheme(isDark);
+  }, [setTheme]);
 
-  // Global drag & drop
-  useEffect(() => {
+  // Global drag & drop for file uploads
+  React.useEffect(() => {
     if (!user) return;
 
     const handleGlobalDrop = (e) => {
       e.preventDefault();
       const files = Array.from(e.dataTransfer.files);
       const imageFiles = files.filter(f => f.type.startsWith("image/"));
-      
+
       if (imageFiles.length > 0 && !uploadModalOpen) {
         setUploadModalOpen(true);
         setTimeout(() => {
@@ -147,211 +118,9 @@ function AppContent() {
       window.removeEventListener('drop', handleGlobalDrop);
       window.removeEventListener('dragover', handleGlobalDragOver);
     };
-  }, [user, uploadModalOpen]);
+  }, [user, uploadModalOpen, setUploadModalOpen]);
 
-  // Refresh data
-  const refreshData = async (uid = user?.uid) => {
-    if (!uid) return;
-    try {
-      const [albumData, photoData] = await Promise.all([
-        getAlbumsByUser(uid),
-        getPhotosByUser(uid)
-      ]);
-      setAlbums(albumData);
-      setPhotos(photoData);
-    } catch (err) {
-      console.error("Error refreshing data:", err);
-      setNotification({ message: t('common:notifications.errorLoadingData'), type: "error" });
-    }
-  };
-
-  // Handle logout
-  const handleLogout = async () => {
-    setConfirmModal({
-      title: t('common:notifications.confirmLogout'),
-      message: t('common:notifications.confirmLogoutMessage'),
-      onConfirm: async () => {
-        try {
-          await signOut(auth);
-          setCurrentPage("home");
-          setNotification({ message: t('common:notifications.loggedOut'), type: "success" });
-        } catch (err) {
-          console.error("Logout error:", err);
-          setNotification({ message: t('common:notifications.logoutError'), type: "error" });
-        }
-      }
-    });
-  };
-
-  // Handle photo click
-  const handlePhotoClick = (photo) => {
-    const index = photos.findIndex(p => p.id === photo.id);
-    setSelectedPhotoIndex(index);
-    setPhotoModalOpen(true);
-  };
-
-  // Handle album click
-  const handleAlbumClick = (album) => {
-    setSelectedAlbum(album);
-    setCurrentPage("album");
-  };
-
-  // Toggle favorite
-  const toggleFavorite = async (photo) => {
-    try {
-      await updatePhoto(photo.id, { favorite: !photo.favorite });
-      await refreshData();
-      setNotification({
-        message: photo.favorite ? t('common:notifications.removedFromFavorites') : t('common:notifications.addedToFavorites'),
-        type: "success"
-      });
-    } catch (err) {
-      console.error("Error toggling favorite:", err);
-      setNotification({ message: t('common:notifications.updateError'), type: "error" });
-    }
-  };
-
-  // ✅ Handle upload - kaller uploadPhoto fra firebase.js
-  const handleUpload = async (selectedFiles, albumId, aiTagging = false) => {
-    if (!user) {
-      setNotification({ message: t('common:notifications.mustBeLoggedIn'), type: "error" });
-      return;
-    }
-
-    try {
-      let successCount = 0;
-
-      for (const fileObj of selectedFiles) {
-        await uploadPhoto(user.uid, fileObj.file, albumId, aiTagging);
-        successCount++;
-      }
-
-      await refreshData();
-
-      const message = aiTagging
-        ? t('common:notifications.photosUploadedWithAI', { count: successCount })
-        : t('common:notifications.photosUploaded', { count: successCount });
-
-      setNotification({ message, type: "success" });
-
-    } catch (error) {
-      console.error("Upload error:", error);
-      setNotification({
-        message: t('common:notifications.uploadError', { message: error.message }),
-        type: "error"
-      });
-      throw error;
-    }
-  };
-
-  // Handle create/edit album
-  const handleAlbumSave = async (albumData) => {
-    try {
-      if (editingAlbum) {
-        await updateAlbum(editingAlbum.id, albumData);
-        setNotification({ message: t('common:notifications.albumUpdated'), type: "success" });
-      } else {
-        await addAlbum({ ...albumData, userId: user.uid });
-        setNotification({ message: t('common:notifications.albumCreated'), type: "success" });
-      }
-      setAlbumModalOpen(false);
-      setEditingAlbum(null);
-      await refreshData();
-    } catch (err) {
-      console.error("Album save error:", err);
-      setNotification({ message: t('common:notifications.albumSaveError'), type: "error" });
-    }
-  };
-
-  // Handle create album from upload modal (returns album ID)
-  const handleCreateAlbumFromUpload = async (albumName) => {
-    try {
-      const albumData = {
-        name: String(albumName).trim(),
-        title: String(albumName).trim(),
-        userId: user.uid,
-        createdAt: new Date().toISOString(),
-        photoCount: 0,
-        cover: ""
-      };
-      
-      const albumId = await addAlbum(albumData);
-      await refreshData();
-      setNotification({ message: t('common:notifications.albumCreated'), type: "success" });
-      return albumId;
-    } catch (err) {
-      console.error("Album creation error:", err);
-      setNotification({ message: t('common:notifications.albumCreationError'), type: "error" });
-      throw err;
-    }
-  };
-
-  // Handle delete album
-  const handleDeleteAlbum = (album) => {
-    const albumPhotos = photos.filter(p => p.albumId === album.id);
-    const photosNote = albumPhotos.length > 0
-      ? t('common:notifications.deleteAlbumPhotosNote', { count: albumPhotos.length })
-      : t('common:notifications.deleteAlbumEmptyNote');
-
-    setConfirmModal({
-      title: t('common:notifications.deleteAlbumTitle'),
-      message: t('common:notifications.deleteAlbumMessage', {
-        name: album.name,
-        photos: photosNote
-      }),
-      onConfirm: async () => {
-        try {
-          // Fjern albumId fra alle bilder i albumet
-          for (const photo of albumPhotos) {
-            await updatePhoto(photo.id, { albumId: null });
-          }
-
-          // Slett albumet fra Firestore
-          const { deleteDoc, doc } = await import('firebase/firestore');
-          const { db } = await import('./firebase');
-          await deleteDoc(doc(db, 'albums', album.id));
-
-          await refreshData();
-          if (currentPage === "album" && selectedAlbum?.id === album.id) {
-            setCurrentPage("albums");
-            setSelectedAlbum(null);
-          }
-          setNotification({ message: t('common:notifications.albumDeleted'), type: "success" });
-        } catch (err) {
-          console.error("Delete album error:", err);
-          setNotification({ message: t('common:notifications.albumDeleteError'), type: "error" });
-        }
-      }
-    });
-  };
-
-  // Handle delete photo
-  const handleDeletePhoto = (photo) => {
-    setConfirmModal({
-      title: t('common:notifications.deletePhotoTitle'),
-      message: t('common:notifications.deletePhotoMessage'),
-      onConfirm: async () => {
-        try {
-          await deletePhoto(photo.id, photo.storagePath);
-          await refreshData();
-          setPhotoModalOpen(false);
-          setNotification({ message: t('common:notifications.photoDeleted'), type: "success" });
-        } catch (err) {
-          console.error("Delete photo error:", err);
-          setNotification({ message: t('common:notifications.photoDeleteError'), type: "error" });
-        }
-      }
-    });
-  };
-
-  // Calculate storage
-  const storageUsed = useMemo(() => {
-    return photos.reduce((acc, photo) => acc + (photo.size || 0), 0);
-  }, [photos]);
-
-  const storageLimit = userProfile?.storageLimit || 524288000; // 500 MB default
-
-  // Show loading
+  // Show loading spinner
   if (loading) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
@@ -360,97 +129,20 @@ function AppContent() {
     );
   }
 
-  // Show login if not authenticated
-  if (!user) {
-    return <LoginPage />;
-  }
-
-  // Show PIN lock screen if locked
-  if (isLocked && pinEnabled) {
-    return <PINLockScreen />;
-  }
-
-  const isAdmin = userProfile?.role === "admin";
+  // Determine if we should show bottom navigation
+  const showBottomNav = user && currentPage !== "album" && currentPage !== "admin" && currentPage !== "security";
 
   return (
     <div className="min-h-screen relative">
       <Particles />
 
-      {/* Main content */}
+      {/* Main content with routing */}
       <main className="relative z-10">
-        {currentPage === "home" && (
-          <HomeDashboard
-            albums={albums}
-            photos={photos}
-            user={userProfile || user}
-            onNavigate={setCurrentPage}
-            refreshData={refreshData}
-          />
-        )}
-
-        {currentPage === "albums" && (
-          <AlbumsPage
-            albums={albums}
-            photos={photos}
-            onNavigate={setCurrentPage}
-            onAlbumClick={handleAlbumClick}
-            onPhotoClick={handlePhotoClick}
-            toggleFavorite={toggleFavorite}
-          />
-        )}
-
-        {currentPage === "search" && (
-          <SearchPage
-            photos={photos}
-            albums={albums}
-            onPhotoClick={handlePhotoClick}
-            toggleFavorite={toggleFavorite}
-          />
-        )}
-
-        {currentPage === "more" && (
-          <MorePage
-            user={userProfile || user}
-            storageUsed={storageUsed}
-            storageLimit={storageLimit}
-            photos={photos}
-            albums={albums}
-            isDarkMode={isDarkMode}
-            setIsDarkMode={setIsDarkMode}
-            onLogout={handleLogout}
-            onNavigate={setCurrentPage}
-          />
-        )}
-
-        {currentPage === "security" && (
-          <SecuritySettings
-            onBack={() => setCurrentPage("more")}
-          />
-        )}
-
-        {currentPage === "album" && selectedAlbum && (
-          <AlbumPage
-            album={selectedAlbum}
-            user={userProfile || user}
-            photos={photos}
-            onBack={() => {
-              setCurrentPage("albums");
-              setSelectedAlbum(null);
-            }}
-            refreshData={refreshData}
-            colors={{}}
-          />
-        )}
-
-        {currentPage === "admin" && isAdmin && (
-          <AdminDashboard
-            onBack={() => setCurrentPage("more")}
-          />
-        )}
+        <AppRoutes />
       </main>
 
-      {/* Bottom navigation */}
-      {currentPage !== "album" && currentPage !== "admin" && currentPage !== "security" && (
+      {/* Bottom Navigation */}
+      {showBottomNav && (
         <nav className="bottom-nav-float">
           <div className="flex justify-around items-center gap-2">
             {/* Home */}
@@ -527,7 +219,7 @@ function AppContent() {
             setAlbumModalOpen(false);
             setEditingAlbum(null);
           }}
-          onSave={handleAlbumSave}
+          onSave={(albumData) => handleAlbumSave(albumData, editingAlbum)}
         />
       )}
 
@@ -540,24 +232,23 @@ function AppContent() {
         />
       )}
 
-     {confirmModal && (
-  <ConfirmModal
-    isOpen={true}
-    title={confirmModal.title}
-    message={confirmModal.message}
-    onConfirm={confirmModal.onConfirm}
-    onClose={() => setConfirmModal(null)}
-    confirmLabel={t('common:notifications.logout')}
-    cancelLabel={t('common:cancel')}
-  />
-)}
-
+      {confirmModal && (
+        <ConfirmModal
+          isOpen={true}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          onConfirm={confirmModal.onConfirm}
+          onClose={() => setConfirmModal(null)}
+          confirmLabel={confirmModal.confirmLabel || t('common:confirm')}
+          cancelLabel={confirmModal.cancelLabel || t('common:cancel')}
+        />
+      )}
 
       {notification && (
         <Notification
           message={notification.message}
           type={notification.type}
-          onClose={() => setNotification(null)}
+          onClose={clearNotification}
         />
       )}
     </div>
