@@ -1,0 +1,21 @@
+{
+  "greeting": "Hei, {{name}}",
+  "user": "der",
+  "newPhoto": "nytt bilde",
+  "newPhotos": "nye bilder",
+  "sinceYesterday": "siden i går",
+  "favoritesTitle": "Favoritter",
+  "recentUploads": "Siste opplastninger",
+  "smartAlbums": "Smarte album",
+  "last30days": "Siste 30 dager",
+  "withFaces": "Med ansikter",
+  "unassigned": "Ikke tildelt",
+  "aiTools": "AI-verktøy",
+  "autoSortTitle": "Auto-sorter",
+  "autoSortDesc": "Organiser automatisk",
+  "enhanceTitle": "Forbedre",
+  "enhanceDesc": "AI-forbedring",
+  "moreAI": "Mer AI",
+  "viewAllTools": "Se alle verktøy",
+  "quickOverview": "Rask oversikt"
+}

@@ -3,8 +3,10 @@
 // COMPONENT: MoveModal.jsx – Flytt valgte bilder til et annet album
 // ============================================================================
 import React, { useState } from "react";
+import { useTranslation } from 'react-i18next';
 
 const MoveModal = ({ isOpen, onClose, albums = [], onConfirm }) => {
+  const { t } = useTranslation('common');
   const [selectedAlbumId, setSelectedAlbumId] = useState("");
 
   if (!isOpen) return null;
@@ -18,15 +20,15 @@ const MoveModal = ({ isOpen, onClose, albums = [], onConfirm }) => {
         onClick={(e) => e.stopPropagation()}
         className="bg-[var(--bg-secondary)] rounded-2xl shadow-2xl border border-white/10 w-full max-w-md p-6"
       >
-        <h2 className="text-xl font-bold text-white mb-4">Flytt til album</h2>
-        <p className="text-sm text-gray-400 mb-4">Velg albumet du vil flytte bildene til.</p>
+        <h2 className="text-xl font-bold text-white mb-4">{t('moveToAlbum')}</h2>
+        <p className="text-sm text-gray-400 mb-4">{t('selectAlbumDesc')}</p>
 
         <select
           value={selectedAlbumId}
           onChange={(e) => setSelectedAlbumId(e.target.value)}
           className="w-full bg-[var(--bg-primary)] text-white border border-white/10 rounded-lg px-4 py-3 mb-6 focus:ring-2 focus:ring-purple-500"
         >
-          <option value="">Velg album...</option>
+          <option value="">{t('selectAlbum')}</option>
           {albums.map((a) => (
             <option key={a.id} value={a.id}>
               {a.name}
@@ -39,7 +41,7 @@ const MoveModal = ({ isOpen, onClose, albums = [], onConfirm }) => {
             onClick={onClose}
             className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
           >
-            Avbryt
+            {t('cancel')}
           </button>
           <button
             disabled={!selectedAlbumId}
@@ -49,7 +51,7 @@ const MoveModal = ({ isOpen, onClose, albums = [], onConfirm }) => {
             }}
             className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg disabled:bg-gray-600 disabled:cursor-not-allowed"
           >
-            Flytt
+            {t('move')}
           </button>
         </div>
       </div>

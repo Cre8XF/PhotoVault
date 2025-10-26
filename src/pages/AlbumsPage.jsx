@@ -31,21 +31,21 @@ const AlbumsPage = ({ albums, photos, onAlbumClick, onPhotoClick }) => {
         <h1 className="text-3xl font-bold">{t('common:albums')}</h1>
         {selectedPhotos.length > 0 && (
           <button onClick={() => setMoveOpen(true)} className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center gap-2">
-            <Move size={18} /> Flytt til album
+            <Move size={18} /> {t('common:moveToAlbum')}
           </button>
         )}
       </div>
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-          <p className="text-sm text-gray-400">Album</p>
+          <p className="text-sm text-gray-400">{t('common:albums')}</p>
           <p className="text-2xl font-bold">{totalAlbums}</p>
         </div>
         <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-          <p className="text-sm text-gray-400">Bilder</p>
+          <p className="text-sm text-gray-400">{t('common:photos')}</p>
           <p className="text-2xl font-bold">{totalPhotos}</p>
         </div>
         <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-          <p className="text-sm text-gray-400">Lagring</p>
+          <p className="text-sm text-gray-400">{t('common:storage')}</p>
           <p className="text-2xl font-bold">{totalSizeMB} MB</p>
         </div>
       </div>

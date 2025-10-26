@@ -50,6 +50,7 @@ function getCategoryIcon(category) {
 }
 
 const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) => {
+  const { t } = useTranslation(['common', 'albums']);
   const [editMode, setEditMode] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState([]);
   const [isMoveOpen, setMoveOpen] = useState(false);
@@ -127,24 +128,24 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
       await setAlbumCover(album.id, photo.url);
       if (refreshData) await refreshData();
     } catch (error) {
-      console.error("Feil ved oppdatering av forside:", error);
-      alert("Kunne ikke sette forsidebilde.");
+      console.error(t('albums:errors.coverUpdateError'), error);
+      alert(t('albums:errors.couldNotSetCover'));
     }
   };
 
   const handleDelete = async (photo) => {
-    if (!window.confirm("Vil du slette dette bildet permanent?")) return;
+    if (!window.confirm(t('albums:errors.confirmDeletePhoto'))) return;
     try {
       await deletePhoto(photo.id, photo.storagePath);
       if (refreshData) await refreshData();
     } catch (error) {
-      console.error("Feil ved sletting:", error);
-      alert("Kunne ikke slette bildet.");
+      console.error(t('albums:errors.photoDeleteError'), error);
+      alert(t('albums:errors.couldNotDeletePhoto'));
     }
   };
 
   const handleBulkDelete = async () => {
-    if (!window.confirm(`Vil du slette ${selectedPhotos.length} bilder permanent?`)) return;
+    if (!window.confirm(t('albums:errors.confirmBulkDelete', { count: selectedPhotos.length }))) return;
     try {
       for (const photo of selectedPhotos) {
         await deletePhoto(photo.id, photo.storagePath);
@@ -152,15 +153,15 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
       setSelectedPhotos([]);
       if (refreshData) await refreshData();
     } catch (error) {
-      console.error("Feil ved bulk-sletting:", error);
-      alert("Kunne ikke slette alle bildene.");
+      console.error(t('albums:errors.bulkDeleteError'), error);
+      alert(t('albums:errors.couldNotDeleteAll'));
     }
   };
 
   const handleUpload = async (files, albumId, aiTagging) => {
     const currentUser = auth.currentUser;
     if (!currentUser) {
-      alert("Du må være innlogget for å laste opp bilder");
+      alert(t('albums:errors.mustBeLoggedIn'));
       return;
     }
     try {
@@ -177,15 +178,15 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
     try {
       if (!userId) {
         const currentUser = auth.currentUser;
-        if (!currentUser) throw new Error("Bruker ikke innlogget");
+        if (!currentUser) throw new Error(t('albums:errors.userNotLoggedIn'));
         userId = currentUser.uid;
       }
       const newAlbum = { name: name.trim(), userId };
       await addAlbum(newAlbum);
       if (refreshData) await refreshData();
     } catch (error) {
-      console.error("Feil ved oppretting av album:", error);
-      alert("Kunne ikke opprette album.");
+      console.error(t('albums:errors.albumCreationError'), error);
+      alert(t('albums:errors.couldNotCreateAlbum'));
     }
   };
 
@@ -212,8 +213,8 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
       if (refreshData) await refreshData();
       setSelectedPhotos([]);
     } catch (error) {
-      console.error("Feil ved flytting:", error);
-      alert("Kunne ikke flytte bildene.");
+      console.error(t('albums:errors.moveError'), error);
+      alert(t('albums:errors.couldNotMovePhotos'));
     }
   };
 
@@ -261,8 +262,8 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
           <div>
             <h1 className="text-2xl font-semibold">{album.name}</h1>
             <p className="text-sm text-gray-400 mt-1">
-              {stats.total} bilder · {stats.totalSize} MB
-              {stats.aiAnalyzed > 0 && ` · ${stats.aiAnalyzed} AI-analysert`}
+              {stats.total} {t('common:photos')} · {stats.totalSize} MB
+              {stats.aiAnalyzed > 0 && ` · ${stats.aiAnalyzed} ${t('albums:stats.aiAnalyzed')}`}
             </p>
           </div>
         </div>
@@ -274,13 +275,13 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
                 onClick={() => setMoveOpen(true)}
                 className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center gap-2 transition"
               >
-                <Move size={18} /> Flytt ({selectedPhotos.length})
+                <Move size={18} /> {t('common:move')} ({selectedPhotos.length})
               </button>
               <button
                 onClick={handleBulkDelete}
                 className="ripple-effect px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 flex items-center gap-2 transition"
               >
-                <Trash2 size={18} /> Slett ({selectedPhotos.length})
+                <Trash2 size={18} /> {t('common:delete')} ({selectedPhotos.length})
               </button>
             </>
           )}
@@ -288,7 +289,7 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
             onClick={() => setUploadOpen(true)}
             className="ripple-effect px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 transition"
           >
-            Last opp
+            {t('common:upload')}
           </button>
           <button
             onClick={() => {
@@ -300,7 +301,7 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
             } flex items-center gap-2 transition`}
           >
             {editMode ? <Check size={18} /> : <Edit3 size={18} />}
-            {editMode ? "Ferdig" : "Rediger"}
+            {editMode ? t('common:done') : t('common:edit')}
           </button>
         </div>
       </div>
@@ -310,14 +311,14 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
         <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
           <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
             <ImageIcon className="w-4 h-4" />
-            Totalt
+            {t('common:total')}
           </div>
           <div className="text-2xl font-bold">{stats.total}</div>
         </div>
         <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
           <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
             <Download className="w-4 h-4" />
-            Størrelse
+            {t('common:size')}
           </div>
           <div className="text-2xl font-bold">{stats.totalSize} MB</div>
         </div>
@@ -330,7 +331,7 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
         <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
           <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
             <Star className="w-4 h-4" />
-            Kategorier
+            {t('albums:stats.categories')}
           </div>
           <div className="text-2xl font-bold">{stats.categories}</div>
         </div>
@@ -346,7 +347,7 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Søk i bilder..."
+              placeholder={t('albums:searchPlaceholder')}
               className="w-full pl-10 pr-10 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
             {searchQuery && (
@@ -366,10 +367,10 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
               onChange={(e) => setSortBy(e.target.value)}
               className="appearance-none pl-4 pr-10 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer"
             >
-              <option value="date-desc">Nyeste først</option>
-              <option value="date-asc">Eldste først</option>
-              <option value="name-asc">Navn A-Å</option>
-              <option value="name-desc">Navn Å-A</option>
+              <option value="date-desc">{t('albums:sorting.newestFirst')}</option>
+              <option value="date-asc">{t('albums:sorting.oldestFirst')}</option>
+              <option value="name-asc">{t('albums:sorting.nameAZ')}</option>
+              <option value="name-desc">{t('albums:sorting.nameZA')}</option>
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           </div>
@@ -382,7 +383,7 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
             }`}
           >
             <Filter className="w-4 h-4" />
-            Filter
+            {t('common:filters')}
           </button>
 
           {/* Grid-størrelse */}
@@ -426,7 +427,7 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
               onClick={handleSelectAll}
               className="ripple-effect px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition text-sm"
             >
-              {selectedPhotos.length === filteredPhotos.length ? "Fjern alle" : "Velg alle"}
+              {selectedPhotos.length === filteredPhotos.length ? t('common:removeAll') : t('common:selectAll')}
             </button>
           )}
         </div>
@@ -435,35 +436,35 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
         {showFilters && (
           <div className="mt-4 pt-4 border-t border-white/10 flex flex-wrap gap-3">
             <div className="flex-1 min-w-[200px]">
-              <label className="text-sm text-gray-400 mb-2 block">Kategori</label>
+              <label className="text-sm text-gray-400 mb-2 block">{t('common:category')}</label>
               <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
                 className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                <option value="all">Alle kategorier</option>
-                <option value="people">👥 People</option>
-                <option value="nature">🌳 Nature</option>
-                <option value="food">🍽️ Food</option>
-                <option value="animals">🐾 Animals</option>
-                <option value="indoor">🏠 Indoor</option>
-                <option value="travel">✈️ Travel</option>
-                <option value="architecture">🏛️ Architecture</option>
-                <option value="event">🎉 Event</option>
-                <option value="sport">⚽ Sport</option>
-                <option value="art">🎨 Art</option>
+                <option value="all">{t('albums:categories.all')}</option>
+                <option value="people">{t('albums:categories.people')}</option>
+                <option value="nature">{t('albums:categories.nature')}</option>
+                <option value="food">{t('albums:categories.food')}</option>
+                <option value="animals">{t('albums:categories.animals')}</option>
+                <option value="indoor">{t('albums:categories.indoor')}</option>
+                <option value="travel">{t('albums:categories.travel')}</option>
+                <option value="architecture">{t('albums:categories.architecture')}</option>
+                <option value="event">{t('albums:categories.event')}</option>
+                <option value="sport">{t('albums:categories.sport')}</option>
+                <option value="art">{t('albums:categories.art')}</option>
               </select>
             </div>
             <div className="flex-1 min-w-[200px]">
-              <label className="text-sm text-gray-400 mb-2 block">AI-status</label>
+              <label className="text-sm text-gray-400 mb-2 block">{t('albums:aiStatus.label')}</label>
               <select
                 value={filterAI}
                 onChange={(e) => setFilterAI(e.target.value)}
                 className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                <option value="all">Alle bilder</option>
-                <option value="ai">🤖 Kun AI-analysert</option>
-                <option value="no-ai">Ikke AI-analysert</option>
+                <option value="all">{t('albums:aiStatus.all')}</option>
+                <option value="ai">{t('albums:aiStatus.aiOnly')}</option>
+                <option value="no-ai">{t('albums:aiStatus.notAI')}</option>
               </select>
             </div>
             <button
@@ -474,7 +475,7 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
               }}
               className="ripple-effect px-4 py-2 bg-red-600/20 hover:bg-red-600/30 rounded-lg transition text-sm self-end"
             >
-              Nullstill filtre
+              {t('common:resetFilters')}
             </button>
           </div>
         )}
@@ -484,12 +485,12 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
       {albumPhotos.length === 0 && (
         <div className="text-center py-20 text-gray-400">
           <ImageIcon className="w-16 h-16 mx-auto mb-4 opacity-50" />
-          <p>Ingen bilder i dette albumet ennå</p>
+          <p>{t('albums:noPhotosYet')}</p>
           <button
             onClick={() => setUploadOpen(true)}
             className="mt-4 ripple-effect px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition"
           >
-            Last opp bilder
+            {t('common:uploadImages')}
           </button>
         </div>
       )}
@@ -498,7 +499,7 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
       {albumPhotos.length > 0 && filteredPhotos.length === 0 && (
         <div className="text-center py-20 text-gray-400">
           <Search className="w-16 h-16 mx-auto mb-4 opacity-50" />
-          <p>Ingen bilder matcher filteret</p>
+          <p>{t('common:noMatchingPhotos')}</p>
           <button
             onClick={() => {
               setFilterCategory("all");
@@ -507,7 +508,7 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
             }}
             className="mt-4 ripple-effect px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition"
           >
-            Nullstill filtre
+            {t('common:resetFilters')}
           </button>
         </div>
       )}
@@ -561,7 +562,7 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
               {album.cover === photo.url && (
                 <div className="absolute top-2 right-2 bg-yellow-500 text-black px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
                   <ImageIcon className="w-3 h-3" />
-                  Forside
+                  {t('albums:setCover')}
                 </div>
               )}
 
@@ -581,7 +582,7 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
                       handleSetCover(photo);
                     }}
                     className="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-full transition shadow-lg"
-                    title="Sett som forside"
+                    title={t('albums:setCover')}
                   >
                     <ImageIcon className="w-4 h-4" />
                   </button>
@@ -591,7 +592,7 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
                       handleDelete(photo);
                     }}
                     className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition shadow-lg"
-                    title="Slett bilde"
+                    title={t('albums:deletePhoto')}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -633,12 +634,12 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
               />
 
               <div className="flex-1 min-w-0">
-                <div className="font-medium truncate">{photo.name || "Uten navn"}</div>
+                <div className="font-medium truncate">{photo.name || t('common:noName')}</div>
                 <div className="text-sm text-gray-400 flex items-center gap-2 mt-1">
                   <Calendar className="w-3 h-3" />
                   {photo.createdAt
                     ? new Date(photo.createdAt).toLocaleDateString("no-NO")
-                    : "Ukjent dato"}
+                    : t('albums:unknownDate')}
                   {photo.category && (
                     <>
                       <span>•</span>
@@ -662,7 +663,7 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
                       handleSetCover(photo);
                     }}
                     className="ripple-effect p-2 bg-yellow-500 hover:bg-yellow-600 rounded-lg transition"
-                    title="Sett som forside"
+                    title={t('albums:setCover')}
                   >
                     <ImageIcon className="w-4 h-4" />
                   </button>
@@ -672,7 +673,7 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
                       handleDelete(photo);
                     }}
                     className="ripple-effect p-2 bg-red-500 hover:bg-red-600 rounded-lg transition"
-                    title="Slett"
+                    title={t('common:delete')}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>

@@ -72,5 +72,54 @@
     "uploading": "Laster opp...",
     "uploadButton": "Last opp",
     "uploadButton_withCount": "Last opp ({{count}})"
-  }
+  },
+  "errors": {
+    "userNotLoggedIn": "Bruker ikke innlogget",
+    "albumCreated": "✅ Album opprettet:",
+    "albumCreationError": "Feil ved oppretting av album:",
+    "couldNotCreateAlbum": "Kunne ikke opprette album. Prøv igjen.",
+    "coverUpdateError": "Feil ved oppdatering av forside:",
+    "couldNotSetCover": "Kunne ikke sette forsidebilde.",
+    "confirmDeletePhoto": "Vil du slette dette bildet permanent?",
+    "photoDeleteError": "Feil ved sletting:",
+    "couldNotDeletePhoto": "Kunne ikke slette bildet.",
+    "confirmBulkDelete": "Vil du slette {{count}} bilder permanent?",
+    "bulkDeleteError": "Feil ved bulk-sletting:",
+    "couldNotDeleteAll": "Kunne ikke slette alle bildene.",
+    "mustBeLoggedIn": "Du må være innlogget for å laste opp bilder",
+    "moveError": "Feil ved flytting:",
+    "couldNotMovePhotos": "Kunne ikke flytte bildene."
+  },
+  "sorting": {
+    "newestFirst": "Nyeste først",
+    "oldestFirst": "Eldste først",
+    "nameAZ": "Navn A-Å",
+    "nameZA": "Navn Å-A"
+  },
+  "categories": {
+    "all": "Alle kategorier",
+    "people": "👥 People",
+    "nature": "🌳 Nature",
+    "food": "🍽️ Food",
+    "animals": "🐾 Animals",
+    "indoor": "🏠 Indoor",
+    "travel": "✈️ Travel",
+    "architecture": "🏛️ Architecture",
+    "event": "🎉 Event",
+    "sport": "⚽ Sport",
+    "art": "🎨 Art"
+  },
+  "aiStatus": {
+    "label": "AI-status",
+    "all": "Alle bilder",
+    "aiOnly": "🤖 Kun AI-analysert",
+    "notAI": "Ikke AI-analysert"
+  },
+  "stats": {
+    "aiAnalyzed": "AI-analysert",
+    "categories": "Kategorier"
+  },
+  "setCover": "Sett som forside",
+  "deletePhoto": "Slett bilde",
+  "unknownDate": "Ukjent dato"
 }

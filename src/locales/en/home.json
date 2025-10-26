@@ -1,0 +1,21 @@
+{
+  "greeting": "Hi, {{name}}",
+  "user": "there",
+  "newPhoto": "new photo",
+  "newPhotos": "new photos",
+  "sinceYesterday": "since yesterday",
+  "favoritesTitle": "Favorites",
+  "recentUploads": "Recent uploads",
+  "smartAlbums": "Smart albums",
+  "last30days": "Last 30 days",
+  "withFaces": "With faces",
+  "unassigned": "Unassigned",
+  "aiTools": "AI tools",
+  "autoSortTitle": "Auto-sort",
+  "autoSortDesc": "Organize automatically",
+  "enhanceTitle": "Enhance",
+  "enhanceDesc": "AI enhancement",
+  "moreAI": "More AI",
+  "viewAllTools": "View all tools",
+  "quickOverview": "Quick overview"
+}
