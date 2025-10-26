@@ -27,6 +27,7 @@ import {
   updateAlbumPhotoCount,
 } from "../firebase";
 import { auth } from "../firebase";
+import { useTranslation } from "react-i18next";
 import { getFirestore, doc, updateDoc } from "firebase/firestore";
 import UploadModal from "../components/UploadModal";
 import MoveModal from "../components/MoveModal";
