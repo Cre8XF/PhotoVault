@@ -100,7 +100,7 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => 
       setPhotoToDelete(null);
       if (refreshData) await refreshData();
     } catch (error) {
-      console.error('Feil ved sletting:', error);
+      console.error('Delete error:', error);
       alert(t('search:errors.couldNotDelete', 'Kunne ikke slette bildet.'));
     }
   };
@@ -111,7 +111,7 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => 
       await setAlbumCover(photo.albumId, photo.url);
       if (refreshData) await refreshData();
     } catch (error) {
-      console.error('Feil ved oppdatering av forside:', error);
+      console.error('Cover update error:', error);
     }
   };
 
@@ -132,7 +132,7 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => 
       if (refreshData) await refreshData();
       setSelectedPhotos([]);
     } catch (e) {
-      console.error('Flytt-feil:', e);
+      console.error('Move error:', e);
       alert(t('search:errors.couldNotMove', 'Kunne ikke flytte bildene. Prøv igjen.'));
     }
   };

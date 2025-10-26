@@ -17,5 +17,10 @@
   "enhanceDesc": "AI-forbedring",
   "moreAI": "Mer AI",
   "viewAllTools": "Se alle verktøy",
-  "quickOverview": "Rask oversikt"
+  "quickOverview": "Rask oversikt",
+  "uploadOrCreateAlbum": "Last opp bilder / Opprett nytt album",
+  "userNotLoggedIn": "Bruker ikke innlogget",
+  "albumCreated": "✅ Album opprettet:",
+  "albumCreationError": "Feil ved oppretting av album:",
+  "couldNotCreateAlbum": "Kunne ikke opprette album. Prøv igjen."
 }
