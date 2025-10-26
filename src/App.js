@@ -1,8 +1,9 @@
 // ============================================================================
-// APP.js – v5.1 med korrekt Firebase-integrasjon
+// APP.js – v5.2 med komplett i18n-støtte
 // ============================================================================
 import React, { useState, useEffect, useMemo } from "react";
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
+import { useTranslation } from 'react-i18next';
 
 // Pages
 import LoginPage from "./pages/LoginPage";
@@ -53,9 +54,12 @@ function App() {
 
 // Main App Component (wrapped in SecurityProvider)
 function AppContent() {
+  // i18n
+  const { t } = useTranslation(['common', 'nav']);
+
   // Auth
   const auth = getAuth();
-  
+
   // Security context
   const { isLocked, pinEnabled } = useSecurityContext();
   
@@ -157,23 +161,23 @@ function AppContent() {
       setPhotos(photoData);
     } catch (err) {
       console.error("Error refreshing data:", err);
-      setNotification({ message: "Feil ved lasting av data", type: "error" });
+      setNotification({ message: t('common:notifications.errorLoadingData'), type: "error" });
     }
   };
 
   // Handle logout
   const handleLogout = async () => {
     setConfirmModal({
-      title: "Bekreft utlogging",
-      message: "Er du sikker på at du vil logge ut?",
+      title: t('common:notifications.confirmLogout'),
+      message: t('common:notifications.confirmLogoutMessage'),
       onConfirm: async () => {
         try {
           await signOut(auth);
           setCurrentPage("home");
-          setNotification({ message: "Du er nå logget ut", type: "success" });
+          setNotification({ message: t('common:notifications.loggedOut'), type: "success" });
         } catch (err) {
           console.error("Logout error:", err);
-          setNotification({ message: "Feil ved utlogging", type: "error" });
+          setNotification({ message: t('common:notifications.logoutError'), type: "error" });
         }
       }
     });
@@ -198,43 +202,43 @@ function AppContent() {
       await updatePhoto(photo.id, { favorite: !photo.favorite });
       await refreshData();
       setNotification({
-        message: photo.favorite ? "Fjernet fra favoritter" : "Lagt til i favoritter",
+        message: photo.favorite ? t('common:notifications.removedFromFavorites') : t('common:notifications.addedToFavorites'),
         type: "success"
       });
     } catch (err) {
       console.error("Error toggling favorite:", err);
-      setNotification({ message: "Feil ved oppdatering", type: "error" });
+      setNotification({ message: t('common:notifications.updateError'), type: "error" });
     }
   };
 
   // ✅ Handle upload - kaller uploadPhoto fra firebase.js
   const handleUpload = async (selectedFiles, albumId, aiTagging = false) => {
     if (!user) {
-      setNotification({ message: "Du må være innlogget", type: "error" });
+      setNotification({ message: t('common:notifications.mustBeLoggedIn'), type: "error" });
       return;
     }
 
     try {
       let successCount = 0;
-      
+
       for (const fileObj of selectedFiles) {
         await uploadPhoto(user.uid, fileObj.file, albumId, aiTagging);
         successCount++;
       }
 
       await refreshData();
-      
-      const message = aiTagging 
-        ? `${successCount} bilder lastet opp med AI-tagging`
-        : `${successCount} bilder lastet opp`;
-      
+
+      const message = aiTagging
+        ? t('common:notifications.photosUploadedWithAI', { count: successCount })
+        : t('common:notifications.photosUploaded', { count: successCount });
+
       setNotification({ message, type: "success" });
-      
+
     } catch (error) {
       console.error("Upload error:", error);
-      setNotification({ 
-        message: `Feil ved opplasting: ${error.message}`, 
-        type: "error" 
+      setNotification({
+        message: t('common:notifications.uploadError', { message: error.message }),
+        type: "error"
       });
       throw error;
     }
@@ -245,17 +249,17 @@ function AppContent() {
     try {
       if (editingAlbum) {
         await updateAlbum(editingAlbum.id, albumData);
-        setNotification({ message: "Album oppdatert", type: "success" });
+        setNotification({ message: t('common:notifications.albumUpdated'), type: "success" });
       } else {
         await addAlbum({ ...albumData, userId: user.uid });
-        setNotification({ message: "Album opprettet", type: "success" });
+        setNotification({ message: t('common:notifications.albumCreated'), type: "success" });
       }
       setAlbumModalOpen(false);
       setEditingAlbum(null);
       await refreshData();
     } catch (err) {
       console.error("Album save error:", err);
-      setNotification({ message: "Feil ved lagring av album", type: "error" });
+      setNotification({ message: t('common:notifications.albumSaveError'), type: "error" });
     }
   };
 
@@ -273,11 +277,11 @@ function AppContent() {
       
       const albumId = await addAlbum(albumData);
       await refreshData();
-      setNotification({ message: "Album opprettet", type: "success" });
+      setNotification({ message: t('common:notifications.albumCreated'), type: "success" });
       return albumId;
     } catch (err) {
       console.error("Album creation error:", err);
-      setNotification({ message: "Feil ved opprettelse av album", type: "error" });
+      setNotification({ message: t('common:notifications.albumCreationError'), type: "error" });
       throw err;
     }
   };
@@ -285,34 +289,37 @@ function AppContent() {
   // Handle delete album
   const handleDeleteAlbum = (album) => {
     const albumPhotos = photos.filter(p => p.albumId === album.id);
+    const photosNote = albumPhotos.length > 0
+      ? t('common:notifications.deleteAlbumPhotosNote', { count: albumPhotos.length })
+      : t('common:notifications.deleteAlbumEmptyNote');
+
     setConfirmModal({
-      title: "Slett album",
-      message: `Er du sikker på at du vil slette "${album.name}"? ${
-        albumPhotos.length > 0 
-          ? `${albumPhotos.length} bilder vil bli flyttet til "Uten album".`
-          : 'Albumet er tomt.'
-      }`,
+      title: t('common:notifications.deleteAlbumTitle'),
+      message: t('common:notifications.deleteAlbumMessage', {
+        name: album.name,
+        photos: photosNote
+      }),
       onConfirm: async () => {
         try {
           // Fjern albumId fra alle bilder i albumet
           for (const photo of albumPhotos) {
             await updatePhoto(photo.id, { albumId: null });
           }
-          
+
           // Slett albumet fra Firestore
           const { deleteDoc, doc } = await import('firebase/firestore');
           const { db } = await import('./firebase');
           await deleteDoc(doc(db, 'albums', album.id));
-          
+
           await refreshData();
           if (currentPage === "album" && selectedAlbum?.id === album.id) {
             setCurrentPage("albums");
             setSelectedAlbum(null);
           }
-          setNotification({ message: "Album slettet", type: "success" });
+          setNotification({ message: t('common:notifications.albumDeleted'), type: "success" });
         } catch (err) {
           console.error("Delete album error:", err);
-          setNotification({ message: "Feil ved sletting", type: "error" });
+          setNotification({ message: t('common:notifications.albumDeleteError'), type: "error" });
         }
       }
     });
@@ -321,17 +328,17 @@ function AppContent() {
   // Handle delete photo
   const handleDeletePhoto = (photo) => {
     setConfirmModal({
-      title: "Slett bilde",
-      message: "Er du sikker på at du vil slette dette bildet? Dette kan ikke angres.",
+      title: t('common:notifications.deletePhotoTitle'),
+      message: t('common:notifications.deletePhotoMessage'),
       onConfirm: async () => {
         try {
           await deletePhoto(photo.id, photo.storagePath);
           await refreshData();
           setPhotoModalOpen(false);
-          setNotification({ message: "Bilde slettet", type: "success" });
+          setNotification({ message: t('common:notifications.photoDeleted'), type: "success" });
         } catch (err) {
           console.error("Delete photo error:", err);
-          setNotification({ message: "Feil ved sletting", type: "error" });
+          setNotification({ message: t('common:notifications.photoDeleteError'), type: "error" });
         }
       }
     });
@@ -454,7 +461,7 @@ function AppContent() {
               }`}
             >
               <Home className="w-6 h-6" />
-              <span className="text-xs font-medium">Hjem</span>
+              <span className="text-xs font-medium">{t('nav:home')}</span>
             </button>
 
             {/* Albums */}
@@ -465,13 +472,14 @@ function AppContent() {
               }`}
             >
               <FolderOpen className="w-6 h-6" />
-              <span className="text-xs font-medium">Album</span>
+              <span className="text-xs font-medium">{t('nav:albums')}</span>
             </button>
 
             {/* Upload (center FAB) */}
             <button
               onClick={() => setUploadModalOpen(true)}
               className="ripple-effect bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 p-4 rounded-full shadow-lg transition transform hover:scale-110 -mt-6"
+              aria-label={t('nav:upload')}
             >
               <Plus className="w-7 h-7 text-white" />
             </button>
@@ -484,7 +492,7 @@ function AppContent() {
               }`}
             >
               <Search className="w-6 h-6" />
-              <span className="text-xs font-medium">Søk</span>
+              <span className="text-xs font-medium">{t('nav:search')}</span>
             </button>
 
             {/* More */}
@@ -495,7 +503,7 @@ function AppContent() {
               }`}
             >
               <Menu className="w-6 h-6" />
-              <span className="text-xs font-medium">Mer</span>
+              <span className="text-xs font-medium">{t('nav:more')}</span>
             </button>
           </div>
         </nav>
@@ -539,8 +547,8 @@ function AppContent() {
     message={confirmModal.message}
     onConfirm={confirmModal.onConfirm}
     onClose={() => setConfirmModal(null)}
-    confirmLabel="Logg ut"
-    cancelLabel="Avbryt"
+    confirmLabel={t('common:notifications.logout')}
+    cancelLabel={t('common:cancel')}
   />
 )}
 
