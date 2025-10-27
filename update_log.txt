@@ -1,24 +1,37 @@
 ============================================== 
 🔄 Oppdaterer PhotoVault fra GitHub... 
-Starttid: 27.10.2025 12:53:46,13 
+Starttid: 27.10.2025 13:47:00,27 
 ============================================== 
  
 [1] Henter siste endringer... 
-HEAD is now at bdac108 feat: Phase 4.3 Step 3 - ReactionPicker component with emoji reactions
-Your branch is up to date with 'origin/claude/phase-4-orchestration-011CUXbTCEBPvvfbwvbM4VVr'.
+error: unable to unlink old 'update_log.txt': Invalid argument
+fatal: Could not reset index file to revision 'origin/claude/phase-4-orchestration-011CUXbTCEBPvvfbwvbM4VVr'.
+M	src/locales/en/common.json
+M	src/locales/no/common.json
+M	update_log.txt
+Your branch is behind 'origin/claude/phase-4-orchestration-011CUXbTCEBPvvfbwvbM4VVr' by 1 commit, and can be fast-forwarded.
+  (use "git pull" to update your local branch)
 Already on 'claude/phase-4-orchestration-011CUXbTCEBPvvfbwvbM4VVr'
 From https://github.com/Cre8XF/PhotoVault
  * branch            claude/phase-4-orchestration-011CUXbTCEBPvvfbwvbM4VVr -> FETCH_HEAD
-Already up to date.
+error: Your local changes to the following files would be overwritten by merge:
+	src/locales/en/common.json
+	src/locales/no/common.json
+Please commit your changes or stash them before you merge.
+error: The following untracked working tree files would be overwritten by merge:
+	src/components/NotificationPanel.jsx
+Please move or remove them before you merge.
+Updating 95d8627..90d2f8e
+Aborting
  
 [2] Installerer avhengigheter... 
 npm error code ERESOLVE
 npm error ERESOLVE could not resolve
 npm error
-npm error While resolving: i18next@25.6.0
-npm error Found: typescript@4.9.5
+npm error While resolving: react-scripts@5.0.1
+npm error Found: typescript@5.9.3
 npm error node_modules/typescript
-npm error   dev typescript@"^4.9.5" from the root project
+npm error   dev typescript@"^5.9.3" from the root project
 npm error   peer typescript@">= 2.7" from fork-ts-checker-webpack-plugin@6.5.3
 npm error   node_modules/fork-ts-checker-webpack-plugin
 npm error     fork-ts-checker-webpack-plugin@"^6.5.0" from react-dev-utils@12.0.1
@@ -26,24 +39,18 @@ npm error     node_modules/react-dev-utils
 npm error       react-dev-utils@"^12.0.1" from react-scripts@5.0.1
 npm error       node_modules/react-scripts
 npm error         react-scripts@"5.0.1" from the root project
-npm error   2 more (react-scripts, tsutils)
+npm error   3 more (i18next, react-i18next, tsutils)
 npm error
 npm error Could not resolve dependency:
-npm error peerOptional typescript@"^5" from i18next@25.6.0
-npm error node_modules/i18next
-npm error   i18next@"^25.6.0" from the root project
-npm error   peer i18next@">= 25.5.2" from react-i18next@16.1.0
-npm error   node_modules/react-i18next
-npm error     react-i18next@"^16.1.0" from the root project
+npm error peerOptional typescript@"^3.2.1 || ^4" from react-scripts@5.0.1
+npm error node_modules/react-scripts
+npm error   react-scripts@"5.0.1" from the root project
 npm error
-npm error Conflicting peer dependency: typescript@5.9.3
+npm error Conflicting peer dependency: typescript@4.9.5
 npm error node_modules/typescript
-npm error   peerOptional typescript@"^5" from i18next@25.6.0
-npm error   node_modules/i18next
-npm error     i18next@"^25.6.0" from the root project
-npm error     peer i18next@">= 25.5.2" from react-i18next@16.1.0
-npm error     node_modules/react-i18next
-npm error       react-i18next@"^16.1.0" from the root project
+npm error   peerOptional typescript@"^3.2.1 || ^4" from react-scripts@5.0.1
+npm error   node_modules/react-scripts
+npm error     react-scripts@"5.0.1" from the root project
 npm error
 npm error Fix the upstream dependency conflict, or retry
 npm error this command with --force or --legacy-peer-deps
@@ -51,17 +58,17 @@ npm error to accept an incorrect (and potentially broken) dependency resolution.
 npm error
 npm error
 npm error For a full report see:
-npm error C:\Users\rogsor0319\AppData\Local\npm-cache\_logs\2025-10-27T11_53_47_928Z-eresolve-report.txt
-npm error A complete log of this run can be found in: C:\Users\rogsor0319\AppData\Local\npm-cache\_logs\2025-10-27T11_53_47_928Z-debug-0.log
+npm error C:\Users\rogsor0319\AppData\Local\npm-cache\_logs\2025-10-27T12_47_02_261Z-eresolve-report.txt
+npm error A complete log of this run can be found in: C:\Users\rogsor0319\AppData\Local\npm-cache\_logs\2025-10-27T12_47_02_261Z-debug-0.log
  
 [3] Starter PhotoVault... 
 
 > photovault@1.0.0 start
 > react-scripts start
 
-(node:12340) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+(node:27588) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-(node:12340) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+(node:27588) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
 Starting the development server...
 
 Compiled with warnings.
@@ -71,6 +78,60 @@ Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capa
 Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts'
 
 Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts'
+
+[eslint] 
+src\components\LazyImage.jsx
+  Line 69:46:  The ref value 'imgRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'imgRef.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+  Line 72:6:   React Hook useEffect has a missing dependency: 'loadImage'. Either include it or remove the dependency array                                                                                                                                                 react-hooks/exhaustive-deps
+
+src\components\PhotoModal.jsx
+  Line 51:6:  React Hook useEffect has missing dependencies: 'nextPhoto' and 'prevPhoto'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\VaultSettingsModal.jsx
+  Line 18:5:  'unlockWithPassword' is assigned a value but never used  no-unused-vars
+
+src\contexts\SecurityContext.jsx
+  Line 6:30:   'encryptData' is defined but never used                                                                                                           no-unused-vars
+  Line 6:43:   'decryptData' is defined but never used                                                                                                           no-unused-vars
+  Line 48:6:   React Hook useEffect has missing dependencies: 'autoLockTimer' and 'setupVisibilityListener'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 143:6:  React Hook useEffect has a missing dependency: 'autoLockTimer'. Either include it or remove the dependency array                                  react-hooks/exhaustive-deps
+
+src\firebase.js
+  Line 12:3:  'setDoc' is defined but never used  no-unused-vars
+
+src\hooks\usePhotoData.js
+  Line 78:6:  React Hook useEffect has missing dependencies: 'refreshData', 'setAlbums', and 'setPhotos'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\hooks\useVault.js
+  Line 133:6:  React Hook useCallback has a missing dependency: 'loadVaultPhotos'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\pages\AdminDashboard.jsx
+  Line 8:36:  'updateDoc' is defined but never used  no-unused-vars
+
+src\pages\AlbumsPage.jsx
+  Line 6:10:   'Folder' is defined but never used                no-unused-vars
+  Line 6:18:   'Image' is defined but never used                 no-unused-vars
+  Line 6:25:   'Star' is defined but never used                  no-unused-vars
+  Line 6:31:   'Calendar' is defined but never used              no-unused-vars
+  Line 8:8:    'LazyImage' is defined but never used             no-unused-vars
+  Line 14:20:  'setViewMode' is assigned a value but never used  no-unused-vars
+
+src\pages\MorePage.jsx
+  Line 31:3:   'Heart' is defined but never used                no-unused-vars
+  Line 40:3:   'Check' is defined but never used                no-unused-vars
+  Line 223:9:  'callOpenAI' is assigned a value but never used  no-unused-vars
+
+src\pages\VaultPage.jsx
+  Line 413:6:  React Hook useEffect has a missing dependency: 'thumbnailUrl'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\utils\biometric.js
+  Line 272:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\googleVision.js
+  Line 235:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\security.js
+  Line 322:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
 
 Search for the keywords to learn more about each warning.
 To ignore, add // eslint-disable-next-line to the line before.
@@ -87,7 +148,62 @@ To ignore, add // eslint-disable-next-line to the line before.
 [1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
 [1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts'[39m[22m
 
-webpack compiled with [1m[33m3 warnings[39m[22m
-Terminate batch job (Y/N)? Terminate batch job (Y/N)? 
-^C 
-Ferdig: 27.10.2025 13:03:27,89 
+[1m[33mWARNING[39m[22m in [1m[eslint] 
+src\components\LazyImage.jsx
+  Line 69:46:  The ref value 'imgRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'imgRef.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+  Line 72:6:   React Hook useEffect has a missing dependency: 'loadImage'. Either include it or remove the dependency array                                                                                                                                                 react-hooks/exhaustive-deps
+
+src\components\PhotoModal.jsx
+  Line 51:6:  React Hook useEffect has missing dependencies: 'nextPhoto' and 'prevPhoto'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\VaultSettingsModal.jsx
+  Line 18:5:  'unlockWithPassword' is assigned a value but never used  no-unused-vars
+
+src\contexts\SecurityContext.jsx
+  Line 6:30:   'encryptData' is defined but never used                                                                                                           no-unused-vars
+  Line 6:43:   'decryptData' is defined but never used                                                                                                           no-unused-vars
+  Line 48:6:   React Hook useEffect has missing dependencies: 'autoLockTimer' and 'setupVisibilityListener'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 143:6:  React Hook useEffect has a missing dependency: 'autoLockTimer'. Either include it or remove the dependency array                                  react-hooks/exhaustive-deps
+
+src\firebase.js
+  Line 12:3:  'setDoc' is defined but never used  no-unused-vars
+
+src\hooks\usePhotoData.js
+  Line 78:6:  React Hook useEffect has missing dependencies: 'refreshData', 'setAlbums', and 'setPhotos'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\hooks\useVault.js
+  Line 133:6:  React Hook useCallback has a missing dependency: 'loadVaultPhotos'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\pages\AdminDashboard.jsx
+  Line 8:36:  'updateDoc' is defined but never used  no-unused-vars
+
+src\pages\AlbumsPage.jsx
+  Line 6:10:   'Folder' is defined but never used                no-unused-vars
+  Line 6:18:   'Image' is defined but never used                 no-unused-vars
+  Line 6:25:   'Star' is defined but never used                  no-unused-vars
+  Line 6:31:   'Calendar' is defined but never used              no-unused-vars
+  Line 8:8:    'LazyImage' is defined but never used             no-unused-vars
+  Line 14:20:  'setViewMode' is assigned a value but never used  no-unused-vars
+
+src\pages\MorePage.jsx
+  Line 31:3:   'Heart' is defined but never used                no-unused-vars
+  Line 40:3:   'Check' is defined but never used                no-unused-vars
+  Line 223:9:  'callOpenAI' is assigned a value but never used  no-unused-vars
+
+src\pages\VaultPage.jsx
+  Line 413:6:  React Hook useEffect has a missing dependency: 'thumbnailUrl'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\utils\biometric.js
+  Line 272:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\googleVision.js
+  Line 235:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\security.js
+  Line 322:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+[39m[22m
+
+webpack compiled with [1m[33m4 warnings[39m[22m
+Terminate batch job (Y/N)? 
+^C
