@@ -22,7 +22,6 @@ import { useVault } from "../hooks/useVault";
 import VaultSetupModal from "../components/VaultSetupModal";
 import VaultSettingsModal from "../components/VaultSettingsModal";
 import useStore from "../state/store";
-import { useNavigate } from "react-router-dom";
 
 const VaultPage = () => {
   const { t } = useTranslation(['vault', 'common']);
@@ -41,7 +40,7 @@ const VaultPage = () => {
     resetActivityTimer,
     checkBiometricAvailability,
   } = useVault();
-  const navigate = useNavigate();
+
   const getTimeUntilAutoLock = useStore((state) => state.getTimeUntilAutoLock);
   const setConfirmModal = useStore((state) => state.setConfirmModal);
 
@@ -314,17 +313,6 @@ const VaultPage = () => {
             <Upload className="w-5 h-5" />
             {t('vault:unlocked.uploadButton', { defaultValue: 'Upload to Vault' })}
           </button>
-          {/* Back to More Page */}
-<div className="mt-6 text-center">
-  <button
-    onClick={() => navigate("/more")}
-    className="px-5 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 
-               text-white font-semibold hover:from-purple-700 hover:to-blue-700 transition"
-  >
-    ← Back to More Page
-  </button>
-</div>
-
         </div>
 
         {/* Photos Grid */}
@@ -455,6 +443,5 @@ const VaultPhotoCard = ({ photo, onView, onDelete, getDecryptedUrl }) => {
     </div>
   );
 };
-
 
 export default VaultPage;
