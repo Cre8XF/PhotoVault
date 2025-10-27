@@ -1,0 +1,73 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    function isValidSize() {
+      // Max 10MB per image
+      return request.resource.size < 10 * 1024 * 1024;
+    }
+
+    // User photos path: photos/{userId}/{fileName}
+    match /photos/{userId}/{fileName} {
+      // Users can read their own photos
+      allow read: if isOwner(userId);
+
+      // Users can upload images to their own folder
+      allow create: if isOwner(userId) && isImage() && isValidSize();
+
+      // Users can delete their own photos
+      allow delete: if isOwner(userId);
+
+      // No updates allowed (delete and recreate instead)
+      allow update: if false;
+    }
+
+    // User thumbnails path: thumbnails/{userId}/{fileName}
+    match /thumbnails/{userId}/{fileName} {
+      // Users can read their own thumbnails
+      allow read: if isOwner(userId);
+
+      // System/cloud functions can create thumbnails
+      allow create: if isOwner(userId) && isImage();
+
+      // Users can delete their own thumbnails
+      allow delete: if isOwner(userId);
+
+      // No updates allowed
+      allow update: if false;
+    }
+
+    // Enhanced photos path: enhanced/{userId}/{fileName}
+    match /enhanced/{userId}/{fileName} {
+      // Users can read their own enhanced photos
+      allow read: if isOwner(userId);
+
+      // System can create enhanced photos
+      allow create: if isOwner(userId) && isImage();
+
+      // Users can delete their own enhanced photos
+      allow delete: if isOwner(userId);
+
+      // No updates allowed
+      allow update: if false;
+    }
+
+    // Deny all other access by default
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

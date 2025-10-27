@@ -85,7 +85,7 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
     try {
       if (!userId) {
         const currentUser = auth.currentUser;
-        if (!currentUser) throw new Error("Bruker ikke innlogget");
+        if (!currentUser) throw new Error(t("home:userNotLoggedIn"));
         userId = currentUser.uid;
       }
 
@@ -95,12 +95,12 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
       };
 
       const albumId = await addAlbum(newAlbum);
-      console.log("✅ Album opprettet:", albumId);
-      
+      console.log(t("home:albumCreated"), albumId);
+
       if (refreshData) await refreshData();
     } catch (error) {
-      console.error("Feil ved oppretting av album:", error);
-      alert("Kunne ikke opprette album. Prøv igjen.");
+      console.error(t("home:albumCreationError"), error);
+      alert(t("home:couldNotCreateAlbum"));
     }
   };
 
@@ -284,7 +284,7 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
         className="ripple-effect glass p-4 rounded-xl hover:bg-white/15 transition flex items-center gap-3 mt-6"
       >
         <ImagePlus className="w-5 h-5 text-purple-400" />
-        <span>Last opp bilder / Opprett nytt album</span>
+        <span>{t("home:uploadOrCreateAlbum")}</span>
       </button>
 
       {/* Quick stats */}

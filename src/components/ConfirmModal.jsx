@@ -3,16 +3,24 @@
 // ============================================================================
 import React from "react";
 import { AlertTriangle } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 const ConfirmModal = ({
   isOpen,
-  title = "Bekreft handling",
-  message = "Er du sikker på at du vil fortsette?",
-  confirmLabel = "Bekreft",
-  cancelLabel = "Avbryt",
+  title,
+  message,
+  confirmLabel,
+  cancelLabel,
   onConfirm,
   onClose,
 }) => {
+  const { t } = useTranslation('common');
+
+  const finalTitle = title || t('confirmAction');
+  const finalMessage = message || t('areYouSure');
+  const finalConfirmLabel = confirmLabel || t('confirm');
+  const finalCancelLabel = cancelLabel || t('cancel');
+
   if (!isOpen) return null;
 
   return (
@@ -30,11 +38,11 @@ const ConfirmModal = ({
           <div className="flex items-center justify-center w-10 h-10 rounded-full bg-yellow-500/20">
             <AlertTriangle className="w-6 h-6 text-yellow-400" />
           </div>
-          <h2 className="text-lg font-semibold">{title}</h2>
+          <h2 className="text-lg font-semibold">{finalTitle}</h2>
         </div>
 
         {/* Body */}
-        <p className="text-gray-300 text-sm leading-relaxed mb-6">{message}</p>
+        <p className="text-gray-300 text-sm leading-relaxed mb-6">{finalMessage}</p>
 
         {/* Buttons */}
         <div className="flex justify-end gap-3">
@@ -43,14 +51,14 @@ const ConfirmModal = ({
             className="ripple-effect px-5 py-2 rounded-xl bg-gray-700/70 hover:bg-gray-600/80
                        text-gray-200 text-sm font-semibold transition-all duration-150"
           >
-            {cancelLabel}
+            {finalCancelLabel}
           </button>
           <button
             onClick={onConfirm}
-            className="ripple-effect px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 
+            className="ripple-effect px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700
                        text-white text-sm font-semibold shadow-sm transition-all duration-150"
           >
-            {confirmLabel}
+            {finalConfirmLabel}
           </button>
         </div>
       </div>

@@ -1,0 +1,292 @@
+// ============================================================================
+// ProfilePage - Phase 2: User Profile Management
+// ============================================================================
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { updateProfile, updateEmail } from 'firebase/auth';
+import { db } from '../firebase';
+import useAuth from '../hooks/useAuth';
+import useStore from '../state/store';
+import {
+  ArrowLeft,
+  User,
+  Mail,
+  Shield,
+  Calendar,
+  Save,
+  Camera,
+} from 'lucide-react';
+
+/**
+ * Profile Page
+ * Display and update user information
+ */
+const ProfilePage = () => {
+  const { t } = useTranslation(['common']);
+  const navigate = useNavigate();
+  const { user, userProfile, fetchUserProfile } = useAuth();
+  const setNotification = useStore((state) => state.setNotification);
+
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    displayName: '',
+    email: '',
+    photoURL: '',
+  });
+
+  // Load user data
+  useEffect(() => {
+    if (user && userProfile) {
+      setFormData({
+        displayName: user.displayName || userProfile.displayName || '',
+        email: user.email || '',
+        photoURL: user.photoURL || userProfile.photoURL || '',
+      });
+    }
+  }, [user, userProfile]);
+
+  /**
+   * Handle form input changes
+   */
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  /**
+   * Save profile changes
+   */
+  const handleSave = async () => {
+    if (!user) return;
+
+    setLoading(true);
+
+    try {
+      // Update Firebase Auth profile
+      await updateProfile(user, {
+        displayName: formData.displayName,
+        photoURL: formData.photoURL,
+      });
+
+      // Update email if changed
+      if (formData.email !== user.email) {
+        await updateEmail(user, formData.email);
+      }
+
+      // Update Firestore user document
+      const userDocRef = doc(db, 'users', user.uid);
+      await updateDoc(userDocRef, {
+        displayName: formData.displayName,
+        photoURL: formData.photoURL,
+        updatedAt: new Date().toISOString(),
+      });
+
+      // Refresh user profile
+      await fetchUserProfile(user.uid);
+
+      setNotification({
+        message: t('common:notifications.profileUpdated') || 'Profile updated successfully',
+        type: 'success',
+      });
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setNotification({
+        message: error.message || 'Failed to update profile',
+        type: 'error',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Format date for display
+   */
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  return (
+    <div className="min-h-screen pb-24">
+      {/* Header */}
+      <div className="sticky top-0 z-10 glass-card border-b border-white/20 px-4 py-4">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate('/more')}
+            className="p-2 hover:bg-white/10 rounded-lg transition"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <h1 className="text-2xl font-bold">My Profile</h1>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-6 max-w-2xl">
+        {/* Profile Photo Section */}
+        <div className="glass-card p-6 mb-6">
+          <div className="flex flex-col items-center mb-6">
+            <div className="relative mb-4">
+              {formData.photoURL ? (
+                <img
+                  src={formData.photoURL}
+                  alt="Profile"
+                  className="w-32 h-32 rounded-full object-cover border-4 border-purple-500"
+                />
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center border-4 border-purple-500">
+                  <User className="w-16 h-16 text-white" />
+                </div>
+              )}
+              <button className="absolute bottom-0 right-0 p-2 bg-purple-600 hover:bg-purple-700 rounded-full shadow-lg transition">
+                <Camera className="w-5 h-5 text-white" />
+              </button>
+            </div>
+            <h2 className="text-xl font-semibold">
+              {formData.displayName || 'No name set'}
+            </h2>
+            <p className="text-sm text-gray-400">{formData.email}</p>
+          </div>
+
+          {/* Role Badge */}
+          <div className="flex justify-center mb-4">
+            <div
+              className={`px-4 py-2 rounded-full text-sm font-medium ${
+                userProfile?.role === 'admin'
+                  ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                  : userProfile?.role === 'pro'
+                  ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                  : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+              }`}
+            >
+              <Shield className="w-4 h-4 inline mr-2" />
+              {userProfile?.role?.toUpperCase() || 'FREE'} Account
+            </div>
+          </div>
+        </div>
+
+        {/* Profile Information Form */}
+        <div className="glass-card p-6 mb-6">
+          <h3 className="text-lg font-semibold mb-4">Profile Information</h3>
+
+          {/* Display Name */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">
+              <User className="w-4 h-4 inline mr-2" />
+              Display Name
+            </label>
+            <input
+              type="text"
+              name="displayName"
+              value={formData.displayName}
+              onChange={handleChange}
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              placeholder="Enter your name"
+            />
+          </div>
+
+          {/* Email */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">
+              <Mail className="w-4 h-4 inline mr-2" />
+              Email Address
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              placeholder="Enter your email"
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              Changing your email will require re-authentication
+            </p>
+          </div>
+
+          {/* Photo URL */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-2">
+              <Camera className="w-4 h-4 inline mr-2" />
+              Profile Photo URL
+            </label>
+            <input
+              type="url"
+              name="photoURL"
+              value={formData.photoURL}
+              onChange={handleChange}
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              placeholder="https://example.com/photo.jpg"
+            />
+          </div>
+
+          {/* Save Button */}
+          <button
+            onClick={handleSave}
+            disabled={loading}
+            className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <div className="spinner w-5 h-5" />
+                Saving...
+              </span>
+            ) : (
+              <span className="flex items-center justify-center gap-2">
+                <Save className="w-5 h-5" />
+                Save Changes
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Account Details */}
+        <div className="glass-card p-6">
+          <h3 className="text-lg font-semibold mb-4">Account Details</h3>
+
+          <div className="space-y-3">
+            <div className="flex justify-between items-center py-2 border-b border-white/10">
+              <span className="text-gray-400">User ID</span>
+              <span className="text-sm font-mono">{user?.uid?.substring(0, 12)}...</span>
+            </div>
+
+            <div className="flex justify-between items-center py-2 border-b border-white/10">
+              <span className="text-gray-400">
+                <Calendar className="w-4 h-4 inline mr-2" />
+                Account Created
+              </span>
+              <span className="text-sm">
+                {formatDate(userProfile?.createdAt || user?.metadata?.creationTime)}
+              </span>
+            </div>
+
+            <div className="flex justify-between items-center py-2">
+              <span className="text-gray-400">
+                <Calendar className="w-4 h-4 inline mr-2" />
+                Last Updated
+              </span>
+              <span className="text-sm">
+                {formatDate(userProfile?.updatedAt)}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ProfilePage;

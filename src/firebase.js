@@ -17,6 +17,8 @@ import {
   deleteDoc,
   updateDoc,
   getDoc,
+  limit,
+  startAfter,
 } from "firebase/firestore";
 import {
   getStorage,
@@ -26,15 +28,29 @@ import {
   deleteObject,
 } from "firebase/storage";
 
-// 🔗 Firebase-konfig
+// 🔗 Firebase-konfig (from environment variables)
 const firebaseConfig = {
-  apiKey: "AIzaSyCv3HzcHXoo2Xk-cmOOiVElLuLx3XZpEXI",
-  authDomain: "photovault-app-a0946.firebaseapp.com",
-  projectId: "photovault-app-a0946",
-  storageBucket: "photovault-app-a0946.firebasestorage.app",
-  messagingSenderId: "727453609889",
-  appId: "1:727453609889:web:ea04b86e7774a7fea565e0",
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
 };
+
+// Validate required environment variables
+const requiredEnvVars = [
+  'REACT_APP_FIREBASE_API_KEY',
+  'REACT_APP_FIREBASE_AUTH_DOMAIN',
+  'REACT_APP_FIREBASE_PROJECT_ID',
+  'REACT_APP_FIREBASE_STORAGE_BUCKET',
+];
+
+const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+if (missingVars.length > 0) {
+  console.error('❌ Missing required environment variables:', missingVars.join(', '));
+  console.error('Please check your .env file and ensure all Firebase config variables are set.');
+}
 
 // 🚀 Initialiser Firebase
 const app = initializeApp(firebaseConfig);
@@ -357,6 +373,115 @@ export async function uploadThumbnail(blob, userId, photoId, size = "small") {
   } catch (error) {
     console.error("🔥 uploadThumbnail:", error);
     throw new Error(error.message);
+  }
+}
+
+// ============================================================================
+// 📄 Pagination Functions - Phase 2
+// ============================================================================
+
+/**
+ * Get photos by user with pagination
+ * @param {string} userId - User ID
+ * @param {number} pageSize - Number of photos per page (default 20)
+ * @param {object} lastDoc - Last document from previous page (for startAfter)
+ * @returns {object} { photos, lastDoc, hasMore }
+ */
+export async function getPhotosByUserPaginated(userId, pageSize = 20, lastDoc = null) {
+  try {
+    let q = query(
+      collection(db, "photos"),
+      where("userId", "==", userId),
+      orderBy("createdAt", "desc"),
+      limit(pageSize)
+    );
+
+    // If lastDoc is provided, start after it
+    if (lastDoc) {
+      q = query(
+        collection(db, "photos"),
+        where("userId", "==", userId),
+        orderBy("createdAt", "desc"),
+        startAfter(lastDoc),
+        limit(pageSize)
+      );
+    }
+
+    const snap = await getDocs(q);
+    const photos = snap.docs.map((d) => {
+      const data = d.data();
+
+      // Convert Firestore Timestamp to ISO string
+      if (data.createdAt?.toDate)
+        data.createdAt = data.createdAt.toDate().toISOString();
+      if (data.updatedAt?.toDate)
+        data.updatedAt = data.updatedAt.toDate().toISOString();
+
+      if (!data.createdAt) data.createdAt = new Date().toISOString();
+      if (!data.updatedAt) data.updatedAt = data.createdAt;
+      if (!("favorite" in data)) data.favorite = false;
+
+      // AI field defaults
+      if (!data.aiTags) data.aiTags = [];
+      if (!("faces" in data)) data.faces = 0;
+      if (!("aiAnalyzed" in data)) data.aiAnalyzed = false;
+
+      return { id: d.id, ...data };
+    });
+
+    // Get last document for next page
+    const newLastDoc = snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null;
+    const hasMore = snap.docs.length === pageSize;
+
+    return { photos, lastDoc: newLastDoc, hasMore };
+  } catch (err) {
+    console.error("🔥 getPhotosByUserPaginated:", err);
+    return { photos: [], lastDoc: null, hasMore: false };
+  }
+}
+
+/**
+ * Get albums by user with pagination
+ * @param {string} userId - User ID
+ * @param {number} pageSize - Number of albums per page (default 10)
+ * @param {object} lastDoc - Last document from previous page
+ * @returns {object} { albums, lastDoc, hasMore }
+ */
+export async function getAlbumsByUserPaginated(userId, pageSize = 10, lastDoc = null) {
+  try {
+    let q = query(
+      collection(db, "albums"),
+      where("userId", "==", userId),
+      orderBy("updatedAt", "desc"),
+      limit(pageSize)
+    );
+
+    if (lastDoc) {
+      q = query(
+        collection(db, "albums"),
+        where("userId", "==", userId),
+        orderBy("updatedAt", "desc"),
+        startAfter(lastDoc),
+        limit(pageSize)
+      );
+    }
+
+    const snap = await getDocs(q);
+    const albums = snap.docs.map((d) => {
+      const data = d.data();
+      if (!data.createdAt) data.createdAt = new Date().toISOString();
+      if (!data.updatedAt) data.updatedAt = data.createdAt;
+      if (!("photoCount" in data)) data.photoCount = 0;
+      return { id: d.id, ...data };
+    });
+
+    const newLastDoc = snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null;
+    const hasMore = snap.docs.length === pageSize;
+
+    return { albums, lastDoc: newLastDoc, hasMore };
+  } catch (err) {
+    console.error("🔥 getAlbumsByUserPaginated:", err);
+    return { albums: [], lastDoc: null, hasMore: false };
   }
 }
 
