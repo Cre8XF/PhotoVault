@@ -123,6 +123,7 @@
   "notificationMention": "{{user}} nevnte deg i en kommentar",
   "notificationShare": "{{user}} delte et album med deg",
   "notificationNew": "Nytt varsel",
+  "commentsAndReactions": "Kommentarer og reaksjoner",
   "notifications": {
     "errorLoadingData": "Feil ved lasting av data",
     "confirmLogout": "Bekreft utlogging",

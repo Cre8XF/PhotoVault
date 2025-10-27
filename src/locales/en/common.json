@@ -123,6 +123,7 @@
   "notificationMention": "{{user}} mentioned you in a comment",
   "notificationShare": "{{user}} shared an album with you",
   "notificationNew": "New notification",
+  "commentsAndReactions": "Comments & Reactions",
   "notifications": {
     "errorLoadingData": "Error loading data",
     "confirmLogout": "Confirm logout",

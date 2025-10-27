@@ -1,14 +1,19 @@
 // ============================================================================
-// COMPONENT: PhotoModal.jsx – v4.0 med AI-visning (Fase 4.1)
+// COMPONENT: PhotoModal.jsx – v4.3 med Comments & Reactions (Phase 4.3)
 // ============================================================================
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { X, ArrowLeft, ArrowRight, Download, Info, Star, Calendar, Tag, Sparkles, Users } from "lucide-react";
+import { X, ArrowLeft, ArrowRight, Download, Info, Star, Calendar, Tag, Sparkles, Users, MessageCircle } from "lucide-react";
+import CommentThread from "./CommentThread";
+import ReactionPicker from "./ReactionPicker";
+import useAuth from "../hooks/useAuth";
 
 const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
   const { t } = useTranslation(['common']);
+  const { user } = useAuth();
   const [index, setIndex] = useState(currentIndex);
   const [showInfo, setShowInfo] = useState(false);
+  const [showComments, setShowComments] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const photo = photos[index];
   const startX = useRef(0);
@@ -379,10 +384,56 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
       )}
 
       {/* Bildetittel nederst */}
-      {photo.name && !showInfo && (
+      {photo.name && !showInfo && !showComments && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md text-gray-900 px-6 py-3 rounded-lg font-medium shadow-lg select-none">
           {photo.name}
         </div>
+      )}
+
+      {/* Comments & Reactions Panel */}
+      {showComments && (
+        <div
+          className="absolute right-4 top-20 bottom-4 w-[28rem] max-w-[calc(100vw-2rem)] bg-gray-900/95 backdrop-blur-xl rounded-2xl p-6 overflow-y-auto animate-scale-in shadow-2xl border border-white/10"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-700">
+            <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+              <MessageCircle className="w-5 h-5 text-purple-400" />
+              {t('common:commentsAndReactions')}
+            </h3>
+            <button
+              onClick={() => setShowComments(false)}
+              className="p-1 text-gray-400 hover:text-white transition"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Reactions */}
+          <div className="mb-6">
+            <ReactionPicker photoId={photo.id} photoOwnerId={photo.userId} />
+          </div>
+
+          {/* Comments */}
+          <div className="border-t border-gray-700 pt-6">
+            <CommentThread photoId={photo.id} photoOwnerId={photo.userId} />
+          </div>
+        </div>
+      )}
+
+      {/* Comments Button (when panel is closed) */}
+      {!showComments && !showInfo && user && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowComments(true);
+          }}
+          className="absolute right-4 bottom-4 bg-purple-600/90 backdrop-blur-md hover:bg-purple-700 text-white p-3 rounded-full transition shadow-lg flex items-center gap-2"
+          title={t('common:commentsAndReactions')}
+        >
+          <MessageCircle className="w-5 h-5" />
+        </button>
       )}
     </div>
   );
