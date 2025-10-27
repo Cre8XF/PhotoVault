@@ -2,22 +2,31 @@
 // APP.js – v6.0 Phase 2: Modern Architecture with Zustand & Hooks
 // ============================================================================
 import React from "react";
-import { BrowserRouter } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 
 // Contexts
 import { SecurityProvider, useSecurityContext } from "./contexts/SecurityContext";
 import { ToastProvider } from './contexts/ToastContext';
 
+// Pages
+import LoginPage from "./pages/LoginPage";
+import HomeDashboard from "./pages/HomeDashboard";
+import AlbumsPage from "./pages/AlbumsPage";
+import SearchPage from "./pages/SearchPage";
+import MorePage from "./pages/MorePage";
+import AlbumPage from "./pages/AlbumPage";
+import AdminDashboard from "./pages/AdminDashboard";
+import SecuritySettings from "./pages/SecuritySettings";
+
 // Components
 import ErrorBoundary from "./components/ErrorBoundary";
-import AppRoutes from "./routes/AppRoutes";
 import UploadModal from "./components/UploadModal";
 import PhotoModal from "./components/PhotoModal";
 import AlbumModal from "./components/AlbumModal";
 import ConfirmModal from "./components/ConfirmModal";
 import Notification from "./components/Notification";
 import Particles from "./components/Particles";
+import PINLockScreen from "./components/PINLockScreen";
 
 // Hooks
 import useAuth from "./hooks/useAuth";
@@ -35,9 +44,7 @@ function App() {
     <ErrorBoundary>
       <ToastProvider>
         <SecurityProvider>
-          <BrowserRouter>
-            <AppContent />
-          </BrowserRouter>
+          <AppContent />
         </SecurityProvider>
       </ToastProvider>
     </ErrorBoundary>
@@ -51,14 +58,19 @@ function AppContent() {
   const { t } = useTranslation(['common', 'nav']);
 
   // Custom hooks
-  const { user, loading } = useAuth();
+  const { user, userProfile, loading, handleLogout, isAdmin } = useAuth();
   const {
     albums,
+    photos,
     handleUpload,
     handleAlbumSave,
     handleCreateAlbumFromUpload,
     toggleFavorite,
+    refreshData,
   } = usePhotoData();
+
+  // Security context
+  const { isLocked, pinEnabled } = useSecurityContext();
 
   // Zustand store
   const uploadModalOpen = useStore((state) => state.uploadModalOpen);
@@ -67,10 +79,12 @@ function AppContent() {
   const confirmModal = useStore((state) => state.confirmModal);
   const notification = useStore((state) => state.notification);
   const editingAlbum = useStore((state) => state.editingAlbum);
-  const photos = useStore((state) => state.photos);
   const selectedPhotoIndex = useStore((state) => state.selectedPhotoIndex);
   const isDarkMode = useStore((state) => state.isDarkMode);
   const currentPage = useStore((state) => state.currentPage);
+  const selectedAlbum = useStore((state) => state.selectedAlbum);
+  const storageUsed = useStore((state) => state.storageUsed);
+  const storageLimit = useStore((state) => state.storageLimit);
 
   const setUploadModalOpen = useStore((state) => state.setUploadModalOpen);
   const setAlbumModalOpen = useStore((state) => state.setAlbumModalOpen);
@@ -79,7 +93,22 @@ function AppContent() {
   const setConfirmModal = useStore((state) => state.setConfirmModal);
   const clearNotification = useStore((state) => state.clearNotification);
   const setCurrentPage = useStore((state) => state.setCurrentPage);
+  const setSelectedAlbum = useStore((state) => state.setSelectedAlbum);
   const setTheme = useStore((state) => state.setTheme);
+
+  // Handle photo click
+  const handlePhotoClick = (photo) => {
+    const index = photos.findIndex(p => p.id === photo.id);
+    const setSelectedPhotoIndex = useStore.getState().setSelectedPhotoIndex;
+    setSelectedPhotoIndex(index);
+    setPhotoModalOpen(true);
+  };
+
+  // Handle album click
+  const handleAlbumClick = (album) => {
+    setSelectedAlbum(album);
+    setCurrentPage("album");
+  };
 
   // Apply theme on mount
   React.useEffect(() => {
@@ -128,16 +157,94 @@ function AppContent() {
     );
   }
 
+  // Show login if not authenticated
+  if (!user) {
+    return <LoginPage />;
+  }
+
+  // Show PIN lock screen if locked
+  if (isLocked && pinEnabled) {
+    return <PINLockScreen />;
+  }
+
   // Determine if we should show bottom navigation
-  const showBottomNav = user && currentPage !== "album" && currentPage !== "admin" && currentPage !== "security";
+  const showBottomNav = currentPage !== "album" && currentPage !== "admin" && currentPage !== "security";
 
   return (
     <div className="min-h-screen relative">
       <Particles />
 
-      {/* Main content with routing */}
+      {/* Main content - state-based rendering */}
       <main className="relative z-10">
-        <AppRoutes />
+        {currentPage === "home" && (
+          <HomeDashboard
+            albums={albums}
+            photos={photos}
+            user={userProfile || user}
+            onNavigate={setCurrentPage}
+            refreshData={refreshData}
+          />
+        )}
+
+        {currentPage === "albums" && (
+          <AlbumsPage
+            albums={albums}
+            photos={photos}
+            onNavigate={setCurrentPage}
+            onAlbumClick={handleAlbumClick}
+            onPhotoClick={handlePhotoClick}
+            toggleFavorite={toggleFavorite}
+          />
+        )}
+
+        {currentPage === "search" && (
+          <SearchPage
+            photos={photos}
+            albums={albums}
+            onPhotoClick={handlePhotoClick}
+            toggleFavorite={toggleFavorite}
+          />
+        )}
+
+        {currentPage === "more" && (
+          <MorePage
+            user={userProfile || user}
+            storageUsed={storageUsed}
+            storageLimit={storageLimit}
+            photos={photos}
+            albums={albums}
+            isDarkMode={isDarkMode}
+            setIsDarkMode={setTheme}
+            onLogout={handleLogout}
+            onNavigate={setCurrentPage}
+          />
+        )}
+
+        {currentPage === "security" && (
+          <SecuritySettings
+            onBack={() => setCurrentPage("more")}
+          />
+        )}
+
+        {currentPage === "album" && selectedAlbum && (
+          <AlbumPage
+            album={selectedAlbum}
+            user={userProfile || user}
+            photos={photos}
+            onBack={() => {
+              setCurrentPage("albums");
+              setSelectedAlbum(null);
+            }}
+            refreshData={refreshData}
+            colors={{}}
+          />
+        )}
+
+        {currentPage === "admin" && isAdmin && (
+          <AdminDashboard
+            onBack={() => setCurrentPage("more")}
+          />
+        )}
       </main>
 
       {/* Bottom Navigation */}
