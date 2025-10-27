@@ -112,6 +112,90 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
 
+    // Comments collection (Phase 4.3)
+    match /comments/{commentId} {
+      // Anyone with access to the photo can read comments
+      allow read: if isAuthenticated();
+
+      // Users can create comments with valid data
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.keys().hasAll(['photoId', 'userId', 'text', 'createdAt']);
+
+      // Users can update their own comments (edit text only)
+      allow update: if isAuthenticated() &&
+                       resource.data.userId == request.auth.uid &&
+                       request.resource.data.userId == resource.data.userId &&
+                       request.resource.data.photoId == resource.data.photoId;
+
+      // Users can delete their own comments, or photo owner can delete any comment
+      allow delete: if isAuthenticated() &&
+                       (resource.data.userId == request.auth.uid ||
+                        get(/databases/$(database)/documents/photos/$(resource.data.photoId)).data.userId == request.auth.uid);
+    }
+
+    // Reactions collection (Phase 4.3)
+    match /reactions/{reactionId} {
+      // Anyone with access to the photo can read reactions
+      allow read: if isAuthenticated();
+
+      // Users can create reactions (one per user per photo per emoji)
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.keys().hasAll(['photoId', 'userId', 'emoji', 'createdAt']);
+
+      // Users can update their own reactions (change emoji)
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
+      // Users can delete their own reactions
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // Notifications collection (Phase 4.3)
+    match /notifications/{notificationId} {
+      // Users can only read their own notifications
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
+      // System can create notifications (authenticated users creating notifications)
+      allow create: if isAuthenticated() &&
+                       request.resource.data.keys().hasAll(['userId', 'type', 'photoId', 'fromUserId', 'read', 'createdAt']);
+
+      // Users can update their own notifications (mark as read)
+      allow update: if isAuthenticated() &&
+                       resource.data.userId == request.auth.uid &&
+                       request.resource.data.keys().hasOnly(['read']) == false;
+
+      // Users can delete their own notifications
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // Shared Links collection (Phase 4.2)
+    match /shared_links/{linkId} {
+      // Public links can be read by anyone
+      allow read: if true;
+
+      // Only authenticated users can create links
+      allow create: if isAuthenticated() &&
+                       request.resource.data.createdBy == request.auth.uid;
+
+      // Only creator can update or delete
+      allow update, delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+    }
+
+    // Activity collection (Phase 4.2)
+    match /activity/{activityId} {
+      // Users can read activity if they're participants
+      allow read: if isAuthenticated() &&
+                     (request.auth.uid in resource.data.participants ||
+                      get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.userId == request.auth.uid);
+
+      // Authenticated users can create activity
+      allow create: if isAuthenticated();
+
+      // No updates or deletes allowed (immutable log)
+      allow update, delete: if false;
+    }
+
     // Deny all other access by default
     match /{document=**} {
       allow read, write: if false;
