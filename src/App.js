@@ -28,6 +28,7 @@ import ConfirmModal from "./components/ConfirmModal";
 import Notification from "./components/Notification";
 import Particles from "./components/Particles";
 import PINLockScreen from "./components/PINLockScreen";
+import NotificationPanel from "./components/NotificationPanel";
 
 // Hooks
 import useAuth from "./hooks/useAuth";
@@ -111,6 +112,14 @@ function AppContent() {
     setCurrentPage("album");
   };
 
+  // Handle navigate to photo from notification
+  const handleNavigateToPhoto = (photoId) => {
+    const photo = photos.find(p => p.id === photoId);
+    if (photo) {
+      handlePhotoClick(photo);
+    }
+  };
+
   // Apply theme on mount
   React.useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
@@ -174,6 +183,13 @@ function AppContent() {
   return (
     <div className="min-h-screen relative">
       <Particles />
+
+      {/* Notification Panel - Fixed top-right */}
+      {user && (
+        <div className="fixed top-4 right-4 z-40">
+          <NotificationPanel onNavigateToPhoto={handleNavigateToPhoto} />
+        </div>
+      )}
 
       {/* Main content - state-based rendering */}
       <main className="relative z-10">
