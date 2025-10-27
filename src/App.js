@@ -17,6 +17,7 @@ import MorePage from "./pages/MorePage";
 import AlbumPage from "./pages/AlbumPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import SecuritySettings from "./pages/SecuritySettings";
+import VaultPage from "./pages/VaultPage";
 
 // Components
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -168,7 +169,7 @@ function AppContent() {
   }
 
   // Determine if we should show bottom navigation
-  const showBottomNav = currentPage !== "album" && currentPage !== "admin" && currentPage !== "security";
+  const showBottomNav = currentPage !== "album" && currentPage !== "admin" && currentPage !== "security" && currentPage !== "vault";
 
   return (
     <div className="min-h-screen relative">
@@ -224,6 +225,10 @@ function AppContent() {
           <SecuritySettings
             onBack={() => setCurrentPage("more")}
           />
+        )}
+
+        {currentPage === "vault" && (
+          <VaultPage />
         )}
 
         {currentPage === "album" && selectedAlbum && (

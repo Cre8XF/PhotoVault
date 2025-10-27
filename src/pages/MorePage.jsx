@@ -38,6 +38,7 @@ import {
   Sun,
   Upload,
   Check,
+  Lock,
 } from "lucide-react";
 import { useSecurityContext } from "../contexts/SecurityContext";
 import { 
@@ -1010,7 +1011,7 @@ Returner kun gyldig JSON med struktur:
               expandedSection === 'settings' ? 'max-h-96' : 'max-h-0'
             }`}>
               <div className="px-6 pb-6 space-y-2">
-                <button 
+                <button
                   onClick={() => onNavigate('security')}
                   className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
                 >
@@ -1023,6 +1024,18 @@ Returner kun gyldig JSON med struktur:
                       )}
                     </div>
                     <p className="text-xs opacity-70">{t('more.settings.securityDesc')}</p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 opacity-50" />
+                </button>
+
+                <button
+                  onClick={() => onNavigate('vault')}
+                  className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
+                >
+                  <Lock className="w-5 h-5 text-purple-400" />
+                  <div className="flex-1">
+                    <p className="font-medium">{t('vault.title', { defaultValue: 'Secure Vault' })}</p>
+                    <p className="text-xs opacity-70">{t('vault.description', { defaultValue: 'Encrypted photo storage' })}</p>
                   </div>
                   <ChevronRight className="w-5 h-5 opacity-50" />
                 </button>
