@@ -3,6 +3,7 @@
 // ============================================================================
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+import { createVaultSlice } from './vaultSlice';
 
 /**
  * PhotoVault Global Store
@@ -234,12 +235,19 @@ const useStore = create(
           aiQueue: [],
           processingAI: false,
         }),
+
+        // =====================================================================
+        // VAULT SLICE
+        // =====================================================================
+        ...createVaultSlice(set, get),
       }),
       {
         name: 'photovault-storage',
         partialize: (state) => ({
           isDarkMode: state.isDarkMode,
-          // Only persist theme preference, not user data
+          // Vault settings (but not unlocked state or photos)
+          vaultPasswordHash: state.vaultPasswordHash,
+          vaultSettings: state.vaultSettings,
         }),
       }
     ),

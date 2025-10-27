@@ -21,6 +21,7 @@ const AdminDashboard = lazy(() => import('../pages/AdminDashboard'));
 const ProfilePage = lazy(() => import('../pages/ProfilePage'));
 const SubscriptionPage = lazy(() => import('../pages/SubscriptionPage'));
 const AISettingsPage = lazy(() => import('../pages/AISettingsPage'));
+const VaultPage = lazy(() => import('../pages/VaultPage'));
 
 /**
  * Loading fallback component
@@ -159,6 +160,15 @@ export const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <AISettingsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/vault"
+          element={
+            <ProtectedRoute>
+              <VaultPage />
             </ProtectedRoute>
           }
         />

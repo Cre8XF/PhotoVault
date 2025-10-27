@@ -95,6 +95,23 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Vault Photos collection (encrypted photos)
+    match /vault_photos/{vaultPhotoId} {
+      // Users can only read their own encrypted vault photos
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
+      // Users can create vault photos (must include userId and encrypted metadata)
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.keys().hasAll(['userId', 'encryptedMetadata', 'cryptoMetadata', 'storageRef', 'createdAt']);
+
+      // Users can update their own vault photos (for lastAccessedAt timestamp)
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
+      // Users can delete their own vault photos
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
     // Deny all other access by default
     match /{document=**} {
       allow read, write: if false;
