@@ -1,20 +1,31 @@
 // ============================================================================
-// useAIQueue Hook - Phase 2: AI Request Queue Management
+// useAIQueue Hook - Phase 3.2: AI Request Queue Management with Rate Limiting
 // ============================================================================
 import { useCallback, useEffect, useRef } from 'react';
 import useStore from '../state/store';
 
 /**
  * Custom hook for AI request queue management
- * Serializes AI operations to prevent API rate limit issues
+ * Serializes AI operations with rate limiting to prevent API throttling
  *
  * Supports:
- * - Google Vision API (image tagging)
- * - Picsart API (image enhancement)
- * - OpenAI GPT (smart sorting)
+ * - Google Vision API (image tagging, face detection, landmarks)
+ * - Picsart API (image enhancement, background removal, upscaling)
+ * - OpenAI GPT-4 Vision (image description, categorization, smart search)
  */
+
+// Rate limits per service (requests per minute and max concurrent)
+const RATE_LIMITS = {
+  googleVision: { rpm: 60, concurrent: 5, delay: 1000 },
+  picsart: { rpm: 30, concurrent: 2, delay: 2000 },
+  openai: { rpm: 20, concurrent: 1, delay: 3000 },
+  duplicateDetection: { rpm: 100, concurrent: 10, delay: 100 }
+};
+
 export const useAIQueue = () => {
   const processingRef = useRef(false);
+  const lastRequestTime = useRef({});
+  const activeRequests = useRef({});
 
   // Zustand store selectors
   const aiQueue = useStore((state) => state.aiQueue);
@@ -26,7 +37,52 @@ export const useAIQueue = () => {
   const setNotification = useStore((state) => state.setNotification);
 
   /**
-   * Process next task in the queue
+   * Wait for rate limit delay if needed
+   */
+  const waitForRateLimit = useCallback(async (service) => {
+    const limits = RATE_LIMITS[service];
+    if (!limits) return;
+
+    const now = Date.now();
+    const lastTime = lastRequestTime.current[service] || 0;
+    const timeSinceLastRequest = now - lastTime;
+
+    if (timeSinceLastRequest < limits.delay) {
+      const waitTime = limits.delay - timeSinceLastRequest;
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+
+    lastRequestTime.current[service] = Date.now();
+  }, []);
+
+  /**
+   * Check if service has capacity for new request
+   */
+  const hasCapacity = useCallback((service) => {
+    const limits = RATE_LIMITS[service];
+    if (!limits) return true;
+
+    const active = activeRequests.current[service] || 0;
+    return active < limits.concurrent;
+  }, []);
+
+  /**
+   * Track active request
+   */
+  const trackRequest = useCallback((service, increment = true) => {
+    if (!activeRequests.current[service]) {
+      activeRequests.current[service] = 0;
+    }
+
+    if (increment) {
+      activeRequests.current[service]++;
+    } else {
+      activeRequests.current[service] = Math.max(0, activeRequests.current[service] - 1);
+    }
+  }, []);
+
+  /**
+   * Process next task in the queue with rate limiting
    */
   const processNextTask = useCallback(async () => {
     if (processingRef.current || aiQueue.length === 0) {
@@ -37,8 +93,24 @@ export const useAIQueue = () => {
     setProcessingAI(true);
 
     const task = aiQueue[0];
+    const service = task.service || task.type || 'general';
 
     try {
+      // Wait for rate limit if needed
+      await waitForRateLimit(service);
+
+      // Check capacity
+      if (!hasCapacity(service)) {
+        // Wait a bit and try again
+        processingRef.current = false;
+        setProcessingAI(false);
+        setTimeout(() => processNextTask(), 500);
+        return;
+      }
+
+      // Track request
+      trackRequest(service, true);
+
       updateAIQueueTask(task.id, { status: 'processing' });
 
       // Execute the task
@@ -62,21 +134,26 @@ export const useAIQueue = () => {
         error: error.message
       });
 
-      // Show notification for failed tasks
-      setNotification({
-        message: `AI task failed: ${error.message}`,
-        type: 'error'
-      });
+      // Show notification for failed tasks (but not for every single failure)
+      if (task.showError !== false) {
+        setNotification({
+          message: `AI task failed: ${error.message}`,
+          type: 'error'
+        });
+      }
 
       // Remove failed task after delay
       setTimeout(() => {
         removeFromAIQueue(task.id);
       }, 2000);
     } finally {
+      // Untrack request
+      trackRequest(service, false);
+
       processingRef.current = false;
       setProcessingAI(false);
     }
-  }, [aiQueue, updateAIQueueTask, removeFromAIQueue, setProcessingAI, setNotification]);
+  }, [aiQueue, updateAIQueueTask, removeFromAIQueue, setProcessingAI, setNotification, waitForRateLimit, hasCapacity, trackRequest]);
 
   /**
    * Auto-process queue when tasks are added
