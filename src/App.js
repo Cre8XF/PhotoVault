@@ -18,7 +18,6 @@ import AlbumModal from "./components/AlbumModal";
 import ConfirmModal from "./components/ConfirmModal";
 import Notification from "./components/Notification";
 import Particles from "./components/Particles";
-import BottomNavigation from "./components/BottomNavigation";
 
 // Hooks
 import useAuth from "./hooks/useAuth";
