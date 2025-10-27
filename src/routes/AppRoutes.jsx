@@ -4,6 +4,7 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import useStore from '../state/store';
+import { useSecurityContext } from '../contexts/SecurityContext';
 
 // Eager-loaded components (critical path)
 import LoginPage from '../pages/LoginPage';
@@ -59,8 +60,7 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
 export const AppRoutes = () => {
   const user = useStore((state) => state.user);
   const loading = useStore((state) => state.loading);
-  const isLocked = useStore((state) => state.isLocked);
-  const pinEnabled = useStore((state) => state.pinEnabled);
+  const { isLocked, pinEnabled } = useSecurityContext();
 
   // Show loading spinner during initial auth check
   if (loading) {
