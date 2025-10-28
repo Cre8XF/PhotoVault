@@ -1,0 +1,86 @@
+============================================== 
+🔄 Oppdaterer PhotoVault fra GitHub... 
+Starttid: 28.10.2025  9:04:54,90 
+============================================== 
+ 
+[1] Henter siste endringer... 
+HEAD is now at 9108a8a fix: resolve Firebase Storage CORS issue for Netlify uploads
+Your branch is up to date with 'origin/claude/phase-4-orchestration-011CUXbTCEBPvvfbwvbM4VVr'.
+Already on 'claude/phase-4-orchestration-011CUXbTCEBPvvfbwvbM4VVr'
+From https://github.com/Cre8XF/PhotoVault
+ * branch            claude/phase-4-orchestration-011CUXbTCEBPvvfbwvbM4VVr -> FETCH_HEAD
+Already up to date.
+ 
+[2] Installerer avhengigheter... 
+npm error code ERESOLVE
+npm error ERESOLVE could not resolve
+npm error
+npm error While resolving: react-scripts@5.0.1
+npm error Found: typescript@5.9.3
+npm error node_modules/typescript
+npm error   dev typescript@"^5.9.3" from the root project
+npm error   peer typescript@">= 2.7" from fork-ts-checker-webpack-plugin@6.5.3
+npm error   node_modules/fork-ts-checker-webpack-plugin
+npm error     fork-ts-checker-webpack-plugin@"^6.5.0" from react-dev-utils@12.0.1
+npm error     node_modules/react-dev-utils
+npm error       react-dev-utils@"^12.0.1" from react-scripts@5.0.1
+npm error       node_modules/react-scripts
+npm error         react-scripts@"5.0.1" from the root project
+npm error   3 more (i18next, react-i18next, tsutils)
+npm error
+npm error Could not resolve dependency:
+npm error peerOptional typescript@"^3.2.1 || ^4" from react-scripts@5.0.1
+npm error node_modules/react-scripts
+npm error   react-scripts@"5.0.1" from the root project
+npm error
+npm error Conflicting peer dependency: typescript@4.9.5
+npm error node_modules/typescript
+npm error   peerOptional typescript@"^3.2.1 || ^4" from react-scripts@5.0.1
+npm error   node_modules/react-scripts
+npm error     react-scripts@"5.0.1" from the root project
+npm error
+npm error Fix the upstream dependency conflict, or retry
+npm error this command with --force or --legacy-peer-deps
+npm error to accept an incorrect (and potentially broken) dependency resolution.
+npm error
+npm error
+npm error For a full report see:
+npm error C:\Users\rogsor0319\AppData\Local\npm-cache\_logs\2025-10-28T08_04_56_972Z-eresolve-report.txt
+npm error A complete log of this run can be found in: C:\Users\rogsor0319\AppData\Local\npm-cache\_logs\2025-10-28T08_04_56_972Z-debug-0.log
+ 
+[3] Starter PhotoVault... 
+
+> photovault@1.0.0 start
+> react-scripts start
+
+(node:6628) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:6628) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+Starting the development server...
+
+Compiled with warnings.
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts'
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts'
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts'
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/definitions.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/index.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/web.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts'[39m[22m
+
+webpack compiled with [1m[33m3 warnings[39m[22m
+Terminate batch job (Y/N)? Terminate batch job (Y/N)? 
+^C
