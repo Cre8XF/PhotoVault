@@ -20,8 +20,9 @@ service firebase.storage {
       return request.resource.size < 10 * 1024 * 1024;
     }
 
-    // User photos path: photos/{userId}/{fileName}
-    match /photos/{userId}/{fileName} {
+    // User photos path: users/{userId}/{albumId}/{fileName}
+    // Matches: users/abc123/album1/photo.jpg OR users/abc123/unassigned/photo.jpg
+    match /users/{userId}/{albumId}/{fileName} {
       // Users can read their own photos
       allow read: if isOwner(userId);
 
@@ -35,12 +36,57 @@ service firebase.storage {
       allow update: if false;
     }
 
-    // User thumbnails path: thumbnails/{userId}/{fileName}
+    // User thumbnails path: users/{userId}/thumbnails/{fileName}
+    match /users/{userId}/thumbnails/{fileName} {
+      // Users can read their own thumbnails
+      allow read: if isOwner(userId);
+
+      // Users can create thumbnails
+      allow create: if isOwner(userId) && isImage();
+
+      // Users can delete their own thumbnails
+      allow delete: if isOwner(userId);
+
+      // No updates allowed
+      allow update: if false;
+    }
+
+    // Vault photos path: vault/{userId}/{fileName}
+    match /vault/{userId}/{fileName} {
+      // Users can read their own vault photos
+      allow read: if isOwner(userId);
+
+      // Users can create vault photos (encrypted)
+      allow create: if isOwner(userId);
+
+      // Users can delete their own vault photos
+      allow delete: if isOwner(userId);
+
+      // No updates allowed
+      allow update: if false;
+    }
+
+    // Legacy photos path (backwards compatibility)
+    match /photos/{userId}/{fileName} {
+      // Users can read their own photos
+      allow read: if isOwner(userId);
+
+      // Users can upload images to their own folder
+      allow create: if isOwner(userId) && isImage() && isValidSize();
+
+      // Users can delete their own photos
+      allow delete: if isOwner(userId);
+
+      // No updates allowed
+      allow update: if false;
+    }
+
+    // Legacy thumbnails path (backwards compatibility)
     match /thumbnails/{userId}/{fileName} {
       // Users can read their own thumbnails
       allow read: if isOwner(userId);
 
-      // System/cloud functions can create thumbnails
+      // Users can create thumbnails
       allow create: if isOwner(userId) && isImage();
 
       // Users can delete their own thumbnails

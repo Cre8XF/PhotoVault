@@ -2,7 +2,9 @@
   {
     "origin": [
       "http://localhost:3000",
-      "https://cre8web-photovault.netlify.app"
+      "https://cre8web-photovault.netlify.app",
+      "https://photovault-app-a0946.web.app",
+      "https://photovault-app-a0946.firebaseapp.com"
     ],
     "method": ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"],
     "maxAgeSeconds": 3600,
