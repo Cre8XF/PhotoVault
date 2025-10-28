@@ -6,15 +6,20 @@
       "https://photovault-app-a0946.web.app",
       "https://photovault-app-a0946.firebaseapp.com"
     ],
-    "method": ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"],
-    "maxAgeSeconds": 3600,
+    "method": ["GET","POST","PUT","DELETE","HEAD","OPTIONS"],
     "responseHeader": [
+      "Authorization",
       "Content-Type",
       "x-goog-meta-*",
       "x-goog-acl",
       "x-goog-resumable",
       "x-goog-content-length-range",
-      "Authorization"
-    ]
+      "x-goog-upload-protocol",
+      "x-goog-upload-command",
+      "x-goog-upload-offset",
+      "x-goog-upload-content-type",
+      "x-goog-upload-content-length"
+    ],
+    "maxAgeSeconds": 3600
   }
 ]

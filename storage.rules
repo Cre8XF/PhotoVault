@@ -26,6 +26,14 @@ service firebase.storage {
       allow delete: if isAuthenticated() && isOwner(userId);
     }
     
+    // ✅ Unassigned album (temporary uploads)
+match /users/{userId}/unassigned/{fileName} {
+  allow read: if isAuthenticated() && isOwner(userId);
+  allow create: if isAuthenticated() && isOwner(userId) && isImage() && isValidSize();
+  allow delete: if isAuthenticated() && isOwner(userId);
+}
+
+    
     // ✅ Thumbnails
     match /users/{userId}/thumbnails/{fileName} {
       allow read: if isAuthenticated() && isOwner(userId);
