@@ -34,25 +34,29 @@ const CommentThread = ({ photoId, photoOwnerId }) => {
   const unsubscribeRef = useRef(null);
 
   // Real-time comment subscription
-  useEffect(() => {
-    if (!photoId) return;
+useEffect(() => {
+  if (!photoId) return;
 
-    setLoading(true);
+  setLoading(true);
 
-    // Subscribe to real-time updates
-    const unsubscribe = getComments(photoId, true, (updatedComments) => {
-      setComments(updatedComments);
-      setLoading(false);
-    });
+  // Subscribe to real-time updates
+  const unsubscribe = getComments(photoId, true, (updatedComments) => {
+    setComments(updatedComments);
+    setLoading(false);
+  });
 
-    unsubscribeRef.current = unsubscribe;
+  // Sett kun hvis det faktisk er en funksjon
+  unsubscribeRef.current = typeof unsubscribe === "function" ? unsubscribe : null;
 
-    return () => {
-      if (unsubscribeRef.current) {
-        unsubscribeRef.current();
-      }
-    };
-  }, [photoId]);
+  // Rydd opp trygt ved unmount
+  return () => {
+    if (typeof unsubscribeRef.current === "function") {
+      unsubscribeRef.current();
+    }
+    unsubscribeRef.current = null;
+  };
+}, [photoId]);
+
 
   // Handle @mention detection
   const handleTextChange = (text) => {

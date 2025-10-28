@@ -28,31 +28,35 @@ const NotificationPanel = ({ onNavigateToPhoto }) => {
   const panelRef = useRef(null);
   const unsubscribeRef = useRef(null);
 
-  // Real-time notification subscription
-  useEffect(() => {
-    if (!user) return;
+ // Real-time notification subscription
+useEffect(() => {
+  if (!user) return;
 
-    setLoading(true);
+  setLoading(true);
 
-    // Subscribe to all notifications for real-time updates
-    const unsubscribe = getNotifications(user.uid, false, true, (updatedNotifications) => {
-      setNotifications(updatedNotifications);
+  // Subscribe to all notifications for real-time updates
+  const unsubscribe = getNotifications(user.uid, false, true, (updatedNotifications) => {
+    setNotifications(updatedNotifications);
 
-      // Update unread count
-      const unread = updatedNotifications.filter((n) => !n.read).length;
-      setUnreadCount(unread);
+    // Update unread count
+    const unread = updatedNotifications.filter((n) => !n.read).length;
+    setUnreadCount(unread);
 
-      setLoading(false);
-    });
+    setLoading(false);
+  });
 
-    unsubscribeRef.current = unsubscribe;
+  // Sett kun hvis det faktisk er en funksjon
+  unsubscribeRef.current = typeof unsubscribe === "function" ? unsubscribe : null;
 
-    return () => {
-      if (unsubscribeRef.current) {
-        unsubscribeRef.current();
-      }
-    };
-  }, [user]);
+  // Rydd opp trygt ved unmount
+  return () => {
+    if (typeof unsubscribeRef.current === "function") {
+      unsubscribeRef.current();
+    }
+    unsubscribeRef.current = null;
+  };
+}, [user]);
+
 
   // Close panel when clicking outside
   useEffect(() => {
