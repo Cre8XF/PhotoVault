@@ -12,8 +12,7 @@ import {
 } from "../utils/nativeBiometric";
 import { isNative, triggerHaptic, showToast } from "../utils/nativeUtils";
 import Particles from "../components/Particles";
-
-const LoginPage = ({ onLogin }) => {
+const LoginPage = ({ onLogin = () => window.location.reload() }) => {
   const { t } = useTranslation('auth');
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
