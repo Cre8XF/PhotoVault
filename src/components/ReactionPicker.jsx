@@ -29,38 +29,42 @@ const ReactionPicker = ({ photoId, photoOwnerId }) => {
   const pickerRef = useRef(null);
   const unsubscribeRef = useRef(null);
 
-  // Real-time reaction subscription
-  useEffect(() => {
-    if (!photoId) return;
+ // Real-time reaction subscription
+useEffect(() => {
+  if (!photoId) return;
 
-    setLoading(true);
+  setLoading(true);
 
-    // Subscribe to real-time updates
-    const unsubscribe = getReactions(photoId, true, (data) => {
-      setReactionData(data);
+  // Subscribe to real-time updates
+  const unsubscribe = getReactions(photoId, true, (data) => {
+    setReactionData(data);
 
-      // Update user's reactions
-      if (user) {
-        const userReactionSet = new Set();
-        data.reactions.forEach((reaction) => {
-          if (reaction.userId === user.uid) {
-            userReactionSet.add(reaction.emoji);
-          }
-        });
-        setUserReactions(userReactionSet);
-      }
+    // Update user's reactions
+    if (user) {
+      const userReactionSet = new Set();
+      data.reactions.forEach((reaction) => {
+        if (reaction.userId === user.uid) {
+          userReactionSet.add(reaction.emoji);
+        }
+      });
+      setUserReactions(userReactionSet);
+    }
 
-      setLoading(false);
-    });
+    setLoading(false);
+  });
 
-    unsubscribeRef.current = unsubscribe;
+  // Sett kun hvis det faktisk er en funksjon
+  unsubscribeRef.current = typeof unsubscribe === "function" ? unsubscribe : null;
 
-    return () => {
-      if (unsubscribeRef.current) {
-        unsubscribeRef.current();
-      }
-    };
-  }, [photoId, user]);
+  // Rydd opp trygt ved unmount
+  return () => {
+    if (typeof unsubscribeRef.current === "function") {
+      unsubscribeRef.current();
+    }
+    unsubscribeRef.current = null;
+  };
+}, [photoId, user]);
+
 
   // Close picker when clicking outside
   useEffect(() => {
