@@ -328,7 +328,7 @@ const UploadModal = ({
       <div
         ref={modalRef}
         tabIndex="-1"
-        className="bg-[var(--bg-secondary)] rounded-2xl shadow-2xl border border-white/10 w-full max-w-2xl max-h-[90vh] overflow-hidden modal-content-enhanced"
+        className="bg-[var(--bg-secondary)] rounded-2xl shadow-2xl border border-white/10 w-full max-w-2xl max-h-[90vh] overflow-y-auto modal-content-enhanced"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-6 border-b border-white/10">
