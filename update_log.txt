@@ -84,3 +84,366 @@ To ignore, add // eslint-disable-next-line to the line before.
 [1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts'[39m[22m
 
 webpack compiled with [1m[33m3 warnings[39m[22m
+Compiling...
+Compiled with warnings.
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts'
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts'
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts'
+
+[eslint] 
+src\components\CommentThread.jsx
+  Line 29:10:  'mentionPosition' is assigned a value but never used  no-unused-vars
+  Line 30:10:  'mentions' is assigned a value but never used         no-unused-vars
+  Line 30:20:  'setMentions' is assigned a value but never used      no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/definitions.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/index.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/web.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m[eslint] 
+src\components\CommentThread.jsx
+  Line 29:10:  'mentionPosition' is assigned a value but never used  no-unused-vars
+  Line 30:10:  'mentions' is assigned a value but never used         no-unused-vars
+  Line 30:20:  'setMentions' is assigned a value but never used      no-unused-vars
+
+[39m[22m
+
+webpack compiled with [1m[33m4 warnings[39m[22m
+Compiling...
+Compiled with warnings.
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts'
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts'
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts'
+
+[eslint] 
+src\components\CommentThread.jsx
+  Line 29:10:  'mentionPosition' is assigned a value but never used  no-unused-vars
+  Line 30:10:  'mentions' is assigned a value but never used         no-unused-vars
+  Line 30:20:  'setMentions' is assigned a value but never used      no-unused-vars
+
+src\components\NotificationPanel.jsx
+  Line 12:3:  'getUnreadCount' is defined but never used  no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/definitions.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/index.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/web.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m[eslint] 
+src\components\CommentThread.jsx
+  Line 29:10:  'mentionPosition' is assigned a value but never used  no-unused-vars
+  Line 30:10:  'mentions' is assigned a value but never used         no-unused-vars
+  Line 30:20:  'setMentions' is assigned a value but never used      no-unused-vars
+
+src\components\NotificationPanel.jsx
+  Line 12:3:  'getUnreadCount' is defined but never used  no-unused-vars
+
+[39m[22m
+
+webpack compiled with [1m[33m4 warnings[39m[22m
+Compiling...
+Compiled with warnings.
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts'
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts'
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts'
+
+[eslint] 
+src\components\CommentThread.jsx
+  Line 29:10:  'mentionPosition' is assigned a value but never used  no-unused-vars
+  Line 30:10:  'mentions' is assigned a value but never used         no-unused-vars
+  Line 30:20:  'setMentions' is assigned a value but never used      no-unused-vars
+
+src\components\NotificationPanel.jsx
+  Line 12:3:  'getUnreadCount' is defined but never used  no-unused-vars
+
+src\components\ReactionPicker.jsx
+  Line 11:3:  'hasUserReacted' is defined but never used  no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/definitions.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/index.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/web.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m[eslint] 
+src\components\CommentThread.jsx
+  Line 29:10:  'mentionPosition' is assigned a value but never used  no-unused-vars
+  Line 30:10:  'mentions' is assigned a value but never used         no-unused-vars
+  Line 30:20:  'setMentions' is assigned a value but never used      no-unused-vars
+
+src\components\NotificationPanel.jsx
+  Line 12:3:  'getUnreadCount' is defined but never used  no-unused-vars
+
+src\components\ReactionPicker.jsx
+  Line 11:3:  'hasUserReacted' is defined but never used  no-unused-vars
+
+[39m[22m
+
+webpack compiled with [1m[33m4 warnings[39m[22m
+Compiling...
+Compiled with warnings.
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts'
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts'
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts'
+
+[eslint] 
+src\components\CommentThread.jsx
+  Line 29:10:  'mentionPosition' is assigned a value but never used  no-unused-vars
+  Line 30:10:  'mentions' is assigned a value but never used         no-unused-vars
+  Line 30:20:  'setMentions' is assigned a value but never used      no-unused-vars
+
+src\components\NotificationPanel.jsx
+  Line 12:3:  'getUnreadCount' is defined but never used  no-unused-vars
+
+src\components\ReactionPicker.jsx
+  Line 11:3:  'hasUserReacted' is defined but never used  no-unused-vars
+
+src\pages\VaultPage.jsx
+  Line 425:6:  React Hook useEffect has a missing dependency: 'thumbnailUrl'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/definitions.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/index.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/web.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m[eslint] 
+src\components\CommentThread.jsx
+  Line 29:10:  'mentionPosition' is assigned a value but never used  no-unused-vars
+  Line 30:10:  'mentions' is assigned a value but never used         no-unused-vars
+  Line 30:20:  'setMentions' is assigned a value but never used      no-unused-vars
+
+src\components\NotificationPanel.jsx
+  Line 12:3:  'getUnreadCount' is defined but never used  no-unused-vars
+
+src\components\ReactionPicker.jsx
+  Line 11:3:  'hasUserReacted' is defined but never used  no-unused-vars
+
+src\pages\VaultPage.jsx
+  Line 425:6:  React Hook useEffect has a missing dependency: 'thumbnailUrl'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+[39m[22m
+
+webpack compiled with [1m[33m4 warnings[39m[22m
+Compiling...
+Compiled with warnings.
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts'
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts'
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts'
+
+[eslint] 
+src\components\CommentThread.jsx
+  Line 29:10:  'mentionPosition' is assigned a value but never used  no-unused-vars
+  Line 30:10:  'mentions' is assigned a value but never used         no-unused-vars
+  Line 30:20:  'setMentions' is assigned a value but never used      no-unused-vars
+
+src\components\NotificationPanel.jsx
+  Line 12:3:  'getUnreadCount' is defined but never used  no-unused-vars
+
+src\components\ReactionPicker.jsx
+  Line 11:3:  'hasUserReacted' is defined but never used  no-unused-vars
+
+src\pages\VaultPage.jsx
+  Line 413:6:  React Hook useEffect has a missing dependency: 'thumbnailUrl'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/definitions.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/index.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/web.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m[eslint] 
+src\components\CommentThread.jsx
+  Line 29:10:  'mentionPosition' is assigned a value but never used  no-unused-vars
+  Line 30:10:  'mentions' is assigned a value but never used         no-unused-vars
+  Line 30:20:  'setMentions' is assigned a value but never used      no-unused-vars
+
+src\components\NotificationPanel.jsx
+  Line 12:3:  'getUnreadCount' is defined but never used  no-unused-vars
+
+src\components\ReactionPicker.jsx
+  Line 11:3:  'hasUserReacted' is defined but never used  no-unused-vars
+
+src\pages\VaultPage.jsx
+  Line 413:6:  React Hook useEffect has a missing dependency: 'thumbnailUrl'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+[39m[22m
+
+webpack compiled with [1m[33m4 warnings[39m[22m
+Compiling...
+Compiled with warnings.
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts'
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts'
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts'
+
+[eslint] 
+src\components\CommentThread.jsx
+  Line 29:10:  'mentionPosition' is assigned a value but never used  no-unused-vars
+  Line 30:10:  'mentions' is assigned a value but never used         no-unused-vars
+  Line 30:20:  'setMentions' is assigned a value but never used      no-unused-vars
+
+src\components\NotificationPanel.jsx
+  Line 12:3:  'getUnreadCount' is defined but never used  no-unused-vars
+
+src\components\ReactionPicker.jsx
+  Line 11:3:  'hasUserReacted' is defined but never used  no-unused-vars
+
+src\pages\VaultPage.jsx
+  Line 423:6:  React Hook useEffect has a missing dependency: 'thumbnailUrl'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/definitions.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/index.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/web.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m[eslint] 
+src\components\CommentThread.jsx
+  Line 29:10:  'mentionPosition' is assigned a value but never used  no-unused-vars
+  Line 30:10:  'mentions' is assigned a value but never used         no-unused-vars
+  Line 30:20:  'setMentions' is assigned a value but never used      no-unused-vars
+
+src\components\NotificationPanel.jsx
+  Line 12:3:  'getUnreadCount' is defined but never used  no-unused-vars
+
+src\components\ReactionPicker.jsx
+  Line 11:3:  'hasUserReacted' is defined but never used  no-unused-vars
+
+src\pages\VaultPage.jsx
+  Line 423:6:  React Hook useEffect has a missing dependency: 'thumbnailUrl'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+[39m[22m
+
+webpack compiled with [1m[33m4 warnings[39m[22m
+Compiling...
+Compiled with warnings.
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts'
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts'
+
+Failed to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts' file: Error: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts'
+
+[eslint] 
+src\components\CommentThread.jsx
+  Line 29:10:  'mentionPosition' is assigned a value but never used  no-unused-vars
+  Line 30:10:  'mentions' is assigned a value but never used         no-unused-vars
+  Line 30:20:  'setMentions' is assigned a value but never used      no-unused-vars
+
+src\components\NotificationPanel.jsx
+  Line 12:3:  'getUnreadCount' is defined but never used  no-unused-vars
+
+src\components\ReactionPicker.jsx
+  Line 11:3:  'hasUserReacted' is defined but never used  no-unused-vars
+
+src\pages\VaultPage.jsx
+  Line 423:6:  React Hook useEffect has a missing dependency: 'thumbnailUrl'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/definitions.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\definitions.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/index.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\index.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m./node_modules/capacitor-native-biometric/dist/esm/web.js[39m[22m
+[1mModule Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+[1m[31mFailed[39m[22m[1m to parse source map from 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts' file: [1m[31mError[39m[22m[1m: ENOENT: no such file or directory, open 'C:\Mine-Prosjekter\PhotoVault\node_modules\capacitor-native-biometric\src\web.ts'[39m[22m
+
+[1m[33mWARNING[39m[22m in [1m[eslint] 
+src\components\CommentThread.jsx
+  Line 29:10:  'mentionPosition' is assigned a value but never used  no-unused-vars
+  Line 30:10:  'mentions' is assigned a value but never used         no-unused-vars
+  Line 30:20:  'setMentions' is assigned a value but never used      no-unused-vars
+
+src\components\NotificationPanel.jsx
+  Line 12:3:  'getUnreadCount' is defined but never used  no-unused-vars
+
+src\components\ReactionPicker.jsx
+  Line 11:3:  'hasUserReacted' is defined but never used  no-unused-vars
+
+src\pages\VaultPage.jsx
+  Line 423:6:  React Hook useEffect has a missing dependency: 'thumbnailUrl'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+[39m[22m
+
+webpack compiled with [1m[33m4 warnings[39m[22m
