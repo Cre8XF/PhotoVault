@@ -1,117 +1,66 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-
+    
     // Helper functions
     function isAuthenticated() {
       return request.auth != null;
     }
-
+    
     function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+      return request.auth.uid == userId;
     }
-
+    
     function isImage() {
       return request.resource.contentType.matches('image/.*');
     }
-
+    
     function isValidSize() {
-      // Max 10MB per image
-      return request.resource.size < 10 * 1024 * 1024;
+      return request.resource.size < 10 * 1024 * 1024; // 10MB
     }
-
-    // User photos path: users/{userId}/{albumId}/{fileName}
-    // Matches: users/abc123/album1/photo.jpg OR users/abc123/unassigned/photo.jpg
+    
+    // ✅ PRIMARY PATH - Current uploads
     match /users/{userId}/{albumId}/{fileName} {
-      // Users can read their own photos
-      allow read: if isOwner(userId);
-
-      // Users can upload images to their own folder
-      allow create: if isOwner(userId) && isImage() && isValidSize();
-
-      // Users can delete their own photos
-      allow delete: if isOwner(userId);
-
-      // No updates allowed (delete and recreate instead)
-      allow update: if false;
+      allow read: if isAuthenticated() && isOwner(userId);
+      allow create: if isAuthenticated() && isOwner(userId) && isImage() && isValidSize();
+      allow delete: if isAuthenticated() && isOwner(userId);
     }
-
-    // User thumbnails path: users/{userId}/thumbnails/{fileName}
+    
+    // ✅ Thumbnails
     match /users/{userId}/thumbnails/{fileName} {
-      // Users can read their own thumbnails
-      allow read: if isOwner(userId);
-
-      // Users can create thumbnails
-      allow create: if isOwner(userId) && isImage();
-
-      // Users can delete their own thumbnails
-      allow delete: if isOwner(userId);
-
-      // No updates allowed
-      allow update: if false;
+      allow read: if isAuthenticated() && isOwner(userId);
+      allow create: if isAuthenticated() && isOwner(userId) && isImage() && isValidSize();
+      allow delete: if isAuthenticated() && isOwner(userId);
     }
-
-    // Vault photos path: vault/{userId}/{fileName}
+    
+    // ✅ Vault (encrypted photos)
     match /vault/{userId}/{fileName} {
-      // Users can read their own vault photos
-      allow read: if isOwner(userId);
-
-      // Users can create vault photos (encrypted)
-      allow create: if isOwner(userId);
-
-      // Users can delete their own vault photos
-      allow delete: if isOwner(userId);
-
-      // No updates allowed
-      allow update: if false;
+      allow read: if isAuthenticated() && isOwner(userId);
+      allow create: if isAuthenticated() && isOwner(userId) && isValidSize();
+      allow delete: if isAuthenticated() && isOwner(userId);
     }
-
-    // Legacy photos path (backwards compatibility)
-    match /photos/{userId}/{fileName} {
-      // Users can read their own photos
-      allow read: if isOwner(userId);
-
-      // Users can upload images to their own folder
-      allow create: if isOwner(userId) && isImage() && isValidSize();
-
-      // Users can delete their own photos
-      allow delete: if isOwner(userId);
-
-      // No updates allowed
-      allow update: if false;
-    }
-
-    // Legacy thumbnails path (backwards compatibility)
-    match /thumbnails/{userId}/{fileName} {
-      // Users can read their own thumbnails
-      allow read: if isOwner(userId);
-
-      // Users can create thumbnails
-      allow create: if isOwner(userId) && isImage();
-
-      // Users can delete their own thumbnails
-      allow delete: if isOwner(userId);
-
-      // No updates allowed
-      allow update: if false;
-    }
-
-    // Enhanced photos path: enhanced/{userId}/{fileName}
+    
+    // ✅ Enhanced photos
     match /enhanced/{userId}/{fileName} {
-      // Users can read their own enhanced photos
-      allow read: if isOwner(userId);
-
-      // System can create enhanced photos
-      allow create: if isOwner(userId) && isImage();
-
-      // Users can delete their own enhanced photos
-      allow delete: if isOwner(userId);
-
-      // No updates allowed
-      allow update: if false;
+      allow read: if isAuthenticated() && isOwner(userId);
+      allow create: if isAuthenticated() && isOwner(userId) && isImage() && isValidSize();
+      allow delete: if isAuthenticated() && isOwner(userId);
     }
-
-    // Deny all other access by default
+    
+    // ✅ Legacy paths (backwards compatibility)
+    match /photos/{userId}/{fileName} {
+      allow read: if isAuthenticated() && isOwner(userId);
+      allow create: if isAuthenticated() && isOwner(userId) && isImage() && isValidSize();
+      allow delete: if isAuthenticated() && isOwner(userId);
+    }
+    
+    match /thumbnails/{userId}/{fileName} {
+      allow read: if isAuthenticated() && isOwner(userId);
+      allow create: if isAuthenticated() && isOwner(userId) && isImage() && isValidSize();
+      allow delete: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // Deny all other paths
     match /{allPaths=**} {
       allow read, write: if false;
     }
