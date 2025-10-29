@@ -3,7 +3,8 @@
  * Provides image analysis, label detection, face detection, and landmark recognition
  */
 
-const GOOGLE_VISION_API = 'https://vision.googleapis.com/v1/images:annotate';
+const GOOGLE_VISION_API = 'https://vision.googleapis.com/v1/projects/photovault-app-a0946/locations/global/images:annotate';
+
 
 /**
  * Get Google Vision API key from environment
