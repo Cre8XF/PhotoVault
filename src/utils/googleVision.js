@@ -9,7 +9,7 @@
  */
 
 const GOOGLE_VISION_API_KEY = process.env.REACT_APP_GOOGLE_VISION_KEY || '';
-const VISION_API_URL = 'https://vision.googleapis.com/v1/images:annotate';
+const VISION_API_URL = 'https://vision.googleapis.com/v1/projects/photovault-app-a0946/locations/global/images:annotate';
 
 /**
  * Analyser et bilde med Google Vision API
