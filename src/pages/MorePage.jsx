@@ -63,7 +63,7 @@ import {
 
 
 import { db } from "../firebase";
-
+import { analyzeImage } from '../services/googleVision';
 
 const MorePage = ({ 
   user, 
@@ -195,7 +195,7 @@ const MorePage = ({
 
     try {
       const response = await fetch(
-        `https://vision.googleapis.com/v1/images:annotate?key=${visionKey}`,
+        `https://vision.googleapis.com/v1/projects/photovault-app-a0946/locations/global/images:annotate?key=${visionKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
