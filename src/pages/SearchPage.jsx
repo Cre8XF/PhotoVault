@@ -71,7 +71,13 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => 
     if (activeFilters.withTags) res = res.filter(p => (p.aiTags || []).length > 0);
     if (activeFilters.aiAnalyzed) res = res.filter(p => !!p.aiAnalyzed);
     if (activeFilters.category) res = res.filter(p => p.category === activeFilters.category);
-    if (activeFilters.albumId) res = res.filter(p => p.albumId === activeFilters.albumId);
+    if (activeFilters.albumId) {
+      if (activeFilters.albumId === 'noAlbum') {
+        res = res.filter(p => !p.albumId || p.albumId === '');
+      } else {
+        res = res.filter(p => p.albumId === activeFilters.albumId);
+      }
+    }
     if (activeFilters.dateRange) {
       const now = Date.now();
       const days = { today: 1, week: 7, month: 30, year: 365 }[activeFilters.dateRange] || 0;
@@ -265,11 +271,19 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => 
             <label className="flex items-center gap-2">
               <Folder size={16} />
               <select
-                value={activeFilters.albumId || ''}
-                onChange={e => setActiveFilters(f => ({ ...f, albumId: e.target.value || null }))}
+                value={activeFilters.albumId === 'noAlbum' ? 'noAlbum' : (activeFilters.albumId || '')}
+                onChange={e => {
+                  const value = e.target.value;
+                  if (value === 'noAlbum') {
+                    setActiveFilters(f => ({ ...f, albumId: 'noAlbum' }));
+                  } else {
+                    setActiveFilters(f => ({ ...f, albumId: value || null }));
+                  }
+                }}
                 className="flex-1 bg-transparent border border-white/10 rounded-lg px-3 py-2"
               >
                 <option value="">{t('search:filterOptions.allAlbums')}</option>
+                <option value="noAlbum">{t('search:filterOptions.noAlbum', 'Uten album')}</option>
                 {albums.map(a => (
                   <option key={a.id} value={a.id}>{a.name}</option>
                 ))}

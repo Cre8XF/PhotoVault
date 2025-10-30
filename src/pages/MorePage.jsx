@@ -63,7 +63,9 @@ import {
 
 
 import { db } from "../firebase";
-import { analyzeImage } from '../services/googleVision';
+import { analyzeImage, detectFaces } from '../services/googleVision';
+import { suggestAlbums } from '../services/openai';
+import { upscaleImage } from '../services/picsart';
 
 const MorePage = ({ 
   user, 
@@ -186,119 +188,14 @@ const MorePage = ({
   };
 
   // ============================================================================
-  // === AI FUNCTIONS - DIRECT API CALLS ===
+  // === AI FUNCTIONS - USING SERVICES ===
   // ============================================================================
-
-  const analyzeImageWithVision = async (imageUrl) => {
-    const visionKey = process.env.REACT_APP_GOOGLE_VISION_KEY;
-    if (!visionKey) return null;
-
-    try {
-      const response = await fetch(
-        `https://vision.googleapis.com/v1/projects/photovault-app-a0946/locations/global/images:annotate?key=${visionKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            requests: [{
-              image: { source: { imageUri: imageUrl } },
-              features: [
-                { type: 'LABEL_DETECTION', maxResults: 10 },
-                { type: 'FACE_DETECTION', maxResults: 5 },
-                { type: 'OBJECT_LOCALIZATION', maxResults: 10 }
-              ]
-            }]
-          })
-        }
-      );
-
-      if (!response.ok) throw new Error(`Vision API: ${response.status}`);
-      return await response.json();
-    } catch (error) {
-      console.error('Vision API error:', error);
-      return null;
-    }
-  };
-
-  const callOpenAI = async (prompt) => {
-    const openaiKey = process.env.REACT_APP_OPENAI_KEY;
-
-    if (!openaiKey || openaiKey.length < 20) {
-      console.warn("OpenAI API key missing or invalid");
-      return null;
-    }
-
-    try {
-      console.log("Calling OpenAI GPT-4o-mini...");
-
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${openaiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [{ role: "user", content: prompt }],
-          temperature: 0.7,
-          max_tokens: 400,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("OpenAI API error response:", errorText);
-        throw new Error(`OpenAI API: ${response.status} - ${errorText}`);
-      }
-
-      const data = await response.json();
-      console.log("OpenAI API response:", data);
-      return data.choices?.[0]?.message?.content?.trim() || null;
-    } catch (error) {
-      console.error("OpenAI API error:", error);
-      return null;
-    }
-  };
-
-  const enhanceImageWithPicsart = async (imageUrl) => {
-    const picsartKey = process.env.REACT_APP_PICSART_KEY;
-    if (!picsartKey) return null;
-
-    try {
-      const response = await fetch('https://api.picsart.io/tools/1.0/upscale', {
-        method: 'POST',
-        headers: {
-          'X-Picsart-API-Key': picsartKey,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          image_url: imageUrl,
-          upscale_factor: 2,
-          format: 'JPG'
-        })
-      });
-
-      if (!response.ok) throw new Error(`Picsart API: ${response.status}`);
-      return await response.json();
-    } catch (error) {
-      console.error('Picsart API error:', error);
-      return null;
-    }
-  };
 
   // ============================================================================
   // === AI FEATURE HANDLERS ===
   // ============================================================================
 
   const handleAutoSort = async () => {
-    const openaiKey = process.env.REACT_APP_OPENAI_KEY;
-
-    if (!openaiKey || openaiKey.length < 10) {
-      showNotification(t('more.ai.errors.missingKey'), "error");
-      console.warn("OpenAI key missing or too short");
-      return;
-    }
-
     try {
       setLoading(true);
       console.log("Auto-sorting photos...", photos.length, "photos");
@@ -308,69 +205,19 @@ const MorePage = ({
         return;
       }
 
-      const photoSummary = photos.slice(0, 20).map(p => ({
-        id: p.id,
-        name: p.name,
-        date: p.createdAt,
-        tags: p.tags || []
-      }));
+      const albums = await suggestAlbums(photos);
 
-      const prompt = `Analyser disse bildene og foreslå en smart sortering i kategorier.
-Bilder: ${JSON.stringify(photoSummary)}
-
-Returner kun gyldig JSON med struktur:
-{
-  "categories": [
-    {"name": "Feriebilder", "photoIds": [...], "reason": "Inneholder..."}
-  ]
-}`;
-
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${openaiKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "gpt-5",
-          messages: [
-            { role: "system", content: "Du er en AI-assistent som sorterer bilder etter tema og innhold." },
-            { role: "user", content: prompt }
-          ]
-        })
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("OpenAI API error:", errorText);
-        showNotification(t('more.ai.errors.sortingFailed'), "error");
-        return;
-      }
-
-      const data = await response.json();
-      const message = data.choices?.[0]?.message?.content || "";
-      console.log("GPT-sort result (raw):", message);
-
-      let parsed;
-      try {
-        parsed = JSON.parse(message);
-      } catch (err) {
-        console.warn("Kunne ikke parse JSON fra GPT:", err);
-        showNotification(t('more.ai.errors.invalidJson'), "error");
-        return;
-      }
-
-      if (parsed?.categories?.length) {
-        for (const cat of parsed.categories) {
-          for (const photoId of cat.photoIds) {
+      if (albums && albums.length > 0) {
+        for (const album of albums) {
+          for (const photoId of album.photoIds) {
             try {
               const ref = doc(db, "photos", photoId);
               await updateDoc(ref, {
-                category: cat.name,
+                category: album.name,
                 aiSorted: true,
-                aiReason: cat.reason
+                aiReason: album.reason
               });
-              console.log(`✅ ${photoId} → ${cat.name}`);
+              console.log(`✅ ${photoId} → ${album.name}`);
             } catch (err) {
               console.warn(`⚠️ Feil ved oppdatering av ${photoId}`, err);
             }
@@ -390,13 +237,6 @@ Returner kun gyldig JSON med struktur:
   };
 
   const handleImageEnhancement = async () => {
-    const picsartKey = process.env.REACT_APP_PICSART_KEY;
-    
-    if (!picsartKey || picsartKey.length < 10) {
-      showNotification(t('more.ai.errors.missingPicsartKey'), "error");
-      return;
-    }
-
     try {
       setLoading(true);
       console.log("Enhancing images with Picsart...");
@@ -407,8 +247,8 @@ Returner kun gyldig JSON med struktur:
         return;
       }
 
-      const result = await enhanceImageWithPicsart(firstPhoto.url);
-      
+      const result = await upscaleImage(firstPhoto.url, 2);
+
       if (result) {
         console.log("Enhancement result:", result);
         showNotification(t('more.ai.notifications.enhancementComplete'), "success");
@@ -424,13 +264,6 @@ Returner kun gyldig JSON med struktur:
   };
 
   const handleFaceRecognition = async () => {
-    const visionKey = process.env.REACT_APP_GOOGLE_VISION_KEY;
-    
-    if (!visionKey) {
-      showNotification(t('more.ai.errors.missingVisionKey'), "error");
-      return;
-    }
-
     try {
       setLoading(true);
       console.log("Detecting faces in photos...");
@@ -440,12 +273,11 @@ Returner kun gyldig JSON med struktur:
 
       for (const photo of photosToAnalyze) {
         if (!photo.url) continue;
-        
-        const result = await analyzeImageWithVision(photo.url);
-        const faces = result?.responses?.[0]?.faceAnnotations || [];
-        totalFaces += faces.length;
-        
-        console.log(`Photo ${photo.id}: ${faces.length} faces detected`);
+
+        const faceCount = await detectFaces(photo.url);
+        totalFaces += faceCount;
+
+        console.log(`Photo ${photo.id}: ${faceCount} faces detected`);
       }
 
       showNotification(t('more.ai.notifications.facesDetected', { count: totalFaces, photos: photosToAnalyze.length }), "success");
@@ -458,13 +290,6 @@ Returner kun gyldig JSON med struktur:
   };
 
   const handleSmartTagging = async () => {
-    const visionKey = process.env.REACT_APP_GOOGLE_VISION_KEY;
-    
-    if (!visionKey) {
-      showNotification(t('more.ai.errors.missingVisionKey'), "error");
-      return;
-    }
-
     try {
       setLoading(true);
       console.log("Smart tagging photos...");
@@ -475,8 +300,8 @@ Returner kun gyldig JSON med struktur:
         return;
       }
 
-      const result = await analyzeImageWithVision(firstPhoto.url);
-      const labels = result?.responses?.[0]?.labelAnnotations || [];
+      const result = await analyzeImage(firstPhoto.url, ['LABEL_DETECTION']);
+      const labels = result?.labelAnnotations || [];
       const tags = labels.map(l => l.description);
 
       console.log("Generated tags:", tags);
@@ -688,17 +513,27 @@ Returner kun gyldig JSON med struktur:
   };
 
   // ============================================================================
-  // === EXTERNAL LINKS ===
+  // === EXTERNAL LINKS & INFO PAGES ===
   // ============================================================================
-  const openExternalLink = (type) => {
-    const links = {
-      help: 'https://photovault.app/help',
-      privacy: 'https://photovault.app/privacy',
-      terms: 'https://photovault.app/terms',
+  const openInfoPage = (type) => {
+    const infoPages = {
+      help: '/info/help.html',
+      security: '/info/security.html',
+      pro: '/info/pro.html',
+      about: '/info/about.html',
+      support: '/info/support.html',
+      privacy: '/info/privacy.html',
+      terms: '/info/terms.html',
     };
 
-    const url = links[type] || links.help;
-    window.open(url, '_blank', 'noopener,noreferrer');
+    const url = infoPages[type];
+    if (url) {
+      // Try to open the local info page
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      // Fallback: show a modal "Page coming soon"
+      showNotification(t('info.comingSoon', 'Side kommer snart'), 'info');
+    }
   };
 
   // ============================================================================
@@ -838,8 +673,8 @@ Returner kun gyldig JSON med struktur:
           <span className="text-sm font-medium">{t('buttons.share')}</span>
         </button>
         
-        <button 
-          onClick={() => openExternalLink('help')}
+        <button
+          onClick={() => openInfoPage('help')}
           className="ripple-effect glass rounded-xl p-4 hover:bg-white/10 transition flex flex-col items-center gap-2 text-center"
         >
           <div className="p-3 bg-green-600/20 rounded-xl">
@@ -1241,8 +1076,8 @@ Returner kun gyldig JSON med struktur:
             </div>
 
             <div className="space-y-2">
-              <button 
-                onClick={() => openExternalLink('help')}
+              <button
+                onClick={() => openInfoPage('help')}
                 className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-3 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
               >
                 <HelpCircle className="w-5 h-5 text-gray-400" />
@@ -1250,8 +1085,8 @@ Returner kun gyldig JSON med struktur:
                 <ExternalLink className="w-4 h-4 opacity-50 ml-auto" />
               </button>
 
-              <button 
-                onClick={() => openExternalLink('privacy')}
+              <button
+                onClick={() => openInfoPage('privacy')}
                 className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-3 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
               >
                 <FileText className="w-5 h-5 text-gray-400" />
@@ -1259,8 +1094,8 @@ Returner kun gyldig JSON med struktur:
                 <ExternalLink className="w-4 h-4 opacity-50 ml-auto" />
               </button>
 
-              <button 
-                onClick={() => openExternalLink('terms')}
+              <button
+                onClick={() => openInfoPage('terms')}
                 className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-3 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
               >
                 <FileText className="w-5 h-5 text-gray-400" />

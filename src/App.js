@@ -184,9 +184,9 @@ function AppContent() {
     <div className="min-h-screen relative">
       <Particles />
 
-      {/* Notification Panel - Fixed top-right */}
+      {/* Notification Panel - Fixed top-right (mobile-safe positioning) */}
       {user && (
-        <div className="fixed top-4 right-4 z-40">
+        <div className="fixed z-40" style={{ top: '24px', right: '16px' }}>
           <NotificationPanel onNavigateToPhoto={handleNavigateToPhoto} />
         </div>
       )}
