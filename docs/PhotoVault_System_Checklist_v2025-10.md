@@ -41,7 +41,7 @@
 | Firestore-data vises (albums, photos) | Laster uten feil                            | ✅     |
 | Storage-opplasting                    | Bilde lastes opp fra Netlify uten CORS-feil | ✅     |
 | Sletting av bilder                    | Fil og dokument fjernes                     | ✅     |
-| Flytting mellom album                 | Teller oppdateres automatisk                | ☐      |
+| Flytting mellom album                 | Teller oppdateres automatisk                | ✅     |
 
 ---
 

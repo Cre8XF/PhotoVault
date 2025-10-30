@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhotoVault - Security</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 { color: #667eea; margin-bottom: 20px; font-size: 2.5em; }
+        h2 { color: #764ba2; margin-top: 30px; margin-bottom: 15px; }
+        p { margin-bottom: 15px; color: #555; }
+        ul { margin-left: 20px; margin-bottom: 15px; }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        .btn:hover { background: #764ba2; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔒 Security</h1>
+        <p>Your privacy and security are our top priorities.</p>
+
+        <h2>Encryption</h2>
+        <ul>
+            <li>End-to-end encryption for Vault photos</li>
+            <li>Secure HTTPS connection</li>
+            <li>Firebase Authentication</li>
+        </ul>
+
+        <h2>Data Protection</h2>
+        <p>Your photos are stored securely on Firebase Cloud Storage with industry-standard encryption.</p>
+
+        <h2>Biometric Authentication</h2>
+        <p>Enhance security with fingerprint or Face ID login.</p>
+
+        <a href="#" onclick="window.close(); return false;" class="btn">Close</a>
+    </div>
+</body>
+</html>
