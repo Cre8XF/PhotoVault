@@ -28,7 +28,7 @@
 | Testpunkt                                          | Forventet resultat           | Status |
 | -------------------------------------------------- | ---------------------------- | ------ |
 | Cloud Vision API aktivert i `photovault-app-a0946` | 200 OK ved test-kall         | ✅     |
-| Auto-tagging ved opplasting                        | Felt `aiTags` fylles         | ☐      |
+| Auto-tagging ved opplasting                        | Felt `aiTags` fylles         | ✅     |
 | Bakgrunnsfjerning (PicsArt)                        | Ny fil uten bakgrunn         | ☐      |
 | Enhance-funksjon                                   | Ny `enhancedUrl` i Firestore | ☐      |
 
@@ -38,10 +38,10 @@
 
 | Testpunkt                               | Forventet resultat             | Status |
 | --------------------------------------- | ------------------------------ | ------ |
-| Opprett nytt album i UploadModal        | Opprettes og vises umiddelbart | ☐      |
-| Sett album-forside                      | Cover oppdateres               | ☐      |
-| Redigeringsmodus (slett / sett forside) | Knappene vises kun i edit-mode | ☐      |
-| Dark / Light-toggle                     | Endrer tema umiddelbart        | ☐      |
+| Opprett nytt album i UploadModal        | Opprettes og vises umiddelbart | ✅     |
+| Sett album-forside                      | Cover oppdateres               | ✅     |
+| Redigeringsmodus (slett / sett forside) | Knappene vises kun i edit-mode | ✅     |
+| Dark / Light-toggle                     | Endrer tema umiddelbart        | ✅     |
 
 ---
 
@@ -49,9 +49,9 @@
 
 | Testpunkt                            | Forventet resultat       | Status |
 | ------------------------------------ | ------------------------ | ------ |
-| Tekstsøk (tittel / tag)              | Treffer riktig           | ☐      |
-| Filter Favoritt / AI / Ansikt / Dato | Filtrerer korrekt        | ☐      |
-| Nullstill filter                     | Gjenoppretter full liste | ☐      |
+| Tekstsøk (tittel / tag)              | Treffer riktig           | ✅     |
+| Filter Favoritt / AI / Ansikt / Dato | Filtrerer korrekt        | ✅     |
+| Nullstill filter                     | Gjenoppretter full liste | ✅     |
 
 ---
 
@@ -62,7 +62,7 @@
 | Netlify build         | Fullført uten feil                            | ✅     |
 | Environment-variabler | Viser riktige verdier (`firebasestorage.app`) | ✅     |
 | Cloud Vision API      | Aktivert i riktig prosjekt                    | ✅     |
-| Cloud Logging         | Viser data etter trafikk                      | ☐      |
+| Cloud Logging         | Viser data etter trafikk                      | ✅     |
 
 ---
 
@@ -70,9 +70,9 @@
 
 | Testpunkt                                      | Forventet resultat             | Status |
 | ---------------------------------------------- | ------------------------------ | ------ |
-| Ingen røde feil i DevTools                     | Konsollen ren                  | ☐      |
-| Alle sider (Home, Albums, Search, More) laster | Ingen tom visning              | ☐      |
-| Responsiv visning (desktop / mobil)            | Elementer justerer seg korrekt | ☐      |
+| Ingen røde feil i DevTools                     | Konsollen ren                  | ✅     |
+| Alle sider (Home, Albums, Search, More) laster | Ingen tom visning              | ✅     |
+| Responsiv visning (desktop / mobil)            | Elementer justerer seg korrekt | ✅     |
 
 ---
 
