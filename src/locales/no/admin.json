@@ -2,11 +2,23 @@
   "title": "Adminpanel",
   "totalUsers": "Totalt: {{count}} brukere",
   "noUsers": "Ingen brukere funnet",
+  "stats": {
+    "totalUsers": "{{count}} Totalt",
+    "users": "Brukere",
+    "proUsers": "Pro-brukere",
+    "adminUsers": "Administratorer",
+    "albums": "Album",
+    "photos": "Bilder",
+    "storage": "Lagring"
+  },
   "table": {
     "name": "Navn",
     "email": "E-post",
+    "isPro": "Pro",
+    "isAdmin": "Admin",
     "albums": "Album",
     "photos": "Bilder",
+    "storage": "Lagring",
     "proStatus": "Pro-status",
     "actions": "Handling"
   },
@@ -14,14 +26,40 @@
     "pro": "PRO",
     "free": "Gratis"
   },
+  "filters": {
+    "all": "Alle",
+    "admin": "Admin",
+    "pro": "Pro",
+    "free": "Gratis"
+  },
+  "search": {
+    "placeholder": "Søk brukere..."
+  },
+  "resultsCount": "Viser {{count}} av {{total}} brukere",
+  "recentActivity": {
+    "title": "Siste aktivitet",
+    "noActivity": "Ingen siste aktivitet",
+    "upload": "Bilde lastet opp",
+    "delete": "Bilde slettet",
+    "albumCreated": "Album opprettet"
+  },
+  "timeAgo": {
+    "justNow": "Akkurat nå",
+    "minutesAgo": "{{count}}m siden",
+    "hoursAgo": "{{count}}t siden",
+    "daysAgo": "{{count}}d siden"
+  },
   "actions": {
     "delete": "Slett bruker",
-    "togglePro": "Endre Pro-status"
+    "togglePro": "Endre Pro-status",
+    "toggleAdmin": "Endre Admin-status"
   },
   "notifications": {
     "proUpdated": "Pro-status oppdatert for {{email}}",
+    "adminUpdated": "Admin-status oppdatert for {{email}}",
     "userDeleted": "Bruker {{email}} er slettet",
     "couldNotChangePro": "Kunne ikke endre Pro-status",
+    "couldNotChangeAdmin": "Kunne ikke endre Admin-status",
     "couldNotDelete": "Kunne ikke slette bruker"
   },
   "confirmDelete": "Slett bruker {{email}}?"

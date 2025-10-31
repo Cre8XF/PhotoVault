@@ -170,6 +170,7 @@
   "more": {
     "admin": {
       "badge": "Admin",
+      "accountLabel": "Admin account",
       "access": "Admin access",
       "userDesc": "Manage users",
       "databaseDesc": "Database tools"

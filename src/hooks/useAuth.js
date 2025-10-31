@@ -108,9 +108,12 @@ export const useAuth = () => {
 
   /**
    * Check if user is pro
+   * Checks both isPro field and role field for backward compatibility
    */
   const isPro = useCallback(() => {
-    return userProfile?.role === 'pro' || userProfile?.role === 'admin';
+    return userProfile?.isPro === true ||
+           userProfile?.role === 'pro' ||
+           userProfile?.role === 'admin';
   }, [userProfile]);
 
   /**

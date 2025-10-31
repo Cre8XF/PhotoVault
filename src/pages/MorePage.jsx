@@ -88,8 +88,13 @@ const MorePage = ({
   
   const { pinEnabled, biometricEnabled } = useSecurityContext();
 
-  const isPro = user?.isPro || false;
-  const isAdmin = user?.role === "admin";
+  // Check for isPro: could be boolean field or role field
+  const isPro = user?.isPro === true ||
+                user?.role === 'pro' ||
+                user?.role === 'admin';
+
+  // Check for isAdmin: check role field
+  const isAdmin = user?.role === 'admin' || user?.isAdmin === true;
 
   // ============================================================================
   // === STORAGE CALCULATION ===
@@ -607,6 +612,12 @@ const MorePage = ({
                   )}
                 </div>
                 <p className="text-white/90 text-sm">{user?.email}</p>
+                {isAdmin && (
+                  <p className="text-white/70 text-xs mt-1 flex items-center gap-1">
+                    <Shield className="w-3 h-3" />
+                    {t('more.admin.accountLabel', 'Admin account')}
+                  </p>
+                )}
               </div>
             </div>
             {!isPro && (
