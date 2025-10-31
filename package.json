@@ -66,6 +66,8 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^7.4.3",
-    "typescript": "^5.9.3"
+    "ajv": "^8.12.0",
+    "ajv-keywords": "^5.1.0",
+    "typescript": "^4.9.5"
   }
 }
