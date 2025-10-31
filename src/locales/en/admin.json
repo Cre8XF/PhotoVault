@@ -2,11 +2,23 @@
   "title": "Admin Panel",
   "totalUsers": "Total: {{count}} users",
   "noUsers": "No users found",
+  "stats": {
+    "totalUsers": "{{count}} Total",
+    "users": "Users",
+    "proUsers": "Pro Users",
+    "adminUsers": "Admins",
+    "albums": "Albums",
+    "photos": "Photos",
+    "storage": "Storage"
+  },
   "table": {
     "name": "Name",
     "email": "Email",
+    "isPro": "Pro",
+    "isAdmin": "Admin",
     "albums": "Albums",
     "photos": "Photos",
+    "storage": "Storage",
     "proStatus": "Pro status",
     "actions": "Actions"
   },
@@ -14,14 +26,40 @@
     "pro": "PRO",
     "free": "Free"
   },
+  "filters": {
+    "all": "All",
+    "admin": "Admin",
+    "pro": "Pro",
+    "free": "Free"
+  },
+  "search": {
+    "placeholder": "Search users..."
+  },
+  "resultsCount": "Showing {{count}} of {{total}} users",
+  "recentActivity": {
+    "title": "Recent Activity",
+    "noActivity": "No recent activity",
+    "upload": "Photo uploaded",
+    "delete": "Photo deleted",
+    "albumCreated": "Album created"
+  },
+  "timeAgo": {
+    "justNow": "Just now",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo": "{{count}}d ago"
+  },
   "actions": {
     "delete": "Delete user",
-    "togglePro": "Toggle Pro status"
+    "togglePro": "Toggle Pro status",
+    "toggleAdmin": "Toggle Admin status"
   },
   "notifications": {
     "proUpdated": "Pro status updated for {{email}}",
+    "adminUpdated": "Admin status updated for {{email}}",
     "userDeleted": "User {{email}} deleted",
     "couldNotChangePro": "Could not change Pro status",
+    "couldNotChangeAdmin": "Could not change Admin status",
     "couldNotDelete": "Could not delete user"
   },
   "confirmDelete": "Delete user {{email}}?"
