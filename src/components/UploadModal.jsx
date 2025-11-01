@@ -4,7 +4,7 @@
 // ============================================================================
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { X, Upload, Camera, Image as ImageIcon, Zap, Sparkles, FolderOpen } from "lucide-react";
+import { X, Upload, Camera, Image as ImageIcon, Zap, FolderOpen } from "lucide-react";
 import { auth } from "../firebase";
 import {
   isNativePlatform,
@@ -51,11 +51,13 @@ const UploadModal = ({
     const saved = localStorage.getItem('autoCompress');
     return saved !== 'false';
   });
-  
-  const [aiTagging, setAiTagging] = useState(() => {
-    const saved = localStorage.getItem('aiAutoTag');
-    return saved !== 'false';
-  });
+
+  // PHASE 2: AI Auto-Tagging - Disabled for MVP
+  const [aiTagging] = useState(false); // Always false for MVP
+  // const [aiTagging, setAiTagging] = useState(() => {
+  //   const saved = localStorage.getItem('aiAutoTag');
+  //   return saved !== 'false';
+  // });
 
   useEffect(() => {
     if (isNative) checkPermissions();
@@ -285,11 +287,12 @@ const UploadModal = ({
     }
   };
 
-  const handleAiToggle = () => {
-    const newValue = !aiTagging;
-    setAiTagging(newValue);
-    localStorage.setItem('aiAutoTag', newValue.toString());
-  };
+  // PHASE 2: AI Auto-Tagging toggle - Disabled for MVP
+  // const handleAiToggle = () => {
+  //   const newValue = !aiTagging;
+  //   setAiTagging(newValue);
+  //   localStorage.setItem('aiAutoTag', newValue.toString());
+  // };
 
   const handleCompressToggle = () => {
     const newValue = !autoCompress;
@@ -483,6 +486,7 @@ const UploadModal = ({
             </div>
           </div>
 
+          {/* PHASE 2: AI Auto-Tagging - Temporarily hidden for MVP
           <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -491,7 +495,7 @@ const UploadModal = ({
                 </div>
                 <div>
                   <p className="font-medium flex items-center gap-2">
-                    {t("upload:aiAutoTagging")} 
+                    {t("upload:aiAutoTagging")}
                     <span className="text-xs bg-purple-600/30 px-2 py-0.5 rounded-full">Beta</span>
                   </p>
                   <p className="text-xs text-gray-400">{t("upload:aiAutoTaggingDesc")}</p>
@@ -512,6 +516,7 @@ const UploadModal = ({
               </button>
             </div>
           </div>
+          */}
         </div>
 
         <div className="px-6 pt-4 pb-4 space-y-3 border-t border-white/10"> 

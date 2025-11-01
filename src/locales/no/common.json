@@ -150,5 +150,22 @@
   "deletePhotoMessage": "Er du sikker på at du vil slette dette bildet? Dette kan ikke angres.",
   "photoDeleted": "Bilde slettet",
   "photoDeleteError": "Feil ved sletting",
-  "logout": "Logg ut"
+  "logout": "Logg ut",
+  "comingSoon": {
+    "title": "Kommer snart",
+    "description": "Denne funksjonen er under utvikling",
+    "aiFeatures": {
+      "title": "AI-drevne funksjoner kommer snart",
+      "description": "Vi bygger kraftige AI-funksjoner som vil inkludere:",
+      "autoTagging": "Automatisk bildemerking",
+      "faceRecognition": "Ansiktsgjenkjenning og gruppering",
+      "smartSearch": "Naturlig språksøk",
+      "imageEnhancement": "Bildeforbedring med ett trykk",
+      "backgroundRemoval": "Bakgrunnsfjernelse",
+      "duplicateDetection": "Oppdaging av duplikater"
+    },
+    "contact": "Kontakt oss på support@fotio.app for å teste tidlig",
+    "notify": "Varsle meg når det er klart",
+    "close": "Lukk"
+  }
 }

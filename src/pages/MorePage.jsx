@@ -63,9 +63,11 @@ import {
 
 
 import { db } from "../firebase";
-import { analyzeImage, detectFaces } from '../services/googleVision';
-import { suggestAlbums } from '../services/openai';
-import { upscaleImage } from '../services/picsart';
+import ComingSoonModal from "../components/ComingSoonModal";
+// PHASE 2: AI Services - Temporarily disabled for MVP
+// import { analyzeImage, detectFaces } from '../services/googleVision';
+// import { suggestAlbums } from '../services/openai';
+// import { upscaleImage } from '../services/picsart';
 
 const MorePage = ({ 
   user, 
@@ -85,7 +87,10 @@ const MorePage = ({
   const [storageLimit] = useState(propStorageLimit || 524288000);
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
-  
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [aiFeatureName, setAIFeatureName] = useState('');
+  const [aiFeatureDescription, setAIFeatureDescription] = useState('');
+
   const { pinEnabled, biometricEnabled } = useSecurityContext();
 
   // Check for isPro: could be boolean field or role field
@@ -198,8 +203,11 @@ const MorePage = ({
 
   // ============================================================================
   // === AI FEATURE HANDLERS ===
+  // PHASE 2: AI Feature Handlers - Temporarily disabled for MVP
+  // Will be re-enabled when user base reaches 500+ users or Pro subscriptions cover costs
   // ============================================================================
 
+  /*
   const handleAutoSort = async () => {
     try {
       setLoading(true);
@@ -329,7 +337,7 @@ const MorePage = ({
 
       for (const photo of photos) {
         const key = `${photo.name}_${photo.size}`;
-        
+
         if (seen.has(key)) {
           duplicates.push({ original: seen.get(key), duplicate: photo });
         } else {
@@ -345,6 +353,15 @@ const MorePage = ({
     } finally {
       setLoading(false);
     }
+  };
+  */
+
+  // MVP: Show "Coming Soon" modal for AI features
+  const showAIFeatureModal = (featureName, description) => {
+    console.log('AI feature disabled - Phase 2 activation required:', featureName);
+    setAIFeatureName(featureName);
+    setAIFeatureDescription(description);
+    setShowAIModal(true);
   };
 
   // ============================================================================
@@ -942,10 +959,10 @@ const MorePage = ({
               expandedSection === 'ai' ? 'max-h-[600px]' : 'max-h-0'
             }`}>
               <div className="px-6 pb-6 space-y-2">
-                <button 
-                  onClick={handleAutoSort}
-                  disabled={loading}
-                  className="ripple-effect w-full bg-purple-600/10 hover:bg-purple-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-purple-500/30 disabled:opacity-50"
+                <button
+                  onClick={() => showAIFeatureModal(t('aiFunctions.autoSort'), t('aiFunctions.autoSortDesc'))}
+                  disabled
+                  className="ripple-effect w-full bg-purple-600/10 hover:bg-purple-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-purple-500/30 opacity-50 cursor-not-allowed"
                 >
                   <div className="p-2 bg-purple-600/30 rounded-lg">
                     <Scan className="w-5 h-5 text-purple-300" />
@@ -954,12 +971,15 @@ const MorePage = ({
                     <p className="font-medium">{t('aiFunctions.autoSort')}</p>
                     <p className="text-xs opacity-70">{t('aiFunctions.autoSortDesc')}</p>
                   </div>
+                  <span className="text-xs bg-purple-600/30 px-2 py-1 rounded-full">
+                    {t('comingSoon.title')}
+                  </span>
                 </button>
 
-                <button 
-                  onClick={handleImageEnhancement}
-                  disabled={loading}
-                  className="ripple-effect w-full bg-blue-600/10 hover:bg-blue-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-blue-500/30 disabled:opacity-50"
+                <button
+                  onClick={() => showAIFeatureModal(t('aiFunctions.imageEnhancement'), t('aiFunctions.imageEnhancementDesc'))}
+                  disabled
+                  className="ripple-effect w-full bg-blue-600/10 hover:bg-blue-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-blue-500/30 opacity-50 cursor-not-allowed"
                 >
                   <div className="p-2 bg-blue-600/30 rounded-lg">
                     <ImagePlus className="w-5 h-5 text-blue-300" />
@@ -968,12 +988,15 @@ const MorePage = ({
                     <p className="font-medium">{t('aiFunctions.imageEnhancement')}</p>
                     <p className="text-xs opacity-70">{t('aiFunctions.imageEnhancementDesc')}</p>
                   </div>
+                  <span className="text-xs bg-blue-600/30 px-2 py-1 rounded-full">
+                    {t('comingSoon.title')}
+                  </span>
                 </button>
 
-                <button 
-                  onClick={handleFaceRecognition}
-                  disabled={loading}
-                  className="ripple-effect w-full bg-pink-600/10 hover:bg-pink-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-pink-500/30 disabled:opacity-50"
+                <button
+                  onClick={() => showAIFeatureModal(t('aiFunctions.faceRecognition'), t('aiFunctions.faceRecognitionDesc'))}
+                  disabled
+                  className="ripple-effect w-full bg-pink-600/10 hover:bg-pink-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-pink-500/30 opacity-50 cursor-not-allowed"
                 >
                   <div className="p-2 bg-pink-600/30 rounded-lg">
                     <Users className="w-5 h-5 text-pink-300" />
@@ -982,12 +1005,15 @@ const MorePage = ({
                     <p className="font-medium">{t('aiFunctions.faceRecognition')}</p>
                     <p className="text-xs opacity-70">{t('aiFunctions.faceRecognitionDesc')}</p>
                   </div>
+                  <span className="text-xs bg-pink-600/30 px-2 py-1 rounded-full">
+                    {t('comingSoon.title')}
+                  </span>
                 </button>
 
-                <button 
-                  onClick={handleSmartTagging}
-                  disabled={loading}
-                  className="ripple-effect w-full bg-green-600/10 hover:bg-green-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-green-500/30 disabled:opacity-50"
+                <button
+                  onClick={() => showAIFeatureModal(t('aiFunctions.smartTagging'), t('aiFunctions.smartTaggingDesc'))}
+                  disabled
+                  className="ripple-effect w-full bg-green-600/10 hover:bg-green-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-green-500/30 opacity-50 cursor-not-allowed"
                 >
                   <div className="p-2 bg-green-600/30 rounded-lg">
                     <Sparkles className="w-5 h-5 text-green-300" />
@@ -996,12 +1022,15 @@ const MorePage = ({
                     <p className="font-medium">{t('aiFunctions.smartTagging')}</p>
                     <p className="text-xs opacity-70">{t('aiFunctions.smartTaggingDesc')}</p>
                   </div>
+                  <span className="text-xs bg-green-600/30 px-2 py-1 rounded-full">
+                    {t('comingSoon.title')}
+                  </span>
                 </button>
 
-                <button 
-                  onClick={handleDuplicateDetection}
-                  disabled={loading}
-                  className="ripple-effect w-full bg-yellow-600/10 hover:bg-yellow-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-yellow-500/30 disabled:opacity-50"
+                <button
+                  onClick={() => showAIFeatureModal(t('aiFunctions.duplicateDetection'), t('aiFunctions.duplicateDetectionDesc'))}
+                  disabled
+                  className="ripple-effect w-full bg-yellow-600/10 hover:bg-yellow-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-yellow-500/30 opacity-50 cursor-not-allowed"
                 >
                   <div className="p-2 bg-yellow-600/30 rounded-lg">
                     <Copy className="w-5 h-5 text-yellow-300" />
@@ -1010,6 +1039,9 @@ const MorePage = ({
                     <p className="font-medium">{t('aiFunctions.duplicateDetection')}</p>
                     <p className="text-xs opacity-70">{t('aiFunctions.duplicateDetectionDesc')}</p>
                   </div>
+                  <span className="text-xs bg-yellow-600/30 px-2 py-1 rounded-full">
+                    {t('comingSoon.title')}
+                  </span>
                 </button>
               </div>
             </div>
@@ -1205,6 +1237,14 @@ const MorePage = ({
           </div>
         </div>
       )}
+
+      {/* === COMING SOON MODAL === */}
+      <ComingSoonModal
+        isOpen={showAIModal}
+        onClose={() => setShowAIModal(false)}
+        featureName={aiFeatureName}
+        description={aiFeatureDescription}
+      />
     </div>
   );
 };
