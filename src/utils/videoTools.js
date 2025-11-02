@@ -2,6 +2,9 @@
  * Video Processing Utilities
  * Handles thumbnail generation, compression, and metadata extraction
  * Uses ffmpeg.wasm for compression (lazy loaded)
+ *
+ * All functions return null on failure to allow graceful degradation
+ * Updated: 2025-11-02 - Added timeouts, error handling, MIME validation
  */
 
 /**
@@ -44,116 +47,169 @@ export function formatFileSize(bytes) {
 }
 
 /**
- * Generates thumbnail from video file at 1 second mark
+ * Generate thumbnail from video at 1 second mark
+ * Returns null on failure (upload continues without thumbnail)
  * @param {File} videoFile - Video file object
  * @returns {Promise<Blob|null>} Thumbnail image blob or null if failed
  */
 export async function generateThumbnail(videoFile) {
+  // Validate file type
+  if (!videoFile.type || !videoFile.type.startsWith('video/')) {
+    console.warn('Invalid video MIME type:', videoFile.type);
+    return null;
+  }
+
   return new Promise((resolve) => {
-    try {
-      const video = document.createElement('video');
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+    const video = document.createElement('video');
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
 
-      video.preload = 'metadata';
-      video.muted = true;
+    video.preload = 'metadata';
+    video.muted = true;
 
-      // Handle video load
-      video.onloadedmetadata = () => {
-        // Set canvas size to video dimensions
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+    let resolved = false;
+    let objectUrl = null;
 
-        // Seek to 1 second (or 10% of duration if shorter)
-        const seekTime = Math.min(1, video.duration * 0.1);
-        video.currentTime = seekTime;
-      };
+    // 8 second timeout
+    const timeout = setTimeout(() => {
+      if (!resolved) {
+        console.warn('Thumbnail generation timeout');
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        video.src = '';
+        resolve(null);
+        resolved = true;
+      }
+    }, 8000);
 
-      // Capture frame when seeked
-      video.onseeked = () => {
+    video.onloadedmetadata = () => {
+      // Set canvas size to video dimensions
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      // Seek to 1 second (or 10% of duration if shorter)
+      const seekTime = Math.min(1, video.duration * 0.1);
+      video.currentTime = seekTime;
+    };
+
+    video.onseeked = () => {
+      if (!resolved) {
+        clearTimeout(timeout);
         try {
           // Draw video frame to canvas
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
           // Convert canvas to blob
           canvas.toBlob((blob) => {
-            // Clean up
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
             video.src = '';
-            URL.revokeObjectURL(video.src);
             resolve(blob);
+            resolved = true;
           }, 'image/jpeg', 0.8);
-        } catch (err) {
-          console.error('Error capturing frame:', err);
+        } catch (error) {
+          console.error('Thumbnail generation error:', error);
+          if (objectUrl) URL.revokeObjectURL(objectUrl);
+          video.src = '';
           resolve(null);
+          resolved = true;
         }
-      };
+      }
+    };
 
-      // Handle errors
-      video.onerror = (err) => {
-        console.error('Video load error:', err);
+    video.onerror = (error) => {
+      if (!resolved) {
+        clearTimeout(timeout);
+        console.error('Video load error for thumbnail:', error);
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        video.src = '';
         resolve(null);
-      };
+        resolved = true;
+      }
+    };
 
-      // Load video
-      video.src = URL.createObjectURL(videoFile);
-    } catch (err) {
-      console.error('Thumbnail generation error:', err);
+    try {
+      objectUrl = URL.createObjectURL(videoFile);
+      video.src = objectUrl;
+    } catch (error) {
+      clearTimeout(timeout);
+      console.error('Failed to create object URL for thumbnail:', error);
       resolve(null);
+      resolved = true;
     }
   });
 }
 
 /**
- * Extracts video metadata without full processing
+ * Extracts video metadata with robust error handling
+ * Returns null on failure (upload continues without metadata)
  * @param {File} videoFile - Video file object
- * @returns {Promise<Object>} { duration, resolution, fps, size }
+ * @returns {Promise<Object|null>} { duration, resolution, fps, size } or null
  */
 export async function extractVideoMetadata(videoFile) {
-  return new Promise((resolve) => {
-    try {
-      const video = document.createElement('video');
-      video.preload = 'metadata';
-      video.muted = true;
+  // Validate file type
+  if (!videoFile.type || !videoFile.type.startsWith('video/')) {
+    console.warn('Invalid video MIME type:', videoFile.type);
+    return null;
+  }
 
-      video.onloadedmetadata = () => {
+  return new Promise((resolve) => {
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.muted = true;
+
+    let resolved = false;
+    let objectUrl = null;
+
+    // 8 second timeout
+    const timeout = setTimeout(() => {
+      if (!resolved) {
+        console.warn('Video metadata timeout - continuing without metadata');
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        video.src = '';
+        resolve(null);
+        resolved = true;
+      }
+    }, 8000);
+
+    video.onloadedmetadata = () => {
+      if (!resolved) {
+        clearTimeout(timeout);
         const metadata = {
           duration: video.duration || 0,
-          resolution: `${video.videoWidth}x${video.videoHeight}`,
-          width: video.videoWidth,
-          height: video.videoHeight,
-          fps: null, // FPS detection would require frame analysis
+          resolution: video.videoWidth && video.videoHeight
+            ? `${video.videoWidth}x${video.videoHeight}`
+            : 'unknown',
+          width: video.videoWidth || 0,
+          height: video.videoHeight || 0,
+          fps: null, // FPS detection is complex, leave as null
           size: videoFile.size
         };
 
-        // Clean up
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
         video.src = '';
-        URL.revokeObjectURL(video.src);
         resolve(metadata);
-      };
+        resolved = true;
+      }
+    };
 
-      video.onerror = (err) => {
-        console.error('Metadata extraction error:', err);
-        resolve({
-          duration: 0,
-          resolution: 'unknown',
-          width: 0,
-          height: 0,
-          fps: null,
-          size: videoFile.size
-        });
-      };
+    video.onerror = (error) => {
+      if (!resolved) {
+        clearTimeout(timeout);
+        console.error('Video metadata extraction error:', error);
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        video.src = '';
+        resolve(null);
+        resolved = true;
+      }
+    };
 
-      video.src = URL.createObjectURL(videoFile);
-    } catch (err) {
-      console.error('Metadata extraction failed:', err);
-      resolve({
-        duration: 0,
-        resolution: 'unknown',
-        width: 0,
-        height: 0,
-        fps: null,
-        size: videoFile.size
-      });
+    try {
+      objectUrl = URL.createObjectURL(videoFile);
+      video.src = objectUrl;
+    } catch (error) {
+      clearTimeout(timeout);
+      console.error('Failed to create object URL for video:', error);
+      resolve(null);
+      resolved = true;
     }
   });
 }
