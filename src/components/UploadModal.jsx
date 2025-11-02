@@ -122,7 +122,8 @@ const UploadModal = ({
         });
 
         if (validation.valid) {
-          validFiles.push({ ...file, fileType: 'image' });
+          file.fileType = 'image';
+          validFiles.push(file);
         } else {
           errors.push({ file: file.name, errors: validation.errors });
         }
@@ -135,7 +136,8 @@ const UploadModal = ({
             errors: ['Videofiler må være under 100 MB']
           });
         } else {
-          validFiles.push({ ...file, fileType: 'video' });
+          file.fileType = 'video';
+          validFiles.push(file);
         }
       }
     }
