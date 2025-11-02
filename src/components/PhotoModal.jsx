@@ -7,6 +7,7 @@ import { X, ArrowLeft, ArrowRight, Download, Info, Star, Calendar, Tag, Sparkles
 import CommentThread from "./CommentThread";
 import ReactionPicker from "./ReactionPicker";
 import useAuth from "../hooks/useAuth";
+import { formatDuration, formatFileSize } from "../utils/videoTools";
 
 const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
   const { t } = useTranslation(['common']);
@@ -215,7 +216,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
         </>
       )}
 
-      {/* Hovedbilde */}
+      {/* Hovedbilde/Video */}
       <div
         onClick={(e) => e.stopPropagation()}
         className="max-w-[90vw] max-h-[85vh] flex items-center justify-center relative"
@@ -225,15 +226,31 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
             <div className="spinner" />
           </div>
         )}
-        
-        <img
-          src={photo.url}
-          alt={photo.name || ""}
-          className={`max-h-[80vh] max-w-full rounded-xl shadow-2xl object-contain transition-opacity duration-300 ${
-            imageLoaded ? "opacity-100" : "opacity-0"
-          }`}
-          onLoad={() => setImageLoaded(true)}
-        />
+
+        {photo.type === 'video' ? (
+          <video
+            key={photo.id}
+            controls
+            poster={photo.thumbnailUrl}
+            className="max-h-[80vh] max-w-full rounded-xl shadow-2xl"
+            onLoadedData={() => setImageLoaded(true)}
+            autoPlay
+          >
+            <source src={photo.url} type="video/mp4" />
+            <source src={photo.url} type="video/quicktime" />
+            <source src={photo.url} type="video/webm" />
+            Din nettleser støtter ikke videoavspilling.
+          </video>
+        ) : (
+          <img
+            src={photo.url}
+            alt={photo.name || ""}
+            className={`max-h-[80vh] max-w-full rounded-xl shadow-2xl object-contain transition-opacity duration-300 ${
+              imageLoaded ? "opacity-100" : "opacity-0"
+            }`}
+            onLoad={() => setImageLoaded(true)}
+          />
+        )}
       </div>
 
       {/* Info-panel */}
@@ -275,9 +292,27 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
               <div>
                 <p className="text-gray-400 mb-1">{t('common:size')}</p>
                 <p className="text-white">
-                  {(photo.size / 1024 / 1024).toFixed(2)} MB
+                  {formatFileSize(photo.size)}
                 </p>
               </div>
+            )}
+
+            {/* Video metadata */}
+            {photo.type === 'video' && photo.metadata && (
+              <>
+                {photo.metadata.duration && (
+                  <div>
+                    <p className="text-gray-400 mb-1">Varighet</p>
+                    <p className="text-white">{formatDuration(photo.metadata.duration)}</p>
+                  </div>
+                )}
+                {photo.metadata.resolution && (
+                  <div>
+                    <p className="text-gray-400 mb-1">Oppløsning</p>
+                    <p className="text-white">{photo.metadata.resolution}</p>
+                  </div>
+                )}
+              </>
             )}
 
             {/* Favoritt */}

@@ -4,7 +4,7 @@
 // ============================================================================
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { X, Upload, Camera, Image as ImageIcon, Zap, Sparkles, FolderOpen } from "lucide-react";
+import { X, Upload, Camera, Image as ImageIcon, Zap, FolderOpen, Video } from "lucide-react";
 import { auth } from "../firebase";
 import {
   isNativePlatform,
@@ -17,6 +17,12 @@ import {
 import { triggerHaptic, showToast } from "../utils/nativeUtils";
 import { useTranslation } from "react-i18next";
 import { compressImage, generateThumbnails, validateImage, calculateSavings } from "../utils/imageOptimization";
+import {
+  isVideoFile,
+  generateThumbnail,
+  extractVideoMetadata,
+  compressVideo
+} from "../utils/videoTools";
 
 const formatFileSize = (bytes) => {
   if (bytes === 0) return "0 Bytes";
@@ -51,11 +57,13 @@ const UploadModal = ({
     const saved = localStorage.getItem('autoCompress');
     return saved !== 'false';
   });
-  
-  const [aiTagging, setAiTagging] = useState(() => {
-    const saved = localStorage.getItem('aiAutoTag');
-    return saved !== 'false';
-  });
+
+  // PHASE 2: AI Auto-Tagging - Disabled for MVP
+  const [aiTagging] = useState(false); // Always false for MVP
+  // const [aiTagging, setAiTagging] = useState(() => {
+  //   const saved = localStorage.getItem('aiAutoTag');
+  //   return saved !== 'false';
+  // });
 
   useEffect(() => {
     if (isNative) checkPermissions();
@@ -103,8 +111,10 @@ const UploadModal = ({
   const handleFiles = async (files) => {
     const validFiles = [];
     const errors = [];
+    const maxVideoSize = 100 * 1024 * 1024; // 100 MB
 
     for (const file of files) {
+      // Handle images
       if (file.type.startsWith("image/")) {
         const validation = validateImage(file, {
           maxSize: 10 * 1024 * 1024,
@@ -112,28 +122,43 @@ const UploadModal = ({
         });
 
         if (validation.valid) {
-          validFiles.push(file);
+          validFiles.push({ ...file, fileType: 'image' });
         } else {
           errors.push({ file: file.name, errors: validation.errors });
+        }
+      }
+      // Handle videos
+      else if (isVideoFile(file)) {
+        if (file.size > maxVideoSize) {
+          errors.push({
+            file: file.name,
+            errors: ['Videofiler må være under 100 MB']
+          });
+        } else {
+          validFiles.push({ ...file, fileType: 'video' });
         }
       }
     }
 
     if (errors.length > 0) {
       console.warn('Some files were invalid:', errors);
+      errors.forEach(err => {
+        showToast(`${err.file}: ${err.errors.join(', ')}`, "error");
+      });
     }
 
     if (files.length !== validFiles.length) {
-      showToast(t("upload:nonImageWarning"), "warning");
+      showToast(t("upload:nonImageWarning") || "Noen filer ble hoppet over", "warning");
     }
 
     const newFiles = validFiles.map((file) => ({
       file,
       preview: URL.createObjectURL(file),
       name: file.name,
-      size: file.size
+      size: file.size,
+      type: file.fileType || 'image'
     }));
-    
+
     setSelectedFiles((prev) => [...prev, ...newFiles]);
   };
 
@@ -196,85 +221,144 @@ const UploadModal = ({
 
   const handleUpload = async () => {
     if (selectedFiles.length === 0) return;
-    
+
     setUploading(true);
     setProcessingProgress(0);
     setCompressionStats(null);
     await triggerHaptic("medium");
 
     try {
-      let processedFiles = selectedFiles;
+      let processedFiles = [];
       let totalOriginalSize = 0;
       let totalCompressedSize = 0;
 
-      if (autoCompress) {
-        const compressed = [];
-        
-        for (let i = 0; i < selectedFiles.length; i++) {
-          const fileObj = selectedFiles[i];
-          const file = fileObj.file;
-          totalOriginalSize += file.size;
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const fileObj = selectedFiles[i];
+        const file = fileObj.file;
+        totalOriginalSize += file.size;
 
+        // Process videos
+        if (fileObj.type === 'video') {
           try {
-            const compressedBlob = await compressImage(file, {
-              maxWidth: 1920,
-              maxHeight: 1080,
-              quality: 0.85
-            });
+            // Generate thumbnail
+            await showToast("Genererer forhåndsvisning...", "info");
+            const thumbnailBlob = await generateThumbnail(file);
 
-            const thumbnails = await generateThumbnails(file);
+            // Extract metadata
+            const metadata = await extractVideoMetadata(file);
 
-            const compressedFile = new File(
-              [compressedBlob],
-              file.name,
-              { type: 'image/jpeg', lastModified: Date.now() }
-            );
+            // Compress if >50MB
+            let videoToUpload = file;
+            if (file.size > 50 * 1024 * 1024 && autoCompress) {
+              await showToast("Komprimerer video...", "info");
+              const compressedBlob = await compressVideo(file, (progress) => {
+                setProcessingProgress(Math.round(progress / 2));
+              });
 
-            totalCompressedSize += compressedFile.size;
-            compressedFile.thumbnails = thumbnails;
-            
-            compressed.push({
-              file: compressedFile,
+              if (compressedBlob) {
+                videoToUpload = new File([compressedBlob], file.name, {
+                  type: 'video/mp4',
+                  lastModified: Date.now()
+                });
+                totalCompressedSize += videoToUpload.size;
+              } else {
+                await showToast("Komprimering feilet, laster opp original", "warning");
+                totalCompressedSize += file.size;
+              }
+            } else {
+              totalCompressedSize += file.size;
+            }
+
+            // Add video with metadata
+            processedFiles.push({
+              file: videoToUpload,
+              thumbnail: thumbnailBlob,
               preview: fileObj.preview,
-              name: compressedFile.name,
-              size: compressedFile.size
+              name: videoToUpload.name,
+              size: videoToUpload.size,
+              type: 'video',
+              metadata: metadata
             });
 
             setProcessingProgress(Math.round(((i + 1) / selectedFiles.length) * 50));
           } catch (error) {
-            console.error(`Failed to process ${file.name}:`, error);
-            compressed.push(fileObj);
+            console.error(`Failed to process video ${file.name}:`, error);
+            await showToast(`Feil ved prosessering av ${file.name}`, "error");
+            // Skip this file
           }
         }
+        // Process images
+        else {
+          try {
+            if (autoCompress) {
+              const compressedBlob = await compressImage(file, {
+                maxWidth: 1920,
+                maxHeight: 1080,
+                quality: 0.85
+              });
 
-        processedFiles = compressed;
+              const thumbnails = await generateThumbnails(file);
 
-        if (totalOriginalSize > 0 && totalCompressedSize > 0) {
-          const savings = calculateSavings(totalOriginalSize, totalCompressedSize);
-          setCompressionStats(savings);
-          console.log('Compression savings:', savings);
+              const compressedFile = new File(
+                [compressedBlob],
+                file.name,
+                { type: 'image/jpeg', lastModified: Date.now() }
+              );
+
+              totalCompressedSize += compressedFile.size;
+              compressedFile.thumbnails = thumbnails;
+
+              processedFiles.push({
+                file: compressedFile,
+                preview: fileObj.preview,
+                name: compressedFile.name,
+                size: compressedFile.size,
+                type: 'photo'
+              });
+            } else {
+              totalCompressedSize += file.size;
+              processedFiles.push({
+                file: file,
+                preview: fileObj.preview,
+                name: file.name,
+                size: file.size,
+                type: 'photo'
+              });
+            }
+
+            setProcessingProgress(Math.round(((i + 1) / selectedFiles.length) * 50));
+          } catch (error) {
+            console.error(`Failed to process ${file.name}:`, error);
+            processedFiles.push(fileObj);
+          }
         }
       }
 
+      if (totalOriginalSize > 0 && totalCompressedSize > 0 && totalOriginalSize !== totalCompressedSize) {
+        const savings = calculateSavings(totalOriginalSize, totalCompressedSize);
+        setCompressionStats(savings);
+        console.log('Compression savings:', savings);
+      }
+
       await onUpload(processedFiles, selectedAlbumId, aiTagging);
-      
+
       localStorage.setItem('aiAutoTag', aiTagging.toString());
       localStorage.setItem('autoCompress', autoCompress.toString());
-      
+
       selectedFiles.forEach((file) => URL.revokeObjectURL(file.preview));
       setSelectedFiles([]);
       setSelectedAlbumId(selectedAlbum || "");
       setProcessingProgress(0);
       setCompressionStats(null);
-      
+
       await triggerHaptic("heavy");
-      
+
       if (aiTagging) {
         await showToast(t("upload:successWithAI", { count: selectedFiles.length }));
       } else {
         await showToast(t("upload:success", { count: selectedFiles.length }));
       }
-      
+
       onClose();
     } catch (error) {
       console.error("Upload error:", error);
@@ -285,11 +369,12 @@ const UploadModal = ({
     }
   };
 
-  const handleAiToggle = () => {
-    const newValue = !aiTagging;
-    setAiTagging(newValue);
-    localStorage.setItem('aiAutoTag', newValue.toString());
-  };
+  // PHASE 2: AI Auto-Tagging toggle - Disabled for MVP
+  // const handleAiToggle = () => {
+  //   const newValue = !aiTagging;
+  //   setAiTagging(newValue);
+  //   localStorage.setItem('aiAutoTag', newValue.toString());
+  // };
 
   const handleCompressToggle = () => {
     const newValue = !autoCompress;
@@ -396,7 +481,7 @@ const UploadModal = ({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/*,video/mp4,video/quicktime,video/webm"
                 multiple
                 onChange={handleFileInput}
                 disabled={uploading}
@@ -413,11 +498,18 @@ const UploadModal = ({
               <div className="grid grid-cols-3 gap-3 max-h-60 overflow-y-auto">
                 {selectedFiles.map((file, index) => (
                   <div key={index} className="relative group">
-                    <img
-                      src={file.preview}
-                      alt={file.name}
-                      className="w-full h-24 object-cover rounded-lg"
-                    />
+                    {file.type === 'video' ? (
+                      <div className="w-full h-24 bg-gray-800 rounded-lg flex items-center justify-center relative">
+                        <Video className="w-8 h-8 text-purple-400" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                      </div>
+                    ) : (
+                      <img
+                        src={file.preview}
+                        alt={file.name}
+                        className="w-full h-24 object-cover rounded-lg"
+                      />
+                    )}
                     <button
                       onClick={() => removeFile(index)}
                       disabled={uploading}
@@ -427,6 +519,7 @@ const UploadModal = ({
                       <X className="w-4 h-4" />
                     </button>
                     <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-1 rounded-b-lg truncate">
+                      {file.type === 'video' && <Video className="w-3 h-3 inline mr-1" />}
                       {formatFileSize(file.size)}
                     </div>
                   </div>
@@ -483,6 +576,7 @@ const UploadModal = ({
             </div>
           </div>
 
+          {/* PHASE 2: AI Auto-Tagging - Temporarily hidden for MVP
           <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -491,7 +585,7 @@ const UploadModal = ({
                 </div>
                 <div>
                   <p className="font-medium flex items-center gap-2">
-                    {t("upload:aiAutoTagging")} 
+                    {t("upload:aiAutoTagging")}
                     <span className="text-xs bg-purple-600/30 px-2 py-0.5 rounded-full">Beta</span>
                   </p>
                   <p className="text-xs text-gray-400">{t("upload:aiAutoTaggingDesc")}</p>
@@ -512,6 +606,7 @@ const UploadModal = ({
               </button>
             </div>
           </div>
+          */}
         </div>
 
         <div className="px-6 pt-4 pb-4 space-y-3 border-t border-white/10"> 

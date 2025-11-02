@@ -1,6 +1,6 @@
 {
   "name": "photovault",
-  "version": "1.0.0",
+  "version": "1.0.0-mvp",
   "private": true,
   "dependencies": {
     "@capacitor/android": "^6.1.0",
@@ -15,6 +15,8 @@
     "@capacitor/splash-screen": "^6.0.3",
     "@capacitor/status-bar": "^6.0.1",
     "@capacitor/toast": "^6.0.3",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "browser-image-compression": "^2.0.2",
     "capacitor-native-biometric": "^4.2.2",
     "firebase": "^11.0.0",

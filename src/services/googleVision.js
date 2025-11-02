@@ -1,9 +1,16 @@
 /**
  * Google Vision API Service
  * Provides image analysis, label detection, face detection, and landmark recognition
+ *
+ * PHASE 2: AI Service - Temporarily disabled for MVP
+ * This service will be re-enabled when:
+ * - User base reaches 500+ users, OR
+ * - Pro subscriptions cover AI costs, OR
+ * - 3+ months of stable operation
  */
 
-const GOOGLE_VISION_API = 'https://vision.googleapis.com/v1/projects/photovault-app-a0946/locations/global/images:annotate';
+// DISABLED FOR MVP - Uncomment for Phase 2
+// const GOOGLE_VISION_API = 'https://vision.googleapis.com/v1/projects/photovault-app-a0946/locations/global/images:annotate';
 
 
 /**
@@ -19,6 +26,9 @@ function getAPIKey() {
  * @param {Array<string>} features - Features to detect
  * @returns {Promise<Object>} Analysis results
  */
+
+// DISABLED FOR MVP - Uncomment for Phase 2
+/*
 export async function analyzeImage(
   imageUrl,
   features = ['LABEL_DETECTION', 'FACE_DETECTION', 'SAFE_SEARCH_DETECTION', 'LANDMARK_DETECTION', 'IMAGE_PROPERTIES']
@@ -60,6 +70,25 @@ export async function analyzeImage(
     throw error;
   }
 }
+*/
+
+// MVP: Return placeholder data
+export async function analyzeImage(imageUrl, features) {
+  console.log('AI feature disabled - Phase 2 activation required:', 'analyzeImage');
+  return {
+    labelAnnotations: [],
+    faceAnnotations: [],
+    landmarkAnnotations: [],
+    safeSearchAnnotation: {
+      adult: 'UNKNOWN',
+      spoof: 'UNKNOWN',
+      medical: 'UNKNOWN',
+      violence: 'UNKNOWN',
+      racy: 'UNKNOWN'
+    },
+    imagePropertiesAnnotation: null
+  };
+}
 
 /**
  * Parse Vision API response into structured data
@@ -98,8 +127,8 @@ export function parseVisionResponse(response) {
  * @returns {Promise<Array<string>>} Array of label strings
  */
 export async function detectLabels(imageUrl) {
-  const response = await analyzeImage(imageUrl, ['LABEL_DETECTION']);
-  return response.labelAnnotations?.map(l => l.description) || [];
+  console.log('AI feature disabled - Phase 2 activation required:', 'detectLabels');
+  return [];
 }
 
 /**
@@ -108,8 +137,8 @@ export async function detectLabels(imageUrl) {
  * @returns {Promise<number>} Number of faces detected
  */
 export async function detectFaces(imageUrl) {
-  const response = await analyzeImage(imageUrl, ['FACE_DETECTION']);
-  return response.faceAnnotations?.length || 0;
+  console.log('AI feature disabled - Phase 2 activation required:', 'detectFaces');
+  return 0;
 }
 
 /**
@@ -118,8 +147,8 @@ export async function detectFaces(imageUrl) {
  * @returns {Promise<string|null>} Landmark name or null
  */
 export async function detectLandmark(imageUrl) {
-  const response = await analyzeImage(imageUrl, ['LANDMARK_DETECTION']);
-  return response.landmarkAnnotations?.[0]?.description || null;
+  console.log('AI feature disabled - Phase 2 activation required:', 'detectLandmark');
+  return null;
 }
 
 /**
@@ -129,34 +158,8 @@ export async function detectLandmark(imageUrl) {
  * @returns {Promise<Array<Object>>} Array of analysis results
  */
 export async function batchAnalyzeImages(imageUrls, features) {
-  const apiKey = getAPIKey();
-
-  if (!apiKey) {
-    throw new Error('Google Vision API key not configured');
-  }
-
-  try {
-    const response = await fetch(`${GOOGLE_VISION_API}?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        requests: imageUrls.map(url => ({
-          image: { source: { imageUri: url } },
-          features: features.map(f => ({ type: f, maxResults: 10 }))
-        }))
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`Google Vision API error: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data.responses.map(parseVisionResponse);
-  } catch (error) {
-    console.error('Batch Google Vision API error:', error);
-    throw error;
-  }
+  console.log('AI feature disabled - Phase 2 activation required:', 'batchAnalyzeImages');
+  return imageUrls.map(() => parseVisionResponse({}));
 }
 
 /**

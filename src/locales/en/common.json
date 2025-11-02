@@ -133,5 +133,22 @@
     "photoDeleted": "Photo deleted",
     "photoDeleteError": "Delete error",
     "logout": "Log out"
+  },
+  "comingSoon": {
+    "title": "Coming Soon",
+    "description": "This feature is under development",
+    "aiFeatures": {
+      "title": "AI-Powered Features Coming Soon",
+      "description": "We're building powerful AI features that will include:",
+      "autoTagging": "Automatic photo tagging",
+      "faceRecognition": "Face recognition and grouping",
+      "smartSearch": "Natural language search",
+      "imageEnhancement": "One-tap photo enhancement",
+      "backgroundRemoval": "Background removal tool",
+      "duplicateDetection": "Duplicate photo detection"
+    },
+    "contact": "Contact us at support@fotio.app to test early",
+    "notify": "Notify me when ready",
+    "close": "Close"
   }
 }

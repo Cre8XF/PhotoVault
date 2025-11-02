@@ -5,20 +5,30 @@ Utviklet som et fullverdig galleri for privat lagring, deling og administrasjon 
 
 ---
 
-## 🚀 Funksjoner
+## 🚀 Funksjoner (MVP - v1.0.0-mvp)
 
-- **Brukerpålogging** via Firebase Auth (e-post / Google)
-- **Albumhåndtering:** opprett, slett, sorter og sett forside
-- **Opplasting:** flere filer samtidig med progressbar
-- **PhotoModal:** lysboksvisning med tastatur- og sveipnavigasjon
-- **Favoritter og sortering**
-- **Admin- og Pro-roller**
-- **Flerspråk (NO/EN)** via `i18next`
-- **Mørk / Lys modus**
-- **Offline-støtte** via IndexedDB
-- **Responsiv design (mobil + desktop)**
-- **Ripple-effekter** på knapper (v2)
-- **AI-plan:** auto-tagging, forbedring, organisering (kommende)
+### Aktive funksjoner
+- ✅ **Brukerpålogging** via Firebase Auth (e-post / Google)
+- ✅ **Albumhåndtering:** opprett, slett, sorter og sett forside
+- ✅ **Opplasting:** flere filer samtidig med progressbar og komprimering
+- ✅ **PhotoModal:** lysboksvisning med tastatur- og sveipnavigasjon
+- ✅ **Favoritter og sortering**
+- ✅ **Søk og filter:** etter tittel, dato, kategori, album
+- ✅ **Admin- og Pro-roller**
+- ✅ **Flerspråk (NO/EN)** via `i18next`
+- ✅ **Mørk / Lys modus**
+- ✅ **Responsiv design (mobil + desktop)**
+- ✅ **Ripple-effekter** på knapper
+
+### Kommer snart (Fase 2 - AI-funksjoner)
+- 🔜 **AI Auto-tagging** (Google Vision API)
+- 🔜 **Ansiktsgjenkjenning** (Google Vision API)
+- 🔜 **Smart søk** (OpenAI GPT-4 Vision)
+- 🔜 **Bildeforbedring** (Picsart API)
+- 🔜 **Bakgrunnsfjernelse** (Picsart API)
+- 🔜 **Duplikatoppdaging**
+
+**Strategi:** AI-funksjoner aktiveres når brukerbase når 500+ brukere eller Pro-abonnementer dekker kostnader.
 
 ---
 
@@ -69,12 +79,15 @@ Produksjon: Netlify eller Firebase Hosting
 
 Android / iOS: via Capacitor Build
 
-🧾 Versjoner
-Versjon	Endringer
-v1.0.0	Grunnstruktur og databinding
-v1.5.0	Opplasting, modal, admin
-v2.0.0	Ripple-effekter, språkstøtte, designforbedring
-v2.5.0 (planlagt)	AI-integrasjon og auto-sortering
+## 🧾 Versjoner
+
+| Versjon | Endringer |
+|---------|-----------|
+| v1.0.0-mvp | MVP-lansering uten AI-funksjoner (kostnadseffektiv) |
+| v2.0.0 (planlagt) | AI-integrasjon: auto-tagging, ansiktsgjenkjenning, smart søk |
+| v3.0.0 (planlagt) | Sikker vault med kryptering og biometrisk lås |
+| v4.0.0 (planlagt) | Deling og samarbeid |
+| v5.0.0 (planlagt) | Native mobilapper (iOS/Android)
 
 🛠 Vedlikehold
 Bruk npm run build før produksjon.
