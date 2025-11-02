@@ -3,8 +3,9 @@
 // ============================================================================
 import React, { useState } from "react";
 import PhotoModal from "./PhotoModal";
-import { ImageOff, Trash2, Star, Image as ImageIcon } from "lucide-react";
+import { ImageOff, Trash2, Star, Image as ImageIcon, Play } from "lucide-react";
 import { deletePhoto, toggleFavorite, setAlbumCover } from "../firebase";
+import { formatDuration } from "../utils/videoTools";
 
 const PhotoGrid = ({
   photos = [],
@@ -95,7 +96,7 @@ const PhotoGrid = ({
         {list.map((photo, i) => (
           <div key={photo.id} className="relative group overflow-hidden rounded-xl">
             <img
-              src={photo.url}
+              src={photo.type === 'video' ? (photo.thumbnailUrl || photo.url) : photo.url}
               alt={photo.title || photo.name || ""}
               className={`w-full ${
                 compact ? "h-40" : "h-56"
@@ -107,6 +108,22 @@ const PhotoGrid = ({
               }
               loading="lazy"
             />
+
+            {/* Video overlay with play icon and duration */}
+            {photo.type === 'video' && (
+              <>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/30">
+                  <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
+                    <Play className="w-6 h-6 text-gray-900 ml-1" fill="currentColor" />
+                  </div>
+                </div>
+                {photo.metadata?.duration && (
+                  <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+                    {formatDuration(photo.metadata.duration)}
+                  </div>
+                )}
+              </>
+            )}
 
             {/* Cover-indikator (vises hvis bildet er albumforside) */}
             {currentAlbum && currentAlbum.cover === photo.url && (

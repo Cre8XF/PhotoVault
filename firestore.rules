@@ -20,7 +20,9 @@ service cloud.firestore {
     function isValidPhotoData() {
       return request.resource.data.keys().hasAll(['userId', 'url', 'createdAt']) &&
              request.resource.data.url is string &&
-             request.resource.data.userId == request.auth.uid;
+             request.resource.data.userId == request.auth.uid &&
+             (!request.resource.data.keys().hasAny(['type']) ||
+              request.resource.data.type in ['photo', 'video']);
     }
 
     function isValidAlbumData() {
