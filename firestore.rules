@@ -1,8 +1,7 @@
 rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
+service firebase.storage {
+  match /b/{bucket}/o {
 
-    // Helper functions
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -12,194 +11,61 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isAuthenticated() &&
-             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      return request.auth.token.email == "rogsor80@gmail.com";
     }
 
-    function isValidPhotoData() {
-      return request.resource.data.keys().hasAll(['userId', 'url', 'createdAt']) &&
-             request.resource.data.url is string &&
-             request.resource.data.userId == request.auth.uid &&
-             (!request.resource.data.keys().hasAny(['type']) ||
-              request.resource.data.type in ['photo', 'video']);
+    function isMedia() {
+      return request.resource.contentType.matches('image/.*') ||
+             request.resource.contentType.matches('video/.*');
     }
 
-    function isValidAlbumData() {
-      return request.resource.data.keys().hasAll(['name', 'userId', 'createdAt']) &&
-             request.resource.data.name is string &&
-             request.resource.data.userId == request.auth.uid;
+    function isValidSize() {
+      return request.resource.size < 50 * 1024 * 1024; // maks 50 MB for media
     }
 
-    // Users collection
-    match /users/{userId} {
-      // Users can read their own profile
+    match /users/{userId}/{albumId}/{fileName} {
       allow read: if isOwner(userId) || isAdmin();
-
-      // Users can create their own profile on signup
-      allow create: if isOwner(userId);
-
-      // Users can update their own profile
-      allow update: if isOwner(userId);
-
-      // Only admins can delete users
-      allow delete: if isAdmin();
+      allow create: if (isOwner(userId) || isAdmin()) && isMedia() && isValidSize();
+      allow delete: if isOwner(userId) || isAdmin();
     }
 
-    // Photos collection
-match /photos/{photoId} {
-  // Users can read their own photos
-  allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
-
-  // Users can create photos with minimal validation (MVP)
-  allow create: if isAuthenticated() &&
-                   request.resource.data.userId == request.auth.uid &&
-                   request.resource.data.url is string;
-
-  // Users can update or delete their own photos
-  allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
-}
-
-
-    // Albums collection
-    match /albums/{albumId} {
-      // Users can read their own albums
-      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
-
-      // Users can create albums with valid data
-      allow create: if isAuthenticated() && isValidAlbumData();
-
-      // Users can update their own albums
-      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
-
-      // Users can delete their own albums
-      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    match /users/{userId}/unassigned/{fileName} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if (isOwner(userId) || isAdmin()) && isMedia() && isValidSize();
+      allow delete: if isOwner(userId) || isAdmin();
     }
 
-    // AI Logs collection (for admin monitoring)
-    match /aiLogs/{logId} {
-      // Only admins can read AI logs
-      allow read: if isAdmin();
-
-      // System can create logs (authenticated users creating their own logs)
-      allow create: if isAuthenticated();
-
-      // No updates or deletes allowed
-      allow update, delete: if false;
+    match /users/{userId}/thumbnails/{fileName} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if (isOwner(userId) || isAdmin()) && isImage() && isValidSize();
+      allow delete: if isOwner(userId) || isAdmin();
     }
 
-    // Admin Dashboard Stats (aggregated data)
-    match /stats/{statId} {
-      // Only admins can read stats
-      allow read: if isAdmin();
-
-      // Only system/cloud functions can write stats
-      allow write: if false;
+    match /vault/{userId}/{fileName} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if (isOwner(userId) || isAdmin()) && isValidSize();
+      allow delete: if isOwner(userId) || isAdmin();
     }
 
-    // Vault Photos collection (encrypted photos)
-    match /vault_photos/{vaultPhotoId} {
-      // Users can only read their own encrypted vault photos
-      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
-
-      // Users can create vault photos (must include userId and encrypted metadata)
-      allow create: if isAuthenticated() &&
-                       request.resource.data.userId == request.auth.uid &&
-                       request.resource.data.keys().hasAll(['userId', 'encryptedMetadata', 'cryptoMetadata', 'storageRef', 'createdAt']);
-
-      // Users can update their own vault photos (for lastAccessedAt timestamp)
-      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
-
-      // Users can delete their own vault photos
-      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    match /enhanced/{userId}/{fileName} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if (isOwner(userId) || isAdmin()) && isImage() && isValidSize();
+      allow delete: if isOwner(userId) || isAdmin();
     }
 
-    // Comments collection (Phase 4.3)
-    match /comments/{commentId} {
-      // Anyone with access to the photo can read comments
-      allow read: if isAuthenticated();
-
-      // Users can create comments with valid data
-      allow create: if isAuthenticated() &&
-                       request.resource.data.userId == request.auth.uid &&
-                       request.resource.data.keys().hasAll(['photoId', 'userId', 'text', 'createdAt']);
-
-      // Users can update their own comments (edit text only)
-      allow update: if isAuthenticated() &&
-                       resource.data.userId == request.auth.uid &&
-                       request.resource.data.userId == resource.data.userId &&
-                       request.resource.data.photoId == resource.data.photoId;
-
-      // Users can delete their own comments, or photo owner can delete any comment
-      allow delete: if isAuthenticated() &&
-                       (resource.data.userId == request.auth.uid ||
-                        get(/databases/$(database)/documents/photos/$(resource.data.photoId)).data.userId == request.auth.uid);
+    match /photos/{userId}/{fileName} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if (isOwner(userId) || isAdmin()) && isMedia() && isValidSize();
+      allow delete: if isOwner(userId) || isAdmin();
     }
 
-    // Reactions collection (Phase 4.3)
-    match /reactions/{reactionId} {
-      // Anyone with access to the photo can read reactions
-      allow read: if isAuthenticated();
-
-      // Users can create reactions (one per user per photo per emoji)
-      allow create: if isAuthenticated() &&
-                       request.resource.data.userId == request.auth.uid &&
-                       request.resource.data.keys().hasAll(['photoId', 'userId', 'emoji', 'createdAt']);
-
-      // Users can update their own reactions (change emoji)
-      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
-
-      // Users can delete their own reactions
-      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    match /thumbnails/{userId}/{fileName} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if (isOwner(userId) || isAdmin()) && isImage() && isValidSize();
+      allow delete: if isOwner(userId) || isAdmin();
     }
 
-    // Notifications collection (Phase 4.3)
-    match /notifications/{notificationId} {
-      // Users can only read their own notifications
-      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
-
-      // System can create notifications (authenticated users creating notifications)
-      allow create: if isAuthenticated() &&
-                       request.resource.data.keys().hasAll(['userId', 'type', 'photoId', 'fromUserId', 'read', 'createdAt']);
-
-      // Users can update their own notifications (mark as read)
-      allow update: if isAuthenticated() &&
-                       resource.data.userId == request.auth.uid &&
-                       request.resource.data.keys().hasOnly(['read']) == false;
-
-      // Users can delete their own notifications
-      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
-    }
-
-    // Shared Links collection (Phase 4.2)
-    match /shared_links/{linkId} {
-      // Public links can be read by anyone
-      allow read: if true;
-
-      // Only authenticated users can create links
-      allow create: if isAuthenticated() &&
-                       request.resource.data.createdBy == request.auth.uid;
-
-      // Only creator can update or delete
-      allow update, delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
-    }
-
-    // Activity collection (Phase 4.2)
-    match /activity/{activityId} {
-      // Users can read activity if they're participants
-      allow read: if isAuthenticated() &&
-                     (request.auth.uid in resource.data.participants ||
-                      get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.userId == request.auth.uid);
-
-      // Authenticated users can create activity
-      allow create: if isAuthenticated();
-
-      // No updates or deletes allowed (immutable log)
-      allow update, delete: if false;
-    }
-
-    // Deny all other access by default
-    match /{document=**} {
+    match /{allPaths=**} {
       allow read, write: if false;
     }
   }
