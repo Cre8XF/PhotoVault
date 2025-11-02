@@ -246,8 +246,18 @@ const UploadModal = ({
             await showToast("Genererer forhåndsvisning...", "info");
             const thumbnailBlob = await generateThumbnail(file);
 
+            if (!thumbnailBlob) {
+              console.warn('Thumbnail generation failed, continuing without');
+              await showToast('Kunne ikke generere forhåndsvisning - fortsetter uten', 'warning');
+            }
+
             // Extract metadata
             const metadata = await extractVideoMetadata(file);
+
+            if (!metadata) {
+              console.warn('Metadata extraction failed, continuing without');
+              await showToast('Metadata kunne ikke leses - video lastes opp uten varighet', 'info');
+            }
 
             // Compress if >50MB
             let videoToUpload = file;
@@ -271,15 +281,19 @@ const UploadModal = ({
               totalCompressedSize += file.size;
             }
 
-            // Add video with metadata
+            // Add video with metadata (fallback if metadata failed)
             processedFiles.push({
               file: videoToUpload,
-              thumbnail: thumbnailBlob,
+              thumbnail: thumbnailBlob || null,
               preview: fileObj.preview,
               name: videoToUpload.name,
               size: videoToUpload.size,
               type: 'video',
-              metadata: metadata
+              metadata: metadata || {
+                duration: 0,
+                resolution: 'unknown',
+                fps: null
+              }
             });
 
             setProcessingProgress(Math.round(((i + 1) / selectedFiles.length) * 50));

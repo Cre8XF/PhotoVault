@@ -272,7 +272,7 @@ export async function uploadPhoto(userId, file, albumId = null, aiTagging = fals
     const storagePath = `users/${userId}/${folderPath}/${timestamp}_${safeName}`;
     const storageRef = ref(storage, storagePath);
     
-    await uploadBytes(storageRef, file);
+    await uploadBytes(storageRef, file, { contentType: file.type });
     const downloadURL = await getDownloadURL(storageRef);
 
     console.log(`📸 Bilde lastet opp til Storage: ${safeName}`);
