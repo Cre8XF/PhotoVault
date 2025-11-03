@@ -1,9 +1,9 @@
 // ============================================================================
-// COMPONENT: PhotoGrid.jsx – v2.2 med forside-funksjonalitet
+// COMPONENT: PhotoGrid.jsx – v2.3 med forbedret video-visning
 // ============================================================================
 import React, { useState } from "react";
 import PhotoModal from "./PhotoModal";
-import { ImageOff, Trash2, Star, Image as ImageIcon, Play } from "lucide-react";
+import { ImageOff, Trash2, Star, Image as ImageIcon, Play, Video } from "lucide-react";
 import { deletePhoto, toggleFavorite, setAlbumCover } from "../firebase";
 import { formatDuration } from "../utils/videoTools";
 
@@ -94,40 +94,76 @@ const PhotoGrid = ({
         } gap-4`}
       >
         {list.map((photo, i) => (
-          <div key={photo.id} className="relative group overflow-hidden rounded-xl">
-            <img
-              src={photo.type === 'video' ? (photo.thumbnailUrl || photo.url) : photo.url}
-              alt={photo.title || photo.name || ""}
-              className={`w-full ${
-                compact ? "h-40" : "h-56"
-              } object-contain bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20 cursor-pointer`}
-              onClick={() =>
-                onPhotoClick
-                  ? onPhotoClick(photo.url)
-                  : setPhotoModal({ open: true, index: i })
-              }
-              loading="lazy"
-            />
+          <div
+            key={photo.id}
+            className="relative group overflow-hidden rounded-xl cursor-pointer"
+            onClick={() =>
+              onPhotoClick
+                ? onPhotoClick(photo.url)
+                : setPhotoModal({ open: true, index: i })
+            }
+          >
+            {/* Video Card */}
+            {photo.type === 'video' ? (
+              <div className={`w-full ${compact ? "h-40" : "h-56"} relative bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20`}>
+                {/* Video Thumbnail or Gradient Placeholder */}
+                {photo.thumbnailUrl ? (
+                  <img
+                    src={photo.thumbnailUrl}
+                    alt={photo.name || 'Video'}
+                    className="w-full h-full object-cover rounded-xl"
+                    loading="lazy"
+                  />
+                ) : (
+                  /* Styled placeholder when thumbnail is missing */
+                  <div className="w-full h-full bg-gradient-to-br from-purple-900 via-purple-800 to-purple-700 flex items-center justify-center rounded-xl">
+                    <Video className="w-20 h-20 text-white/50" />
+                  </div>
+                )}
 
-            {/* Video overlay with play icon and duration */}
-            {photo.type === 'video' && (
-              <>
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/30">
-                  <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
-                    <Play className="w-6 h-6 text-gray-900 ml-1" fill="currentColor" />
+                {/* Play Icon Overlay */}
+                <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div className="bg-white/30 backdrop-blur-sm rounded-full p-4 scale-90 group-hover:scale-100 transition-transform duration-200">
+                    <Play className="w-10 h-10 text-white fill-white" />
                   </div>
                 </div>
-                {photo.metadata?.duration && (
-                  <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+
+                {/* Duration Badge (if metadata exists) */}
+                {photo.metadata?.duration && photo.metadata.duration > 0 && (
+                  <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium px-2 py-1 rounded backdrop-blur-sm">
                     {formatDuration(photo.metadata.duration)}
                   </div>
                 )}
-              </>
+
+                {/* Video Type Badge */}
+                <div className="absolute top-2 left-2 bg-purple-600/90 text-white text-xs font-medium px-2 py-1 rounded flex items-center gap-1 backdrop-blur-sm">
+                  <Video className="w-3 h-3" />
+                  <span>Video</span>
+                </div>
+              </div>
+            ) : (
+              /* Regular Photo */
+              <img
+                src={photo.url}
+                alt={photo.title || photo.name || ""}
+                className={`w-full ${
+                  compact ? "h-40" : "h-56"
+                } object-contain bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20`}
+                loading="lazy"
+              />
             )}
 
             {/* Cover-indikator (vises hvis bildet er albumforside) */}
-            {currentAlbum && currentAlbum.cover === photo.url && (
+            {currentAlbum && currentAlbum.cover === photo.url && photo.type !== 'video' && (
               <div className="absolute top-2 left-2 bg-yellow-500 text-black px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
+                <ImageIcon className="w-3 h-3" />
+                Forside
+              </div>
+            )}
+
+            {/* Cover indicator for videos (adjusted position to not overlap video badge) */}
+            {currentAlbum && currentAlbum.cover === photo.url && photo.type === 'video' && (
+              <div className="absolute top-2 left-20 bg-yellow-500 text-black px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
                 <ImageIcon className="w-3 h-3" />
                 Forside
               </div>

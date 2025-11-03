@@ -263,21 +263,43 @@ export async function updatePhotoAlbum(photoId, targetAlbumId) {
 // ============================================================================
 
 // 🔹 Last opp bildefil komplett (Storage + Firestore) med AI-støtte
-export async function uploadPhoto(userId, file, albumId = null, aiTagging = false) {
+export async function uploadPhoto(userId, file, albumId = null, aiTagging = false, thumbnailBlob = null, videoMetadata = null) {
   try {
-    // 1. Last opp til Storage
+    // Determine if this is a video
+    const isVideo = file.type && file.type.startsWith('video/');
+
+    // 1. Upload thumbnail to Storage (if provided for video)
+    let thumbnailUrl = null;
+    if (isVideo && thumbnailBlob) {
+      try {
+        const timestamp = Date.now();
+        const thumbName = file.name.replace(/\.[^.]+$/, '_thumb.jpg');
+        const thumbSafeName = thumbName.replace(/\s+/g, "_");
+        const thumbPath = `users/${userId}/thumbnails/${timestamp}_${thumbSafeName}`;
+        const thumbRef = ref(storage, thumbPath);
+
+        await uploadBytes(thumbRef, thumbnailBlob);
+        thumbnailUrl = await getDownloadURL(thumbRef);
+        console.log('✅ [Upload] Thumbnail uploaded:', thumbnailUrl);
+      } catch (thumbError) {
+        console.error('❌ [Upload] Thumbnail upload failed:', thumbError);
+        // Continue without thumbnail
+      }
+    }
+
+    // 2. Upload main file to Storage
     const timestamp = Date.now();
     const safeName = file.name.replace(/\s+/g, "_");
     const folderPath = albumId || "unassigned";
     const storagePath = `users/${userId}/${folderPath}/${timestamp}_${safeName}`;
     const storageRef = ref(storage, storagePath);
-    
+
     await uploadBytes(storageRef, file, { contentType: file.type });
     const downloadURL = await getDownloadURL(storageRef);
 
-    console.log(`📸 Bilde lastet opp til Storage: ${safeName}`);
+    console.log(`📸 ${isVideo ? 'Video' : 'Bilde'} lastet opp til Storage: ${safeName}`);
 
-    // 2. Forbered metadata
+    // 3. Prepare metadata
     const photoData = {
       name: file.name,
       url: downloadURL,
@@ -285,9 +307,15 @@ export async function uploadPhoto(userId, file, albumId = null, aiTagging = fals
       albumId: albumId,
       storagePath: storagePath,
       size: file.size,
-      type: file.type,
+      type: isVideo ? 'video' : file.type, // Use string "video" for videos, not MIME type
       favorite: false,
-      
+
+      // Video-specific fields
+      ...(isVideo && {
+        thumbnailUrl: thumbnailUrl,
+        metadata: videoMetadata || { duration: 0, resolution: 'unknown', fps: null }
+      }),
+
       // AI-felt (Fase 4.0)
       aiTags: [],
       faces: 0,
@@ -300,7 +328,7 @@ export async function uploadPhoto(userId, file, albumId = null, aiTagging = fals
       bgRemoved: false,
       noBgUrl: null,
       bgRemovedAt: null,
-      
+
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };

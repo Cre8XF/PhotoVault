@@ -93,7 +93,15 @@ export const usePhotoData = () => {
       let successCount = 0;
 
       for (const fileObj of selectedFiles) {
-        await uploadPhoto(user.uid, fileObj.file, albumId, aiTagging);
+        // Pass thumbnail and metadata for videos
+        await uploadPhoto(
+          user.uid,
+          fileObj.file,
+          albumId,
+          aiTagging,
+          fileObj.thumbnail || null,
+          fileObj.metadata || null
+        );
         successCount++;
       }
 
