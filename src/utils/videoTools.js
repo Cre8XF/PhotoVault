@@ -47,91 +47,174 @@ export function formatFileSize(bytes) {
 }
 
 /**
- * Generate thumbnail from video at 1 second mark
- * Returns null on failure (upload continues without thumbnail)
+ * Generate thumbnail from video file
+ * Returns blob on success, null on failure
+ * Includes comprehensive logging for debugging
  * @param {File} videoFile - Video file object
  * @returns {Promise<Blob|null>} Thumbnail image blob or null if failed
  */
 export async function generateThumbnail(videoFile) {
+  console.log('🎬 [Thumbnail] Starting generation for:', videoFile.name);
+
   // Validate file type
   if (!videoFile.type || !videoFile.type.startsWith('video/')) {
-    console.warn('Invalid video MIME type:', videoFile.type);
+    console.warn('❌ [Thumbnail] Invalid MIME type:', videoFile.type);
+    return null;
+  }
+
+  // Validate file size (sanity check)
+  if (videoFile.size === 0) {
+    console.warn('❌ [Thumbnail] File is empty');
     return null;
   }
 
   return new Promise((resolve) => {
     const video = document.createElement('video');
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-
     video.preload = 'metadata';
-    video.muted = true;
+    video.muted = true;  // CRITICAL: Required for autoplay in browsers
+    video.playsInline = true;  // Required for iOS
 
-    let resolved = false;
     let objectUrl = null;
+    let resolved = false;
 
-    // 8 second timeout
+    // 12 second timeout (generous for large files)
     const timeout = setTimeout(() => {
       if (!resolved) {
-        console.warn('Thumbnail generation timeout');
-        if (objectUrl) URL.revokeObjectURL(objectUrl);
-        video.src = '';
+        console.warn('⏱️ [Thumbnail] Timeout after 12 seconds');
+        cleanup();
         resolve(null);
         resolved = true;
       }
-    }, 8000);
+    }, 12000);
+
+    const cleanup = () => {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+        objectUrl = null;
+      }
+      video.src = '';
+      video.load();
+    };
 
     video.onloadedmetadata = () => {
-      // Set canvas size to video dimensions
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      if (resolved) return;
 
-      // Seek to 1 second (or 10% of duration if shorter)
-      const seekTime = Math.min(1, video.duration * 0.1);
-      video.currentTime = seekTime;
+      console.log('✅ [Thumbnail] Metadata loaded - duration:', video.duration.toFixed(2), 'seconds');
+
+      // Validate duration
+      if (!video.duration || video.duration === 0) {
+        console.warn('⚠️ [Thumbnail] Video has no duration');
+        cleanup();
+        clearTimeout(timeout);
+        resolve(null);
+        resolved = true;
+        return;
+      }
+
+      // Seek to 1 second or 5% of duration (whichever is smaller)
+      const seekTime = Math.min(1, video.duration * 0.05);
+      console.log('⏩ [Thumbnail] Seeking to:', seekTime.toFixed(2), 'seconds');
+
+      try {
+        video.currentTime = seekTime;
+      } catch (error) {
+        console.error('❌ [Thumbnail] Seek failed:', error);
+        cleanup();
+        clearTimeout(timeout);
+        resolve(null);
+        resolved = true;
+      }
     };
 
     video.onseeked = () => {
-      if (!resolved) {
-        clearTimeout(timeout);
-        try {
-          // Draw video frame to canvas
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      if (resolved) return;
 
-          // Convert canvas to blob
-          canvas.toBlob((blob) => {
-            if (objectUrl) URL.revokeObjectURL(objectUrl);
-            video.src = '';
-            resolve(blob);
-            resolved = true;
-          }, 'image/jpeg', 0.8);
-        } catch (error) {
-          console.error('Thumbnail generation error:', error);
-          if (objectUrl) URL.revokeObjectURL(objectUrl);
-          video.src = '';
+      console.log('📸 [Thumbnail] Seeked successfully, capturing frame...');
+      clearTimeout(timeout);
+
+      try {
+        // Validate video dimensions
+        if (!video.videoWidth || !video.videoHeight) {
+          console.error('❌ [Thumbnail] Video has no dimensions');
+          cleanup();
           resolve(null);
           resolved = true;
+          return;
         }
+
+        console.log(`📐 [Thumbnail] Video dimensions: ${video.videoWidth}x${video.videoHeight}`);
+
+        // Create canvas with optimized size
+        const canvas = document.createElement('canvas');
+        const maxWidth = 640;  // Max thumbnail width
+        const scale = Math.min(1, maxWidth / video.videoWidth);
+
+        canvas.width = Math.floor(video.videoWidth * scale);
+        canvas.height = Math.floor(video.videoHeight * scale);
+
+        console.log(`🖼️ [Thumbnail] Canvas size: ${canvas.width}x${canvas.height}`);
+
+        const ctx = canvas.getContext('2d', { alpha: false });
+        if (!ctx) {
+          console.error('❌ [Thumbnail] Failed to get canvas context');
+          cleanup();
+          resolve(null);
+          resolved = true;
+          return;
+        }
+
+        // Draw video frame to canvas
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert to blob
+        canvas.toBlob(
+          (blob) => {
+            if (blob && blob.size > 0) {
+              console.log('✅ [Thumbnail] Generated successfully:', (blob.size / 1024).toFixed(1), 'KB');
+              cleanup();
+              resolve(blob);
+              resolved = true;
+            } else {
+              console.error('❌ [Thumbnail] toBlob returned invalid blob');
+              cleanup();
+              resolve(null);
+              resolved = true;
+            }
+          },
+          'image/jpeg',
+          0.85  // Quality: 85%
+        );
+      } catch (error) {
+        console.error('❌ [Thumbnail] Canvas error:', error);
+        cleanup();
+        resolve(null);
+        resolved = true;
       }
     };
 
     video.onerror = (error) => {
       if (!resolved) {
         clearTimeout(timeout);
-        console.error('Video load error for thumbnail:', error);
-        if (objectUrl) URL.revokeObjectURL(objectUrl);
-        video.src = '';
+        console.error('❌ [Thumbnail] Video error:', error);
+        console.error('Video error details:', {
+          error: video.error,
+          networkState: video.networkState,
+          readyState: video.readyState
+        });
+        cleanup();
         resolve(null);
         resolved = true;
       }
     };
 
+    // Create object URL and set video source
     try {
       objectUrl = URL.createObjectURL(videoFile);
       video.src = objectUrl;
+      console.log('🔗 [Thumbnail] Object URL created');
     } catch (error) {
       clearTimeout(timeout);
-      console.error('Failed to create object URL for thumbnail:', error);
+      console.error('❌ [Thumbnail] Failed to create object URL:', error);
       resolve(null);
       resolved = true;
     }
@@ -139,15 +222,17 @@ export async function generateThumbnail(videoFile) {
 }
 
 /**
- * Extracts video metadata with robust error handling
- * Returns null on failure (upload continues without metadata)
+ * Extract video metadata (duration, resolution)
+ * Returns object with metadata or null on failure
  * @param {File} videoFile - Video file object
  * @returns {Promise<Object|null>} { duration, resolution, fps, size } or null
  */
 export async function extractVideoMetadata(videoFile) {
+  console.log('📊 [Metadata] Extracting for:', videoFile.name);
+
   // Validate file type
   if (!videoFile.type || !videoFile.type.startsWith('video/')) {
-    console.warn('Invalid video MIME type:', videoFile.type);
+    console.warn('❌ [Metadata] Invalid MIME type:', videoFile.type);
     return null;
   }
 
@@ -162,7 +247,7 @@ export async function extractVideoMetadata(videoFile) {
     // 8 second timeout
     const timeout = setTimeout(() => {
       if (!resolved) {
-        console.warn('Video metadata timeout - continuing without metadata');
+        console.warn('⏱️ [Metadata] Timeout after 8 seconds');
         if (objectUrl) URL.revokeObjectURL(objectUrl);
         video.src = '';
         resolve(null);
@@ -173,6 +258,7 @@ export async function extractVideoMetadata(videoFile) {
     video.onloadedmetadata = () => {
       if (!resolved) {
         clearTimeout(timeout);
+
         const metadata = {
           duration: video.duration || 0,
           resolution: video.videoWidth && video.videoHeight
@@ -184,6 +270,7 @@ export async function extractVideoMetadata(videoFile) {
           size: videoFile.size
         };
 
+        console.log('✅ [Metadata] Extracted:', metadata);
         if (objectUrl) URL.revokeObjectURL(objectUrl);
         video.src = '';
         resolve(metadata);
@@ -194,7 +281,7 @@ export async function extractVideoMetadata(videoFile) {
     video.onerror = (error) => {
       if (!resolved) {
         clearTimeout(timeout);
-        console.error('Video metadata extraction error:', error);
+        console.error('❌ [Metadata] Error:', error);
         if (objectUrl) URL.revokeObjectURL(objectUrl);
         video.src = '';
         resolve(null);
@@ -205,9 +292,10 @@ export async function extractVideoMetadata(videoFile) {
     try {
       objectUrl = URL.createObjectURL(videoFile);
       video.src = objectUrl;
+      console.log('🔗 [Metadata] Object URL created');
     } catch (error) {
       clearTimeout(timeout);
-      console.error('Failed to create object URL for video:', error);
+      console.error('❌ [Metadata] Failed to create object URL:', error);
       resolve(null);
       resolved = true;
     }
