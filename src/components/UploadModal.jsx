@@ -60,10 +60,6 @@ const UploadModal = ({
 
   // PHASE 2: AI Auto-Tagging - Disabled for MVP
   const [aiTagging] = useState(false); // Always false for MVP
-  // const [aiTagging, setAiTagging] = useState(() => {
-  //   const saved = localStorage.getItem('aiAutoTag');
-  //   return saved !== 'false';
-  // });
 
   useEffect(() => {
     if (isNative) checkPermissions();
@@ -400,13 +396,6 @@ const UploadModal = ({
     }
   };
 
-  // PHASE 2: AI Auto-Tagging toggle - Disabled for MVP
-  // const handleAiToggle = () => {
-  //   const newValue = !aiTagging;
-  //   setAiTagging(newValue);
-  //   localStorage.setItem('aiAutoTag', newValue.toString());
-  // };
-
   const handleCompressToggle = () => {
     const newValue = !autoCompress;
     setAutoCompress(newValue);
@@ -607,37 +596,6 @@ const UploadModal = ({
             </div>
           </div>
 
-          {/* PHASE 2: AI Auto-Tagging - Temporarily hidden for MVP
-          <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-600/30 rounded-lg">
-                  <Sparkles className="w-5 h-5 text-purple-400" />
-                </div>
-                <div>
-                  <p className="font-medium flex items-center gap-2">
-                    {t("upload:aiAutoTagging")}
-                    <span className="text-xs bg-purple-600/30 px-2 py-0.5 rounded-full">Beta</span>
-                  </p>
-                  <p className="text-xs text-gray-400">{t("upload:aiAutoTaggingDesc")}</p>
-                </div>
-              </div>
-              <button
-                onClick={handleAiToggle}
-                disabled={uploading}
-                className={`relative w-14 h-7 rounded-full transition ${
-                  aiTagging ? "bg-purple-600" : "bg-gray-600"
-                } ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                <div
-                  className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                    aiTagging ? "translate-x-7" : "translate-x-0"
-                  }`}
-                />
-              </button>
-            </div>
-          </div>
-          */}
         </div>
 
         <div className="px-6 pt-4 pb-4 space-y-3 border-t border-white/10"> 
