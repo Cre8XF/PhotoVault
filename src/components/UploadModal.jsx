@@ -111,19 +111,29 @@ const UploadModal = ({
   const handleFiles = async (files) => {
     const validFiles = [];
     const errors = [];
+    const warnings = [];
     const maxVideoSize = 100 * 1024 * 1024; // 100 MB
+    const maxImageSize = 50 * 1024 * 1024; // 50 MB (increased from 10 MB)
 
     for (const file of files) {
       // Handle images
       if (file.type.startsWith("image/")) {
         const validation = validateImage(file, {
-          maxSize: 10 * 1024 * 1024,
+          maxSize: maxImageSize,
           allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
         });
 
         if (validation.valid) {
           file.fileType = 'image';
           validFiles.push(file);
+
+          // Warn about large files
+          if (file.size > 10 * 1024 * 1024) {
+            warnings.push({
+              file: file.name,
+              message: `Stort bilde (${(file.size / 1024 / 1024).toFixed(1)}MB) - vil bli komprimert`
+            });
+          }
         } else {
           errors.push({ file: file.name, errors: validation.errors });
         }
@@ -147,6 +157,11 @@ const UploadModal = ({
       errors.forEach(err => {
         showToast(`${err.file}: ${err.errors.join(', ')}`, "error");
       });
+    }
+
+    if (warnings.length > 0) {
+      console.log('Large files will be compressed:', warnings);
+      showToast(`${warnings.length} store bilder vil bli komprimert automatisk`, "info");
     }
 
     if (files.length !== validFiles.length) {

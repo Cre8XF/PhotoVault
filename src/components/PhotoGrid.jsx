@@ -189,8 +189,8 @@ const PhotoGrid = ({
                   title={photo.favorite ? "Fjern favoritt" : "Legg til favoritt"}
                   className={`p-1.5 rounded-full ${
                     photo.favorite
-                      ? "bg-yellow-500/80 text-white"
-                      : "bg-black/50 text-gray-300 hover:bg-yellow-500/70"
+                      ? "bg-red-500/80 text-white"
+                      : "bg-black/50 text-gray-300 hover:bg-red-500/70"
                   } transition shadow-lg`}
                 >
                   <Star className="w-4 h-4" fill={photo.favorite ? "currentColor" : "none"} />

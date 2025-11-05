@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Lock, Mail, Eye, EyeOff, Fingerprint } from "lucide-react";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../firebase";
 import { 
   isBiometricAvailable, 
@@ -24,10 +24,35 @@ const LoginPage = ({ onLogin = () => window.location.reload() }) => {
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricType, setBiometricType] = useState('none');
   const [savedCredentials, setSavedCredentials] = useState(null);
+  const [resetEmailSent, setResetEmailSent] = useState(false);
 
   useEffect(() => {
     checkBiometric();
   }, []);
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError(t('errors.emailRequired') || "Vennligst skriv inn e-postadressen din");
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setResetEmailSent(true);
+      setError("");
+      await showToast(t('passwordResetSent') || "E-post for tilbakestilling sendt!");
+      setTimeout(() => setResetEmailSent(false), 5000);
+    } catch (error) {
+      console.error("Password reset error:", error);
+      if (error.code === "auth/user-not-found") {
+        setError(t('errors.userNotFound') || "Fant ingen bruker med denne e-posten");
+      } else if (error.code === "auth/invalid-email") {
+        setError(t('errors.invalidEmail') || "Ugyldig e-postadresse");
+      } else {
+        setError(t('errors.passwordResetFailed') || "Kunne ikke sende tilbakestillingslenke");
+      }
+    }
+  };
 
   const checkBiometric = async () => {
     if (!isNative()) return;
@@ -225,10 +250,30 @@ const LoginPage = ({ onLogin = () => window.location.reload() }) => {
             </div>
           )}
 
+          {/* Success Message (Password Reset) */}
+          {resetEmailSent && (
+            <div className="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-3 rounded-xl text-sm">
+              {t('passwordResetEmailSent') || "E-post for tilbakestilling sendt! Sjekk innboksen din."}
+            </div>
+          )}
+
           {/* Error Message */}
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm">
               {error}
+            </div>
+          )}
+
+          {/* Forgot Password Link (only on login mode) */}
+          {isLogin && (
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
+              >
+                {t('forgotPassword') || "Glemt passord?"}
+              </button>
             </div>
           )}
 

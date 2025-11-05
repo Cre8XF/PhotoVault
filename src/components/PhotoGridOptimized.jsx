@@ -45,8 +45,8 @@ const PhotoGridOptimized = ({
             }}
           >
             <LazyImage
-              src={photo.url}
-              thumbnail={photo.thumbnailSmall}
+              src={photo.type === 'video' && photo.thumbnailUrl ? photo.thumbnailUrl : photo.url}
+              thumbnail={photo.thumbnailSmall || photo.thumbnailUrl}
               alt={photo.name || ""}
               className="w-full h-48 object-contain bg-gray-900 transition-transform group-hover:scale-105"
             />
