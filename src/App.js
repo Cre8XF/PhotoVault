@@ -3,6 +3,7 @@
 // ============================================================================
 import React from "react";
 import { useTranslation } from 'react-i18next';
+import i18n from './i18n';
 
 // Contexts
 import { SecurityProvider, useSecurityContext } from "./contexts/SecurityContext";
@@ -157,6 +158,12 @@ function AppContent() {
       window.removeEventListener('dragover', handleGlobalDragOver);
     };
   }, [user, uploadModalOpen, setUploadModalOpen]);
+
+  // Set initial language on mount
+  React.useEffect(() => {
+    const savedLang = localStorage.getItem('photoVaultLanguage') || 'no';
+    i18n.changeLanguage(savedLang);
+  }, []);
 
   // Show loading spinner
   if (loading) {
