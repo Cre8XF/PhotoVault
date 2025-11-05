@@ -225,7 +225,7 @@ const UploadModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 animate-fade-in">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1001] p-4 animate-fade-in">
       <div
         ref={modalRef}
         tabIndex={-1}
@@ -460,7 +460,7 @@ const UploadModal = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="px-6 pt-4 pb-4 space-y-3 border-t border-white/10">
+        <div className="px-6 pt-4 pb-24 space-y-3 border-t border-white/10">
           <button
             onClick={handleCreateAlbumClick}
             disabled={uploading}
