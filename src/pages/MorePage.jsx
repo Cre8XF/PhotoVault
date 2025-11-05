@@ -779,7 +779,9 @@ const MorePage = ({
 
         {/* === RIGHT COLUMN === */}
         <div className="space-y-6">
-          {/* === AI FEATURES === */}
+          {/* === AI FEATURES ===
+          PHASE 2: AI Features section hidden for MVP
+          Will be re-enabled when AI is activated (moved to experimental/ai/)
           <section className="glass rounded-2xl overflow-hidden border-2 border-purple-500/20">
             <button
               onClick={() => toggleSection('ai')}
@@ -892,6 +894,7 @@ const MorePage = ({
               </div>
             </div>
           </section>
+          */}
 
           {/* === ACCOUNT === */}
           <section className="glass rounded-2xl p-6">
