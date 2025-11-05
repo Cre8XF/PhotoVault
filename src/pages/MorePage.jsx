@@ -41,12 +41,8 @@ import {
   Lock,
 } from "lucide-react";
 import { useSecurityContext } from "../contexts/SecurityContext";
-import { 
-  getStorage, 
-  ref as storageRef, 
-  listAll, 
-  getMetadata 
-} from "firebase/storage";
+// Storage imports now in useStorageCalc hook
+// import { getStorage, ref as storageRef, listAll, getMetadata } from "firebase/storage";
 import { 
   getFirestore, 
   doc, 
@@ -64,6 +60,7 @@ import {
 
 import { db } from "../firebase";
 import ComingSoonModal from "../components/ComingSoonModal";
+import { useStorageCalc } from "../hooks/useStorageCalc";
 // PHASE 2: AI Services - Temporarily disabled for MVP
 // import { analyzeImage, detectFaces } from '../services/googleVision';
 // import { suggestAlbums } from '../services/openai';
@@ -83,8 +80,6 @@ const MorePage = ({
   const { t, i18n } = useTranslation(['translation', 'common', 'albums']);
   const [expandedSection, setExpandedSection] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [storageUsed, setStorageUsed] = useState(propStorageUsed || 0);
-  const [storageLimit] = useState(propStorageLimit || 524288000);
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
   const [showAIModal, setShowAIModal] = useState(false);
@@ -92,6 +87,16 @@ const MorePage = ({
   const [aiFeatureDescription, setAIFeatureDescription] = useState('');
 
   const { pinEnabled, biometricEnabled } = useSecurityContext();
+
+  // Use storage calculation hook
+  const {
+    storageUsed,
+    storageLimit,
+    storagePercentage: storagePercent,
+    storageLoading,
+    refreshStorage,
+    formatBytes
+  } = useStorageCalc(user?.uid, propStorageUsed, propStorageLimit);
 
   // Check for isPro: could be boolean field or role field
   const isPro = user?.isPro === true ||
@@ -101,50 +106,7 @@ const MorePage = ({
   // Check for isAdmin: check role field
   const isAdmin = user?.role === 'admin' || user?.isAdmin === true;
 
-  // ============================================================================
-  // === STORAGE CALCULATION ===
-  // ============================================================================
-  useEffect(() => {
-    const calculateStorageUsage = async () => {
-      if (!user?.uid) return;
-
-      try {
-        const storage = getStorage();
-        const userStorageRef = storageRef(storage, `users/${user.uid}/photos`);
-        
-        const listResult = await listAll(userStorageRef);
-        let totalBytes = 0;
-
-        await Promise.all(
-          listResult.items.map(async (item) => {
-            try {
-              const metadata = await getMetadata(item);
-              totalBytes += metadata.size || 0;
-            } catch (error) {
-              console.error("Error getting metadata for:", item.fullPath, error);
-            }
-          })
-        );
-
-        setStorageUsed(totalBytes);
-      } catch (error) {
-        console.error("Error calculating storage:", error);
-        setStorageUsed(propStorageUsed || 0);
-      }
-    };
-
-    calculateStorageUsage();
-  }, [user?.uid, propStorageUsed]);
-
-  const storagePercent = Math.round((storageUsed / storageLimit) * 100);
-
-  const formatBytes = (bytes) => {
-    if (bytes === 0) return `0 ${t('common:size')}`;
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
-  };
+  // Storage calculation now handled by useStorageCalc hook
 
   // ============================================================================
   // === STATISTICS ===
