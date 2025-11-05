@@ -31,6 +31,8 @@ const useStore = create(
           photos: [],
           currentPage: 'home',
           selectedAlbum: null,
+          notification: null,
+          confirmModal: null,
         }),
 
         // =====================================================================

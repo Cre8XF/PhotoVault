@@ -184,9 +184,9 @@ function AppContent() {
     <div className="min-h-screen relative">
       <Particles />
 
-      {/* Notification Panel - Fixed top-right (mobile-safe positioning) */}
+      {/* Notification Panel - Fixed top-right with mobile-responsive positioning */}
       {user && (
-        <div className="fixed z-40" style={{ top: '24px', right: '16px' }}>
+        <div className="fixed z-40 top-4 right-4 md:top-6 md:right-6">
           <NotificationPanel onNavigateToPhoto={handleNavigateToPhoto} />
         </div>
       )}
@@ -211,6 +211,7 @@ function AppContent() {
             onAlbumClick={handleAlbumClick}
             onPhotoClick={handlePhotoClick}
             toggleFavorite={toggleFavorite}
+            refreshData={refreshData}
           />
         )}
 
