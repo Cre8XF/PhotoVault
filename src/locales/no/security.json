@@ -23,7 +23,7 @@
       "finish": "Fullfør",
       "loading": "Laster..."
     },
-    "change": {
+    "changeFlow": {
       "title": "Endre PIN-kode",
       "enterCurrent": "Skriv inn nåværende PIN",
       "enterNew": "Skriv inn ny PIN (4-6 siffer)",

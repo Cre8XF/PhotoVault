@@ -200,22 +200,36 @@ const SecuritySettings = ({ onBack }) => {
   };
 
   const handleBiometricToggle = async () => {
+    console.log('🔐 Biometric toggle clicked', {
+      biometricEnabled,
+      pinEnabled,
+      biometricAvailable,
+      biometricName
+    });
+
     if (biometricEnabled) {
+      console.log('🔓 Disabling biometric authentication');
       disableBiometric();
       showNotification(t('biometric.notifications.disabled', { type: biometricName }), 'success');
     } else {
       if (!pinEnabled) {
+        console.log('⚠️ Biometric requires PIN to be enabled first');
         showNotification(t('biometric.notifications.mustEnablePin'), 'error');
         return;
       }
 
+      console.log('🔒 Enabling biometric authentication...');
       setLoading(true);
       const result = await enableBiometric();
       setLoading(false);
 
+      console.log('🔐 Biometric enable result:', result);
+
       if (result.success) {
+        console.log('✅ Biometric enabled successfully');
         showNotification(t('biometric.notifications.enabled', { type: biometricName }), 'success');
       } else {
+        console.log('❌ Biometric enable failed:', result.error);
         showNotification(result.error || t('biometric.notifications.couldNotEnable', { type: biometricName }), 'error');
       }
     }
@@ -346,7 +360,7 @@ const SecuritySettings = ({ onBack }) => {
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
-            <h1 className="text-2xl font-bold">{t('pin.change.title')}</h1>
+            <h1 className="text-2xl font-bold">{t('pin.changeFlow.title')}</h1>
           </div>
 
           <div className="flex gap-2 mb-8">
@@ -357,9 +371,9 @@ const SecuritySettings = ({ onBack }) => {
 
           <div className="glass rounded-2xl p-6 mb-6">
             <h3 className="font-semibold mb-4">
-              {changePINStep === 1 ? t('pin.change.enterCurrent') :
-               changePINStep === 2 ? t('pin.change.enterNew') :
-               t('pin.change.confirmNew')}
+              {changePINStep === 1 ? t('pin.changeFlow.enterCurrent') :
+               changePINStep === 2 ? t('pin.changeFlow.enterNew') :
+               t('pin.changeFlow.confirmNew')}
             </h3>
 
             <div className="relative mb-4">

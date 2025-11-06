@@ -3,6 +3,7 @@
 // ============================================================================
 import React from "react";
 import { useTranslation } from 'react-i18next';
+import i18n from './i18n';
 
 // Contexts
 import { SecurityProvider, useSecurityContext } from "./contexts/SecurityContext";
@@ -18,6 +19,8 @@ import AlbumPage from "./pages/AlbumPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import SecuritySettings from "./pages/SecuritySettings";
 import VaultPage from "./pages/VaultPage";
+import ProfilePage from "./pages/ProfilePage";
+import SubscriptionPage from "./pages/SubscriptionPage";
 
 // Components
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -158,6 +161,12 @@ function AppContent() {
     };
   }, [user, uploadModalOpen, setUploadModalOpen]);
 
+  // Set initial language on mount
+  React.useEffect(() => {
+    const savedLang = localStorage.getItem('photoVaultLanguage') || 'no';
+    i18n.changeLanguage(savedLang);
+  }, []);
+
   // Show loading spinner
   if (loading) {
     return (
@@ -178,7 +187,7 @@ function AppContent() {
   }
 
   // Determine if we should show bottom navigation
-  const showBottomNav = currentPage !== "album" && currentPage !== "admin" && currentPage !== "security" && currentPage !== "vault";
+  const showBottomNav = currentPage !== "album" && currentPage !== "admin" && currentPage !== "security" && currentPage !== "vault" && currentPage !== "profile" && currentPage !== "subscription";
 
   return (
     <div className="min-h-screen relative">
@@ -246,6 +255,18 @@ function AppContent() {
 
         {currentPage === "vault" && (
           <VaultPage />
+        )}
+
+        {currentPage === "profile" && (
+          <ProfilePage
+            onBack={() => setCurrentPage("more")}
+          />
+        )}
+
+        {currentPage === "subscription" && (
+          <SubscriptionPage
+            onBack={() => setCurrentPage("more")}
+          />
         )}
 
         {currentPage === "album" && selectedAlbum && (
