@@ -2,7 +2,6 @@
 // ProfilePage - Phase 2: User Profile Management
 // ============================================================================
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { updateProfile, updateEmail } from 'firebase/auth';
@@ -23,9 +22,8 @@ import {
  * Profile Page
  * Display and update user information
  */
-const ProfilePage = () => {
+const ProfilePage = ({ onBack }) => {
   const { t } = useTranslation(['common']);
-  const navigate = useNavigate();
   const { user, userProfile, fetchUserProfile } = useAuth();
   const setNotification = useStore((state) => state.setNotification);
 
@@ -126,7 +124,7 @@ const ProfilePage = () => {
       <div className="sticky top-0 z-10 glass-card border-b border-white/20 px-4 py-4">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate('/more')}
+            onClick={onBack}
             className="p-2 hover:bg-white/10 rounded-lg transition"
           >
             <ArrowLeft className="w-6 h-6" />

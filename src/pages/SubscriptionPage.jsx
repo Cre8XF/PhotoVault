@@ -1,12 +1,11 @@
 // ============================================================================
 // SubscriptionPage - Phase 2: Subscription & Storage Management
 // ============================================================================
-import React, { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-import useAuth from '../hooks/useAuth'
-import usePhotoData from '../hooks/usePhotoData'
-import useStore from '../state/store'
+import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import useAuth from '../hooks/useAuth';
+import usePhotoData from '../hooks/usePhotoData';
+import useStore from '../state/store';
 import {
   ArrowLeft,
   Crown,
@@ -23,13 +22,12 @@ import {
  * Subscription Page
  * Shows current plan, storage usage, and AI quota
  */
-const SubscriptionPage = () => {
-  const { t } = useTranslation(['common'])
-  const navigate = useNavigate()
-  const { userProfile, isPro, isAdmin } = useAuth()
-  const { photos } = usePhotoData()
-  const storageUsed = useStore((state) => state.storageUsed)
-  const storageLimit = useStore((state) => state.storageLimit)
+const SubscriptionPage = ({ onBack }) => {
+  const { t } = useTranslation(['common']);
+  const { userProfile, isPro, isAdmin } = useAuth();
+  const { photos } = usePhotoData();
+  const storageUsed = useStore((state) => state.storageUsed);
+  const storageLimit = useStore((state) => state.storageLimit);
 
   /**
    * Calculate storage usage percentage
@@ -127,7 +125,7 @@ const SubscriptionPage = () => {
       <div className="sticky top-0 z-10 glass-card border-b border-white/20 px-4 py-4">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setCurrentPage('more')}
+            onClick={onBack}
             className="p-2 hover:bg-white/10 rounded-lg transition"
           >
             <ArrowLeft className="w-6 h-6" />
