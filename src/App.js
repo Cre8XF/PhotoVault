@@ -19,6 +19,8 @@ import AlbumPage from "./pages/AlbumPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import SecuritySettings from "./pages/SecuritySettings";
 import VaultPage from "./pages/VaultPage";
+import ProfilePage from "./pages/ProfilePage";
+import SubscriptionPage from "./pages/SubscriptionPage";
 
 // Components
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -185,7 +187,7 @@ function AppContent() {
   }
 
   // Determine if we should show bottom navigation
-  const showBottomNav = currentPage !== "album" && currentPage !== "admin" && currentPage !== "security" && currentPage !== "vault";
+  const showBottomNav = currentPage !== "album" && currentPage !== "admin" && currentPage !== "security" && currentPage !== "vault" && currentPage !== "profile" && currentPage !== "subscription";
 
   return (
     <div className="min-h-screen relative">
@@ -253,6 +255,18 @@ function AppContent() {
 
         {currentPage === "vault" && (
           <VaultPage />
+        )}
+
+        {currentPage === "profile" && (
+          <ProfilePage
+            onBack={() => setCurrentPage("more")}
+          />
+        )}
+
+        {currentPage === "subscription" && (
+          <SubscriptionPage
+            onBack={() => setCurrentPage("more")}
+          />
         )}
 
         {currentPage === "album" && selectedAlbum && (

@@ -1057,7 +1057,10 @@ const MorePage = ({
             </div>
 
             <div className="space-y-2">
-              <button className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10">
+              <button
+                onClick={() => onNavigate('profile')}
+                className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
+              >
                 <User className="w-5 h-5 text-gray-400" />
                 <div className="flex-1">
                   <p className="font-medium">{t('account.profile')}</p>
@@ -1066,14 +1069,17 @@ const MorePage = ({
                 <ChevronRight className="w-5 h-5 opacity-50" />
               </button>
 
-              <button className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10">
+              <button
+                onClick={() => onNavigate('subscription')}
+                className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
+              >
                 <CreditCard className="w-5 h-5 text-gray-400" />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <p className="font-medium">{t('account.subscription')}</p>
                     <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      isPro 
-                        ? 'bg-yellow-500/20 text-yellow-400' 
+                      isPro
+                        ? 'bg-yellow-500/20 text-yellow-400'
                         : 'bg-gray-500/20 text-gray-400'
                     }`}>
                       {isPro ? t('subscription.pro') : t('subscription.free')}

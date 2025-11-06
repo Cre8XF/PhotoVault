@@ -23,7 +23,7 @@
       "finish": "Finish",
       "loading": "Loading..."
     },
-    "change": {
+    "changeFlow": {
       "title": "Change PIN code",
       "enterCurrent": "Enter current PIN",
       "enterNew": "Enter new PIN (4-6 digits)",

@@ -13,7 +13,7 @@ const iconMap = {
 
 const Notification = ({ notification, onClose, setNotification }) => {
   // Safe defaults (hooks må kalles uansett)
-  const message  = notification?.message ?? "";
+  const message  = notification?.message ?? "An error occurred";
   const type     = notification?.type ?? "info";
   const duration = notification?.duration ?? 3000;
 
@@ -46,7 +46,7 @@ const Notification = ({ notification, onClose, setNotification }) => {
         bg-gradient-to-r ${colors} border backdrop-blur-md text-white font-medium`}
       >
         {iconMap[type]}
-        <span>{message}</span>
+        <span>{message || 'An error occurred'}</span>
         <button
           onClick={handleClose}
           className="ml-2 hover:opacity-70 transition-opacity"
