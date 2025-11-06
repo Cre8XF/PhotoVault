@@ -1,8 +1,8 @@
 // ============================================================================
 // PAGE: MorePage.jsx – v7.0 FULL API INTEGRATION WITH i18n
 // ============================================================================
-import React, { useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
+import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   User,
   Settings,
@@ -39,54 +39,52 @@ import {
   Upload,
   Check,
   Lock,
-} from "lucide-react";
-import { useSecurityContext } from "../contexts/SecurityContext";
+} from 'lucide-react'
+import { useSecurityContext } from '../contexts/SecurityContext'
 // Storage imports now in useStorageCalc hook
 // import { getStorage, ref as storageRef, listAll, getMetadata } from "firebase/storage";
-import { 
-  getFirestore, 
-  doc, 
-  deleteDoc, 
-  updateDoc, 
-  collection, 
-  getDocs 
-} from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  deleteDoc,
+  updateDoc,
+  collection,
+  getDocs,
+} from 'firebase/firestore'
 
-import { 
-  getAuth, 
-  deleteUser as deleteAuthUser 
-} from "firebase/auth";
+import { getAuth, deleteUser as deleteAuthUser } from 'firebase/auth'
 
+import { getStorage, ref as storageRef, listAll } from 'firebase/storage'
 
-import { db } from "../firebase";
-import ComingSoonModal from "../components/ComingSoonModal";
-import { useStorageCalc } from "../hooks/useStorageCalc";
+import { db } from '../firebase'
+import ComingSoonModal from '../components/ComingSoonModal'
+import { useStorageCalc } from '../hooks/useStorageCalc'
 // PHASE 2: AI Services - Temporarily disabled for MVP
 // import { analyzeImage, detectFaces } from '../services/googleVision';
 // import { suggestAlbums } from '../services/openai';
 // import { upscaleImage } from '../services/picsart';
 
-const MorePage = ({ 
-  user, 
-  storageUsed: propStorageUsed, 
-  storageLimit: propStorageLimit, 
+const MorePage = ({
+  user,
+  storageUsed: propStorageUsed,
+  storageLimit: propStorageLimit,
   photos,
   albums,
-  isDarkMode, 
-  setIsDarkMode, 
+  isDarkMode,
+  setIsDarkMode,
   onLogout,
-  onNavigate 
+  onNavigate,
 }) => {
-  const { t, i18n } = useTranslation(['translation', 'common', 'albums']);
-  const [expandedSection, setExpandedSection] = useState(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [notification, setNotification] = useState(null);
-  const [showAIModal, setShowAIModal] = useState(false);
-  const [aiFeatureName, setAIFeatureName] = useState('');
-  const [aiFeatureDescription, setAIFeatureDescription] = useState('');
+  const { t, i18n } = useTranslation(['translation', 'common', 'albums'])
+  const [expandedSection, setExpandedSection] = useState(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [notification, setNotification] = useState(null)
+  const [showAIModal, setShowAIModal] = useState(false)
+  const [aiFeatureName, setAIFeatureName] = useState('')
+  const [aiFeatureDescription, setAIFeatureDescription] = useState('')
 
-  const { pinEnabled, biometricEnabled } = useSecurityContext();
+  const { pinEnabled, biometricEnabled } = useSecurityContext()
 
   // Use storage calculation hook
   const {
@@ -95,16 +93,15 @@ const MorePage = ({
     storagePercentage: storagePercent,
     storageLoading,
     refreshStorage,
-    formatBytes
-  } = useStorageCalc(user?.uid, propStorageUsed, propStorageLimit);
+    formatBytes,
+  } = useStorageCalc(user?.uid, propStorageUsed, propStorageLimit)
 
   // Check for isPro: could be boolean field or role field
-  const isPro = user?.isPro === true ||
-                user?.role === 'pro' ||
-                user?.role === 'admin';
+  const isPro =
+    user?.isPro === true || user?.role === 'pro' || user?.role === 'admin'
 
   // Check for isAdmin: check role field
-  const isAdmin = user?.role === 'admin' || user?.isAdmin === true;
+  const isAdmin = user?.role === 'admin' || user?.isAdmin === true
 
   // Storage calculation now handled by useStorageCalc hook
 
@@ -114,50 +111,51 @@ const MorePage = ({
   const stats = {
     totalPhotos: photos?.length || 0,
     totalAlbums: albums?.length || 0,
-    favorites: photos?.filter(p => p.favorite).length || 0,
-    aiAnalyzed: photos?.filter(p => p.aiAnalyzed).length || 0,
-    recentUploads: photos?.filter(p => {
-      if (!p.createdAt) return false;
-      const uploadDate = new Date(p.createdAt);
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      return uploadDate > weekAgo;
-    }).length || 0,
-  };
+    favorites: photos?.filter((p) => p.favorite).length || 0,
+    aiAnalyzed: photos?.filter((p) => p.aiAnalyzed).length || 0,
+    recentUploads:
+      photos?.filter((p) => {
+        if (!p.createdAt) return false
+        const uploadDate = new Date(p.createdAt)
+        const weekAgo = new Date()
+        weekAgo.setDate(weekAgo.getDate() - 7)
+        return uploadDate > weekAgo
+      }).length || 0,
+  }
 
   // ============================================================================
   // === NOTIFICATION SYSTEM ===
   // ============================================================================
   const showNotification = (message, type = 'success') => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
+    setNotification({ message, type })
+    setTimeout(() => setNotification(null), 3000)
+  }
 
   // ============================================================================
   // === STRIPE INTEGRATION ===
   // ============================================================================
   const handleUpgradeToPro = async () => {
-    const stripePublicKey = process.env.REACT_APP_STRIPE_PUBLIC_KEY;
-    const stripeCheckoutUrl = process.env.REACT_APP_STRIPE_CHECKOUT_URL;
+    const stripePublicKey = process.env.REACT_APP_STRIPE_PUBLIC_KEY
+    const stripeCheckoutUrl = process.env.REACT_APP_STRIPE_CHECKOUT_URL
 
     if (!stripePublicKey || !stripeCheckoutUrl) {
-      console.warn("Stripe keys not configured");
-      showNotification(t('notifications.upgradeUnavailable'), "error");
-      return;
+      console.warn('Stripe keys not configured')
+      showNotification(t('notifications.upgradeUnavailable'), 'error')
+      return
     }
 
     try {
-      setLoading(true);
-      
-      const checkoutUrl = `${stripeCheckoutUrl}?client_reference_id=${user.uid}&customer_email=${user.email}`;
-      window.location.href = checkoutUrl;
+      setLoading(true)
+
+      const checkoutUrl = `${stripeCheckoutUrl}?client_reference_id=${user.uid}&customer_email=${user.email}`
+      window.location.href = checkoutUrl
     } catch (error) {
-      console.error("Error initiating Stripe checkout:", error);
-      showNotification(t('more.subscription.upgradeError'), "error");
+      console.error('Error initiating Stripe checkout:', error)
+      showNotification(t('more.subscription.upgradeError'), 'error')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // ============================================================================
   // === AI FEATURE HANDLERS ===
@@ -166,27 +164,30 @@ const MorePage = ({
 
   // MVP: Show "Coming Soon" modal for AI features
   const showAIFeatureModal = (featureName, description) => {
-    console.log('AI feature disabled - Phase 2 activation required:', featureName);
-    setAIFeatureName(featureName);
-    setAIFeatureDescription(description);
-    setShowAIModal(true);
-  };
+    console.log(
+      'AI feature disabled - Phase 2 activation required:',
+      featureName
+    )
+    setAIFeatureName(featureName)
+    setAIFeatureDescription(description)
+    setShowAIModal(true)
+  }
 
   // ============================================================================
   // === EXPORT FUNCTION ===
   // ============================================================================
   const exportUserData = async () => {
-    const exportUrl = process.env.REACT_APP_EXPORT_URL;
+    const exportUrl = process.env.REACT_APP_EXPORT_URL
 
     if (!exportUrl) {
-      console.warn("Export URL not configured");
-      showNotification(t('more.export.unavailable'), "error");
-      return;
+      console.warn('Export URL not configured')
+      showNotification(t('more.export.unavailable'), 'error')
+      return
     }
 
     try {
-      setLoading(true);
-      console.log("Exporting user data for:", user.uid);
+      setLoading(true)
+      console.log('Exporting user data for:', user.uid)
 
       const response = await fetch(exportUrl, {
         method: 'POST',
@@ -197,150 +198,147 @@ const MorePage = ({
           userId: user.uid,
           email: user.email,
         }),
-      });
+      })
 
       if (!response.ok) {
-        throw new Error(`Export failed: ${response.status}`);
+        throw new Error(`Export failed: ${response.status}`)
       }
 
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `photovault-export-${user.uid}-${Date.now()}.zip`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `photovault-export-${user.uid}-${Date.now()}.zip`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
 
-      showNotification(t('notifications.exported'), "success");
+      showNotification(t('notifications.exported'), 'success')
     } catch (error) {
-      console.error("Error exporting data:", error);
-      showNotification(t('more.export.failed'), "error");
+      console.error('Error exporting data:', error)
+      showNotification(t('more.export.failed'), 'error')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // ============================================================================
   // === IMPORT FUNCTION ===
   // ============================================================================
   const handleImportData = async (event) => {
-    const importUrl = process.env.REACT_APP_IMPORT_URL;
-    const file = event.target.files?.[0];
+    const importUrl = process.env.REACT_APP_IMPORT_URL
+    const file = event.target.files?.[0]
 
-    if (!file) return;
+    if (!file) return
 
     if (!importUrl) {
-      console.warn("Import URL not configured");
-      showNotification(t('more.import.unavailable'), "error");
-      return;
+      console.warn('Import URL not configured')
+      showNotification(t('more.import.unavailable'), 'error')
+      return
     }
 
     try {
-      setLoading(true);
-      console.log("Importing user data:", file.name);
+      setLoading(true)
+      console.log('Importing user data:', file.name)
 
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('userId', user.uid);
-      formData.append('email', user.email);
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('userId', user.uid)
+      formData.append('email', user.email)
 
       const response = await fetch(importUrl, {
         method: 'POST',
         body: formData,
-      });
+      })
 
       if (!response.ok) {
-        throw new Error(`Import failed: ${response.status}`);
+        throw new Error(`Import failed: ${response.status}`)
       }
 
-      const result = await response.json();
-      console.log("Import result:", result);
+      const result = await response.json()
+      console.log('Import result:', result)
 
-      showNotification(t('notifications.imported'), "success");
-      
-      setTimeout(() => window.location.reload(), 1500);
+      showNotification(t('notifications.imported'), 'success')
+
+      setTimeout(() => window.location.reload(), 1500)
     } catch (error) {
-      console.error("Error importing data:", error);
-      showNotification(t('more.import.failed'), "error");
+      console.error('Error importing data:', error)
+      showNotification(t('more.import.failed'), 'error')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // ============================================================================
   // === SHARE FUNCTION ===
   // ============================================================================
   const handleShareProfile = async () => {
-    const shareBaseUrl = process.env.REACT_APP_SHARE_BASE_URL || 'https://photovault.app/u/';
-    const shareLink = `${shareBaseUrl}${user.uid}`;
+    const shareBaseUrl =
+      process.env.REACT_APP_SHARE_BASE_URL || 'https://photovault.app/u/'
+    const shareLink = `${shareBaseUrl}${user.uid}`
 
     try {
-      await navigator.clipboard.writeText(shareLink);
-      showNotification(t('notifications.copied'), "success");
+      await navigator.clipboard.writeText(shareLink)
+      showNotification(t('notifications.copied'), 'success')
     } catch (error) {
-      console.error("Error copying to clipboard:", error);
-      showNotification(t('more.share.failed'), "error");
+      console.error('Error copying to clipboard:', error)
+      showNotification(t('more.share.failed'), 'error')
     }
-  };
+  }
 
   // ============================================================================
   // === DELETE ACCOUNT ===
   // ============================================================================
   const deleteAccount = async () => {
-    if (!user?.uid) return;
+    if (!user?.uid) return
 
     try {
-      setLoading(true);
-      console.log("Deleting account for:", user.uid);
+      setLoading(true)
+      console.log('Deleting account for:', user.uid)
 
-      const auth = getAuth();
-      const db = getFirestore();
-      const storage = getStorage();
+      const auth = getAuth()
+      const db = getFirestore()
+      const storage = getStorage()
 
-      const collections = ['photos', 'albums', 'shared', 'favorites'];
-      
+      const collections = ['photos', 'albums', 'shared', 'favorites']
+
       for (const collectionName of collections) {
-        const collectionRef = collection(db, 'users', user.uid, collectionName);
-        const snapshot = await getDocs(collectionRef);
-        
-        await Promise.all(
-          snapshot.docs.map(doc => deleteDoc(doc.ref))
-        );
+        const collectionRef = collection(db, 'users', user.uid, collectionName)
+        const snapshot = await getDocs(collectionRef)
+
+        await Promise.all(snapshot.docs.map((doc) => deleteDoc(doc.ref)))
       }
 
-      await deleteDoc(doc(db, 'users', user.uid));
+      await deleteDoc(doc(db, 'users', user.uid))
 
       try {
-        const userStorageRef = storageRef(storage, `users/${user.uid}`);
-        const listResult = await listAll(userStorageRef);
-        
-        await Promise.all(
-          listResult.items.map(item => item.delete())
-        );
+        const userStorageRef = storageRef(storage, `users/${user.uid}`)
+        const listResult = await listAll(userStorageRef)
+
+        await Promise.all(listResult.items.map((item) => item.delete()))
       } catch (storageError) {
-        console.warn("Storage deletion error:", storageError);
+        console.warn('Storage deletion error:', storageError)
       }
 
-      const currentUser = auth.currentUser;
+      const currentUser = auth.currentUser
       if (currentUser) {
-        await deleteAuthUser(currentUser);
+        await deleteAuthUser(currentUser)
       }
 
-      showNotification(t('notifications.deleted'), "success");
-      
+      showNotification(t('notifications.deleted'), 'success')
+
       setTimeout(() => {
-        window.location.href = '/';
-      }, 1500);
+        window.location.href = '/'
+      }, 1500)
     } catch (error) {
-      console.error("Error deleting account:", error);
-      showNotification(t('more.account.deleteError'), "error");
-      setShowDeleteConfirm(false);
+      console.error('Error deleting account:', error)
+      showNotification(t('more.account.deleteError'), 'error')
+      setShowDeleteConfirm(false)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // ============================================================================
   // === EXTERNAL LINKS & INFO PAGES ===
@@ -354,30 +352,33 @@ const MorePage = ({
       support: '/info/support.html',
       privacy: '/info/privacy.html',
       terms: '/info/terms.html',
-    };
+    }
 
-    const url = infoPages[type];
+    const url = infoPages[type]
     if (url) {
       // Try to open the local info page
-      window.open(url, '_blank', 'noopener,noreferrer');
+      window.open(url, '_blank', 'noopener,noreferrer')
     } else {
       // Fallback: show a modal "Page coming soon"
-      showNotification(t('info.comingSoon', 'Side kommer snart'), 'info');
+      showNotification(t('info.comingSoon', 'Side kommer snart'), 'info')
     }
-  };
+  }
 
   // ============================================================================
   // === UI HELPERS ===
   // ============================================================================
   const toggleSection = (section) => {
-    setExpandedSection(expandedSection === section ? null : section);
-  };
+    setExpandedSection(expandedSection === section ? null : section)
+  }
 
   const changeLanguage = (lng) => {
-    i18n.changeLanguage(lng);
-    const langName = lng === 'no' ? 'Norsk' : 'English';
-    showNotification(t('notifications.languageChanged', { lang: langName }), "success");
-  };
+    i18n.changeLanguage(lng)
+    const langName = lng === 'no' ? 'Norsk' : 'English'
+    showNotification(
+      t('notifications.languageChanged', { lang: langName }),
+      'success'
+    )
+  }
 
   // ============================================================================
   // === RENDER ===
@@ -386,9 +387,13 @@ const MorePage = ({
     <div className="min-h-screen p-4 md:p-8 pb-24 animate-fade-in max-w-6xl mx-auto">
       {/* Notification Toast */}
       {notification && (
-        <div className={`fixed top-4 right-4 z-50 glass rounded-xl p-4 shadow-lg animate-slide-in-right flex items-center gap-3 ${
-          notification.type === 'success' ? 'border-green-500/50' : 'border-red-500/50'
-        } border-2`}>
+        <div
+          className={`fixed top-4 right-4 z-50 glass rounded-xl p-4 shadow-lg animate-slide-in-right flex items-center gap-3 ${
+            notification.type === 'success'
+              ? 'border-green-500/50'
+              : 'border-red-500/50'
+          } border-2`}
+        >
           {notification.type === 'success' ? (
             <CheckCircle className="w-5 h-5 text-green-400" />
           ) : (
@@ -416,7 +421,9 @@ const MorePage = ({
             <div className="flex items-center gap-4">
               <div className="relative">
                 <div className="w-20 h-20 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center text-3xl font-bold border-4 border-white/30">
-                  {user?.displayName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
+                  {user?.displayName?.[0]?.toUpperCase() ||
+                    user?.email?.[0]?.toUpperCase() ||
+                    'U'}
                 </div>
                 {(pinEnabled || biometricEnabled) && (
                   <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1 border-2 border-white">
@@ -427,7 +434,9 @@ const MorePage = ({
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <h2 className="text-2xl font-bold text-white">
-                    {user?.displayName || user?.email?.split('@')[0] || t('profile.user')}
+                    {user?.displayName ||
+                      user?.email?.split('@')[0] ||
+                      t('profile.user')}
                   </h2>
                   {isAdmin && (
                     <span className="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 font-semibold">
@@ -446,7 +455,7 @@ const MorePage = ({
               </div>
             </div>
             {!isPro && (
-              <button 
+              <button
                 onClick={handleUpgradeToPro}
                 disabled={loading}
                 className="ripple-effect bg-white/20 backdrop-blur-xl hover:bg-white/30 text-white px-4 py-2 rounded-xl font-semibold transition flex items-center gap-2 border border-white/30 disabled:opacity-50"
@@ -470,7 +479,9 @@ const MorePage = ({
                 <Clock className="w-3 h-3" />
                 {t('more.stats.recentUploads')}
               </div>
-              <p className="text-2xl font-bold text-white">{stats.recentUploads}</p>
+              <p className="text-2xl font-bold text-white">
+                {stats.recentUploads}
+              </p>
             </div>
           </div>
         </div>
@@ -487,8 +498,8 @@ const MorePage = ({
           </div>
           <span className="text-sm font-medium">{t('settings.security')}</span>
         </button>
-        
-        <button 
+
+        <button
           onClick={exportUserData}
           disabled={loading}
           className="ripple-effect glass rounded-xl p-4 hover:bg-white/10 transition flex flex-col items-center gap-2 text-center disabled:opacity-50"
@@ -498,8 +509,8 @@ const MorePage = ({
           </div>
           <span className="text-sm font-medium">{t('buttons.export')}</span>
         </button>
-        
-        <button 
+
+        <button
           onClick={handleShareProfile}
           className="ripple-effect glass rounded-xl p-4 hover:bg-white/10 transition flex flex-col items-center gap-2 text-center"
         >
@@ -508,7 +519,7 @@ const MorePage = ({
           </div>
           <span className="text-sm font-medium">{t('buttons.share')}</span>
         </button>
-        
+
         <button
           onClick={() => openInfoPage('help')}
           className="ripple-effect glass rounded-xl p-4 hover:bg-white/10 transition flex flex-col items-center gap-2 text-center"
@@ -531,7 +542,9 @@ const MorePage = ({
                 <div className="p-2 bg-purple-600/20 rounded-lg">
                   <HardDrive className="w-5 h-5 text-purple-400" />
                 </div>
-                <h3 className="font-semibold text-lg">{t('account.storage')}</h3>
+                <h3 className="font-semibold text-lg">
+                  {t('account.storage')}
+                </h3>
               </div>
               {storagePercent > 80 && (
                 <span className="bg-orange-500/20 text-orange-400 text-xs px-2 py-1 rounded-full flex items-center gap-1">
@@ -544,27 +557,37 @@ const MorePage = ({
             <div className="space-y-4">
               <div className="flex justify-between items-end">
                 <div>
-                  <p className="text-3xl font-bold">{formatBytes(storageUsed)}</p>
-                  <p className="text-sm opacity-70 mt-1">{t('more.storage.of')} {formatBytes(storageLimit)}</p>
+                  <p className="text-3xl font-bold">
+                    {formatBytes(storageUsed)}
+                  </p>
+                  <p className="text-sm opacity-70 mt-1">
+                    {t('more.storage.of')} {formatBytes(storageLimit)}
+                  </p>
                 </div>
                 <div className="text-right">
-                  <p className={`text-2xl font-bold ${
-                    storagePercent > 90 ? 'text-red-400' : 
-                    storagePercent > 70 ? 'text-orange-400' : 
-                    'text-purple-400'
-                  }`}>
+                  <p
+                    className={`text-2xl font-bold ${
+                      storagePercent > 90
+                        ? 'text-red-400'
+                        : storagePercent > 70
+                        ? 'text-orange-400'
+                        : 'text-purple-400'
+                    }`}
+                  >
                     {storagePercent}%
                   </p>
                   <p className="text-xs opacity-70">{t('storage.used')}</p>
                 </div>
               </div>
-              
+
               <div className="relative w-full bg-white/10 rounded-full h-4 overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${
-                    storagePercent > 90 ? 'bg-gradient-to-r from-red-500 to-red-600' : 
-                    storagePercent > 70 ? 'bg-gradient-to-r from-orange-500 to-yellow-500' : 
-                    'bg-gradient-to-r from-purple-500 to-pink-500'
+                    storagePercent > 90
+                      ? 'bg-gradient-to-r from-red-500 to-red-600'
+                      : storagePercent > 70
+                      ? 'bg-gradient-to-r from-orange-500 to-yellow-500'
+                      : 'bg-gradient-to-r from-purple-500 to-pink-500'
                   }`}
                   style={{ width: `${Math.min(storagePercent, 100)}%` }}
                 >
@@ -577,11 +600,13 @@ const MorePage = ({
                   <div className="flex items-start gap-3">
                     <TrendingUp className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
                     <div className="flex-1">
-                      <p className="font-semibold text-sm mb-1">{t('storage.needMoreSpace')}</p>
+                      <p className="font-semibold text-sm mb-1">
+                        {t('storage.needMoreSpace')}
+                      </p>
                       <p className="text-xs opacity-70 mb-3">
                         {t('storage.upgradeHint')}
                       </p>
-                      <button 
+                      <button
                         onClick={handleUpgradeToPro}
                         disabled={loading}
                         className="ripple-effect w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-2 rounded-lg font-semibold transition text-sm flex items-center justify-center gap-2 disabled:opacity-50"
@@ -602,7 +627,9 @@ const MorePage = ({
               <div className="p-2 bg-blue-600/20 rounded-lg">
                 <Globe className="w-5 h-5 text-blue-400" />
               </div>
-              <h3 className="font-semibold text-lg">{t('customization.title')}</h3>
+              <h3 className="font-semibold text-lg">
+                {t('customization.title')}
+              </h3>
             </div>
 
             <div className="space-y-4">
@@ -631,15 +658,22 @@ const MorePage = ({
                   <div>
                     <p className="font-medium">{t('theme.title')}</p>
                     <p className="text-xs opacity-70">
-                      {isDarkMode ? t('customization.themeDark') : t('customization.themeLight')}
+                      {isDarkMode
+                        ? t('customization.themeDark')
+                        : t('customization.themeLight')}
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => {
-                    setIsDarkMode(!isDarkMode);
-                    const themeName = !isDarkMode ? t('theme.dark') : t('theme.light');
-                    showNotification(t('notifications.themeChanged', { theme: themeName }), "success");
+                    setIsDarkMode(!isDarkMode)
+                    const themeName = !isDarkMode
+                      ? t('theme.dark')
+                      : t('theme.light')
+                    showNotification(
+                      t('notifications.themeChanged', { theme: themeName }),
+                      'success'
+                    )
                   }}
                   className={`relative w-14 h-8 rounded-full transition-all ${
                     isDarkMode ? 'bg-purple-600' : 'bg-gray-400'
@@ -673,14 +707,18 @@ const MorePage = ({
                 </div>
                 <h3 className="font-semibold text-lg">{t('settings.title')}</h3>
               </div>
-              <ChevronRight className={`w-5 h-5 transition-transform duration-300 ${
-                expandedSection === 'settings' ? 'rotate-90' : ''
-              }`} />
+              <ChevronRight
+                className={`w-5 h-5 transition-transform duration-300 ${
+                  expandedSection === 'settings' ? 'rotate-90' : ''
+                }`}
+              />
             </button>
 
-            <div className={`overflow-hidden transition-all duration-300 ${
-              expandedSection === 'settings' ? 'max-h-96' : 'max-h-0'
-            }`}>
+            <div
+              className={`overflow-hidden transition-all duration-300 ${
+                expandedSection === 'settings' ? 'max-h-96' : 'max-h-0'
+              }`}
+            >
               <div className="px-6 pb-6 space-y-2">
                 <button
                   onClick={() => onNavigate('security')}
@@ -694,7 +732,9 @@ const MorePage = ({
                         <CheckCircle className="w-4 h-4 text-green-400" />
                       )}
                     </div>
-                    <p className="text-xs opacity-70">{t('more.settings.securityDesc')}</p>
+                    <p className="text-xs opacity-70">
+                      {t('more.settings.securityDesc')}
+                    </p>
                   </div>
                   <ChevronRight className="w-5 h-5 opacity-50" />
                 </button>
@@ -705,8 +745,14 @@ const MorePage = ({
                 >
                   <Lock className="w-5 h-5 text-purple-400" />
                   <div className="flex-1">
-                    <p className="font-medium">{t('vault.title', { defaultValue: 'Secure Vault' })}</p>
-                    <p className="text-xs opacity-70">{t('vault.description', { defaultValue: 'Encrypted photo storage' })}</p>
+                    <p className="font-medium">
+                      {t('vault.title', { defaultValue: 'Secure Vault' })}
+                    </p>
+                    <p className="text-xs opacity-70">
+                      {t('vault.description', {
+                        defaultValue: 'Encrypted photo storage',
+                      })}
+                    </p>
                   </div>
                   <ChevronRight className="w-5 h-5 opacity-50" />
                 </button>
@@ -715,7 +761,9 @@ const MorePage = ({
                   <Bell className="w-5 h-5 text-blue-400" />
                   <div className="flex-1">
                     <p className="font-medium">{t('settings.notifications')}</p>
-                    <p className="text-xs opacity-70">{t('more.settings.notificationsDesc')}</p>
+                    <p className="text-xs opacity-70">
+                      {t('more.settings.notificationsDesc')}
+                    </p>
                   </div>
                   <ChevronRight className="w-5 h-5 opacity-50" />
                 </button>
@@ -724,12 +772,14 @@ const MorePage = ({
                   <Upload className="w-5 h-5 text-green-400" />
                   <div className="flex-1">
                     <p className="font-medium">{t('more.import.title')}</p>
-                    <p className="text-xs opacity-70">{t('more.import.description')}</p>
+                    <p className="text-xs opacity-70">
+                      {t('more.import.description')}
+                    </p>
                   </div>
                   <ChevronRight className="w-5 h-5 opacity-50" />
-                  <input 
-                    type="file" 
-                    accept=".zip,.json" 
+                  <input
+                    type="file"
+                    accept=".zip,.json"
                     onChange={handleImportData}
                     className="hidden"
                   />
@@ -872,7 +922,9 @@ const MorePage = ({
                 <User className="w-5 h-5 text-gray-400" />
                 <div className="flex-1">
                   <p className="font-medium">{t('account.profile')}</p>
-                  <p className="text-xs opacity-70">{t('more.account.profileDesc')}</p>
+                  <p className="text-xs opacity-70">
+                    {t('more.account.profileDesc')}
+                  </p>
                 </div>
                 <ChevronRight className="w-5 h-5 opacity-50" />
               </button>
@@ -882,15 +934,19 @@ const MorePage = ({
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <p className="font-medium">{t('account.subscription')}</p>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      isPro 
-                        ? 'bg-yellow-500/20 text-yellow-400' 
-                        : 'bg-gray-500/20 text-gray-400'
-                    }`}>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full ${
+                        isPro
+                          ? 'bg-yellow-500/20 text-yellow-400'
+                          : 'bg-gray-500/20 text-gray-400'
+                      }`}
+                    >
                       {isPro ? t('subscription.pro') : t('subscription.free')}
                     </span>
                   </div>
-                  <p className="text-xs opacity-70">{t('more.account.subscriptionDesc')}</p>
+                  <p className="text-xs opacity-70">
+                    {t('more.account.subscriptionDesc')}
+                  </p>
                 </div>
                 <ChevronRight className="w-5 h-5 opacity-50" />
               </button>
@@ -902,7 +958,9 @@ const MorePage = ({
                 <LogOut className="w-5 h-5" />
                 <div className="flex-1">
                   <p className="font-medium">{t('account.logout')}</p>
-                  <p className="text-xs opacity-70">{t('more.account.logoutDesc')}</p>
+                  <p className="text-xs opacity-70">
+                    {t('more.account.logoutDesc')}
+                  </p>
                 </div>
               </button>
 
@@ -914,7 +972,9 @@ const MorePage = ({
                 <Trash2 className="w-5 h-5" />
                 <div className="flex-1">
                   <p className="font-medium">{t('account.deleteAccount')}</p>
-                  <p className="text-xs opacity-70">{t('more.account.deleteDesc')}</p>
+                  <p className="text-xs opacity-70">
+                    {t('more.account.deleteDesc')}
+                  </p>
                 </div>
               </button>
             </div>
@@ -1001,7 +1061,9 @@ const MorePage = ({
               <HardDrive className="w-5 h-5 text-yellow-400" />
               <div className="flex-1">
                 <p className="font-medium">{t('admin.databaseTools')}</p>
-                <p className="text-xs opacity-70">{t('more.admin.databaseDesc')}</p>
+                <p className="text-xs opacity-70">
+                  {t('more.admin.databaseDesc')}
+                </p>
               </div>
               <ChevronRight className="w-5 h-5 opacity-50" />
             </button>
@@ -1017,7 +1079,9 @@ const MorePage = ({
               <div className="p-3 bg-red-600/20 rounded-xl">
                 <AlertCircle className="w-6 h-6 text-red-400" />
               </div>
-              <h3 className="text-xl font-bold">{t('modals.deleteAccountTitle')}</h3>
+              <h3 className="text-xl font-bold">
+                {t('modals.deleteAccountTitle')}
+              </h3>
             </div>
             <p className="opacity-70 mb-6">
               {t('modals.deleteAccountMessage')}
@@ -1057,7 +1121,7 @@ const MorePage = ({
         description={aiFeatureDescription}
       />
     </div>
-  );
-};
+  )
+}
 
-export default MorePage;
+export default MorePage
