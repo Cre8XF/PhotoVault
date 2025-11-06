@@ -7,48 +7,55 @@ export default function UserManagementPanel({ users, onUpdate }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
 
-  const filteredUsers = users.filter(user =>
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.displayName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Safely handle missing fields
+  const filteredUsers = users.filter(user => {
+    const email = user.email?.toLowerCase() || '';
+    const name = user.displayName?.toLowerCase() || '';
+    return email.includes(searchTerm.toLowerCase()) || name.includes(searchTerm.toLowerCase());
+  });
 
   const handleToggleActive = async (userId, currentStatus) => {
-    if (!confirm(`Are you sure you want to ${currentStatus ? 'disable' : 'enable'} this user?`)) {
-      return;
-    }
+    const confirmed = window.confirm(
+      `Are you sure you want to ${currentStatus ? 'disable' : 'enable'} this user?`
+    );
+    if (!confirmed) return;
 
     try {
       await updateDoc(doc(db, 'users', userId), {
-        isActive: !currentStatus
+        isActive: !currentStatus,
       });
       alert(`User ${!currentStatus ? 'enabled' : 'disabled'} successfully`);
       onUpdate();
     } catch (error) {
+      console.error('Error updating user:', error);
       alert('Error updating user: ' + error.message);
     }
   };
 
   const handleDeleteUser = async (userId, userEmail) => {
-    if (!confirm(`DANGER: Delete user ${userEmail}? This will delete all their photos and data. This action cannot be undone.`)) {
-      return;
-    }
+    const confirmed = window.confirm(
+      `⚠️ DANGER: Delete user ${userEmail}? This will delete all their photos and data. This action cannot be undone.`
+    );
+    if (!confirmed) return;
 
-    const confirmText = prompt('Type "DELETE" to confirm:');
+    const confirmText = window.prompt('Type "DELETE" to confirm:');
     if (confirmText !== 'DELETE') {
       alert('Deletion cancelled');
       return;
     }
 
     try {
-      // Delete user document
       await deleteDoc(doc(db, 'users', userId));
-      // Note: Photos and storage should be deleted via Cloud Functions
-      alert('User deleted successfully');
+      // Deletion of photos and storage handled by Cloud Functions
+      alert(`User ${userEmail} deleted successfully`);
       onUpdate();
     } catch (error) {
+      console.error('Error deleting user:', error);
       alert('Error deleting user: ' + error.message);
     }
   };
+}
+
 
   const formatBytes = (bytes) => {
     if (bytes === 0) return '0 Bytes';
