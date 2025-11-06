@@ -1,0 +1,603 @@
+BUILD - Complete Admin Dashboard with Full Functionality
+
+CONTEXT:
+Build a professional admin dashboard for PhotoVault with:
+- User management (view, disable, delete)
+- System statistics (users, photos, storage)
+- Database overview
+- Content monitoring
+- Full CRUD operations
+
+SECURITY FIRST:
+Before starting, verify Firebase rules protect admin routes.
+Only users with isAdmin=true should access /admin.
+
+---
+
+PHASE 1: DATA FETCHING & DISPLAY
+
+FILE: src/hooks/useAdminData.js
+
+Create custom hook to fetch all admin data:
+```javascript
+import { useState, useEffect } from 'react';
+import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { db } from '../firebase';
+import { ref, listAll, getMetadata } from 'firebase/storage';
+import { storage } from '../firebase';
+
+export function useAdminData() {
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalPhotos: 0,
+    totalStorage: 0,
+    activeUsers: 0
+  });
+  const [users, setUsers] = useState([]);
+  const [recentPhotos, setRecentPhotos] = useState([]);
+
+  useEffect(() => {
+    fetchAdminData();
+  }, []);
+
+  async function fetchAdminData() {
+    try {
+      setLoading(true);
+
+      // Fetch all users
+      const usersSnapshot = await getDocs(collection(db, 'users'));
+      const usersData = [];
+      let totalPhotos = 0;
+      let totalStorageBytes = 0;
+
+      for (const userDoc of usersSnapshot.docs) {
+        const userData = userDoc.data();
+
+        // Count user's photos
+        const photosSnapshot = await getDocs(
+          collection(db, `users/${userDoc.id}/photos`)
+        );
+        const photoCount = photosSnapshot.size;
+        totalPhotos += photoCount;
+
+        // Calculate user's storage
+        let userStorage = 0;
+        photosSnapshot.forEach(photoDoc => {
+          const photoData = photoDoc.data();
+          userStorage += photoData.size || 0;
+        });
+        totalStorageBytes += userStorage;
+
+        usersData.push({
+          id: userDoc.id,
+          email: userData.email,
+          displayName: userData.displayName || 'N/A',
+          createdAt: userData.createdAt?.toDate(),
+          lastLogin: userData.lastLogin?.toDate(),
+          photoCount: photoCount,
+          storageUsed: userStorage,
+          isActive: userData.isActive !== false,
+          isAdmin: userData.isAdmin || false
+        });
+      }
+
+      // Fetch recent photos (last 20)
+      const recentPhotosQuery = query(
+        collection(db, 'photos'), // If you have a global photos collection
+        orderBy('createdAt', 'desc'),
+        limit(20)
+      );
+      const recentPhotosSnapshot = await getDocs(recentPhotosQuery);
+      const recentPhotosData = recentPhotosSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate()
+      }));
+
+      setUsers(usersData);
+      setRecentPhotos(recentPhotosData);
+      setStats({
+        totalUsers: usersData.length,
+        totalPhotos: totalPhotos,
+        totalStorage: totalStorageBytes,
+        activeUsers: usersData.filter(u => u.isActive).length
+      });
+
+    } catch (error) {
+      console.error('Error fetching admin data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return { stats, users, recentPhotos, loading, refetch: fetchAdminData };
+}
+```
+
+---
+
+PHASE 2: ADMIN DASHBOARD LAYOUT
+
+FILE: src/pages/AdminDashboard.jsx
+```jsx
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  ArrowLeft, Users, Database, Image, HardDrive,
+  TrendingUp, Activity, AlertCircle, Settings
+} from 'lucide-react';
+import { useAdminData } from '../hooks/useAdminData';
+import UserManagementPanel from '../components/admin/UserManagementPanel';
+import DatabasePanel from '../components/admin/DatabasePanel';
+import StatsPanel from '../components/admin/StatsPanel';
+
+export default function AdminDashboard() {
+  const navigate = useNavigate();
+  const { stats, users, recentPhotos, loading, refetch } = useAdminData();
+  const [activeTab, setActiveTab] = useState('overview');
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
+
+  const formatBytes = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate(-1)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+                <p className="text-sm text-gray-500">PhotoVault Administration</p>
+              </div>
+            </div>
+            <button
+              onClick={refetch}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            >
+              <Activity className="w-4 h-4" />
+              Refresh
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4">
+          <nav className="flex gap-1">
+            {[
+              { id: 'overview', label: 'Overview', icon: TrendingUp },
+              { id: 'users', label: 'Users', icon: Users },
+              { id: 'database', label: 'Database', icon: Database },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-6 py-3 border-b-2 transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-purple-600 text-purple-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <tab.icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {activeTab === 'overview' && (
+          <StatsPanel stats={stats} users={users} recentPhotos={recentPhotos} />
+        )}
+        {activeTab === 'users' && (
+          <UserManagementPanel users={users} onUpdate={refetch} />
+        )}
+        {activeTab === 'database' && (
+          <DatabasePanel stats={stats} />
+        )}
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+PHASE 3: STATS PANEL (Overview Tab)
+
+FILE: src/components/admin/StatsPanel.jsx
+```jsx
+import { Users, Image, HardDrive, Activity } from 'lucide-react';
+
+export default function StatsPanel({ stats, users, recentPhotos }) {
+  const formatBytes = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+  };
+
+  const statCards = [
+    {
+      title: 'Total Users',
+      value: stats.totalUsers,
+      icon: Users,
+      color: 'blue',
+      subtitle: `${stats.activeUsers} active`
+    },
+    {
+      title: 'Total Photos',
+      value: stats.totalPhotos.toLocaleString(),
+      icon: Image,
+      color: 'green',
+      subtitle: 'across all users'
+    },
+    {
+      title: 'Total Storage',
+      value: formatBytes(stats.totalStorage),
+      icon: HardDrive,
+      color: 'purple',
+      subtitle: 'used'
+    },
+    {
+      title: 'Avg per User',
+      value: Math.round(stats.totalPhotos / stats.totalUsers || 0),
+      icon: Activity,
+      color: 'orange',
+      subtitle: 'photos'
+    }
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {statCards.map((stat, index) => (
+          <div key={index} className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className={`w-12 h-12 bg-${stat.color}-100 dark:bg-${stat.color}-900 rounded-lg flex items-center justify-center`}>
+                <stat.icon className={`w-6 h-6 text-${stat.color}-600`} />
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold">{stat.value}</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{stat.title}</p>
+            <p className="text-xs text-gray-500 mt-1">{stat.subtitle}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Top Users by Storage */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+        <h2 className="text-lg font-semibold mb-4">Top Users by Storage</h2>
+        <div className="space-y-3">
+          {users
+            .sort((a, b) => b.storageUsed - a.storageUsed)
+            .slice(0, 5)
+            .map(user => (
+              <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div>
+                  <p className="font-medium">{user.email}</p>
+                  <p className="text-sm text-gray-500">{user.photoCount} photos</p>
+                </div>
+                <p className="font-semibold text-purple-600">{formatBytes(user.storageUsed)}</p>
+              </div>
+            ))}
+        </div>
+      </div>
+
+      {/* Recent Photos */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+        <h2 className="text-lg font-semibold mb-4">Recent Uploads</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+          {recentPhotos.slice(0, 10).map(photo => (
+            <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden">
+              <img
+                src={photo.url}
+                alt={photo.title || 'Photo'}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                <p className="text-xs text-white truncate">{photo.title || 'Untitled'}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+PHASE 4: USER MANAGEMENT PANEL
+
+FILE: src/components/admin/UserManagementPanel.jsx
+```jsx
+import { useState } from 'react';
+import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
+import { Search, MoreVertical, Ban, Trash2, CheckCircle } from 'lucide-react';
+
+export default function UserManagementPanel({ users, onUpdate }) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  const filteredUsers = users.filter(user =>
+    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.displayName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleToggleActive = async (userId, currentStatus) => {
+    if (!confirm(`Are you sure you want to ${currentStatus ? 'disable' : 'enable'} this user?`)) {
+      return;
+    }
+
+    try {
+      await updateDoc(doc(db, 'users', userId), {
+        isActive: !currentStatus
+      });
+      alert(`User ${!currentStatus ? 'enabled' : 'disabled'} successfully`);
+      onUpdate();
+    } catch (error) {
+      alert('Error updating user: ' + error.message);
+    }
+  };
+
+  const handleDeleteUser = async (userId, userEmail) => {
+    if (!confirm(`DANGER: Delete user ${userEmail}? This will delete all their photos and data. This action cannot be undone.`)) {
+      return;
+    }
+
+    const confirmText = prompt('Type "DELETE" to confirm:');
+    if (confirmText !== 'DELETE') {
+      alert('Deletion cancelled');
+      return;
+    }
+
+    try {
+      // Delete user document
+      await deleteDoc(doc(db, 'users', userId));
+      // Note: Photos and storage should be deleted via Cloud Functions
+      alert('User deleted successfully');
+      onUpdate();
+    } catch (error) {
+      alert('Error deleting user: ' + error.message);
+    }
+  };
+
+  const formatBytes = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+      {/* Search */}
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search users by email or name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700"
+          />
+        </div>
+      </div>
+
+      {/* Users Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-gray-50 dark:bg-gray-700">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Photos</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Storage</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Joined</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            {filteredUsers.map(user => (
+              <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <td className="px-6 py-4">
+                  <div>
+                    <p className="font-medium">{user.displayName}</p>
+                    <p className="text-sm text-gray-500">{user.email}</p>
+                    {user.isAdmin && (
+                      <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-purple-100 text-purple-700 rounded">
+                        Admin
+                      </span>
+                    )}
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-sm">{user.photoCount}</td>
+                <td className="px-6 py-4 text-sm">{formatBytes(user.storageUsed)}</td>
+                <td className="px-6 py-4">
+                  {user.isActive ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
+                      <CheckCircle className="w-3 h-3" />
+                      Active
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-red-100 text-red-700 rounded">
+                      <Ban className="w-3 h-3" />
+                      Disabled
+                    </span>
+                  )}
+                </td>
+                <td className="px-6 py-4 text-sm">
+                  {user.createdAt?.toLocaleDateString()}
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleToggleActive(user.id, user.isActive)}
+                      className={`p-2 rounded-lg ${
+                        user.isActive
+                          ? 'hover:bg-red-100 text-red-600'
+                          : 'hover:bg-green-100 text-green-600'
+                      }`}
+                      title={user.isActive ? 'Disable user' : 'Enable user'}
+                    >
+                      {user.isActive ? <Ban className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+                    </button>
+                    <button
+                      onClick={() => handleDeleteUser(user.id, user.email)}
+                      className="p-2 hover:bg-red-100 text-red-600 rounded-lg"
+                      title="Delete user"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {filteredUsers.length === 0 && (
+        <div className="p-8 text-center text-gray-500">
+          No users found matching "{searchTerm}"
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+PHASE 5: DATABASE PANEL
+
+FILE: src/components/admin/DatabasePanel.jsx
+```jsx
+import { Database, HardDrive, Image, Users } from 'lucide-react';
+
+export default function DatabasePanel({ stats }) {
+  const formatBytes = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Database Stats */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Database className="w-5 h-5" />
+          Firestore Database
+        </h2>
+        <div className="space-y-3">
+          <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <span className="text-gray-600 dark:text-gray-400">User documents</span>
+            <span className="font-semibold">{stats.totalUsers}</span>
+          </div>
+          <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <span className="text-gray-600 dark:text-gray-400">Photo documents</span>
+            <span className="font-semibold">{stats.totalPhotos}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Storage Stats */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <HardDrive className="w-5 h-5" />
+          Firebase Storage
+        </h2>
+        <div className="space-y-3">
+          <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <span className="text-gray-600 dark:text-gray-400">Total storage used</span>
+            <span className="font-semibold">{formatBytes(stats.totalStorage)}</span>
+          </div>
+          <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <span className="text-gray-600 dark:text-gray-400">Avg per user</span>
+            <span className="font-semibold">
+              {formatBytes(stats.totalStorage / stats.totalUsers || 0)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Info Box */}
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <p className="text-sm text-blue-800 dark:text-blue-200">
+          💡 Database cleanup and advanced tools will be available in Phase 2.
+        </p>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+DELIVERABLE:
+
+Complete admin dashboard with:
+✅ Full user list with search
+✅ User management (disable/enable/delete)
+✅ System statistics (users, photos, storage)
+✅ Top users by storage
+✅ Recent uploads preview
+✅ Database overview
+✅ Proper navigation (back button works)
+✅ Responsive design
+✅ Loading states
+✅ Confirmation dialogs for destructive actions
+
+SECURITY NOTES:
+- Ensure Firebase rules protect admin routes
+- Only isAdmin=true users should access
+- Consider adding audit logging for admin actions
+- User deletion should trigger Cloud Function to clean up photos
+
+TEST CHECKLIST:
+- [ ] Navigate to /admin → Dashboard loads
+- [ ] View system stats → Correct numbers
+- [ ] Search users → Filter works
+- [ ] Disable user → Confirmation + Success
+- [ ] Enable user → Confirmation + Success
+- [ ] Delete user → Double confirmation + Success
+- [ ] View recent uploads → Photos display
+- [ ] Click back → Returns to MorePage
+- [ ] Refresh button → Data reloads
+
+COMMIT MESSAGE:
+"feat: complete admin dashboard with user management and system stats"
