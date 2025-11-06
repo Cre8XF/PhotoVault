@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Users, Database, Image, HardDrive,
   TrendingUp, Activity, AlertCircle, Settings
@@ -9,8 +8,7 @@ import UserManagementPanel from '../components/admin/UserManagementPanel';
 import DatabasePanel from '../components/admin/DatabasePanel';
 import StatsPanel from '../components/admin/StatsPanel';
 
-export default function AdminDashboard() {
-  const navigate = useNavigate();
+export default function AdminDashboard({ onBack }) {
   const { stats, users, recentPhotos, loading, refetch } = useAdminData();
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -38,7 +36,7 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
-                onClick={() => navigate(-1)}
+                onClick={onBack}
                 className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
               >
                 <ArrowLeft className="w-5 h-5" />
