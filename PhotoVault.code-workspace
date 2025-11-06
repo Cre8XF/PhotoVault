@@ -1,0 +1,63 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    // ===== VISNING =====
+    "workbench.colorTheme": "Tomorrow Night Blue",
+    "workbench.iconTheme": "vs-seti",
+    "window.zoomLevel": 0,
+    "workbench.startupEditor": "none",
+    "editor.minimap.enabled": true,
+    "editor.wordWrap": "on",
+    "editor.fontFamily": "JetBrains Mono, Consolas, 'Courier New', monospace",
+    "editor.fontSize": 14,
+    "editor.cursorSmoothCaretAnimation": "on",
+    "editor.smoothScrolling": true,
+    "editor.tabSize": 2,
+    "editor.lineNumbers": "on",
+    "breadcrumbs.enabled": true,
+
+    // ===== FORMATTERING =====
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "prettier.singleQuote": true,
+    "prettier.trailingComma": "es5",
+    "prettier.semi": false,
+
+    // ===== GIT =====
+    "git.autofetch": true,
+    "git.confirmSync": false,
+    "git.enableSmartCommit": true,
+
+    // ===== TERMINAL =====
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "terminal.integrated.cursorBlinking": true,
+    "terminal.integrated.fontSize": 13,
+
+    // ===== FILEHÅNDTERING =====
+    "files.autoSave": "onFocusChange",
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "explorer.confirmDelete": false,
+    "explorer.confirmDragAndDrop": false,
+
+    // ===== OUTLINE OG PROBLEMS =====
+    "outline.icons": true,
+    "outline.expandItems": true,
+    "problems.autoReveal": true
+  },
+  "extensions": {
+    "recommendations": [
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint",
+      "dsznajder.es7-react-js-snippets",
+      "bradlc.vscode-tailwindcss",
+      "eamodio.gitlens",
+      "pkief.material-icon-theme",
+      "christian-kohler.path-intellisense"
+    ]
+  }
+}

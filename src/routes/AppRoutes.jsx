@@ -20,7 +20,8 @@ const SecuritySettings = lazy(() => import('../pages/SecuritySettings'));
 const AdminDashboard = lazy(() => import('../pages/AdminDashboard'));
 const ProfilePage = lazy(() => import('../pages/ProfilePage'));
 const SubscriptionPage = lazy(() => import('../pages/SubscriptionPage'));
-const AISettingsPage = lazy(() => import('../pages/AISettingsPage'));
+// PHASE 2: AI Settings - Disabled for MVP (moved to experimental/ai/)
+// const AISettingsPage = lazy(() => import('../pages/AISettingsPage'));
 const VaultPage = lazy(() => import('../pages/VaultPage'));
 
 /**
@@ -155,6 +156,7 @@ export const AppRoutes = () => {
           }
         />
 
+        {/* PHASE 2: AI Settings - Disabled for MVP
         <Route
           path="/ai-settings"
           element={
@@ -163,6 +165,7 @@ export const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+        */}
 
         <Route
           path="/vault"
