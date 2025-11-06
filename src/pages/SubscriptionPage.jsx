@@ -1,12 +1,12 @@
 // ============================================================================
 // SubscriptionPage - Phase 2: Subscription & Storage Management
 // ============================================================================
-import React, { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import useAuth from '../hooks/useAuth';
-import usePhotoData from '../hooks/usePhotoData';
-import useStore from '../state/store';
+import React, { useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import useAuth from '../hooks/useAuth'
+import usePhotoData from '../hooks/usePhotoData'
+import useStore from '../state/store'
 import {
   ArrowLeft,
   Crown,
@@ -17,38 +17,38 @@ import {
   Sparkles,
   Shield,
   Database,
-} from 'lucide-react';
+} from 'lucide-react'
 
 /**
  * Subscription Page
  * Shows current plan, storage usage, and AI quota
  */
 const SubscriptionPage = () => {
-  const { t } = useTranslation(['common']);
-  const navigate = useNavigate();
-  const { userProfile, isPro, isAdmin } = useAuth();
-  const { photos } = usePhotoData();
-  const storageUsed = useStore((state) => state.storageUsed);
-  const storageLimit = useStore((state) => state.storageLimit);
+  const { t } = useTranslation(['common'])
+  const navigate = useNavigate()
+  const { userProfile, isPro, isAdmin } = useAuth()
+  const { photos } = usePhotoData()
+  const storageUsed = useStore((state) => state.storageUsed)
+  const storageLimit = useStore((state) => state.storageLimit)
 
   /**
    * Calculate storage usage percentage
    */
   const storagePercentage = useMemo(() => {
-    if (isAdmin) return 0; // Unlimited for admins
-    return Math.min((storageUsed / storageLimit) * 100, 100);
-  }, [storageUsed, storageLimit, isAdmin]);
+    if (isAdmin) return 0 // Unlimited for admins
+    return Math.min((storageUsed / storageLimit) * 100, 100)
+  }, [storageUsed, storageLimit, isAdmin])
 
   /**
    * Format bytes to human-readable size
    */
   const formatBytes = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
-  };
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
+  }
 
   /**
    * Get current plan details
@@ -61,7 +61,7 @@ const SubscriptionPage = () => {
         aiRequests: 'Unlimited',
         color: 'from-red-600 to-red-800',
         icon: <Shield className="w-6 h-6" />,
-      };
+      }
     } else if (isPro) {
       return {
         name: 'Pro',
@@ -69,7 +69,7 @@ const SubscriptionPage = () => {
         aiRequests: '1000/month',
         color: 'from-purple-600 to-pink-600',
         icon: <Crown className="w-6 h-6" />,
-      };
+      }
     } else {
       return {
         name: 'Free',
@@ -77,9 +77,9 @@ const SubscriptionPage = () => {
         aiRequests: '100/month',
         color: 'from-blue-600 to-cyan-600',
         icon: <Database className="w-6 h-6" />,
-      };
+      }
     }
-  }, [isAdmin, isPro]);
+  }, [isAdmin, isPro])
 
   /**
    * Subscription plans
@@ -119,15 +119,15 @@ const SubscriptionPage = () => {
       current: isPro && !isAdmin,
       recommended: true,
     },
-  ];
-
+  ]
+  const setCurrentPage = useStore((state) => state.setCurrentPage)
   return (
     <div className="min-h-screen pb-24">
       {/* Header */}
       <div className="sticky top-0 z-10 glass-card border-b border-white/20 px-4 py-4">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate('/more')}
+            onClick={() => setCurrentPage('more')}
             className="p-2 hover:bg-white/10 rounded-lg transition"
           >
             <ArrowLeft className="w-6 h-6" />
@@ -186,7 +186,8 @@ const SubscriptionPage = () => {
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
               <span className="text-gray-400">
-                {formatBytes(storageUsed)} / {isAdmin ? '∞' : formatBytes(storageLimit)}
+                {formatBytes(storageUsed)} /{' '}
+                {isAdmin ? '∞' : formatBytes(storageLimit)}
               </span>
               <span className="text-gray-400">
                 {isAdmin ? 'Unlimited' : `${storagePercentage.toFixed(1)}%`}
@@ -211,7 +212,8 @@ const SubscriptionPage = () => {
           {storagePercentage > 80 && !isAdmin && (
             <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
               <p className="text-sm text-yellow-400">
-                You're running low on storage. Consider upgrading to Pro for 50 GB.
+                You're running low on storage. Consider upgrading to Pro for 50
+                GB.
               </p>
             </div>
           )}
@@ -220,7 +222,9 @@ const SubscriptionPage = () => {
         {/* Available Plans */}
         {!isAdmin && (
           <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-6 text-center">Choose Your Plan</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center">
+              Choose Your Plan
+            </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {plans.map((plan) => (
@@ -288,17 +292,19 @@ const SubscriptionPage = () => {
           <div className="glass-card p-6 bg-gradient-to-r from-red-500/10 to-red-600/10 border-2 border-red-500/30">
             <div className="flex items-center gap-3 mb-2">
               <Shield className="w-6 h-6 text-red-400" />
-              <h3 className="text-xl font-bold text-red-400">Administrator Account</h3>
+              <h3 className="text-xl font-bold text-red-400">
+                Administrator Account
+              </h3>
             </div>
             <p className="text-gray-300">
-              You have unlimited storage and AI requests. This account has full administrative
-              privileges.
+              You have unlimited storage and AI requests. This account has full
+              administrative privileges.
             </p>
           </div>
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default SubscriptionPage;
+export default SubscriptionPage

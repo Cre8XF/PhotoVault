@@ -1,11 +1,10 @@
 // ============================================================================
-// COMPONENT: UploadModal.jsx – v5.0 Kombinert versjon
-// Kombinerer funksjonalitet fra original + optimalisert versjon
+// COMPONENT: UploadModal.jsx – v6.0 SIMPLIFIED
+// Refactored to use useUpload hook for better separation of concerns
 // ============================================================================
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { X, Upload, Camera, Image as ImageIcon, Zap, FolderOpen, Video } from "lucide-react";
-import { auth } from "../firebase";
 import {
   isNativePlatform,
   takePicture,
@@ -16,13 +15,7 @@ import {
 } from "../utils/nativeCamera";
 import { triggerHaptic, showToast } from "../utils/nativeUtils";
 import { useTranslation } from "react-i18next";
-import { compressImage, generateThumbnails, validateImage, calculateSavings } from "../utils/imageOptimization";
-import {
-  isVideoFile,
-  generateThumbnail,
-  extractVideoMetadata,
-  compressVideo
-} from "../utils/videoTools";
+import { useUpload } from "../hooks/useUpload";
 
 const formatFileSize = (bytes) => {
   if (bytes === 0) return "0 Bytes";
@@ -40,40 +33,38 @@ const UploadModal = ({
   albums = [],
   selectedAlbum = null,
 }) => {
+  // UI State
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [selectedAlbumId, setSelectedAlbumId] = useState(selectedAlbum || "");
   const [dragActive, setDragActive] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [permissions, setPermissions] = useState({ camera: "prompt", photos: "prompt" });
-  const [processingProgress, setProcessingProgress] = useState(0);
-  const [compressionStats, setCompressionStats] = useState(null);
-  const fileInputRef = useRef(null);
-  const modalRef = useRef(null);
-  const isNative = isNativePlatform();
-  const { t } = useTranslation(["common", "upload"]);
   const [showAlbums, setShowAlbums] = useState(false);
-  
   const [autoCompress, setAutoCompress] = useState(() => {
     const saved = localStorage.getItem('autoCompress');
     return saved !== 'false';
   });
-
-  // PHASE 2: AI Auto-Tagging - Disabled for MVP
   const [aiTagging] = useState(false); // Always false for MVP
-  // const [aiTagging, setAiTagging] = useState(() => {
-  //   const saved = localStorage.getItem('aiAutoTag');
-  //   return saved !== 'false';
-  // });
 
+  // Refs
+  const fileInputRef = useRef(null);
+  const modalRef = useRef(null);
+
+  // Hooks
+  const isNative = isNativePlatform();
+  const { t } = useTranslation(["common", "upload"]);
+  const { uploading, processingProgress, compressionStats, validateFiles, uploadFiles } = useUpload();
+
+  // Permission check for native platforms
   useEffect(() => {
-    if (isNative) checkPermissions();
+    if (isNative) checkPermissionsAsync();
   }, [isNative]);
 
-  const checkPermissions = async () => {
+  const checkPermissionsAsync = async () => {
     const perms = await checkCameraPermissions();
     setPermissions(perms);
   };
 
+  // Keyboard shortcuts
   const handleKeyDown = useCallback((e) => {
     if (e.key === 'Escape' && !uploading) {
       onClose();
@@ -83,13 +74,14 @@ const UploadModal = ({
   useEffect(() => {
     if (isOpen) {
       document.addEventListener('keydown', handleKeyDown);
-      setTimeout(() => modalRef.current?.focus(), 0); 
+      setTimeout(() => modalRef.current?.focus(), 0);
     }
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen, handleKeyDown]);
 
+  // Drag and drop handlers
   const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -101,457 +93,261 @@ const UploadModal = ({
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    if (e.dataTransfer.files?.length > 0) handleFiles(Array.from(e.dataTransfer.files));
+    if (e.dataTransfer.files?.length > 0) handleFilesAsync(Array.from(e.dataTransfer.files));
   };
 
   const handleFileInput = (e) => {
-    if (e.target.files?.length > 0) handleFiles(Array.from(e.target.files));
+    if (e.target.files?.length > 0) handleFilesAsync(Array.from(e.target.files));
   };
 
-  const handleFiles = async (files) => {
-    const validFiles = [];
-    const errors = [];
-    const warnings = [];
-    const maxVideoSize = 100 * 1024 * 1024; // 100 MB
-    const maxImageSize = 50 * 1024 * 1024; // 50 MB (increased from 10 MB)
+  // File validation and preview generation
+  const handleFilesAsync = async (files) => {
+    const { validFiles, errors, warnings } = await validateFiles(files);
 
-    for (const file of files) {
-      // Handle images
-      if (file.type.startsWith("image/")) {
-        const validation = validateImage(file, {
-          maxSize: maxImageSize,
-          allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
-        });
-
-        if (validation.valid) {
-          file.fileType = 'image';
-          validFiles.push(file);
-
-          // Warn about large files
-          if (file.size > 10 * 1024 * 1024) {
-            warnings.push({
-              file: file.name,
-              message: `Stort bilde (${(file.size / 1024 / 1024).toFixed(1)}MB) - vil bli komprimert`
-            });
-          }
-        } else {
-          errors.push({ file: file.name, errors: validation.errors });
-        }
-      }
-      // Handle videos
-      else if (isVideoFile(file)) {
-        if (file.size > maxVideoSize) {
-          errors.push({
-            file: file.name,
-            errors: ['Videofiler må være under 100 MB']
-          });
-        } else {
-          file.fileType = 'video';
-          validFiles.push(file);
-        }
-      }
-    }
-
+    // Show errors
     if (errors.length > 0) {
-      console.warn('Some files were invalid:', errors);
       errors.forEach(err => {
-        showToast(`${err.file}: ${err.errors.join(', ')}`, "error");
+        console.error(`File ${err.file}:`, err.errors);
+        showToast(`${err.file}: ${err.errors.join(', ')}`, 'error');
       });
     }
 
+    // Show warnings
     if (warnings.length > 0) {
-      console.log('Large files will be compressed:', warnings);
-      showToast(`${warnings.length} store bilder vil bli komprimert automatisk`, "info");
+      warnings.forEach(warn => {
+        console.warn(`File ${warn.file}:`, warn.message);
+      });
     }
 
-    if (files.length !== validFiles.length) {
-      showToast(t("upload:nonImageWarning") || "Noen filer ble hoppet over", "warning");
-    }
-
-    const newFiles = validFiles.map((file) => ({
+    // Generate previews
+    const filesWithPreviews = validFiles.map(file => ({
       file,
       preview: URL.createObjectURL(file),
       name: file.name,
       size: file.size,
-      type: file.fileType || 'image'
+      type: file.fileType
     }));
 
-    setSelectedFiles((prev) => [...prev, ...newFiles]);
+    setSelectedFiles(prev => [...prev, ...filesWithPreviews]);
+
+    if (validFiles.length > 0) {
+      await triggerHaptic('light');
+    }
   };
 
-  const removeFile = (index) => {
-    setSelectedFiles((prev) => {
-      const newFiles = [...prev];
-      URL.revokeObjectURL(newFiles[index].preview);
-      newFiles.splice(index, 1);
-      return newFiles;
-    });
-  };
-
+  // Native camera handlers
   const handleNativeCamera = async () => {
-    try {
-      await triggerHaptic("light");
-      if (permissions.camera === "denied") {
-        const newPerms = await requestCameraPermissions();
-        setPermissions(newPerms);
-        if (newPerms.camera === "denied") {
-          await showToast(t("upload:cameraPermission"));
-          return;
-        }
+    if (permissions.camera !== 'granted') {
+      const granted = await requestCameraPermissions();
+      if (!granted) {
+        await showToast(t("upload:permissions.cameraRequired"), "error");
+        return;
       }
-      const image = await takePicture();
-      const blob = await convertWebPathToBlob(image.uri);
-      const file = new File([blob], `camera-${Date.now()}.jpg`, { type: "image/jpeg" });
-      handleFiles([file]);
-      await triggerHaptic("medium");
+    }
+
+    try {
+      const photo = await takePicture();
+      if (!photo) return;
+
+      const blob = await convertWebPathToBlob(photo.webPath);
+      const file = new File([blob], `photo_${Date.now()}.jpg`, { type: "image/jpeg" });
+      handleFilesAsync([file]);
     } catch (error) {
       console.error("Camera error:", error);
-      await showToast(t("upload:cameraError"));
+      await showToast(t("upload:errors.cameraFailed"), "error");
     }
   };
 
   const handleNativeGallery = async () => {
+    if (permissions.photos !== 'granted') {
+      await showToast(t("upload:permissions.photosRequired"), "info");
+      return;
+    }
+
     try {
-      await triggerHaptic("light");
-      if (permissions.photos === "denied") {
-        const newPerms = await requestCameraPermissions();
-        setPermissions(newPerms);
-        if (newPerms.photos === "denied") {
-          await showToast(t("upload:galleryPermission"));
-          return;
-        }
-      }
       const images = await pickImage(true);
+      if (!images || images.length === 0) return;
+
       const files = await Promise.all(
-        images.map(async (img, index) => {
-          const blob = await convertWebPathToBlob(img.uri);
-          return new File([blob], `photo-${Date.now()}-${index}.jpg`, { type: "image/jpeg" });
+        images.map(async (img) => {
+          const blob = await convertWebPathToBlob(img.webPath);
+          return new File([blob], `photo_${Date.now()}.jpg`, { type: "image/jpeg" });
         })
       );
-      handleFiles(files);
-      await triggerHaptic("medium");
+
+      handleFilesAsync(files);
     } catch (error) {
       console.error("Gallery error:", error);
-      await showToast(t("upload:galleryError"));
+      await showToast(t("upload:errors.galleryFailed"), "error");
     }
   };
 
-  const handleUpload = async () => {
-    if (selectedFiles.length === 0) return;
-
-    setUploading(true);
-    setProcessingProgress(0);
-    setCompressionStats(null);
-    await triggerHaptic("medium");
-
-    try {
-      let processedFiles = [];
-      let totalOriginalSize = 0;
-      let totalCompressedSize = 0;
-
-      for (let i = 0; i < selectedFiles.length; i++) {
-        const fileObj = selectedFiles[i];
-        const file = fileObj.file;
-        totalOriginalSize += file.size;
-
-        // Process videos
-        if (fileObj.type === 'video') {
-          try {
-            // Generate thumbnail
-            await showToast("Genererer forhåndsvisning...", "info");
-            const thumbnailBlob = await generateThumbnail(file);
-
-            if (!thumbnailBlob) {
-              console.warn('Thumbnail generation failed, continuing without');
-              await showToast('Kunne ikke generere forhåndsvisning - fortsetter uten', 'warning');
-            }
-
-            // Extract metadata
-            const metadata = await extractVideoMetadata(file);
-
-            if (!metadata) {
-              console.warn('Metadata extraction failed, continuing without');
-              await showToast('Metadata kunne ikke leses - video lastes opp uten varighet', 'info');
-            }
-
-            // Compress if >50MB
-            let videoToUpload = file;
-            if (file.size > 50 * 1024 * 1024 && autoCompress) {
-              await showToast("Komprimerer video...", "info");
-              const compressedBlob = await compressVideo(file, (progress) => {
-                setProcessingProgress(Math.round(progress / 2));
-              });
-
-              if (compressedBlob) {
-                videoToUpload = new File([compressedBlob], file.name, {
-                  type: 'video/mp4',
-                  lastModified: Date.now()
-                });
-                totalCompressedSize += videoToUpload.size;
-              } else {
-                await showToast("Komprimering feilet, laster opp original", "warning");
-                totalCompressedSize += file.size;
-              }
-            } else {
-              totalCompressedSize += file.size;
-            }
-
-            // Add video with metadata (fallback if metadata failed)
-            processedFiles.push({
-              file: videoToUpload,
-              thumbnail: thumbnailBlob || null,
-              preview: fileObj.preview,
-              name: videoToUpload.name,
-              size: videoToUpload.size,
-              type: 'video',
-              metadata: metadata || {
-                duration: 0,
-                resolution: 'unknown',
-                fps: null
-              }
-            });
-
-            setProcessingProgress(Math.round(((i + 1) / selectedFiles.length) * 50));
-          } catch (error) {
-            console.error(`Failed to process video ${file.name}:`, error);
-            await showToast(`Feil ved prosessering av ${file.name}`, "error");
-            // Skip this file
-          }
-        }
-        // Process images
-        else {
-          try {
-            if (autoCompress) {
-              const compressedBlob = await compressImage(file, {
-                maxWidth: 1920,
-                maxHeight: 1080,
-                quality: 0.85
-              });
-
-              const thumbnails = await generateThumbnails(file);
-
-              const compressedFile = new File(
-                [compressedBlob],
-                file.name,
-                { type: 'image/jpeg', lastModified: Date.now() }
-              );
-
-              totalCompressedSize += compressedFile.size;
-              compressedFile.thumbnails = thumbnails;
-
-              processedFiles.push({
-                file: compressedFile,
-                preview: fileObj.preview,
-                name: compressedFile.name,
-                size: compressedFile.size,
-                type: 'photo'
-              });
-            } else {
-              totalCompressedSize += file.size;
-              processedFiles.push({
-                file: file,
-                preview: fileObj.preview,
-                name: file.name,
-                size: file.size,
-                type: 'photo'
-              });
-            }
-
-            setProcessingProgress(Math.round(((i + 1) / selectedFiles.length) * 50));
-          } catch (error) {
-            console.error(`Failed to process ${file.name}:`, error);
-            processedFiles.push(fileObj);
-          }
-        }
-      }
-
-      if (totalOriginalSize > 0 && totalCompressedSize > 0 && totalOriginalSize !== totalCompressedSize) {
-        const savings = calculateSavings(totalOriginalSize, totalCompressedSize);
-        setCompressionStats(savings);
-        console.log('Compression savings:', savings);
-      }
-
-      await onUpload(processedFiles, selectedAlbumId, aiTagging);
-
-      localStorage.setItem('aiAutoTag', aiTagging.toString());
-      localStorage.setItem('autoCompress', autoCompress.toString());
-
-      selectedFiles.forEach((file) => URL.revokeObjectURL(file.preview));
-      setSelectedFiles([]);
-      setSelectedAlbumId(selectedAlbum || "");
-      setProcessingProgress(0);
-      setCompressionStats(null);
-
-      await triggerHaptic("heavy");
-
-      if (aiTagging) {
-        await showToast(t("upload:successWithAI", { count: selectedFiles.length }));
-      } else {
-        await showToast(t("upload:success", { count: selectedFiles.length }));
-      }
-
-      onClose();
-    } catch (error) {
-      console.error("Upload error:", error);
-      await showToast(t("upload:failed"));
-    } finally {
-      setUploading(false);
-      setProcessingProgress(0);
-    }
+  // Remove file from selection
+  const removeFile = (index) => {
+    URL.revokeObjectURL(selectedFiles[index].preview);
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  // PHASE 2: AI Auto-Tagging toggle - Disabled for MVP
-  // const handleAiToggle = () => {
-  //   const newValue = !aiTagging;
-  //   setAiTagging(newValue);
-  //   localStorage.setItem('aiAutoTag', newValue.toString());
-  // };
-
+  // Toggle compression
   const handleCompressToggle = () => {
     const newValue = !autoCompress;
     setAutoCompress(newValue);
     localStorage.setItem('autoCompress', newValue.toString());
   };
 
-  const handleCreateAlbumClick = async () => {
-    const name = prompt(t("upload:newAlbumPrompt"));
-    if (!name || !name.trim()) return;
+  // Handle upload
+  const handleUploadClick = async () => {
+    const result = await uploadFiles(selectedFiles, selectedAlbumId, aiTagging, onUpload, t);
 
-    const user = auth.currentUser;
-    if (!user) {
-      await showToast("Du må være innlogget");
-      return;
-    }
-
-    if (onCreateAlbum) {
-      await onCreateAlbum(name.trim(), user.uid);
+    if (result.success) {
+      // Cleanup and close
+      selectedFiles.forEach(f => URL.revokeObjectURL(f.preview));
+      setSelectedFiles([]);
+      setSelectedAlbumId(selectedAlbum || "");
+      onClose();
     }
   };
 
-  const handleBackdropClick = (e) => {
-    if (e.target === e.currentTarget && !uploading) {
-      onClose();
-    }
+  // Handle create album
+  const handleCreateAlbumClick = () => {
+    onCreateAlbum();
+    onClose();
+  };
+
+  // Close modal
+  const handleClose = () => {
+    if (uploading) return;
+    selectedFiles.forEach(f => URL.revokeObjectURL(f.preview));
+    setSelectedFiles([]);
+    onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-      onClick={handleBackdropClick}
-    >
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1001] p-4 animate-fade-in">
       <div
         ref={modalRef}
-        tabIndex="-1"
-        className="bg-[var(--bg-secondary)] rounded-2xl shadow-2xl border border-white/10 w-full max-w-2xl max-h-[90vh] overflow-y-auto modal-content-enhanced"
-        onClick={(e) => e.stopPropagation()}
+        tabIndex={-1}
+        className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl border border-white/10"
       >
+        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/10">
-          <h2 className="text-2xl font-bold text-white">{t("upload:title")}</h2>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-600/20 rounded-lg">
+              <Upload className="w-6 h-6 text-blue-400" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold">{t("upload:title")}</h2>
+              <p className="text-sm text-gray-400">{t("upload:subtitle")}</p>
+            </div>
+          </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             disabled={uploading}
-            className="ripple-effect p-2 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="ripple-effect p-2 hover:bg-white/10 rounded-lg transition disabled:opacity-50"
           >
-            <X className="w-6 h-6 text-gray-400" />
+            <X className="w-6 h-6" />
           </button>
         </div>
 
-        <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-200px)]">
-          {isNative && (
-            <div className="grid grid-cols-2 gap-4">
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+          {/* File Selection Methods */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+            {/* Native Camera */}
+            {isNative && (
               <button
                 onClick={handleNativeCamera}
                 disabled={uploading}
-                className="ripple-effect flex flex-col items-center justify-center p-6 bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl hover:scale-105 transition-transform disabled:opacity-50"
+                className="ripple-effect flex flex-col items-center gap-2 p-4 bg-white/5 hover:bg-white/10 rounded-xl transition border border-white/10 disabled:opacity-50"
               >
-                <Camera className="w-12 h-12 text-white mb-3" />
-                <span className="text-white font-medium">{t("upload:takePhoto")}</span>
+                <Camera className="w-8 h-8 text-green-400" />
+                <span className="text-sm font-medium">{t("upload:camera")}</span>
               </button>
+            )}
+
+            {/* Native Gallery */}
+            {isNative && (
               <button
                 onClick={handleNativeGallery}
                 disabled={uploading}
-                className="ripple-effect flex flex-col items-center justify-center p-6 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl hover:scale-105 transition-transform disabled:opacity-50"
+                className="ripple-effect flex flex-col items-center gap-2 p-4 bg-white/5 hover:bg-white/10 rounded-xl transition border border-white/10 disabled:opacity-50"
               >
-                <ImageIcon className="w-12 h-12 text-white mb-3" />
-                <span className="text-white font-medium">{t("upload:chooseGallery")}</span>
+                <ImageIcon className="w-8 h-8 text-purple-400" />
+                <span className="text-sm font-medium">{t("upload:gallery")}</span>
               </button>
-            </div>
-          )}
+            )}
 
-          {!isNative && (
-            <div
-               className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-colors upload-modal-dropzone ${
-                dragActive
-                  ? "border-purple-500 bg-purple-500/10"
-                  : "border-white/20 hover:border-white/40"
-              } ${uploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
-              onClick={() => !uploading && fileInputRef.current?.click()}
+            {/* Browse Files */}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="ripple-effect flex flex-col items-center gap-2 p-4 bg-white/5 hover:bg-white/10 rounded-xl transition border border-white/10 disabled:opacity-50"
             >
-              <Upload className="w-16 h-16 text-purple-500 mx-auto mb-4" />
-              <p className="text-white text-lg font-medium mb-2">
-                {t("upload:dragDrop")}
-              </p>
-              <p className="text-gray-400 mb-4">{t("upload:or")}</p>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  fileInputRef.current?.click();
-                }}
-                disabled={uploading}
-                className="ripple-effect px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {t("upload:selectFiles")}
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*,video/mp4,video/quicktime,video/webm"
-                multiple
-                onChange={handleFileInput}
-                disabled={uploading}
-                className="hidden"
-              />
-            </div>
-          )}
-          
+              <FolderOpen className="w-8 h-8 text-blue-400" />
+              <span className="text-sm font-medium">{t("upload:browse")}</span>
+            </button>
+          </div>
+
+          {/* Drag and Drop Area */}
+          <div
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+            className={`border-2 border-dashed rounded-xl p-8 text-center transition ${
+              dragActive
+                ? "border-blue-500 bg-blue-500/10"
+                : "border-white/20 hover:border-white/40"
+            }`}
+          >
+            <Upload className="w-12 h-12 mx-auto mb-3 opacity-60" />
+            <p className="text-lg font-medium mb-1">{t("upload:dragDrop")}</p>
+            <p className="text-sm opacity-60">{t("upload:supportedFormats")}</p>
+          </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*,video/*"
+            onChange={handleFileInput}
+            className="hidden"
+          />
+
+          {/* Selected Files Preview */}
           {selectedFiles.length > 0 && (
-            <div>
-              <h3 className="text-white font-medium mb-3">
-                {t("upload:selectedPhotos", { count: selectedFiles.length })}
+            <div className="mt-6">
+              <h3 className="text-sm font-medium mb-3">
+                {t("upload:selectedFiles")} ({selectedFiles.length})
               </h3>
-              <div className="grid grid-cols-3 gap-3 max-h-60 overflow-y-auto">
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-60 overflow-y-auto">
                 {selectedFiles.map((file, index) => (
-                  <div key={index} className="relative group">
+                  <div
+                    key={index}
+                    className="relative group aspect-square bg-black/20 rounded-lg overflow-hidden"
+                  >
                     {file.type === 'video' ? (
-                      <div className="w-full h-24 bg-gray-800 rounded-lg flex items-center justify-center relative">
-                        <Video className="w-8 h-8 text-purple-400" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                        <Video className="w-8 h-8 text-white" />
                       </div>
                     ) : (
                       <img
                         src={file.preview}
                         alt={file.name}
-                        className="w-full h-24 object-cover rounded-lg"
+                        className="w-full h-full object-cover"
                       />
                     )}
                     <button
                       onClick={() => removeFile(index)}
                       disabled={uploading}
-                      className="ripple-effect absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
-                      aria-label={t("common:remove")}
+                      className="absolute top-1 right-1 p-1 bg-red-600 rounded-full opacity-0 group-hover:opacity-100 transition disabled:opacity-50"
                     >
                       <X className="w-4 h-4" />
                     </button>
-                    <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-1 rounded-b-lg truncate">
-                      {file.type === 'video' && <Video className="w-3 h-3 inline mr-1" />}
-                      {formatFileSize(file.size)}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                      <p className="text-xs truncate">{file.name}</p>
+                      <p className="text-xs opacity-60">{formatFileSize(file.size)}</p>
                     </div>
                   </div>
                 ))}
@@ -559,88 +355,112 @@ const UploadModal = ({
             </div>
           )}
 
-          {uploading && processingProgress > 0 && processingProgress < 50 && (
-            <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4">
-              <p className="text-sm mb-2 text-purple-300">Komprimerer bilder...</p>
-              <div className="w-full bg-gray-700 rounded-full h-2">
+          {/* Album Selection */}
+          <div className="mt-6">
+            <button
+              onClick={() => setShowAlbums(!showAlbums)}
+              disabled={uploading}
+              className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center justify-between border border-white/10 disabled:opacity-50"
+            >
+              <div className="flex items-center gap-3">
+                <FolderOpen className="w-5 h-5" />
+                <span className="text-sm font-medium">
+                  {selectedAlbumId
+                    ? albums.find(a => a.id === selectedAlbumId)?.name || t("upload:selectAlbum")
+                    : t("upload:noAlbum")}
+                </span>
+              </div>
+            </button>
+
+            {showAlbums && (
+              <div className="mt-2 max-h-40 overflow-y-auto bg-white/5 rounded-xl border border-white/10">
+                <button
+                  onClick={() => {
+                    setSelectedAlbumId("");
+                    setShowAlbums(false);
+                  }}
+                  className="w-full p-3 text-left hover:bg-white/10 transition text-sm"
+                >
+                  {t("upload:noAlbum")}
+                </button>
+                {albums.map((album) => (
+                  <button
+                    key={album.id}
+                    onClick={() => {
+                      setSelectedAlbumId(album.id);
+                      setShowAlbums(false);
+                    }}
+                    className="w-full p-3 text-left hover:bg-white/10 transition text-sm border-t border-white/5"
+                  >
+                    {album.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Options */}
+          <div className="mt-6 space-y-3">
+            {/* Auto Compress Toggle */}
+            <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-600/30 rounded-lg">
+                    <Zap className="w-5 h-5 text-green-400" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{t("upload:autoCompress")}</p>
+                    <p className="text-xs text-gray-400">{t("upload:autoCompressDesc")}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleCompressToggle}
+                  disabled={uploading}
+                  className={`relative w-14 h-7 rounded-full transition ${
+                    autoCompress ? "bg-green-600" : "bg-gray-600"
+                  } ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <div
+                    className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
+                      autoCompress ? "translate-x-7" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          {uploading && (
+            <div className="mt-6">
+              <div className="flex justify-between text-sm mb-2">
+                <span>{t("upload:processing")}</span>
+                <span>{processingProgress}%</span>
+              </div>
+              <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                 <div
-                  className="bg-purple-600 h-2 rounded-full transition-all"
-                  style={{ width: `${processingProgress * 2}%` }}
+                  className="h-full bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300"
+                  style={{ width: `${processingProgress}%` }}
                 />
               </div>
             </div>
           )}
 
+          {/* Compression Stats */}
           {compressionStats && (
-            <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4">
-              <p className="text-sm text-green-400">
-                ✓ Lagringsplass spart: {(compressionStats.savedBytes / 1024 / 1024).toFixed(2)} MB 
-                ({compressionStats.savedPercentage}%)
+            <div className="mt-4 p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
+              <p className="text-sm text-green-400 font-medium">
+                {t("upload:compressionSaved")}: {compressionStats.savedPercentage}%
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                {formatFileSize(compressionStats.originalSize)} → {formatFileSize(compressionStats.compressedSize)}
               </p>
             </div>
           )}
-
-          <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-600/30 rounded-lg">
-                  <Zap className="w-5 h-5 text-blue-400" />
-                </div>
-                <div>
-                  <p className="font-medium">{t("upload:autoCompress")}</p>
-                  <p className="text-xs text-gray-400">{t("upload:autoCompressDesc")}</p>
-                </div>
-              </div>
-              <button
-                onClick={handleCompressToggle}
-                disabled={uploading}
-                className={`relative w-14 h-7 rounded-full transition ${
-                  autoCompress ? "bg-blue-600" : "bg-gray-600"
-                } ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                <div
-                  className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                    autoCompress ? "translate-x-7" : "translate-x-0"
-                  }`}
-                />
-              </button>
-            </div>
-          </div>
-
-          {/* PHASE 2: AI Auto-Tagging - Temporarily hidden for MVP
-          <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-600/30 rounded-lg">
-                  <Sparkles className="w-5 h-5 text-purple-400" />
-                </div>
-                <div>
-                  <p className="font-medium flex items-center gap-2">
-                    {t("upload:aiAutoTagging")}
-                    <span className="text-xs bg-purple-600/30 px-2 py-0.5 rounded-full">Beta</span>
-                  </p>
-                  <p className="text-xs text-gray-400">{t("upload:aiAutoTaggingDesc")}</p>
-                </div>
-              </div>
-              <button
-                onClick={handleAiToggle}
-                disabled={uploading}
-                className={`relative w-14 h-7 rounded-full transition ${
-                  aiTagging ? "bg-purple-600" : "bg-gray-600"
-                } ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                <div
-                  className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                    aiTagging ? "translate-x-7" : "translate-x-0"
-                  }`}
-                />
-              </button>
-            </div>
-          </div>
-          */}
         </div>
 
-        <div className="px-6 pt-4 pb-4 space-y-3 border-t border-white/10"> 
+        {/* Footer Actions */}
+        <div className="px-6 pt-4 pb-24 space-y-3 border-t border-white/10">
           <button
             onClick={handleCreateAlbumClick}
             disabled={uploading}
@@ -649,76 +469,14 @@ const UploadModal = ({
             {t("upload:newAlbum")}
           </button>
 
-          <label className="block text-white font-medium mb-1 flex items-center gap-2">
-            <FolderOpen className="w-4 h-4" />
-            {t("upload:chooseAlbum")}
-          </label>
-
-          <div className="relative">
-            <button
-              onClick={() => !uploading && setShowAlbums(!showAlbums)}
-              disabled={uploading}
-              className={`ripple-effect w-full flex justify-between items-center bg-[var(--bg-secondary)] text-white border border-white/10 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 transition 
-                         ${showAlbums ? 'ring-2 ring-purple-500' : 'hover:border-white/40'} 
-                         ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`} 
-            >
-              <span>
-                {selectedAlbumId
-                  ? albums.find((a) => a.id === selectedAlbumId)?.name
-                  : t("upload:noAlbum")}
-              </span>
-              <span className="text-gray-400">
-                {showAlbums ? '▲' : '▼'}
-              </span>
-            </button>
-
-            {showAlbums && !uploading && (
-              <div 
-                className="absolute z-50 bottom-full mb-1 w-full bg-[var(--bg-secondary)] border border-white/10 rounded-lg shadow-xl overflow-hidden upload-modal-albumlist max-h-60 overflow-y-auto"
-              >
-                <div
-                  onClick={() => {
-                    setSelectedAlbumId("");
-                    setShowAlbums(false);
-                  }}
-                  className="px-4 py-2 hover:bg-purple-600/30 cursor-pointer"
-                >
-                  {t("upload:noAlbum")}
-                </div>
-                {albums.map((album) => (
-                  <div
-                    key={album.id}
-                    onClick={() => {
-                      setSelectedAlbumId(album.id);
-                      setShowAlbums(false);
-                    }}
-                    className="px-4 py-2 hover:bg-purple-600/30 cursor-pointer"
-                  >
-                    {album.name} ({album.photoCount || 0} {t("common:photos")})
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between p-6 border-t border-white/10 bg-[var(--bg-primary)]">
           <button
-            onClick={onClose}
-            disabled={uploading}
-            className="ripple-effect px-6 py-3 text-gray-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {t("common:cancel")}
-          </button>
-          <button
-            onClick={handleUpload}
+            onClick={handleUploadClick}
             disabled={selectedFiles.length === 0 || uploading}
-            className="ripple-effect px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-medium flex items-center gap-2"
+            className="ripple-effect w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-3 rounded-lg transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
-            {uploading && <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />}
             {uploading
-              ? (processingProgress < 50 ? t("upload:processing") || "Prosesserer..." : t("upload:uploading"))
-              : t("upload:uploadPhotos", { count: selectedFiles.length })}
+              ? t("upload:uploading", { count: selectedFiles.length })
+              : t("upload:uploadButton", { count: selectedFiles.length })}
           </button>
         </div>
       </div>
@@ -726,4 +484,4 @@ const UploadModal = ({
   );
 };
 
-export default UploadModal
+export default UploadModal;
