@@ -1,85 +1,84 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    
-    // Helper functions
+
+    // --- Helper-funksjoner ---
     function isAuthenticated() {
       return request.auth != null;
     }
-    
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
-    
+    function isAdmin() {
+      return request.auth.token.email == "rogsor80@gmail.com";
+    }
     function isImage() {
       return request.resource.contentType.matches('image/.*');
     }
-
     function isVideo() {
       return request.resource.contentType.matches('video/.*');
     }
-
     function isValidSize() {
-      return request.resource.size < 10 * 1024 * 1024; // 10MB for images
+      return request.resource.size < 10 * 1024 * 1024; // 10 MB
     }
-
     function isValidVideoSize() {
-      return request.resource.size < 100 * 1024 * 1024; // 100MB for videos
+      return request.resource.size < 100 * 1024 * 1024; // 100 MB
     }
-    
-    // ✅ PRIMARY PATH - Current uploads (photos and videos)
+
+    // --- Hovedbaner ---
+
+    // 📂 Brukeropplastinger (bilder og videoer)
     match /users/{userId}/{albumId}/{fileName} {
-      allow read: if isAuthenticated() && isOwner(userId);
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
       allow create: if isAuthenticated() && isOwner(userId) &&
-                       ((isImage() && isValidSize()) || (isVideo() && isValidVideoSize()));
-      allow delete: if isAuthenticated() && isOwner(userId);
-    }
-    
-    // ✅ Unassigned album (temporary uploads - photos and videos)
-    match /users/{userId}/unassigned/{fileName} {
-      allow read: if isAuthenticated() && isOwner(userId);
-      allow create: if isAuthenticated() && isOwner(userId) &&
-                       ((isImage() && isValidSize()) || (isVideo() && isValidVideoSize()));
+        ((isImage() && isValidSize()) || (isVideo() && isValidVideoSize()));
       allow delete: if isAuthenticated() && isOwner(userId);
     }
 
-    
-    // ✅ Thumbnails
+    // 📂 Midlertidige (unassigned)
+    match /users/{userId}/unassigned/{fileName} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow create: if isAuthenticated() && isOwner(userId) &&
+        ((isImage() && isValidSize()) || (isVideo() && isValidVideoSize()));
+      allow delete: if isAuthenticated() && isOwner(userId);
+    }
+
+    // 📂 Thumbnails
     match /users/{userId}/thumbnails/{fileName} {
-      allow read: if isAuthenticated() && isOwner(userId);
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
       allow create: if isAuthenticated() && isOwner(userId) && isImage() && isValidSize();
       allow delete: if isAuthenticated() && isOwner(userId);
     }
-    
-    // ✅ Vault (encrypted photos)
+
+    // 📂 Vault (krypterte filer)
     match /vault/{userId}/{fileName} {
-      allow read: if isAuthenticated() && isOwner(userId);
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
       allow create: if isAuthenticated() && isOwner(userId) && isValidSize();
       allow delete: if isAuthenticated() && isOwner(userId);
     }
-    
-    // ✅ Enhanced photos
+
+    // 📂 Forbedrede bilder (enhanced)
     match /enhanced/{userId}/{fileName} {
-      allow read: if isAuthenticated() && isOwner(userId);
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
       allow create: if isAuthenticated() && isOwner(userId) && isImage() && isValidSize();
       allow delete: if isAuthenticated() && isOwner(userId);
     }
-    
-    // ✅ Legacy paths (backwards compatibility - photos and videos)
+
+    // 📂 Legacy paths (kompatibilitet)
     match /photos/{userId}/{fileName} {
-      allow read: if isAuthenticated() && isOwner(userId);
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
       allow create: if isAuthenticated() && isOwner(userId) &&
-                       ((isImage() && isValidSize()) || (isVideo() && isValidVideoSize()));
+        ((isImage() && isValidSize()) || (isVideo() && isValidVideoSize()));
       allow delete: if isAuthenticated() && isOwner(userId);
     }
-    
+
     match /thumbnails/{userId}/{fileName} {
-      allow read: if isAuthenticated() && isOwner(userId);
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
       allow create: if isAuthenticated() && isOwner(userId) && isImage() && isValidSize();
       allow delete: if isAuthenticated() && isOwner(userId);
     }
-    
-    // Deny all other paths
+
+    // 🚫 Alle andre stier nektes
     match /{allPaths=**} {
       allow read, write: if false;
     }
