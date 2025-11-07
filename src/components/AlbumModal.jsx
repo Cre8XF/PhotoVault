@@ -11,6 +11,10 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
   const [description, setDescription] = useState("");
   const [cover, setCover] = useState("");
 
+  // New state for UX
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   useEffect(() => {
     if (editingAlbum) {
       setName(editingAlbum.name || "");
@@ -19,20 +23,88 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
     }
   }, [editingAlbum]);
 
-  const handleSave = (e) => {
-    e.preventDefault();
-    if (!name.trim()) return alert(t('albums:enterAlbumName'));
-
-    const albumData = {
-      id: editingAlbum ? editingAlbum.id : Date.now().toString(),
-      name: name.trim(),
-      description: description.trim(),
-      cover: cover.trim(),
-      createdAt: editingAlbum?.createdAt || new Date().toISOString(),
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'auto';
     };
+  }, []);
 
-    onSave(albumData);
-    onClose();
+  // ESC key to close modal
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape' && !loading) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [onClose, loading]);
+
+  // Validation helper
+  const validateForm = () => {
+    // Clear previous errors
+    setError('');
+
+    // Validate name
+    if (!name.trim()) {
+      setError(t('albums:enterAlbumName') || 'Album name is required');
+      return false;
+    }
+
+    if (name.length > 50) {
+      setError('Album name must be less than 50 characters');
+      return false;
+    }
+
+    if (description.length > 200) {
+      setError('Description must be less than 200 characters');
+      return false;
+    }
+
+    return true;
+  };
+
+  // Enhanced submit handler
+  const handleSave = async (e) => {
+    e.preventDefault();
+
+    // Validate form
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError('');
+
+      const albumData = {
+        id: editingAlbum ? editingAlbum.id : Date.now().toString(),
+        name: name.trim(),
+        description: description.trim(),
+        cover: cover.trim(),
+        createdAt: editingAlbum?.createdAt || new Date().toISOString(),
+      };
+
+      await onSave(albumData);
+
+      // Show success toast if available
+      if (window.showToast) {
+        window.showToast(editingAlbum ? 'Album updated successfully! 🎉' : 'Album created successfully! 🎉', 'success');
+      }
+
+      onClose();
+    } catch (err) {
+      console.error('Error saving album:', err);
+      setError(err.message || 'Failed to save album. Please try again.');
+
+      if (window.showToast) {
+        window.showToast('Failed to save album', 'error');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -53,7 +125,8 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
           </h2>
           <button
             onClick={onClose}
-            className="ripple-effect text-gray-400 hover:text-gray-200 transition"
+            disabled={loading}
+            className="ripple-effect text-gray-400 hover:text-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <X className="w-5 h-5" />
           </button>
@@ -62,15 +135,25 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
         {/* Form */}
         <form onSubmit={handleSave} className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-300 mb-1">{t('albums:name')}</label>
+            <label className="block text-sm text-gray-300 mb-1">
+              {t('albums:name')} <span className="text-red-500">*</span>
+            </label>
             <input
+              autoFocus
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t('albums:namePlaceholder')}
-              className="w-full p-3 rounded-xl bg-gray-800/60 border border-gray-600/50 
-                         text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              onChange={(e) => {
+                setName(e.target.value);
+                setError(''); // Clear error on change
+              }}
+              placeholder={t('albums:namePlaceholder') || 'Enter album name (max 50 characters)'}
+              maxLength={50}
+              disabled={loading}
+              className="w-full p-3 rounded-xl bg-gray-800/60 border border-gray-600/50
+                         text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500
+                         disabled:opacity-50 disabled:cursor-not-allowed"
             />
+            <p className="text-xs text-gray-500 mt-1">{name.length}/50 characters</p>
           </div>
 
           <div>
@@ -78,11 +161,15 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder={t('albums:descriptionPlaceholder')}
+              placeholder={t('albums:descriptionPlaceholder') || 'Add a description (optional, max 200 characters)'}
+              maxLength={200}
               rows="3"
-              className="w-full p-3 rounded-xl bg-gray-800/60 border border-gray-600/50 
-                         text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+              disabled={loading}
+              className="w-full p-3 rounded-xl bg-gray-800/60 border border-gray-600/50
+                         text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none
+                         disabled:opacity-50 disabled:cursor-not-allowed"
             />
+            <p className="text-xs text-gray-500 mt-1">{description.length}/200 characters</p>
           </div>
 
           <div>
@@ -95,8 +182,10 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               value={cover}
               onChange={(e) => setCover(e.target.value)}
               placeholder="https://..."
-              className="w-full p-3 rounded-xl bg-gray-800/60 border border-gray-600/50 
-                         text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              disabled={loading}
+              className="w-full p-3 rounded-xl bg-gray-800/60 border border-gray-600/50
+                         text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500
+                         disabled:opacity-50 disabled:cursor-not-allowed"
             />
             {cover && (
               <img
@@ -107,21 +196,40 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
             )}
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            </div>
+          )}
+
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="ripple-effect px-5 py-2 rounded-xl bg-gray-700/60 hover:bg-gray-600/70 
-                         text-gray-200 text-sm font-semibold transition-colors"
+              disabled={loading}
+              className="ripple-effect px-5 py-2 rounded-xl bg-gray-700/60 hover:bg-gray-600/70
+                         text-gray-200 text-sm font-semibold transition-colors
+                         disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t('albums:cancel')}
             </button>
             <button
               type="submit"
-              className="ripple-effect px-5 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 
-                         hover:from-purple-600 hover:to-pink-600 text-white text-sm font-semibold transition-colors"
+              disabled={loading || !name.trim()}
+              className="ripple-effect px-5 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500
+                         hover:from-purple-600 hover:to-pink-600 text-white text-sm font-semibold transition-colors
+                         disabled:opacity-50 disabled:cursor-not-allowed
+                         flex items-center justify-center gap-2"
             >
-              {editingAlbum ? t('albums:saveChanges') : t('albums:createAlbum')}
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                  {editingAlbum ? 'Updating...' : 'Creating...'}
+                </>
+              ) : (
+                editingAlbum ? t('albums:saveChanges') : t('albums:createAlbum')
+              )}
             </button>
           </div>
         </form>
