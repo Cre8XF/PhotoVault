@@ -7,6 +7,7 @@ export default function AdminDashboard({ onBack }) {
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
     totalUsers: 0,
+    totalAlbums: 0,
     totalPhotos: 0,
     totalVideos: 0,
     totalStorageBytes: 0,
@@ -20,37 +21,47 @@ export default function AdminDashboard({ onBack }) {
     try {
       setLoading(true)
 
-      // Count users
+      // --- Count all users ---
       const usersSnapshot = await getDocs(collection(db, 'users'))
       const totalUsers = usersSnapshot.size
 
-      // Count photos and videos
+      let totalAlbums = 0
       let totalPhotos = 0
       let totalVideos = 0
       let totalStorageBytes = 0
 
+      // --- Loop through each user ---
       for (const userDoc of usersSnapshot.docs) {
-        const photosSnapshot = await getDocs(
-          collection(db, `users/${userDoc.id}/photos`)
+        const userId = userDoc.id
+
+        // Fetch albums under each user
+        const albumsSnapshot = await getDocs(
+          collection(db, `users/${userId}/albums`)
         )
+        totalAlbums += albumsSnapshot.size
 
-        photosSnapshot.forEach((photoDoc) => {
-          const data = photoDoc.data()
+        // Loop through albums to count photos/videos
+        for (const albumDoc of albumsSnapshot.docs) {
+          const albumId = albumDoc.id
+          const photosSnapshot = await getDocs(
+            collection(db, `users/${userId}/albums/${albumId}/photos`)
+          )
 
-          // Count photo vs video
-          if (data.isVideo) {
-            totalVideos++
-          } else {
-            totalPhotos++
-          }
-
-          // Sum storage
-          totalStorageBytes += data.size || 0
-        })
+          photosSnapshot.forEach((photoDoc) => {
+            const data = photoDoc.data()
+            if (data.isVideo) {
+              totalVideos++
+            } else {
+              totalPhotos++
+            }
+            totalStorageBytes += data.size || 0
+          })
+        }
       }
 
       setStats({
         totalUsers,
+        totalAlbums,
         totalPhotos,
         totalVideos,
         totalStorageBytes,
@@ -64,7 +75,7 @@ export default function AdminDashboard({ onBack }) {
   }
 
   function formatBytes(bytes) {
-    if (bytes === 0) return '0 Bytes'
+    if (!bytes || bytes === 0) return '0 Bytes'
     const k = 1024
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
@@ -86,12 +97,12 @@ export default function AdminDashboard({ onBack }) {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
-      {/* DEBUG TEST - Remove this after fixing */}
+      {/* Debug banner */}
       <div className="fixed top-0 left-0 right-0 bg-red-500 text-white text-center p-4 z-[9999]">
         🔴 ADMIN DASHBOARD IS RENDERING 🔴
       </div>
 
-      {/* Header with Back Button */}
+      {/* Header */}
       <div className="max-w-4xl mx-auto mb-6">
         <button
           onClick={onBack}
@@ -107,81 +118,58 @@ export default function AdminDashboard({ onBack }) {
         </p>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Grid */}
       <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Total Users */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-              <Users className="w-6 h-6 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Total Users
-              </p>
-              <p className="text-3xl font-bold">{stats.totalUsers}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Total Photos */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-              <Image className="w-6 h-6 text-green-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Total Photos
-              </p>
-              <p className="text-3xl font-bold">
-                {stats.totalPhotos.toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Total Videos */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-              <Video className="w-6 h-6 text-purple-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Total Videos
-              </p>
-              <p className="text-3xl font-bold">
-                {stats.totalVideos.toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Total Storage */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
-              <HardDrive className="w-6 h-6 text-orange-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Total Storage
-              </p>
-              <p className="text-3xl font-bold">
-                {formatBytes(stats.totalStorageBytes)}
-              </p>
-            </div>
-          </div>
-        </div>
+        <StatCard
+          icon={<Users className="w-6 h-6 text-blue-600" />}
+          color="blue"
+          label="Total Users"
+          value={stats.totalUsers}
+        />
+        <StatCard
+          icon={<Image className="w-6 h-6 text-green-600" />}
+          color="green"
+          label="Total Photos"
+          value={stats.totalPhotos}
+        />
+        <StatCard
+          icon={<Video className="w-6 h-6 text-purple-600" />}
+          color="purple"
+          label="Total Videos"
+          value={stats.totalVideos}
+        />
+        <StatCard
+          icon={<HardDrive className="w-6 h-6 text-orange-600" />}
+          color="orange"
+          label="Total Storage"
+          value={formatBytes(stats.totalStorageBytes)}
+        />
       </div>
 
-      {/* Info Box */}
+      {/* Info */}
       <div className="max-w-4xl mx-auto mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
         <p className="text-sm text-blue-800 dark:text-blue-200">
           💡 Additional admin features (user management, database tools) can be
           added later.
         </p>
+      </div>
+    </div>
+  )
+}
+
+function StatCard({ icon, color, label, value }) {
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+      <div className="flex items-center gap-4">
+        <div
+          className={`w-12 h-12 bg-${color}-100 dark:bg-${color}-900 rounded-lg flex items-center justify-center`}
+        >
+          {icon}
+        </div>
+        <div>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{label}</p>
+          <p className="text-3xl font-bold">{value}</p>
+        </div>
       </div>
     </div>
   )
