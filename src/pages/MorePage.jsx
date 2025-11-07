@@ -1063,7 +1063,10 @@ const MorePage = ({
               <ChevronRight className="w-5 h-5 opacity-50" />
             </button>
 
-            <button className="ripple-effect bg-yellow-600/10 hover:bg-yellow-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-yellow-500/30">
+            <button
+              onClick={() => onNavigate('admin')}
+              className="ripple-effect bg-yellow-600/10 hover:bg-yellow-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-yellow-500/30"
+            >
               <HardDrive className="w-5 h-5 text-yellow-400" />
               <div className="flex-1">
                 <p className="font-medium">{t('admin.databaseTools')}</p>

@@ -1,99 +1,166 @@
-import { useState } from 'react';
-import {
-  ArrowLeft, Users, Database, Image, HardDrive,
-  TrendingUp, Activity, AlertCircle, Settings
-} from 'lucide-react';
-import { useAdminData } from '../hooks/useAdminData';
-import UserManagementPanel from '../components/admin/UserManagementPanel';
-import DatabasePanel from '../components/admin/DatabasePanel';
-import StatsPanel from '../components/admin/StatsPanel';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, Users, Image, Video, HardDrive } from 'lucide-react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase';
 
 export default function AdminDashboard({ onBack }) {
-  const { stats, users, recentPhotos, loading, refetch } = useAdminData();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalPhotos: 0,
+    totalVideos: 0,
+    totalStorageBytes: 0
+  });
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-      </div>
-    );
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  async function fetchStats() {
+    try {
+      setLoading(true);
+
+      // Count users
+      const usersSnapshot = await getDocs(collection(db, 'users'));
+      const totalUsers = usersSnapshot.size;
+
+      // Count photos and videos
+      let totalPhotos = 0;
+      let totalVideos = 0;
+      let totalStorageBytes = 0;
+
+      for (const userDoc of usersSnapshot.docs) {
+        const photosSnapshot = await getDocs(
+          collection(db, `users/${userDoc.id}/photos`)
+        );
+
+        photosSnapshot.forEach(photoDoc => {
+          const data = photoDoc.data();
+
+          // Count photo vs video
+          if (data.isVideo) {
+            totalVideos++;
+          } else {
+            totalPhotos++;
+          }
+
+          // Sum storage
+          totalStorageBytes += data.size || 0;
+        });
+      }
+
+      setStats({
+        totalUsers,
+        totalPhotos,
+        totalVideos,
+        totalStorageBytes
+      });
+
+    } catch (error) {
+      console.error('Error fetching admin stats:', error);
+      alert('Error loading admin data: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  const formatBytes = (bytes) => {
+  function formatBytes(bytes) {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
-  };
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading admin data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={onBack}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <div>
-                <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-                <p className="text-sm text-gray-500">PhotoVault Administration</p>
-              </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+      {/* Header with Back Button */}
+      <div className="max-w-4xl mx-auto mb-6">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-purple-600 hover:text-purple-700 mb-4"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span className="font-medium">Tilbake til More</span>
+        </button>
+
+        <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
+        <p className="text-gray-600 dark:text-gray-400">PhotoVault System Overview</p>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        {/* Total Users */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+              <Users className="w-6 h-6 text-blue-600" />
             </div>
-            <button
-              onClick={refetch}
-              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-            >
-              <Activity className="w-4 h-4" />
-              Refresh
-            </button>
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Total Users</p>
+              <p className="text-3xl font-bold">{stats.totalUsers}</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Tabs */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4">
-          <nav className="flex gap-1">
-            {[
-              { id: 'overview', label: 'Overview', icon: TrendingUp },
-              { id: 'users', label: 'Users', icon: Users },
-              { id: 'database', label: 'Database', icon: Database },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-6 py-3 border-b-2 transition-colors ${
-                  activeTab === tab.id
-                    ? 'border-purple-600 text-purple-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <tab.icon className="w-4 h-4" />
-                {tab.label}
-              </button>
-            ))}
-          </nav>
+        {/* Total Photos */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+              <Image className="w-6 h-6 text-green-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Total Photos</p>
+              <p className="text-3xl font-bold">{stats.totalPhotos.toLocaleString()}</p>
+            </div>
+          </div>
         </div>
+
+        {/* Total Videos */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+              <Video className="w-6 h-6 text-purple-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Total Videos</p>
+              <p className="text-3xl font-bold">{stats.totalVideos.toLocaleString()}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Total Storage */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
+              <HardDrive className="w-6 h-6 text-orange-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Total Storage</p>
+              <p className="text-3xl font-bold">{formatBytes(stats.totalStorageBytes)}</p>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        {activeTab === 'overview' && (
-          <StatsPanel stats={stats} users={users} recentPhotos={recentPhotos} />
-        )}
-        {activeTab === 'users' && (
-          <UserManagementPanel users={users} onUpdate={refetch} />
-        )}
-        {activeTab === 'database' && (
-          <DatabasePanel stats={stats} />
-        )}
+      {/* Info Box */}
+      <div className="max-w-4xl mx-auto mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <p className="text-sm text-blue-800 dark:text-blue-200">
+          💡 Additional admin features (user management, database tools) can be added later.
+        </p>
       </div>
     </div>
   );
