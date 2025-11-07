@@ -1,45 +1,48 @@
 // ============================================================================
 // APP.js – v6.0 Phase 2: Modern Architecture with Zustand & Hooks
 // ============================================================================
-import React from "react";
-import { useTranslation } from 'react-i18next';
-import i18n from './i18n';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
+import i18n from './i18n'
 
 // Contexts
-import { SecurityProvider, useSecurityContext } from "./contexts/SecurityContext";
-import { ToastProvider } from './contexts/ToastContext';
+import {
+  SecurityProvider,
+  useSecurityContext,
+} from './contexts/SecurityContext'
+import { ToastProvider } from './contexts/ToastContext'
 
 // Pages
-import LoginPage from "./pages/LoginPage";
-import HomeDashboard from "./pages/HomeDashboard";
-import AlbumsPage from "./pages/AlbumsPage";
-import SearchPage from "./pages/SearchPage";
-import MorePage from "./pages/MorePage";
-import AlbumPage from "./pages/AlbumPage";
-import AdminDashboard from "./pages/AdminDashboard";
-import SecuritySettings from "./pages/SecuritySettings";
-import VaultPage from "./pages/VaultPage";
-import ProfilePage from "./pages/ProfilePage";
-import SubscriptionPage from "./pages/SubscriptionPage";
+import LoginPage from './pages/LoginPage'
+import HomeDashboard from './pages/HomeDashboard'
+import AlbumsPage from './pages/AlbumsPage'
+import SearchPage from './pages/SearchPage'
+import MorePage from './pages/MorePage'
+import AlbumPage from './pages/AlbumPage'
+import AdminDashboard from './pages/AdminDashboard'
+import SecuritySettings from './pages/SecuritySettings'
+import VaultPage from './pages/VaultPage'
+import ProfilePage from './pages/ProfilePage'
+import SubscriptionPage from './pages/SubscriptionPage'
 
 // Components
-import ErrorBoundary from "./components/ErrorBoundary";
-import UploadModal from "./components/UploadModal";
-import PhotoModal from "./components/PhotoModal";
-import AlbumModal from "./components/AlbumModal";
-import ConfirmModal from "./components/ConfirmModal";
-import Notification from "./components/Notification";
-import Particles from "./components/Particles";
-import PINLockScreen from "./components/PINLockScreen";
-import NotificationPanel from "./components/NotificationPanel";
+import ErrorBoundary from './components/ErrorBoundary'
+import UploadModal from './components/UploadModal'
+import PhotoModal from './components/PhotoModal'
+import AlbumModal from './components/AlbumModal'
+import ConfirmModal from './components/ConfirmModal'
+import Notification from './components/Notification'
+import Particles from './components/Particles'
+import PINLockScreen from './components/PINLockScreen'
+import NotificationPanel from './components/NotificationPanel'
 
 // Hooks
-import useAuth from "./hooks/useAuth";
-import usePhotoData from "./hooks/usePhotoData";
-import useStore from "./state/store";
+import useAuth from './hooks/useAuth'
+import usePhotoData from './hooks/usePhotoData'
+import useStore from './state/store'
 
 // Icons
-import { Home, FolderOpen, Plus, Search, Menu } from "lucide-react";
+import { Home, FolderOpen, Plus, Search, Menu } from 'lucide-react'
 
 /**
  * Main App Component with new architecture
@@ -53,17 +56,17 @@ function App() {
         </SecurityProvider>
       </ToastProvider>
     </ErrorBoundary>
-  );
+  )
 }
 
 /**
  * App Content Component
  */
 function AppContent() {
-  const { t } = useTranslation(['common', 'nav']);
+  const { t } = useTranslation(['common', 'nav'])
 
   // Custom hooks
-  const { user, userProfile, loading, handleLogout, isAdmin } = useAuth();
+  const { user, userProfile, loading, handleLogout, isAdmin } = useAuth()
   const {
     albums,
     photos,
@@ -72,100 +75,102 @@ function AppContent() {
     handleCreateAlbumFromUpload,
     toggleFavorite,
     refreshData,
-  } = usePhotoData();
+  } = usePhotoData()
 
   // Security context
-  const { isLocked, pinEnabled } = useSecurityContext();
+  const { isLocked, pinEnabled } = useSecurityContext()
 
   // Zustand store
-  const uploadModalOpen = useStore((state) => state.uploadModalOpen);
-  const albumModalOpen = useStore((state) => state.albumModalOpen);
-  const photoModalOpen = useStore((state) => state.photoModalOpen);
-  const confirmModal = useStore((state) => state.confirmModal);
-  const notification = useStore((state) => state.notification);
-  const editingAlbum = useStore((state) => state.editingAlbum);
-  const selectedPhotoIndex = useStore((state) => state.selectedPhotoIndex);
-  const isDarkMode = useStore((state) => state.isDarkMode);
-  const currentPage = useStore((state) => state.currentPage);
-  const selectedAlbum = useStore((state) => state.selectedAlbum);
-  const storageUsed = useStore((state) => state.storageUsed);
-  const storageLimit = useStore((state) => state.storageLimit);
+  const uploadModalOpen = useStore((state) => state.uploadModalOpen)
+  const albumModalOpen = useStore((state) => state.albumModalOpen)
+  const photoModalOpen = useStore((state) => state.photoModalOpen)
+  const confirmModal = useStore((state) => state.confirmModal)
+  const notification = useStore((state) => state.notification)
+  const editingAlbum = useStore((state) => state.editingAlbum)
+  const selectedPhotoIndex = useStore((state) => state.selectedPhotoIndex)
+  const isDarkMode = useStore((state) => state.isDarkMode)
+  const currentPage = useStore((state) => state.currentPage)
+  const selectedAlbum = useStore((state) => state.selectedAlbum)
+  const storageUsed = useStore((state) => state.storageUsed)
+  const storageLimit = useStore((state) => state.storageLimit)
 
-  const setUploadModalOpen = useStore((state) => state.setUploadModalOpen);
-  const setAlbumModalOpen = useStore((state) => state.setAlbumModalOpen);
-  const setEditingAlbum = useStore((state) => state.setEditingAlbum);
-  const setPhotoModalOpen = useStore((state) => state.setPhotoModalOpen);
-  const setConfirmModal = useStore((state) => state.setConfirmModal);
-  const clearNotification = useStore((state) => state.clearNotification);
-  const setCurrentPage = useStore((state) => state.setCurrentPage);
-  const setSelectedAlbum = useStore((state) => state.setSelectedAlbum);
-  const setTheme = useStore((state) => state.setTheme);
+  const setUploadModalOpen = useStore((state) => state.setUploadModalOpen)
+  const setAlbumModalOpen = useStore((state) => state.setAlbumModalOpen)
+  const setEditingAlbum = useStore((state) => state.setEditingAlbum)
+  const setPhotoModalOpen = useStore((state) => state.setPhotoModalOpen)
+  const setConfirmModal = useStore((state) => state.setConfirmModal)
+  const clearNotification = useStore((state) => state.clearNotification)
+  const setCurrentPage = useStore((state) => state.setCurrentPage)
+  const setSelectedAlbum = useStore((state) => state.setSelectedAlbum)
+  const setTheme = useStore((state) => state.setTheme)
 
   // Handle photo click
   const handlePhotoClick = (photo) => {
-    const index = photos.findIndex(p => p.id === photo.id);
-    const setSelectedPhotoIndex = useStore.getState().setSelectedPhotoIndex;
-    setSelectedPhotoIndex(index);
-    setPhotoModalOpen(true);
-  };
+    const index = photos.findIndex((p) => p.id === photo.id)
+    const setSelectedPhotoIndex = useStore.getState().setSelectedPhotoIndex
+    setSelectedPhotoIndex(index)
+    setPhotoModalOpen(true)
+  }
 
   // Handle album click
   const handleAlbumClick = (album) => {
-    setSelectedAlbum(album);
-    setCurrentPage("album");
-  };
+    setSelectedAlbum(album)
+    setCurrentPage('album')
+  }
 
   // Handle navigate to photo from notification
   const handleNavigateToPhoto = (photoId) => {
-    const photo = photos.find(p => p.id === photoId);
+    const photo = photos.find((p) => p.id === photoId)
     if (photo) {
-      handlePhotoClick(photo);
+      handlePhotoClick(photo)
     }
-  };
+  }
 
   // Apply theme on mount
   React.useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    const isDark = savedTheme !== "light";
-    setTheme(isDark);
-  }, [setTheme]);
+    const savedTheme = localStorage.getItem('theme')
+    const isDark = savedTheme !== 'light'
+    setTheme(isDark)
+  }, [setTheme])
 
   // Global drag & drop for file uploads
   React.useEffect(() => {
-    if (!user) return;
+    if (!user) return
 
     const handleGlobalDrop = (e) => {
-      e.preventDefault();
-      const files = Array.from(e.dataTransfer.files);
-      const imageFiles = files.filter(f => f.type.startsWith("image/"));
+      e.preventDefault()
+      const files = Array.from(e.dataTransfer.files)
+      const imageFiles = files.filter((f) => f.type.startsWith('image/'))
 
       if (imageFiles.length > 0 && !uploadModalOpen) {
-        setUploadModalOpen(true);
+        setUploadModalOpen(true)
         setTimeout(() => {
-          const event = new CustomEvent('externalFileDrop', { detail: imageFiles });
-          window.dispatchEvent(event);
-        }, 100);
+          const event = new CustomEvent('externalFileDrop', {
+            detail: imageFiles,
+          })
+          window.dispatchEvent(event)
+        }, 100)
       }
-    };
+    }
 
     const handleGlobalDragOver = (e) => {
-      e.preventDefault();
-    };
+      e.preventDefault()
+    }
 
-    window.addEventListener('drop', handleGlobalDrop);
-    window.addEventListener('dragover', handleGlobalDragOver);
+    window.addEventListener('drop', handleGlobalDrop)
+    window.addEventListener('dragover', handleGlobalDragOver)
 
     return () => {
-      window.removeEventListener('drop', handleGlobalDrop);
-      window.removeEventListener('dragover', handleGlobalDragOver);
-    };
-  }, [user, uploadModalOpen, setUploadModalOpen]);
+      window.removeEventListener('drop', handleGlobalDrop)
+      window.removeEventListener('dragover', handleGlobalDragOver)
+    }
+  }, [user, uploadModalOpen, setUploadModalOpen])
 
   // Set initial language on mount
   React.useEffect(() => {
-    const savedLang = localStorage.getItem('photoVaultLanguage') || 'no';
-    i18n.changeLanguage(savedLang);
-  }, []);
+    const savedLang = localStorage.getItem('photoVaultLanguage') || 'no'
+    i18n.changeLanguage(savedLang)
+  }, [])
 
   // Show loading spinner
   if (loading) {
@@ -173,21 +178,27 @@ function AppContent() {
       <div className="fixed inset-0 flex items-center justify-center">
         <div className="spinner" />
       </div>
-    );
+    )
   }
 
   // Show login if not authenticated
   if (!user) {
-    return <LoginPage />;
+    return <LoginPage />
   }
 
   // Show PIN lock screen if locked
   if (isLocked && pinEnabled) {
-    return <PINLockScreen />;
+    return <PINLockScreen />
   }
 
   // Determine if we should show bottom navigation
-  const showBottomNav = currentPage !== "album" && currentPage !== "admin" && currentPage !== "security" && currentPage !== "vault" && currentPage !== "profile" && currentPage !== "subscription";
+  const showBottomNav =
+    currentPage !== 'album' &&
+    currentPage !== 'admin' &&
+    currentPage !== 'security' &&
+    currentPage !== 'vault' &&
+    currentPage !== 'profile' &&
+    currentPage !== 'subscription'
 
   return (
     <div className="min-h-screen relative">
@@ -202,7 +213,7 @@ function AppContent() {
 
       {/* Main content - state-based rendering */}
       <main className="relative z-10">
-        {currentPage === "home" && (
+        {currentPage === 'home' && (
           <HomeDashboard
             albums={albums}
             photos={photos}
@@ -212,7 +223,7 @@ function AppContent() {
           />
         )}
 
-        {currentPage === "albums" && (
+        {currentPage === 'albums' && (
           <AlbumsPage
             albums={albums}
             photos={photos}
@@ -224,7 +235,7 @@ function AppContent() {
           />
         )}
 
-        {currentPage === "search" && (
+        {currentPage === 'search' && (
           <SearchPage
             photos={photos}
             albums={albums}
@@ -233,7 +244,7 @@ function AppContent() {
           />
         )}
 
-        {currentPage === "more" && (
+        {currentPage === 'more' && (
           <MorePage
             user={userProfile || user}
             storageUsed={storageUsed}
@@ -247,46 +258,49 @@ function AppContent() {
           />
         )}
 
-        {currentPage === "security" && (
-          <SecuritySettings
-            onBack={() => setCurrentPage("more")}
-          />
+        {currentPage === 'security' && (
+          <SecuritySettings onBack={() => setCurrentPage('more')} />
         )}
 
-        {currentPage === "vault" && (
-          <VaultPage />
+        {currentPage === 'vault' && <VaultPage />}
+
+        {currentPage === 'profile' && (
+          <ProfilePage onBack={() => setCurrentPage('more')} />
         )}
 
-        {currentPage === "profile" && (
-          <ProfilePage
-            onBack={() => setCurrentPage("more")}
-          />
+        {currentPage === 'subscription' && (
+          <SubscriptionPage onBack={() => setCurrentPage('more')} />
         )}
 
-        {currentPage === "subscription" && (
-          <SubscriptionPage
-            onBack={() => setCurrentPage("more")}
-          />
-        )}
-
-        {currentPage === "album" && selectedAlbum && (
+        {currentPage === 'album' && selectedAlbum && (
           <AlbumPage
             album={selectedAlbum}
             user={userProfile || user}
             photos={photos}
             onBack={() => {
-              setCurrentPage("albums");
-              setSelectedAlbum(null);
+              setCurrentPage('albums')
+              setSelectedAlbum(null)
             }}
             refreshData={refreshData}
             colors={{}}
           />
         )}
 
-        {currentPage === "admin" && isAdmin && (
-          <AdminDashboard
-            onBack={() => setCurrentPage("more")}
-          />
+        {console.log('🔍 Current page state:', currentPage)}
+        {console.log('🔍 isAdmin value:', isAdmin)}
+
+        {currentPage === 'admin' && isAdmin && (
+          <>
+            {console.log('🔍 RENDERING ADMIN DASHBOARD')}
+            {console.log('🔍 currentPage:', currentPage)}
+            {console.log('🔍 isAdmin:', isAdmin)}
+            <AdminDashboard
+              onBack={() => {
+                console.log('🔍 BACK BUTTON CLICKED')
+                setCurrentPage('more')
+              }}
+            />
+          </>
         )}
       </main>
 
@@ -296,9 +310,9 @@ function AppContent() {
           <div className="flex justify-around items-center gap-2">
             {/* Home */}
             <button
-              onClick={() => setCurrentPage("home")}
+              onClick={() => setCurrentPage('home')}
               className={`ripple-effect nav-item-premium ${
-                currentPage === "home" ? "active" : ""
+                currentPage === 'home' ? 'active' : ''
               }`}
             >
               <Home className="w-6 h-6" />
@@ -307,9 +321,9 @@ function AppContent() {
 
             {/* Albums */}
             <button
-              onClick={() => setCurrentPage("albums")}
+              onClick={() => setCurrentPage('albums')}
               className={`ripple-effect nav-item-premium ${
-                currentPage === "albums" ? "active" : ""
+                currentPage === 'albums' ? 'active' : ''
               }`}
             >
               <FolderOpen className="w-6 h-6" />
@@ -327,9 +341,9 @@ function AppContent() {
 
             {/* Search */}
             <button
-              onClick={() => setCurrentPage("search")}
+              onClick={() => setCurrentPage('search')}
               className={`ripple-effect nav-item-premium ${
-                currentPage === "search" ? "active" : ""
+                currentPage === 'search' ? 'active' : ''
               }`}
             >
               <Search className="w-6 h-6" />
@@ -338,9 +352,9 @@ function AppContent() {
 
             {/* More */}
             <button
-              onClick={() => setCurrentPage("more")}
+              onClick={() => setCurrentPage('more')}
               className={`ripple-effect nav-item-premium ${
-                currentPage === "more" ? "active" : ""
+                currentPage === 'more' ? 'active' : ''
               }`}
             >
               <Menu className="w-6 h-6" />
@@ -365,8 +379,8 @@ function AppContent() {
         <AlbumModal
           album={editingAlbum}
           onClose={() => {
-            setAlbumModalOpen(false);
-            setEditingAlbum(null);
+            setAlbumModalOpen(false)
+            setEditingAlbum(null)
           }}
           onSave={(albumData) => handleAlbumSave(albumData, editingAlbum)}
         />
@@ -401,7 +415,7 @@ function AppContent() {
         />
       )}
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
