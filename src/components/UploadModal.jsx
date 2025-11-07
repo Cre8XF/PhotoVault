@@ -4,6 +4,7 @@
 // ============================================================================
 import AlbumModal from './AlbumModal'
 import React, { useState, useRef, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import {
   X,
   Upload,
@@ -264,7 +265,9 @@ const UploadModal = ({
       <div
         ref={modalRef}
         tabIndex="-1"
-        className="bg-[var(--bg-secondary)] rounded-2xl shadow-2xl border border-white/10 w-full max-w-2xl max-h-[85vh] overflow-y-auto modal-content-enhanced pb-24 md:pb-8"
+        className={`bg-[var(--bg-secondary)] rounded-2xl shadow-2xl border border-white/10 w-full max-w-2xl max-h-[85vh] overflow-y-auto modal-content-enhanced pb-24 md:pb-8 ${
+          showAlbumModal ? 'pointer-events-none opacity-50' : ''
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -526,14 +529,21 @@ const UploadModal = ({
               : t('upload:uploadButton', { count: selectedFiles.length })}
           </button>
 
-          {showAlbumModal && (
-            <div className="fixed inset-0 z-[1100]">
-              <AlbumModal
-                onClose={() => setShowAlbumModal(false)}
-                onSave={handleAlbumSave}
-              />
-            </div>
-          )}
+          {showAlbumModal &&
+            createPortal(
+              <div
+                className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/50 animate-fade-in"
+                onClick={() => setShowAlbumModal(false)}
+              >
+                <div onClick={(e) => e.stopPropagation()}>
+                  <AlbumModal
+                    onClose={() => setShowAlbumModal(false)}
+                    onSave={handleAlbumSave}
+                  />
+                </div>
+              </div>,
+              document.body
+            )}
         </div>
       </div>
     </div>

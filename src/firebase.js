@@ -100,8 +100,24 @@ export async function addAlbum(data) {
     userId: user.uid, // 🔹 viktig
   }
 
+  // Current: Global albums collection
   const refDoc = await addDoc(collection(db, 'albums'), payload)
   console.log(`📂 Album opprettet for bruker ${user.uid}: ${payload.name}`)
+
+  /* FUTURE: Nested albums under user (Phase 2)
+  const albumRef = collection(db, 'users', user.uid, 'albums');
+  await addDoc(albumRef, {
+    ...payload,
+    userId: user.uid,
+    createdAt: serverTimestamp()
+  });
+  Benefits:
+  - Better data isolation
+  - Easier security rules
+  - Per-user album limits
+  - Improved query performance
+  */
+
   return refDoc.id
 }
 
