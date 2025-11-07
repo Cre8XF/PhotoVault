@@ -1,8 +1,8 @@
 // ============================================================================
 // firebase.js – komplett integrasjon (v3.1) med konsolidert cover-funksjon
 // ============================================================================
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { initializeApp } from 'firebase/app'
+import { getAuth } from 'firebase/auth'
 
 import {
   getFirestore,
@@ -19,14 +19,14 @@ import {
   getDoc,
   limit,
   startAfter,
-} from "firebase/firestore";
+} from 'firebase/firestore'
 import {
   getStorage,
   ref,
   uploadBytes,
   getDownloadURL,
   deleteObject,
-} from "firebase/storage";
+} from 'firebase/storage'
 
 // 🔗 Firebase-konfig (from environment variables)
 const firebaseConfig = {
@@ -36,7 +36,7 @@ const firebaseConfig = {
   storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.REACT_APP_FIREBASE_APP_ID,
-};
+}
 
 // Validate required environment variables
 const requiredEnvVars = [
@@ -44,19 +44,24 @@ const requiredEnvVars = [
   'REACT_APP_FIREBASE_AUTH_DOMAIN',
   'REACT_APP_FIREBASE_PROJECT_ID',
   'REACT_APP_FIREBASE_STORAGE_BUCKET',
-];
+]
 
-const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+const missingVars = requiredEnvVars.filter((varName) => !process.env[varName])
 if (missingVars.length > 0) {
-  console.error('❌ Missing required environment variables:', missingVars.join(', '));
-  console.error('Please check your .env file and ensure all Firebase config variables are set.');
+  console.error(
+    '❌ Missing required environment variables:',
+    missingVars.join(', ')
+  )
+  console.error(
+    'Please check your .env file and ensure all Firebase config variables are set.'
+  )
 }
 
 // 🚀 Initialiser Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const storage = getStorage(app);
-const auth = getAuth(app);
+const app = initializeApp(firebaseConfig)
+const db = getFirestore(app)
+const storage = getStorage(app)
+const auth = getAuth(app)
 
 // ============================================================================
 // 📁 Firestore-funksjoner
@@ -65,107 +70,111 @@ const auth = getAuth(app);
 // 🔹 Hent alle album for en bruker
 export async function getAlbumsByUser(userId) {
   try {
-    const q = query(collection(db, "albums"), where("userId", "==", userId));
-    const snap = await getDocs(q);
+    const q = query(collection(db, 'albums'), where('userId', '==', userId))
+    const snap = await getDocs(q)
     return snap.docs.map((d) => {
-      const data = d.data();
-      if (!data.createdAt) data.createdAt = new Date().toISOString();
-      if (!data.updatedAt) data.updatedAt = data.createdAt;
-      if (!("photoCount" in data)) data.photoCount = 0;
-      return { id: d.id, ...data };
-    });
+      const data = d.data()
+      if (!data.createdAt) data.createdAt = new Date().toISOString()
+      if (!data.updatedAt) data.updatedAt = data.createdAt
+      if (!('photoCount' in data)) data.photoCount = 0
+      return { id: d.id, ...data }
+    })
   } catch (err) {
-    console.error("🔥 getAlbumsByUser:", err);
-    return [];
+    console.error('🔥 getAlbumsByUser:', err)
+    return []
   }
 }
 
 // 🔹 Legg til nytt album
 export async function addAlbum(data) {
-  const now = new Date().toISOString();
+  const now = new Date().toISOString()
+  const user = auth.currentUser
+  if (!user) throw new Error('Ingen bruker logget inn')
+
   const payload = {
-    name: data.name || data.title || "Uten navn",
+    name: data.name || data.title || 'Uten navn',
     createdAt: data.createdAt || now,
     updatedAt: now,
     photoCount: 0,
-    cover: data.cover || "",
-    userId: data.userId || "",
-  };
-  const refDoc = await addDoc(collection(db, "albums"), payload);
-  console.log(`📂 Album opprettet: ${payload.name}`);
-  return refDoc.id;
+    cover: data.cover || '',
+    userId: user.uid, // 🔹 viktig
+  }
+
+  const refDoc = await addDoc(collection(db, 'albums'), payload)
+  console.log(`📂 Album opprettet for bruker ${user.uid}: ${payload.name}`)
+  return refDoc.id
 }
 
 // 🔹 Oppdater album
 export async function updateAlbum(albumId, updates) {
   try {
-    const refDoc = doc(db, "albums", albumId);
+    const refDoc = doc(db, 'albums', albumId)
     await updateDoc(refDoc, {
       ...updates,
       updatedAt: new Date().toISOString(),
-    });
-    console.log(`📝 Album oppdatert (${albumId})`);
+    })
+    console.log(`📝 Album oppdatert (${albumId})`)
   } catch (err) {
-    console.error("🔥 updateAlbum:", err);
+    console.error('🔥 updateAlbum:', err)
   }
 }
 
 // 🔹 Sett cover-bilde (KONSOLIDERT FUNKSJON)
 export async function setAlbumCover(albumId, photoUrl) {
   try {
-    const refDoc = doc(db, "albums", albumId);
+    const refDoc = doc(db, 'albums', albumId)
     await updateDoc(refDoc, {
       cover: photoUrl,
       updatedAt: new Date().toISOString(),
-    });
-    console.log(`🖼️ Cover oppdatert for album ${albumId}`);
+    })
+    console.log(`🖼️ Cover oppdatert for album ${albumId}`)
   } catch (err) {
-    console.error("🔥 setAlbumCover:", err);
-    throw err;
+    console.error('🔥 setAlbumCover:', err)
+    throw err
   }
 }
 
 // 🔹 Hent alle bilder for bruker
 export async function getPhotosByUser(userId) {
   try {
-    const q = query(collection(db, "photos"), where("userId", "==", userId));
-    const snap = await getDocs(q);
+    const q = query(collection(db, 'photos'), where('userId', '==', userId))
+    const snap = await getDocs(q)
 
     return snap.docs.map((d) => {
-      const data = d.data();
+      const data = d.data()
 
       // 🔧 Konverter Firestore Timestamp til ISO-streng
       if (data.createdAt?.toDate)
-        data.createdAt = data.createdAt.toDate().toISOString();
+        data.createdAt = data.createdAt.toDate().toISOString()
       if (data.updatedAt?.toDate)
-        data.updatedAt = data.updatedAt.toDate().toISOString();
+        data.updatedAt = data.updatedAt.toDate().toISOString()
 
-      if (!data.createdAt) data.createdAt = new Date().toISOString();
-      if (!data.updatedAt) data.updatedAt = data.createdAt;
-      if (!("favorite" in data)) data.favorite = false;
-      
+      if (!data.createdAt) data.createdAt = new Date().toISOString()
+      if (!data.updatedAt) data.updatedAt = data.createdAt
+      if (!('favorite' in data)) data.favorite = false
+
       // AI-felt defaults
-      if (!data.aiTags) data.aiTags = [];
-      if (!("faces" in data)) data.faces = 0;
-      if (!("aiAnalyzed" in data)) data.aiAnalyzed = false;
+      if (!data.aiTags) data.aiTags = []
+      if (!('faces' in data)) data.faces = 0
+      if (!('aiAnalyzed' in data)) data.aiAnalyzed = false
 
-      return { id: d.id, ...data };
-    });
+      return { id: d.id, ...data }
+    })
   } catch (err) {
-    console.error("🔥 getPhotosByUser:", err);
-    return [];
+    console.error('🔥 getPhotosByUser:', err)
+    return []
   }
 }
 
 // 🔹 Legg til nytt bilde
 export async function addPhoto(data) {
-  const now = new Date().toISOString();
+  const now = new Date().toISOString()
   const payload = {
     ...data,
     createdAt: data.createdAt || now,
     updatedAt: now,
     favorite: data.favorite || false,
-    
+
     // AI-defaults
     aiTags: data.aiTags || [],
     faces: data.faces || 0,
@@ -178,43 +187,43 @@ export async function addPhoto(data) {
     bgRemoved: data.bgRemoved || false,
     noBgUrl: data.noBgUrl || null,
     bgRemovedAt: data.bgRemovedAt || null,
-  };
+  }
 
-  const refDoc = await addDoc(collection(db, "photos"), payload);
-  console.log(`📸 Bilde lagret: ${refDoc.id}`);
-  return refDoc.id;
+  const refDoc = await addDoc(collection(db, 'photos'), payload)
+  console.log(`📸 Bilde lagret: ${refDoc.id}`)
+  return refDoc.id
 }
 
 // 🔹 Oppdater metadata for et bilde
 export async function updatePhoto(photoId, updates) {
   try {
-    const refDoc = doc(db, "photos", photoId);
+    const refDoc = doc(db, 'photos', photoId)
     await updateDoc(refDoc, {
       ...updates,
       updatedAt: new Date().toISOString(),
-    });
+    })
   } catch (err) {
-    console.error("🔥 updatePhoto:", err);
+    console.error('🔥 updatePhoto:', err)
   }
 }
 
 // ⭐ Toggle favoritt-status
 export async function toggleFavorite(photoId, currentStatus) {
   try {
-    const refDoc = doc(db, "photos", photoId);
-    const newStatus = !currentStatus;
+    const refDoc = doc(db, 'photos', photoId)
+    const newStatus = !currentStatus
 
     await updateDoc(refDoc, {
       favorite: newStatus,
       updatedAt: new Date().toISOString(),
-    });
+    })
 
-    console.log(`⭐ Favoritt oppdatert: ${photoId} → ${newStatus}`);
-    return newStatus;
+    console.log(`⭐ Favoritt oppdatert: ${photoId} → ${newStatus}`)
+    return newStatus
   } catch (err) {
-    console.error("🔥 toggleFavorite error:", err);
-    console.error("PhotoId:", photoId, "CurrentStatus:", currentStatus);
-    throw err;
+    console.error('🔥 toggleFavorite error:', err)
+    console.error('PhotoId:', photoId, 'CurrentStatus:', currentStatus)
+    throw err
   }
 }
 
@@ -222,39 +231,39 @@ export async function toggleFavorite(photoId, currentStatus) {
 export async function deletePhoto(photoId, storagePath) {
   try {
     if (storagePath) {
-      const storageRef = ref(storage, storagePath);
-      await deleteObject(storageRef);
+      const storageRef = ref(storage, storagePath)
+      await deleteObject(storageRef)
     }
-    await deleteDoc(doc(db, "photos", photoId));
+    await deleteDoc(doc(db, 'photos', photoId))
   } catch (err) {
-    console.error("🔥 deletePhoto:", err);
+    console.error('🔥 deletePhoto:', err)
   }
 }
 
 // 🔹 Oppdater antall bilder i et album
 export async function updateAlbumPhotoCount(albumId, newCount) {
   try {
-    const refDoc = doc(db, "albums", albumId);
+    const refDoc = doc(db, 'albums', albumId)
     await updateDoc(refDoc, {
       photoCount: newCount,
       updatedAt: new Date().toISOString(),
-    });
+    })
   } catch (err) {
-    console.error("🔥 updateAlbumPhotoCount:", err);
+    console.error('🔥 updateAlbumPhotoCount:', err)
   }
 }
 
 // 🔹 Oppdater hvilket album et bilde tilhører
 export async function updatePhotoAlbum(photoId, targetAlbumId) {
   try {
-    const photoRef = doc(db, "photos", photoId);
-    await updateDoc(photoRef, { 
+    const photoRef = doc(db, 'photos', photoId)
+    await updateDoc(photoRef, {
       albumId: targetAlbumId,
-      updatedAt: new Date().toISOString()
-    });
+      updatedAt: new Date().toISOString(),
+    })
   } catch (err) {
-    console.error("🔥 updatePhotoAlbum:", err);
-    throw err;
+    console.error('🔥 updatePhotoAlbum:', err)
+    throw err
   }
 }
 
@@ -263,41 +272,50 @@ export async function updatePhotoAlbum(photoId, targetAlbumId) {
 // ============================================================================
 
 // 🔹 Last opp bildefil komplett (Storage + Firestore) med AI-støtte
-export async function uploadPhoto(userId, file, albumId = null, aiTagging = false, thumbnailBlob = null, videoMetadata = null) {
+export async function uploadPhoto(
+  userId,
+  file,
+  albumId = null,
+  aiTagging = false,
+  thumbnailBlob = null,
+  videoMetadata = null
+) {
   try {
     // Determine if this is a video
-    const isVideo = file.type && file.type.startsWith('video/');
+    const isVideo = file.type && file.type.startsWith('video/')
 
     // 1. Upload thumbnail to Storage (if provided for video)
-    let thumbnailUrl = null;
+    let thumbnailUrl = null
     if (isVideo && thumbnailBlob) {
       try {
-        const timestamp = Date.now();
-        const thumbName = file.name.replace(/\.[^.]+$/, '_thumb.jpg');
-        const thumbSafeName = thumbName.replace(/\s+/g, "_");
-        const thumbPath = `users/${userId}/thumbnails/${timestamp}_${thumbSafeName}`;
-        const thumbRef = ref(storage, thumbPath);
+        const timestamp = Date.now()
+        const thumbName = file.name.replace(/\.[^.]+$/, '_thumb.jpg')
+        const thumbSafeName = thumbName.replace(/\s+/g, '_')
+        const thumbPath = `users/${userId}/thumbnails/${timestamp}_${thumbSafeName}`
+        const thumbRef = ref(storage, thumbPath)
 
-        await uploadBytes(thumbRef, thumbnailBlob);
-        thumbnailUrl = await getDownloadURL(thumbRef);
-        console.log('✅ [Upload] Thumbnail uploaded:', thumbnailUrl);
+        await uploadBytes(thumbRef, thumbnailBlob)
+        thumbnailUrl = await getDownloadURL(thumbRef)
+        console.log('✅ [Upload] Thumbnail uploaded:', thumbnailUrl)
       } catch (thumbError) {
-        console.error('❌ [Upload] Thumbnail upload failed:', thumbError);
+        console.error('❌ [Upload] Thumbnail upload failed:', thumbError)
         // Continue without thumbnail
       }
     }
 
     // 2. Upload main file to Storage
-    const timestamp = Date.now();
-    const safeName = file.name.replace(/\s+/g, "_");
-    const folderPath = albumId || "unassigned";
-    const storagePath = `users/${userId}/${folderPath}/${timestamp}_${safeName}`;
-    const storageRef = ref(storage, storagePath);
+    const timestamp = Date.now()
+    const safeName = file.name.replace(/\s+/g, '_')
+    const folderPath = albumId || 'unassigned'
+    const storagePath = `users/${userId}/${folderPath}/${timestamp}_${safeName}`
+    const storageRef = ref(storage, storagePath)
 
-    await uploadBytes(storageRef, file, { contentType: file.type });
-    const downloadURL = await getDownloadURL(storageRef);
+    await uploadBytes(storageRef, file, { contentType: file.type })
+    const downloadURL = await getDownloadURL(storageRef)
 
-    console.log(`📸 ${isVideo ? 'Video' : 'Bilde'} lastet opp til Storage: ${safeName}`);
+    console.log(
+      `📸 ${isVideo ? 'Video' : 'Bilde'} lastet opp til Storage: ${safeName}`
+    )
 
     // 3. Prepare metadata
     const photoData = {
@@ -313,7 +331,11 @@ export async function uploadPhoto(userId, file, albumId = null, aiTagging = fals
       // Video-specific fields
       ...(isVideo && {
         thumbnailUrl: thumbnailUrl,
-        metadata: videoMetadata || { duration: 0, resolution: 'unknown', fps: null }
+        metadata: videoMetadata || {
+          duration: 0,
+          resolution: 'unknown',
+          fps: null,
+        },
       }),
 
       // AI-felt (Fase 4.0)
@@ -330,77 +352,77 @@ export async function uploadPhoto(userId, file, albumId = null, aiTagging = fals
       bgRemovedAt: null,
 
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+      updatedAt: new Date().toISOString(),
+    }
 
     // 3. AI-tagging (hvis aktivert) - Fase 4.1
     if (aiTagging) {
       try {
-        console.log("🤖 Starter AI-analyse...");
-        
+        console.log('🤖 Starter AI-analyse...')
+
         // Import gjøres her for å unngå circular dependency
-        const { analyzeImage } = await import('./utils/googleVision');
-        
+        const { analyzeImage } = await import('./utils/googleVision')
+
         const analysis = await analyzeImage(downloadURL, {
           detectLabels: true,
           detectFaces: true,
           detectSafeSearch: true,
-          maxLabels: 10
-        });
-        
+          maxLabels: 10,
+        })
+
         // Oppdater photoData med AI-resultater
-        photoData.aiTags = analysis.labels.map(l => l.name);
-        photoData.faces = analysis.faces;
-        photoData.category = analysis.category || null;
-        photoData.aiAnalyzed = true;
-        photoData.analyzedAt = new Date().toISOString();
-        
-        console.log(`✅ AI-analyse fullført: ${photoData.aiTags.length} tags, ${photoData.faces} ansikter`);
-        
+        photoData.aiTags = analysis.labels.map((l) => l.name)
+        photoData.faces = analysis.faces
+        photoData.category = analysis.category || null
+        photoData.aiAnalyzed = true
+        photoData.analyzedAt = new Date().toISOString()
+
+        console.log(
+          `✅ AI-analyse fullført: ${photoData.aiTags.length} tags, ${photoData.faces} ansikter`
+        )
       } catch (aiError) {
-        console.warn("⚠️ AI-analyse feilet:", aiError.message);
+        console.warn('⚠️ AI-analyse feilet:', aiError.message)
         // Fortsett med opplasting selv om AI feiler
       }
     }
 
     // 4. Lagre metadata i Firestore
-    const photoId = await addPhoto(photoData);
-    console.log(`✅ Bilde lagret i Firestore: ${photoId}`);
+    const photoId = await addPhoto(photoData)
+    console.log(`✅ Bilde lagret i Firestore: ${photoId}`)
 
     // 5. Oppdater album photoCount (hvis albumId finnes)
     if (albumId) {
       try {
-        const albumRef = doc(db, "albums", albumId);
-        const albumSnap = await getDoc(albumRef);
+        const albumRef = doc(db, 'albums', albumId)
+        const albumSnap = await getDoc(albumRef)
         if (albumSnap.exists()) {
-          const currentCount = albumSnap.data().photoCount || 0;
-          await updateAlbumPhotoCount(albumId, currentCount + 1);
-          console.log(`📂 Album photoCount oppdatert: ${albumId}`);
+          const currentCount = albumSnap.data().photoCount || 0
+          await updateAlbumPhotoCount(albumId, currentCount + 1)
+          console.log(`📂 Album photoCount oppdatert: ${albumId}`)
         }
       } catch (err) {
-        console.warn("⚠️ Kunne ikke oppdatere album count:", err);
+        console.warn('⚠️ Kunne ikke oppdatere album count:', err)
       }
     }
 
-    return photoId;
-
+    return photoId
   } catch (error) {
-    console.error("🔥 uploadPhoto error:", error);
-    throw new Error(`Upload feilet: ${error.message}`);
+    console.error('🔥 uploadPhoto error:', error)
+    throw new Error(`Upload feilet: ${error.message}`)
   }
 }
 
 // 🔹 Last opp thumbnail
-export async function uploadThumbnail(blob, userId, photoId, size = "small") {
+export async function uploadThumbnail(blob, userId, photoId, size = 'small') {
   try {
-    const storagePath = `users/${userId}/thumbnails/${photoId}_${size}.jpg`;
-    const storageRef = ref(storage, storagePath);
-    await uploadBytes(storageRef, blob);
-    const downloadURL = await getDownloadURL(storageRef);
-    return { downloadURL, storagePath };
+    const storagePath = `users/${userId}/thumbnails/${photoId}_${size}.jpg`
+    const storageRef = ref(storage, storagePath)
+    await uploadBytes(storageRef, blob)
+    const downloadURL = await getDownloadURL(storageRef)
+    return { downloadURL, storagePath }
   } catch (error) {
-    console.error("🔥 uploadThumbnail:", error);
-    throw new Error(error.message);
+    console.error('🔥 uploadThumbnail:', error)
+    throw new Error(error.message)
   }
 }
 
@@ -415,56 +437,61 @@ export async function uploadThumbnail(blob, userId, photoId, size = "small") {
  * @param {object} lastDoc - Last document from previous page (for startAfter)
  * @returns {object} { photos, lastDoc, hasMore }
  */
-export async function getPhotosByUserPaginated(userId, pageSize = 20, lastDoc = null) {
+export async function getPhotosByUserPaginated(
+  userId,
+  pageSize = 20,
+  lastDoc = null
+) {
   try {
     let q = query(
-      collection(db, "photos"),
-      where("userId", "==", userId),
-      orderBy("createdAt", "desc"),
+      collection(db, 'photos'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc'),
       limit(pageSize)
-    );
+    )
 
     // If lastDoc is provided, start after it
     if (lastDoc) {
       q = query(
-        collection(db, "photos"),
-        where("userId", "==", userId),
-        orderBy("createdAt", "desc"),
+        collection(db, 'photos'),
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc'),
         startAfter(lastDoc),
         limit(pageSize)
-      );
+      )
     }
 
-    const snap = await getDocs(q);
+    const snap = await getDocs(q)
     const photos = snap.docs.map((d) => {
-      const data = d.data();
+      const data = d.data()
 
       // Convert Firestore Timestamp to ISO string
       if (data.createdAt?.toDate)
-        data.createdAt = data.createdAt.toDate().toISOString();
+        data.createdAt = data.createdAt.toDate().toISOString()
       if (data.updatedAt?.toDate)
-        data.updatedAt = data.updatedAt.toDate().toISOString();
+        data.updatedAt = data.updatedAt.toDate().toISOString()
 
-      if (!data.createdAt) data.createdAt = new Date().toISOString();
-      if (!data.updatedAt) data.updatedAt = data.createdAt;
-      if (!("favorite" in data)) data.favorite = false;
+      if (!data.createdAt) data.createdAt = new Date().toISOString()
+      if (!data.updatedAt) data.updatedAt = data.createdAt
+      if (!('favorite' in data)) data.favorite = false
 
       // AI field defaults
-      if (!data.aiTags) data.aiTags = [];
-      if (!("faces" in data)) data.faces = 0;
-      if (!("aiAnalyzed" in data)) data.aiAnalyzed = false;
+      if (!data.aiTags) data.aiTags = []
+      if (!('faces' in data)) data.faces = 0
+      if (!('aiAnalyzed' in data)) data.aiAnalyzed = false
 
-      return { id: d.id, ...data };
-    });
+      return { id: d.id, ...data }
+    })
 
     // Get last document for next page
-    const newLastDoc = snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null;
-    const hasMore = snap.docs.length === pageSize;
+    const newLastDoc =
+      snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null
+    const hasMore = snap.docs.length === pageSize
 
-    return { photos, lastDoc: newLastDoc, hasMore };
+    return { photos, lastDoc: newLastDoc, hasMore }
   } catch (err) {
-    console.error("🔥 getPhotosByUserPaginated:", err);
-    return { photos: [], lastDoc: null, hasMore: false };
+    console.error('🔥 getPhotosByUserPaginated:', err)
+    return { photos: [], lastDoc: null, hasMore: false }
   }
 }
 
@@ -475,45 +502,50 @@ export async function getPhotosByUserPaginated(userId, pageSize = 20, lastDoc = 
  * @param {object} lastDoc - Last document from previous page
  * @returns {object} { albums, lastDoc, hasMore }
  */
-export async function getAlbumsByUserPaginated(userId, pageSize = 10, lastDoc = null) {
+export async function getAlbumsByUserPaginated(
+  userId,
+  pageSize = 10,
+  lastDoc = null
+) {
   try {
     let q = query(
-      collection(db, "albums"),
-      where("userId", "==", userId),
-      orderBy("updatedAt", "desc"),
+      collection(db, 'albums'),
+      where('userId', '==', userId),
+      orderBy('updatedAt', 'desc'),
       limit(pageSize)
-    );
+    )
 
     if (lastDoc) {
       q = query(
-        collection(db, "albums"),
-        where("userId", "==", userId),
-        orderBy("updatedAt", "desc"),
+        collection(db, 'albums'),
+        where('userId', '==', userId),
+        orderBy('updatedAt', 'desc'),
         startAfter(lastDoc),
         limit(pageSize)
-      );
+      )
     }
 
-    const snap = await getDocs(q);
+    const snap = await getDocs(q)
     const albums = snap.docs.map((d) => {
-      const data = d.data();
-      if (!data.createdAt) data.createdAt = new Date().toISOString();
-      if (!data.updatedAt) data.updatedAt = data.createdAt;
-      if (!("photoCount" in data)) data.photoCount = 0;
-      return { id: d.id, ...data };
-    });
+      const data = d.data()
+      if (!data.createdAt) data.createdAt = new Date().toISOString()
+      if (!data.updatedAt) data.updatedAt = data.createdAt
+      if (!('photoCount' in data)) data.photoCount = 0
+      return { id: d.id, ...data }
+    })
 
-    const newLastDoc = snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null;
-    const hasMore = snap.docs.length === pageSize;
+    const newLastDoc =
+      snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null
+    const hasMore = snap.docs.length === pageSize
 
-    return { albums, lastDoc: newLastDoc, hasMore };
+    return { albums, lastDoc: newLastDoc, hasMore }
   } catch (err) {
-    console.error("🔥 getAlbumsByUserPaginated:", err);
-    return { albums: [], lastDoc: null, hasMore: false };
+    console.error('🔥 getAlbumsByUserPaginated:', err)
+    return { albums: [], lastDoc: null, hasMore: false }
   }
 }
 
 // ============================================================================
 // 📦 Eksporter Firebase-objekter
 // ============================================================================
-export { db, storage, auth };
+export { db, storage, auth }
