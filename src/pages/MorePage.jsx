@@ -1052,7 +1052,11 @@ const MorePage = ({
 
           <div className="grid md:grid-cols-2 gap-3">
             <button
-              onClick={() => onNavigate('admin')}
+              onClick={() => {
+                console.log('🔍 User management clicked')
+                console.log('🔍 onNavigate prop:', onNavigate)
+                onNavigate('admin')
+              }}
               className="ripple-effect bg-yellow-600/10 hover:bg-yellow-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-yellow-500/30"
             >
               <Users className="w-5 h-5 text-yellow-400" />
@@ -1064,7 +1068,11 @@ const MorePage = ({
             </button>
 
             <button
-              onClick={() => onNavigate('admin')}
+              onClick={() => {
+                console.log('🔍 Database tools clicked')
+                console.log('🔍 onNavigate prop:', onNavigate)
+                onNavigate('admin')
+              }}
               className="ripple-effect bg-yellow-600/10 hover:bg-yellow-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-yellow-500/30"
             >
               <HardDrive className="w-5 h-5 text-yellow-400" />
