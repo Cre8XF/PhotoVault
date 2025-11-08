@@ -39,6 +39,8 @@ import {
   Upload,
   Check,
   Lock,
+  Folder,
+  Image,
 } from 'lucide-react'
 import { useSecurityContext } from '../contexts/SecurityContext'
 // Storage imports now in useStorageCalc hook
