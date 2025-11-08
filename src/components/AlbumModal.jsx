@@ -114,6 +114,7 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        tabIndex={-1}
         className="w-full max-w-md rounded-2xl shadow-2xl border border-gray-700/40
                     bg-gradient-to-b from-gray-800/90 to-gray-900/90 p-6 backdrop-blur-xl"
       >
