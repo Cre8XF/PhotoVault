@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions
+    // ===== HELPER FUNCTIONS =====
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -20,11 +20,10 @@ service cloud.firestore {
     }
 
     function userIdUnchanged() {
-      return resource.data.userId == request.resource.data.userId;
+      return !('userId' in resource.data) || resource.data.userId == request.resource.data.userId;
     }
 
-    // Main rule: All authenticated users can READ everything,
-    // but can only CREATE/EDIT/DELETE their own data
+    // ===== TOP-LEVEL COLLECTIONS =====
     match /{collection}/{docId} {
       // Anyone authenticated can read
       allow read: if isAuthenticated();
@@ -32,14 +31,49 @@ service cloud.firestore {
       // Only owner can create (with their own userId) or admin
       allow create: if isOwnerOnCreate() || isAdmin();
 
-      // Only owner can update/delete (userId must not change) or admin
+      // Only owner can update/delete or admin
       // PLUS: fallback for old documents without userId
       allow update, delete: if isAdmin()
-        || (isOwner(resource.data.userId) && userIdUnchanged())
-        || !('userId' in resource.data); // Allow old docs without userId
+        || isOwner(resource.data.userId)
+        || !('userId' in resource.data); // Fallback for old docs
     }
 
-    // Explicitly deny anything else
+    // ===== USER DOCUMENTS & SUBCOLLECTIONS =====
+    match /users/{userId} {
+      // User document itself
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId) || isAdmin();
+
+      // Subcollection: users/{userId}/photos
+      match /photos/{photoId} {
+        allow read: if isAuthenticated();
+        allow create: if isOwner(userId) || isAdmin();
+        allow update, delete: if isOwner(userId) || isAdmin()
+          || !('userId' in resource.data);
+      }
+
+      // Subcollection: users/{userId}/albums
+      match /albums/{albumId} {
+        allow read: if isAuthenticated();
+        allow create: if isOwner(userId) || isAdmin();
+        allow update, delete: if isOwner(userId) || isAdmin()
+          || !('userId' in resource.data);
+      }
+
+      // Subcollection: users/{userId}/vault
+      match /vault/{vaultId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow write: if isOwner(userId) || isAdmin();
+      }
+
+      // Any other subcollections under users
+      match /{document=**} {
+        allow read: if isAuthenticated();
+        allow write: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    // ===== DENY EVERYTHING ELSE =====
     match /{document=**} {
       allow read, write: if false;
     }
