@@ -10,7 +10,7 @@ import PhotoGridOptimized from '../components/PhotoGridOptimized';
 import MoveModal from '../components/MoveModal';
 import { updatePhotoAlbum, updatePhoto } from '../firebase';
 import { doc, deleteDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import { Edit2, Trash2 } from 'lucide-react';
 import useStore from '../state/store';
 
@@ -40,6 +40,27 @@ const AlbumsPage = ({ albums, photos, onAlbumClick, onPhotoClick, refreshData, o
         try {
           setLoading(true);
 
+          // 🔍 DEBUG: Log album data before delete
+          console.log('🔍 DELETE DEBUG - Album data:', {
+            id: album.id,
+            name: album.name,
+            userId: album.userId,
+            hasUserId: 'userId' in album,
+            currentUser: auth.currentUser?.uid,
+            isMatch: album.userId === auth.currentUser?.uid,
+          });
+
+          // Check if album has userId
+          if (!album.userId) {
+            console.warn('⚠️ Album missing userId field - may cause permission error');
+            console.warn('⚠️ Please run the migration to fix old albums (see MorePage)');
+          }
+
+          // Check if user owns this album
+          if (album.userId && album.userId !== auth.currentUser?.uid) {
+            throw new Error('You do not own this album');
+          }
+
           // Remove albumId from all photos in this album
           for (const photo of albumPhotos) {
             await updatePhoto(photo.id, { albumId: null });
@@ -47,6 +68,8 @@ const AlbumsPage = ({ albums, photos, onAlbumClick, onPhotoClick, refreshData, o
 
           // Delete album from Firestore
           await deleteDoc(doc(db, 'albums', album.id));
+
+          console.log('✅ Album deleted successfully');
 
           // Refresh data
           if (refreshData) {
@@ -58,9 +81,20 @@ const AlbumsPage = ({ albums, photos, onAlbumClick, onPhotoClick, refreshData, o
             type: 'success'
           });
         } catch (error) {
-          console.error('Error deleting album:', error);
+          console.error('❌ Error deleting album:', error);
+          console.error('Error code:', error.code);
+          console.error('Error message:', error.message);
+
+          let errorMessage = t('common:error') || 'Feil ved sletting';
+
+          if (error.code === 'permission-denied') {
+            errorMessage = 'Permission denied. Album may be missing userId field. Check console and run migration.';
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+
           setNotification({
-            message: t('common:error') || 'Feil ved sletting',
+            message: errorMessage,
             type: 'error'
           });
         } finally {

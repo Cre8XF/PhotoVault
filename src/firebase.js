@@ -561,6 +561,100 @@ export async function getAlbumsByUserPaginated(
 }
 
 // ============================================================================
+// 🔧 Migration Functions
+// ============================================================================
+
+/**
+ * Migration: Add userId to albums that are missing it
+ * Run this ONCE to fix old data
+ */
+export async function migrateAlbumsAddUserId() {
+  try {
+    const currentUserId = auth.currentUser?.uid
+    if (!currentUserId) {
+      throw new Error('No user logged in')
+    }
+
+    console.log('🔧 Starting migration: Adding userId to albums...')
+
+    const albumsSnapshot = await getDocs(collection(db, 'albums'))
+    let fixed = 0
+    let skipped = 0
+
+    for (const albumDoc of albumsSnapshot.docs) {
+      const albumData = albumDoc.data()
+
+      // If album missing userId, add current user's ID
+      if (!albumData.userId) {
+        console.log(
+          `Fixing album: ${albumDoc.id} - "${albumData.name}" (missing userId)`
+        )
+        await updateDoc(doc(db, 'albums', albumDoc.id), {
+          userId: currentUserId,
+          updatedAt: new Date().toISOString(),
+        })
+        fixed++
+      } else {
+        skipped++
+      }
+    }
+
+    console.log(
+      `✅ Migration complete: ${fixed} albums fixed, ${skipped} already had userId`
+    )
+    return { fixed, skipped, total: albumsSnapshot.docs.length }
+  } catch (error) {
+    console.error('❌ Migration failed:', error)
+    throw error
+  }
+}
+
+/**
+ * Migration: Add userId to photos that are missing it
+ * Run this ONCE to fix old data
+ */
+export async function migratePhotosAddUserId() {
+  try {
+    const currentUserId = auth.currentUser?.uid
+    if (!currentUserId) {
+      throw new Error('No user logged in')
+    }
+
+    console.log('🔧 Starting migration: Adding userId to photos...')
+
+    const photosSnapshot = await getDocs(collection(db, 'photos'))
+    let fixed = 0
+    let skipped = 0
+
+    for (const photoDoc of photosSnapshot.docs) {
+      const photoData = photoDoc.data()
+
+      // If photo missing userId, add current user's ID
+      if (!photoData.userId) {
+        console.log(
+          `Fixing photo: ${photoDoc.id} - "${photoData.name || 'unnamed'}" (missing userId)`
+        )
+        await updateDoc(doc(db, 'photos', photoDoc.id), {
+          userId: currentUserId,
+          updatedAt: new Date().toISOString(),
+        })
+        fixed++
+      } else {
+        skipped++
+      }
+    }
+
+    console.log(
+      `✅ Migration complete: ${fixed} photos fixed, ${skipped} already had userId`
+    )
+    return { fixed, skipped, total: photosSnapshot.docs.length }
+  } catch (error) {
+    console.error('❌ Migration failed:', error)
+    throw error
+  }
+}
+
+// ============================================================================
 // 📦 Eksporter Firebase-objekter
 // ============================================================================
 export { db, storage, auth }
