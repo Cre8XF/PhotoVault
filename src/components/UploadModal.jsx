@@ -58,6 +58,7 @@ const UploadModal = ({
     return saved !== 'false'
   })
   const [aiTagging] = useState(false) // Always false for MVP
+  const [isCreatingAlbum, setIsCreatingAlbum] = useState(false) // Reentrancy guard
 
   // Refs
   const fileInputRef = useRef(null)
@@ -245,7 +246,10 @@ const UploadModal = ({
 
   // Handle create album
   const handleAlbumSave = async (albumData) => {
-    console.log('🔁 handleAlbumSave triggered')
+    // Reentrancy guard - prevent double creation in StrictMode
+    if (isCreatingAlbum) {
+      return
+    }
 
     const cleanAlbum = {
       name: String(albumData.name || '').trim(),
@@ -266,17 +270,22 @@ const UploadModal = ({
     }
 
     try {
-      // 🔹 Bare ett faktisk kall til Firestore
+      setIsCreatingAlbum(true)
+
+      // Single Firestore write - creates album document
       const newAlbumRef = await addAlbum(cleanAlbum)
 
       window.showToast?.('Album created 🎉', 'success')
       setShowAlbumModal(false)
 
-      // 🔹 Oppdater UI, men ikke opprett nytt dokument
+      // Notify parent to refresh UI - does NOT create another document
       if (onCreateAlbum) onCreateAlbum({ id: newAlbumRef.id, ...cleanAlbum })
     } catch (error) {
       console.error('Error creating album:', error)
       window.showToast?.('Failed to create album', 'error')
+    } finally {
+      // Reset guard after a delay to allow modal close animations
+      setTimeout(() => setIsCreatingAlbum(false), 1000)
     }
   }
 
