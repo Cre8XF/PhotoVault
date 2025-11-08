@@ -1,7 +1,7 @@
 // ============================================================================
-// usePhotoData Hook - Phase 2: Photo & Album Data Management
+// usePhotoData Hook - Phase 3: Photo & Album Data Management with Guards
 // ============================================================================
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { doc, deleteDoc } from 'firebase/firestore';
 import {
@@ -24,6 +24,12 @@ import useStore from '../state/store';
  */
 export const usePhotoData = () => {
   const { t } = useTranslation(['common']);
+
+  // Reentrancy guards (Phase 3)
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
   // Zustand store selectors
   const user = useStore((state) => state.user);
@@ -83,6 +89,12 @@ export const usePhotoData = () => {
    * Handle photo upload
    */
   const handleUpload = useCallback(async (selectedFiles, albumId, aiTagging = false) => {
+    // GUARD: Prevent duplicate uploads
+    if (isUploading) {
+      console.warn('Upload already in progress, ignoring duplicate call');
+      return;
+    }
+
     if (!user) {
       setNotification({
         message: t('common:notifications.mustBeLoggedIn'),
@@ -90,6 +102,8 @@ export const usePhotoData = () => {
       });
       return;
     }
+
+    setIsUploading(true);
 
     try {
       let successCount = 0;
@@ -121,14 +135,24 @@ export const usePhotoData = () => {
         type: 'error'
       });
       throw error;
+    } finally {
+      setIsUploading(false);
     }
-  }, [user, refreshData, setNotification, t]);
+  }, [isUploading, user, refreshData, setNotification, t]);
 
   /**
    * Update existing album
    * Note: Album creation is handled exclusively by UploadModal
    */
   const handleAlbumSave = useCallback(async (albumData, editingAlbum = null) => {
+    // GUARD: Prevent duplicate calls
+    if (isSaving) {
+      console.warn('Album save already in progress, ignoring duplicate call');
+      return;
+    }
+
+    setIsSaving(true);
+
     try {
       if (!editingAlbum) {
         // This should never happen in current architecture
@@ -149,8 +173,11 @@ export const usePhotoData = () => {
         message: t('common:notifications.albumSaveError'),
         type: 'error'
       });
+      throw err;
+    } finally {
+      setIsSaving(false);
     }
-  }, [refreshData, setNotification, t]);
+  }, [isSaving, refreshData, setNotification, t]);
 
   /**
    * Create album from upload modal (returns album ID)
@@ -189,6 +216,14 @@ export const usePhotoData = () => {
         photos: photosNote
       }),
       onConfirm: async () => {
+        // GUARD: Prevent duplicate deletes
+        if (isDeleting) {
+          console.warn('Delete already in progress, ignoring duplicate call');
+          return;
+        }
+
+        setIsDeleting(true);
+
         try {
           // Remove albumId from all photos in the album
           for (const photo of albumPhotos) {
@@ -216,10 +251,13 @@ export const usePhotoData = () => {
             message: t('common:notifications.albumDeleteError'),
             type: 'error'
           });
+          throw err;
+        } finally {
+          setIsDeleting(false);
         }
       }
     });
-  }, [photos, refreshData, currentPage, selectedAlbum, setConfirmModal, setNotification, setCurrentPage, setSelectedAlbum, t]);
+  }, [isDeleting, photos, refreshData, currentPage, selectedAlbum, setConfirmModal, setNotification, setCurrentPage, setSelectedAlbum, t]);
 
   /**
    * Delete photo with confirmation
@@ -229,6 +267,14 @@ export const usePhotoData = () => {
       title: t('common:notifications.deletePhotoTitle'),
       message: t('common:notifications.deletePhotoMessage'),
       onConfirm: async () => {
+        // GUARD: Prevent duplicate deletes
+        if (isDeleting) {
+          console.warn('Delete already in progress, ignoring duplicate call');
+          return;
+        }
+
+        setIsDeleting(true);
+
         try {
           await deletePhoto(photo.id, photo.storagePath);
           await refreshData();
@@ -244,15 +290,26 @@ export const usePhotoData = () => {
             message: t('common:notifications.photoDeleteError'),
             type: 'error'
           });
+          throw err;
+        } finally {
+          setIsDeleting(false);
         }
       }
     });
-  }, [refreshData, closePhotoModal, setConfirmModal, setNotification, t]);
+  }, [isDeleting, refreshData, closePhotoModal, setConfirmModal, setNotification, t]);
 
   /**
    * Toggle favorite status of a photo
    */
   const toggleFavorite = useCallback(async (photo) => {
+    // GUARD: Prevent duplicate toggles
+    if (isTogglingFavorite) {
+      console.warn('Toggle favorite already in progress, ignoring duplicate call');
+      return;
+    }
+
+    setIsTogglingFavorite(true);
+
     try {
       await updatePhoto(photo.id, { favorite: !photo.favorite });
       await refreshData();
@@ -269,8 +326,11 @@ export const usePhotoData = () => {
         message: t('common:notifications.updateError'),
         type: 'error'
       });
+      throw err;
+    } finally {
+      setIsTogglingFavorite(false);
     }
-  }, [refreshData, setNotification, t]);
+  }, [isTogglingFavorite, refreshData, setNotification, t]);
 
   /**
    * Get photos by album ID
@@ -297,6 +357,14 @@ export const usePhotoData = () => {
    * Set album cover image
    */
   const handleSetAlbumCover = useCallback(async (albumId, coverUrl) => {
+    // GUARD: Prevent duplicate calls
+    if (isSaving) {
+      console.warn('Save operation already in progress, ignoring duplicate call');
+      return;
+    }
+
+    setIsSaving(true);
+
     try {
       await setAlbumCover(albumId, coverUrl);
       await refreshData();
@@ -311,13 +379,24 @@ export const usePhotoData = () => {
         message: t('common:notifications.coverUpdateError'),
         type: 'error'
       });
+      throw err;
+    } finally {
+      setIsSaving(false);
     }
-  }, [refreshData, setNotification, t]);
+  }, [isSaving, refreshData, setNotification, t]);
 
   /**
    * Update album photo count
    */
   const handleUpdatePhotoCount = useCallback(async (albumId, count) => {
+    // GUARD: Prevent duplicate calls
+    if (isSaving) {
+      console.warn('Save operation already in progress, ignoring duplicate call');
+      return;
+    }
+
+    setIsSaving(true);
+
     try {
       await updateAlbumPhotoCount(albumId, count);
       await refreshData();
@@ -327,8 +406,11 @@ export const usePhotoData = () => {
         message: t('common:notifications.updateError'),
         type: 'error'
       });
+      throw err;
+    } finally {
+      setIsSaving(false);
     }
-  }, [refreshData, setNotification, t]);
+  }, [isSaving, refreshData, setNotification, t]);
 
   return {
     // Data
@@ -350,6 +432,12 @@ export const usePhotoData = () => {
     getPhotosByAlbum,
     getPhotosWithoutAlbum,
     getFavoritePhotos,
+
+    // Guard states (for UI feedback)
+    isSaving,
+    isDeleting,
+    isUploading,
+    isTogglingFavorite,
   };
 };
 
