@@ -94,14 +94,15 @@ const UploadModal = ({
   )
 
   useEffect(() => {
-    if (isOpen) {
+    // Only focus UploadModal if AlbumModal is NOT open
+    if (isOpen && !showAlbumModal) {
       document.addEventListener('keydown', handleKeyDown)
       setTimeout(() => modalRef.current?.focus(), 0)
     }
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isOpen, handleKeyDown])
+  }, [isOpen, handleKeyDown, showAlbumModal]) // Add showAlbumModal dependency
 
   // Drag and drop handlers
   const handleDrag = (e) => {
