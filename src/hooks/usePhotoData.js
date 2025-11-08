@@ -123,23 +123,22 @@ export const usePhotoData = () => {
   }, [user, refreshData, setNotification, t]);
 
   /**
-   * Create or update album
+   * Update existing album
+   * Note: Album creation is handled exclusively by UploadModal
    */
   const handleAlbumSave = useCallback(async (albumData, editingAlbum = null) => {
     try {
-      if (editingAlbum) {
-        await updateAlbum(editingAlbum.id, albumData);
-        setNotification({
-          message: t('common:notifications.albumUpdated'),
-          type: 'success'
-        });
-      } else {
-        await addAlbum({ ...albumData, userId: user.uid });
-        setNotification({
-          message: t('common:notifications.albumCreated'),
-          type: 'success'
-        });
+      if (!editingAlbum) {
+        // This should never happen in current architecture
+        console.error('handleAlbumSave called without editingAlbum - use UploadModal for creation');
+        throw new Error('Album creation must be done through UploadModal');
       }
+
+      await updateAlbum(editingAlbum.id, albumData);
+      setNotification({
+        message: t('common:notifications.albumUpdated'),
+        type: 'success'
+      });
 
       await refreshData();
     } catch (err) {
@@ -149,7 +148,7 @@ export const usePhotoData = () => {
         type: 'error'
       });
     }
-  }, [user?.uid, refreshData, setNotification, t]);
+  }, [refreshData, setNotification, t]);
 
   /**
    * Create album from upload modal (returns album ID)
