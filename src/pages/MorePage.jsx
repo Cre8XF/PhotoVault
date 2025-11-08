@@ -56,7 +56,7 @@ import { getAuth, deleteUser as deleteAuthUser } from 'firebase/auth'
 
 import { getStorage, ref as storageRef, listAll } from 'firebase/storage'
 
-import { db } from '../firebase'
+import { db, migrateAlbumsAddUserId, migratePhotosAddUserId } from '../firebase'
 import ComingSoonModal from '../components/ComingSoonModal'
 import { useStorageCalc } from '../hooks/useStorageCalc'
 // PHASE 2: AI Services - Temporarily disabled for MVP
@@ -83,6 +83,8 @@ const MorePage = ({
   const [showAIModal, setShowAIModal] = useState(false)
   const [aiFeatureName, setAIFeatureName] = useState('')
   const [aiFeatureDescription, setAIFeatureDescription] = useState('')
+  const [migrating, setMigrating] = useState(false)
+  const [migrationResult, setMigrationResult] = useState(null)
 
   const { pinEnabled, biometricEnabled } = useSecurityContext()
 
@@ -337,6 +339,87 @@ const MorePage = ({
       setShowDeleteConfirm(false)
     } finally {
       setLoading(false)
+    }
+  }
+
+  // ============================================================================
+  // === MIGRATION FUNCTIONS ===
+  // ============================================================================
+  const handleMigrateAlbums = async () => {
+    if (
+      !window.confirm(
+        'This will add your userId to all albums that are missing it. Continue?'
+      )
+    ) {
+      return
+    }
+
+    try {
+      setMigrating(true)
+      setMigrationResult(null)
+      console.log('🔧 Starting album migration...')
+
+      const result = await migrateAlbumsAddUserId()
+
+      console.log('✅ Migration complete:', result)
+      setMigrationResult({
+        type: 'albums',
+        ...result,
+      })
+
+      showNotification(
+        `Migration complete! Fixed: ${result.fixed} albums, Skipped: ${result.skipped} albums`,
+        'success'
+      )
+
+      // Refresh page after 2 seconds to show updated data
+      setTimeout(() => {
+        window.location.reload()
+      }, 2000)
+    } catch (error) {
+      console.error('❌ Migration failed:', error)
+      showNotification('Migration failed: ' + error.message, 'error')
+    } finally {
+      setMigrating(false)
+    }
+  }
+
+  const handleMigratePhotos = async () => {
+    if (
+      !window.confirm(
+        'This will add your userId to all photos that are missing it. Continue?'
+      )
+    ) {
+      return
+    }
+
+    try {
+      setMigrating(true)
+      setMigrationResult(null)
+      console.log('🔧 Starting photo migration...')
+
+      const result = await migratePhotosAddUserId()
+
+      console.log('✅ Migration complete:', result)
+      setMigrationResult({
+        type: 'photos',
+        ...result,
+      })
+
+      showNotification(
+        `Migration complete! Fixed: ${result.fixed} photos, Skipped: ${result.skipped} photos`,
+        'success'
+      )
+
+      // Refresh page after 2 seconds to show updated data
+      setTimeout(() => {
+        window.location.reload()
+      }, 2000)
+    } catch (error) {
+      console.error('❌ Migration failed:', error)
+      showNotification('Migration failed: ' + error.message, 'error')
+    } finally {
+      setMigrating(false)
     }
   }
 
@@ -1084,6 +1167,72 @@ const MorePage = ({
               </div>
               <ChevronRight className="w-5 h-5 opacity-50" />
             </button>
+          </div>
+
+          {/* Migration Tools - Developer/Debug */}
+          <div className="mt-4 pt-4 border-t border-yellow-500/20">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertCircle className="w-4 h-4 text-orange-400" />
+              <h4 className="font-semibold text-sm text-orange-400">
+                🔧 Migration Tools (Developer)
+              </h4>
+            </div>
+            <p className="text-xs opacity-70 mb-3">
+              Fix old albums/photos missing userId field. Run once to enable
+              delete/edit permissions.
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-3">
+              <button
+                onClick={handleMigrateAlbums}
+                disabled={migrating || loading}
+                className="ripple-effect bg-orange-600/10 hover:bg-orange-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <div className="p-2 bg-orange-600/30 rounded-lg">
+                  <Folder className="w-5 h-5 text-orange-300" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-sm">
+                    {migrating ? 'Migrating Albums...' : 'Fix Albums'}
+                  </p>
+                  <p className="text-xs opacity-70">Add userId to albums</p>
+                </div>
+              </button>
+
+              <button
+                onClick={handleMigratePhotos}
+                disabled={migrating || loading}
+                className="ripple-effect bg-orange-600/10 hover:bg-orange-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <div className="p-2 bg-orange-600/30 rounded-lg">
+                  <Image className="w-5 h-5 text-orange-300" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-sm">
+                    {migrating ? 'Migrating Photos...' : 'Fix Photos'}
+                  </p>
+                  <p className="text-xs opacity-70">Add userId to photos</p>
+                </div>
+              </button>
+            </div>
+
+            {/* Migration Result Display */}
+            {migrationResult && (
+              <div className="mt-3 bg-green-600/10 border border-green-500/30 rounded-xl p-3">
+                <div className="flex items-center gap-2 text-green-400 mb-1">
+                  <CheckCircle className="w-4 h-4" />
+                  <p className="font-semibold text-sm">Migration Complete!</p>
+                </div>
+                <p className="text-xs opacity-70">
+                  Type: {migrationResult.type} | Fixed:{' '}
+                  {migrationResult.fixed} | Skipped: {migrationResult.skipped}{' '}
+                  | Total: {migrationResult.total}
+                </p>
+                <p className="text-xs opacity-70 mt-1">
+                  Page will refresh in 2 seconds...
+                </p>
+              </div>
+            )}
           </div>
         </section>
       )}
