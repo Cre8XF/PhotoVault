@@ -73,6 +73,9 @@ function AppContent() {
     handleUpload,
     handleAlbumSave,
     handleCreateAlbumFromUpload,
+    handleDeletePhoto,
+    handleSetAlbumCover,
+    handleUpdatePhotoCount,
     toggleFavorite,
     refreshData,
   } = usePhotoData()
@@ -275,6 +278,7 @@ function AppContent() {
         {currentPage === 'album' && selectedAlbum && (
           <AlbumPage
             album={selectedAlbum}
+            albums={albums}
             user={userProfile || user}
             photos={photos}
             onBack={() => {
@@ -282,6 +286,12 @@ function AppContent() {
               setSelectedAlbum(null)
             }}
             refreshData={refreshData}
+            onDeletePhoto={handleDeletePhoto}
+            onSetAlbumCover={handleSetAlbumCover}
+            onUpload={handleUpload}
+            onSaveAlbum={handleAlbumSave}
+            onUpdatePhotoCount={handleUpdatePhotoCount}
+            onToggleFavorite={toggleFavorite}
             colors={{}}
           />
         )}

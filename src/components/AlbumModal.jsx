@@ -4,7 +4,6 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, FolderPlus, Image as ImageIcon } from 'lucide-react'
-import { updateAlbum } from '../firebase'
 
 const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
   const { t } = useTranslation(['albums'])
@@ -86,17 +85,11 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
         cover: cover.trim(),
       }
 
-      if (editingAlbum) {
-        // UPDATE existing album
-        await updateAlbum(editingAlbum.id, albumData)
-        if (window.showToast) {
-          window.showToast('Album updated ✅', 'success')
-        }
-      } else {
-        // CREATE new album - let parent handle creation
-        onSave(albumData)
-        // Parent will show success toast
-      }
+      // Let parent handle both create and update
+      await onSave(albumData, editingAlbum)
+
+      // Close modal on success
+      onClose()
     } catch (err) {
       console.error('Error saving album:', err)
       setError(err.message || 'Failed to save album. Please try again.')

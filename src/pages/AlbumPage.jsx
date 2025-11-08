@@ -19,15 +19,6 @@ import {
   Filter,
   ChevronDown,
 } from 'lucide-react'
-import {
-  deletePhoto,
-  setAlbumCover,
-  uploadPhoto,
-  updateAlbum,
-  updateAlbumPhotoCount,
-} from '../firebase'
-
-import { auth } from '../firebase'
 import { useTranslation } from 'react-i18next'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
 import UploadModal from '../components/UploadModal'
@@ -59,6 +50,12 @@ const AlbumPage = ({
   photos,
   onBack,
   refreshData,
+  onDeletePhoto,
+  onSetAlbumCover,
+  onUpload,
+  onSaveAlbum,
+  onUpdatePhotoCount,
+  onToggleFavorite,
 }) => {
   const { t } = useTranslation(['common', 'albums'])
   const [editMode, setEditMode] = useState(false)
@@ -138,8 +135,7 @@ const AlbumPage = ({
 
   const handleSetCover = async (photo) => {
     try {
-      await setAlbumCover(album.id, photo.url)
-      if (refreshData) await refreshData()
+      await onSetAlbumCover(album.id, photo.url)
     } catch (error) {
       console.error(t('albums:errors.coverUpdateError'), error)
       alert(t('albums:errors.couldNotSetCover'))
@@ -149,8 +145,7 @@ const AlbumPage = ({
   const handleDelete = async (photo) => {
     if (!window.confirm(t('albums:errors.confirmDeletePhoto'))) return
     try {
-      await deletePhoto(photo.id, photo.storagePath)
-      if (refreshData) await refreshData()
+      await onDeletePhoto(photo)
     } catch (error) {
       console.error(t('albums:errors.photoDeleteError'), error)
       alert(t('albums:errors.couldNotDeletePhoto'))
@@ -166,10 +161,9 @@ const AlbumPage = ({
       return
     try {
       for (const photo of selectedPhotos) {
-        await deletePhoto(photo.id, photo.storagePath)
+        await onDeletePhoto(photo)
       }
       setSelectedPhotos([])
-      if (refreshData) await refreshData()
     } catch (error) {
       console.error(t('albums:errors.bulkDeleteError'), error)
       alert(t('albums:errors.couldNotDeleteAll'))
@@ -177,34 +171,16 @@ const AlbumPage = ({
   }
 
   const handleUpload = async (files, albumId, aiTagging) => {
-    const currentUser = auth.currentUser
-    if (!currentUser) {
-      alert(t('albums:errors.mustBeLoggedIn'))
-      return
-    }
     try {
-      for (const fileObj of files) {
-        await uploadPhoto(
-          currentUser.uid,
-          fileObj.file,
-          albumId || album.id,
-          aiTagging
-        )
-      }
-      await refreshData()
+      await onUpload(files, albumId || album.id, aiTagging)
     } catch (error) {
       console.error('Upload error:', error)
     }
   }
 
   const handleCreateAlbum = async (albumData) => {
-    try {
-      // Album already created by UploadModal - just refresh UI
-      if (refreshData) await refreshData()
-    } catch (error) {
-      console.error(t('albums:errors.albumCreationError'), error)
-      alert(t('albums:errors.couldNotCreateAlbum'))
-    }
+    // Album already created by UploadModal - no action needed
+    // refreshData is called automatically by the upload modal handler
   }
 
   const handleMovePhotos = async (targetAlbumId) => {
@@ -221,17 +197,16 @@ const AlbumPage = ({
       await Promise.all(updates)
 
       const fromCount = albumPhotos.length - selectedPhotos.length
-      await updateAlbumPhotoCount(album.id, Math.max(0, fromCount))
+      await onUpdatePhotoCount(album.id, Math.max(0, fromCount))
 
       const targetAlbumPhotos = photos.filter(
         (p) => p.albumId === targetAlbumId
       ).length
-      await updateAlbumPhotoCount(
+      await onUpdatePhotoCount(
         targetAlbumId,
         targetAlbumPhotos + selectedPhotos.length
       )
 
-      if (refreshData) await refreshData()
       setSelectedPhotos([])
     } catch (error) {
       console.error(t('albums:errors.moveError'), error)
@@ -752,6 +727,7 @@ const AlbumPage = ({
           photos={filteredPhotos}
           currentIndex={photoModal.index}
           onClose={() => setPhotoModal({ open: false, index: 0 })}
+          onToggleFavorite={onToggleFavorite}
         />
       )}
 
@@ -777,10 +753,9 @@ const AlbumPage = ({
         <AlbumModal
           editingAlbum={editingAlbum}
           onClose={() => setEditingAlbum(null)}
-          onSave={async (data) => {
-            await updateAlbum(editingAlbum.id, data)
+          onSave={async (data, editingAlbum) => {
+            await onSaveAlbum(data, editingAlbum)
             setEditingAlbum(null)
-            if (refreshData) await refreshData()
           }}
         />
       )}

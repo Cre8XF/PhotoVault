@@ -12,6 +12,8 @@ import {
   uploadPhoto,
   updatePhoto,
   deletePhoto,
+  setAlbumCover,
+  updateAlbumPhotoCount,
 } from '../firebase';
 import { db } from '../firebase';
 import useStore from '../state/store';
@@ -291,6 +293,43 @@ export const usePhotoData = () => {
     return photos.filter(photo => photo.favorite);
   }, [photos]);
 
+  /**
+   * Set album cover image
+   */
+  const handleSetAlbumCover = useCallback(async (albumId, coverUrl) => {
+    try {
+      await setAlbumCover(albumId, coverUrl);
+      await refreshData();
+
+      setNotification({
+        message: t('common:notifications.coverUpdated'),
+        type: 'success'
+      });
+    } catch (err) {
+      console.error('Set album cover error:', err);
+      setNotification({
+        message: t('common:notifications.coverUpdateError'),
+        type: 'error'
+      });
+    }
+  }, [refreshData, setNotification, t]);
+
+  /**
+   * Update album photo count
+   */
+  const handleUpdatePhotoCount = useCallback(async (albumId, count) => {
+    try {
+      await updateAlbumPhotoCount(albumId, count);
+      await refreshData();
+    } catch (err) {
+      console.error('Update photo count error:', err);
+      setNotification({
+        message: t('common:notifications.updateError'),
+        type: 'error'
+      });
+    }
+  }, [refreshData, setNotification, t]);
+
   return {
     // Data
     albums,
@@ -303,6 +342,8 @@ export const usePhotoData = () => {
     handleCreateAlbumFromUpload,
     handleDeleteAlbum,
     handleDeletePhoto,
+    handleSetAlbumCover,
+    handleUpdatePhotoCount,
     toggleFavorite,
 
     // Utilities
