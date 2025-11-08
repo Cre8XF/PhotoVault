@@ -3,9 +3,10 @@
 // Phase 2: Optimized with React.memo
 // ============================================================================
 import React, { useState, memo } from 'react'
+import { Edit3 } from 'lucide-react' // 🔹 ikon for redigering
 
 const AlbumCard = memo(
-  ({ album, photos = [], onOpen }) => {
+  ({ album, photos = [], onOpen, onEdit }) => {
     const [tilt, setTilt] = useState({ x: 0, y: 0 })
 
     // Prioriter album.cover, ellers bruk første bilde i albumet
@@ -49,7 +50,7 @@ const AlbumCard = memo(
 
     return (
       <div
-        className="ripple-effect album-card glass cursor-pointer"
+        className="relative ripple-effect album-card glass cursor-pointer group"
         onClick={() => onOpen && onOpen(album)}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
@@ -70,6 +71,18 @@ const AlbumCard = memo(
               className="max-h-full max-w-full object-contain rounded-xl"
               loading="lazy"
             />
+
+            {/* 🔹 Redigeringsknapp (vises ved hover) */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                if (onEdit) onEdit(album)
+              }}
+              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition"
+              title="Rediger album"
+            >
+              <Edit3 size={16} />
+            </button>
           </div>
         ) : (
           <div className="album-thumb flex items-center justify-center text-gray-400 bg-gradient-to-br from-gray-900 to-indigo-900 aspect-[16/9] rounded-xl">
@@ -108,7 +121,6 @@ const AlbumCard = memo(
     )
   },
   (prevProps, nextProps) => {
-    // Custom comparison function for better performance
     return (
       prevProps.album.id === nextProps.album.id &&
       prevProps.album.name === nextProps.album.name &&
@@ -120,5 +132,4 @@ const AlbumCard = memo(
 )
 
 AlbumCard.displayName = 'AlbumCard'
-
 export default AlbumCard

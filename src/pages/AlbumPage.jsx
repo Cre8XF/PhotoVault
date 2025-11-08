@@ -23,15 +23,17 @@ import {
   deletePhoto,
   setAlbumCover,
   uploadPhoto,
-  addAlbum,
+  updateAlbum,
   updateAlbumPhotoCount,
 } from '../firebase'
+
 import { auth } from '../firebase'
 import { useTranslation } from 'react-i18next'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
 import UploadModal from '../components/UploadModal'
 import MoveModal from '../components/MoveModal'
 import PhotoModal from '../components/PhotoModal'
+import AlbumModal from '../components/AlbumModal'
 
 function getCategoryIcon(category) {
   const icons = {
@@ -64,6 +66,7 @@ const AlbumPage = ({
   const [isMoveOpen, setMoveOpen] = useState(false)
   const [isUploadOpen, setUploadOpen] = useState(false)
   const [photoModal, setPhotoModal] = useState({ open: false, index: 0 })
+  const [editingAlbum, setEditingAlbum] = useState(null)
 
   // Nye states for sortering og visning
   const [sortBy, setSortBy] = useState('date-desc')
@@ -75,8 +78,8 @@ const AlbumPage = ({
   const [filterAI, setFilterAI] = useState('all')
 
   const albumPhotos = useMemo(
-    () => photos.filter((p) => p.albumId === album.id),
-    [photos, album.id]
+    () => (album ? photos.filter((p) => p.albumId === album.id) : []),
+    [photos, album]
   )
 
   // Filtrer og sorter bilder
@@ -330,6 +333,14 @@ const AlbumPage = ({
           >
             {editMode ? <Check size={18} /> : <Edit3 size={18} />}
             {editMode ? t('common:done') : t('common:edit')}
+          </button>
+
+          {/* 🔹 NY KNAPP FOR Å REDIGERE ALBUM */}
+          <button
+            onClick={() => setEditingAlbum(album)}
+            className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center gap-2 transition"
+          >
+            <Edit3 size={18} /> {t('albums:editAlbum')}
           </button>
         </div>
       </div>
@@ -753,12 +764,26 @@ const AlbumPage = ({
         albums={albums}
         selectedAlbum={album.id}
       />
+
       <MoveModal
         isOpen={isMoveOpen}
         onClose={() => setMoveOpen(false)}
         albums={albums}
         onConfirm={handleMovePhotos}
       />
+
+      {/* 🔹 Rediger album-modal */}
+      {editingAlbum && (
+        <AlbumModal
+          editingAlbum={editingAlbum}
+          onClose={() => setEditingAlbum(null)}
+          onSave={async (data) => {
+            await updateAlbum(editingAlbum.id, data)
+            setEditingAlbum(null)
+            if (refreshData) await refreshData()
+          }}
+        />
+      )}
     </div>
   )
 }
