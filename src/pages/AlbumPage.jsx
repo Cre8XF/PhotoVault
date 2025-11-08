@@ -196,17 +196,7 @@ const AlbumPage = ({
 
   const handleCreateAlbum = async (albumData) => {
     try {
-      const currentUser = auth.currentUser
-      if (!currentUser) throw new Error(t('albums:errors.userNotLoggedIn'))
-
-      const newAlbum = {
-        name: String(albumData.name).trim(),
-        description: String(albumData.description || ''),
-        cover: String(albumData.cover || ''),
-        userId: currentUser.uid,
-      }
-
-      await addAlbum(newAlbum)
+      // Album already created by UploadModal - just refresh UI
       if (refreshData) await refreshData()
     } catch (error) {
       console.error(t('albums:errors.albumCreationError'), error)

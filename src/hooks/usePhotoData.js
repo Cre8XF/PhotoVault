@@ -154,26 +154,14 @@ export const usePhotoData = () => {
   /**
    * Create album from upload modal (returns album ID)
    */
-  const handleCreateAlbumFromUpload = useCallback(async (albumName) => {
+  const handleCreateAlbumFromUpload = useCallback(async (albumData) => {
     try {
-      const albumData = {
-        name: String(albumName).trim(),
-        title: String(albumName).trim(),
-        userId: user.uid,
-        createdAt: new Date().toISOString(),
-        photoCount: 0,
-        cover: ''
-      };
-
-      const albumId = await addAlbum(albumData);
+      // Album already created by UploadModal - just refresh UI
       await refreshData();
 
-      setNotification({
-        message: t('common:notifications.albumCreated'),
-        type: 'success'
-      });
+      // Don't show notification - UploadModal already showed one
 
-      return albumId;
+      return albumData.id;
     } catch (err) {
       console.error('Album creation error:', err);
       setNotification({
@@ -182,7 +170,7 @@ export const usePhotoData = () => {
       });
       throw err;
     }
-  }, [user?.uid, refreshData, setNotification, t]);
+  }, [refreshData, setNotification, t]);
 
   /**
    * Delete album with confirmation

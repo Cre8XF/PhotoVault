@@ -81,22 +81,9 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
     }
   ];
 
-  const handleCreateAlbum = async (name, userId) => {
+  const handleCreateAlbum = async (albumData) => {
     try {
-      if (!userId) {
-        const currentUser = auth.currentUser;
-        if (!currentUser) throw new Error(t("home:userNotLoggedIn"));
-        userId = currentUser.uid;
-      }
-
-      const newAlbum = {
-        name: String(name).trim(),
-        userId: userId,
-      };
-
-      const albumId = await addAlbum(newAlbum);
-      console.log(t("home:albumCreated"), albumId);
-
+      // Album already created by UploadModal - just refresh UI
       if (refreshData) await refreshData();
     } catch (error) {
       console.error(t("home:albumCreationError"), error);
