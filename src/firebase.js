@@ -181,6 +181,72 @@ export async function getPhotosByUser(userId) {
   }
 }
 
+// ============================================================================
+// PHASE 4: Single Resource Getters (for selective refresh if needed)
+// ============================================================================
+
+/**
+ * Get single album by ID
+ * Used for selective refresh instead of fetching all albums
+ */
+export async function getAlbum(albumId) {
+  try {
+    const docRef = doc(db, 'albums', albumId)
+    const docSnap = await getDoc(docRef)
+
+    if (!docSnap.exists()) {
+      throw new Error('Album not found')
+    }
+
+    const data = docSnap.data()
+    if (!data.createdAt) data.createdAt = new Date().toISOString()
+    if (!data.updatedAt) data.updatedAt = data.createdAt
+    if (!('photoCount' in data)) data.photoCount = 0
+
+    return { id: docSnap.id, ...data }
+  } catch (error) {
+    console.error('🔥 getAlbum:', error)
+    throw error
+  }
+}
+
+/**
+ * Get single photo by ID
+ * Used for selective refresh instead of fetching all photos
+ */
+export async function getPhoto(photoId) {
+  try {
+    const docRef = doc(db, 'photos', photoId)
+    const docSnap = await getDoc(docRef)
+
+    if (!docSnap.exists()) {
+      throw new Error('Photo not found')
+    }
+
+    const data = docSnap.data()
+
+    // 🔧 Konverter Firestore Timestamp til ISO-streng
+    if (data.createdAt?.toDate)
+      data.createdAt = data.createdAt.toDate().toISOString()
+    if (data.updatedAt?.toDate)
+      data.updatedAt = data.updatedAt.toDate().toISOString()
+
+    if (!data.createdAt) data.createdAt = new Date().toISOString()
+    if (!data.updatedAt) data.updatedAt = data.createdAt
+    if (!('favorite' in data)) data.favorite = false
+
+    // AI-felt defaults
+    if (!data.aiTags) data.aiTags = []
+    if (!('faces' in data)) data.faces = 0
+    if (!('aiAnalyzed' in data)) data.aiAnalyzed = false
+
+    return { id: docSnap.id, ...data }
+  } catch (error) {
+    console.error('🔥 getPhoto:', error)
+    throw error
+  }
+}
+
 // 🔹 Legg til nytt bilde
 export async function addPhoto(data) {
   const now = new Date().toISOString()
