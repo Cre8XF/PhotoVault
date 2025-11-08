@@ -2,15 +2,12 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // -----------------------------
-    // Helper-funksjoner
-    // -----------------------------
+    // Helper functions
     function isAuthenticated() {
       return request.auth != null;
     }
 
     function isAdmin() {
-      // Admin har full tilgang til alt
       return request.auth.token.email == "rogsor80@gmail.com";
     }
 
@@ -18,107 +15,31 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Bruk ved create i globale samlinger (resource finnes ikke ennå)
     function isOwnerOnCreate() {
       return isAuthenticated() && request.resource.data.userId == request.auth.uid;
     }
 
-    // Forby endring av userId ved update
     function userIdUnchanged() {
       return resource.data.userId == request.resource.data.userId;
     }
 
-    // -----------------------------
-    // USERS (rot)
-    // -----------------------------
-    match /users/{userId} {
-      allow read: if isOwner(userId) || isAdmin();
-      allow create: if isAuthenticated() && request.auth.uid == userId;
-      allow update, delete: if (isOwner(userId) && userIdUnchanged()) || isAdmin();
+    // Main rule: All authenticated users can READ everything,
+    // but can only CREATE/EDIT/DELETE their own data
+    match /{collection}/{docId} {
+      // Anyone authenticated can read
+      allow read: if isAuthenticated();
+
+      // Only owner can create (with their own userId) or admin
+      allow create: if isOwnerOnCreate() || isAdmin();
+
+      // Only owner can update/delete (userId must not change) or admin
+      // PLUS: fallback for old documents without userId
+      allow update, delete: if isAdmin()
+        || (isOwner(resource.data.userId) && userIdUnchanged())
+        || !('userId' in resource.data); // Allow old docs without userId
     }
 
-    // -----------------------------
-    // GLOBALE SAMLINGER
-    // -----------------------------
-
-    // Albums (global)
-    match /albums/{albumId} {
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      allow create: if isOwnerOnCreate();
-      allow update, delete: if (isOwner(resource.data.userId) && userIdUnchanged()) || isAdmin();
-    }
-
-    // Photos (global)
-    match /photos/{photoId} {
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      allow create: if isOwnerOnCreate();
-      allow update, delete: if (isOwner(resource.data.userId) && userIdUnchanged()) || isAdmin();
-    }
-
-    // Unassigned (bilder uten album)
-    match /unassigned/{docId} {
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      allow create: if isOwnerOnCreate();
-      allow update, delete: if (isOwner(resource.data.userId) && userIdUnchanged()) || isAdmin();
-    }
-
-    // Enhanced (AI-behandlede kopier)
-    match /enhanced/{docId} {
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      allow create: if isOwnerOnCreate();
-      allow update, delete: if (isOwner(resource.data.userId) && userIdUnchanged()) || isAdmin();
-    }
-
-    // Vault (kryptert område)
-    match /vault/{docId} {
-      // Kun eier eller admin
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      allow create: if isOwnerOnCreate();
-      allow update, delete: if (isOwner(resource.data.userId) && userIdUnchanged()) || isAdmin();
-    }
-
-    // -----------------------------
-    // NESTEDE SAMLINGER UNDER /users/{uid}
-    // (støtte for fremtidig struktur)
-    // -----------------------------
-    match /users/{userId}/albums/{albumId} {
-      allow read: if isOwner(userId) || isAdmin();
-      allow create: if isAuthenticated() && request.auth.uid == userId
-                    && request.resource.data.userId == userId;
-      allow update, delete: if (isOwner(userId) && userIdUnchanged()) || isAdmin();
-    }
-
-    match /users/{userId}/photos/{photoId} {
-      allow read: if isOwner(userId) || isAdmin();
-      allow create: if isAuthenticated() && request.auth.uid == userId
-                    && request.resource.data.userId == userId;
-      allow update, delete: if (isOwner(userId) && userIdUnchanged()) || isAdmin();
-    }
-
-    match /users/{userId}/unassigned/{docId} {
-      allow read: if isOwner(userId) || isAdmin();
-      allow create: if isAuthenticated() && request.auth.uid == userId
-                    && request.resource.data.userId == userId;
-      allow update, delete: if (isOwner(userId) && userIdUnchanged()) || isAdmin();
-    }
-
-    match /users/{userId}/enhanced/{docId} {
-      allow read: if isOwner(userId) || isAdmin();
-      allow create: if isAuthenticated() && request.auth.uid == userId
-                    && request.resource.data.userId == userId;
-      allow update, delete: if (isOwner(userId) && userIdUnchanged()) || isAdmin();
-    }
-
-    match /users/{userId}/vault/{docId} {
-      allow read: if isOwner(userId) || isAdmin();
-      allow create: if isAuthenticated() && request.auth.uid == userId
-                    && request.resource.data.userId == userId;
-      allow update, delete: if (isOwner(userId) && userIdUnchanged()) || isAdmin();
-    }
-
-    // -----------------------------
-    // Fallback: blokker alt annet
-    // -----------------------------
+    // Explicitly deny anything else
     match /{document=**} {
       allow read, write: if false;
     }

@@ -27,18 +27,13 @@ const ConfirmModal = ({
   const handleConfirm = async () => {
     try {
       setLoading(true)
-      await onConfirm()
-      if (window.showToast) {
-        window.showToast('Album deleted successfully', 'success')
-      }
+      await onConfirm() // Wait for async operation
     } catch (err) {
-      console.error('Error confirming action:', err)
-      if (window.showToast) {
-        window.showToast('Failed to delete album', 'error')
-      }
+      console.error('Confirm action failed:', err)
+      // Error already shown by caller's toast
     } finally {
       setLoading(false)
-      onClose() // alltid lukk modal etterpå
+      onClose() // ALWAYS close modal
     }
   }
 
