@@ -9,7 +9,7 @@ import { deletePhoto, setAlbumCover, updateAlbumPhotoCount } from '../firebase';
 import MoveModal from '../components/MoveModal';
 import ConfirmModal from '../components/ConfirmModal';
 
-const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => {
+const SearchPage = ({ photos = [], albums = [], onPhotoClick, toggleFavorite, refreshData }) => {
   const { t } = useTranslation(['search', 'common']);
 
   // Søk og filter
@@ -369,6 +369,28 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, refreshData }) => 
               onClick={() => !editMode && onPhotoClick(photo)}
               className="max-h-full max-w-full object-contain cursor-pointer transition-transform duration-300 group-hover:scale-[1.03]"
             />
+
+            {/* Favorite toggle - always visible */}
+            {!editMode && toggleFavorite && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFavorite(photo);
+                }}
+                className={`absolute top-2 left-2 p-1.5 rounded-full transition opacity-0 group-hover:opacity-100 ${
+                  photo.favorite
+                    ? 'bg-yellow-500/90 hover:bg-yellow-600'
+                    : 'bg-black/60 hover:bg-white/30'
+                }`}
+                title={photo.favorite ? t('common:removeFavorite') : t('common:addToFavorites')}
+              >
+                <Star
+                  className="w-3.5 h-3.5"
+                  fill={photo.favorite ? 'currentColor' : 'none'}
+                />
+              </button>
+            )}
+
             {editMode && (
               <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition">
                 <button

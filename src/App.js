@@ -244,6 +244,7 @@ function AppContent() {
             albums={albums}
             onPhotoClick={handlePhotoClick}
             toggleFavorite={toggleFavorite}
+            refreshData={refreshData}
           />
         )}
 
@@ -387,7 +388,7 @@ function AppContent() {
 
       {albumModalOpen && (
         <AlbumModal
-          album={editingAlbum}
+          editingAlbum={editingAlbum}
           onClose={() => {
             setAlbumModalOpen(false)
             setEditingAlbum(null)
