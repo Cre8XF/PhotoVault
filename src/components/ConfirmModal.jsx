@@ -1,9 +1,9 @@
 // ============================================================================
-// COMPONENT: ConfirmModal.jsx – elegant bekreftelsesdialog uten inline-style
+// COMPONENT: ConfirmModal.jsx – med "Deleting..." animasjon og auto-close
 // ============================================================================
-import React from "react";
-import { AlertTriangle } from "lucide-react";
-import { useTranslation } from 'react-i18next';
+import React, { useState } from 'react'
+import { AlertTriangle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 const ConfirmModal = ({
   isOpen,
@@ -14,14 +14,33 @@ const ConfirmModal = ({
   onConfirm,
   onClose,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation('common')
+  const [loading, setLoading] = useState(false)
 
-  const finalTitle = title || t('confirmAction');
-  const finalMessage = message || t('areYouSure');
-  const finalConfirmLabel = confirmLabel || t('confirm');
-  const finalCancelLabel = cancelLabel || t('cancel');
+  const finalTitle = title || t('confirmAction')
+  const finalMessage = message || t('areYouSure')
+  const finalConfirmLabel = confirmLabel || t('confirm')
+  const finalCancelLabel = cancelLabel || t('cancel')
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
+
+  const handleConfirm = async () => {
+    try {
+      setLoading(true)
+      await onConfirm()
+      if (window.showToast) {
+        window.showToast('Album deleted successfully', 'success')
+      }
+    } catch (err) {
+      console.error('Error confirming action:', err)
+      if (window.showToast) {
+        window.showToast('Failed to delete album', 'error')
+      }
+    } finally {
+      setLoading(false)
+      onClose() // alltid lukk modal etterpå
+    }
+  }
 
   return (
     <div
@@ -42,28 +61,43 @@ const ConfirmModal = ({
         </div>
 
         {/* Body */}
-        <p className="text-gray-300 text-sm leading-relaxed mb-6">{finalMessage}</p>
+        <p className="text-gray-300 text-sm leading-relaxed mb-6">
+          {finalMessage}
+        </p>
 
         {/* Buttons */}
         <div className="flex justify-end gap-3">
           <button
             onClick={onClose}
+            disabled={loading}
             className="ripple-effect px-5 py-2 rounded-xl bg-gray-700/70 hover:bg-gray-600/80
-                       text-gray-200 text-sm font-semibold transition-all duration-150"
+                       text-gray-200 text-sm font-semibold transition-all duration-150
+                       disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {finalCancelLabel}
           </button>
+
           <button
-            onClick={onConfirm}
+            onClick={handleConfirm}
+            disabled={loading}
             className="ripple-effect px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700
-                       text-white text-sm font-semibold shadow-sm transition-all duration-150"
+                       text-white text-sm font-semibold shadow-sm transition-all duration-150
+                       flex items-center justify-center gap-2
+                       disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {finalConfirmLabel}
+            {loading ? (
+              <>
+                <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                Deleting...
+              </>
+            ) : (
+              finalConfirmLabel
+            )}
           </button>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ConfirmModal;
+export default ConfirmModal

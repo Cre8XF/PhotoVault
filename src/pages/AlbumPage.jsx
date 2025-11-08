@@ -1,7 +1,7 @@
 // ============================================================================
 // PAGE: AlbumPage.jsx – forbedret med sortering, filtrering og statistikk
 // ============================================================================
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo } from 'react'
 import {
   ArrowLeft,
   Trash2,
@@ -18,236 +18,269 @@ import {
   X,
   Filter,
   ChevronDown,
-} from "lucide-react";
+} from 'lucide-react'
 import {
   deletePhoto,
   setAlbumCover,
   uploadPhoto,
   addAlbum,
   updateAlbumPhotoCount,
-} from "../firebase";
-import { auth } from "../firebase";
-import { useTranslation } from "react-i18next";
-import { getFirestore, doc, updateDoc } from "firebase/firestore";
-import UploadModal from "../components/UploadModal";
-import MoveModal from "../components/MoveModal";
-import PhotoModal from "../components/PhotoModal";
+} from '../firebase'
+import { auth } from '../firebase'
+import { useTranslation } from 'react-i18next'
+import { getFirestore, doc, updateDoc } from 'firebase/firestore'
+import UploadModal from '../components/UploadModal'
+import MoveModal from '../components/MoveModal'
+import PhotoModal from '../components/PhotoModal'
 
 function getCategoryIcon(category) {
   const icons = {
-    people: "👥",
-    nature: "🌳",
-    food: "🍽️",
-    animals: "🐾",
-    indoor: "🏠",
-    travel: "✈️",
-    architecture: "🏛️",
-    event: "🎉",
-    sport: "⚽",
-    art: "🎨",
-    other: "📷",
-  };
-  return icons[category] || icons.other;
+    people: '👥',
+    nature: '🌳',
+    food: '🍽️',
+    animals: '🐾',
+    indoor: '🏠',
+    travel: '✈️',
+    architecture: '🏛️',
+    event: '🎉',
+    sport: '⚽',
+    art: '🎨',
+    other: '📷',
+  }
+  return icons[category] || icons.other
 }
 
-const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) => {
-  const { t } = useTranslation(['common', 'albums']);
-  const [editMode, setEditMode] = useState(false);
-  const [selectedPhotos, setSelectedPhotos] = useState([]);
-  const [isMoveOpen, setMoveOpen] = useState(false);
-  const [isUploadOpen, setUploadOpen] = useState(false);
-  const [photoModal, setPhotoModal] = useState({ open: false, index: 0 });
+const AlbumPage = ({
+  album,
+  albums = [],
+  user,
+  photos,
+  onBack,
+  refreshData,
+}) => {
+  const { t } = useTranslation(['common', 'albums'])
+  const [editMode, setEditMode] = useState(false)
+  const [selectedPhotos, setSelectedPhotos] = useState([])
+  const [isMoveOpen, setMoveOpen] = useState(false)
+  const [isUploadOpen, setUploadOpen] = useState(false)
+  const [photoModal, setPhotoModal] = useState({ open: false, index: 0 })
 
   // Nye states for sortering og visning
-  const [sortBy, setSortBy] = useState("date-desc");
-  const [gridSize, setGridSize] = useState(4);
-  const [viewMode, setViewMode] = useState("grid");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
-  const [filterCategory, setFilterCategory] = useState("all");
-  const [filterAI, setFilterAI] = useState("all");
+  const [sortBy, setSortBy] = useState('date-desc')
+  const [gridSize, setGridSize] = useState(4)
+  const [viewMode, setViewMode] = useState('grid')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
+  const [filterCategory, setFilterCategory] = useState('all')
+  const [filterAI, setFilterAI] = useState('all')
 
   const albumPhotos = useMemo(
     () => photos.filter((p) => p.albumId === album.id),
     [photos, album.id]
-  );
+  )
 
   // Filtrer og sorter bilder
   const filteredPhotos = useMemo(() => {
-    let filtered = [...albumPhotos];
+    let filtered = [...albumPhotos]
 
     if (searchQuery) {
       filtered = filtered.filter((p) =>
-        (p.name || "").toLowerCase().includes(searchQuery.toLowerCase())
-      );
+        (p.name || '').toLowerCase().includes(searchQuery.toLowerCase())
+      )
     }
 
-    if (filterCategory !== "all") {
-      filtered = filtered.filter((p) => p.category === filterCategory);
+    if (filterCategory !== 'all') {
+      filtered = filtered.filter((p) => p.category === filterCategory)
     }
 
-    if (filterAI === "ai") {
-      filtered = filtered.filter((p) => p.aiAnalyzed);
-    } else if (filterAI === "no-ai") {
-      filtered = filtered.filter((p) => !p.aiAnalyzed);
+    if (filterAI === 'ai') {
+      filtered = filtered.filter((p) => p.aiAnalyzed)
+    } else if (filterAI === 'no-ai') {
+      filtered = filtered.filter((p) => !p.aiAnalyzed)
     }
 
     filtered.sort((a, b) => {
       switch (sortBy) {
-        case "date-desc":
-          return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-        case "date-asc":
-          return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
-        case "name-asc":
-          return (a.name || "").localeCompare(b.name || "");
-        case "name-desc":
-          return (b.name || "").localeCompare(a.name || "");
+        case 'date-desc':
+          return new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+        case 'date-asc':
+          return new Date(a.createdAt || 0) - new Date(b.createdAt || 0)
+        case 'name-asc':
+          return (a.name || '').localeCompare(b.name || '')
+        case 'name-desc':
+          return (b.name || '').localeCompare(a.name || '')
         default:
-          return 0;
+          return 0
       }
-    });
+    })
 
-    return filtered;
-  }, [albumPhotos, searchQuery, sortBy, filterCategory, filterAI]);
+    return filtered
+  }, [albumPhotos, searchQuery, sortBy, filterCategory, filterAI])
 
   // Statistikk
   const stats = useMemo(() => {
-    const totalSize = albumPhotos.reduce((sum, p) => sum + (p.size || 0), 0);
-    const aiCount = albumPhotos.filter((p) => p.aiAnalyzed).length;
-    const categories = [...new Set(albumPhotos.map((p) => p.category).filter(Boolean))];
-    
+    const totalSize = albumPhotos.reduce((sum, p) => sum + (p.size || 0), 0)
+    const aiCount = albumPhotos.filter((p) => p.aiAnalyzed).length
+    const categories = [
+      ...new Set(albumPhotos.map((p) => p.category).filter(Boolean)),
+    ]
+
     return {
       total: albumPhotos.length,
       totalSize: (totalSize / (1024 * 1024)).toFixed(1),
       aiAnalyzed: aiCount,
       categories: categories.length,
-    };
-  }, [albumPhotos]);
+    }
+  }, [albumPhotos])
 
   const handleSetCover = async (photo) => {
     try {
-      await setAlbumCover(album.id, photo.url);
-      if (refreshData) await refreshData();
+      await setAlbumCover(album.id, photo.url)
+      if (refreshData) await refreshData()
     } catch (error) {
-      console.error(t('albums:errors.coverUpdateError'), error);
-      alert(t('albums:errors.couldNotSetCover'));
+      console.error(t('albums:errors.coverUpdateError'), error)
+      alert(t('albums:errors.couldNotSetCover'))
     }
-  };
+  }
 
   const handleDelete = async (photo) => {
-    if (!window.confirm(t('albums:errors.confirmDeletePhoto'))) return;
+    if (!window.confirm(t('albums:errors.confirmDeletePhoto'))) return
     try {
-      await deletePhoto(photo.id, photo.storagePath);
-      if (refreshData) await refreshData();
+      await deletePhoto(photo.id, photo.storagePath)
+      if (refreshData) await refreshData()
     } catch (error) {
-      console.error(t('albums:errors.photoDeleteError'), error);
-      alert(t('albums:errors.couldNotDeletePhoto'));
+      console.error(t('albums:errors.photoDeleteError'), error)
+      alert(t('albums:errors.couldNotDeletePhoto'))
     }
-  };
+  }
 
   const handleBulkDelete = async () => {
-    if (!window.confirm(t('albums:errors.confirmBulkDelete', { count: selectedPhotos.length }))) return;
+    if (
+      !window.confirm(
+        t('albums:errors.confirmBulkDelete', { count: selectedPhotos.length })
+      )
+    )
+      return
     try {
       for (const photo of selectedPhotos) {
-        await deletePhoto(photo.id, photo.storagePath);
+        await deletePhoto(photo.id, photo.storagePath)
       }
-      setSelectedPhotos([]);
-      if (refreshData) await refreshData();
+      setSelectedPhotos([])
+      if (refreshData) await refreshData()
     } catch (error) {
-      console.error(t('albums:errors.bulkDeleteError'), error);
-      alert(t('albums:errors.couldNotDeleteAll'));
+      console.error(t('albums:errors.bulkDeleteError'), error)
+      alert(t('albums:errors.couldNotDeleteAll'))
     }
-  };
+  }
 
   const handleUpload = async (files, albumId, aiTagging) => {
-    const currentUser = auth.currentUser;
+    const currentUser = auth.currentUser
     if (!currentUser) {
-      alert(t('albums:errors.mustBeLoggedIn'));
-      return;
+      alert(t('albums:errors.mustBeLoggedIn'))
+      return
     }
     try {
       for (const fileObj of files) {
-        await uploadPhoto(currentUser.uid, fileObj.file, albumId || album.id, aiTagging);
+        await uploadPhoto(
+          currentUser.uid,
+          fileObj.file,
+          albumId || album.id,
+          aiTagging
+        )
       }
-      await refreshData();
+      await refreshData()
     } catch (error) {
-      console.error("Upload error:", error);
+      console.error('Upload error:', error)
     }
-  };
+  }
 
-  const handleCreateAlbum = async (name, userId) => {
+  const handleCreateAlbum = async (albumData) => {
     try {
-      if (!userId) {
-        const currentUser = auth.currentUser;
-        if (!currentUser) throw new Error(t('albums:errors.userNotLoggedIn'));
-        userId = currentUser.uid;
+      const currentUser = auth.currentUser
+      if (!currentUser) throw new Error(t('albums:errors.userNotLoggedIn'))
+
+      const newAlbum = {
+        name: String(albumData.name).trim(),
+        description: String(albumData.description || ''),
+        cover: String(albumData.cover || ''),
+        userId: currentUser.uid,
       }
-      const newAlbum = { name: name.trim(), userId };
-      await addAlbum(newAlbum);
-      if (refreshData) await refreshData();
+
+      await addAlbum(newAlbum)
+      if (refreshData) await refreshData()
     } catch (error) {
-      console.error(t('albums:errors.albumCreationError'), error);
-      alert(t('albums:errors.couldNotCreateAlbum'));
+      console.error(t('albums:errors.albumCreationError'), error)
+      alert(t('albums:errors.couldNotCreateAlbum'))
     }
-  };
+  }
 
   const handleMovePhotos = async (targetAlbumId) => {
     try {
-      const db = getFirestore();
-      const updates = selectedPhotos
-        .filter(Boolean)
-        .map(async (photo) => {
-          const photoId = typeof photo === "string" ? photo : photo.id || photo.docId;
-          if (!photoId) return;
-          const photoRef = doc(db, "photos", photoId);
-          await updateDoc(photoRef, { albumId: targetAlbumId });
-        });
+      const db = getFirestore()
+      const updates = selectedPhotos.filter(Boolean).map(async (photo) => {
+        const photoId =
+          typeof photo === 'string' ? photo : photo.id || photo.docId
+        if (!photoId) return
+        const photoRef = doc(db, 'photos', photoId)
+        await updateDoc(photoRef, { albumId: targetAlbumId })
+      })
 
-      await Promise.all(updates);
-      
-      const fromCount = albumPhotos.length - selectedPhotos.length;
-      await updateAlbumPhotoCount(album.id, Math.max(0, fromCount));
-      
-      const targetAlbumPhotos = photos.filter((p) => p.albumId === targetAlbumId).length;
-      await updateAlbumPhotoCount(targetAlbumId, targetAlbumPhotos + selectedPhotos.length);
+      await Promise.all(updates)
 
-      if (refreshData) await refreshData();
-      setSelectedPhotos([]);
+      const fromCount = albumPhotos.length - selectedPhotos.length
+      await updateAlbumPhotoCount(album.id, Math.max(0, fromCount))
+
+      const targetAlbumPhotos = photos.filter(
+        (p) => p.albumId === targetAlbumId
+      ).length
+      await updateAlbumPhotoCount(
+        targetAlbumId,
+        targetAlbumPhotos + selectedPhotos.length
+      )
+
+      if (refreshData) await refreshData()
+      setSelectedPhotos([])
     } catch (error) {
-      console.error(t('albums:errors.moveError'), error);
-      alert(t('albums:errors.couldNotMovePhotos'));
+      console.error(t('albums:errors.moveError'), error)
+      alert(t('albums:errors.couldNotMovePhotos'))
     }
-  };
+  }
 
   const togglePhotoSelection = (photo) => {
     setSelectedPhotos((prev) => {
-      const isSelected = prev.some((p) => (typeof p === "string" ? p : p.id) === photo.id);
+      const isSelected = prev.some(
+        (p) => (typeof p === 'string' ? p : p.id) === photo.id
+      )
       if (isSelected) {
-        return prev.filter((p) => (typeof p === "string" ? p : p.id) !== photo.id);
+        return prev.filter(
+          (p) => (typeof p === 'string' ? p : p.id) !== photo.id
+        )
       } else {
-        return [...prev, photo];
+        return [...prev, photo]
       }
-    });
-  };
+    })
+  }
 
   const isPhotoSelected = (photo) => {
-    return selectedPhotos.some((p) => (typeof p === "string" ? p : p.id) === photo.id);
-  };
+    return selectedPhotos.some(
+      (p) => (typeof p === 'string' ? p : p.id) === photo.id
+    )
+  }
 
   const handleSelectAll = () => {
     if (selectedPhotos.length === filteredPhotos.length) {
-      setSelectedPhotos([]);
+      setSelectedPhotos([])
     } else {
-      setSelectedPhotos([...filteredPhotos]);
+      setSelectedPhotos([...filteredPhotos])
     }
-  };
+  }
 
   const gridClass = {
-    2: "grid-cols-2",
-    3: "grid-cols-2 md:grid-cols-3",
-    4: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
-    5: "grid-cols-3 md:grid-cols-4 lg:grid-cols-5",
-  }[gridSize];
+    2: 'grid-cols-2',
+    3: 'grid-cols-2 md:grid-cols-3',
+    4: 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4',
+    5: 'grid-cols-3 md:grid-cols-4 lg:grid-cols-5',
+  }[gridSize]
 
   return (
     <div className="album-page p-4 md:p-8 min-h-screen">
@@ -264,7 +297,8 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
             <h1 className="text-2xl font-semibold">{album.name}</h1>
             <p className="text-sm text-gray-400 mt-1">
               {stats.total} {t('common:photos')} · {stats.totalSize} MB
-              {stats.aiAnalyzed > 0 && ` · ${stats.aiAnalyzed} ${t('albums:stats.aiAnalyzed')}`}
+              {stats.aiAnalyzed > 0 &&
+                ` · ${stats.aiAnalyzed} ${t('albums:stats.aiAnalyzed')}`}
             </p>
           </div>
         </div>
@@ -282,7 +316,8 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
                 onClick={handleBulkDelete}
                 className="ripple-effect px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 flex items-center gap-2 transition"
               >
-                <Trash2 size={18} /> {t('common:delete')} ({selectedPhotos.length})
+                <Trash2 size={18} /> {t('common:delete')} (
+                {selectedPhotos.length})
               </button>
             </>
           )}
@@ -294,11 +329,13 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
           </button>
           <button
             onClick={() => {
-              setEditMode(!editMode);
-              if (editMode) setSelectedPhotos([]);
+              setEditMode(!editMode)
+              if (editMode) setSelectedPhotos([])
             }}
             className={`ripple-effect px-4 py-2 rounded-xl ${
-              editMode ? "bg-green-600 hover:bg-green-700" : "bg-white/10 hover:bg-white/20"
+              editMode
+                ? 'bg-green-600 hover:bg-green-700'
+                : 'bg-white/10 hover:bg-white/20'
             } flex items-center gap-2 transition`}
           >
             {editMode ? <Check size={18} /> : <Edit3 size={18} />}
@@ -353,7 +390,7 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
             />
             {searchQuery && (
               <button
-                onClick={() => setSearchQuery("")}
+                onClick={() => setSearchQuery('')}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
               >
                 <X className="w-4 h-4" />
@@ -368,8 +405,12 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
               onChange={(e) => setSortBy(e.target.value)}
               className="appearance-none pl-4 pr-10 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer"
             >
-              <option value="date-desc">{t('albums:sorting.newestFirst')}</option>
-              <option value="date-asc">{t('albums:sorting.oldestFirst')}</option>
+              <option value="date-desc">
+                {t('albums:sorting.newestFirst')}
+              </option>
+              <option value="date-asc">
+                {t('albums:sorting.oldestFirst')}
+              </option>
               <option value="name-asc">{t('albums:sorting.nameAZ')}</option>
               <option value="name-desc">{t('albums:sorting.nameZA')}</option>
             </select>
@@ -380,7 +421,7 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`ripple-effect px-4 py-2 rounded-lg flex items-center gap-2 transition ${
-              showFilters ? "bg-purple-600" : "bg-white/5 hover:bg-white/10"
+              showFilters ? 'bg-purple-600' : 'bg-white/5 hover:bg-white/10'
             }`}
           >
             <Filter className="w-4 h-4" />
@@ -394,7 +435,7 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
                 key={size}
                 onClick={() => setGridSize(size)}
                 className={`ripple-effect px-3 py-1 rounded ${
-                  gridSize === size ? "bg-purple-600" : "hover:bg-white/10"
+                  gridSize === size ? 'bg-purple-600' : 'hover:bg-white/10'
                 } transition text-sm`}
               >
                 {size}
@@ -405,17 +446,17 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
           {/* View mode */}
           <div className="flex gap-1 bg-white/5 rounded-lg p-1">
             <button
-              onClick={() => setViewMode("grid")}
+              onClick={() => setViewMode('grid')}
               className={`ripple-effect p-2 rounded ${
-                viewMode === "grid" ? "bg-purple-600" : "hover:bg-white/10"
+                viewMode === 'grid' ? 'bg-purple-600' : 'hover:bg-white/10'
               } transition`}
             >
               <Grid3x3 className="w-4 h-4" />
             </button>
             <button
-              onClick={() => setViewMode("list")}
+              onClick={() => setViewMode('list')}
               className={`ripple-effect p-2 rounded ${
-                viewMode === "list" ? "bg-purple-600" : "hover:bg-white/10"
+                viewMode === 'list' ? 'bg-purple-600' : 'hover:bg-white/10'
               } transition`}
             >
               <List className="w-4 h-4" />
@@ -428,7 +469,9 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
               onClick={handleSelectAll}
               className="ripple-effect px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition text-sm"
             >
-              {selectedPhotos.length === filteredPhotos.length ? t('common:removeAll') : t('common:selectAll')}
+              {selectedPhotos.length === filteredPhotos.length
+                ? t('common:removeAll')
+                : t('common:selectAll')}
             </button>
           )}
         </div>
@@ -437,7 +480,9 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
         {showFilters && (
           <div className="mt-4 pt-4 border-t border-white/10 flex flex-wrap gap-3">
             <div className="flex-1 min-w-[200px]">
-              <label className="text-sm text-gray-400 mb-2 block">{t('common:category')}</label>
+              <label className="text-sm text-gray-400 mb-2 block">
+                {t('common:category')}
+              </label>
               <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
@@ -447,17 +492,23 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
                 <option value="people">{t('albums:categories.people')}</option>
                 <option value="nature">{t('albums:categories.nature')}</option>
                 <option value="food">{t('albums:categories.food')}</option>
-                <option value="animals">{t('albums:categories.animals')}</option>
+                <option value="animals">
+                  {t('albums:categories.animals')}
+                </option>
                 <option value="indoor">{t('albums:categories.indoor')}</option>
                 <option value="travel">{t('albums:categories.travel')}</option>
-                <option value="architecture">{t('albums:categories.architecture')}</option>
+                <option value="architecture">
+                  {t('albums:categories.architecture')}
+                </option>
                 <option value="event">{t('albums:categories.event')}</option>
                 <option value="sport">{t('albums:categories.sport')}</option>
                 <option value="art">{t('albums:categories.art')}</option>
               </select>
             </div>
             <div className="flex-1 min-w-[200px]">
-              <label className="text-sm text-gray-400 mb-2 block">{t('albums:aiStatus.label')}</label>
+              <label className="text-sm text-gray-400 mb-2 block">
+                {t('albums:aiStatus.label')}
+              </label>
               <select
                 value={filterAI}
                 onChange={(e) => setFilterAI(e.target.value)}
@@ -470,9 +521,9 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
             </div>
             <button
               onClick={() => {
-                setFilterCategory("all");
-                setFilterAI("all");
-                setSearchQuery("");
+                setFilterCategory('all')
+                setFilterAI('all')
+                setSearchQuery('')
               }}
               className="ripple-effect px-4 py-2 bg-red-600/20 hover:bg-red-600/30 rounded-lg transition text-sm self-end"
             >
@@ -503,9 +554,9 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
           <p>{t('common:noMatchingPhotos')}</p>
           <button
             onClick={() => {
-              setFilterCategory("all");
-              setFilterAI("all");
-              setSearchQuery("");
+              setFilterCategory('all')
+              setFilterAI('all')
+              setSearchQuery('')
             }}
             className="mt-4 ripple-effect px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition"
           >
@@ -515,30 +566,29 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
       )}
 
       {/* Bilder - Grid View */}
-      {viewMode === "grid" && filteredPhotos.length > 0 && (
+      {viewMode === 'grid' && filteredPhotos.length > 0 && (
         <div className={`grid ${gridClass} gap-4`}>
           {filteredPhotos.map((photo, index) => (
             <div
               key={photo.id}
               className={`relative group cursor-pointer ${
-                isPhotoSelected(photo) ? "ring-4 ring-purple-500" : ""
+                isPhotoSelected(photo) ? 'ring-4 ring-purple-500' : ''
               }`}
               onClick={() => {
                 if (editMode) {
-                  togglePhotoSelection(photo);
+                  togglePhotoSelection(photo)
                 } else {
-                  setPhotoModal({ open: true, index });
+                  setPhotoModal({ open: true, index })
                 }
               }}
             >
-             <div className="relative aspect-[4/5] w-full overflow-hidden rounded-lg bg-black/10 flex items-center justify-center">
-  <img
-    src={photo.url}
-    alt={photo.name}
-    className="max-h-full max-w-full object-contain border border-white/10 transition-transform duration-300 hover:scale-[1.03] rounded-lg"
-  />
-</div>
-
+              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-lg bg-black/10 flex items-center justify-center">
+                <img
+                  src={photo.url}
+                  alt={photo.name}
+                  className="max-h-full max-w-full object-contain border border-white/10 transition-transform duration-300 hover:scale-[1.03] rounded-lg"
+                />
+              </div>
 
               {/* AI-indikatorer */}
               <div className="absolute top-2 left-2 flex flex-col gap-1">
@@ -579,8 +629,8 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
                 <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition">
                   <button
                     onClick={(e) => {
-                      e.stopPropagation();
-                      handleSetCover(photo);
+                      e.stopPropagation()
+                      handleSetCover(photo)
                     }}
                     className="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-full transition shadow-lg"
                     title={t('albums:setCover')}
@@ -589,8 +639,8 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
                   </button>
                   <button
                     onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(photo);
+                      e.stopPropagation()
+                      handleDelete(photo)
                     }}
                     className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition shadow-lg"
                     title={t('albums:deletePhoto')}
@@ -612,19 +662,19 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
       )}
 
       {/* Bilder - List View */}
-      {viewMode === "list" && filteredPhotos.length > 0 && (
+      {viewMode === 'list' && filteredPhotos.length > 0 && (
         <div className="space-y-2">
           {filteredPhotos.map((photo, index) => (
             <div
               key={photo.id}
               className={`flex items-center gap-4 p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition cursor-pointer ${
-                isPhotoSelected(photo) ? "ring-2 ring-purple-500" : ""
+                isPhotoSelected(photo) ? 'ring-2 ring-purple-500' : ''
               }`}
               onClick={() => {
                 if (editMode) {
-                  togglePhotoSelection(photo);
+                  togglePhotoSelection(photo)
                 } else {
-                  setPhotoModal({ open: true, index });
+                  setPhotoModal({ open: true, index })
                 }
               }}
             >
@@ -635,16 +685,20 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
               />
 
               <div className="flex-1 min-w-0">
-                <div className="font-medium truncate">{photo.name || t('common:noName')}</div>
+                <div className="font-medium truncate">
+                  {photo.name || t('common:noName')}
+                </div>
                 <div className="text-sm text-gray-400 flex items-center gap-2 mt-1">
                   <Calendar className="w-3 h-3" />
                   {photo.createdAt
-                    ? new Date(photo.createdAt).toLocaleDateString("no-NO")
+                    ? new Date(photo.createdAt).toLocaleDateString('no-NO')
                     : t('albums:unknownDate')}
                   {photo.category && (
                     <>
                       <span>•</span>
-                      <span>{getCategoryIcon(photo.category)} {photo.category}</span>
+                      <span>
+                        {getCategoryIcon(photo.category)} {photo.category}
+                      </span>
                     </>
                   )}
                   {photo.aiAnalyzed && (
@@ -660,8 +714,8 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
                 <div className="flex gap-2">
                   <button
                     onClick={(e) => {
-                      e.stopPropagation();
-                      handleSetCover(photo);
+                      e.stopPropagation()
+                      handleSetCover(photo)
                     }}
                     className="ripple-effect p-2 bg-yellow-500 hover:bg-yellow-600 rounded-lg transition"
                     title={t('albums:setCover')}
@@ -670,8 +724,8 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
                   </button>
                   <button
                     onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(photo);
+                      e.stopPropagation()
+                      handleDelete(photo)
                     }}
                     className="ripple-effect p-2 bg-red-500 hover:bg-red-600 rounded-lg transition"
                     title={t('common:delete')}
@@ -716,7 +770,7 @@ const AlbumPage = ({ album, albums = [], user, photos, onBack, refreshData }) =>
         onConfirm={handleMovePhotos}
       />
     </div>
-  );
-};
+  )
+}
 
-export default AlbumPage;
+export default AlbumPage

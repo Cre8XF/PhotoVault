@@ -85,40 +85,39 @@ export async function getAlbumsByUser(userId) {
   }
 }
 
-// 🔹 Legg til nytt album
+// 🔹 Legg til nytt album (oppdatert og sikret)
 export async function addAlbum(data) {
-  const now = new Date().toISOString()
   const user = auth.currentUser
   if (!user) throw new Error('Ingen bruker logget inn')
 
-  const payload = {
-    name: data.name || data.title || 'Uten navn',
-    createdAt: data.createdAt || now,
-    updatedAt: now,
-    photoCount: 0,
-    cover: data.cover || '',
-    userId: user.uid, // 🔹 viktig
+  try {
+    const now = new Date().toISOString()
+
+    const cleanAlbum = {
+      name: data.name?.toString().trim() || 'Uten navn',
+      description: data.description?.toString().trim() || '',
+      cover: data.cover?.toString().trim() || '',
+      createdAt: data.createdAt || now,
+      updatedAt: now,
+      photoCount: 0,
+      userId: user.uid,
+    }
+
+    const refDoc = await addDoc(collection(db, 'albums'), cleanAlbum)
+    console.log(`📂 Album opprettet for bruker ${user.uid}: ${cleanAlbum.name}`)
+
+    if (window.showToast) {
+      window.showToast('Album created successfully 🎉', 'success')
+    }
+
+    return refDoc.id
+  } catch (err) {
+    console.error('🔥 addAlbum:', err)
+    if (window.showToast) {
+      window.showToast('Failed to create album', 'error')
+    }
+    throw err
   }
-
-  // Current: Global albums collection
-  const refDoc = await addDoc(collection(db, 'albums'), payload)
-  console.log(`📂 Album opprettet for bruker ${user.uid}: ${payload.name}`)
-
-  /* FUTURE: Nested albums under user (Phase 2)
-  const albumRef = collection(db, 'users', user.uid, 'albums');
-  await addDoc(albumRef, {
-    ...payload,
-    userId: user.uid,
-    createdAt: serverTimestamp()
-  });
-  Benefits:
-  - Better data isolation
-  - Easier security rules
-  - Per-user album limits
-  - Improved query performance
-  */
-
-  return refDoc.id
 }
 
 // 🔹 Oppdater album
