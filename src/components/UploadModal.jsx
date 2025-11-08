@@ -245,7 +245,8 @@ const UploadModal = ({
 
   // Handle create album
   const handleAlbumSave = async (albumData) => {
-    // Clean and validate data
+    console.log('🔁 handleAlbumSave triggered')
+
     const cleanAlbum = {
       name: String(albumData.name || '').trim(),
       description: String(albumData.description || '').trim(),
@@ -265,15 +266,20 @@ const UploadModal = ({
     }
 
     try {
-      await addAlbum(cleanAlbum) // ✅ CORRECT - clean object
+      // 🔹 Bare ett faktisk kall til Firestore
+      const newAlbumRef = await addAlbum(cleanAlbum)
+
       window.showToast?.('Album created 🎉', 'success')
       setShowAlbumModal(false)
-      if (onCreateAlbum) await onCreateAlbum(cleanAlbum) // Notify parent to refresh
+
+      // 🔹 Oppdater UI, men ikke opprett nytt dokument
+      if (onCreateAlbum) onCreateAlbum({ id: newAlbumRef.id, ...cleanAlbum })
     } catch (error) {
       console.error('Error creating album:', error)
       window.showToast?.('Failed to create album', 'error')
     }
   }
+
   const handleCreateAlbumClick = () => {
     setShowAlbumModal(true)
   }

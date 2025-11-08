@@ -1,115 +1,113 @@
 // ============================================================================
 // COMPONENT: AlbumModal.jsx – v2.1 med i18n
 // ============================================================================
-import React, { useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { X, FolderPlus, Image as ImageIcon } from "lucide-react";
-import { updateAlbum } from '../firebase';
+import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import { X, FolderPlus, Image as ImageIcon } from 'lucide-react'
+import { updateAlbum } from '../firebase'
 
 const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
-  const { t } = useTranslation(['albums']);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [cover, setCover] = useState("");
+  const { t } = useTranslation(['albums'])
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+  const [cover, setCover] = useState('')
 
   // New state for UX
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     if (editingAlbum) {
-      setName(editingAlbum.name || "");
-      setDescription(editingAlbum.description || "");
-      setCover(editingAlbum.cover || "");
+      setName(editingAlbum.name || '')
+      setDescription(editingAlbum.description || '')
+      setCover(editingAlbum.cover || '')
     }
-  }, [editingAlbum]);
+  }, [editingAlbum])
 
   // Prevent body scroll when modal is open
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden'
     return () => {
-      document.body.style.overflow = 'auto';
-    };
-  }, []);
+      document.body.style.overflow = 'auto'
+    }
+  }, [])
 
   // ESC key to close modal
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === 'Escape' && !loading) {
-        onClose();
+        onClose()
       }
-    };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
-  }, [onClose, loading]);
+    }
+    window.addEventListener('keydown', handleEsc)
+    return () => window.removeEventListener('keydown', handleEsc)
+  }, [onClose, loading])
 
   // Validation helper
   const validateForm = () => {
     // Clear previous errors
-    setError('');
+    setError('')
 
     // Validate name
     if (!name.trim()) {
-      setError(t('albums:enterAlbumName') || 'Album name is required');
-      return false;
+      setError(t('albums:enterAlbumName') || 'Album name is required')
+      return false
     }
 
     if (name.length > 50) {
-      setError('Album name must be less than 50 characters');
-      return false;
+      setError('Album name must be less than 50 characters')
+      return false
     }
 
     if (description.length > 200) {
-      setError('Description must be less than 200 characters');
-      return false;
+      setError('Description must be less than 200 characters')
+      return false
     }
 
-    return true;
-  };
+    return true
+  }
 
   // Enhanced submit handler
   const handleSave = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
 
     // Validate form
     if (!validateForm()) {
-      return;
+      return
     }
 
     try {
-      setLoading(true);
-      setError('');
+      setLoading(true)
+      setError('')
 
       const albumData = {
         name: name.trim(),
         description: description.trim(),
         cover: cover.trim(),
-      };
+      }
 
       if (editingAlbum) {
         // UPDATE existing album
-        await updateAlbum(editingAlbum.id, albumData);
+        await updateAlbum(editingAlbum.id, albumData)
         if (window.showToast) {
-          window.showToast('Album updated ✅', 'success');
+          window.showToast('Album updated ✅', 'success')
         }
       } else {
         // CREATE new album - let parent handle creation
-        await onSave(albumData);
+        onSave(albumData)
         // Parent will show success toast
       }
-
-      onClose();
     } catch (err) {
-      console.error('Error saving album:', err);
-      setError(err.message || 'Failed to save album. Please try again.');
+      console.error('Error saving album:', err)
+      setError(err.message || 'Failed to save album. Please try again.')
 
       if (window.showToast) {
-        window.showToast('Failed to save album', 'error');
+        window.showToast('Failed to save album', 'error')
       }
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div
@@ -148,25 +146,35 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               type="text"
               value={name}
               onChange={(e) => {
-                setName(e.target.value);
-                setError(''); // Clear error on change
+                setName(e.target.value)
+                setError('') // Clear error on change
               }}
-              placeholder={t('albums:namePlaceholder') || 'Enter album name (max 50 characters)'}
+              placeholder={
+                t('albums:namePlaceholder') ||
+                'Enter album name (max 50 characters)'
+              }
               maxLength={50}
               disabled={loading}
               className="w-full p-3 rounded-xl bg-gray-800/60 border border-gray-600/50
                          text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500
                          disabled:opacity-50 disabled:cursor-not-allowed"
             />
-            <p className="text-xs text-gray-500 mt-1">{name.length}/50 characters</p>
+            <p className="text-xs text-gray-500 mt-1">
+              {name.length}/50 characters
+            </p>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-300 mb-1">{t('albums:description')}</label>
+            <label className="block text-sm text-gray-300 mb-1">
+              {t('albums:description')}
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder={t('albums:descriptionPlaceholder') || 'Add a description (optional, max 200 characters)'}
+              placeholder={
+                t('albums:descriptionPlaceholder') ||
+                'Add a description (optional, max 200 characters)'
+              }
               maxLength={200}
               rows="3"
               disabled={loading}
@@ -174,7 +182,9 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
                          text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none
                          disabled:opacity-50 disabled:cursor-not-allowed"
             />
-            <p className="text-xs text-gray-500 mt-1">{description.length}/200 characters</p>
+            <p className="text-xs text-gray-500 mt-1">
+              {description.length}/200 characters
+            </p>
           </div>
 
           <div>
@@ -232,15 +242,17 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
                   {editingAlbum ? 'Updating...' : 'Creating...'}
                 </>
+              ) : editingAlbum ? (
+                t('albums:saveChanges')
               ) : (
-                editingAlbum ? t('albums:saveChanges') : t('albums:createAlbum')
+                t('albums:createAlbum')
               )}
             </button>
           </div>
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AlbumModal;
+export default AlbumModal

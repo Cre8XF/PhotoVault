@@ -19,32 +19,24 @@ service cloud.firestore {
       return isAuthenticated() && request.resource.data.userId == request.auth.uid;
     }
 
-    function userIdUnchanged() {
-      return !('userId' in resource.data) || resource.data.userId == request.resource.data.userId;
-    }
-
     // ===== TOP-LEVEL COLLECTIONS =====
     match /{collection}/{docId} {
-      // Anyone authenticated can read
       allow read: if isAuthenticated();
-
-      // Only owner can create (with their own userId) or admin
       allow create: if isOwnerOnCreate() || isAdmin();
 
-      // Only owner can update/delete or admin
-      // PLUS: fallback for old documents without userId
+      // ✅ gir slettetilgang enten via resource.data.userId (hvis finnes)
+      // eller via fallback for dokumenter uten userId-felt
       allow update, delete: if isAdmin()
-        || isOwner(resource.data.userId)
-        || !('userId' in resource.data); // Fallback for old docs
+        || (resource.data.userId != null && isOwner(resource.data.userId))
+        || !('userId' in resource.data);
     }
 
-    // ===== USER DOCUMENTS & SUBCOLLECTIONS =====
+    // ===== USER-BASERT STRUKTUR =====
     match /users/{userId} {
-      // User document itself
       allow read: if isAuthenticated();
       allow write: if isOwner(userId) || isAdmin();
 
-      // Subcollection: users/{userId}/photos
+      // --- Photos ---
       match /photos/{photoId} {
         allow read: if isAuthenticated();
         allow create: if isOwner(userId) || isAdmin();
@@ -52,28 +44,31 @@ service cloud.firestore {
           || !('userId' in resource.data);
       }
 
-      // Subcollection: users/{userId}/albums
+      // --- Albums ---
       match /albums/{albumId} {
         allow read: if isAuthenticated();
         allow create: if isOwner(userId) || isAdmin();
-        allow update, delete: if isOwner(userId) || isAdmin()
+
+        // ✅ tillater sletting fra både Netlify og lokal emulator
+        allow update, delete: if isOwner(userId)
+          || (resource.data.userId != null && isOwner(resource.data.userId))
+          || isAdmin()
           || !('userId' in resource.data);
       }
 
-      // Subcollection: users/{userId}/vault
+      // --- Vault ---
       match /vault/{vaultId} {
-        allow read: if isOwner(userId) || isAdmin();
-        allow write: if isOwner(userId) || isAdmin();
+        allow read, write: if isOwner(userId) || isAdmin();
       }
 
-      // Any other subcollections under users
+      // --- Andre sub-samlinger ---
       match /{document=**} {
         allow read: if isAuthenticated();
         allow write: if isOwner(userId) || isAdmin();
       }
     }
 
-    // ===== DENY EVERYTHING ELSE =====
+    // ===== DEFAULT DENY =====
     match /{document=**} {
       allow read, write: if false;
     }
