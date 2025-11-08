@@ -25,6 +25,7 @@ import {
 import { triggerHaptic, showToast } from '../utils/nativeUtils'
 import { useTranslation } from 'react-i18next'
 import { useUpload } from '../hooks/useUpload'
+import { auth, addAlbum } from '../firebase'
 
 const formatFileSize = (bytes) => {
   if (bytes === 0) return '0 Bytes'
@@ -244,8 +245,34 @@ const UploadModal = ({
 
   // Handle create album
   const handleAlbumSave = async (albumData) => {
-    await onCreateAlbum(albumData)
-    setShowAlbumModal(false)
+    // Clean and validate data
+    const cleanAlbum = {
+      name: String(albumData.name || '').trim(),
+      description: String(albumData.description || '').trim(),
+      cover: String(albumData.cover || '').trim(),
+      createdAt: new Date().toISOString(),
+      userId: auth.currentUser?.uid,
+    }
+
+    if (!cleanAlbum.userId) {
+      window.showToast?.('You must be logged in to create an album', 'error')
+      return
+    }
+
+    if (!cleanAlbum.name) {
+      window.showToast?.('Album name is required', 'error')
+      return
+    }
+
+    try {
+      await addAlbum(cleanAlbum) // ✅ CORRECT - clean object
+      window.showToast?.('Album created 🎉', 'success')
+      setShowAlbumModal(false)
+      if (onCreateAlbum) await onCreateAlbum(cleanAlbum) // Notify parent to refresh
+    } catch (error) {
+      console.error('Error creating album:', error)
+      window.showToast?.('Failed to create album', 'error')
+    }
   }
   const handleCreateAlbumClick = () => {
     setShowAlbumModal(true)
