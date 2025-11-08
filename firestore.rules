@@ -44,18 +44,6 @@ service cloud.firestore {
           || !('userId' in resource.data);
       }
 
-      // --- Albums ---
-      match /albums/{albumId} {
-        allow read: if isAuthenticated();
-        allow create: if isOwner(userId) || isAdmin();
-
-        // ✅ tillater sletting fra både Netlify og lokal emulator
-        allow update, delete: if isOwner(userId)
-          || (resource.data.userId != null && isOwner(resource.data.userId))
-          || isAdmin()
-          || !('userId' in resource.data);
-      }
-
       // --- Vault ---
       match /vault/{vaultId} {
         allow read, write: if isOwner(userId) || isAdmin();
