@@ -18,7 +18,8 @@ const PhotoGrid = ({
   editMode = false,
   currentAlbum = null,
 }) => {
-  const list = filterUnassigned ? photos.filter((p) => !p.albumId) : photos;
+  const safePhotos = Array.isArray(photos) ? photos : [];
+  const list = filterUnassigned ? safePhotos.filter((p) => !p.albumId) : safePhotos;
   const [photoModal, setPhotoModal] = useState({ open: false, index: 0 });
   const [loading, setLoading] = useState(false);
 

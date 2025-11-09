@@ -19,17 +19,21 @@ const PhotoGridOptimized = ({
 
   const toggleSelect = (photoId) => {
     if (!enableSelection) return;
-    updateSelected((prev) =>
-      prev.includes(photoId)
-        ? prev.filter((id) => id !== photoId)
-        : [...prev, photoId]
-    );
+    updateSelected((prev) => {
+      const safePrev = Array.isArray(prev) ? prev : [];
+      return safePrev.includes(photoId)
+        ? safePrev.filter((id) => id !== photoId)
+        : [...safePrev, photoId];
+    });
   };
+
+  const safePhotos = Array.isArray(photos) ? photos : [];
+  const safeCurrentSelected = Array.isArray(currentSelected) ? currentSelected : [];
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-      {photos.map((photo) => {
-        const selected = currentSelected.includes(photo.id);
+      {safePhotos.map((photo) => {
+        const selected = safeCurrentSelected.includes(photo.id);
         return (
           <div
             key={photo.id}

@@ -28,7 +28,7 @@ const AlbumsPage = ({ albums, photos, onAlbumClick, onPhotoClick, refreshData, o
 
   // Delete album handler
   const handleDeleteAlbum = (album) => {
-    const albumPhotos = photos.filter(p => p.albumId === album.id);
+    const albumPhotos = (photos || []).filter(p => p.albumId === album.id);
     const photosNote = albumPhotos.length > 0
       ? `Dette vil også fjerne ${albumPhotos.length} bilder fra albumet (men ikke slette dem).`
       : 'Dette albumet er tomt.';
@@ -141,7 +141,7 @@ const AlbumsPage = ({ albums, photos, onAlbumClick, onPhotoClick, refreshData, o
 
       {viewMode === 'albums' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {albums.map(album => (
+          {(albums || []).map(album => (
             <div key={album.id} className="relative group">
               <AlbumCard album={album} photos={photos} onOpen={() => onAlbumClick(album)} />
 

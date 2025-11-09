@@ -10,10 +10,11 @@ const AlbumCard = memo(
     const [tilt, setTilt] = useState({ x: 0, y: 0 })
 
     // Prioriter album.cover, ellers bruk første bilde i albumet
+    const safePhotos = Array.isArray(photos) ? photos : [];
     const coverUrl =
-      album.cover || photos.find((p) => p.albumId === album.id)?.url || ''
+      album.cover || safePhotos.find((p) => p.albumId === album.id)?.url || ''
 
-    const count = photos.filter((p) => p.albumId === album.id).length
+    const count = safePhotos.filter((p) => p.albumId === album.id).length
 
     let updatedStr = ''
     const updatedAt = album.updatedAt || album.createdAt
