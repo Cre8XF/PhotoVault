@@ -75,7 +75,7 @@ const AlbumPage = ({
   const [filterAI, setFilterAI] = useState('all')
 
   const albumPhotos = useMemo(
-    () => (album ? photos.filter((p) => p.albumId === album.id) : []),
+    () => (album ? (photos || []).filter((p) => p.albumId === album.id) : []),
     [photos, album]
   )
 

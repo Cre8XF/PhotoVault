@@ -104,13 +104,13 @@ const AlbumsPage = ({ albums, photos, onAlbumClick, onPhotoClick, refreshData, o
     });
   };
 
-  const albumPhotos = useMemo(() => photos.filter(p => !p.albumId), [photos]);
+  const albumPhotos = useMemo(() => (photos || []).filter(p => !p.albumId), [photos]);
 
   // Beregning før return
   const totalAlbums = albums.length;
-  const totalPhotos = albums.reduce((sum, a) => sum + (a.photoCount || 0), 0);
+  const totalPhotos = (albums || []).reduce((sum, a) => sum + (a.photoCount || 0), 0);
   const totalSizeMB = (
-  photos.reduce((sum, p) => sum + (p.size || 0), 0) / (1024 * 1024)
+  (photos || []).reduce((sum, p) => sum + (p.size || 0), 0) / (1024 * 1024)
 ).toFixed(1);
 
 
