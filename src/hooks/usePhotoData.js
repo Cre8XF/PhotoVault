@@ -54,16 +54,32 @@ export const usePhotoData = () => {
     if (!uid) return;
 
     try {
-      const [albumData, photoData] = await Promise.all([
+      const [fetchedAlbums, fetchedPhotos] = await Promise.all([
         getAlbumsByUser(uid),
         getPhotosByUser(uid)
       ]);
 
-      setAlbums(albumData);
-      setPhotos(photoData);
+      // VALIDATION + LOGGING
+      console.log('🔵 Fetched albums:', typeof fetchedAlbums, 'Is array?', Array.isArray(fetchedAlbums));
+      console.log('🔵 Fetched photos:', typeof fetchedPhotos, 'Is array?', Array.isArray(fetchedPhotos));
+
+      // FORCE ARRAYS
+      const safeAlbums = Array.isArray(fetchedAlbums) ? fetchedAlbums : [];
+      const safePhotos = Array.isArray(fetchedPhotos) ? fetchedPhotos : [];
+
+      // ERROR LOGGING
+      if (!Array.isArray(fetchedAlbums)) {
+        console.error('❌ getAlbumsByUser returned non-array:', fetchedAlbums);
+      }
+      if (!Array.isArray(fetchedPhotos)) {
+        console.error('❌ getPhotosByUser returned non-array:', fetchedPhotos);
+      }
+
+      setAlbums(safeAlbums);
+      setPhotos(safePhotos);
       updateStorageUsed();
 
-      return { albums: albumData, photos: photoData };
+      return { albums: safeAlbums, photos: safePhotos };
     } catch (err) {
       console.error('Error refreshing data:', err);
       setNotification({
