@@ -169,7 +169,7 @@ export const usePhotoData = () => {
       }
 
       // OPTIMISTIC UPDATE - Update UI immediately
-      setAlbums(prev => prev.map(album =>
+      setAlbums(prev => (prev || []).map(album =>
         album.id === editingAlbum.id
           ? { ...album, ...albumData }
           : album
@@ -248,8 +248,8 @@ export const usePhotoData = () => {
 
         try {
           // OPTIMISTIC UPDATE - Remove from UI immediately
-          setAlbums(prev => prev.filter(a => a.id !== album.id));
-          setPhotos(prev => prev.map(p =>
+          setAlbums(prev => (prev || []).filter(a => a.id !== album.id));
+          setPhotos(prev => (prev || []).map(p =>
             p.albumId === album.id ? { ...p, albumId: null } : p
           ));
 
@@ -308,7 +308,7 @@ export const usePhotoData = () => {
 
         try {
           // OPTIMISTIC UPDATE - Remove from UI immediately (FIXES ISSUE 2)
-          setPhotos(prev => prev.filter(p => p.id !== photo.id));
+          setPhotos(prev => (prev || []).filter(p => p.id !== photo.id));
           closePhotoModal();
 
           // Sync to backend in background
@@ -355,7 +355,7 @@ export const usePhotoData = () => {
       const newFavoriteState = !photo.favorite;
 
       // OPTIMISTIC UPDATE - Update UI immediately
-      setPhotos(prev => prev.map(p =>
+      setPhotos(prev => (prev || []).map(p =>
         p.id === photo.id
           ? { ...p, favorite: newFavoriteState }
           : p
@@ -424,7 +424,7 @@ export const usePhotoData = () => {
 
     try {
       // OPTIMISTIC UPDATE - Update UI immediately (FIXES ISSUE 1)
-      setAlbums(prev => prev.map(album =>
+      setAlbums(prev => (prev || []).map(album =>
         album.id === albumId
           ? { ...album, cover: coverUrl }
           : album
@@ -470,7 +470,7 @@ export const usePhotoData = () => {
 
     try {
       // OPTIMISTIC UPDATE - Update UI immediately
-      setAlbums(prev => prev.map(album =>
+      setAlbums(prev => (prev || []).map(album =>
         album.id === albumId
           ? { ...album, photoCount: count }
           : album
