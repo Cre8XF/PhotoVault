@@ -24,32 +24,40 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
   const [isUploadOpen, setUploadOpen] = useState(false);
 
   const stats = useMemo(
-    () => ({
-      total: photos.length,
-      favorites: photos.filter((p) => p.favorite).length,
-      recent: photos.filter((p) => {
-        const daysDiff =
-          Math.floor((Date.now() - new Date(p.createdAt)) / (1000 * 60 * 60 * 24));
-        return daysDiff <= 1;
-      }).length,
-      unassigned: photos.filter((p) => !p.albumId).length,
-      withFaces: photos.filter((p) => p.faces > 0).length
-    }),
+    () => {
+      const safePhotos = Array.isArray(photos) ? photos : [];
+      return {
+        total: safePhotos.length,
+        favorites: safePhotos.filter((p) => p.favorite).length,
+        recent: safePhotos.filter((p) => {
+          const daysDiff =
+            Math.floor((Date.now() - new Date(p.createdAt)) / (1000 * 60 * 60 * 24));
+          return daysDiff <= 1;
+        }).length,
+        unassigned: safePhotos.filter((p) => !p.albumId).length,
+        withFaces: safePhotos.filter((p) => p.faces > 0).length
+      };
+    },
     [photos]
   );
 
   const favoritePhotos = useMemo(
-    () => photos.filter((p) => p.favorite).slice(0, 8),
+    () => {
+      const safePhotos = Array.isArray(photos) ? photos : [];
+      return safePhotos.filter((p) => p.favorite).slice(0, 8);
+    },
     [photos]
   );
 
   const recentPhotos = useMemo(
-    () =>
-      [...photos]
+    () => {
+      const safePhotos = Array.isArray(photos) ? photos : [];
+      return [...safePhotos]
         .sort(
           (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
         )
-        .slice(0, 12),
+        .slice(0, 12);
+    },
     [photos]
   );
 
@@ -58,7 +66,7 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
       id: "last30days",
       icon: Calendar,
       name: t("home:last30days"),
-      count: photos.filter((p) => {
+      count: (photos || []).filter((p) => {
         const daysDiff =
           Math.floor((Date.now() - new Date(p.createdAt)) / (1000 * 60 * 60 * 24));
         return daysDiff <= 30;

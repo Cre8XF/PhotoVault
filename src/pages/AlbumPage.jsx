@@ -119,14 +119,15 @@ const AlbumPage = ({
 
   // Statistikk
   const stats = useMemo(() => {
-    const totalSize = albumPhotos.reduce((sum, p) => sum + (p.size || 0), 0)
-    const aiCount = albumPhotos.filter((p) => p.aiAnalyzed).length
+    const safeAlbumPhotos = Array.isArray(albumPhotos) ? albumPhotos : [];
+    const totalSize = safeAlbumPhotos.reduce((sum, p) => sum + (p.size || 0), 0)
+    const aiCount = safeAlbumPhotos.filter((p) => p.aiAnalyzed).length
     const categories = [
-      ...new Set(albumPhotos.map((p) => p.category).filter(Boolean)),
+      ...new Set(safeAlbumPhotos.map((p) => p.category).filter(Boolean)),
     ]
 
     return {
-      total: albumPhotos.length,
+      total: safeAlbumPhotos.length,
       totalSize: (totalSize / (1024 * 1024)).toFixed(1),
       aiAnalyzed: aiCount,
       categories: categories.length,
@@ -186,7 +187,8 @@ const AlbumPage = ({
   const handleMovePhotos = async (targetAlbumId) => {
     try {
       const db = getFirestore()
-      const updates = selectedPhotos.filter(Boolean).map(async (photo) => {
+      const safeSelected = Array.isArray(selectedPhotos) ? selectedPhotos : [];
+      const updates = safeSelected.filter(Boolean).map(async (photo) => {
         const photoId =
           typeof photo === 'string' ? photo : photo.id || photo.docId
         if (!photoId) return
@@ -196,15 +198,16 @@ const AlbumPage = ({
 
       await Promise.all(updates)
 
-      const fromCount = albumPhotos.length - selectedPhotos.length
+      const safeAlbumPhotos = Array.isArray(albumPhotos) ? albumPhotos : [];
+      const fromCount = safeAlbumPhotos.length - safeSelected.length
       await onUpdatePhotoCount(album.id, Math.max(0, fromCount))
 
-      const targetAlbumPhotos = photos.filter(
+      const targetAlbumPhotos = (photos || []).filter(
         (p) => p.albumId === targetAlbumId
       ).length
       await onUpdatePhotoCount(
         targetAlbumId,
-        targetAlbumPhotos + selectedPhotos.length
+        targetAlbumPhotos + safeSelected.length
       )
 
       setSelectedPhotos([])
@@ -216,21 +219,23 @@ const AlbumPage = ({
 
   const togglePhotoSelection = (photo) => {
     setSelectedPhotos((prev) => {
-      const isSelected = prev.some(
+      const safePrev = Array.isArray(prev) ? prev : [];
+      const isSelected = safePrev.some(
         (p) => (typeof p === 'string' ? p : p.id) === photo.id
       )
       if (isSelected) {
-        return prev.filter(
+        return safePrev.filter(
           (p) => (typeof p === 'string' ? p : p.id) !== photo.id
         )
       } else {
-        return [...prev, photo]
+        return [...safePrev, photo]
       }
     })
   }
 
   const isPhotoSelected = (photo) => {
-    return selectedPhotos.some(
+    const safeSelected = Array.isArray(selectedPhotos) ? selectedPhotos : [];
+    return safeSelected.some(
       (p) => (typeof p === 'string' ? p : p.id) === photo.id
     )
   }

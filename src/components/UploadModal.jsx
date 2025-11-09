@@ -454,7 +454,7 @@ const UploadModal = ({
                 <FolderOpen className="w-5 h-5" />
                 <span className="text-sm font-medium">
                   {selectedAlbumId
-                    ? albums.find((a) => a.id === selectedAlbumId)?.name ||
+                    ? (albums || []).find((a) => a.id === selectedAlbumId)?.name ||
                       t('upload:selectAlbum')
                     : t('upload:noAlbum')}
                 </span>
@@ -472,7 +472,7 @@ const UploadModal = ({
                 >
                   {t('upload:noAlbum')}
                 </button>
-                {albums.map((album) => (
+                {(albums || []).map((album) => (
                   <button
                     key={album.id}
                     onClick={() => {
