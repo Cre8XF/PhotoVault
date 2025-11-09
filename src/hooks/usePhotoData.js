@@ -1,9 +1,9 @@
 // ============================================================================
-// usePhotoData Hook - Phase 4: Photo & Album Data Management with Optimistic Updates
+// usePhotoData Hook - Phase 4.1: FIXED DEPENDENCIES & ARRAY GUARDS
 // ============================================================================
-import { useCallback, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { doc, deleteDoc } from 'firebase/firestore';
+import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { doc, deleteDoc } from 'firebase/firestore'
 import {
   getAlbumsByUser,
   getPhotosByUser,
@@ -14,508 +14,622 @@ import {
   deletePhoto,
   setAlbumCover,
   updateAlbumPhotoCount,
-} from '../firebase';
-import { db } from '../firebase';
-import useStore from '../state/store';
+} from '../firebase'
+import { db } from '../firebase'
+import useStore from '../state/store'
 
 /**
  * Custom hook for photo and album data management
  * Handles all CRUD operations for photos and albums
+ *
+ * 🔒 PHASE 4.1 UPDATE: Fixed dependencies and added array validation
  */
 export const usePhotoData = () => {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation(['common'])
 
   // Reentrancy guards (Phase 3)
-  const [isSaving, setIsSaving] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+  const [isSaving, setIsSaving] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false)
 
   // Zustand store selectors
-  const user = useStore((state) => state.user);
-  const albums = useStore((state) => state.albums);
-  const photos = useStore((state) => state.photos);
-  const setAlbums = useStore((state) => state.setAlbums);
-  const setPhotos = useStore((state) => state.setPhotos);
-  const setNotification = useStore((state) => state.setNotification);
-  const setConfirmModal = useStore((state) => state.setConfirmModal);
-  const updateStorageUsed = useStore((state) => state.updateStorageUsed);
-  const currentPage = useStore((state) => state.currentPage);
-  const selectedAlbum = useStore((state) => state.selectedAlbum);
-  const setCurrentPage = useStore((state) => state.setCurrentPage);
-  const setSelectedAlbum = useStore((state) => state.setSelectedAlbum);
-  const closePhotoModal = useStore((state) => state.closePhotoModal);
+  const user = useStore((state) => state.user)
+  const albums = useStore((state) => state.albums)
+  const photos = useStore((state) => state.photos)
+  const setAlbums = useStore((state) => state.setAlbums)
+  const setPhotos = useStore((state) => state.setPhotos)
+  const setNotification = useStore((state) => state.setNotification)
+  const setConfirmModal = useStore((state) => state.setConfirmModal)
+  const updateStorageUsed = useStore((state) => state.updateStorageUsed)
+  const currentPage = useStore((state) => state.currentPage)
+  const selectedAlbum = useStore((state) => state.selectedAlbum)
+  const setCurrentPage = useStore((state) => state.setCurrentPage)
+  const setSelectedAlbum = useStore((state) => state.setSelectedAlbum)
+  const closePhotoModal = useStore((state) => state.closePhotoModal)
 
   /**
    * Refresh all data (albums + photos) for current user
-   * PHASE 4: Renamed from refreshData - used as fallback for error rollback
+   * PHASE 4.1: Added comprehensive array validation
    */
-  const refreshAllData = useCallback(async (uid = user?.uid) => {
-    if (!uid) return;
-
-    try {
-      const [fetchedAlbums, fetchedPhotos] = await Promise.all([
-        getAlbumsByUser(uid),
-        getPhotosByUser(uid)
-      ]);
-
-      // VALIDATION + LOGGING
-      console.log('🔵 Fetched albums:', typeof fetchedAlbums, 'Is array?', Array.isArray(fetchedAlbums));
-      console.log('🔵 Fetched photos:', typeof fetchedPhotos, 'Is array?', Array.isArray(fetchedPhotos));
-
-      // FORCE ARRAYS
-      const safeAlbums = Array.isArray(fetchedAlbums) ? fetchedAlbums : [];
-      const safePhotos = Array.isArray(fetchedPhotos) ? fetchedPhotos : [];
-
-      // ERROR LOGGING
-      if (!Array.isArray(fetchedAlbums)) {
-        console.error('❌ getAlbumsByUser returned non-array:', fetchedAlbums);
-      }
-      if (!Array.isArray(fetchedPhotos)) {
-        console.error('❌ getPhotosByUser returned non-array:', fetchedPhotos);
+  const refreshAllData = useCallback(
+    async (uid) => {
+      if (!uid) {
+        console.warn('⚠️ refreshAllData called without uid')
+        return { albums: [], photos: [] }
       }
 
-      setAlbums(safeAlbums);
-      setPhotos(safePhotos);
-      updateStorageUsed();
+      try {
+        const [fetchedAlbums, fetchedPhotos] = await Promise.all([
+          getAlbumsByUser(uid),
+          getPhotosByUser(uid),
+        ])
 
-      return { albums: safeAlbums, photos: safePhotos };
-    } catch (err) {
-      console.error('Error refreshing data:', err);
-      setNotification({
-        message: t('common:notifications.errorLoadingData'),
-        type: 'error'
-      });
-      return { albums: [], photos: [] };
-    }
-  }, [user?.uid, setAlbums, setPhotos, updateStorageUsed, setNotification, t]);
+        // 🔒 CRITICAL VALIDATION
+        const isAlbumsArray = Array.isArray(fetchedAlbums)
+        const isPhotosArray = Array.isArray(fetchedPhotos)
+
+        if (!isAlbumsArray) {
+          console.error('❌ getAlbumsByUser returned non-array:', {
+            type: typeof fetchedAlbums,
+            value: fetchedAlbums,
+            isArray: isAlbumsArray,
+          })
+        }
+
+        if (!isPhotosArray) {
+          console.error('❌ getPhotosByUser returned non-array:', {
+            type: typeof fetchedPhotos,
+            value: fetchedPhotos,
+            isArray: isPhotosArray,
+          })
+        }
+
+        // FORCE ARRAYS - Store's setAlbums/setPhotos now also validate, but double-check here
+        const safeAlbums = isAlbumsArray ? fetchedAlbums : []
+        const safePhotos = isPhotosArray ? fetchedPhotos : []
+
+        console.log('✅ Refresh complete:', {
+          albums: safeAlbums.length,
+          photos: safePhotos.length,
+        })
+
+        // Store validates again, but we're passing safe arrays
+        setAlbums(safeAlbums)
+        setPhotos(safePhotos)
+        updateStorageUsed()
+
+        return { albums: safeAlbums, photos: safePhotos }
+      } catch (err) {
+        console.error('❌ Error refreshing data:', err)
+        setNotification({
+          message: t('common:notifications.errorLoadingData'),
+          type: 'error',
+        })
+
+        // On error, reset to empty arrays (safe state)
+        setAlbums([])
+        setPhotos([])
+        return { albums: [], photos: [] }
+      }
+    },
+    [setAlbums, setPhotos, updateStorageUsed, setNotification, t]
+  )
 
   // Alias for backwards compatibility
-  const refreshData = refreshAllData;
+  const refreshData = refreshAllData
 
   /**
    * Auto-refresh data when user changes
+   * 🔒 FIXED: Proper dependency array to avoid infinite loops
    */
   useEffect(() => {
     if (user?.uid) {
-      refreshData(user.uid);
+      refreshAllData(user.uid)
     } else {
-      setAlbums([]);
-      setPhotos([]);
+      // No user - clear data
+      setAlbums([])
+      setPhotos([])
     }
-  }, [user?.uid]); // Only depend on user.uid to avoid infinite loops
+  }, [user?.uid]) // Only user.uid - refreshAllData is stable via useCallback
 
   /**
    * Handle photo upload
    * PHASE 4: Refresh only after upload - photos appear immediately
    */
-  const handleUpload = useCallback(async (selectedFiles, albumId, aiTagging = false) => {
-    // GUARD: Prevent duplicate uploads
-    if (isUploading) {
-      console.warn('Upload already in progress, ignoring duplicate call');
-      return;
-    }
-
-    if (!user) {
-      setNotification({
-        message: t('common:notifications.mustBeLoggedIn'),
-        type: 'error'
-      });
-      return;
-    }
-
-    setIsUploading(true);
-
-    try {
-      let successCount = 0;
-
-      for (const fileObj of selectedFiles) {
-        // Pass thumbnail and metadata for videos
-        await uploadPhoto(
-          user.uid,
-          fileObj.file,
-          albumId,
-          aiTagging,
-          fileObj.thumbnail || null,
-          fileObj.metadata || null
-        );
-        successCount++;
+  const handleUpload = useCallback(
+    async (selectedFiles, albumId, aiTagging = false) => {
+      // GUARD: Prevent duplicate uploads
+      if (isUploading) {
+        console.warn('⚠️ Upload already in progress, ignoring duplicate call')
+        return
       }
 
-      // Refresh to get newly uploaded photos with their IDs
-      // Note: We could make this optimistic too, but uploadPhoto doesn't return the photo object yet
-      await refreshAllData();
+      if (!user) {
+        setNotification({
+          message: t('common:notifications.mustBeLoggedIn'),
+          type: 'error',
+        })
+        return
+      }
 
-      const message = aiTagging
-        ? t('common:notifications.photosUploadedWithAI', { count: successCount })
-        : t('common:notifications.photosUploaded', { count: successCount });
+      setIsUploading(true)
 
-      setNotification({ message, type: 'success' });
-    } catch (error) {
-      console.error('Upload error:', error);
-      setNotification({
-        message: t('common:notifications.uploadError', { message: error.message }),
-        type: 'error'
-      });
-      throw error;
-    } finally {
-      setIsUploading(false);
-    }
-  }, [isUploading, user, refreshAllData, setNotification, t]);
+      try {
+        let successCount = 0
+
+        for (const fileObj of selectedFiles) {
+          // Pass thumbnail and metadata for videos
+          await uploadPhoto(
+            user.uid,
+            fileObj.file,
+            albumId,
+            aiTagging,
+            fileObj.thumbnail || null,
+            fileObj.metadata || null
+          )
+          successCount++
+        }
+
+        // Refresh to get newly uploaded photos with their IDs
+        await refreshAllData(user.uid)
+
+        const message = aiTagging
+          ? t('common:notifications.photosUploadedWithAI', {
+              count: successCount,
+            })
+          : t('common:notifications.photosUploaded', { count: successCount })
+
+        setNotification({ message, type: 'success' })
+      } catch (error) {
+        console.error('❌ Upload error:', error)
+        setNotification({
+          message: t('common:notifications.uploadError', {
+            message: error.message,
+          }),
+          type: 'error',
+        })
+        throw error
+      } finally {
+        setIsUploading(false)
+      }
+    },
+    [isUploading, user, refreshAllData, setNotification, t]
+  )
 
   /**
    * Update existing album
    * PHASE 4: Optimistic update - UI updates immediately, no full refresh
-   * Note: Album creation is handled exclusively by UploadModal
    */
-  const handleAlbumSave = useCallback(async (albumData, editingAlbum = null) => {
-    // GUARD: Prevent duplicate calls
-    if (isSaving) {
-      console.warn('Album save already in progress, ignoring duplicate call');
-      return;
-    }
-
-    setIsSaving(true);
-
-    try {
-      if (!editingAlbum) {
-        // This should never happen in current architecture
-        console.error('handleAlbumSave called without editingAlbum - use UploadModal for creation');
-        throw new Error('Album creation must be done through UploadModal');
+  const handleAlbumSave = useCallback(
+    async (albumData, editingAlbum = null) => {
+      // GUARD: Prevent duplicate calls
+      if (isSaving) {
+        console.warn(
+          '⚠️ Album save already in progress, ignoring duplicate call'
+        )
+        return
       }
 
-      // OPTIMISTIC UPDATE - Update UI immediately
-      setAlbums(prev => (prev || []).map(album =>
-        album.id === editingAlbum.id
-          ? { ...album, ...albumData }
-          : album
-      ));
+      setIsSaving(true)
 
-      // Sync to backend in background
-      await updateAlbum(editingAlbum.id, albumData);
+      try {
+        if (!editingAlbum) {
+          console.error('❌ handleAlbumSave called without editingAlbum')
+          throw new Error('Album creation must be done through UploadModal')
+        }
 
-      setNotification({
-        message: t('common:notifications.albumUpdated'),
-        type: 'success'
-      });
+        // OPTIMISTIC UPDATE - Update UI immediately
+        setAlbums((prev) => {
+          const safePrev = Array.isArray(prev) ? prev : []
+          return safePrev.map((album) =>
+            album.id === editingAlbum.id ? { ...album, ...albumData } : album
+          )
+        })
 
-      // No refresh needed! ✅
-    } catch (err) {
-      console.error('Album save error:', err);
+        // Sync to backend in background
+        await updateAlbum(editingAlbum.id, albumData)
 
-      // ROLLBACK - Refresh from server if it fails
-      await refreshAllData();
+        setNotification({
+          message: t('common:notifications.albumUpdated'),
+          type: 'success',
+        })
+      } catch (err) {
+        console.error('❌ Album save error:', err)
 
-      setNotification({
-        message: t('common:notifications.albumSaveError'),
-        type: 'error'
-      });
-      throw err;
-    } finally {
-      setIsSaving(false);
-    }
-  }, [isSaving, setAlbums, refreshAllData, setNotification, t]);
+        // ROLLBACK - Refresh from server if it fails
+        if (user?.uid) {
+          await refreshAllData(user.uid)
+        }
+
+        setNotification({
+          message: t('common:notifications.albumSaveError'),
+          type: 'error',
+        })
+        throw err
+      } finally {
+        setIsSaving(false)
+      }
+    },
+    [isSaving, user?.uid, setAlbums, refreshAllData, setNotification, t]
+  )
 
   /**
    * Create album from upload modal (returns album ID)
    */
-  const handleCreateAlbumFromUpload = useCallback(async (albumData) => {
-    try {
-      // Album already created by UploadModal - just refresh UI
-      await refreshData();
+  const handleCreateAlbumFromUpload = useCallback(
+    async (albumData) => {
+      try {
+        // Album already created by UploadModal - just refresh UI
+        if (user?.uid) {
+          await refreshAllData(user.uid)
+        }
 
-      // Don't show notification - UploadModal already showed one
-
-      return albumData.id;
-    } catch (err) {
-      console.error('Album creation error:', err);
-      setNotification({
-        message: t('common:notifications.albumCreationError'),
-        type: 'error'
-      });
-      throw err;
-    }
-  }, [refreshData, setNotification, t]);
+        return albumData.id
+      } catch (err) {
+        console.error('❌ Album creation error:', err)
+        setNotification({
+          message: t('common:notifications.albumCreationError'),
+          type: 'error',
+        })
+        throw err
+      }
+    },
+    [user?.uid, refreshAllData, setNotification, t]
+  )
 
   /**
    * Delete album with confirmation
    * PHASE 4: Optimistic update - Album disappears immediately
    */
-  const handleDeleteAlbum = useCallback((album) => {
-    const albumPhotos = photos.filter(p => p.albumId === album.id);
-    const photosNote = albumPhotos.length > 0
-      ? t('common:notifications.deleteAlbumPhotosNote', { count: albumPhotos.length })
-      : t('common:notifications.deleteAlbumEmptyNote');
+  const handleDeleteAlbum = useCallback(
+    (album) => {
+      const safePhotos = Array.isArray(photos) ? photos : []
+      const albumPhotos = safePhotos.filter((p) => p.albumId === album.id)
+      const photosNote =
+        albumPhotos.length > 0
+          ? t('common:notifications.deleteAlbumPhotosNote', {
+              count: albumPhotos.length,
+            })
+          : t('common:notifications.deleteAlbumEmptyNote')
 
-    setConfirmModal({
-      title: t('common:notifications.deleteAlbumTitle'),
-      message: t('common:notifications.deleteAlbumMessage', {
-        name: album.name,
-        photos: photosNote
-      }),
-      onConfirm: async () => {
-        // GUARD: Prevent duplicate deletes
-        if (isDeleting) {
-          console.warn('Delete already in progress, ignoring duplicate call');
-          return;
-        }
-
-        setIsDeleting(true);
-
-        try {
-          // OPTIMISTIC UPDATE - Remove from UI immediately
-          setAlbums(prev => (prev || []).filter(a => a.id !== album.id));
-          setPhotos(prev => (prev || []).map(p =>
-            p.albumId === album.id ? { ...p, albumId: null } : p
-          ));
-
-          // Navigate away if currently viewing this album
-          if (currentPage === 'album' && selectedAlbum?.id === album.id) {
-            setCurrentPage('albums');
-            setSelectedAlbum(null);
+      setConfirmModal({
+        title: t('common:notifications.deleteAlbumTitle'),
+        message: t('common:notifications.deleteAlbumMessage', {
+          name: album.name,
+          photos: photosNote,
+        }),
+        onConfirm: async () => {
+          if (isDeleting) {
+            console.warn(
+              '⚠️ Delete already in progress, ignoring duplicate call'
+            )
+            return
           }
 
-          // Sync to backend in background
-          for (const photo of albumPhotos) {
-            await updatePhoto(photo.id, { albumId: null });
+          setIsDeleting(true)
+
+          try {
+            // OPTIMISTIC UPDATE
+            setAlbums((prev) => {
+              const safePrev = Array.isArray(prev) ? prev : []
+              return safePrev.filter((a) => a.id !== album.id)
+            })
+
+            setPhotos((prev) => {
+              const safePrev = Array.isArray(prev) ? prev : []
+              return safePrev.map((p) =>
+                p.albumId === album.id ? { ...p, albumId: null } : p
+              )
+            })
+
+            // Navigate away if viewing this album
+            if (currentPage === 'album' && selectedAlbum?.id === album.id) {
+              setCurrentPage('albums')
+              setSelectedAlbum(null)
+            }
+
+            // Sync to backend
+            for (const photo of albumPhotos) {
+              await updatePhoto(photo.id, { albumId: null })
+            }
+            await deleteDoc(doc(db, 'albums', album.id))
+
+            setNotification({
+              message: t('common:notifications.albumDeleted'),
+              type: 'success',
+            })
+          } catch (err) {
+            console.error('❌ Delete album error:', err)
+
+            // ROLLBACK
+            if (user?.uid) {
+              await refreshAllData(user.uid)
+            }
+
+            setNotification({
+              message: t('common:notifications.albumDeleteError'),
+              type: 'error',
+            })
+            throw err
+          } finally {
+            setIsDeleting(false)
           }
-          await deleteDoc(doc(db, 'albums', album.id));
-
-          setNotification({
-            message: t('common:notifications.albumDeleted'),
-            type: 'success'
-          });
-
-          // No refresh needed! ✅
-        } catch (err) {
-          console.error('Delete album error:', err);
-
-          // ROLLBACK - Refresh from server if it fails
-          await refreshAllData();
-
-          setNotification({
-            message: t('common:notifications.albumDeleteError'),
-            type: 'error'
-          });
-          throw err;
-        } finally {
-          setIsDeleting(false);
-        }
-      }
-    });
-  }, [isDeleting, photos, setAlbums, setPhotos, refreshAllData, currentPage, selectedAlbum, setConfirmModal, setNotification, setCurrentPage, setSelectedAlbum, t]);
+        },
+      })
+    },
+    [
+      isDeleting,
+      user?.uid,
+      photos,
+      setAlbums,
+      setPhotos,
+      refreshAllData,
+      currentPage,
+      selectedAlbum,
+      setConfirmModal,
+      setNotification,
+      setCurrentPage,
+      setSelectedAlbum,
+      t,
+    ]
+  )
 
   /**
    * Delete photo with confirmation
-   * PHASE 4: Optimistic update - Fixes Issue 2 (photo not disappearing immediately)
+   * PHASE 4: Optimistic update
    */
-  const handleDeletePhoto = useCallback((photo) => {
-    setConfirmModal({
-      title: t('common:notifications.deletePhotoTitle'),
-      message: t('common:notifications.deletePhotoMessage'),
-      onConfirm: async () => {
-        // GUARD: Prevent duplicate deletes
-        if (isDeleting) {
-          console.warn('Delete already in progress, ignoring duplicate call');
-          return;
-        }
+  const handleDeletePhoto = useCallback(
+    (photo) => {
+      setConfirmModal({
+        title: t('common:notifications.deletePhotoTitle'),
+        message: t('common:notifications.deletePhotoMessage'),
+        onConfirm: async () => {
+          if (isDeleting) {
+            console.warn(
+              '⚠️ Delete already in progress, ignoring duplicate call'
+            )
+            return
+          }
 
-        setIsDeleting(true);
+          setIsDeleting(true)
 
-        try {
-          // OPTIMISTIC UPDATE - Remove from UI immediately (FIXES ISSUE 2)
-          setPhotos(prev => (prev || []).filter(p => p.id !== photo.id));
-          closePhotoModal();
+          try {
+            // OPTIMISTIC UPDATE
+            setPhotos((prev) => {
+              const safePrev = Array.isArray(prev) ? prev : []
+              return safePrev.filter((p) => p.id !== photo.id)
+            })
+            closePhotoModal()
 
-          // Sync to backend in background
-          await deletePhoto(photo.id, photo.storagePath);
+            // Sync to backend
+            await deletePhoto(photo.id, photo.storagePath)
 
-          setNotification({
-            message: t('common:notifications.photoDeleted'),
-            type: 'success'
-          });
+            setNotification({
+              message: t('common:notifications.photoDeleted'),
+              type: 'success',
+            })
+          } catch (err) {
+            console.error('❌ Delete photo error:', err)
 
-          // No refresh needed! ✅
-        } catch (err) {
-          console.error('Delete photo error:', err);
+            // ROLLBACK
+            if (user?.uid) {
+              await refreshAllData(user.uid)
+            }
 
-          // ROLLBACK - Refresh from server if it fails
-          await refreshAllData();
-
-          setNotification({
-            message: t('common:notifications.photoDeleteError'),
-            type: 'error'
-          });
-          throw err;
-        } finally {
-          setIsDeleting(false);
-        }
-      }
-    });
-  }, [isDeleting, setPhotos, refreshAllData, closePhotoModal, setConfirmModal, setNotification, t]);
+            setNotification({
+              message: t('common:notifications.photoDeleteError'),
+              type: 'error',
+            })
+            throw err
+          } finally {
+            setIsDeleting(false)
+          }
+        },
+      })
+    },
+    [
+      isDeleting,
+      user?.uid,
+      setPhotos,
+      refreshAllData,
+      closePhotoModal,
+      setConfirmModal,
+      setNotification,
+      t,
+    ]
+  )
 
   /**
-   * Toggle favorite status of a photo
-   * PHASE 4: Optimistic update - Heart icon updates immediately
+   * Toggle favorite status
+   * PHASE 4: Optimistic update
    */
-  const toggleFavorite = useCallback(async (photo) => {
-    // GUARD: Prevent duplicate toggles
-    if (isTogglingFavorite) {
-      console.warn('Toggle favorite already in progress, ignoring duplicate call');
-      return;
-    }
+  const toggleFavorite = useCallback(
+    async (photo) => {
+      if (isTogglingFavorite) {
+        console.warn(
+          '⚠️ Toggle favorite already in progress, ignoring duplicate call'
+        )
+        return
+      }
 
-    setIsTogglingFavorite(true);
+      setIsTogglingFavorite(true)
 
-    try {
-      const newFavoriteState = !photo.favorite;
+      try {
+        const newFavoriteState = !photo.favorite
 
-      // OPTIMISTIC UPDATE - Update UI immediately
-      setPhotos(prev => (prev || []).map(p =>
-        p.id === photo.id
-          ? { ...p, favorite: newFavoriteState }
-          : p
-      ));
+        // OPTIMISTIC UPDATE
+        setPhotos((prev) => {
+          const safePrev = Array.isArray(prev) ? prev : []
+          return safePrev.map((p) =>
+            p.id === photo.id ? { ...p, favorite: newFavoriteState } : p
+          )
+        })
 
-      // Sync to backend in background
-      await updatePhoto(photo.id, { favorite: newFavoriteState });
+        // Sync to backend
+        await updatePhoto(photo.id, { favorite: newFavoriteState })
 
-      setNotification({
-        message: newFavoriteState
-          ? t('common:notifications.addedToFavorites')
-          : t('common:notifications.removedFromFavorites'),
-        type: 'success'
-      });
+        setNotification({
+          message: newFavoriteState
+            ? t('common:notifications.addedToFavorites')
+            : t('common:notifications.removedFromFavorites'),
+          type: 'success',
+        })
+      } catch (err) {
+        console.error('❌ Error toggling favorite:', err)
 
-      // No refresh needed! ✅
-    } catch (err) {
-      console.error('Error toggling favorite:', err);
+        // ROLLBACK
+        if (user?.uid) {
+          await refreshAllData(user.uid)
+        }
 
-      // ROLLBACK - Refresh from server if it fails
-      await refreshAllData();
-
-      setNotification({
-        message: t('common:notifications.updateError'),
-        type: 'error'
-      });
-      throw err;
-    } finally {
-      setIsTogglingFavorite(false);
-    }
-  }, [isTogglingFavorite, setPhotos, refreshAllData, setNotification, t]);
+        setNotification({
+          message: t('common:notifications.updateError'),
+          type: 'error',
+        })
+        throw err
+      } finally {
+        setIsTogglingFavorite(false)
+      }
+    },
+    [
+      isTogglingFavorite,
+      user?.uid,
+      setPhotos,
+      refreshAllData,
+      setNotification,
+      t,
+    ]
+  )
 
   /**
    * Get photos by album ID
    */
-  const getPhotosByAlbum = useCallback((albumId) => {
-    return photos.filter(photo => photo.albumId === albumId);
-  }, [photos]);
+  const getPhotosByAlbum = useCallback(
+    (albumId) => {
+      const safePhotos = Array.isArray(photos) ? photos : []
+      return safePhotos.filter((photo) => photo.albumId === albumId)
+    },
+    [photos]
+  )
 
   /**
    * Get photos without album
    */
   const getPhotosWithoutAlbum = useCallback(() => {
-    return photos.filter(photo => !photo.albumId);
-  }, [photos]);
+    const safePhotos = Array.isArray(photos) ? photos : []
+    return safePhotos.filter((photo) => !photo.albumId)
+  }, [photos])
 
   /**
    * Get favorite photos
    */
   const getFavoritePhotos = useCallback(() => {
-    return photos.filter(photo => photo.favorite);
-  }, [photos]);
+    const safePhotos = Array.isArray(photos) ? photos : []
+    return safePhotos.filter((photo) => photo.favorite)
+  }, [photos])
 
   /**
    * Set album cover image
-   * PHASE 4: Optimistic update - Fixes Issue 1 (cover not updating immediately)
+   * PHASE 4: Optimistic update
    */
-  const handleSetAlbumCover = useCallback(async (albumId, coverUrl) => {
-    // GUARD: Prevent duplicate calls
-    if (isSaving) {
-      console.warn('Save operation already in progress, ignoring duplicate call');
-      return;
-    }
+  const handleSetAlbumCover = useCallback(
+    async (albumId, coverUrl) => {
+      if (isSaving) {
+        console.warn(
+          '⚠️ Save operation already in progress, ignoring duplicate call'
+        )
+        return
+      }
 
-    setIsSaving(true);
+      setIsSaving(true)
 
-    try {
-      // OPTIMISTIC UPDATE - Update UI immediately (FIXES ISSUE 1)
-      setAlbums(prev => (prev || []).map(album =>
-        album.id === albumId
-          ? { ...album, cover: coverUrl }
-          : album
-      ));
+      try {
+        // OPTIMISTIC UPDATE
+        setAlbums((prev) => {
+          const safePrev = Array.isArray(prev) ? prev : []
+          return safePrev.map((album) =>
+            album.id === albumId ? { ...album, cover: coverUrl } : album
+          )
+        })
 
-      // Sync to backend in background
-      await setAlbumCover(albumId, coverUrl);
+        // Sync to backend
+        await setAlbumCover(albumId, coverUrl)
 
-      setNotification({
-        message: t('common:notifications.coverUpdated'),
-        type: 'success'
-      });
+        setNotification({
+          message: t('common:notifications.coverUpdated'),
+          type: 'success',
+        })
+      } catch (err) {
+        console.error('❌ Set album cover error:', err)
 
-      // No refresh needed! ✅
-    } catch (err) {
-      console.error('Set album cover error:', err);
+        // ROLLBACK
+        if (user?.uid) {
+          await refreshAllData(user.uid)
+        }
 
-      // ROLLBACK - Refresh from server if it fails
-      await refreshAllData();
-
-      setNotification({
-        message: t('common:notifications.coverUpdateError'),
-        type: 'error'
-      });
-      throw err;
-    } finally {
-      setIsSaving(false);
-    }
-  }, [isSaving, setAlbums, refreshAllData, setNotification, t]);
+        setNotification({
+          message: t('common:notifications.coverUpdateError'),
+          type: 'error',
+        })
+        throw err
+      } finally {
+        setIsSaving(false)
+      }
+    },
+    [isSaving, user?.uid, setAlbums, refreshAllData, setNotification, t]
+  )
 
   /**
    * Update album photo count
-   * PHASE 4: Optimistic update - Count updates immediately
+   * PHASE 4: Optimistic update
    */
-  const handleUpdatePhotoCount = useCallback(async (albumId, count) => {
-    // GUARD: Prevent duplicate calls
-    if (isSaving) {
-      console.warn('Save operation already in progress, ignoring duplicate call');
-      return;
-    }
+  const handleUpdatePhotoCount = useCallback(
+    async (albumId, count) => {
+      if (isSaving) {
+        console.warn(
+          '⚠️ Save operation already in progress, ignoring duplicate call'
+        )
+        return
+      }
 
-    setIsSaving(true);
+      setIsSaving(true)
 
-    try {
-      // OPTIMISTIC UPDATE - Update UI immediately
-      setAlbums(prev => (prev || []).map(album =>
-        album.id === albumId
-          ? { ...album, photoCount: count }
-          : album
-      ));
+      try {
+        // OPTIMISTIC UPDATE
+        setAlbums((prev) => {
+          const safePrev = Array.isArray(prev) ? prev : []
+          return safePrev.map((album) =>
+            album.id === albumId ? { ...album, photoCount: count } : album
+          )
+        })
 
-      // Sync to backend in background
-      await updateAlbumPhotoCount(albumId, count);
+        // Sync to backend
+        await updateAlbumPhotoCount(albumId, count)
+      } catch (err) {
+        console.error('❌ Update photo count error:', err)
 
-      // No refresh needed! ✅
-    } catch (err) {
-      console.error('Update photo count error:', err);
+        // ROLLBACK
+        if (user?.uid) {
+          await refreshAllData(user.uid)
+        }
 
-      // ROLLBACK - Refresh from server if it fails
-      await refreshAllData();
-
-      setNotification({
-        message: t('common:notifications.updateError'),
-        type: 'error'
-      });
-      throw err;
-    } finally {
-      setIsSaving(false);
-    }
-  }, [isSaving, setAlbums, refreshAllData, setNotification, t]);
+        setNotification({
+          message: t('common:notifications.updateError'),
+          type: 'error',
+        })
+        throw err
+      } finally {
+        setIsSaving(false)
+      }
+    },
+    [isSaving, user?.uid, setAlbums, refreshAllData, setNotification, t]
+  )
 
   return {
-    // Data
-    albums,
-    photos,
+    // Data - Always return safe arrays
+    albums: Array.isArray(albums) ? albums : [],
+    photos: Array.isArray(photos) ? photos : [],
 
     // Actions
     refreshData,
@@ -538,7 +652,7 @@ export const usePhotoData = () => {
     isDeleting,
     isUploading,
     isTogglingFavorite,
-  };
-};
+  }
+}
 
-export default usePhotoData;
+export default usePhotoData

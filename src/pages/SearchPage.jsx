@@ -1,19 +1,64 @@
 // ============================================================================
-// PAGE: SearchPage.jsx – v5.5 MED FULL I18N
+// PAGE: SearchPage.jsx – v5.6 MED ARRAY-GUARDS FIKSET
 // ============================================================================
-import React, { useState, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Search as SearchIcon, X, Calendar, Tag, Star, Users, Folder, SlidersHorizontal, Sparkles, Move, Trash2, Edit3, Check } from 'lucide-react';
-import { getFirestore, doc, updateDoc } from 'firebase/firestore';
-import { deletePhoto, setAlbumCover, updateAlbumPhotoCount } from '../firebase';
-import MoveModal from '../components/MoveModal';
-import ConfirmModal from '../components/ConfirmModal';
+import React, { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+import {
+  Search as SearchIcon,
+  X,
+  Calendar,
+  Tag,
+  Star,
+  Users,
+  Folder,
+  SlidersHorizontal,
+  Sparkles,
+  Move,
+  Trash2,
+  Edit3,
+  Check,
+} from 'lucide-react'
+import { getFirestore, doc, updateDoc } from 'firebase/firestore'
+import { deletePhoto, setAlbumCover, updateAlbumPhotoCount } from '../firebase'
+import MoveModal from '../components/MoveModal'
+import ConfirmModal from '../components/ConfirmModal'
 
-const SearchPage = ({ photos = [], albums = [], onPhotoClick, toggleFavorite, refreshData }) => {
-  const { t } = useTranslation(['search', 'common']);
+const SearchPage = ({
+  photos = [],
+  albums = [],
+  onPhotoClick,
+  toggleFavorite,
+  refreshData,
+}) => {
+  const { t } = useTranslation(['search', 'common'])
+
+  // 🔒 SIKRE AT PROPS ER ARRAYS
+  const safePhotos = useMemo(() => {
+    if (!Array.isArray(photos)) {
+      console.warn(
+        '⚠️ SearchPage received non-array photos:',
+        typeof photos,
+        photos
+      )
+      return []
+    }
+    return photos
+  }, [photos])
+
+  const safeAlbums = useMemo(() => {
+    if (!Array.isArray(albums)) {
+      console.warn(
+        '⚠️ SearchPage received non-array albums:',
+        typeof albums,
+        albums
+      )
+      return []
+    }
+    return albums
+  }, [albums])
 
   // Søk og filter
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState('')
   const [activeFilters, setActiveFilters] = useState({
     favorites: false,
     withFaces: false,
@@ -21,131 +66,155 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, toggleFavorite, re
     aiAnalyzed: false,
     dateRange: null,
     albumId: null,
-    category: null
-  });
-  const [showFilters, setShowFilters] = useState(false);
+    category: null,
+  })
+  const [showFilters, setShowFilters] = useState(false)
 
   // Redigeringsmodus og flytting
-  const [editMode, setEditMode] = useState(false);
-  const [selectedPhotos, setSelectedPhotos] = useState([]);
-  const [isMoveOpen, setMoveOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false)
+  const [selectedPhotos, setSelectedPhotos] = useState([])
+  const [isMoveOpen, setMoveOpen] = useState(false)
 
   // Bekreftelsesdialog for sletting
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [photoToDelete, setPhotoToDelete] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [photoToDelete, setPhotoToDelete] = useState(null)
 
-  // Kategorier og AI-tags
+  // 🔒 SIKRET: Kategorier med array-guard
   const categories = useMemo(() => {
-    const set = new Set();
-    const safePhotos = Array.isArray(photos) ? photos : [];
-    safePhotos.forEach(p => p.category && set.add(p.category));
-    return Array.from(set).sort();
-  }, [photos]);
+    const set = new Set()
+    safePhotos.forEach((p) => p.category && set.add(p.category))
+    return Array.from(set).sort()
+  }, [safePhotos])
 
+  // 🔒 SIKRET: PopularTags med array-guard
   const popularTags = useMemo(() => {
-    const counts = {};
-    const safePhotos = Array.isArray(photos) ? photos : [];
-    safePhotos.forEach(p =>
-      (p.aiTags || []).forEach(t => {
-        counts[t] = (counts[t] || 0) + 1;
+    const counts = {}
+    safePhotos.forEach((p) =>
+      (Array.isArray(p.aiTags) ? p.aiTags : []).forEach((t) => {
+        counts[t] = (counts[t] || 0) + 1
       })
-    );
+    )
     return Object.entries(counts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 12)
-      .map(([tag, count]) => ({ tag, count }));
-  }, [photos]);
+      .map(([tag, count]) => ({ tag, count }))
+  }, [safePhotos])
 
-  // --- Filtrering ---
+  // 🔒 SIKRET: Filtrering med array-guards
   const filteredPhotos = useMemo(() => {
-    let res = Array.isArray(photos) ? photos : [];
+    let res = safePhotos
+
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      res = res.filter(p => {
-        const inName = p.name?.toLowerCase().includes(q);
-        const inTags = p.aiTags?.some(t => t.toLowerCase().includes(q));
-        const inCat = p.category?.toLowerCase().includes(q);
-        return inName || inTags || inCat;
-      });
+      const q = searchQuery.toLowerCase()
+      res = res.filter((p) => {
+        const inName = p.name?.toLowerCase().includes(q)
+        const inTags = Array.isArray(p.aiTags)
+          ? p.aiTags.some((t) => t.toLowerCase().includes(q))
+          : false
+        const inCat = p.category?.toLowerCase().includes(q)
+        return inName || inTags || inCat
+      })
     }
-    if (activeFilters.favorites) res = res.filter(p => p.favorite);
-    if (activeFilters.withFaces) res = res.filter(p => (p.faces || 0) > 0);
-    if (activeFilters.withTags) res = res.filter(p => (p.aiTags || []).length > 0);
-    if (activeFilters.aiAnalyzed) res = res.filter(p => !!p.aiAnalyzed);
-    if (activeFilters.category) res = res.filter(p => p.category === activeFilters.category);
+
+    if (activeFilters.favorites) res = res.filter((p) => p.favorite)
+    if (activeFilters.withFaces) res = res.filter((p) => (p.faces || 0) > 0)
+    if (activeFilters.withTags)
+      res = res.filter((p) => Array.isArray(p.aiTags) && p.aiTags.length > 0)
+    if (activeFilters.aiAnalyzed) res = res.filter((p) => !!p.aiAnalyzed)
+    if (activeFilters.category)
+      res = res.filter((p) => p.category === activeFilters.category)
+
     if (activeFilters.albumId) {
       if (activeFilters.albumId === 'noAlbum') {
-        res = res.filter(p => !p.albumId || p.albumId === '');
+        res = res.filter((p) => !p.albumId || p.albumId === '')
       } else {
-        res = res.filter(p => p.albumId === activeFilters.albumId);
+        res = res.filter((p) => p.albumId === activeFilters.albumId)
       }
     }
+
     if (activeFilters.dateRange) {
-      const now = Date.now();
-      const days = { today: 1, week: 7, month: 30, year: 365 }[activeFilters.dateRange] || 0;
+      const now = Date.now()
+      const days =
+        { today: 1, week: 7, month: 30, year: 365 }[activeFilters.dateRange] ||
+        0
       if (days > 0) {
-        const cutoff = now - days * 24 * 60 * 60 * 1000;
-        res = res.filter(p => new Date(p.createdAt || p.uploadedAt || 0).getTime() >= cutoff);
+        const cutoff = now - days * 24 * 60 * 60 * 1000
+        res = res.filter(
+          (p) => new Date(p.createdAt || p.uploadedAt || 0).getTime() >= cutoff
+        )
       }
     }
-    return res;
-  }, [photos, searchQuery, activeFilters]);
+
+    return res
+  }, [safePhotos, searchQuery, activeFilters])
 
   const activeFilterCount = useMemo(() => {
-    return Object.values(activeFilters).filter(Boolean).length;
-  }, [activeFilters]);
+    return Object.values(activeFilters).filter(Boolean).length
+  }, [activeFilters])
 
   // --- Sletting ---
-  const requestDelete = photo => {
-    setPhotoToDelete(photo);
-    setConfirmOpen(true);
-  };
+  const requestDelete = (photo) => {
+    setPhotoToDelete(photo)
+    setConfirmOpen(true)
+  }
 
   const handleConfirmDelete = async () => {
-    if (!photoToDelete) return;
+    if (!photoToDelete) return
     try {
-      await deletePhoto(photoToDelete.id, photoToDelete.storagePath);
-      setPhotoToDelete(null);
-      if (refreshData) await refreshData();
+      await deletePhoto(photoToDelete.id, photoToDelete.storagePath)
+      setPhotoToDelete(null)
+      if (refreshData) await refreshData()
     } catch (error) {
-      console.error('Delete error:', error);
-      alert(t('search:errors.couldNotDelete', 'Kunne ikke slette bildet.'));
+      console.error('Delete error:', error)
+      alert(t('search:errors.couldNotDelete', 'Kunne ikke slette bildet.'))
     }
-  };
+  }
 
   // --- Sett forside ---
-  const handleSetCover = async photo => {
+  const handleSetCover = async (photo) => {
     try {
-      await setAlbumCover(photo.albumId, photo.url);
-      if (refreshData) await refreshData();
+      await setAlbumCover(photo.albumId, photo.url)
+      if (refreshData) await refreshData()
     } catch (error) {
-      console.error('Cover update error:', error);
+      console.error('Cover update error:', error)
     }
-  };
+  }
 
-  // --- Flytting ---
-  const handleMovePhotos = async targetAlbumId => {
+  // 🔒 SIKRET: Flytting med array-guards
+  const handleMovePhotos = async (targetAlbumId) => {
     try {
-      const db = getFirestore();
-      const safeSelectedPhotos = Array.isArray(selectedPhotos) ? selectedPhotos : [];
-      const selectedIds = safeSelectedPhotos.map(sp => (typeof sp === 'string' ? sp : sp?.id || sp?.docId));
-      const ops = selectedIds.map(async photoId => {
-        const ref = doc(db, 'photos', photoId);
-        await updateDoc(ref, { albumId: targetAlbumId });
-      });
-      await Promise.all(ops);
+      const db = getFirestore()
+      const safeSelected = Array.isArray(selectedPhotos) ? selectedPhotos : []
+      const selectedIds = safeSelected.map((sp) =>
+        typeof sp === 'string' ? sp : sp?.id || sp?.docId
+      )
 
-      const safePhotos = Array.isArray(photos) ? photos : [];
-      const targetBefore = safePhotos.filter(p => p.albumId === targetAlbumId).length;
-      await updateAlbumPhotoCount(targetAlbumId, targetBefore + selectedIds.length);
+      const ops = selectedIds.map(async (photoId) => {
+        const ref = doc(db, 'photos', photoId)
+        await updateDoc(ref, { albumId: targetAlbumId })
+      })
+      await Promise.all(ops)
 
-      if (refreshData) await refreshData();
-      setSelectedPhotos([]);
+      const targetBefore = safePhotos.filter(
+        (p) => p.albumId === targetAlbumId
+      ).length
+      await updateAlbumPhotoCount(
+        targetAlbumId,
+        targetBefore + selectedIds.length
+      )
+
+      if (refreshData) await refreshData()
+      setSelectedPhotos([])
     } catch (e) {
-      console.error('Move error:', e);
-      alert(t('search:errors.couldNotMove', 'Kunne ikke flytte bildene. Prøv igjen.'));
+      console.error('Move error:', e)
+      alert(
+        t(
+          'search:errors.couldNotMove',
+          'Kunne ikke flytte bildene. Prøv igjen.'
+        )
+      )
     }
-  };
+  }
 
   // --- Nullstill filtre ---
   const clearFilters = () => {
@@ -156,10 +225,10 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, toggleFavorite, re
       aiAnalyzed: false,
       dateRange: null,
       albumId: null,
-      category: null
-    });
-    setSearchQuery('');
-  };
+      category: null,
+    })
+    setSearchQuery('')
+  }
 
   return (
     <div className="min-h-screen p-6 md:p-10 pb-24 animate-fade-in">
@@ -171,7 +240,7 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, toggleFavorite, re
             onClick={() => setEditMode(!editMode)}
             title={t('search:clickToManage')}
             className={`ripple-effect px-4 py-2 rounded-xl flex items-center gap-2 transition ${
-              editMode ? "btn-edit-active" : "bg-white/10 hover:bg-white/20"
+              editMode ? 'btn-edit-active' : 'bg-white/10 hover:bg-white/20'
             }`}
           >
             {editMode && (
@@ -183,20 +252,22 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, toggleFavorite, re
             {editMode ? t('search:done') : t('search:edit')}
           </button>
 
-          <button 
-            onClick={() => setShowFilters(v => !v)} 
+          <button
+            onClick={() => setShowFilters((v) => !v)}
             className="ripple-effect px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 flex items-center gap-2"
           >
             <SlidersHorizontal size={18} />
             {t('search:filters')}
             {activeFilterCount > 0 && (
-              <span className="ml-1 rounded-md px-2 py-0.5 text-sm bg-purple-600">{activeFilterCount}</span>
+              <span className="ml-1 rounded-md px-2 py-0.5 text-sm bg-purple-600">
+                {activeFilterCount}
+              </span>
             )}
           </button>
 
           {selectedPhotos.length > 0 && (
-            <button 
-              onClick={() => setMoveOpen(true)} 
+            <button
+              onClick={() => setMoveOpen(true)}
               className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
             >
               <Move size={18} /> {t('search:move')}
@@ -213,12 +284,12 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, toggleFavorite, re
             type="text"
             placeholder={t('search:searchIn')}
             value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="flex-1 bg-transparent outline-none text-lg"
           />
           {searchQuery && (
-            <button 
-              onClick={() => setSearchQuery('')} 
+            <button
+              onClick={() => setSearchQuery('')}
               className="ripple-effect p-1 hover:bg-white/10 rounded-lg transition"
             >
               <X className="w-5 h-5" />
@@ -233,36 +304,52 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, toggleFavorite, re
           {/* Primærfiltre */}
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => setActiveFilters(f => ({ ...f, favorites: !f.favorites }))}
+              onClick={() =>
+                setActiveFilters((f) => ({ ...f, favorites: !f.favorites }))
+              }
               className={`px-3 py-2 rounded-lg border ${
-                activeFilters.favorites ? 'bg-yellow-600 border-yellow-500' : 'border-white/10'
+                activeFilters.favorites
+                  ? 'bg-yellow-600 border-yellow-500'
+                  : 'border-white/10'
               } flex items-center gap-2`}
             >
               <Star size={16} /> {t('search:filterOptions.favorites')}
             </button>
 
             <button
-              onClick={() => setActiveFilters(f => ({ ...f, withFaces: !f.withFaces }))}
+              onClick={() =>
+                setActiveFilters((f) => ({ ...f, withFaces: !f.withFaces }))
+              }
               className={`px-3 py-2 rounded-lg border ${
-                activeFilters.withFaces ? 'bg-blue-600 border-blue-500' : 'border-white/10'
+                activeFilters.withFaces
+                  ? 'bg-blue-600 border-blue-500'
+                  : 'border-white/10'
               } flex items-center gap-2`}
             >
               <Users size={16} /> {t('search:filterOptions.withFaces')}
             </button>
 
             <button
-              onClick={() => setActiveFilters(f => ({ ...f, withTags: !f.withTags }))}
+              onClick={() =>
+                setActiveFilters((f) => ({ ...f, withTags: !f.withTags }))
+              }
               className={`px-3 py-2 rounded-lg border ${
-                activeFilters.withTags ? 'bg-emerald-600 border-emerald-500' : 'border-white/10'
+                activeFilters.withTags
+                  ? 'bg-emerald-600 border-emerald-500'
+                  : 'border-white/10'
               } flex items-center gap-2`}
             >
               <Tag size={16} /> {t('search:filterOptions.withTags')}
             </button>
 
             <button
-              onClick={() => setActiveFilters(f => ({ ...f, aiAnalyzed: !f.aiAnalyzed }))}
+              onClick={() =>
+                setActiveFilters((f) => ({ ...f, aiAnalyzed: !f.aiAnalyzed }))
+              }
               className={`px-3 py-2 rounded-lg border ${
-                activeFilters.aiAnalyzed ? 'bg-purple-600 border-purple-500' : 'border-white/10'
+                activeFilters.aiAnalyzed
+                  ? 'bg-purple-600 border-purple-500'
+                  : 'border-white/10'
               } flex items-center gap-2`}
             >
               <Sparkles size={16} /> {t('search:filterOptions.aiAnalyzed')}
@@ -275,21 +362,29 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, toggleFavorite, re
             <label className="flex items-center gap-2">
               <Folder size={16} />
               <select
-                value={activeFilters.albumId === 'noAlbum' ? 'noAlbum' : (activeFilters.albumId || '')}
-                onChange={e => {
-                  const value = e.target.value;
+                value={
+                  activeFilters.albumId === 'noAlbum'
+                    ? 'noAlbum'
+                    : activeFilters.albumId || ''
+                }
+                onChange={(e) => {
+                  const value = e.target.value
                   if (value === 'noAlbum') {
-                    setActiveFilters(f => ({ ...f, albumId: 'noAlbum' }));
+                    setActiveFilters((f) => ({ ...f, albumId: 'noAlbum' }))
                   } else {
-                    setActiveFilters(f => ({ ...f, albumId: value || null }));
+                    setActiveFilters((f) => ({ ...f, albumId: value || null }))
                   }
                 }}
                 className="flex-1 bg-transparent border border-white/10 rounded-lg px-3 py-2"
               >
                 <option value="">{t('search:filterOptions.allAlbums')}</option>
-                <option value="noAlbum">{t('search:filterOptions.noAlbum', 'Uten album')}</option>
-                {albums.map(a => (
-                  <option key={a.id} value={a.id}>{a.name}</option>
+                <option value="noAlbum">
+                  {t('search:filterOptions.noAlbum', 'Uten album')}
+                </option>
+                {safeAlbums.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
                 ))}
               </select>
             </label>
@@ -299,12 +394,21 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, toggleFavorite, re
               <Tag size={16} />
               <select
                 value={activeFilters.category || ''}
-                onChange={e => setActiveFilters(f => ({ ...f, category: e.target.value || null }))}
+                onChange={(e) =>
+                  setActiveFilters((f) => ({
+                    ...f,
+                    category: e.target.value || null,
+                  }))
+                }
                 className="flex-1 bg-transparent border border-white/10 rounded-lg px-3 py-2"
               >
-                <option value="">{t('search:filterOptions.allCategories')}</option>
-                {categories.map(c => (
-                  <option key={c} value={c}>{c}</option>
+                <option value="">
+                  {t('search:filterOptions.allCategories')}
+                </option>
+                {categories.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
                 ))}
               </select>
             </label>
@@ -314,7 +418,12 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, toggleFavorite, re
               <Calendar size={16} />
               <select
                 value={activeFilters.dateRange || ''}
-                onChange={e => setActiveFilters(f => ({ ...f, dateRange: e.target.value || null }))}
+                onChange={(e) =>
+                  setActiveFilters((f) => ({
+                    ...f,
+                    dateRange: e.target.value || null,
+                  }))
+                }
                 className="flex-1 bg-transparent border border-white/10 rounded-lg px-3 py-2"
               >
                 <option value="">{t('search:filterOptions.allDates')}</option>
@@ -326,16 +435,18 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, toggleFavorite, re
             </label>
           </div>
 
-          {/* Populære AI-tags */}
+          {/* 🔒 SIKRET: Populære AI-tags med array-guard */}
           {popularTags.length > 0 && (
             <div>
-              <div className="text-sm opacity-70 mb-2">{t('search:popularTags')}</div>
+              <div className="text-sm opacity-70 mb-2">
+                {t('search:popularTags')}
+              </div>
               <div className="flex flex-wrap gap-2">
                 {popularTags.map(({ tag, count }) => (
-                  <button 
-                    key={tag} 
-                    onClick={() => setSearchQuery(tag)} 
-                    className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-sm" 
+                  <button
+                    key={tag}
+                    onClick={() => setSearchQuery(tag)}
+                    className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-sm"
                     title={t('search:hits', { count })}
                   >
                     #{tag}
@@ -360,7 +471,7 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, toggleFavorite, re
         </button>
       </div>
 
-      {/* Resultater */}
+      {/* 🔒 SIKRET: Resultater med array-guard */}
       <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
         {filteredPhotos.map((photo) => (
           <div
@@ -378,15 +489,19 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, toggleFavorite, re
             {!editMode && toggleFavorite && (
               <button
                 onClick={(e) => {
-                  e.stopPropagation();
-                  toggleFavorite(photo);
+                  e.stopPropagation()
+                  toggleFavorite(photo)
                 }}
                 className={`absolute top-2 left-2 p-1.5 rounded-full transition opacity-0 group-hover:opacity-100 ${
                   photo.favorite
                     ? 'bg-yellow-500/90 hover:bg-yellow-600'
                     : 'bg-black/60 hover:bg-white/30'
                 }`}
-                title={photo.favorite ? t('common:removeFavorite') : t('common:addToFavorites')}
+                title={
+                  photo.favorite
+                    ? t('common:removeFavorite')
+                    : t('common:addToFavorites')
+                }
               >
                 <Star
                   className="w-3.5 h-3.5"
@@ -432,11 +547,11 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, toggleFavorite, re
       )}
 
       {/* Flytt-modal */}
-      <MoveModal 
-        isOpen={isMoveOpen} 
-        onClose={() => setMoveOpen(false)} 
-        albums={albums} 
-        onConfirm={handleMovePhotos} 
+      <MoveModal
+        isOpen={isMoveOpen}
+        onClose={() => setMoveOpen(false)}
+        albums={safeAlbums}
+        onConfirm={handleMovePhotos}
       />
 
       {/* Bekreft sletting */}
@@ -450,7 +565,7 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, toggleFavorite, re
         cancelLabel={t('search:confirmDelete.cancel')}
       />
     </div>
-  );
-};
+  )
+}
 
-export default SearchPage;
+export default SearchPage

@@ -1,5 +1,5 @@
 // ============================================================================
-// PAGE: MorePage.jsx – v7.0 FULL API INTEGRATION WITH i18n
+// PAGE: MorePage.jsx – v7.1 MED ARRAY-GUARDS FIKSET
 // ============================================================================
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -43,8 +43,6 @@ import {
   Image,
 } from 'lucide-react'
 import { useSecurityContext } from '../contexts/SecurityContext'
-// Storage imports now in useStorageCalc hook
-// import { getStorage, ref as storageRef, listAll, getMetadata } from "firebase/storage";
 import {
   getFirestore,
   doc,
@@ -61,10 +59,6 @@ import { getStorage, ref as storageRef, listAll } from 'firebase/storage'
 import { db, migrateAlbumsAddUserId, migratePhotosAddUserId } from '../firebase'
 import ComingSoonModal from '../components/ComingSoonModal'
 import { useStorageCalc } from '../hooks/useStorageCalc'
-// PHASE 2: AI Services - Temporarily disabled for MVP
-// import { analyzeImage, detectFaces } from '../services/googleVision';
-// import { suggestAlbums } from '../services/openai';
-// import { upscaleImage } from '../services/picsart';
 
 const MorePage = ({
   user,
@@ -90,6 +84,31 @@ const MorePage = ({
 
   const { pinEnabled, biometricEnabled } = useSecurityContext()
 
+  // 🔒 SIKRE AT PROPS ER ARRAYS
+  const safePhotos = React.useMemo(() => {
+    if (!Array.isArray(photos)) {
+      console.warn(
+        '⚠️ MorePage received non-array photos:',
+        typeof photos,
+        photos
+      )
+      return []
+    }
+    return photos
+  }, [photos])
+
+  const safeAlbums = React.useMemo(() => {
+    if (!Array.isArray(albums)) {
+      console.warn(
+        '⚠️ MorePage received non-array albums:',
+        typeof albums,
+        albums
+      )
+      return []
+    }
+    return albums
+  }, [albums])
+
   // Use storage calculation hook
   const {
     storageUsed,
@@ -107,25 +126,23 @@ const MorePage = ({
   // Check for isAdmin: check role field
   const isAdmin = user?.role === 'admin' || user?.isAdmin === true
 
-  // Storage calculation now handled by useStorageCalc hook
-
-  // ============================================================================
-  // === STATISTICS ===
-  // ============================================================================
-  const stats = {
-    totalPhotos: photos?.length || 0,
-    totalAlbums: albums?.length || 0,
-    favorites: photos?.filter((p) => p.favorite).length || 0,
-    aiAnalyzed: photos?.filter((p) => p.aiAnalyzed).length || 0,
-    recentUploads:
-      photos?.filter((p) => {
-        if (!p.createdAt) return false
-        const uploadDate = new Date(p.createdAt)
-        const weekAgo = new Date()
-        weekAgo.setDate(weekAgo.getDate() - 7)
-        return uploadDate > weekAgo
-      }).length || 0,
-  }
+  // 🔒 SIKRET: Statistics med array-guards
+  const stats = React.useMemo(() => {
+    return {
+      totalPhotos: safePhotos.length || 0,
+      totalAlbums: safeAlbums.length || 0,
+      favorites: safePhotos.filter((p) => p.favorite).length || 0,
+      aiAnalyzed: safePhotos.filter((p) => p.aiAnalyzed).length || 0,
+      recentUploads:
+        safePhotos.filter((p) => {
+          if (!p.createdAt) return false
+          const uploadDate = new Date(p.createdAt)
+          const weekAgo = new Date()
+          weekAgo.setDate(weekAgo.getDate() - 7)
+          return uploadDate > weekAgo
+        }).length || 0,
+    }
+  }, [safePhotos, safeAlbums])
 
   // ============================================================================
   // === NOTIFICATION SYSTEM ===
@@ -160,11 +177,6 @@ const MorePage = ({
       setLoading(false)
     }
   }
-
-  // ============================================================================
-  // === AI FEATURE HANDLERS ===
-  // PHASE 2: AI handlers removed - will be in /experimental/ai for future use
-  // ============================================================================
 
   // MVP: Show "Coming Soon" modal for AI features
   const showAIFeatureModal = (featureName, description) => {
@@ -876,123 +888,6 @@ const MorePage = ({
 
         {/* === RIGHT COLUMN === */}
         <div className="space-y-6">
-          {/* === AI FEATURES ===
-          PHASE 2: AI Features section hidden for MVP
-          Will be re-enabled when AI is activated (moved to experimental/ai/)
-          <section className="glass rounded-2xl overflow-hidden border-2 border-purple-500/20">
-            <button
-              onClick={() => toggleSection('ai')}
-              className="w-full p-6 hover:bg-white/5 transition"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg">
-                    <Wand2 className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="text-left">
-                    <h3 className="font-semibold text-lg">{t('aiFunctions.title')}</h3>
-                    <p className="text-xs opacity-70">{t('more.ai.subtitle')}</p>
-                  </div>
-                </div>
-                <ChevronRight className={`w-5 h-5 transition-transform duration-300 ${
-                  expandedSection === 'ai' ? 'rotate-90' : ''
-                }`} />
-              </div>
-            </button>
-
-            <div className={`overflow-hidden transition-all duration-300 ${
-              expandedSection === 'ai' ? 'max-h-[600px]' : 'max-h-0'
-            }`}>
-              <div className="px-6 pb-6 space-y-2">
-                <button
-                  onClick={() => showAIFeatureModal(t('aiFunctions.autoSort'), t('aiFunctions.autoSortDesc'))}
-                  disabled
-                  className="ripple-effect w-full bg-purple-600/10 hover:bg-purple-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-purple-500/30 opacity-50 cursor-not-allowed"
-                >
-                  <div className="p-2 bg-purple-600/30 rounded-lg">
-                    <Scan className="w-5 h-5 text-purple-300" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium">{t('aiFunctions.autoSort')}</p>
-                    <p className="text-xs opacity-70">{t('aiFunctions.autoSortDesc')}</p>
-                  </div>
-                  <span className="text-xs bg-purple-600/30 px-2 py-1 rounded-full">
-                    {t('comingSoon.title')}
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => showAIFeatureModal(t('aiFunctions.imageEnhancement'), t('aiFunctions.imageEnhancementDesc'))}
-                  disabled
-                  className="ripple-effect w-full bg-blue-600/10 hover:bg-blue-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-blue-500/30 opacity-50 cursor-not-allowed"
-                >
-                  <div className="p-2 bg-blue-600/30 rounded-lg">
-                    <ImagePlus className="w-5 h-5 text-blue-300" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium">{t('aiFunctions.imageEnhancement')}</p>
-                    <p className="text-xs opacity-70">{t('aiFunctions.imageEnhancementDesc')}</p>
-                  </div>
-                  <span className="text-xs bg-blue-600/30 px-2 py-1 rounded-full">
-                    {t('comingSoon.title')}
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => showAIFeatureModal(t('aiFunctions.faceRecognition'), t('aiFunctions.faceRecognitionDesc'))}
-                  disabled
-                  className="ripple-effect w-full bg-pink-600/10 hover:bg-pink-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-pink-500/30 opacity-50 cursor-not-allowed"
-                >
-                  <div className="p-2 bg-pink-600/30 rounded-lg">
-                    <Users className="w-5 h-5 text-pink-300" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium">{t('aiFunctions.faceRecognition')}</p>
-                    <p className="text-xs opacity-70">{t('aiFunctions.faceRecognitionDesc')}</p>
-                  </div>
-                  <span className="text-xs bg-pink-600/30 px-2 py-1 rounded-full">
-                    {t('comingSoon.title')}
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => showAIFeatureModal(t('aiFunctions.smartTagging'), t('aiFunctions.smartTaggingDesc'))}
-                  disabled
-                  className="ripple-effect w-full bg-green-600/10 hover:bg-green-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-green-500/30 opacity-50 cursor-not-allowed"
-                >
-                  <div className="p-2 bg-green-600/30 rounded-lg">
-                    <Sparkles className="w-5 h-5 text-green-300" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium">{t('aiFunctions.smartTagging')}</p>
-                    <p className="text-xs opacity-70">{t('aiFunctions.smartTaggingDesc')}</p>
-                  </div>
-                  <span className="text-xs bg-green-600/30 px-2 py-1 rounded-full">
-                    {t('comingSoon.title')}
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => showAIFeatureModal(t('aiFunctions.duplicateDetection'), t('aiFunctions.duplicateDetectionDesc'))}
-                  disabled
-                  className="ripple-effect w-full bg-yellow-600/10 hover:bg-yellow-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-yellow-500/30 opacity-50 cursor-not-allowed"
-                >
-                  <div className="p-2 bg-yellow-600/30 rounded-lg">
-                    <Copy className="w-5 h-5 text-yellow-300" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium">{t('aiFunctions.duplicateDetection')}</p>
-                    <p className="text-xs opacity-70">{t('aiFunctions.duplicateDetectionDesc')}</p>
-                  </div>
-                  <span className="text-xs bg-yellow-600/30 px-2 py-1 rounded-full">
-                    {t('comingSoon.title')}
-                  </span>
-                </button>
-              </div>
-            </div>
-          </section>
-          */}
-
           {/* === ACCOUNT === */}
           <section className="glass rounded-2xl p-6">
             <div className="flex items-center gap-2 mb-4">
@@ -1114,7 +1009,7 @@ const MorePage = ({
                   <p className="font-medium text-sm">{t('info.about')}</p>
                 </div>
                 <span className="text-xs opacity-70 font-mono">
-                  {t('info.version')} {process.env.REACT_APP_VERSION || '7.0'}
+                  {t('info.version')} {process.env.REACT_APP_VERSION || '7.1'}
                 </span>
               </div>
             </div>
@@ -1226,9 +1121,9 @@ const MorePage = ({
                   <p className="font-semibold text-sm">Migration Complete!</p>
                 </div>
                 <p className="text-xs opacity-70">
-                  Type: {migrationResult.type} | Fixed:{' '}
-                  {migrationResult.fixed} | Skipped: {migrationResult.skipped}{' '}
-                  | Total: {migrationResult.total}
+                  Type: {migrationResult.type} | Fixed: {migrationResult.fixed}{' '}
+                  | Skipped: {migrationResult.skipped} | Total:{' '}
+                  {migrationResult.total}
                 </p>
                 <p className="text-xs opacity-70 mt-1">
                   Page will refresh in 2 seconds...
