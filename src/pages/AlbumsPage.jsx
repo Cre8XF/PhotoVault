@@ -28,7 +28,8 @@ const AlbumsPage = ({ albums, photos, onAlbumClick, onPhotoClick, refreshData, o
 
   // Delete album handler
   const handleDeleteAlbum = (album) => {
-    const albumPhotos = (photos || []).filter(p => p.albumId === album.id);
+    const safePhotos = Array.isArray(photos) ? photos : [];
+    const albumPhotos = safePhotos.filter(p => p.albumId === album.id);
     const photosNote = albumPhotos.length > 0
       ? `Dette vil også fjerne ${albumPhotos.length} bilder fra albumet (men ikke slette dem).`
       : 'Dette albumet er tomt.';
@@ -104,13 +105,19 @@ const AlbumsPage = ({ albums, photos, onAlbumClick, onPhotoClick, refreshData, o
     });
   };
 
-  const albumPhotos = useMemo(() => (photos || []).filter(p => !p.albumId), [photos]);
+  const albumPhotos = useMemo(() => {
+    const safePhotos = Array.isArray(photos) ? photos : [];
+    return safePhotos.filter(p => !p.albumId);
+  }, [photos]);
 
   // Beregning før return
-  const totalAlbums = albums.length;
-  const totalPhotos = (albums || []).reduce((sum, a) => sum + (a.photoCount || 0), 0);
+  const safeAlbums = Array.isArray(albums) ? albums : [];
+  const safePhotos = Array.isArray(photos) ? photos : [];
+
+  const totalAlbums = safeAlbums.length;
+  const totalPhotos = safeAlbums.reduce((sum, a) => sum + (a.photoCount || 0), 0);
   const totalSizeMB = (
-  (photos || []).reduce((sum, p) => sum + (p.size || 0), 0) / (1024 * 1024)
+  safePhotos.reduce((sum, p) => sum + (p.size || 0), 0) / (1024 * 1024)
 ).toFixed(1);
 
 
@@ -141,7 +148,7 @@ const AlbumsPage = ({ albums, photos, onAlbumClick, onPhotoClick, refreshData, o
 
       {viewMode === 'albums' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {(albums || []).map(album => (
+          {safeAlbums.map(album => (
             <div key={album.id} className="relative group">
               <AlbumCard album={album} photos={photos} onOpen={() => onAlbumClick(album)} />
 
