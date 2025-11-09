@@ -45,31 +45,39 @@ const useStore = create(
         setPhotos: (photos) => set({ photos }),
 
         addAlbum: (album) => set((state) => ({
-          albums: [...state.albums, album]
+          albums: Array.isArray(state.albums) ? [...state.albums, album] : [album]
         })),
 
         updateAlbum: (albumId, updates) => set((state) => ({
-          albums: state.albums.map(album =>
-            album.id === albumId ? { ...album, ...updates } : album
-          )
+          albums: Array.isArray(state.albums)
+            ? state.albums.map(album =>
+                album.id === albumId ? { ...album, ...updates } : album
+              )
+            : []
         })),
 
         deleteAlbum: (albumId) => set((state) => ({
-          albums: state.albums.filter(album => album.id !== albumId)
+          albums: Array.isArray(state.albums)
+            ? state.albums.filter(album => album.id !== albumId)
+            : []
         })),
 
         addPhoto: (photo) => set((state) => ({
-          photos: [...state.photos, photo]
+          photos: Array.isArray(state.photos) ? [...state.photos, photo] : [photo]
         })),
 
         updatePhoto: (photoId, updates) => set((state) => ({
-          photos: state.photos.map(photo =>
-            photo.id === photoId ? { ...photo, ...updates } : photo
-          )
+          photos: Array.isArray(state.photos)
+            ? state.photos.map(photo =>
+                photo.id === photoId ? { ...photo, ...updates } : photo
+              )
+            : []
         })),
 
         deletePhoto: (photoId) => set((state) => ({
-          photos: state.photos.filter(photo => photo.id !== photoId)
+          photos: Array.isArray(state.photos)
+            ? state.photos.filter(photo => photo.id !== photoId)
+            : []
         })),
 
         // =====================================================================
@@ -186,7 +194,10 @@ const useStore = create(
         storageLimit: 524288000, // 500 MB default
 
         updateStorageUsed: () => {
-          const total = get().photos.reduce((acc, photo) => acc + (photo.size || 0), 0);
+          const photos = get().photos;
+          const total = Array.isArray(photos)
+            ? photos.reduce((acc, photo) => acc + (photo.size || 0), 0)
+            : 0;
           set({ storageUsed: total });
         },
 
@@ -196,23 +207,28 @@ const useStore = create(
         // COMPUTED GETTERS
         // =====================================================================
         getAlbumById: (albumId) => {
-          return get().albums.find(album => album.id === albumId);
+          const albums = get().albums;
+          return Array.isArray(albums) ? albums.find(album => album.id === albumId) : null;
         },
 
         getPhotoById: (photoId) => {
-          return get().photos.find(photo => photo.id === photoId);
+          const photos = get().photos;
+          return Array.isArray(photos) ? photos.find(photo => photo.id === photoId) : null;
         },
 
         getPhotosByAlbum: (albumId) => {
-          return get().photos.filter(photo => photo.albumId === albumId);
+          const photos = get().photos;
+          return Array.isArray(photos) ? photos.filter(photo => photo.albumId === albumId) : [];
         },
 
         getFavoritePhotos: () => {
-          return get().photos.filter(photo => photo.favorite);
+          const photos = get().photos;
+          return Array.isArray(photos) ? photos.filter(photo => photo.favorite) : [];
         },
 
         getPhotosWithoutAlbum: () => {
-          return get().photos.filter(photo => !photo.albumId);
+          const photos = get().photos;
+          return Array.isArray(photos) ? photos.filter(photo => !photo.albumId) : [];
         },
 
         isAdmin: () => {
