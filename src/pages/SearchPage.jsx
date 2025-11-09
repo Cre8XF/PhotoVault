@@ -37,13 +37,15 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, toggleFavorite, re
   // Kategorier og AI-tags
   const categories = useMemo(() => {
     const set = new Set();
-    (photos || []).forEach(p => p.category && set.add(p.category));
+    const safePhotos = Array.isArray(photos) ? photos : [];
+    safePhotos.forEach(p => p.category && set.add(p.category));
     return Array.from(set).sort();
   }, [photos]);
 
   const popularTags = useMemo(() => {
     const counts = {};
-    (photos || []).forEach(p =>
+    const safePhotos = Array.isArray(photos) ? photos : [];
+    safePhotos.forEach(p =>
       (p.aiTags || []).forEach(t => {
         counts[t] = (counts[t] || 0) + 1;
       })
@@ -125,14 +127,16 @@ const SearchPage = ({ photos = [], albums = [], onPhotoClick, toggleFavorite, re
   const handleMovePhotos = async targetAlbumId => {
     try {
       const db = getFirestore();
-      const selectedIds = (selectedPhotos || []).map(sp => (typeof sp === 'string' ? sp : sp?.id || sp?.docId));
+      const safeSelectedPhotos = Array.isArray(selectedPhotos) ? selectedPhotos : [];
+      const selectedIds = safeSelectedPhotos.map(sp => (typeof sp === 'string' ? sp : sp?.id || sp?.docId));
       const ops = selectedIds.map(async photoId => {
         const ref = doc(db, 'photos', photoId);
         await updateDoc(ref, { albumId: targetAlbumId });
       });
       await Promise.all(ops);
 
-      const targetBefore = (photos || []).filter(p => p.albumId === targetAlbumId).length;
+      const safePhotos = Array.isArray(photos) ? photos : [];
+      const targetBefore = safePhotos.filter(p => p.albumId === targetAlbumId).length;
       await updateAlbumPhotoCount(targetAlbumId, targetBefore + selectedIds.length);
 
       if (refreshData) await refreshData();

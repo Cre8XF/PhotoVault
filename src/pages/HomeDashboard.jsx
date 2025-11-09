@@ -61,12 +61,14 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
     [photos]
   );
 
+  const safePhotosForSmartAlbums = Array.isArray(photos) ? photos : [];
+
   const smartAlbums = [
     {
       id: "last30days",
       icon: Calendar,
       name: t("home:last30days"),
-      count: (photos || []).filter((p) => {
+      count: safePhotosForSmartAlbums.filter((p) => {
         const daysDiff =
           Math.floor((Date.now() - new Date(p.createdAt)) / (1000 * 60 * 60 * 24));
         return daysDiff <= 30;

@@ -74,10 +74,11 @@ const AlbumPage = ({
   const [filterCategory, setFilterCategory] = useState('all')
   const [filterAI, setFilterAI] = useState('all')
 
-  const albumPhotos = useMemo(
-    () => (album ? (photos || []).filter((p) => p.albumId === album.id) : []),
-    [photos, album]
-  )
+  const albumPhotos = useMemo(() => {
+    if (!album) return [];
+    const safePhotos = Array.isArray(photos) ? photos : [];
+    return safePhotos.filter((p) => p.albumId === album.id);
+  }, [photos, album])
 
   // Filtrer og sorter bilder
   const filteredPhotos = useMemo(() => {
@@ -202,7 +203,8 @@ const AlbumPage = ({
       const fromCount = safeAlbumPhotos.length - safeSelected.length
       await onUpdatePhotoCount(album.id, Math.max(0, fromCount))
 
-      const targetAlbumPhotos = (photos || []).filter(
+      const safePhotos = Array.isArray(photos) ? photos : [];
+      const targetAlbumPhotos = safePhotos.filter(
         (p) => p.albumId === targetAlbumId
       ).length
       await onUpdatePhotoCount(
