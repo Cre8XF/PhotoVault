@@ -161,11 +161,21 @@ function AppContent() {
         getAlbumsByUser(uid),
         getPhotosByUser(uid),
       ])
-      setAlbums(albumData)
-      setPhotos(photoData)
+
+      // Force new references to trigger re-render even if arrays look identical
+      setAlbums([...albumData])
+      setPhotos([...photoData])
+
+      // Optional: log refresh confirmation
+      console.log(
+        `🔄 Data refreshed: ${albumData.length} albums, ${photoData.length} photos`
+      )
     } catch (err) {
       console.error('Error refreshing data:', err)
-      setNotification({ message: 'Feil ved lasting av data', type: 'error' })
+      setNotification({
+        message: 'Feil ved lasting av data',
+        type: 'error',
+      })
     }
   }
 
