@@ -17,6 +17,7 @@ import {
 } from '../firebase'
 import { db } from '../firebase'
 import useStore from '../state/store'
+import { listenToAlbumsByUser, listenToPhotosByUser } from '../firebase'
 
 /**
  * Custom hook for photo and album data management
@@ -124,14 +125,33 @@ export const usePhotoData = () => {
    * 🔒 FIXED: Proper dependency array to avoid infinite loops
    */
   useEffect(() => {
-    if (user?.uid) {
-      refreshAllData(user.uid)
-    } else {
-      // No user - clear data
+    if (!user?.uid) {
+      console.warn('⏸ Ingen bruker – nullstiller data.')
       setAlbums([])
       setPhotos([])
+      return
     }
-  }, [user?.uid]) // Only user.uid - refreshAllData is stable via useCallback
+
+    console.log('🔗 Starter Firestore live listeners for bruker:', user.uid)
+
+    // Start Firestore listeners
+    const unsubAlbums = listenToAlbumsByUser(user.uid, (data) =>
+      setAlbums(data)
+    )
+    const unsubPhotos = listenToPhotosByUser(user.uid, (data) =>
+      setPhotos(data)
+    )
+
+    // Initial engangs-refresh (for sikkerhet)
+    refreshAllData(user.uid)
+
+    // Rydd opp ved logout
+    return () => {
+      console.log('🧹 Stopper Firestore listeners')
+      unsubAlbums()
+      unsubPhotos()
+    }
+  }, [user?.uid])
 
   /**
    * Handle photo upload
