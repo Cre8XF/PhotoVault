@@ -810,7 +810,6 @@ const AlbumPage = ({
         isOpen={isShareModalOpen}
         onClose={() => setShareModalOpen(false)}
         album={album}
-        user={user}
       />
     </div>
   )
