@@ -162,11 +162,10 @@ function AppContent() {
         getPhotosByUser(uid),
       ])
 
-      // Force new references to trigger re-render even if arrays look identical
-      setAlbums([...albumData])
-      setPhotos([...photoData])
+      // 🔄 Always create new references so React re-renders even if data is identical
+      setAlbums(JSON.parse(JSON.stringify(albumData)))
+      setPhotos(JSON.parse(JSON.stringify(photoData)))
 
-      // Optional: log refresh confirmation
       console.log(
         `🔄 Data refreshed: ${albumData.length} albums, ${photoData.length} photos`
       )
