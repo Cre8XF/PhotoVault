@@ -120,6 +120,11 @@
     "categories": "Kategorier"
   },
   "setCover": "Sett som forside",
+  "coverSet": "✓ Bilde satt som forside",
+  "photosMoved": "✓ {{count}} bilder flyttet til \"{{album}}\"",
+  "photosDeleted": "{{count}} bilder slettet",
+  "bulkDeleteTitle": "Slett flere bilder",
+  "bulkDeleteMessage": "Er du sikker på at du vil slette {{count}} bilder?",
   "deletePhoto": "Slett bilde",
   "unknownDate": "Ukjent dato"
 }
