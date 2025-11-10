@@ -16,6 +16,7 @@ const QRCodeDisplay = ({ url, albumName, onDownload, onCopyLink }) => {
       {/* QR Code */}
       <div className="bg-white p-6 rounded-2xl shadow-lg">
         <QRCodeSVG
+          id="qr-code-svg"
           value={url}
           size={256}
           level="H"
