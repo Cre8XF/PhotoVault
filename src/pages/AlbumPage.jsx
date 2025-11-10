@@ -24,6 +24,7 @@ import {
   X,
   Filter,
   ChevronDown,
+  Share2,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
@@ -31,6 +32,7 @@ import UploadModal from '../components/UploadModal'
 import MoveModal from '../components/MoveModal'
 import PhotoModal from '../components/PhotoModal'
 import AlbumModal from '../components/AlbumModal'
+import QRShareModal from '../features/qr-sharing/components/QRShareModal'
 import useStore from '../state/store'
 
 function getCategoryIcon(category) {
@@ -71,6 +73,7 @@ const AlbumPage = ({
   const [isUploadOpen, setUploadOpen] = useState(false)
   const [photoModal, setPhotoModal] = useState({ open: false, index: 0 })
   const [editingAlbum, setEditingAlbum] = useState(null)
+  const [isShareModalOpen, setShareModalOpen] = useState(false)
 
   // Zustand store
   const setNotification = useStore((state) => state.setNotification)
@@ -372,6 +375,15 @@ const AlbumPage = ({
             <span className="hidden sm:inline">
               {editMode ? t('common:done') : t('common:edit')}
             </span>
+          </button>
+
+          {/* Share Album Button */}
+          <button
+            onClick={() => setShareModalOpen(true)}
+            className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 transition flex items-center gap-2"
+          >
+            <Share2 size={18} />
+            <span className="hidden sm:inline">Del album</span>
           </button>
 
           {/* Edit Album Button */}
@@ -793,6 +805,13 @@ const AlbumPage = ({
           }}
         />
       )}
+
+      <QRShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        album={album}
+        user={user}
+      />
     </div>
   )
 }
