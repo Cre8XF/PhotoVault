@@ -170,9 +170,9 @@ const AlbumPage = ({
   const handleSetCover = async (photo) => {
     try {
       await onSetAlbumCover(album.id, photo.url)
-      // ✅ NY: Toast-melding
+      // ✅ FIXED: Use i18n instead of hardcoded string
       setNotification({
-        message: '✓ Bilde satt som cover',
+        message: t('albums:coverSet'),
         type: 'success',
       })
     } catch (error) {
@@ -202,15 +202,12 @@ const AlbumPage = ({
   const handleBulkDelete = async () => {
     // ✅ ENDRET: Vis ÉN ConfirmModal for alle bildene
     setConfirmModal({
-      title: 'Slett flere bilder',
-      message: `Er du sikker på at du vil slette ${selectedPhotos.length} bilder?`,
-      confirmLabel: 'Slett',
-      cancelLabel: 'Avbryt',
+      title: t('albums:bulkDeleteTitle'),
+      message: t('albums:bulkDeleteMessage', { count: selectedPhotos.length }),
+      confirmLabel: t('common:delete'),
+      cancelLabel: t('common:cancel'),
       onConfirm: async () => {
         try {
-          // Importer deletePhoto fra firebase hvis ikke allerede gjort
-          // import { deletePhoto } from '../firebase'
-
           // Slett alle direkte uten ekstra dialoger
           const { deletePhoto } = await import('../firebase')
           for (const photo of selectedPhotos) {
@@ -224,7 +221,7 @@ const AlbumPage = ({
 
           setSelectedPhotos([])
           setNotification({
-            message: `${selectedPhotos.length} bilder slettet`,
+            message: t('albums:photosDeleted', { count: selectedPhotos.length }),
             type: 'success',
           })
         } catch (error) {
@@ -260,10 +257,17 @@ const AlbumPage = ({
       const targetAlbumName = targetAlbum?.name || 'ukjent album'
 
       const safeSelected = Array.isArray(selectedPhotos) ? selectedPhotos : []
-      const updates = safeSelected.filter(Boolean).map(async (photo) => {
+
+      // ✅ FIXED: Filter out invalid photos first to avoid undefined in Promise.all
+      const validPhotos = safeSelected.filter((photo) => {
         const photoId =
           typeof photo === 'string' ? photo : photo.id || photo.docId
-        if (!photoId) return
+        return Boolean(photoId)
+      })
+
+      const updates = validPhotos.map(async (photo) => {
+        const photoId =
+          typeof photo === 'string' ? photo : photo.id || photo.docId
         const photoRef = doc(db, 'photos', photoId)
         await updateDoc(photoRef, { albumId: targetAlbumId })
       })
@@ -272,18 +276,21 @@ const AlbumPage = ({
 
       // Oppdater photoCount for begge album
       const safeAlbumPhotos = Array.isArray(albumPhotos) ? albumPhotos : []
-      const fromCount = safeAlbumPhotos.length - safeSelected.length
+      const fromCount = safeAlbumPhotos.length - validPhotos.length
       await onUpdatePhotoCount(album.id, Math.max(0, fromCount))
 
       const safePhotos = Array.isArray(photos) ? photos : []
       const toCount =
         safePhotos.filter((p) => p.albumId === targetAlbumId).length +
-        safeSelected.length
+        validPhotos.length
       await onUpdatePhotoCount(targetAlbumId, toCount)
 
-      // ✅ NY: Toast-melding
+      // ✅ FIXED: Use i18n instead of hardcoded string
       setNotification({
-        message: `✓ ${safeSelected.length} bilder flyttet til "${targetAlbumName}"`,
+        message: t('albums:photosMoved', {
+          count: validPhotos.length,
+          album: targetAlbumName,
+        }),
         type: 'success',
       })
 
@@ -297,7 +304,7 @@ const AlbumPage = ({
     } catch (error) {
       console.error('Move error:', error)
       setNotification({
-        message: t('albums:errors.couldNotMove'),
+        message: t('albums:errors.couldNotMovePhotos'),
         type: 'error',
       })
     }

@@ -120,6 +120,11 @@
     "categories": "Categories"
   },
   "setCover": "Set as cover",
+  "coverSet": "✓ Image set as cover",
+  "photosMoved": "✓ {{count}} photos moved to \"{{album}}\"",
+  "photosDeleted": "{{count}} photos deleted",
+  "bulkDeleteTitle": "Delete multiple photos",
+  "bulkDeleteMessage": "Are you sure you want to delete {{count}} photos?",
   "deletePhoto": "Delete photo",
   "unknownDate": "Unknown date"
 }
