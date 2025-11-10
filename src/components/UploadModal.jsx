@@ -71,6 +71,8 @@ const UploadModal = ({
     uploading,
     processingProgress,
     compressionStats,
+    uploadCount, // ✅ NY
+    totalFiles,
     validateFiles,
     uploadFiles,
   } = useUpload()
@@ -454,8 +456,9 @@ const UploadModal = ({
                 <FolderOpen className="w-5 h-5" />
                 <span className="text-sm font-medium">
                   {selectedAlbumId
-                    ? (Array.isArray(albums) ? albums : []).find((a) => a.id === selectedAlbumId)?.name ||
-                      t('upload:selectAlbum')
+                    ? (Array.isArray(albums) ? albums : []).find(
+                        (a) => a.id === selectedAlbumId
+                      )?.name || t('upload:selectAlbum')
                     : t('upload:noAlbum')}
                 </span>
               </div>
@@ -526,7 +529,12 @@ const UploadModal = ({
             <div className="mt-6">
               <div className="flex justify-between text-sm mb-2">
                 <span>{t('upload:processing')}</span>
-                <span>{processingProgress}%</span>
+                {/* ✅ OPPDATERT: Vis både antall og prosent */}
+                <span>
+                  {totalFiles > 0 && uploadCount > 0
+                    ? `${uploadCount}/${totalFiles} bilder (${processingProgress}%)`
+                    : `${processingProgress}%`}
+                </span>
               </div>
               <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                 <div
@@ -534,6 +542,14 @@ const UploadModal = ({
                   style={{ width: `${processingProgress}%` }}
                 />
               </div>
+              {/* ✅ NY: Vise detaljert status */}
+              {totalFiles > 0 && uploadCount > 0 && (
+                <p className="text-xs text-gray-400 mt-2 text-center">
+                  {uploadCount === totalFiles
+                    ? t('upload:uploadComplete', 'Opplasting fullført! ✓')
+                    : t('upload:uploadingFiles', 'Laster opp bilder...')}
+                </p>
+              )}
             </div>
           )}
 

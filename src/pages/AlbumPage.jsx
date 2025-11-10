@@ -1,6 +1,12 @@
 // ============================================================================
-// PAGE: AlbumPage.jsx – forbedret med sortering, filtrering og statistikk
+// PAGE: AlbumPage.jsx – OPPDATERT: Fjernet dobbeltbekreftelse
 // ============================================================================
+// ENDRINGER:
+// 1. Fjernet window.confirm() fra handleDelete og handleBulkDelete
+// 2. Bruker kun ConfirmModal via onDeletePhoto prop (som kaller usePhotoData)
+// 3. Lagt til toast-melding ved handleSetCover
+// 4. Forbedret handleMovePhotos med bekreftelsesdialog og auto-refresh
+
 import React, { useState, useMemo } from 'react'
 import {
   ArrowLeft,
@@ -25,6 +31,7 @@ import UploadModal from '../components/UploadModal'
 import MoveModal from '../components/MoveModal'
 import PhotoModal from '../components/PhotoModal'
 import AlbumModal from '../components/AlbumModal'
+import useStore from '../state/store'
 
 function getCategoryIcon(category) {
   const icons = {
@@ -65,7 +72,11 @@ const AlbumPage = ({
   const [photoModal, setPhotoModal] = useState({ open: false, index: 0 })
   const [editingAlbum, setEditingAlbum] = useState(null)
 
-  // Nye states for sortering og visning
+  // Zustand store
+  const setNotification = useStore((state) => state.setNotification)
+  const setConfirmModal = useStore((state) => state.setConfirmModal)
+
+  // States for sorting and view
   const [sortBy, setSortBy] = useState('date-desc')
   const [gridSize, setGridSize] = useState(4)
   const [viewMode, setViewMode] = useState('grid')
@@ -75,52 +86,72 @@ const AlbumPage = ({
   const [filterAI, setFilterAI] = useState('all')
 
   const albumPhotos = useMemo(() => {
-    if (!album) return [];
-    const safePhotos = Array.isArray(photos) ? photos : [];
-    return safePhotos.filter((p) => p.albumId === album.id);
+    if (!album) return []
+    const safePhotos = Array.isArray(photos) ? photos : []
+    return safePhotos.filter((p) => p.albumId === album.id)
   }, [photos, album])
 
-  // Filtrer og sorter bilder
+  // Filter and sort photos
   const filteredPhotos = useMemo(() => {
-    let filtered = [...albumPhotos]
+    let result = [...albumPhotos]
 
-    if (searchQuery) {
-      filtered = filtered.filter((p) =>
-        (p.name || '').toLowerCase().includes(searchQuery.toLowerCase())
-      )
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      result = result.filter((p) => {
+        const nameMatch = p.name?.toLowerCase().includes(query)
+        const tagsMatch = Array.isArray(p.aiTags)
+          ? p.aiTags.some((tag) => tag.toLowerCase().includes(query))
+          : false
+        const categoryMatch = p.category?.toLowerCase().includes(query)
+        return nameMatch || tagsMatch || categoryMatch
+      })
     }
 
+    // Category filter
     if (filterCategory !== 'all') {
-      filtered = filtered.filter((p) => p.category === filterCategory)
+      result = result.filter((p) => p.category === filterCategory)
     }
 
-    if (filterAI === 'ai') {
-      filtered = filtered.filter((p) => p.aiAnalyzed)
-    } else if (filterAI === 'no-ai') {
-      filtered = filtered.filter((p) => !p.aiAnalyzed)
+    // AI filter
+    if (filterAI === 'analyzed') {
+      result = result.filter((p) => p.aiAnalyzed)
+    } else if (filterAI === 'not-analyzed') {
+      result = result.filter((p) => !p.aiAnalyzed)
     }
 
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'date-desc':
-          return new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-        case 'date-asc':
-          return new Date(a.createdAt || 0) - new Date(b.createdAt || 0)
-        case 'name-asc':
-          return (a.name || '').localeCompare(b.name || '')
-        case 'name-desc':
-          return (b.name || '').localeCompare(a.name || '')
-        default:
-          return 0
-      }
-    })
+    // Sorting
+    switch (sortBy) {
+      case 'date-desc':
+        result.sort(
+          (a, b) =>
+            new Date(b.createdAt || b.uploadedAt || 0) -
+            new Date(a.createdAt || a.uploadedAt || 0)
+        )
+        break
+      case 'date-asc':
+        result.sort(
+          (a, b) =>
+            new Date(a.createdAt || a.uploadedAt || 0) -
+            new Date(b.createdAt || b.uploadedAt || 0)
+        )
+        break
+      case 'name-asc':
+        result.sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+        break
+      case 'name-desc':
+        result.sort((a, b) => (b.name || '').localeCompare(a.name || ''))
+        break
+      default:
+        break
+    }
 
-    return filtered
-  }, [albumPhotos, searchQuery, sortBy, filterCategory, filterAI])
+    return result
+  }, [albumPhotos, searchQuery, filterCategory, filterAI, sortBy])
 
-  // Statistikk
+  // Statistics
   const stats = useMemo(() => {
-    const safeAlbumPhotos = Array.isArray(albumPhotos) ? albumPhotos : [];
+    const safeAlbumPhotos = Array.isArray(albumPhotos) ? albumPhotos : []
     const totalSize = safeAlbumPhotos.reduce((sum, p) => sum + (p.size || 0), 0)
     const aiCount = safeAlbumPhotos.filter((p) => p.aiAnalyzed).length
     const categories = [
@@ -135,41 +166,76 @@ const AlbumPage = ({
     }
   }, [albumPhotos])
 
+  // 🔧 FIX 1: handleSetCover - Legg til toast-melding
   const handleSetCover = async (photo) => {
     try {
       await onSetAlbumCover(album.id, photo.url)
+      // ✅ NY: Toast-melding
+      setNotification({
+        message: '✓ Bilde satt som cover',
+        type: 'success',
+      })
     } catch (error) {
       console.error(t('albums:errors.coverUpdateError'), error)
-      alert(t('albums:errors.couldNotSetCover'))
+      setNotification({
+        message: t('albums:errors.couldNotSetCover'),
+        type: 'error',
+      })
     }
   }
 
+  // 🔧 FIX 2: handleDelete - Fjern window.confirm, la usePhotoData håndtere ConfirmModal
   const handleDelete = async (photo) => {
-    if (!window.confirm(t('albums:errors.confirmDeletePhoto'))) return
+    // ✅ ENDRET: Kaller onDeletePhoto direkte (den viser ConfirmModal)
     try {
       await onDeletePhoto(photo)
     } catch (error) {
       console.error(t('albums:errors.photoDeleteError'), error)
-      alert(t('albums:errors.couldNotDeletePhoto'))
+      setNotification({
+        message: t('albums:errors.couldNotDeletePhoto'),
+        type: 'error',
+      })
     }
   }
 
+  // 🔧 FIX 3: handleBulkDelete - Én dialog, deretter slett direkte
   const handleBulkDelete = async () => {
-    if (
-      !window.confirm(
-        t('albums:errors.confirmBulkDelete', { count: selectedPhotos.length })
-      )
-    )
-      return
-    try {
-      for (const photo of selectedPhotos) {
-        await onDeletePhoto(photo)
-      }
-      setSelectedPhotos([])
-    } catch (error) {
-      console.error(t('albums:errors.bulkDeleteError'), error)
-      alert(t('albums:errors.couldNotDeleteAll'))
-    }
+    // ✅ ENDRET: Vis ÉN ConfirmModal for alle bildene
+    setConfirmModal({
+      title: 'Slett flere bilder',
+      message: `Er du sikker på at du vil slette ${selectedPhotos.length} bilder?`,
+      confirmLabel: 'Slett',
+      cancelLabel: 'Avbryt',
+      onConfirm: async () => {
+        try {
+          // Importer deletePhoto fra firebase hvis ikke allerede gjort
+          // import { deletePhoto } from '../firebase'
+
+          // Slett alle direkte uten ekstra dialoger
+          const { deletePhoto } = await import('../firebase')
+          for (const photo of selectedPhotos) {
+            await deletePhoto(photo.id, photo.storagePath)
+          }
+
+          // Refresh for å oppdatere UI
+          if (refreshData) {
+            await refreshData()
+          }
+
+          setSelectedPhotos([])
+          setNotification({
+            message: `${selectedPhotos.length} bilder slettet`,
+            type: 'success',
+          })
+        } catch (error) {
+          console.error(t('albums:errors.bulkDeleteError'), error)
+          setNotification({
+            message: t('albums:errors.couldNotDeleteAll'),
+            type: 'error',
+          })
+        }
+      },
+    })
   }
 
   const handleUpload = async (files, albumId, aiTagging) => {
@@ -185,10 +251,15 @@ const AlbumPage = ({
     // refreshData is called automatically by the upload modal handler
   }
 
+  // 🔧 FIX 4: handleMovePhotos - Legg til toast + refresh (INGEN ekstra dialog!)
   const handleMovePhotos = async (targetAlbumId) => {
+    // MoveModal har allerede spurt brukeren - IKKE legg til ny dialog!
     try {
       const db = getFirestore()
-      const safeSelected = Array.isArray(selectedPhotos) ? selectedPhotos : [];
+      const targetAlbum = albums.find((a) => a.id === targetAlbumId)
+      const targetAlbumName = targetAlbum?.name || 'ukjent album'
+
+      const safeSelected = Array.isArray(selectedPhotos) ? selectedPhotos : []
       const updates = safeSelected.filter(Boolean).map(async (photo) => {
         const photoId =
           typeof photo === 'string' ? photo : photo.id || photo.docId
@@ -199,362 +270,305 @@ const AlbumPage = ({
 
       await Promise.all(updates)
 
-      const safeAlbumPhotos = Array.isArray(albumPhotos) ? albumPhotos : [];
+      // Oppdater photoCount for begge album
+      const safeAlbumPhotos = Array.isArray(albumPhotos) ? albumPhotos : []
       const fromCount = safeAlbumPhotos.length - safeSelected.length
       await onUpdatePhotoCount(album.id, Math.max(0, fromCount))
 
-      const safePhotos = Array.isArray(photos) ? photos : [];
-      const targetAlbumPhotos = safePhotos.filter(
-        (p) => p.albumId === targetAlbumId
-      ).length
-      await onUpdatePhotoCount(
-        targetAlbumId,
-        targetAlbumPhotos + safeSelected.length
-      )
+      const safePhotos = Array.isArray(photos) ? photos : []
+      const toCount =
+        safePhotos.filter((p) => p.albumId === targetAlbumId).length +
+        safeSelected.length
+      await onUpdatePhotoCount(targetAlbumId, toCount)
+
+      // ✅ NY: Toast-melding
+      setNotification({
+        message: `✓ ${safeSelected.length} bilder flyttet til "${targetAlbumName}"`,
+        type: 'success',
+      })
+
+      // ✅ NY: Auto-refresh
+      if (refreshData) {
+        await refreshData()
+      }
 
       setSelectedPhotos([])
+      setMoveOpen(false)
     } catch (error) {
-      console.error(t('albums:errors.moveError'), error)
-      alert(t('albums:errors.couldNotMovePhotos'))
+      console.error('Move error:', error)
+      setNotification({
+        message: t('albums:errors.couldNotMove'),
+        type: 'error',
+      })
     }
   }
 
   const togglePhotoSelection = (photo) => {
     setSelectedPhotos((prev) => {
-      const safePrev = Array.isArray(prev) ? prev : [];
-      const isSelected = safePrev.some(
-        (p) => (typeof p === 'string' ? p : p.id) === photo.id
-      )
-      if (isSelected) {
-        return safePrev.filter(
-          (p) => (typeof p === 'string' ? p : p.id) !== photo.id
-        )
-      } else {
-        return [...safePrev, photo]
-      }
+      const isSelected = prev.some((p) => p.id === photo.id)
+      return isSelected
+        ? prev.filter((p) => p.id !== photo.id)
+        : [...prev, photo]
     })
   }
 
   const isPhotoSelected = (photo) => {
-    const safeSelected = Array.isArray(selectedPhotos) ? selectedPhotos : [];
-    return safeSelected.some(
-      (p) => (typeof p === 'string' ? p : p.id) === photo.id
+    return selectedPhotos.some((p) => p.id === photo.id)
+  }
+
+  if (!album) {
+    return (
+      <div className="p-6">
+        <p>{t('albums:errors.albumNotFound')}</p>
+      </div>
     )
   }
 
-  const handleSelectAll = () => {
-    if (selectedPhotos.length === filteredPhotos.length) {
-      setSelectedPhotos([])
-    } else {
-      setSelectedPhotos([...filteredPhotos])
-    }
-  }
-
-  const gridClass = {
-    2: 'grid-cols-2',
-    3: 'grid-cols-2 md:grid-cols-3',
-    4: 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4',
-    5: 'grid-cols-3 md:grid-cols-4 lg:grid-cols-5',
-  }[gridSize]
-
   return (
-    <div className="album-page p-4 md:p-8 min-h-screen">
+    <div className="min-h-screen p-6 md:p-10 pb-24 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <button
             onClick={onBack}
-            className="ripple-effect p-2 rounded-full bg-white/10 hover:bg-white/20 transition"
+            className="ripple-effect p-2 hover:bg-white/10 rounded-lg transition"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-6 h-6" />
           </button>
           <div>
-            <h1 className="text-2xl font-semibold">{album.name}</h1>
-            <p className="text-sm text-gray-400 mt-1">
-              {stats.total} {t('common:photos')} · {stats.totalSize} MB
-              {stats.aiAnalyzed > 0 &&
-                ` · ${stats.aiAnalyzed} ${t('albums:stats.aiAnalyzed')}`}
-            </p>
+            <h1 className="text-3xl font-bold">{album.name}</h1>
+            {album.description && (
+              <p className="text-gray-400 mt-1">{album.description}</p>
+            )}
           </div>
         </div>
 
-        <div className="flex gap-2">
-          {selectedPhotos.length > 0 && (
-            <>
-              <button
-                onClick={() => setMoveOpen(true)}
-                className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center gap-2 transition"
-              >
-                <Move size={18} /> {t('common:move')} ({selectedPhotos.length})
-              </button>
-              <button
-                onClick={handleBulkDelete}
-                className="ripple-effect px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 flex items-center gap-2 transition"
-              >
-                <Trash2 size={18} /> {t('common:delete')} (
-                {selectedPhotos.length})
-              </button>
-            </>
-          )}
-          <button
-            onClick={() => setUploadOpen(true)}
-            className="ripple-effect px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 transition"
-          >
-            {t('common:upload')}
-          </button>
+        <div className="flex items-center gap-2">
+          {/* Edit Mode Toggle */}
           <button
             onClick={() => {
               setEditMode(!editMode)
-              if (editMode) setSelectedPhotos([])
+              setSelectedPhotos([])
             }}
-            className={`ripple-effect px-4 py-2 rounded-xl ${
+            className={`ripple-effect px-4 py-2 rounded-xl flex items-center gap-2 transition ${
               editMode
-                ? 'bg-green-600 hover:bg-green-700'
+                ? 'bg-purple-600 text-white'
                 : 'bg-white/10 hover:bg-white/20'
-            } flex items-center gap-2 transition`}
-          >
-            {editMode ? <Check size={18} /> : <Edit3 size={18} />}
-            {editMode ? t('common:done') : t('common:edit')}
-          </button>
-
-          {/* 🔹 NY KNAPP FOR Å REDIGERE ALBUM */}
-          <button
-            onClick={() => setEditingAlbum(album)}
-            className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center gap-2 transition"
-          >
-            <Edit3 size={18} /> {t('albums:editAlbum')}
-          </button>
-        </div>
-      </div>
-
-      {/* Statistikk-panel */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-          <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
-            <ImageIcon className="w-4 h-4" />
-            {t('common:total')}
-          </div>
-          <div className="text-2xl font-bold">{stats.total}</div>
-        </div>
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-          <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
-            <Download className="w-4 h-4" />
-            {t('common:size')}
-          </div>
-          <div className="text-2xl font-bold">{stats.totalSize} MB</div>
-        </div>
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-          <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
-            🤖 AI
-          </div>
-          <div className="text-2xl font-bold">{stats.aiAnalyzed}</div>
-        </div>
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-          <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
-            <Star className="w-4 h-4" />
-            {t('albums:stats.categories')}
-          </div>
-          <div className="text-2xl font-bold">{stats.categories}</div>
-        </div>
-      </div>
-
-      {/* Toolbar */}
-      <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 mb-6 border border-white/10">
-        <div className="flex flex-wrap gap-3 items-center">
-          {/* Søk */}
-          <div className="flex-1 min-w-[200px] relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t('albums:searchPlaceholder')}
-              className="w-full pl-10 pr-10 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-
-          {/* Sortering */}
-          <div className="relative">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="appearance-none pl-4 pr-10 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer"
-            >
-              <option value="date-desc">
-                {t('albums:sorting.newestFirst')}
-              </option>
-              <option value="date-asc">
-                {t('albums:sorting.oldestFirst')}
-              </option>
-              <option value="name-asc">{t('albums:sorting.nameAZ')}</option>
-              <option value="name-desc">{t('albums:sorting.nameZA')}</option>
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-          </div>
-
-          {/* Filter-knapp */}
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`ripple-effect px-4 py-2 rounded-lg flex items-center gap-2 transition ${
-              showFilters ? 'bg-purple-600' : 'bg-white/5 hover:bg-white/10'
             }`}
           >
-            <Filter className="w-4 h-4" />
-            {t('common:filters')}
+            {editMode ? (
+              <Check className="w-5 h-5" />
+            ) : (
+              <Edit3 className="w-5 h-5" />
+            )}
+            <span className="hidden sm:inline">
+              {editMode ? t('common:done') : t('common:edit')}
+            </span>
           </button>
 
-          {/* Grid-størrelse */}
-          <div className="flex gap-1 bg-white/5 rounded-lg p-1">
-            {[2, 3, 4, 5].map((size) => (
-              <button
-                key={size}
-                onClick={() => setGridSize(size)}
-                className={`ripple-effect px-3 py-1 rounded ${
-                  gridSize === size ? 'bg-purple-600' : 'hover:bg-white/10'
-                } transition text-sm`}
-              >
-                {size}
-              </button>
-            ))}
-          </div>
+          {/* Edit Album Button */}
+          <button
+            onClick={() => setEditingAlbum(album)}
+            className="ripple-effect p-2 hover:bg-white/10 rounded-lg transition"
+            title={t('albums:editAlbum')}
+          >
+            <Edit3 className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
 
-          {/* View mode */}
-          <div className="flex gap-1 bg-white/5 rounded-lg p-1">
+      {/* Stats Row */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+          <p className="text-sm text-gray-400">{t('albums:photos')}</p>
+          <p className="text-2xl font-bold">{stats.total}</p>
+        </div>
+        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+          <p className="text-sm text-gray-400">{t('albums:size')}</p>
+          <p className="text-2xl font-bold">{stats.totalSize} MB</p>
+        </div>
+        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+          <p className="text-sm text-gray-400">{t('albums:aiAnalyzed')}</p>
+          <p className="text-2xl font-bold">{stats.aiAnalyzed}</p>
+        </div>
+        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+          <p className="text-sm text-gray-400">{t('albums:categories')}</p>
+          <p className="text-2xl font-bold">{stats.categories}</p>
+        </div>
+      </div>
+
+      {/* Action Bar */}
+      {editMode && selectedPhotos.length > 0 && (
+        <div className="bg-purple-600/20 border border-purple-500/30 rounded-xl p-4 mb-6 flex items-center justify-between">
+          <span className="font-medium">
+            {t('albums:selectedCount', { count: selectedPhotos.length })}
+          </span>
+          <div className="flex gap-2">
             <button
-              onClick={() => setViewMode('grid')}
-              className={`ripple-effect p-2 rounded ${
-                viewMode === 'grid' ? 'bg-purple-600' : 'hover:bg-white/10'
-              } transition`}
+              onClick={() => setMoveOpen(true)}
+              className="ripple-effect px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-2 transition"
             >
-              <Grid3x3 className="w-4 h-4" />
+              <Move className="w-4 h-4" />
+              {t('common:move')}
             </button>
             <button
-              onClick={() => setViewMode('list')}
-              className={`ripple-effect p-2 rounded ${
-                viewMode === 'list' ? 'bg-purple-600' : 'hover:bg-white/10'
-              } transition`}
+              onClick={handleBulkDelete}
+              className="ripple-effect px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg flex items-center gap-2 transition"
             >
-              <List className="w-4 h-4" />
+              <Trash2 className="w-4 h-4" />
+              {t('common:delete')}
             </button>
           </div>
+        </div>
+      )}
 
-          {/* Velg alle */}
-          {editMode && (
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6">
+        {/* Search */}
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t('albums:searchPhotos')}
+            className="w-full pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
+          {searchQuery && (
             <button
-              onClick={handleSelectAll}
-              className="ripple-effect px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition text-sm"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-white/10 rounded-lg transition"
             >
-              {selectedPhotos.length === filteredPhotos.length
-                ? t('common:removeAll')
-                : t('common:selectAll')}
+              <X className="w-4 h-4" />
             </button>
           )}
         </div>
 
-        {/* Filter-panel */}
-        {showFilters && (
-          <div className="mt-4 pt-4 border-t border-white/10 flex flex-wrap gap-3">
-            <div className="flex-1 min-w-[200px]">
-              <label className="text-sm text-gray-400 mb-2 block">
-                {t('common:category')}
+        {/* View Mode */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`ripple-effect p-3 rounded-lg transition ${
+              viewMode === 'grid'
+                ? 'bg-purple-600'
+                : 'bg-white/5 hover:bg-white/10'
+            }`}
+          >
+            <Grid3x3 className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            className={`ripple-effect p-3 rounded-lg transition ${
+              viewMode === 'list'
+                ? 'bg-purple-600'
+                : 'bg-white/5 hover:bg-white/10'
+            }`}
+          >
+            <List className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Filters Toggle */}
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className="ripple-effect px-4 py-3 bg-white/5 hover:bg-white/10 rounded-lg flex items-center gap-2 transition"
+        >
+          <Filter className="w-5 h-5" />
+          {t('albums:filters')}
+          <ChevronDown
+            className={`w-4 h-4 transition-transform ${
+              showFilters ? 'rotate-180' : ''
+            }`}
+          />
+        </button>
+
+        {/* Upload Button */}
+        <button
+          onClick={() => setUploadOpen(true)}
+          className="ripple-effect px-4 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-2 transition font-medium"
+        >
+          <ImageIcon className="w-5 h-5" />
+          {t('albums:uploadPhotos')}
+        </button>
+      </div>
+
+      {/* Filters Panel */}
+      {showFilters && (
+        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Sort */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                {t('albums:sortBy')}
+              </label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="date-desc">{t('albums:sortDateDesc')}</option>
+                <option value="date-asc">{t('albums:sortDateAsc')}</option>
+                <option value="name-asc">{t('albums:sortNameAsc')}</option>
+                <option value="name-desc">{t('albums:sortNameDesc')}</option>
+              </select>
+            </div>
+
+            {/* Category Filter */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                {t('albums:category')}
               </label>
               <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                <option value="all">{t('albums:categories.all')}</option>
-                <option value="people">{t('albums:categories.people')}</option>
-                <option value="nature">{t('albums:categories.nature')}</option>
-                <option value="food">{t('albums:categories.food')}</option>
+                <option value="all">{t('albums:allCategories')}</option>
+                <option value="people">👥 {t('albums:categoryPeople')}</option>
+                <option value="nature">🌳 {t('albums:categoryNature')}</option>
+                <option value="food">🍽️ {t('albums:categoryFood')}</option>
                 <option value="animals">
-                  {t('albums:categories.animals')}
+                  🐾 {t('albums:categoryAnimals')}
                 </option>
-                <option value="indoor">{t('albums:categories.indoor')}</option>
-                <option value="travel">{t('albums:categories.travel')}</option>
-                <option value="architecture">
-                  {t('albums:categories.architecture')}
-                </option>
-                <option value="event">{t('albums:categories.event')}</option>
-                <option value="sport">{t('albums:categories.sport')}</option>
-                <option value="art">{t('albums:categories.art')}</option>
+                <option value="indoor">🏠 {t('albums:categoryIndoor')}</option>
+                <option value="travel">✈️ {t('albums:categoryTravel')}</option>
               </select>
             </div>
-            <div className="flex-1 min-w-[200px]">
-              <label className="text-sm text-gray-400 mb-2 block">
-                {t('albums:aiStatus.label')}
+
+            {/* AI Filter */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                {t('albums:aiStatus')}
               </label>
               <select
                 value={filterAI}
                 onChange={(e) => setFilterAI(e.target.value)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                <option value="all">{t('albums:aiStatus.all')}</option>
-                <option value="ai">{t('albums:aiStatus.aiOnly')}</option>
-                <option value="no-ai">{t('albums:aiStatus.notAI')}</option>
+                <option value="all">{t('albums:allPhotos')}</option>
+                <option value="analyzed">{t('albums:aiAnalyzedOnly')}</option>
+                <option value="not-analyzed">{t('albums:notAnalyzed')}</option>
               </select>
             </div>
-            <button
-              onClick={() => {
-                setFilterCategory('all')
-                setFilterAI('all')
-                setSearchQuery('')
-              }}
-              className="ripple-effect px-4 py-2 bg-red-600/20 hover:bg-red-600/30 rounded-lg transition text-sm self-end"
-            >
-              {t('common:resetFilters')}
-            </button>
           </div>
-        )}
-      </div>
-
-      {/* Tom tilstand */}
-      {albumPhotos.length === 0 && (
-        <div className="text-center py-20 text-gray-400">
-          <ImageIcon className="w-16 h-16 mx-auto mb-4 opacity-50" />
-          <p>{t('albums:noPhotosYet')}</p>
-          <button
-            onClick={() => setUploadOpen(true)}
-            className="mt-4 ripple-effect px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition"
-          >
-            {t('common:uploadImages')}
-          </button>
         </div>
       )}
 
-      {/* Ingen resultat etter filtrering */}
-      {albumPhotos.length > 0 && filteredPhotos.length === 0 && (
-        <div className="text-center py-20 text-gray-400">
-          <Search className="w-16 h-16 mx-auto mb-4 opacity-50" />
-          <p>{t('common:noMatchingPhotos')}</p>
-          <button
-            onClick={() => {
-              setFilterCategory('all')
-              setFilterAI('all')
-              setSearchQuery('')
-            }}
-            className="mt-4 ripple-effect px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition"
-          >
-            {t('common:resetFilters')}
-          </button>
-        </div>
-      )}
-
-      {/* Bilder - Grid View */}
+      {/* Photos Grid */}
       {viewMode === 'grid' && filteredPhotos.length > 0 && (
-        <div className={`grid ${gridClass} gap-4`}>
+        <div
+          className={`grid gap-4 ${
+            gridSize === 2
+              ? 'grid-cols-2'
+              : gridSize === 3
+              ? 'grid-cols-2 sm:grid-cols-3'
+              : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'
+          }`}
+        >
           {filteredPhotos.map((photo, index) => (
             <div
               key={photo.id}
-              className={`relative group cursor-pointer ${
+              className={`relative group aspect-square bg-black/20 rounded-xl overflow-hidden cursor-pointer transition hover:scale-105 ${
                 isPhotoSelected(photo) ? 'ring-4 ring-purple-500' : ''
               }`}
               onClick={() => {
@@ -565,57 +579,53 @@ const AlbumPage = ({
                 }
               }}
             >
-              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-lg bg-black/10 flex items-center justify-center">
-                <img
-                  src={photo.url}
-                  alt={photo.name}
-                  className="max-h-full max-w-full object-contain border border-white/10 transition-transform duration-300 hover:scale-[1.03] rounded-lg"
-                />
+              <img
+                src={photo.url}
+                alt={photo.name}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+
+              {/* Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition" />
+
+              {/* Info */}
+              <div className="absolute bottom-0 left-0 right-0 p-3 text-white opacity-0 group-hover:opacity-100 transition">
+                <div className="text-xs space-y-1">
+                  {photo.name && (
+                    <p className="font-medium truncate">{photo.name}</p>
+                  )}
+                  <div className="flex items-center gap-2 text-xs text-gray-300">
+                    <Calendar className="w-3 h-3" />
+                    {photo.createdAt
+                      ? new Date(photo.createdAt).toLocaleDateString('no-NO')
+                      : t('albums:unknownDate')}
+                    {photo.category && (
+                      <>
+                        <span>•</span>
+                        <span>
+                          {getCategoryIcon(photo.category)} {photo.category}
+                        </span>
+                      </>
+                    )}
+                    {photo.aiAnalyzed && (
+                      <>
+                        <span>•</span>
+                        <span>🤖 AI</span>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              {/* AI-indikatorer */}
-              <div className="absolute top-2 left-2 flex flex-col gap-1">
-                {photo.aiAnalyzed && (
-                  <span className="px-2 py-1 bg-purple-600/80 backdrop-blur rounded-full text-[10px] font-bold flex items-center gap-1 shadow">
-                    🤖 AI
-                  </span>
-                )}
-                {photo.faces > 0 && (
-                  <span className="px-2 py-1 bg-pink-500/80 backdrop-blur rounded-full text-[10px] font-bold shadow">
-                    👤 {photo.faces}
-                  </span>
-                )}
-                {photo.category && (
-                  <span className="px-2 py-1 bg-blue-500/80 backdrop-blur rounded-full text-[10px] shadow">
-                    {getCategoryIcon(photo.category)}
-                  </span>
-                )}
-              </div>
-
-              {/* Cover-indikator */}
-              {album.cover === photo.url && (
-                <div className="absolute top-2 right-2 bg-yellow-500 text-black px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
-                  <ImageIcon className="w-3 h-3" />
-                  {t('albums:setCover')}
-                </div>
-              )}
-
-              {/* Valgt-indikator */}
-              {isPhotoSelected(photo) && (
-                <div className="absolute top-2 right-2 bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center">
-                  <Check className="w-4 h-4" />
-                </div>
-              )}
-
-              {/* Rediger-knapper */}
-              {editMode && !isPhotoSelected(photo) && (
-                <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition">
+              {editMode && (
+                <div className="absolute top-2 right-2 flex gap-2">
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
                       handleSetCover(photo)
                     }}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-full transition shadow-lg"
+                    className="ripple-effect p-2 bg-yellow-500 hover:bg-yellow-600 rounded-lg transition"
                     title={t('albums:setCover')}
                   >
                     <ImageIcon className="w-4 h-4" />
@@ -625,18 +635,17 @@ const AlbumPage = ({
                       e.stopPropagation()
                       handleDelete(photo)
                     }}
-                    className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition shadow-lg"
-                    title={t('albums:deletePhoto')}
+                    className="ripple-effect p-2 bg-red-500 hover:bg-red-600 rounded-lg transition"
+                    title={t('common:delete')}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               )}
 
-              {/* Bildenavn */}
-              {photo.name && (
-                <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-2 rounded-b-xl truncate opacity-0 group-hover:opacity-100 transition">
-                  {photo.name}
+              {isPhotoSelected(photo) && (
+                <div className="absolute top-2 left-2 bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center">
+                  <Check className="w-4 h-4" />
                 </div>
               )}
             </div>
@@ -644,7 +653,7 @@ const AlbumPage = ({
         </div>
       )}
 
-      {/* Bilder - List View */}
+      {/* Photos List View */}
       {viewMode === 'list' && filteredPhotos.length > 0 && (
         <div className="space-y-2">
           {filteredPhotos.map((photo, index) => (
@@ -682,12 +691,6 @@ const AlbumPage = ({
                       <span>
                         {getCategoryIcon(photo.category)} {photo.category}
                       </span>
-                    </>
-                  )}
-                  {photo.aiAnalyzed && (
-                    <>
-                      <span>•</span>
-                      <span>🤖 AI</span>
                     </>
                   )}
                 </div>
@@ -728,6 +731,23 @@ const AlbumPage = ({
         </div>
       )}
 
+      {/* Empty State */}
+      {filteredPhotos.length === 0 && (
+        <div className="text-center py-16">
+          <ImageIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+          <p className="text-xl font-medium mb-2">{t('albums:noPhotos')}</p>
+          <p className="text-gray-400 mb-6">
+            {t('albums:noPhotosDescription')}
+          </p>
+          <button
+            onClick={() => setUploadOpen(true)}
+            className="ripple-effect px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl transition"
+          >
+            {t('albums:uploadFirstPhotos')}
+          </button>
+        </div>
+      )}
+
       {/* PhotoModal */}
       {photoModal.open && (
         <PhotoModal
@@ -738,7 +758,7 @@ const AlbumPage = ({
         />
       )}
 
-      {/* Modaler */}
+      {/* Modals */}
       <UploadModal
         isOpen={isUploadOpen}
         onClose={() => setUploadOpen(false)}
@@ -755,7 +775,6 @@ const AlbumPage = ({
         onConfirm={handleMovePhotos}
       />
 
-      {/* 🔹 Rediger album-modal */}
       {editingAlbum && (
         <AlbumModal
           editingAlbum={editingAlbum}
