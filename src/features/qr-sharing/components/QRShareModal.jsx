@@ -4,9 +4,11 @@ import { useTranslation } from 'react-i18next'
 import QRCodeDisplay from './QRCodeDisplay'
 import { generatePublicSlug, getPublicAlbumUrl } from '../utils/generatePublicSlug'
 import { doc, updateDoc, getFirestore } from 'firebase/firestore'
+import useAuth from '../../../hooks/useAuth'
 
-const QRShareModal = ({ isOpen, onClose, album, user }) => {
+const QRShareModal = ({ isOpen, onClose, album }) => {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const [loading, setLoading] = useState(false)
   const [publicUrl, setPublicUrl] = useState('')
   const [shareSettings, setShareSettings] = useState({
@@ -28,14 +30,31 @@ const QRShareModal = ({ isOpen, onClose, album, user }) => {
   }, [isOpen, album])
 
   const generateAndSaveSlug = async () => {
+    // Debug logging
+    console.log('🔍 DEBUG - generateAndSaveSlug called')
+    console.log('User object:', user)
+    console.log('User UID:', user?.uid)
+    console.log('Album:', album)
+
+    if (!user || !user.uid) {
+      console.error('❌ ERROR: User or user.uid is undefined')
+      alert('Bruker ikke lastet. Vent litt og prøv igjen.')
+      return
+    }
+
     setLoading(true)
     try {
       const slug = generatePublicSlug(album.name)
       const url = getPublicAlbumUrl(slug)
 
+      console.log('✅ Generated slug:', slug)
+      console.log('✅ Generated URL:', url)
+
       // Lagre til Firestore
       const db = getFirestore()
       const albumRef = doc(db, `users/${user.uid}/albums/${album.id}`)
+
+      console.log('📝 Saving to Firestore path:', `users/${user.uid}/albums/${album.id}`)
 
       await updateDoc(albumRef, {
         publicSlug: slug,
@@ -44,10 +63,11 @@ const QRShareModal = ({ isOpen, onClose, album, user }) => {
         sharedAt: new Date().toISOString(),
       })
 
+      console.log('✅ Successfully saved to Firestore')
       setPublicUrl(url)
     } catch (error) {
-      console.error('Error generating slug:', error)
-      alert('Kunne ikke generere delingslenke')
+      console.error('❌ Error generating slug:', error)
+      alert('Kunne ikke generere delingslenke: ' + error.message)
     } finally {
       setLoading(false)
     }
@@ -93,6 +113,15 @@ const QRShareModal = ({ isOpen, onClose, album, user }) => {
   }
 
   const handleTogglePublic = async () => {
+    console.log('🔍 DEBUG - handleTogglePublic called')
+    console.log('User UID:', user?.uid)
+
+    if (!user || !user.uid) {
+      console.error('❌ ERROR: User or user.uid is undefined')
+      alert('Bruker ikke lastet. Vent litt og prøv igjen.')
+      return
+    }
+
     setLoading(true)
     try {
       const db = getFirestore()
@@ -100,20 +129,42 @@ const QRShareModal = ({ isOpen, onClose, album, user }) => {
 
       const newPublicState = !shareSettings.isPublic
 
+      console.log('📝 Toggling public to:', newPublicState)
+
       await updateDoc(albumRef, {
         isPublic: newPublicState,
         'publicSettings.allowUpload': shareSettings.allowUpload,
       })
 
+      console.log('✅ Successfully toggled public state')
+
       setShareSettings(prev => ({ ...prev, isPublic: newPublicState }))
     } catch (error) {
-      console.error('Error toggling public:', error)
+      console.error('❌ Error toggling public:', error)
+      alert('Kunne ikke oppdatere innstillinger: ' + error.message)
     } finally {
       setLoading(false)
     }
   }
 
   if (!isOpen) return null
+
+  // Show loading if user is not ready yet
+  if (!user) {
+    return (
+      <div
+        className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+        onClick={onClose}
+      >
+        <div className="bg-gradient-to-b from-gray-800/90 to-gray-900/90 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+            <p className="opacity-70">Laster brukerdata...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div
