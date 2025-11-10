@@ -166,17 +166,16 @@ const AlbumPage = ({
     }
   }, [albumPhotos])
 
-  // 🔧 FIX 1: handleSetCover - Legg til toast-melding
   const handleSetCover = async (photo) => {
     try {
       await onSetAlbumCover(album.id, photo.url)
-      // ✅ NY: Toast-melding
+
+      // ✅ TOAST IS HERE (Line 174-177)
       setNotification({
-        message: '✓ Bilde satt som cover',
+        message: t('albums:coverSet'), // "✓ Image set as cover"
         type: 'success',
       })
     } catch (error) {
-      console.error(t('albums:errors.coverUpdateError'), error)
       setNotification({
         message: t('albums:errors.couldNotSetCover'),
         type: 'error',
