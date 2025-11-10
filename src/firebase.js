@@ -3,7 +3,7 @@
 // ============================================================================
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
-
+import { onSnapshot } from 'firebase/firestore'
 import {
   getFirestore,
   collection,
@@ -179,6 +179,26 @@ export async function getPhotosByUser(userId) {
     console.error('🔥 getPhotosByUser:', err)
     return []
   }
+}
+// ============================================================================
+// 📡 Live Firestore Listeners (for realtime updates)
+// ============================================================================
+// 🔹 Live listener for albums
+export function listenToAlbumsByUser(userId, callback) {
+  const q = query(collection(db, 'albums'), where('userId', '==', userId))
+  return onSnapshot(q, (snapshot) => {
+    const albums = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
+    callback(albums)
+  })
+}
+
+// 🔹 Live listener for photos
+export function listenToPhotosByUser(userId, callback) {
+  const q = query(collection(db, 'photos'), where('userId', '==', userId))
+  return onSnapshot(q, (snapshot) => {
+    const photos = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
+    callback(photos)
+  })
 }
 
 // ============================================================================
@@ -698,7 +718,9 @@ export async function migratePhotosAddUserId() {
       // If photo missing userId, add current user's ID
       if (!photoData.userId) {
         console.log(
-          `Fixing photo: ${photoDoc.id} - "${photoData.name || 'unnamed'}" (missing userId)`
+          `Fixing photo: ${photoDoc.id} - "${
+            photoData.name || 'unnamed'
+          }" (missing userId)`
         )
         await updateDoc(doc(db, 'photos', photoDoc.id), {
           userId: currentUserId,
