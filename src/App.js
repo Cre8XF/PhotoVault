@@ -2,6 +2,7 @@
 // APP.js – v6.0 Phase 2: Modern Architecture with Zustand & Hooks
 // ============================================================================
 import React from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import i18n from './i18n'
 
@@ -24,6 +25,7 @@ import SecuritySettings from './pages/SecuritySettings'
 import VaultPage from './pages/VaultPage'
 import ProfilePage from './pages/ProfilePage'
 import SubscriptionPage from './pages/SubscriptionPage'
+import PublicAlbumPage from './pages/PublicAlbumPage'
 
 // Components
 import ErrorBoundary from './components/ErrorBoundary'
@@ -52,7 +54,15 @@ function App() {
     <ErrorBoundary>
       <ToastProvider>
         <SecurityProvider>
-          <AppContent />
+          <BrowserRouter>
+            <Routes>
+              {/* Public route - no authentication required */}
+              <Route path="/share/:slug" element={<PublicAlbumPage />} />
+
+              {/* All other routes - authenticated */}
+              <Route path="*" element={<AppContent />} />
+            </Routes>
+          </BrowserRouter>
         </SecurityProvider>
       </ToastProvider>
     </ErrorBoundary>
