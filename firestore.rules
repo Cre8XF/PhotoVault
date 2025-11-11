@@ -25,29 +25,38 @@ service cloud.firestore {
       allow read: if resource.data.isPublic == true;
 
       // Eier eller admin kan lese/skrive alt
-      allow read, write, update, delete: if isOwner(resource.data.userId) || isAdmin();
+      allow read, write, update, delete:
+        if isOwner(resource.data.userId) || isAdmin();
+    }
+
+    // --- Offentlige bilder i brukers photos ---
+    match /users/{userId}/photos/{photoId} {
+      // Tillat lesing av bilder i offentlige album
+      allow read: if
+        resource.data.albumId != null &&
+        get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.isPublic == true;
+
+      // Eier eller admin har full tilgang
+      allow read, write, update, delete:
+        if isOwner(userId) ||
+           isOwner(get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.userId) ||
+           isAdmin();
     }
 
     // ===== TOP-LEVEL COLLECTIONS =====
     match /{collection}/{docId} {
       allow read: if isAuthenticated();
       allow create: if isOwnerOnCreate() || isAdmin();
-      allow update, delete: if isAdmin()
-        || (resource.data.userId != null && isOwner(resource.data.userId))
-        || !('userId' in resource.data);
+      allow update, delete:
+        if isAdmin()
+          || (resource.data.userId != null && isOwner(resource.data.userId))
+          || !('userId' in resource.data);
     }
 
     // ===== USER-BASERT STRUKTUR =====
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow write: if isOwner(userId) || isAdmin();
-
-      match /photos/{photoId} {
-        allow read: if isAuthenticated();
-        allow create: if isOwner(userId) || isAdmin();
-        allow update, delete: if isOwner(userId) || isAdmin()
-          || !('userId' in resource.data);
-      }
 
       match /vault/{vaultId} {
         allow read, write: if isOwner(userId) || isAdmin();

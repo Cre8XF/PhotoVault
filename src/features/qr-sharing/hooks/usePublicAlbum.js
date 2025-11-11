@@ -1,5 +1,13 @@
 import { useState, useEffect } from 'react'
-import { getFirestore, collection, query, where, getDocs, onSnapshot } from 'firebase/firestore'
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  onSnapshot,
+  orderBy,
+} from 'firebase/firestore'
 
 export const usePublicAlbum = (slug) => {
   const [album, setAlbum] = useState(null)
@@ -14,7 +22,7 @@ export const usePublicAlbum = (slug) => {
       try {
         const db = getFirestore()
 
-        // Find album by publicSlug
+        // Finn album basert på slug
         const albumsRef = collection(db, 'albums')
         const q = query(albumsRef, where('publicSlug', '==', slug))
         const querySnapshot = await getDocs(q)
@@ -28,14 +36,14 @@ export const usePublicAlbum = (slug) => {
         const albumDoc = querySnapshot.docs[0]
         const albumData = { id: albumDoc.id, ...albumDoc.data() }
 
-        // Check if album is public
+        // Sjekk om albumet er offentlig
         if (!albumData.isPublic) {
           setError('Dette albumet er ikke lenger offentlig tilgjengelig')
           setLoading(false)
           return
         }
 
-        // Check expiry date
+        // Sjekk om delingen er utløpt
         if (albumData.publicSettings?.expiresAt) {
           const expiryDate = new Date(albumData.publicSettings.expiresAt)
           if (expiryDate < new Date()) {
@@ -47,21 +55,25 @@ export const usePublicAlbum = (slug) => {
 
         setAlbum(albumData)
 
-        // Fetch photos from album
-        const photosRef = collection(db, `albums/${albumDoc.id}/photos`)
+        // 🔹 Hent bilder fra brukerens photos basert på albumId
+        const photosRef = collection(db, `users/${albumData.userId}/photos`)
+        const photosQuery = query(
+          photosRef,
+          where('albumId', '==', albumData.id),
+          orderBy('createdAt', 'desc')
+        )
 
-        // Real-time listener for photos
-        const unsubscribe = onSnapshot(photosRef, (snapshot) => {
-          const photosData = snapshot.docs.map(doc => ({
+        // Lytt i sanntid
+        const unsubscribe = onSnapshot(photosQuery, (snapshot) => {
+          const photosData = snapshot.docs.map((doc) => ({
             id: doc.id,
-            ...doc.data()
+            ...doc.data(),
           }))
           setPhotos(photosData)
           setLoading(false)
         })
 
         return () => unsubscribe()
-
       } catch (err) {
         console.error('Error fetching public album:', err)
         setError('Kunne ikke laste album')
