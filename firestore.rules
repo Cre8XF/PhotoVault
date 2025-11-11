@@ -19,7 +19,7 @@ service cloud.firestore {
       return isAuthenticated() && request.resource.data.userId == request.auth.uid;
     }
 
-    // ===== ALBUMS (før generelle regler) =====
+    // ===== ALBUMS =====
     match /albums/{albumId} {
       // Alle kan lese hvis albumet er offentlig
       allow read: if resource.data.isPublic == true;
@@ -29,43 +29,59 @@ service cloud.firestore {
         if isOwner(resource.data.userId) || isAdmin();
     }
 
-    // --- Offentlige bilder i brukers photos ---
-    match /users/{userId}/photos/{photoId} {
-      // Tillat lesing av bilder i offentlige album
+    // ===== PHOTOS (TOPP NIVÅ) =====
+    match /photos/{photoId} {
+      // Tillat lesing av bilder som tilhører offentlig album
       allow read: if
         resource.data.albumId != null &&
+        exists(/databases/$(database)/documents/albums/$(resource.data.albumId)) &&
         get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.isPublic == true;
 
-      // Eier eller admin har full tilgang
+      // Eier eller admin kan endre egne bilder
       allow read, write, update, delete:
-        if isOwner(userId) ||
-           isOwner(get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.userId) ||
-           isAdmin();
+        if isOwner(resource.data.userId) || isAdmin();
     }
 
-    // ===== TOP-LEVEL COLLECTIONS =====
+    // ===== BRUKER-BASERT STRUKTUR =====
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId) || isAdmin();
+
+      // 🔹 Bilder under users/{userId}/photos
+      match /photos/{photoId} {
+        // Offentlig lesing for bilder i offentlige album
+        allow read: if
+          resource.data.albumId != null &&
+          exists(/databases/$(database)/documents/albums/$(resource.data.albumId)) &&
+          get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.isPublic == true;
+
+        // Eier eller admin har full tilgang
+        allow read, write, update, delete:
+          if isOwner(userId)
+             || isOwner(get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.userId)
+             || isAdmin();
+      }
+
+      // Vault og andre undersamlinger
+      match /vault/{vaultId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+
+      // Default for øvrige undersamlinger
+      match /{document=**} {
+        allow read: if isAuthenticated();
+        allow write: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    // ===== GENERELL TILGANG =====
     match /{collection}/{docId} {
       allow read: if isAuthenticated();
       allow create: if isOwnerOnCreate() || isAdmin();
       allow update, delete:
         if isAdmin()
-          || (resource.data.userId != null && isOwner(resource.data.userId))
-          || !('userId' in resource.data);
-    }
-
-    // ===== USER-BASERT STRUKTUR =====
-    match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow write: if isOwner(userId) || isAdmin();
-
-      match /vault/{vaultId} {
-        allow read, write: if isOwner(userId) || isAdmin();
-      }
-
-      match /{document=**} {
-        allow read: if isAuthenticated();
-        allow write: if isOwner(userId) || isAdmin();
-      }
+        || (resource.data.userId != null && isOwner(resource.data.userId))
+        || !('userId' in resource.data);
     }
 
     // ===== DEFAULT DENY =====

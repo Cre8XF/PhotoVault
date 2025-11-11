@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   getFirestore,
   collection,
@@ -14,42 +14,44 @@ export const usePublicAlbum = (slug) => {
   const [photos, setPhotos] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const triedRootRef = useRef(false) // hindrer evig fallback-loop
 
   useEffect(() => {
     if (!slug) return
+    let unsubscribe = () => {}
 
     const fetchPublicAlbum = async () => {
       try {
         const db = getFirestore()
 
-        // Finn album basert på slug
-        const albumsRef = collection(db, 'albums')
-        const q = query(albumsRef, where('publicSlug', '==', slug))
-        const querySnapshot = await getDocs(q)
-
-        if (querySnapshot.empty) {
-          console.log('❌ [usePublicAlbum] Album not found for slug:', slug)
+        // 🔹 1) Finn album via slug
+        const qAlbum = query(
+          collection(db, 'albums'),
+          where('publicSlug', '==', slug)
+        )
+        const snap = await getDocs(qAlbum)
+        if (snap.empty) {
+          console.warn('❌ [usePublicAlbum] Album not found for slug:', slug)
           setError('Album ikke funnet')
           setLoading(false)
           return
         }
 
-        const albumDoc = querySnapshot.docs[0]
+        const albumDoc = snap.docs[0]
         const albumData = { id: albumDoc.id, ...albumDoc.data() }
 
-        // Sjekk om albumet er offentlig
+        // 🔹 2) Sjekk offentlighet og utløp
         if (!albumData.isPublic) {
-          console.log('❌ [usePublicAlbum] Album is not public')
+          console.warn('❌ [usePublicAlbum] Album is not public')
           setError('Dette albumet er ikke lenger offentlig tilgjengelig')
           setLoading(false)
           return
         }
 
-        // Sjekk om delingen er utløpt
         if (albumData.publicSettings?.expiresAt) {
-          const expiryDate = new Date(albumData.publicSettings.expiresAt)
-          if (expiryDate < new Date()) {
-            console.log('❌ [usePublicAlbum] Album has expired')
+          const expiry = new Date(albumData.publicSettings.expiresAt)
+          if (expiry < new Date()) {
+            console.warn('❌ [usePublicAlbum] Album link expired')
             setError('Denne delingslenken har utløpt')
             setLoading(false)
             return
@@ -58,48 +60,95 @@ export const usePublicAlbum = (slug) => {
 
         setAlbum(albumData)
 
-        // 🔹 Hent bilder fra brukerens photos basert på albumId
-        const photosRef = collection(db, `users/${albumData.userId}/photos`)
-        const photosQuery = query(
-          photosRef,
-          where('albumId', '==', albumData.id),
-          orderBy('createdAt', 'desc')
-        )
+        // 🔹 3) Lytt mot users/{userId}/photos
+        const listenNested = () => {
+          const nestedRef = collection(db, `users/${albumData.userId}/photos`)
+          const nestedQ = query(
+            nestedRef,
+            where('albumId', '==', albumData.id),
+            orderBy('createdAt', 'desc')
+          )
 
-        // Lytt i sanntid
-        const unsubscribe = onSnapshot(
-          photosQuery,
-          (snapshot) => {
-            const photosData = snapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }))
-            setPhotos(photosData)
-            setLoading(false)
-          },
-          (error) => {
-            console.error('❌ [usePublicAlbum] Snapshot error:', error)
-            if (error.code === 'permission-denied') {
-              setError('Ingen tilgang til bilder. Sjekk Firestore-regler.')
-            } else {
-              setError('Kunne ikke laste bilder: ' + error.message)
+          unsubscribe = onSnapshot(
+            nestedQ,
+            (snapshot) => {
+              if (snapshot.empty && !triedRootRef.current) {
+                console.log(
+                  '⚠️ [usePublicAlbum] No photos under user, trying root/photos'
+                )
+                triedRootRef.current = true
+                unsubscribe()
+                listenRoot()
+                return
+              }
+
+              const rows = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
+              console.log(
+                '✅ [usePublicAlbum] Loaded',
+                rows.length,
+                'photos (nested)'
+              )
+              setPhotos(rows)
+              setLoading(false)
+            },
+            (e) => {
+              console.error('❌ [usePublicAlbum] Nested snapshot error:', e)
+              if (!triedRootRef.current) {
+                triedRootRef.current = true
+                listenRoot()
+                return
+              }
+              setError('Kunne ikke laste bilder: ' + e.message)
+              setLoading(false)
             }
-            setLoading(false)
-          }
-        )
-
-        return () => {
-          console.log('🔍 [usePublicAlbum] Cleaning up snapshot listener')
-          unsubscribe()
+          )
         }
+
+        // 🔹 4) Fallback til toppnivå photos
+        const listenRoot = () => {
+          const rootRef = collection(db, 'photos')
+          const rootQ = query(
+            rootRef,
+            where('albumId', '==', albumData.id),
+            orderBy('createdAt', 'desc')
+          )
+
+          unsubscribe = onSnapshot(
+            rootQ,
+            (snapshot) => {
+              const rows = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
+              console.log(
+                '✅ [usePublicAlbum] Loaded',
+                rows.length,
+                'photos (root)'
+              )
+              setPhotos(rows)
+              setLoading(false)
+            },
+            (e) => {
+              console.error('❌ [usePublicAlbum] Root snapshot error:', e)
+              setError('Kunne ikke laste bilder: ' + e.message)
+              setLoading(false)
+            }
+          )
+        }
+
+        listenNested()
       } catch (err) {
         console.error('❌ [usePublicAlbum] Fetch error:', err)
-        setError('Kunne ikke laste album: ' + err.message)
+        setError('Kunne ikke laste album: ' + (err?.message || String(err)))
         setLoading(false)
       }
     }
 
     fetchPublicAlbum()
+
+    // Rydd opp lytter ved unmount
+    return () => {
+      try {
+        unsubscribe()
+      } catch (_) {}
+    }
   }, [slug])
 
   return { album, photos, loading, error }
