@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { usePublicAlbum } from '../features/qr-sharing/hooks/usePublicAlbum'
 import { trackPublicView } from '../features/qr-sharing/utils/analytics'
-import { ArrowLeft, Upload, Image as ImageIcon } from 'lucide-react'
+import { Upload, Image as ImageIcon } from 'lucide-react'
 import PhotoModal from '../components/PhotoModal'
 import UploadModal from '../components/UploadModal'
 
@@ -56,17 +56,9 @@ const PublicAlbumPage = () => {
       {/* Header */}
       <div className="sticky top-0 z-10 glass-card border-b border-white/20 px-4 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate('/')}
-              className="p-2 hover:bg-white/10 rounded-lg transition"
-            >
-              <ArrowLeft className="w-6 h-6" />
-            </button>
-            <div>
-              <h1 className="text-xl font-bold">{album.name}</h1>
-              <p className="text-sm opacity-70">{photos.length} bilder</p>
-            </div>
+          <div>
+            <h1 className="text-xl font-bold">{album.name}</h1>
+            <p className="text-sm opacity-70">{photos.length} bilder</p>
           </div>
 
           {album.publicSettings?.allowUpload && (
