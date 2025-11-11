@@ -3,7 +3,7 @@ import { X, Share2, Globe, Lock, Calendar } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import QRCodeDisplay from './QRCodeDisplay'
 import { generatePublicSlug, getPublicAlbumUrl } from '../utils/generatePublicSlug'
-import { doc, updateDoc, getFirestore } from 'firebase/firestore'
+import { doc, setDoc, getFirestore } from 'firebase/firestore'
 import useAuth from '../../../hooks/useAuth'
 
 const QRShareModal = ({ isOpen, onClose, album }) => {
@@ -52,16 +52,20 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
 
       // Lagre til Firestore
       const db = getFirestore()
-      const albumRef = doc(db, `users/${user.uid}/albums/${album.id}`)
+      const albumRef = doc(db, `albums/${album.id}`)
 
-      console.log('📝 Saving to Firestore path:', `users/${user.uid}/albums/${album.id}`)
+      console.log('📝 Saving to Firestore path:', `albums/${album.id}`)
 
-      await updateDoc(albumRef, {
-        publicSlug: slug,
-        isPublic: true,
-        publicSettings: shareSettings,
-        sharedAt: new Date().toISOString(),
-      })
+      await setDoc(
+        albumRef,
+        {
+          publicSlug: slug,
+          isPublic: true,
+          publicSettings: shareSettings,
+          sharedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      )
 
       console.log('✅ Successfully saved to Firestore')
       setPublicUrl(url)
@@ -125,16 +129,23 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
     setLoading(true)
     try {
       const db = getFirestore()
-      const albumRef = doc(db, `users/${user.uid}/albums/${album.id}`)
+      const albumRef = doc(db, `albums/${album.id}`)
 
       const newPublicState = !shareSettings.isPublic
 
       console.log('📝 Toggling public to:', newPublicState)
+      console.log('📝 Saving to Firestore path:', `albums/${album.id}`)
 
-      await updateDoc(albumRef, {
-        isPublic: newPublicState,
-        'publicSettings.allowUpload': shareSettings.allowUpload,
-      })
+      await setDoc(
+        albumRef,
+        {
+          isPublic: newPublicState,
+          publicSettings: {
+            allowUpload: shareSettings.allowUpload,
+          },
+        },
+        { merge: true }
+      )
 
       console.log('✅ Successfully toggled public state')
 
