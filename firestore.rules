@@ -19,13 +19,19 @@ service cloud.firestore {
       return isAuthenticated() && request.resource.data.userId == request.auth.uid;
     }
 
+    // ===== ALBUMS (før generelle regler) =====
+    match /albums/{albumId} {
+      // Alle kan lese hvis albumet er offentlig
+      allow read: if resource.data.isPublic == true;
+
+      // Eier eller admin kan lese/skrive alt
+      allow read, write, update, delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+
     // ===== TOP-LEVEL COLLECTIONS =====
     match /{collection}/{docId} {
       allow read: if isAuthenticated();
       allow create: if isOwnerOnCreate() || isAdmin();
-
-      // ✅ gir slettetilgang enten via resource.data.userId (hvis finnes)
-      // eller via fallback for dokumenter uten userId-felt
       allow update, delete: if isAdmin()
         || (resource.data.userId != null && isOwner(resource.data.userId))
         || !('userId' in resource.data);
@@ -36,7 +42,6 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow write: if isOwner(userId) || isAdmin();
 
-      // --- Photos ---
       match /photos/{photoId} {
         allow read: if isAuthenticated();
         allow create: if isOwner(userId) || isAdmin();
@@ -44,27 +49,15 @@ service cloud.firestore {
           || !('userId' in resource.data);
       }
 
-      // --- Vault ---
       match /vault/{vaultId} {
         allow read, write: if isOwner(userId) || isAdmin();
       }
 
-      // --- Andre sub-samlinger ---
       match /{document=**} {
         allow read: if isAuthenticated();
         allow write: if isOwner(userId) || isAdmin();
       }
     }
-
-        // ===== ALBUMS =====
-    match /albums/{albumId} {
-      // Alle kan lese hvis albumet er offentlig
-      allow read: if resource.data.isPublic == true;
-
-      // Eier eller admin kan lese/skrive alt
-      allow read, write, update, delete: if isOwner(resource.data.userId) || isAdmin();
-    }
-
 
     // ===== DEFAULT DENY =====
     match /{document=**} {
