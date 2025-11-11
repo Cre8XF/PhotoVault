@@ -23,8 +23,7 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
     exportCollageBlob,
     downloadCollage,
     loading,
-    error,
-    isReady
+    error
   } = useCollageCanvas(selectedLayout, selectedPhotos, {
     backgroundColor: '#ffffff',
     spacing: 0,

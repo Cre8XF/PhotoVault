@@ -1,5 +1,5 @@
 import React from 'react'
-import { Grid, Image } from 'lucide-react'
+import { Grid } from 'lucide-react'
 
 /**
  * Layout selector component - displays grid of available layouts
