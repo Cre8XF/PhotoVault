@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { X, Share2, Globe, Lock, Calendar } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import QRCodeDisplay from './QRCodeDisplay'
-import { generatePublicSlug, getPublicAlbumUrl } from '../utils/generatePublicSlug'
+import {
+  generatePublicSlug,
+  getPublicAlbumUrl,
+} from '../utils/generatePublicSlug'
 import { doc, setDoc, getFirestore } from 'firebase/firestore'
 import useAuth from '../../../hooks/useAuth'
 
@@ -61,8 +64,11 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
         {
           publicSlug: slug,
           isPublic: true,
-          publicSettings: shareSettings,
           sharedAt: new Date().toISOString(),
+          publicSettings: {
+            allowUpload: shareSettings.allowUpload,
+            expiresAt: shareSettings.expiresAt,
+          },
         },
         { merge: true }
       )
@@ -149,7 +155,7 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
 
       console.log('✅ Successfully toggled public state')
 
-      setShareSettings(prev => ({ ...prev, isPublic: newPublicState }))
+      setShareSettings((prev) => ({ ...prev, isPublic: newPublicState }))
     } catch (error) {
       console.error('❌ Error toggling public:', error)
       alert('Kunne ikke oppdatere innstillinger: ' + error.message)
@@ -236,19 +242,19 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
               <Lock className="w-5 h-5 text-green-400" />
               <div>
                 <p className="font-medium">Tillat opplasting</p>
-                <p className="text-sm opacity-70">
-                  Andre kan laste opp bilder
-                </p>
+                <p className="text-sm opacity-70">Andre kan laste opp bilder</p>
               </div>
             </div>
             <label className="relative inline-block w-12 h-6">
               <input
                 type="checkbox"
                 checked={shareSettings.allowUpload}
-                onChange={() => setShareSettings(prev => ({
-                  ...prev,
-                  allowUpload: !prev.allowUpload
-                }))}
+                onChange={() =>
+                  setShareSettings((prev) => ({
+                    ...prev,
+                    allowUpload: !prev.allowUpload,
+                  }))
+                }
                 disabled={!shareSettings.isPublic || loading}
                 className="sr-only peer"
               />
