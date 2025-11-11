@@ -28,6 +28,7 @@ export const usePublicAlbum = (slug) => {
         const querySnapshot = await getDocs(q)
 
         if (querySnapshot.empty) {
+          console.log('❌ [usePublicAlbum] Album not found for slug:', slug)
           setError('Album ikke funnet')
           setLoading(false)
           return
@@ -38,6 +39,7 @@ export const usePublicAlbum = (slug) => {
 
         // Sjekk om albumet er offentlig
         if (!albumData.isPublic) {
+          console.log('❌ [usePublicAlbum] Album is not public')
           setError('Dette albumet er ikke lenger offentlig tilgjengelig')
           setLoading(false)
           return
@@ -47,6 +49,7 @@ export const usePublicAlbum = (slug) => {
         if (albumData.publicSettings?.expiresAt) {
           const expiryDate = new Date(albumData.publicSettings.expiresAt)
           if (expiryDate < new Date()) {
+            console.log('❌ [usePublicAlbum] Album has expired')
             setError('Denne delingslenken har utløpt')
             setLoading(false)
             return
@@ -64,19 +67,34 @@ export const usePublicAlbum = (slug) => {
         )
 
         // Lytt i sanntid
-        const unsubscribe = onSnapshot(photosQuery, (snapshot) => {
-          const photosData = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-          setPhotos(photosData)
-          setLoading(false)
-        })
+        const unsubscribe = onSnapshot(
+          photosQuery,
+          (snapshot) => {
+            const photosData = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }))
+            setPhotos(photosData)
+            setLoading(false)
+          },
+          (error) => {
+            console.error('❌ [usePublicAlbum] Snapshot error:', error)
+            if (error.code === 'permission-denied') {
+              setError('Ingen tilgang til bilder. Sjekk Firestore-regler.')
+            } else {
+              setError('Kunne ikke laste bilder: ' + error.message)
+            }
+            setLoading(false)
+          }
+        )
 
-        return () => unsubscribe()
+        return () => {
+          console.log('🔍 [usePublicAlbum] Cleaning up snapshot listener')
+          unsubscribe()
+        }
       } catch (err) {
-        console.error('Error fetching public album:', err)
-        setError('Kunne ikke laste album')
+        console.error('❌ [usePublicAlbum] Fetch error:', err)
+        setError('Kunne ikke laste album: ' + err.message)
         setLoading(false)
       }
     }
