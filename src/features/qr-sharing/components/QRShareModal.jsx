@@ -16,8 +16,8 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
   const [loading, setLoading] = useState(false)
   const [publicUrl, setPublicUrl] = useState('')
   const [shareSettings, setShareSettings] = useState({
-    isPublic: album.isPublic || false,
-    allowUpload: false,
+    isPublic: !!album.isPublic,
+    allowUpload: !!album?.publicSettings?.allowUpload,
     expiresAt: null,
   })
 
