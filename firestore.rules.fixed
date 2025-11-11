@@ -1,0 +1,94 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===== HELPER FUNCTIONS =====
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return request.auth.token.email == "rogsor80@gmail.com";
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isOwnerOnCreate() {
+      return isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // ===== ALBUMS (top-level collection) =====
+    match /albums/{albumId} {
+      // Anyone can read if album is public
+      allow read: if resource.data.isPublic == true;
+
+      // Owner or admin can do anything
+      allow read, write, update, delete:
+        if isOwner(resource.data.userId) || isAdmin();
+    }
+
+    // ===== USER-BASED STRUCTURE =====
+    match /users/{userId} {
+      // Allow reading user document if authenticated
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId) || isAdmin();
+
+      // PHOTOS - Specific rule comes FIRST
+      match /photos/{photoId} {
+        // PUBLIC ACCESS: Allow reading photos in public albums
+        // This rule allows unauthenticated users to read photos if:
+        // 1. The photo has an albumId
+        // 2. That album exists and is public
+        allow read: if
+          resource.data.albumId != null &&
+          exists(/databases/$(database)/documents/albums/$(resource.data.albumId)) &&
+          get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.isPublic == true;
+
+        // AUTHENTICATED ACCESS: Owner or admin has full access
+        allow read, write, update, delete:
+          if isOwner(userId) || isAdmin();
+
+        // ALTERNATIVE: If photo belongs to a public album and user is owner of that album
+        allow read, write, update, delete: if
+          resource.data.albumId != null &&
+          exists(/databases/$(database)/documents/albums/$(resource.data.albumId)) &&
+          (isOwner(get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.userId) || isAdmin());
+      }
+
+      // VAULT - Full access for owner/admin only
+      match /vault/{vaultId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+
+      // ALBUMS subcollection (if used)
+      match /albums/{albumId} {
+        allow read: if isAuthenticated();
+        allow write: if isOwner(userId) || isAdmin();
+      }
+
+      // WILDCARD - comes LAST to avoid overriding specific rules
+      // This catches any other subcollections under users/{userId}
+      match /{document=**} {
+        allow read: if isAuthenticated();
+        allow write: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    // ===== TOP-LEVEL COLLECTIONS (catch-all) =====
+    match /{collection}/{docId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwnerOnCreate() || isAdmin();
+      allow update, delete:
+        if isAdmin()
+          || (resource.data.userId != null && isOwner(resource.data.userId))
+          || !('userId' in resource.data);
+    }
+
+    // ===== DEFAULT DENY =====
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

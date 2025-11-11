@@ -28,6 +28,7 @@ export const usePublicAlbum = (slug) => {
         const querySnapshot = await getDocs(q)
 
         if (querySnapshot.empty) {
+          console.log('❌ [usePublicAlbum] Album not found for slug:', slug)
           setError('Album ikke funnet')
           setLoading(false)
           return
@@ -38,6 +39,7 @@ export const usePublicAlbum = (slug) => {
 
         // Sjekk om albumet er offentlig
         if (!albumData.isPublic) {
+          console.log('❌ [usePublicAlbum] Album is not public')
           setError('Dette albumet er ikke lenger offentlig tilgjengelig')
           setLoading(false)
           return
@@ -47,6 +49,7 @@ export const usePublicAlbum = (slug) => {
         if (albumData.publicSettings?.expiresAt) {
           const expiryDate = new Date(albumData.publicSettings.expiresAt)
           if (expiryDate < new Date()) {
+            console.log('❌ [usePublicAlbum] Album has expired')
             setError('Denne delingslenken har utløpt')
             setLoading(false)
             return
@@ -71,12 +74,20 @@ export const usePublicAlbum = (slug) => {
           }))
           setPhotos(photosData)
           setLoading(false)
-        })
+          return
+        }
+
+        // Hent bilder fra brukerens photos basert på albumId
+        const photosPath = `users/${albumData.userId}/photos`
+        console.log('🔍 [usePublicAlbum] Querying photos at path:', photosPath)
+        console.log('🔍 [usePublicAlbum] Filter: albumId ==', albumData.id)
 
         return () => unsubscribe()
       } catch (err) {
-        console.error('Error fetching public album:', err)
-        setError('Kunne ikke laste album')
+        console.error('❌ [usePublicAlbum] Fetch error:', err)
+        console.error('Error code:', err.code)
+        console.error('Error message:', err.message)
+        setError('Kunne ikke laste album: ' + err.message)
         setLoading(false)
       }
     }
