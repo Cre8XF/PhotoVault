@@ -25,6 +25,7 @@ import {
   Filter,
   ChevronDown,
   Share2,
+  Layout,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
@@ -33,6 +34,7 @@ import MoveModal from '../components/MoveModal'
 import PhotoModal from '../components/PhotoModal'
 import AlbumModal from '../components/AlbumModal'
 import QRShareModal from '../features/qr-sharing/components/QRShareModal'
+import { CollageBuilder } from '../features/collage'
 import useStore from '../state/store'
 
 function getCategoryIcon(category) {
@@ -74,6 +76,7 @@ const AlbumPage = ({
   const [photoModal, setPhotoModal] = useState({ open: false, index: 0 })
   const [editingAlbum, setEditingAlbum] = useState(null)
   const [isShareModalOpen, setShareModalOpen] = useState(false)
+  const [isCollageOpen, setCollageOpen] = useState(false)
 
   // Zustand store
   const setNotification = useStore((state) => state.setNotification)
@@ -327,6 +330,35 @@ const AlbumPage = ({
     return selectedPhotos.some((p) => p.id === photo.id)
   }
 
+  // Save collage as a new photo in the album
+  const handleSaveCollage = async (blob, metadata) => {
+    try {
+      console.log('💾 Saving collage to album...')
+
+      // Create file from blob
+      const file = new File([blob], `collage_${Date.now()}.png`, {
+        type: 'image/png'
+      })
+
+      // Use the existing upload handler
+      await handleUpload([file], album.id, false)
+
+      setNotification({
+        message: 'Kollasj lagret! 🎨',
+        type: 'success',
+      })
+
+      console.log('✅ Collage saved successfully')
+    } catch (error) {
+      console.error('❌ Error saving collage:', error)
+      setNotification({
+        message: 'Kunne ikke lagre kollasjen',
+        type: 'error',
+      })
+      throw error
+    }
+  }
+
   if (!album) {
     return (
       <div className="p-6">
@@ -375,6 +407,17 @@ const AlbumPage = ({
             <span className="hidden sm:inline">
               {editMode ? t('common:done') : t('common:edit')}
             </span>
+          </button>
+
+          {/* Create Collage Button */}
+          <button
+            onClick={() => setCollageOpen(true)}
+            disabled={albumPhotos.length < 2}
+            className="ripple-effect px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            title={albumPhotos.length < 2 ? 'Trenger minst 2 bilder' : 'Lag kollasj'}
+          >
+            <Layout size={18} />
+            <span className="hidden sm:inline">Lag kollasj</span>
           </button>
 
           {/* Share Album Button */}
@@ -811,6 +854,15 @@ const AlbumPage = ({
         onClose={() => setShareModalOpen(false)}
         album={album}
       />
+
+      {/* Collage Builder */}
+      {isCollageOpen && (
+        <CollageBuilder
+          availablePhotos={albumPhotos}
+          onClose={() => setCollageOpen(false)}
+          onSave={handleSaveCollage}
+        />
+      )}
     </div>
   )
 }
