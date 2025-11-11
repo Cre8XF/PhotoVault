@@ -3,7 +3,7 @@ import { X, Share2, Globe, Lock, Calendar } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import QRCodeDisplay from './QRCodeDisplay'
 import { generatePublicSlug, getPublicAlbumUrl } from '../utils/generatePublicSlug'
-import { doc, setDoc, getFirestore } from 'firebase/firestore'
+import { doc, setDoc, getFirestore, deleteField } from 'firebase/firestore'
 import useAuth from '../../../hooks/useAuth'
 
 const QRShareModal = ({ isOpen, onClose, album }) => {
@@ -60,8 +60,13 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
         albumRef,
         {
           publicSlug: slug,
-          isPublic: true,
-          publicSettings: shareSettings,
+          isPublic: true, // Top-level field only
+          publicSettings: {
+            allowUpload: shareSettings.allowUpload,
+            expiresAt: shareSettings.expiresAt,
+          },
+          // Clean up any old nested isPublic field
+          'publicSettings.isPublic': deleteField(),
           sharedAt: new Date().toISOString(),
         },
         { merge: true }
@@ -139,10 +144,13 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
       await setDoc(
         albumRef,
         {
-          isPublic: newPublicState,
+          isPublic: newPublicState, // Top-level field only
           publicSettings: {
             allowUpload: shareSettings.allowUpload,
+            expiresAt: shareSettings.expiresAt,
           },
+          // Clean up any old nested isPublic field
+          'publicSettings.isPublic': deleteField(),
         },
         { merge: true }
       )
