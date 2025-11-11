@@ -51,10 +51,10 @@ import { Home, FolderOpen, Plus, Search, Menu } from 'lucide-react'
  */
 function App() {
   return (
-    <ErrorBoundary>
-      <ToastProvider>
-        <SecurityProvider>
-          <BrowserRouter>
+    <BrowserRouter>
+      <ErrorBoundary>
+        <ToastProvider>
+          <SecurityProvider>
             <Routes>
               {/* Public route - no authentication required */}
               <Route path="/share/:slug" element={<PublicAlbumPage />} />
@@ -62,10 +62,10 @@ function App() {
               {/* All other routes - authenticated */}
               <Route path="*" element={<AppContent />} />
             </Routes>
-          </BrowserRouter>
-        </SecurityProvider>
-      </ToastProvider>
-    </ErrorBoundary>
+          </SecurityProvider>
+        </ToastProvider>
+      </ErrorBoundary>
+    </BrowserRouter>
   )
 }
 
