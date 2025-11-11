@@ -56,6 +56,16 @@ service cloud.firestore {
       }
     }
 
+        // ===== ALBUMS =====
+    match /albums/{albumId} {
+      // Alle kan lese hvis albumet er offentlig
+      allow read: if resource.data.isPublic == true;
+
+      // Eier eller admin kan lese/skrive alt
+      allow read, write, update, delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+
+
     // ===== DEFAULT DENY =====
     match /{document=**} {
       allow read, write: if false;
