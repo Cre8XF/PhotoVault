@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { usePublicAlbum } from '../features/qr-sharing/hooks/usePublicAlbum'
+import { trackPublicView } from '../features/qr-sharing/utils/analytics'
 import { ArrowLeft, Upload, Image as ImageIcon } from 'lucide-react'
 import PhotoModal from '../components/PhotoModal'
 import UploadModal from '../components/UploadModal'
@@ -11,6 +12,13 @@ const PublicAlbumPage = () => {
   const { album, photos, loading, error } = usePublicAlbum(slug)
   const [photoModal, setPhotoModal] = useState({ open: false, index: 0 })
   const [uploadOpen, setUploadOpen] = useState(false)
+
+  // Track analytics when album loads
+  useEffect(() => {
+    if (album && slug) {
+      trackPublicView(slug, document.referrer)
+    }
+  }, [album, slug])
 
   if (loading) {
     return (

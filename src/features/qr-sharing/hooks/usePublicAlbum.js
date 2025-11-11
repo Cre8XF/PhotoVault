@@ -7,6 +7,7 @@ import {
   getDocs,
   onSnapshot,
   orderBy,
+  doc,
 } from 'firebase/firestore'
 
 export const usePublicAlbum = (slug) => {
@@ -58,31 +59,111 @@ export const usePublicAlbum = (slug) => {
 
         setAlbum(albumData)
 
-        // 🔹 Hent bilder fra brukerens photos basert på albumId
-        const photosRef = collection(db, `users/${albumData.userId}/photos`)
-        const photosQuery = query(
-          photosRef,
-          where('albumId', '==', albumData.id),
-          orderBy('createdAt', 'desc')
-        )
-
-        // Lytt i sanntid
-        const unsubscribe = onSnapshot(photosQuery, (snapshot) => {
-          const photosData = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-          setPhotos(photosData)
+        // Verify userId exists
+        if (!albumData.userId) {
+          console.error('❌ [usePublicAlbum] Album has no userId field!')
+          setError('Albumdata mangler bruker-ID')
           setLoading(false)
           return
         }
+
+        // Set up real-time listener for album changes (deletion, privacy, expiry)
+        const albumDocRef = doc(db, 'albums', albumDoc.id)
+        const unsubscribeAlbum = onSnapshot(
+          albumDocRef,
+          (snapshot) => {
+            if (!snapshot.exists()) {
+              console.log('❌ [usePublicAlbum] Album deleted')
+              setError('Dette albumet eksisterer ikke lenger')
+              setAlbum(null)
+              setPhotos([])
+              return
+            }
+
+            const updatedAlbumData = { id: snapshot.id, ...snapshot.data() }
+
+            // Check if album is still public
+            if (!updatedAlbumData.isPublic) {
+              console.log('❌ [usePublicAlbum] Album made private')
+              setError('Eieren har gjort dette albumet privat')
+              setAlbum(null)
+              setPhotos([])
+              return
+            }
+
+            // Check expiry date
+            if (updatedAlbumData.publicSettings?.expiresAt) {
+              const expiryDate = new Date(updatedAlbumData.publicSettings.expiresAt)
+              if (expiryDate < new Date()) {
+                console.log('❌ [usePublicAlbum] Album expired')
+                setError('Denne delingslenken har utløpt')
+                setAlbum(null)
+                setPhotos([])
+                return
+              }
+            }
+
+            // Update album data if still valid
+            setAlbum(updatedAlbumData)
+          },
+          (error) => {
+            console.error('❌ [usePublicAlbum] Album snapshot error:', error)
+          }
+        )
 
         // Hent bilder fra brukerens photos basert på albumId
         const photosPath = `users/${albumData.userId}/photos`
         console.log('🔍 [usePublicAlbum] Querying photos at path:', photosPath)
         console.log('🔍 [usePublicAlbum] Filter: albumId ==', albumData.id)
 
-        return () => unsubscribe()
+        const photosRef = collection(db, photosPath)
+        const photosQuery = query(
+          photosRef,
+          where('albumId', '==', albumData.id),
+          orderBy('createdAt', 'desc')
+        )
+
+        // Lytt i sanntid for photos
+        const unsubscribePhotos = onSnapshot(
+          photosQuery,
+          (snapshot) => {
+            console.log('✅ [usePublicAlbum] Query returned', snapshot.docs.length, 'photos')
+
+            const photosData = snapshot.docs.map((doc) => {
+              const data = doc.data()
+              console.log('📷 [usePublicAlbum] Photo:', {
+                id: doc.id,
+                albumId: data.albumId,
+                userId: data.userId,
+                hasUrl: !!data.url,
+                createdAt: data.createdAt
+              })
+              return { id: doc.id, ...data }
+            })
+
+            console.log('✅ [usePublicAlbum] Setting', photosData.length, 'photos in state')
+            setPhotos(photosData)
+            setLoading(false)
+          },
+          (error) => {
+            console.error('❌ [usePublicAlbum] Snapshot error:', error)
+            console.error('Error code:', error.code)
+            console.error('Error message:', error.message)
+
+            if (error.code === 'permission-denied') {
+              setError('Ingen tilgang til bilder. Sjekk Firestore-regler.')
+            } else {
+              setError('Kunne ikke laste bilder: ' + error.message)
+            }
+            setLoading(false)
+          }
+        )
+
+        return () => {
+          console.log('🔍 [usePublicAlbum] Cleaning up snapshot listeners')
+          unsubscribeAlbum()
+          unsubscribePhotos()
+        }
       } catch (err) {
         console.error('❌ [usePublicAlbum] Fetch error:', err)
         console.error('Error code:', err.code)
