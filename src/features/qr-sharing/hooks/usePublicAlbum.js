@@ -7,6 +7,7 @@ import {
   getDocs,
   onSnapshot,
   orderBy,
+  doc,
 } from 'firebase/firestore'
 
 export const usePublicAlbum = (slug) => {

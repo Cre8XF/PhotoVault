@@ -8,6 +8,12 @@ import {
 } from '../utils/generatePublicSlug'
 import { doc, setDoc, getFirestore, deleteField } from 'firebase/firestore'
 import useAuth from '../../../hooks/useAuth'
+import {
+  trackQRGenerated,
+  trackQRDownload,
+  trackLinkCopied,
+  trackSharingToggled,
+} from '../utils/analytics'
 
 
 const QRShareModal = ({ isOpen, onClose, album }) => {
@@ -79,6 +85,9 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
 
       console.log('✅ Successfully saved to Firestore')
       setPublicUrl(url)
+
+      // Track analytics
+      trackQRGenerated(album.id, user.uid)
     } catch (error) {
       console.error('❌ Error generating slug:', error)
       alert('Kunne ikke generere delingslenke: ' + error.message)
@@ -88,6 +97,9 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
   }
 
   const handleDownloadQR = () => {
+    // Track analytics
+    trackQRDownload(album.id, album.name)
+
     // Konverter SVG til PNG og last ned
     const svg = document.querySelector('#qr-code-svg')
     const canvas = document.createElement('canvas')
@@ -119,6 +131,10 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(publicUrl)
+
+      // Track analytics
+      trackLinkCopied(album.id, publicUrl)
+
       return true
     } catch (error) {
       console.error('Copy failed:', error)
@@ -163,6 +179,9 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
       console.log('✅ Successfully toggled public state')
 
       setShareSettings((prev) => ({ ...prev, isPublic: newPublicState }))
+
+      // Track analytics
+      trackSharingToggled(album.id, newPublicState)
     } catch (error) {
       console.error('❌ Error toggling public:', error)
       alert('Kunne ikke oppdatere innstillinger: ' + error.message)
@@ -268,6 +287,30 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
               <div className="w-full h-full bg-gray-600 rounded-full peer-checked:bg-green-600 transition peer-disabled:opacity-50"></div>
               <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition peer-checked:translate-x-6"></div>
             </label>
+          </div>
+
+          {/* Expiry date */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Calendar className="w-5 h-5 text-orange-400" />
+              <div>
+                <p className="font-medium">Utløpsdato</p>
+                <p className="text-sm opacity-70">Automatisk deaktivering</p>
+              </div>
+            </div>
+            <input
+              type="date"
+              min={new Date().toISOString().split('T')[0]}
+              value={shareSettings.expiresAt || ''}
+              onChange={(e) =>
+                setShareSettings((prev) => ({
+                  ...prev,
+                  expiresAt: e.target.value,
+                }))
+              }
+              disabled={!shareSettings.isPublic || loading}
+              className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50"
+            />
           </div>
         </div>
 
