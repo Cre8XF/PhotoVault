@@ -6,8 +6,9 @@ import {
   generatePublicSlug,
   getPublicAlbumUrl,
 } from '../utils/generatePublicSlug'
-import { doc, setDoc, getFirestore } from 'firebase/firestore'
+import { doc, setDoc, getFirestore, deleteField } from 'firebase/firestore'
 import useAuth from '../../../hooks/useAuth'
+
 
 const QRShareModal = ({ isOpen, onClose, album }) => {
   const { t } = useTranslation()
@@ -59,19 +60,22 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
 
       console.log('📝 Saving to Firestore path:', `albums/${album.id}`)
 
-      await setDoc(
-        albumRef,
-        {
-          publicSlug: slug,
-          isPublic: true,
-          sharedAt: new Date().toISOString(),
-          publicSettings: {
-            allowUpload: shareSettings.allowUpload,
-            expiresAt: shareSettings.expiresAt,
-          },
-        },
-        { merge: true }
-      )
+     await setDoc(
+  albumRef,
+  {
+    publicSlug: slug,
+    isPublic: true,
+    sharedAt: new Date().toISOString(),
+    publicSettings: {
+      allowUpload: shareSettings.allowUpload,
+      expiresAt: shareSettings.expiresAt,
+    },
+    // rydder bort gammel struktur
+    'publicSettings.isPublic': deleteField(),
+  },
+  { merge: true }
+)
+
 
       console.log('✅ Successfully saved to Firestore')
       setPublicUrl(url)
@@ -145,10 +149,13 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
       await setDoc(
         albumRef,
         {
-          isPublic: newPublicState,
+          isPublic: newPublicState, // Top-level field only
           publicSettings: {
             allowUpload: shareSettings.allowUpload,
+            expiresAt: shareSettings.expiresAt,
           },
+          // Clean up any old nested isPublic field
+          'publicSettings.isPublic': deleteField(),
         },
         { merge: true }
       )
