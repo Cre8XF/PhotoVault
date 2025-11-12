@@ -382,8 +382,28 @@ export async function uploadPhoto(
   videoMetadata = null
 ) {
   try {
-    // Determine if this is a video
-    const isVideo = file.type && file.type.startsWith('video/')
+    // Validate inputs
+    if (!userId) {
+      console.error('❌ uploadPhoto: No userId provided')
+      throw new Error('No user ID provided to uploadPhoto')
+    }
+
+    if (!file) {
+      console.error('❌ uploadPhoto: No file provided')
+      throw new Error('No file provided to uploadPhoto')
+    }
+
+    // Log file details for debugging
+    console.log('📄 uploadPhoto received file:', {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      hasType: !!file.type
+    })
+
+    // Determine if this is a video (with fallback)
+    const fileType = file.type || 'image/png' // Fallback to image/png if type is missing
+    const isVideo = fileType.startsWith('video/')
 
     // 1. Upload thumbnail to Storage (if provided for video)
     let thumbnailUrl = null
@@ -411,7 +431,7 @@ export async function uploadPhoto(
     const storagePath = `users/${userId}/${folderPath}/${timestamp}_${safeName}`
     const storageRef = ref(storage, storagePath)
 
-    await uploadBytes(storageRef, file, { contentType: file.type })
+    await uploadBytes(storageRef, file, { contentType: fileType })
     const downloadURL = await getDownloadURL(storageRef)
 
     console.log(
@@ -426,7 +446,7 @@ export async function uploadPhoto(
       albumId: albumId,
       storagePath: storagePath,
       size: file.size,
-      type: isVideo ? 'video' : file.type, // Use string "video" for videos, not MIME type
+      type: isVideo ? 'video' : fileType, // Use string "video" for videos, not MIME type
       favorite: false,
 
       // Video-specific fields

@@ -346,8 +346,13 @@ const AlbumPage = ({
         throw new Error('File object missing type property')
       }
 
-      // Use the existing upload handler
-      await handleUpload([file], album.id, false)
+      // CRITICAL FIX: handleUpload expects array of objects with .file property
+      // Not just raw File objects
+      await handleUpload([{
+        file: file,
+        thumbnail: null,
+        metadata: metadata
+      }], album.id, false)
 
       console.log('✅ Upload complete, refreshing data...')
 
