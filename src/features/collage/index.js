@@ -1,5 +1,5 @@
 /**
- * Collage Maker Feature - Phase 1: Canvas Engine & Layouts
+ * Collage Maker Feature - Phase 1 & 2: Canvas Engine, Layouts, Text & Stickers
  *
  * Main exports for the collage maker feature module
  */
@@ -10,6 +10,8 @@ export { default as CollageBuilder } from './components/CollageBuilder'
 // Sub-components
 export { default as LayoutSelector } from './components/LayoutSelector'
 export { default as PhotoSelector } from './components/PhotoSelector'
+export { default as TextToolPanel } from './components/TextToolPanel'
+export { default as StickerPanel } from './components/StickerPanel'
 
 // Layouts
 export {
@@ -44,3 +46,25 @@ export {
   drawImageContain,
   createThumbnail
 } from './utils/imageLoader'
+
+// Phase 2: Text Utilities
+export {
+  drawText,
+  drawMultilineText,
+  measureText,
+  wrapText,
+  FONT_FAMILIES,
+  FONT_WEIGHTS,
+  TEXT_COLORS
+} from './utils/textUtils'
+
+// Phase 2: Sticker Utilities
+export {
+  STICKERS,
+  getStickerCategories,
+  getStickersByCategory,
+  drawSticker,
+  drawStickerRotated,
+  getStickerBounds,
+  STICKER_SIZES
+} from './utils/stickers'
