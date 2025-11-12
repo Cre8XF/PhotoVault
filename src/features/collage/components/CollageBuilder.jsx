@@ -54,6 +54,8 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
     try {
       setSaving(true)
       console.log('💾 Saving collage...')
+      console.log('📊 Layout:', selectedLayout.name)
+      console.log('📷 Photos:', selectedPhotos.length)
 
       // Export as blob
       const blob = await exportCollageBlob('png', 0.95)
@@ -61,6 +63,8 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
       if (!blob) {
         throw new Error('Failed to export collage')
       }
+
+      console.log('📦 Blob created:', blob.size, 'bytes', blob.type)
 
       // Call parent save handler
       await onSave(blob, {
@@ -70,11 +74,14 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
       })
 
       console.log('✅ Collage saved successfully')
-      onClose()
+
+      // Small delay so user sees success notification
+      setTimeout(() => {
+        onClose()
+      }, 500)
     } catch (err) {
       console.error('❌ Error saving collage:', err)
       alert('Kunne ikke lagre kollasjen. Prøv igjen.')
-    } finally {
       setSaving(false)
     }
   }
@@ -82,6 +89,11 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
   const handleDownload = () => {
     const filename = `kollasj_${Date.now()}.png`
     downloadCollage(filename, 'png', 0.95)
+  }
+
+  const handleChangePhotos = () => {
+    console.log('🔄 Going back to photo selection')
+    setStep(2)
   }
 
   const canSave = selectedLayout && selectedPhotos.length > 0 && !loading && !saving
@@ -168,11 +180,12 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
           {step === 3 && selectedLayout && (
             <div>
               <button
-                onClick={() => setStep(2)}
-                className="flex items-center gap-2 text-sm opacity-70 hover:opacity-100 transition mb-4"
+                onClick={handleChangePhotos}
+                disabled={saving}
+                className="w-full mb-4 px-4 py-3 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/50 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <ArrowLeft className="w-4 h-4" />
-                Endre bilder
+                <ArrowLeft className="w-5 h-5" />
+                <span className="font-medium">Endre bilder</span>
               </button>
 
               <div className="glass-card p-4 rounded-xl border border-white/10 mb-4">
@@ -224,6 +237,17 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
                   <div className="text-center">
                     <Loader className="w-12 h-12 animate-spin mx-auto mb-3 text-purple-400" />
                     <p className="text-sm">Laster bilder...</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Saving overlay */}
+              {saving && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/70 rounded-lg z-10">
+                  <div className="text-center glass-card p-6 rounded-xl">
+                    <Loader className="w-16 h-16 animate-spin mx-auto mb-4 text-purple-400" />
+                    <h3 className="font-bold text-lg mb-2">Lagrer kollasj...</h3>
+                    <p className="text-sm opacity-70">Laster opp til Firebase Storage</p>
                   </div>
                 </div>
               )}

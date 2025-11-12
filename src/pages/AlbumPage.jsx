@@ -333,22 +333,33 @@ const AlbumPage = ({
   // Save collage as a new photo in the album
   const handleSaveCollage = async (blob, metadata) => {
     try {
-      console.log('💾 Saving collage to album...')
+      console.log('💾 Saving collage to album...', metadata)
 
       // Create file from blob
       const file = new File([blob], `collage_${Date.now()}.png`, {
-        type: 'image/png'
+        type: 'image/png',
+        lastModified: Date.now()
       })
+
+      console.log('📄 Created file from blob:', file.name, file.size, 'bytes')
 
       // Use the existing upload handler
       await handleUpload([file], album.id, false)
 
+      console.log('✅ Upload complete, refreshing data...')
+
+      // Refresh data to show the new collage
+      if (refreshData) {
+        await refreshData()
+      }
+
+      // Show success notification
       setNotification({
         message: 'Kollasj lagret! 🎨',
         type: 'success',
       })
 
-      console.log('✅ Collage saved successfully')
+      console.log('✅ Collage saved and data refreshed')
     } catch (error) {
       console.error('❌ Error saving collage:', error)
       setNotification({
