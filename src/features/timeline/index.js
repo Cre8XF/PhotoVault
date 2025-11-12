@@ -1,5 +1,5 @@
 /**
- * Timeline Feature - Phase 1 & 2: Date Grouping Logic & Timeline UI
+ * Timeline Feature - Phase 1, 2 & 3: Date Grouping, Timeline UI & On This Day Widget
  *
  * Main exports for the timeline feature module
  */
@@ -10,6 +10,7 @@ export { default as TimelineView } from './components/TimelineView'
 // Sub-components
 export { default as DateSection } from './components/DateSection'
 export { default as TimelineNavigation } from './components/TimelineNavigation'
+export { default as OnThisDayWidget } from './components/OnThisDayWidget'
 
 // Date Grouping Utilities
 export {
@@ -23,8 +24,5 @@ export {
   getAvailableMonthsForYear
 } from './utils/dateGrouping'
 
-// Phase 3 components (On This Day Widget)
-// export { default as OnThisDayWidget } from './components/OnThisDayWidget'
-
-// Hooks
+// Hooks (Phase 4)
 // export { useTimeline } from './hooks/useTimeline'

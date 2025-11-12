@@ -1,5 +1,5 @@
 /**
- * Timeline Feature - Phase 2: Timeline UI
+ * Timeline Feature - Phase 2 & 3: Timeline UI with "On This Day" Widget
  *
  * TimelineView Component - Main timeline view with date grouping
  */
@@ -8,6 +8,7 @@ import React, { useMemo, useState } from 'react'
 import { groupPhotosByDate, groupPhotosByMonth, groupPhotosByYear } from '../utils/dateGrouping'
 import DateSection from './DateSection'
 import TimelineNavigation from './TimelineNavigation'
+import OnThisDayWidget from './OnThisDayWidget'
 
 const TimelineView = ({ photos, onPhotoClick }) => {
   const [groupBy, setGroupBy] = useState('day') // 'day' | 'month' | 'year'
@@ -52,17 +53,25 @@ const TimelineView = ({ photos, onPhotoClick }) => {
             </p>
           </div>
         ) : (
-          // Timeline sections
-          <div className="space-y-8">
-            {groups.map((group, index) => (
-              <DateSection
-                key={group.dateKey || index}
-                date={group.displayDate}
-                photos={group.photos}
-                onPhotoClick={onPhotoClick}
-              />
-            ))}
-          </div>
+          <>
+            {/* On This Day Widget */}
+            <OnThisDayWidget
+              photos={photos}
+              onPhotoClick={onPhotoClick}
+            />
+
+            {/* Timeline sections */}
+            <div className="space-y-8">
+              {groups.map((group, index) => (
+                <DateSection
+                  key={group.dateKey || index}
+                  date={group.displayDate}
+                  photos={group.photos}
+                  onPhotoClick={onPhotoClick}
+                />
+              ))}
+            </div>
+          </>
         )}
 
         {/* Stats Footer */}
