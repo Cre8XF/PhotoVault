@@ -1,17 +1,20 @@
 /**
- * Timeline Feature - Phase 2 & 3: Timeline UI with "On This Day" Widget
+ * Timeline Feature - Phase 2, 3 & 4: Timeline UI with Navigation
  *
- * TimelineView Component - Main timeline view with date grouping
+ * TimelineView Component - Main timeline view with date grouping and jump-to-date
  */
 
-import React, { useMemo, useState } from 'react'
-import { groupPhotosByDate, groupPhotosByMonth, groupPhotosByYear } from '../utils/dateGrouping'
+import React, { useMemo, useState, useRef, useCallback } from 'react'
+import { groupPhotosByDate, groupPhotosByMonth, groupPhotosByYear, getAvailableYears } from '../utils/dateGrouping'
 import DateSection from './DateSection'
 import TimelineNavigation from './TimelineNavigation'
 import OnThisDayWidget from './OnThisDayWidget'
+import JumpToDatePicker from './JumpToDatePicker'
 
 const TimelineView = ({ photos, onPhotoClick }) => {
   const [groupBy, setGroupBy] = useState('day') // 'day' | 'month' | 'year'
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const sectionRefs = useRef({})
 
   // Group photos based on selected view
   const groups = useMemo(() => {
@@ -31,6 +34,61 @@ const TimelineView = ({ photos, onPhotoClick }) => {
   }, [photos, groupBy])
 
   console.log(`✅ Timeline: Created ${groups.length} ${groupBy} groups`)
+
+  // Get available years for date picker
+  const availableYears = useMemo(() => {
+    return getAvailableYears(photos || [])
+  }, [photos])
+
+  // Handle jump to date
+  const handleJumpToDate = useCallback((selectedDate) => {
+    console.log('🎯 Jumping to date:', selectedDate)
+
+    // Find the closest group to scroll to
+    let targetKey = null
+
+    if (groupBy === 'day') {
+      // Format as YYYY-MM-DD
+      const year = selectedDate.getFullYear()
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0')
+      const day = String(selectedDate.getDate()).padStart(2, '0')
+      targetKey = `${year}-${month}-${day}`
+    } else if (groupBy === 'month') {
+      // Format as YYYY-MM
+      const year = selectedDate.getFullYear()
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0')
+      targetKey = `${year}-${month}`
+    } else {
+      // Year view
+      targetKey = String(selectedDate.getFullYear())
+    }
+
+    console.log('🔍 Looking for section with key:', targetKey)
+
+    // Try exact match first
+    if (sectionRefs.current[targetKey]) {
+      console.log('✅ Found exact match, scrolling...')
+      sectionRefs.current[targetKey].scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      })
+      return
+    }
+
+    // If no exact match, find closest earlier date
+    const sortedKeys = Object.keys(sectionRefs.current).sort().reverse()
+    const closestKey = sortedKeys.find(key => key <= targetKey)
+
+    if (closestKey && sectionRefs.current[closestKey]) {
+      console.log('✅ Found closest match:', closestKey, '- scrolling...')
+      sectionRefs.current[closestKey].scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      })
+    } else {
+      console.warn('⚠️ No matching section found for:', targetKey)
+    }
+  }, [groupBy])
 
   return (
     <div className="timeline-view min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
@@ -60,15 +118,29 @@ const TimelineView = ({ photos, onPhotoClick }) => {
               onPhotoClick={onPhotoClick}
             />
 
+            {/* Jump to Date Picker */}
+            <JumpToDatePicker
+              onDateSelect={handleJumpToDate}
+              availableYears={availableYears}
+            />
+
             {/* Timeline sections */}
             <div className="space-y-8">
               {groups.map((group, index) => (
-                <DateSection
+                <div
                   key={group.dateKey || index}
-                  date={group.displayDate}
-                  photos={group.photos}
-                  onPhotoClick={onPhotoClick}
-                />
+                  ref={(el) => {
+                    if (el && group.dateKey) {
+                      sectionRefs.current[group.dateKey] = el
+                    }
+                  }}
+                >
+                  <DateSection
+                    date={group.displayDate}
+                    photos={group.photos}
+                    onPhotoClick={onPhotoClick}
+                  />
+                </div>
               ))}
             </div>
           </>
