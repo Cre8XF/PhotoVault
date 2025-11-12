@@ -337,7 +337,7 @@ const AlbumPage = ({
       console.log('📄 File received:', {
         name: file.name,
         size: file.size,
-        type: file.type
+        type: file.type,
       })
 
       // Verify file has type property (should be set by CollageBuilder)
@@ -348,17 +348,23 @@ const AlbumPage = ({
 
       // CRITICAL FIX: handleUpload expects array of objects with .file property
       // Not just raw File objects
-      await handleUpload([{
-        file: file,
-        thumbnail: null,
-        metadata: metadata
-      }], album.id, false)
+      await handleUpload(
+        [
+          {
+            file: file,
+            thumbnail: null,
+            metadata: metadata,
+          },
+        ],
+        album.id,
+        false
+      )
 
       console.log('✅ Upload complete, refreshing data...')
 
       // Refresh data to show the new collage
-      if (refreshData) {
-        await refreshData()
+      if (refreshData && user?.uid) {
+        await refreshData(user.uid)
       }
 
       // Show success notification
@@ -433,7 +439,9 @@ const AlbumPage = ({
             onClick={() => setCollageOpen(true)}
             disabled={albumPhotos.length < 2}
             className="ripple-effect px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            title={albumPhotos.length < 2 ? 'Trenger minst 2 bilder' : 'Lag kollasj'}
+            title={
+              albumPhotos.length < 2 ? 'Trenger minst 2 bilder' : 'Lag kollasj'
+            }
           >
             <Layout size={18} />
             <span className="hidden sm:inline">Lag kollasj</span>
