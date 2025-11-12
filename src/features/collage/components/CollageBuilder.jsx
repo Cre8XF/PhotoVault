@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { X, Download, ArrowLeft, Loader, Image as ImageIcon } from 'lucide-react'
+import { X, Download, ArrowLeft, Loader, Image as ImageIcon, Type, Smile } from 'lucide-react'
 import { getAllLayouts } from '../layouts/gridLayouts'
 import { useCollageCanvas } from '../hooks/useCollageCanvas'
 import LayoutSelector from './LayoutSelector'
 import PhotoSelector from './PhotoSelector'
+import TextToolPanel from './TextToolPanel'
+import StickerPanel from './StickerPanel'
 
 /**
  * Main collage builder component - full-screen editor
