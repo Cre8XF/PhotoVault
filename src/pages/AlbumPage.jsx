@@ -334,14 +334,31 @@ const AlbumPage = ({
   const handleSaveCollage = async (blob, metadata) => {
     try {
       console.log('💾 Saving collage to album...', metadata)
+      console.log('📦 Blob info:', {
+        size: blob.size,
+        type: blob.type
+      })
 
-      // Create file from blob
-      const file = new File([blob], `collage_${Date.now()}.png`, {
+      // Create file from blob with explicit type
+      const filename = `collage_${Date.now()}.png`
+      const file = new File([blob], filename, {
         type: 'image/png',
         lastModified: Date.now()
       })
 
-      console.log('📄 Created file from blob:', file.name, file.size, 'bytes')
+      // Verify file was created correctly
+      console.log('📄 Created file from blob:', {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified
+      })
+
+      // Ensure file has type property
+      if (!file.type) {
+        console.error('❌ File type is missing! Blob type:', blob.type)
+        throw new Error('File object missing type property')
+      }
 
       // Use the existing upload handler
       await handleUpload([file], album.id, false)
