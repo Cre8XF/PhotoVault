@@ -331,32 +331,18 @@ const AlbumPage = ({
   }
 
   // Save collage as a new photo in the album
-  const handleSaveCollage = async (blob, metadata) => {
+  const handleSaveCollage = async (file, metadata) => {
     try {
       console.log('💾 Saving collage to album...', metadata)
-      console.log('📦 Blob info:', {
-        size: blob.size,
-        type: blob.type
-      })
-
-      // Create file from blob with explicit type
-      const filename = `collage_${Date.now()}.png`
-      const file = new File([blob], filename, {
-        type: 'image/png',
-        lastModified: Date.now()
-      })
-
-      // Verify file was created correctly
-      console.log('📄 Created file from blob:', {
+      console.log('📄 File received:', {
         name: file.name,
         size: file.size,
-        type: file.type,
-        lastModified: file.lastModified
+        type: file.type
       })
 
-      // Ensure file has type property
+      // Verify file has type property (should be set by CollageBuilder)
       if (!file.type) {
-        console.error('❌ File type is missing! Blob type:', blob.type)
+        console.error('❌ File type is missing!')
         throw new Error('File object missing type property')
       }
 
