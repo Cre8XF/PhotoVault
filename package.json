@@ -19,6 +19,7 @@
     "@ffmpeg/util": "^0.12.2",
     "browser-image-compression": "^2.0.2",
     "capacitor-native-biometric": "^4.2.2",
+    "date-fns": "^4.1.0",
     "firebase": "^11.0.0",
     "i18next": "^22.4.9",
     "i18next-browser-languagedetector": "^8.2.0",
