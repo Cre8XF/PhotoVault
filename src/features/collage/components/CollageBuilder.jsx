@@ -14,7 +14,6 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
   const [selectedLayout, setSelectedLayout] = useState(null)
   const [selectedPhotos, setSelectedPhotos] = useState([])
   const [saving, setSaving] = useState(false)
-  const [manualNavigation, setManualNavigation] = useState(false)
 
   const layouts = getAllLayouts()
 
@@ -31,20 +30,14 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
     showPlaceholders: true
   })
 
-  // Auto-advance to preview when photos are selected (but not when user manually goes back)
+  // Auto-advance to preview when photos are selected
+  // Only auto-advance if we're at step 2 and just completed photo selection
   useEffect(() => {
-    if (selectedLayout && selectedPhotos.length === selectedLayout.slots && step === 2 && !manualNavigation) {
+    if (selectedLayout && selectedPhotos.length === selectedLayout.slots && step === 2) {
       console.log('🚀 Auto-advancing to preview (all photos selected)')
       setStep(3)
     }
-    // Reset manual navigation flag after a short delay
-    if (manualNavigation) {
-      const timer = setTimeout(() => {
-        setManualNavigation(false)
-      }, 200)
-      return () => clearTimeout(timer)
-    }
-  }, [selectedPhotos, selectedLayout, step, manualNavigation])
+  }, [selectedPhotos.length, selectedLayout?.slots, step])
 
   const handleLayoutSelect = (layout) => {
     setSelectedLayout(layout)
@@ -75,8 +68,27 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
 
       console.log('📦 Blob created:', blob.size, 'bytes', blob.type)
 
-      // Call parent save handler
-      await onSave(blob, {
+      // Convert Blob to File (THIS IS THE FIX - uploadPhoto expects File, not Blob)
+      const filename = `collage_${Date.now()}.png`
+      const file = new File([blob], filename, {
+        type: 'image/png',
+        lastModified: Date.now()
+      })
+
+      console.log('📄 File created:', {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified
+      })
+
+      // Verify file has type property (required by uploadPhoto)
+      if (!file.type) {
+        throw new Error('File object missing type property')
+      }
+
+      // Call parent save handler with File object
+      await onSave(file, {
         layout: selectedLayout.name,
         photoCount: selectedPhotos.length,
         type: 'collage'
@@ -101,8 +113,10 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
   }
 
   const handleChangePhotos = () => {
-    console.log('🔄 Going back to photo selection (manual navigation)')
-    setManualNavigation(true)
+    console.log('🔄 Going back to photo selection')
+    // Clear selected photos to force user to reselect
+    // This prevents auto-advance flicker
+    setSelectedPhotos([])
     setStep(2)
   }
 
