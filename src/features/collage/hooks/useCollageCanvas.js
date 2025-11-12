@@ -120,7 +120,18 @@ export const useCollageCanvas = (layout, photos = [], options = {}) => {
     const mimeType = format === 'jpg' || format === 'jpeg' ? 'image/jpeg' : 'image/png'
     const blob = await canvasToBlob(canvasRef.current, mimeType, quality)
 
-    console.log('📤 Collage exported as blob')
+    console.log('📤 Collage exported as blob:', {
+      size: blob?.size,
+      type: blob?.type,
+      mimeType: mimeType
+    })
+
+    // Verify blob has correct type
+    if (!blob || !blob.type) {
+      console.error('❌ Blob missing type property!')
+      return null
+    }
+
     return blob
   }, [])
 

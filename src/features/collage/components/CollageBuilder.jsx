@@ -14,6 +14,7 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
   const [selectedLayout, setSelectedLayout] = useState(null)
   const [selectedPhotos, setSelectedPhotos] = useState([])
   const [saving, setSaving] = useState(false)
+  const [manualNavigation, setManualNavigation] = useState(false)
 
   const layouts = getAllLayouts()
 
@@ -30,12 +31,20 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
     showPlaceholders: true
   })
 
-  // Auto-advance to preview when photos are selected
+  // Auto-advance to preview when photos are selected (but not when user manually goes back)
   useEffect(() => {
-    if (selectedLayout && selectedPhotos.length === selectedLayout.slots && step === 2) {
+    if (selectedLayout && selectedPhotos.length === selectedLayout.slots && step === 2 && !manualNavigation) {
+      console.log('🚀 Auto-advancing to preview (all photos selected)')
       setStep(3)
     }
-  }, [selectedPhotos, selectedLayout, step])
+    // Reset manual navigation flag after a short delay
+    if (manualNavigation) {
+      const timer = setTimeout(() => {
+        setManualNavigation(false)
+      }, 200)
+      return () => clearTimeout(timer)
+    }
+  }, [selectedPhotos, selectedLayout, step, manualNavigation])
 
   const handleLayoutSelect = (layout) => {
     setSelectedLayout(layout)
@@ -92,7 +101,8 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
   }
 
   const handleChangePhotos = () => {
-    console.log('🔄 Going back to photo selection')
+    console.log('🔄 Going back to photo selection (manual navigation)')
+    setManualNavigation(true)
     setStep(2)
   }
 
