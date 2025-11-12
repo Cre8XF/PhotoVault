@@ -2,14 +2,18 @@ import { useRef, useEffect, useState, useCallback } from 'react'
 import { loadImage } from '../utils/imageLoader'
 import { clearCanvas, drawPlaceholder, canvasToDataURL, canvasToBlob } from '../utils/canvasUtils'
 import { drawImageCover } from '../utils/imageLoader'
+import { drawText } from '../utils/textUtils'
+import { drawSticker } from '../utils/stickers'
 
 /**
  * Custom hook for managing collage canvas operations
  * @param {Object} layout - Layout definition with canvas dimensions and positions
  * @param {Array} photos - Array of photo objects with url property
+ * @param {Array} textLayers - Array of text layer objects
+ * @param {Array} stickerLayers - Array of sticker layer objects
  * @param {Object} options - Additional options (backgroundColor, spacing, etc.)
  */
-export const useCollageCanvas = (layout, photos = [], options = {}) => {
+export const useCollageCanvas = (layout, photos = [], textLayers = [], stickerLayers = [], options = {}) => {
   const canvasRef = useRef(null)
   const [ctx, setCtx] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -80,6 +84,37 @@ export const useCollageCanvas = (layout, photos = [], options = {}) => {
         }
       }
 
+      // Draw stickers (layer above photos, below text)
+      if (stickerLayers && stickerLayers.length > 0) {
+        console.log('🎨 Drawing', stickerLayers.length, 'stickers')
+        stickerLayers.forEach((sticker) => {
+          try {
+            drawSticker(ctx, sticker.emoji, sticker.x, sticker.y, sticker.size)
+          } catch (stickerError) {
+            console.error('❌ Failed to draw sticker:', stickerError)
+          }
+        })
+      }
+
+      // Draw text layers (top layer, above everything)
+      if (textLayers && textLayers.length > 0) {
+        console.log('🎨 Drawing', textLayers.length, 'text layers')
+        textLayers.forEach((textLayer) => {
+          try {
+            drawText(ctx, textLayer.text, textLayer.x, textLayer.y, {
+              fontSize: textLayer.fontSize,
+              fontFamily: textLayer.fontFamily,
+              fontWeight: textLayer.fontWeight,
+              color: textLayer.color,
+              shadow: textLayer.shadow,
+              stroke: textLayer.stroke
+            })
+          } catch (textError) {
+            console.error('❌ Failed to draw text:', textError)
+          }
+        })
+      }
+
       console.log('✅ Collage drawing complete')
       setLoading(false)
     } catch (err) {
@@ -87,14 +122,14 @@ export const useCollageCanvas = (layout, photos = [], options = {}) => {
       setError(err.message)
       setLoading(false)
     }
-  }, [ctx, layout, photos, isReady, backgroundColor, spacing, showPlaceholders])
+  }, [ctx, layout, photos, textLayers, stickerLayers, isReady, backgroundColor, spacing, showPlaceholders])
 
   // Auto-draw when dependencies change
   useEffect(() => {
     if (isReady && layout && ctx) {
       drawCollage()
     }
-  }, [isReady, layout, photos, drawCollage, ctx])
+  }, [isReady, layout, photos, textLayers, stickerLayers, drawCollage, ctx])
 
   // Export collage as data URL
   const exportCollage = useCallback((format = 'png', quality = 0.95) => {

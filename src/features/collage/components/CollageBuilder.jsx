@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { X, Download, ArrowLeft, Loader, Image as ImageIcon } from 'lucide-react'
+import { X, Download, ArrowLeft, Loader, Image as ImageIcon, Type, Smile } from 'lucide-react'
 import { getAllLayouts } from '../layouts/gridLayouts'
 import { useCollageCanvas } from '../hooks/useCollageCanvas'
 import LayoutSelector from './LayoutSelector'
 import PhotoSelector from './PhotoSelector'
+import TextToolPanel from './TextToolPanel'
+import StickerPanel from './StickerPanel'
 
 /**
  * Main collage builder component - full-screen editor
@@ -15,16 +17,21 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
   const [selectedPhotos, setSelectedPhotos] = useState([])
   const [saving, setSaving] = useState(false)
 
+  // Phase 2: Text and Sticker layers
+  const [textLayers, setTextLayers] = useState([])
+  const [stickerLayers, setStickerLayers] = useState([])
+  const [activeTab, setActiveTab] = useState('edit') // 'edit', 'text', 'stickers'
+
   const layouts = getAllLayouts()
 
-  // Initialize canvas hook
+  // Initialize canvas hook with text and sticker layers
   const {
     canvasRef,
     exportCollageBlob,
     downloadCollage,
     loading,
     error
-  } = useCollageCanvas(selectedLayout, selectedPhotos, {
+  } = useCollageCanvas(selectedLayout, selectedPhotos, textLayers, stickerLayers, {
     backgroundColor: '#ffffff',
     spacing: 0,
     showPlaceholders: true
@@ -120,6 +127,34 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
     setStep(2)
   }
 
+  // Phase 2: Text layer handlers
+  const handleAddText = (textData) => {
+    setTextLayers([...textLayers, textData])
+    console.log('✅ Text layer added:', textData)
+  }
+
+  const handleUpdateText = (id, updates) => {
+    setTextLayers(textLayers.map(layer =>
+      layer.id === id ? { ...layer, ...updates } : layer
+    ))
+  }
+
+  const handleDeleteText = (id) => {
+    setTextLayers(textLayers.filter(layer => layer.id !== id))
+    console.log('🗑️ Text layer deleted:', id)
+  }
+
+  // Phase 2: Sticker layer handlers
+  const handleAddSticker = (stickerData) => {
+    setStickerLayers([...stickerLayers, stickerData])
+    console.log('✅ Sticker added:', stickerData)
+  }
+
+  const handleDeleteSticker = (id) => {
+    setStickerLayers(stickerLayers.filter(layer => layer.id !== id))
+    console.log('🗑️ Sticker deleted:', id)
+  }
+
   const canSave = selectedLayout && selectedPhotos.length > 0 && !loading && !saving
 
   return (
@@ -203,32 +238,92 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
 
           {step === 3 && selectedLayout && (
             <div>
-              <button
-                onClick={handleChangePhotos}
-                disabled={saving}
-                className="w-full mb-4 px-4 py-3 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/50 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                <span className="font-medium">Endre bilder</span>
-              </button>
-
-              <div className="glass-card p-4 rounded-xl border border-white/10 mb-4">
-                <h3 className="font-bold mb-2">Layout info</h3>
-                <p className="text-sm opacity-70">{selectedLayout.name}</p>
-                <p className="text-sm opacity-70">{selectedPhotos.length} bilder</p>
-                <p className="text-xs opacity-50 mt-2">
-                  {selectedLayout.canvas.width} × {selectedLayout.canvas.height}px
-                </p>
+              {/* Tab Navigation */}
+              <div className="flex gap-2 mb-4">
+                <button
+                  onClick={() => setActiveTab('edit')}
+                  className={`flex-1 px-3 py-2 rounded-lg transition flex items-center justify-center gap-2 ${
+                    activeTab === 'edit'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-white/5 hover:bg-white/10'
+                  }`}
+                >
+                  <ImageIcon className="w-4 h-4" />
+                  <span className="text-sm font-medium">Rediger</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('text')}
+                  className={`flex-1 px-3 py-2 rounded-lg transition flex items-center justify-center gap-2 ${
+                    activeTab === 'text'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-white/5 hover:bg-white/10'
+                  }`}
+                >
+                  <Type className="w-4 h-4" />
+                  <span className="text-sm font-medium">Tekst</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('stickers')}
+                  className={`flex-1 px-3 py-2 rounded-lg transition flex items-center justify-center gap-2 ${
+                    activeTab === 'stickers'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-white/5 hover:bg-white/10'
+                  }`}
+                >
+                  <Smile className="w-4 h-4" />
+                  <span className="text-sm font-medium">Stickers</span>
+                </button>
               </div>
 
-              <div className="glass-card p-4 rounded-xl border border-white/10">
-                <h3 className="font-bold mb-2">Tips</h3>
-                <ul className="text-sm opacity-70 space-y-1">
-                  <li>• Trykk "Last ned" for å lagre lokalt</li>
-                  <li>• Trykk "Lagre" for å legge til i album</li>
-                  <li>• Bruk "Endre bilder" for å bytte bilder</li>
-                </ul>
-              </div>
+              {/* Tab Content */}
+              {activeTab === 'edit' && (
+                <div>
+                  <button
+                    onClick={handleChangePhotos}
+                    disabled={saving}
+                    className="w-full mb-4 px-4 py-3 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/50 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                    <span className="font-medium">Endre bilder</span>
+                  </button>
+
+                  <div className="glass-card p-4 rounded-xl border border-white/10 mb-4">
+                    <h3 className="font-bold mb-2">Layout info</h3>
+                    <p className="text-sm opacity-70">{selectedLayout.name}</p>
+                    <p className="text-sm opacity-70">{selectedPhotos.length} bilder</p>
+                    <p className="text-xs opacity-50 mt-2">
+                      {selectedLayout.canvas.width} × {selectedLayout.canvas.height}px
+                    </p>
+                  </div>
+
+                  <div className="glass-card p-4 rounded-xl border border-white/10">
+                    <h3 className="font-bold mb-2">Tips</h3>
+                    <ul className="text-sm opacity-70 space-y-1">
+                      <li>• Trykk "Last ned" for å lagre lokalt</li>
+                      <li>• Trykk "Lagre" for å legge til i album</li>
+                      <li>• Bruk "Endre bilder" for å bytte bilder</li>
+                      <li>• Legg til tekst og stickers med fanene over</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'text' && (
+                <TextToolPanel
+                  textLayers={textLayers}
+                  onAddText={handleAddText}
+                  onUpdateText={handleUpdateText}
+                  onDeleteText={handleDeleteText}
+                />
+              )}
+
+              {activeTab === 'stickers' && (
+                <StickerPanel
+                  stickerLayers={stickerLayers}
+                  onAddSticker={handleAddSticker}
+                  onDeleteSticker={handleDeleteSticker}
+                />
+              )}
             </div>
           )}
         </div>
