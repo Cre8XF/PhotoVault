@@ -1,15 +1,8 @@
 // ============================================================================
-// COMPONENT: Notification.jsx – moderne toast-varsler (stabil)
+// COMPONENT: Notification.jsx – Premium toast notifications
 // ============================================================================
 import React, { useEffect, useCallback } from "react";
 import { CheckCircle2, XCircle, Info, AlertTriangle, X } from "lucide-react";
-
-const iconMap = {
-  success: <CheckCircle2 className="text-green-400 w-5 h-5" />,
-  error:   <XCircle     className="text-red-400 w-5 h-5" />,
-  info:    <Info        className="text-blue-400 w-5 h-5" />,
-  warning: <AlertTriangle className="text-yellow-400 w-5 h-5" />,
-};
 
 const Notification = ({ notification, onClose, setNotification }) => {
   // Safe defaults (hooks må kalles uansett)
@@ -32,27 +25,32 @@ const Notification = ({ notification, onClose, setNotification }) => {
 
   if (!notification) return null;
 
-  const colors = {
-    success: "from-green-500/70 to-green-600/50 border-green-400/40",
-    error:   "from-red-500/70 to-red-600/50 border-red-400/40",
-    info:    "from-blue-500/70 to-blue-600/50 border-blue-400/40",
-    warning: "from-yellow-500/70 to-yellow-600/50 border-yellow-400/40",
-  }[type];
+  // Icon mapping with enhanced styling
+  const iconConfig = {
+    success: { icon: CheckCircle2, color: "text-green-400" },
+    error:   { icon: XCircle, color: "text-red-400" },
+    info:    { icon: Info, color: "text-blue-400" },
+    warning: { icon: AlertTriangle, color: "text-yellow-400" },
+  };
+
+  const { icon: IconComponent, color } = iconConfig[type] || iconConfig.info;
 
   return (
-    <div className="fixed top-6 right-6 z-50 animate-slideIn">
-      <div
-        className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg 
-        bg-gradient-to-r ${colors} border backdrop-blur-md text-white font-medium`}
-      >
-        {iconMap[type]}
-        <span>{message || 'An error occurred'}</span>
+    <div className="fixed top-20 right-6 z-[9999] animate-slideIn">
+      <div className={`toast ${type} flex items-center gap-3`}>
+        <div className={`flex-shrink-0 ${color}`}>
+          <IconComponent className="w-5 h-5" />
+        </div>
+        <p className="flex-1 text-sm font-medium text-white">
+          {message || 'An error occurred'}
+        </p>
         <button
           onClick={handleClose}
-          className="ml-2 hover:opacity-70 transition-opacity"
-          title="Lukk varsel"
+          className="ripple-effect flex-shrink-0 p-1 hover:bg-white/10 rounded-lg transition-colors"
+          title="Close notification"
+          aria-label="Close"
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4 text-white/80" />
         </button>
       </div>
     </div>
