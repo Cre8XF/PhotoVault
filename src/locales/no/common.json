@@ -180,6 +180,11 @@
     "photoSaved": "Bildet er lagret! Du finner det redigerte bildet i albumet.",
     "photoSaveError": "Kunne ikke lagre det redigerte bildet. Prøv igjen."
   },
+  "video": {
+    "notSupported": "Din nettleser støtter ikke videoavspilling.",
+    "duration": "Varighet",
+    "resolution": "Oppløsning"
+  },
   "albumCard": {
     "editAlbum": "Rediger album"
   }
