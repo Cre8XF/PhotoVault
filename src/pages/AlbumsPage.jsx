@@ -1,10 +1,11 @@
 // ============================================================================
 // PAGE: AlbumsPage.jsx – med støtte for flervalg og flytt til album
 // ============================================================================
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Folder, Image, Star, Calendar, Move } from 'lucide-react';
 import AlbumCard from '../components/AlbumCard';
+import { SkeletonCard } from '../components/SkeletonCard';
 import LazyImage from '../components/LazyImage';
 import PhotoGridOptimized from '../components/PhotoGridOptimized';
 import MoveModal from '../components/MoveModal';
@@ -20,6 +21,17 @@ const AlbumsPage = ({ albums, photos, onAlbumClick, onPhotoClick, refreshData, o
   const [selectedPhotos, setSelectedPhotos] = useState([]);
   const [isMoveOpen, setMoveOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+  // Track initial data loading
+  useEffect(() => {
+    if ((albums && albums.length > 0) || (photos && photos.length > 0)) {
+      setIsInitialLoading(false);
+    } else {
+      const timer = setTimeout(() => setIsInitialLoading(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [albums, photos]);
 
   const setConfirmModal = useStore((state) => state.setConfirmModal);
   const setNotification = useStore((state) => state.setNotification);
@@ -146,9 +158,17 @@ const AlbumsPage = ({ albums, photos, onAlbumClick, onPhotoClick, refreshData, o
         </div>
       </div>
 
-      {viewMode === 'albums' && (
+      {isInitialLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {safeAlbums.map(album => (
+          {Array(6).fill(0).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      ) : (
+        <>
+          {viewMode === 'albums' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {safeAlbums.map(album => (
             <div key={album.id} className="relative group">
               <AlbumCard album={album} photos={photos} onOpen={() => onAlbumClick(album)} />
 
@@ -179,10 +199,12 @@ const AlbumsPage = ({ albums, photos, onAlbumClick, onPhotoClick, refreshData, o
               </div>
             </div>
           ))}
-        </div>
-      )}
+            </div>
+          )}
 
-      {viewMode === 'photos' && <PhotoGridOptimized photos={albumPhotos} onPhotoClick={onPhotoClick} selectedPhotos={selectedPhotos} setSelectedPhotos={setSelectedPhotos} />}
+          {viewMode === 'photos' && <PhotoGridOptimized photos={albumPhotos} onPhotoClick={onPhotoClick} selectedPhotos={selectedPhotos} setSelectedPhotos={setSelectedPhotos} />}
+        </>
+      )}
 
       <MoveModal
         isOpen={isMoveOpen}
