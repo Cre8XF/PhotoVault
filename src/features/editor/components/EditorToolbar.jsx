@@ -1,17 +1,18 @@
 /**
- * Photo Editor - Phase 1: Crop & Rotate
+ * Photo Editor - Phase 1, 2 & 3: Crop, Rotate, Filters & Text
  *
  * EditorToolbar Component - Tool selection toolbar
  */
 
 import React from 'react'
-import { Crop, RotateCw, Palette, Undo2 } from 'lucide-react'
+import { Crop, RotateCw, Palette, Type, Undo2 } from 'lucide-react'
 
 const EditorToolbar = ({ activeTool, onToolChange, onReset }) => {
   const tools = [
     { id: 'crop', label: 'Beskjær', icon: Crop },
     { id: 'rotate', label: 'Roter', icon: RotateCw },
-    { id: 'filters', label: 'Filtre', icon: Palette }
+    { id: 'filters', label: 'Filtre', icon: Palette },
+    { id: 'text', label: 'Tekst', icon: Type }
   ]
 
   return (

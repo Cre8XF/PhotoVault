@@ -1,5 +1,5 @@
 /**
- * Photo Editor - Phase 1 & 2: Crop, Rotate, Filters & Adjustments
+ * Photo Editor - Phase 1, 2 & 3: Crop, Rotate, Filters, Adjustments & Text Overlay
  *
  * usePhotoEditor Hook - Manages canvas state and editor operations
  */
@@ -7,6 +7,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { loadImageToCanvas, rotateCanvas90, applyCrop, canvasToBlob } from '../utils/cropUtils'
 import { applyFilter, applyAdjustments } from '../utils/filterUtils'
+import { applyTextLayers } from '../utils/textUtils'
 
 export const usePhotoEditor = (initialImageUrl) => {
   const [loading, setLoading] = useState(true)
@@ -18,6 +19,8 @@ export const usePhotoEditor = (initialImageUrl) => {
     contrast: 1.0,
     saturation: 1.0
   })
+  const [textLayers, setTextLayers] = useState([]) // Array of text layers
+  const [currentTextLayer, setCurrentTextLayer] = useState(null) // Currently editing text layer
 
   const canvasRef = useRef(null)
   const originalCanvasRef = useRef(null) // Keep original for reset
@@ -152,6 +155,72 @@ export const usePhotoEditor = (initialImageUrl) => {
   }, [])
 
   /**
+   * Add a new text layer
+   */
+  const addTextLayer = useCallback((textLayer) => {
+    setTextLayers((prev) => [...prev, textLayer])
+    setCurrentTextLayer(textLayer)
+    console.log('✍️ Text layer added:', textLayer.id)
+
+    // Trigger re-render
+    if (canvasRef.current) {
+      renderCurrentCanvas()
+    }
+  }, [])
+
+  /**
+   * Update a text layer
+   */
+  const updateTextLayer = useCallback((updatedLayer) => {
+    setTextLayers((prev) =>
+      prev.map((layer) => (layer.id === updatedLayer.id ? updatedLayer : layer))
+    )
+    setCurrentTextLayer(updatedLayer)
+    console.log('✍️ Text layer updated:', updatedLayer.id)
+
+    // Trigger re-render
+    if (canvasRef.current) {
+      renderCurrentCanvas()
+    }
+  }, [])
+
+  /**
+   * Remove a text layer
+   */
+  const removeTextLayer = useCallback((layerId) => {
+    setTextLayers((prev) => prev.filter((layer) => layer.id !== layerId))
+    setCurrentTextLayer(null)
+    console.log('🗑️ Text layer removed:', layerId)
+
+    // Trigger re-render
+    if (canvasRef.current) {
+      renderCurrentCanvas()
+    }
+  }, [])
+
+  /**
+   * Select a text layer for editing
+   */
+  const selectTextLayer = useCallback((layerId) => {
+    const layer = textLayers.find((l) => l.id === layerId)
+    setCurrentTextLayer(layer || null)
+  }, [textLayers])
+
+  /**
+   * Clear all text layers
+   */
+  const clearTextLayers = useCallback(() => {
+    setTextLayers([])
+    setCurrentTextLayer(null)
+    console.log('🗑️ All text layers cleared')
+
+    // Trigger re-render
+    if (canvasRef.current) {
+      renderCurrentCanvas()
+    }
+  }, [])
+
+  /**
    * Reset to original image
    */
   const reset = useCallback(() => {
@@ -164,6 +233,8 @@ export const usePhotoEditor = (initialImageUrl) => {
         contrast: 1.0,
         saturation: 1.0
       })
+      setTextLayers([])
+      setCurrentTextLayer(null)
       console.log('↩️ Reset to original')
 
       if (canvasRef.current) {
@@ -179,7 +250,12 @@ export const usePhotoEditor = (initialImageUrl) => {
     if (!canvasRef.current || !currentCanvasRef.current) return
 
     const displayCanvas = canvasRef.current
-    const sourceCanvas = currentCanvasRef.current
+    let sourceCanvas = currentCanvasRef.current
+
+    // Apply text layers if any exist
+    if (textLayers.length > 0) {
+      sourceCanvas = applyTextLayers(currentCanvasRef.current, textLayers)
+    }
 
     // Update display canvas size
     displayCanvas.width = sourceCanvas.width
@@ -189,7 +265,7 @@ export const usePhotoEditor = (initialImageUrl) => {
     const ctx = displayCanvas.getContext('2d')
     ctx.clearRect(0, 0, displayCanvas.width, displayCanvas.height)
     ctx.drawImage(sourceCanvas, 0, 0)
-  }, [])
+  }, [textLayers])
 
   /**
    * Export current canvas as blob
@@ -247,10 +323,17 @@ export const usePhotoEditor = (initialImageUrl) => {
     rotation,
     currentFilter,
     currentAdjustments,
+    textLayers,
+    currentTextLayer,
     rotate90,
     crop,
     applyFilter: applyFilterToCanvas,
     applyAdjustments: applyAdjustmentsToCanvas,
+    addTextLayer,
+    updateTextLayer,
+    removeTextLayer,
+    selectTextLayer,
+    clearTextLayers,
     reset,
     exportImage,
     exportDataURL,
