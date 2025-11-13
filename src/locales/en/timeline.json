@@ -1,0 +1,44 @@
+{
+  "emptyState": {
+    "title": "No photos to display",
+    "description": "Upload photos to see them organized in the timeline"
+  },
+  "stats": {
+    "showing": "Showing",
+    "photo": "photo",
+    "photo_plural": "photos",
+    "in": "in",
+    "day": "day",
+    "day_plural": "days",
+    "month": "month",
+    "month_plural": "months",
+    "year": "year",
+    "year_plural": "years"
+  },
+  "jumpToDate": {
+    "title": "Jump to date",
+    "button": "Go to"
+  },
+  "months": {
+    "january": "January",
+    "february": "February",
+    "march": "March",
+    "april": "April",
+    "may": "May",
+    "june": "June",
+    "july": "July",
+    "august": "August",
+    "september": "September",
+    "october": "October",
+    "november": "November",
+    "december": "December"
+  },
+  "onThisDay": {
+    "title": "On This Day",
+    "description": "Memories from {{date}} in previous years",
+    "yearsAgo": "{{count}} years ago",
+    "more": "more",
+    "memory": "memory",
+    "memory_plural": "memories"
+  }
+}

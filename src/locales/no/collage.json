@@ -1,0 +1,43 @@
+{
+  "title": "Lag kollasj",
+  "steps": {
+    "step1": "Steg 1: Velg layout",
+    "step2": "Steg 2: Velg bilder",
+    "step3": "Steg 3: Forhåndsvisning"
+  },
+  "buttons": {
+    "download": "Last ned",
+    "save": "Lagre",
+    "saving": "Lagrer...",
+    "changePhotos": "Endre bilder",
+    "close": "Lukk"
+  },
+  "tabs": {
+    "edit": "Rediger",
+    "text": "Tekst",
+    "stickers": "Stickers"
+  },
+  "layout": {
+    "title": "Layout info",
+    "photos": "bilder",
+    "selectPrompt": "Velg en layout",
+    "selectHelp": "Velg en layout fra menyen til venstre for å starte"
+  },
+  "tips": {
+    "title": "Tips",
+    "download": "Trykk \"Last ned\" for å lagre lokalt",
+    "save": "Trykk \"Lagre\" for å legge til i album",
+    "change": "Bruk \"Endre bilder\" for å bytte bilder",
+    "addElements": "Legg til tekst og stickers med fanene over"
+  },
+  "loading": {
+    "photos": "Laster bilder...",
+    "saving": "Lagrer kollasj...",
+    "uploading": "Laster opp til Firebase Storage"
+  },
+  "errors": {
+    "saveError": "Kunne ikke lagre kollasjen. Prøv igjen.",
+    "exportError": "Kunne ikke eksportere kollasjen",
+    "title": "Feil"
+  }
+}

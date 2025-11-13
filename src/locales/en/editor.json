@@ -1,0 +1,69 @@
+{
+  "title": "Edit Photo",
+  "buttons": {
+    "download": "Download",
+    "save": "Save",
+    "saving": "Saving...",
+    "close": "Close",
+    "apply": "Apply",
+    "cancel": "Cancel",
+    "reset": "Reset",
+    "addText": "Add Text"
+  },
+  "loading": {
+    "image": "Loading image...",
+    "processing": "Processing..."
+  },
+  "errors": {
+    "canvasError": "Could not save image (canvas missing)",
+    "saveError": "Could not save image",
+    "blobError": "Blob conversion failed",
+    "contextError": "Canvas context missing"
+  },
+  "toolbar": {
+    "crop": "Crop",
+    "rotate": "Rotate",
+    "filters": "Filters",
+    "text": "Text"
+  },
+  "crop": {
+    "title": "Crop Image",
+    "aspectRatio": "Aspect Ratio",
+    "free": "Free",
+    "selectedArea": "Selected Area",
+    "help": "Select aspect ratio and click \"Apply\" to crop"
+  },
+  "rotate": {
+    "title": "Rotate Image",
+    "currentRotation": "Current Rotation",
+    "rotate90": "Rotate 90° clockwise",
+    "help": "Click to rotate the image 90° to the right"
+  },
+  "filters": {
+    "title": "Filters and Adjustments",
+    "presets": "Filter Presets",
+    "brightness": "Brightness",
+    "contrast": "Contrast",
+    "saturation": "Saturation",
+    "resetAdjustments": "Reset Adjustments",
+    "help": "Select filter and adjust brightness, contrast and saturation"
+  },
+  "text": {
+    "title": "Text Overlay",
+    "textLabel": "Text",
+    "placeholder": "Enter your text here...",
+    "fontFamily": "Font Family",
+    "fontSize": "Size",
+    "color": "Color",
+    "style": "Style",
+    "alignment": "Alignment",
+    "position": "Position",
+    "horizontal": "Horizontal",
+    "vertical": "Vertical",
+    "shadow": "Shadow",
+    "blur": "Blur",
+    "outline": "Outline",
+    "width": "Width",
+    "removeLayer": "Remove text layer"
+  }
+}
