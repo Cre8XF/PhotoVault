@@ -6,9 +6,11 @@
 
 import React, { useMemo } from 'react'
 import { Calendar, Cake } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { getPhotosOnThisDay } from '../utils/dateGrouping'
 
 const OnThisDayWidget = ({ photos, onPhotoClick, referenceDate = new Date() }) => {
+  const { t } = useTranslation(['timeline'])
   // Get memories from same day in previous years
   const memories = useMemo(() => {
     if (!photos || photos.length === 0) {
@@ -39,10 +41,10 @@ const OnThisDayWidget = ({ photos, onPhotoClick, referenceDate = new Date() }) =
         </div>
         <div>
           <h3 className="text-xl font-bold flex items-center gap-2">
-            På denne dagen
+            {t('timeline:onThisDay.title')}
           </h3>
           <p className="text-sm text-gray-400">
-            Minner fra {dayMonth} i tidligere år
+            {t('timeline:onThisDay.description', { date: dayMonth })}
           </p>
         </div>
       </div>
@@ -71,7 +73,7 @@ const OnThisDayWidget = ({ photos, onPhotoClick, referenceDate = new Date() }) =
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-bold text-white">
-                    {photo.yearsAgo} {photo.yearsAgo === 1 ? 'år' : 'år'} siden
+                    {t('timeline:onThisDay.yearsAgo', { count: photo.yearsAgo })}
                   </p>
                   <p className="text-xs text-gray-300">
                     {new Date(photo.createdAt?.toDate ? photo.createdAt.toDate() : photo.createdAt).getFullYear()}
@@ -95,7 +97,7 @@ const OnThisDayWidget = ({ photos, onPhotoClick, referenceDate = new Date() }) =
       {memories.length > 8 && (
         <div className="mt-4 text-center">
           <p className="text-sm text-gray-400">
-            +{memories.length - 8} flere {memories.length - 8 === 1 ? 'minne' : 'minner'}
+            +{memories.length - 8} {t('timeline:onThisDay.more')} {memories.length - 8 === 1 ? t('timeline:onThisDay.memory') : t('timeline:onThisDay.memory_plural')}
           </p>
         </div>
       )}

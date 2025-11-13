@@ -5,6 +5,7 @@
  */
 
 import React, { useMemo, useState, useRef, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { groupPhotosByDate, groupPhotosByMonth, groupPhotosByYear, getAvailableYears } from '../utils/dateGrouping'
 import DateSection from './DateSection'
 import TimelineNavigation from './TimelineNavigation'
@@ -12,6 +13,7 @@ import OnThisDayWidget from './OnThisDayWidget'
 import JumpToDatePicker from './JumpToDatePicker'
 
 const TimelineView = ({ photos, onPhotoClick }) => {
+  const { t } = useTranslation(['timeline'])
   const [groupBy, setGroupBy] = useState('day') // 'day' | 'month' | 'year'
   const [showDatePicker, setShowDatePicker] = useState(false)
   const sectionRefs = useRef({})
@@ -105,9 +107,9 @@ const TimelineView = ({ photos, onPhotoClick }) => {
           // Empty state
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="text-6xl mb-4">📅</div>
-            <h2 className="text-2xl font-bold mb-2">Ingen bilder å vise</h2>
+            <h2 className="text-2xl font-bold mb-2">{t('timeline:emptyState.title')}</h2>
             <p className="text-gray-400">
-              Last opp bilder for å se dem organisert i tidslinjen
+              {t('timeline:emptyState.description')}
             </p>
           </div>
         ) : (
@@ -149,10 +151,10 @@ const TimelineView = ({ photos, onPhotoClick }) => {
         {/* Stats Footer */}
         {groups.length > 0 && (
           <div className="mt-12 text-center text-gray-500 text-sm pb-8">
-            Viser {photos.length} {photos.length === 1 ? 'bilde' : 'bilder'} i {groups.length} {
-              groupBy === 'day' ? 'dager' :
-              groupBy === 'month' ? 'måneder' :
-              'år'
+            {t('timeline:stats.showing')} {photos.length} {photos.length === 1 ? t('timeline:stats.photo') : t('timeline:stats.photo_plural')} {t('timeline:stats.in')} {groups.length} {
+              groupBy === 'day' ? (groups.length === 1 ? t('timeline:stats.day') : t('timeline:stats.day_plural')) :
+              groupBy === 'month' ? (groups.length === 1 ? t('timeline:stats.month') : t('timeline:stats.month_plural')) :
+              (groups.length === 1 ? t('timeline:stats.year') : t('timeline:stats.year_plural'))
             }
           </div>
         )}
