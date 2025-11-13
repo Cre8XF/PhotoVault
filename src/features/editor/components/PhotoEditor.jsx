@@ -14,7 +14,7 @@ import FilterPanel from './FilterPanel'
 import TextTool from './TextTool'
 
 const PhotoEditor = ({ photo, onClose, onSave }) => {
-  const [activeTool, setActiveTool] = useState('rotate') // 'crop' | 'rotate' | 'filters'
+  const [activeTool, setActiveTool] = useState('rotate') // 'crop' | 'rotate' | 'filters' | 'text'
   const [saving, setSaving] = useState(false)
 
   const {
@@ -22,8 +22,8 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
     loading,
     error,
     rotation,
-    currentFilter,
-    currentAdjustments,
+    // currentFilter,
+    // currentAdjustments,
     textLayers,
     currentTextLayer,
     rotate90,
@@ -33,12 +33,12 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
     addTextLayer,
     updateTextLayer,
     removeTextLayer,
-    selectTextLayer,
-    clearTextLayers,
+    // selectTextLayer,
+    // clearTextLayers,
     reset,
-    exportImage,
-    exportDataURL,
-    getDimensions
+    // exportImage,
+    // exportDataURL,
+    getDimensions,
   } = usePhotoEditor(photo?.url)
 
   const handleCropApply = (cropArea) => {
@@ -48,8 +48,74 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
     }
   }
 
+  /**
+   * Tegn alle tekstlag inn på canvas.
+   * Dette brukes både ved "Last ned" og "Lagre" slik at teksten faktisk
+   * blir bakt inn i bildefilen.
+   */
+  const drawTextLayersOnCanvas = () => {
+    const canvas = canvasRef.current
+    if (!canvas || !textLayers || textLayers.length === 0) return
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    textLayers.forEach((layer) => {
+      if (!layer || !layer.text) return
+
+      ctx.save()
+
+      const fontSize = layer.size || 40
+      const fontFamily = layer.font || 'system-ui'
+      const weight = layer.bold ? 'bold ' : ''
+      const style = layer.italic ? 'italic ' : ''
+
+      ctx.font = `${weight}${style}${fontSize}px ${fontFamily}`
+      ctx.fillStyle = layer.color || '#ffffff'
+      ctx.textAlign = layer.align || 'left'
+      ctx.textBaseline = 'middle'
+
+      // Skygge
+      if (layer.shadow) {
+        ctx.shadowColor = layer.shadowColor || 'rgba(0,0,0,0.8)'
+        ctx.shadowBlur = layer.shadowBlur ?? 4
+        ctx.shadowOffsetX = layer.shadowOffsetX ?? 0
+        ctx.shadowOffsetY = layer.shadowOffsetY ?? 0
+      } else {
+        ctx.shadowColor = 'transparent'
+        ctx.shadowBlur = 0
+        ctx.shadowOffsetX = 0
+        ctx.shadowOffsetY = 0
+      }
+
+      const x = layer.x ?? canvas.width / 2
+      const y = layer.y ?? canvas.height / 2
+
+      // Stroke (outline)
+      if (layer.strokeWidth && layer.strokeWidth > 0) {
+        ctx.lineWidth = layer.strokeWidth
+        ctx.strokeStyle = layer.strokeColor || '#000000'
+        ctx.strokeText(layer.text, x, y)
+      }
+
+      // Fill text
+      ctx.fillText(layer.text, x, y)
+
+      ctx.restore()
+    })
+  }
+
+  /**
+   * LAST NED – inkluderer nå tekstlag
+   */
   const handleDownload = () => {
-    const dataURL = exportDataURL('image/jpeg', 0.95)
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    // Bak tekstlagene inn i canvas
+    drawTextLayersOnCanvas()
+
+    const dataURL = canvas.toDataURL('image/jpeg', 0.95)
     const link = document.createElement('a')
     link.download = `edited_${photo?.name || 'photo'}.jpg`
     link.href = dataURL
@@ -57,23 +123,53 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
     console.log('📥 Downloaded edited photo')
   }
 
+  /**
+   * LAGRE – laster opp bilde med tekst til Firebase via onSave(blob, photo)
+   */
   const handleSave = async () => {
     if (!onSave) {
       console.warn('No onSave handler provided')
       return
     }
 
+    const canvas = canvasRef.current
+    if (!canvas) {
+      alert('Kunne ikke lagre bildet (canvas mangler)')
+      return
+    }
+
     setSaving(true)
 
     try {
-      const blob = await exportImage('image/jpeg', 0.95)
-      await onSave(blob, photo)
-      console.log('✅ Saved edited photo')
-      onClose()
+      const ctx = canvas.getContext('2d')
+      if (!ctx) throw new Error('Canvas context mangler')
+
+      // Bak tekstlagene inn i canvas før vi konverterer til Blob
+      drawTextLayersOnCanvas()
+
+      canvas.toBlob(
+        async (blob) => {
+          try {
+            if (!blob) {
+              throw new Error('Blob-konvertering feilet')
+            }
+
+            await onSave(blob, photo)
+            console.log('✅ Saved edited photo')
+            onClose()
+          } catch (err) {
+            console.error('Failed to save photo:', err)
+            alert('Kunne ikke lagre bildet')
+          } finally {
+            setSaving(false)
+          }
+        },
+        'image/jpeg',
+        0.95
+      )
     } catch (error) {
       console.error('Failed to save photo:', error)
       alert('Kunne ikke lagre bildet')
-    } finally {
       setSaving(false)
     }
   }
@@ -106,7 +202,9 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
               className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition flex items-center gap-2 disabled:opacity-50"
             >
               <Save className="w-5 h-5" />
-              <span className="hidden sm:inline">{saving ? 'Lagrer...' : 'Lagre'}</span>
+              <span className="hidden sm:inline">
+                {saving ? 'Lagrer...' : 'Lagre'}
+              </span>
             </button>
           )}
         </div>
@@ -132,10 +230,7 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
           )}
 
           {activeTool === 'rotate' && (
-            <RotateTool
-              onRotate={rotate90}
-              rotation={rotation}
-            />
+            <RotateTool onRotate={rotate90} rotation={rotation} />
           )}
 
           {activeTool === 'filters' && (
@@ -184,7 +279,7 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
                 style={{
                   maxWidth: '100%',
                   maxHeight: 'calc(100vh - 200px)',
-                  objectFit: 'contain'
+                  objectFit: 'contain',
                 }}
               />
             </div>

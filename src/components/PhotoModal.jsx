@@ -1,153 +1,171 @@
 // ============================================================================
 // COMPONENT: PhotoModal.jsx – v4.4 med Photo Editor Integration (Phase 6)
 // ============================================================================
-import React, { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { X, ArrowLeft, ArrowRight, Download, Info, Star, Calendar, Tag, Sparkles, Users, Edit2 } from "lucide-react";
+import React, { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import {
+  X,
+  ArrowLeft,
+  ArrowRight,
+  Download,
+  Info,
+  Star,
+  Calendar,
+  Tag,
+  Sparkles,
+  Users,
+  Edit2,
+} from 'lucide-react'
 // PHASE 2: Social features disabled for MVP
 // import CommentThread from "./CommentThread";
 // import ReactionPicker from "./ReactionPicker";
-import useAuth from "../hooks/useAuth";
-import { formatDuration, formatFileSize } from "../utils/videoTools";
-import { PhotoEditor } from "../features/editor";
-import { saveEditedPhoto } from "../features/editor";
+import useAuth from '../hooks/useAuth'
+import { formatDuration, formatFileSize } from '../utils/videoTools'
+import { PhotoEditor } from '../features/editor'
+import { saveEditedPhoto } from '../features/editor'
 
-const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite, onPhotoEdited }) => {
-  const { t } = useTranslation(['common']);
-  const { user } = useAuth();
-  const [index, setIndex] = useState(currentIndex);
-  const [showInfo, setShowInfo] = useState(false);
-  const [showEditor, setShowEditor] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const photo = photos[index];
-  const startX = useRef(0);
+const PhotoModal = ({
+  photos,
+  currentIndex,
+  onClose,
+  onToggleFavorite,
+  onPhotoEdited,
+}) => {
+  const { t } = useTranslation(['common'])
+  const { user } = useAuth()
+  const [index, setIndex] = useState(currentIndex)
+  const [showInfo, setShowInfo] = useState(false)
+  const [showEditor, setShowEditor] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
+  const photo = photos[index]
+  const startX = useRef(0)
 
   const nextPhoto = () => {
-    setImageLoaded(false);
-    setIndex((i) => (i + 1) % photos.length);
-  };
+    setImageLoaded(false)
+    setIndex((i) => (i + 1) % photos.length)
+  }
 
   const prevPhoto = () => {
-    setImageLoaded(false);
-    setIndex((i) => (i - 1 + photos.length) % photos.length);
-  };
+    setImageLoaded(false)
+    setIndex((i) => (i - 1 + photos.length) % photos.length)
+  }
 
   useEffect(() => {
     const handleKey = (e) => {
-      if (!photo) return;
+      if (!photo) return
 
       switch (e.key) {
-        case "ArrowRight":
-          nextPhoto();
-          break;
-        case "ArrowLeft":
-          prevPhoto();
-          break;
-        case "Escape":
-          onClose();
-          break;
-        case "i":
-        case "I":
-          setShowInfo((s) => !s);
-          break;
+        case 'ArrowRight':
+          nextPhoto()
+          break
+        case 'ArrowLeft':
+          prevPhoto()
+          break
+        case 'Escape':
+          onClose()
+          break
+        case 'i':
+        case 'I':
+          setShowInfo((s) => !s)
+          break
         default:
-          break;
+          break
       }
-    };
+    }
 
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [photo, photos.length, onClose]);
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [photo, photos.length, onClose])
 
   useEffect(() => {
-    const modal = document.querySelector(".photo-modal-wrapper");
+    const modal = document.querySelector('.photo-modal-wrapper')
     if (modal) {
-      modal.style.position = "relative";
-      modal.style.display = "flex";
-      modal.style.alignItems = "center";
-      modal.style.justifyContent = "center";
+      modal.style.position = 'relative'
+      modal.style.display = 'flex'
+      modal.style.alignItems = 'center'
+      modal.style.justifyContent = 'center'
     }
-  }, []);
+  }, [])
 
-  const handleTouchStart = (e) => (startX.current = e.touches[0].clientX);
+  const handleTouchStart = (e) => (startX.current = e.touches[0].clientX)
   const handleTouchEnd = (e) => {
-    const diff = e.changedTouches[0].clientX - startX.current;
-    if (diff > 50) prevPhoto();
-    if (diff < -50) nextPhoto();
-  };
+    const diff = e.changedTouches[0].clientX - startX.current
+    if (diff > 50) prevPhoto()
+    if (diff < -50) nextPhoto()
+  }
 
   const handleDownload = async () => {
     try {
-      const response = await fetch(photo.url);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${photo.name || "photo"}.jpg`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+      const response = await fetch(photo.url)
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${photo.name || 'photo'}.jpg`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
     } catch (err) {
-      console.error("Download error:", err);
+      console.error('Download error:', err)
     }
-  };
+  }
 
   const handleEditClick = () => {
     // Only allow editing images, not videos
     if (photo.type === 'video') {
-      alert('Videoredigering er ikke støttet ennå');
-      return;
+      alert('Videoredigering er ikke støttet ennå')
+      return
     }
-    setShowEditor(true);
-  };
+    setShowEditor(true)
+  }
 
   const handleEditSave = async (blob, originalPhoto) => {
     try {
       if (!user?.uid) {
-        throw new Error('User not authenticated');
+        throw new Error('User not authenticated')
       }
 
-      console.log('💾 Saving edited photo...');
+      console.log('💾 Saving edited photo...')
 
       // Save edited photo to Firebase
-      const newPhoto = await saveEditedPhoto(blob, originalPhoto, user.uid);
+      const newPhoto = await saveEditedPhoto(blob, originalPhoto, user.uid)
 
-      console.log('✅ Photo saved successfully:', newPhoto.id);
+      console.log('✅ Photo saved successfully:', newPhoto.id)
 
       // Notify parent component if callback provided
       if (onPhotoEdited) {
-        onPhotoEdited(newPhoto);
+        onPhotoEdited(newPhoto)
       }
 
       // Close editor
-      setShowEditor(false);
+      setShowEditor(false)
 
       // Show success message
-      alert('Bildet er lagret! Du finner det redigerte bildet i albumet.');
+      alert('Bildet er lagret! Du finner det redigerte bildet i albumet.')
     } catch (error) {
-      console.error('❌ Failed to save edited photo:', error);
-      alert('Kunne ikke lagre det redigerte bildet. Prøv igjen.');
+      console.error('❌ Failed to save edited photo:', error)
+      alert('Kunne ikke lagre det redigerte bildet. Prøv igjen.')
     }
-  };
+  }
 
   const handleEditorClose = () => {
-    setShowEditor(false);
-  };
+    setShowEditor(false)
+  }
 
-  if (!photo) return null;
+  if (!photo) return null
 
   const formatDate = (dateStr) => {
-    if (!dateStr) return t('common:unknown');
-    const d = new Date(dateStr);
+    if (!dateStr) return t('common:unknown')
+    const d = new Date(dateStr)
     return d.toLocaleDateString('no-NO', {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  }
 
   return (
     <div
@@ -169,21 +187,29 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite, onPhotoEd
           <div className="flex items-center gap-2">
             {onToggleFavorite && (
               <button
-                aria-label={photo.favorite ? t('common:removeFavorite') : t('common:addToFavorites')}
+                aria-label={
+                  photo.favorite
+                    ? t('common:removeFavorite')
+                    : t('common:addToFavorites')
+                }
                 onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleFavorite(photo);
+                  e.stopPropagation()
+                  onToggleFavorite(photo)
                 }}
                 className={`ripple-effect backdrop-blur-md text-white p-2.5 rounded-lg transition shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
                   photo.favorite
-                    ? "bg-yellow-500/90 hover:bg-yellow-600"
-                    : "bg-white/20 hover:bg-white/30"
+                    ? 'bg-yellow-500/90 hover:bg-yellow-600'
+                    : 'bg-white/20 hover:bg-white/30'
                 }`}
-                title={photo.favorite ? t('common:removeFavorite') : t('common:addToFavorites')}
+                title={
+                  photo.favorite
+                    ? t('common:removeFavorite')
+                    : t('common:addToFavorites')
+                }
               >
                 <Star
                   className="w-5 h-5"
-                  fill={photo.favorite ? "currentColor" : "none"}
+                  fill={photo.favorite ? 'currentColor' : 'none'}
                 />
               </button>
             )}
@@ -191,11 +217,11 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite, onPhotoEd
             <button
               aria-label={t('common:showInfo')}
               onClick={(e) => {
-                e.stopPropagation();
-                setShowInfo(!showInfo);
+                e.stopPropagation()
+                setShowInfo(!showInfo)
               }}
               className={`ripple-effect backdrop-blur-md text-white p-2.5 rounded-lg transition shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-400 ${
-                showInfo ? "bg-purple-600/90" : "bg-white/20 hover:bg-white/30"
+                showInfo ? 'bg-purple-600/90' : 'bg-white/20 hover:bg-white/30'
               }`}
               title={t('common:showInfo')}
             >
@@ -206,8 +232,8 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite, onPhotoEd
               <button
                 aria-label="Rediger bilde"
                 onClick={(e) => {
-                  e.stopPropagation();
-                  handleEditClick();
+                  e.stopPropagation()
+                  handleEditClick()
                 }}
                 className="ripple-effect bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-2.5 rounded-lg transition shadow-lg focus:outline-none focus:ring-2 focus:ring-green-400"
                 title="Rediger bilde"
@@ -219,8 +245,8 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite, onPhotoEd
             <button
               aria-label={t('common:download')}
               onClick={(e) => {
-                e.stopPropagation();
-                handleDownload();
+                e.stopPropagation()
+                handleDownload()
               }}
               className="ripple-effect bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-2.5 rounded-lg transition shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               title={t('common:download')}
@@ -245,13 +271,13 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite, onPhotoEd
         <>
           <button
             aria-label={t('common:previous')}
-            className="hidden sm:flex ripple-effect absolute left-4 top-1/2 -translate-y-1/2 
-                       bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-4 
-                       rounded-full transition shadow-2xl z-10 border-2 border-white/30 
+            className="hidden sm:flex ripple-effect absolute left-4 top-1/2 -translate-y-1/2
+                       bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-4
+                       rounded-full transition shadow-2xl z-10 border-2 border-white/30
                        focus:outline-none focus:ring-2 focus:ring-white"
             onClick={(e) => {
-              e.stopPropagation();
-              prevPhoto();
+              e.stopPropagation()
+              prevPhoto()
             }}
             title={t('common:previous')}
           >
@@ -260,13 +286,13 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite, onPhotoEd
 
           <button
             aria-label={t('common:next')}
-            className="hidden sm:flex ripple-effect absolute right-4 top-1/2 -translate-y-1/2 
-                       bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-4 
-                       rounded-full transition shadow-2xl z-10 border-2 border-white/30 
+            className="hidden sm:flex ripple-effect absolute right-4 top-1/2 -translate-y-1/2
+                       bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-4
+                       rounded-full transition shadow-2xl z-10 border-2 border-white/30
                        focus:outline-none focus:ring-2 focus:ring-white"
             onClick={(e) => {
-              e.stopPropagation();
-              nextPhoto();
+              e.stopPropagation()
+              nextPhoto()
             }}
             title={t('common:next')}
           >
@@ -303,9 +329,9 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite, onPhotoEd
         ) : (
           <img
             src={photo.url}
-            alt={photo.name || ""}
+            alt={photo.name || ''}
             className={`max-h-[80vh] max-w-full rounded-xl shadow-2xl object-contain transition-opacity duration-300 ${
-              imageLoaded ? "opacity-100" : "opacity-0"
+              imageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
             onLoad={() => setImageLoaded(true)}
           />
@@ -350,9 +376,7 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite, onPhotoEd
             {photo.size && (
               <div>
                 <p className="text-gray-400 mb-1">{t('common:size')}</p>
-                <p className="text-white">
-                  {formatFileSize(photo.size)}
-                </p>
+                <p className="text-white">{formatFileSize(photo.size)}</p>
               </div>
             )}
 
@@ -362,7 +386,9 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite, onPhotoEd
                 {photo.metadata.duration && (
                   <div>
                     <p className="text-gray-400 mb-1">Varighet</p>
-                    <p className="text-white">{formatDuration(photo.metadata.duration)}</p>
+                    <p className="text-white">
+                      {formatDuration(photo.metadata.duration)}
+                    </p>
                   </div>
                 )}
                 {photo.metadata.resolution && (
@@ -380,11 +406,17 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite, onPhotoEd
               <div className="flex items-center gap-2">
                 {photo.favorite ? (
                   <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded text-xs flex items-center gap-1">
-                    <Star aria-hidden="true" className="w-3 h-3" fill="currentColor" />
+                    <Star
+                      aria-hidden="true"
+                      className="w-3 h-3"
+                      fill="currentColor"
+                    />
                     {t('common:favorite')}
                   </span>
                 ) : (
-                  <span className="text-gray-500 text-xs">{t('common:notFavorite')}</span>
+                  <span className="text-gray-500 text-xs">
+                    {t('common:notFavorite')}
+                  </span>
                 )}
               </div>
             </div>
@@ -478,22 +510,27 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite, onPhotoEd
       )}
 
       {/* Bildetittel nederst */}
-      {photo.name && !showInfo && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md text-gray-900 px-6 py-3 rounded-lg font-medium shadow-lg select-none">
+      {photo.name && !showInfo && !showEditor && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md text-gray-900 px-6 py-3 rounded-lg font-medium shadow-lg select-none z-20">
           {photo.name}
         </div>
       )}
 
-      {/* Photo Editor */}
+      {/* Photo Editor – ligger over ALT */}
       {showEditor && (
-        <PhotoEditor
-          photo={photo}
-          onClose={handleEditorClose}
-          onSave={handleEditSave}
-        />
+        <div
+          className="absolute inset-0 z-[999] flex items-center justify-center bg-black/80 backdrop-blur-md"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <PhotoEditor
+            photo={photo}
+            onClose={handleEditorClose}
+            onSave={handleEditSave}
+          />
+        </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default PhotoModal;
+export default PhotoModal
