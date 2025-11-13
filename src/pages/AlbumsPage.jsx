@@ -168,8 +168,8 @@ const AlbumsPage = ({ albums, photos, onAlbumClick, onPhotoClick, refreshData, o
         <>
           {viewMode === 'albums' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {safeAlbums.map(album => (
-            <div key={album.id} className="relative group">
+              {safeAlbums.map((album, index) => (
+            <div key={album.id} className={`relative group animate-fade-in-up stagger-${(index % 12) + 1}`}>
               <AlbumCard album={album} photos={photos} onOpen={() => onAlbumClick(album)} />
 
               {/* Album action buttons - show on hover */}
