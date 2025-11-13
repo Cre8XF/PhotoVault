@@ -147,9 +147,7 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               }
               maxLength={50}
               disabled={loading}
-              className="w-full p-3 rounded-xl bg-gray-800/60 border border-gray-600/50
-                         text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500
-                         disabled:opacity-50 disabled:cursor-not-allowed"
+              className="input-premium disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <p className="text-xs text-gray-500 mt-1">
               {name.length}/50 characters
@@ -170,9 +168,7 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               maxLength={200}
               rows="3"
               disabled={loading}
-              className="w-full p-3 rounded-xl bg-gray-800/60 border border-gray-600/50
-                         text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none
-                         disabled:opacity-50 disabled:cursor-not-allowed"
+              className="input-premium disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <p className="text-xs text-gray-500 mt-1">
               {description.length}/200 characters
@@ -190,9 +186,7 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               onChange={(e) => setCover(e.target.value)}
               placeholder="https://..."
               disabled={loading}
-              className="w-full p-3 rounded-xl bg-gray-800/60 border border-gray-600/50
-                         text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500
-                         disabled:opacity-50 disabled:cursor-not-allowed"
+              className="input-premium disabled:opacity-50 disabled:cursor-not-allowed"
             />
             {cover && (
               <img

@@ -534,7 +534,7 @@ const AlbumPage = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t('albums:searchPhotos')}
-            className="w-full pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="input-premium !pl-10 !pr-10 !py-3"
           />
           {searchQuery && (
             <button
@@ -606,7 +606,7 @@ const AlbumPage = ({
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="input-premium !py-2"
               >
                 <option value="date-desc">{t('albums:sortDateDesc')}</option>
                 <option value="date-asc">{t('albums:sortDateAsc')}</option>
@@ -623,7 +623,7 @@ const AlbumPage = ({
               <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="input-premium !py-2"
               >
                 <option value="all">{t('albums:allCategories')}</option>
                 <option value="people">👥 {t('albums:categoryPeople')}</option>
@@ -645,7 +645,7 @@ const AlbumPage = ({
               <select
                 value={filterAI}
                 onChange={(e) => setFilterAI(e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="input-premium !py-2"
               >
                 <option value="all">{t('albums:allPhotos')}</option>
                 <option value="analyzed">{t('albums:aiAnalyzedOnly')}</option>
