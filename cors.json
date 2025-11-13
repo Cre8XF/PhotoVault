@@ -4,7 +4,9 @@
       "http://localhost:3000",
       "https://cre8web-photovault.netlify.app",
       "https://photovault-app-a0946.web.app",
-      "https://photovault-app-a0946.firebaseapp.com"
+      "https://photovault-app-a0946.firebaseapp.com",
+      "https://pixtr.cloud",
+      "https://www.pixtr.cloud"
     ],
     "method": ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"],
     "responseHeader": [
@@ -17,7 +19,8 @@
       "x-goog-upload-command",
       "x-goog-upload-offset",
       "x-goog-upload-content-type",
-      "x-goog-upload-content-length"
+      "x-goog-upload-content-length",
+      "Access-Control-Allow-Origin"
     ],
     "maxAgeSeconds": 3600
   }
