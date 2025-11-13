@@ -65,7 +65,7 @@ const AlbumCard = memo(
         }}
       >
         {coverUrl ? (
-          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-black/10 flex items-center justify-center">
+          <div className="photo-container-enhanced relative aspect-[16/9] w-full flex items-center justify-center">
             <img
               src={coverUrl}
               alt={album.name || 'Album'}

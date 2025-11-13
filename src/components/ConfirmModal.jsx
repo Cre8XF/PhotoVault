@@ -44,8 +44,7 @@ const ConfirmModal = ({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-sm p-6 rounded-2xl shadow-2xl border border-white/10
-                   bg-gradient-to-b from-gray-800/90 to-gray-900/90 text-gray-100 animate-scale-in"
+        className="glass card-premium relative w-full max-w-sm p-6 rounded-2xl shadow-2xl text-gray-100 animate-scale-in"
       >
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
