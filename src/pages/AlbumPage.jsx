@@ -679,7 +679,7 @@ const AlbumPage = ({
           {filteredPhotos.map((photo, index) => (
             <div
               key={photo.id}
-              className={`relative group aspect-square bg-black/20 rounded-xl overflow-hidden cursor-pointer transition hover:scale-105 ${
+              className={`relative group aspect-square bg-black/20 rounded-xl overflow-hidden cursor-pointer transition hover:scale-105 animate-fade-in-up stagger-${(index % 12) + 1} ${
                 isPhotoSelected(photo) ? 'ring-4 ring-purple-500' : ''
               }`}
               onClick={() => {
@@ -770,7 +770,7 @@ const AlbumPage = ({
           {filteredPhotos.map((photo, index) => (
             <div
               key={photo.id}
-              className={`flex items-center gap-4 p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition cursor-pointer ${
+              className={`flex items-center gap-4 p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition cursor-pointer animate-fade-in-up stagger-${(index % 12) + 1} ${
                 isPhotoSelected(photo) ? 'ring-2 ring-purple-500' : ''
               }`}
               onClick={() => {
