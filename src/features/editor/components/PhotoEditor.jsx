@@ -6,6 +6,7 @@
 
 import React, { useState } from 'react'
 import { X, Download, Save } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { usePhotoEditor } from '../hooks/usePhotoEditor'
 import EditorToolbar from './EditorToolbar'
 import CropTool from './CropTool'
@@ -14,6 +15,7 @@ import FilterPanel from './FilterPanel'
 import TextTool from './TextTool'
 
 const PhotoEditor = ({ photo, onClose, onSave }) => {
+  const { t } = useTranslation(['editor'])
   const [activeTool, setActiveTool] = useState('rotate') // 'crop' | 'rotate' | 'filters' | 'text'
   const [saving, setSaving] = useState(false)
 
@@ -134,7 +136,7 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
 
     const canvas = canvasRef.current
     if (!canvas) {
-      alert('Kunne ikke lagre bildet (canvas mangler)')
+      alert(t('editor:errors.canvasError'))
       return
     }
 
@@ -142,7 +144,7 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
 
     try {
       const ctx = canvas.getContext('2d')
-      if (!ctx) throw new Error('Canvas context mangler')
+      if (!ctx) throw new Error(t('editor:errors.contextError'))
 
       // Bak tekstlagene inn i canvas før vi konverterer til Blob
       drawTextLayersOnCanvas()
@@ -151,7 +153,7 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
         async (blob) => {
           try {
             if (!blob) {
-              throw new Error('Blob-konvertering feilet')
+              throw new Error(t('editor:errors.blobError'))
             }
 
             await onSave(blob, photo)
@@ -159,7 +161,7 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
             onClose()
           } catch (err) {
             console.error('Failed to save photo:', err)
-            alert('Kunne ikke lagre bildet')
+            alert(t('editor:errors.saveError'))
           } finally {
             setSaving(false)
           }
@@ -169,7 +171,7 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
       )
     } catch (error) {
       console.error('Failed to save photo:', error)
-      alert('Kunne ikke lagre bildet')
+      alert(t('editor:errors.saveError'))
       setSaving(false)
     }
   }
@@ -185,7 +187,7 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
           <X className="w-6 h-6" />
         </button>
 
-        <h1 className="text-xl font-bold">Rediger bilde</h1>
+        <h1 className="text-xl font-bold">{t('editor:title')}</h1>
 
         <div className="flex gap-2">
           <button
@@ -193,7 +195,7 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition flex items-center gap-2"
           >
             <Download className="w-5 h-5" />
-            <span className="hidden sm:inline">Last ned</span>
+            <span className="hidden sm:inline">{t('editor:buttons.download')}</span>
           </button>
           {onSave && (
             <button
@@ -203,7 +205,7 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
             >
               <Save className="w-5 h-5" />
               <span className="hidden sm:inline">
-                {saving ? 'Lagrer...' : 'Lagre'}
+                {saving ? t('editor:buttons.saving') : t('editor:buttons.save')}
               </span>
             </button>
           )}
@@ -255,7 +257,7 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
           {loading && (
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-              <p className="text-gray-400">Laster bilde...</p>
+              <p className="text-gray-400">{t('editor:loading.image')}</p>
             </div>
           )}
 
@@ -266,7 +268,7 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
                 onClick={onClose}
                 className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg"
               >
-                Lukk
+                {t('editor:buttons.close')}
               </button>
             </div>
           )}
