@@ -6,13 +6,17 @@
 
 import React, { useState, useEffect } from 'react'
 import { Calendar } from 'lucide-react'
-
-const MONTHS = [
-  'Januar', 'Februar', 'Mars', 'April', 'Mai', 'Juni',
-  'Juli', 'August', 'September', 'Oktober', 'November', 'Desember'
-]
+import { useTranslation } from 'react-i18next'
 
 const JumpToDatePicker = ({ onDateSelect, availableYears = [] }) => {
+  const { t } = useTranslation(['timeline'])
+
+  const MONTHS = [
+    t('timeline:months.january'), t('timeline:months.february'), t('timeline:months.march'),
+    t('timeline:months.april'), t('timeline:months.may'), t('timeline:months.june'),
+    t('timeline:months.july'), t('timeline:months.august'), t('timeline:months.september'),
+    t('timeline:months.october'), t('timeline:months.november'), t('timeline:months.december')
+  ]
   const currentYear = new Date().getFullYear()
   const currentMonth = new Date().getMonth()
 
@@ -44,7 +48,7 @@ const JumpToDatePicker = ({ onDateSelect, availableYears = [] }) => {
     <div className="jump-to-date-picker bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 mb-6">
       <div className="flex items-center gap-3 mb-3">
         <Calendar className="w-5 h-5 text-purple-400" />
-        <h3 className="font-bold text-sm">Gå til dato</h3>
+        <h3 className="font-bold text-sm">{t('timeline:jumpToDate.title')}</h3>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
@@ -75,7 +79,7 @@ const JumpToDatePicker = ({ onDateSelect, availableYears = [] }) => {
           onClick={handleJumpToDate}
           className="px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium transition flex items-center justify-center gap-2"
         >
-          <span>Gå til</span>
+          <span>{t('timeline:jumpToDate.button')}</span>
         </button>
       </div>
     </div>
