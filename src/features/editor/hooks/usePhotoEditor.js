@@ -1,16 +1,23 @@
 /**
- * Photo Editor - Phase 1: Crop & Rotate
+ * Photo Editor - Phase 1 & 2: Crop, Rotate, Filters & Adjustments
  *
  * usePhotoEditor Hook - Manages canvas state and editor operations
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { loadImageToCanvas, rotateCanvas90, applyCrop, canvasToBlob } from '../utils/cropUtils'
+import { applyFilter, applyAdjustments } from '../utils/filterUtils'
 
 export const usePhotoEditor = (initialImageUrl) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [rotation, setRotation] = useState(0) // 0, 90, 180, 270
+  const [currentFilter, setCurrentFilter] = useState('none')
+  const [currentAdjustments, setCurrentAdjustments] = useState({
+    brightness: 0,
+    contrast: 1.0,
+    saturation: 1.0
+  })
 
   const canvasRef = useRef(null)
   const originalCanvasRef = useRef(null) // Keep original for reset
@@ -91,12 +98,72 @@ export const usePhotoEditor = (initialImageUrl) => {
   }, [])
 
   /**
+   * Apply filter to current canvas
+   */
+  const applyFilterToCanvas = useCallback((filterName) => {
+    if (!currentCanvasRef.current) {
+      console.warn('No canvas to apply filter')
+      return false
+    }
+
+    const filteredCanvas = applyFilter(currentCanvasRef.current, filterName)
+
+    if (filteredCanvas) {
+      currentCanvasRef.current = filteredCanvas
+      setCurrentFilter(filterName)
+      console.log(`🎨 Filter applied: ${filterName}`)
+
+      // Trigger re-render
+      if (canvasRef.current) {
+        renderCurrentCanvas()
+      }
+
+      return true
+    }
+
+    return false
+  }, [])
+
+  /**
+   * Apply adjustments (brightness, contrast, saturation) to current canvas
+   */
+  const applyAdjustmentsToCanvas = useCallback((adjustments) => {
+    if (!currentCanvasRef.current) {
+      console.warn('No canvas to apply adjustments')
+      return false
+    }
+
+    const adjustedCanvas = applyAdjustments(currentCanvasRef.current, adjustments)
+
+    if (adjustedCanvas) {
+      currentCanvasRef.current = adjustedCanvas
+      setCurrentAdjustments(adjustments)
+      console.log('🔧 Adjustments applied:', adjustments)
+
+      // Trigger re-render
+      if (canvasRef.current) {
+        renderCurrentCanvas()
+      }
+
+      return true
+    }
+
+    return false
+  }, [])
+
+  /**
    * Reset to original image
    */
   const reset = useCallback(() => {
     if (originalCanvasRef.current) {
       currentCanvasRef.current = originalCanvasRef.current
       setRotation(0)
+      setCurrentFilter('none')
+      setCurrentAdjustments({
+        brightness: 0,
+        contrast: 1.0,
+        saturation: 1.0
+      })
       console.log('↩️ Reset to original')
 
       if (canvasRef.current) {
@@ -178,8 +245,12 @@ export const usePhotoEditor = (initialImageUrl) => {
     loading,
     error,
     rotation,
+    currentFilter,
+    currentAdjustments,
     rotate90,
     crop,
+    applyFilter: applyFilterToCanvas,
+    applyAdjustments: applyAdjustmentsToCanvas,
     reset,
     exportImage,
     exportDataURL,

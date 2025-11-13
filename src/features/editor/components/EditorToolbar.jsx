@@ -5,12 +5,13 @@
  */
 
 import React from 'react'
-import { Crop, RotateCw, Undo2 } from 'lucide-react'
+import { Crop, RotateCw, Palette, Undo2 } from 'lucide-react'
 
 const EditorToolbar = ({ activeTool, onToolChange, onReset }) => {
   const tools = [
     { id: 'crop', label: 'Beskjær', icon: Crop },
-    { id: 'rotate', label: 'Roter', icon: RotateCw }
+    { id: 'rotate', label: 'Roter', icon: RotateCw },
+    { id: 'filters', label: 'Filtre', icon: Palette }
   ]
 
   return (

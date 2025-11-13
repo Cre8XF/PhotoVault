@@ -1,5 +1,5 @@
 /**
- * Photo Editor Feature - Phase 1: Crop & Rotate
+ * Photo Editor Feature - Phase 1 & 2: Crop, Rotate, Filters & Adjustments
  *
  * Main exports for the photo editor feature module
  */
@@ -10,6 +10,7 @@ export { default as PhotoEditor } from './components/PhotoEditor'
 // Sub-components
 export { default as CropTool } from './components/CropTool'
 export { default as RotateTool } from './components/RotateTool'
+export { default as FilterPanel } from './components/FilterPanel'
 export { default as EditorToolbar } from './components/EditorToolbar'
 
 // Hooks
@@ -26,5 +27,12 @@ export {
   rotateCanvas90
 } from './utils/cropUtils'
 
-// Phase 2: Filter utilities will be added later
-// export { FILTERS, applyFilter, adjustBrightness } from './utils/filterUtils'
+// Utilities - Filters & Adjustments
+export {
+  FILTERS,
+  applyFilter,
+  adjustBrightness,
+  adjustContrast,
+  adjustSaturation,
+  applyAdjustments
+} from './utils/filterUtils'
