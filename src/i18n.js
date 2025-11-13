@@ -28,6 +28,12 @@ import uploadNO from './locales/no/upload.json';
 import uploadEN from './locales/en/upload.json';
 import navNO from './locales/no/nav.json';
 import navEN from './locales/en/nav.json';
+import editorNO from './locales/no/editor.json';
+import editorEN from './locales/en/editor.json';
+import collageNO from './locales/no/collage.json';
+import collageEN from './locales/en/collage.json';
+import timelineNO from './locales/no/timeline.json';
+import timelineEN from './locales/en/timeline.json';
 
 const resources = {
   no: {
@@ -41,7 +47,10 @@ const resources = {
     auth: authNO,
     home: homeNO,
     upload: uploadNO,
-    nav: navNO
+    nav: navNO,
+    editor: editorNO,
+    collage: collageNO,
+    timeline: timelineNO
   },
   en: {
     translation: translationEN,
@@ -54,7 +63,10 @@ const resources = {
     auth: authEN,
     home: homeEN,
     upload: uploadEN,
-    nav: navEN
+    nav: navEN,
+    editor: editorEN,
+    collage: collageEN,
+    timeline: timelineEN
   }
 };
 
@@ -65,7 +77,7 @@ i18n
     resources,
     fallbackLng: 'en', // Fallback hvis språk ikke finnes
     defaultNS: 'translation',
-    ns: ['translation', 'security', 'albums', 'common', 'search', 'ai', 'admin', 'auth', 'home', 'upload', 'nav'],
+    ns: ['translation', 'security', 'albums', 'common', 'search', 'ai', 'admin', 'auth', 'home', 'upload', 'nav', 'editor', 'collage', 'timeline'],
     
     interpolation: {
       escapeValue: false // React escaper allerede

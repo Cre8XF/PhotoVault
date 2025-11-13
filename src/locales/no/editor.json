@@ -1,0 +1,69 @@
+{
+  "title": "Rediger bilde",
+  "buttons": {
+    "download": "Last ned",
+    "save": "Lagre",
+    "saving": "Lagrer...",
+    "close": "Lukk",
+    "apply": "Bruk",
+    "cancel": "Avbryt",
+    "reset": "Tilbakestill",
+    "addText": "Legg til tekst"
+  },
+  "loading": {
+    "image": "Laster bilde...",
+    "processing": "Behandler..."
+  },
+  "errors": {
+    "canvasError": "Kunne ikke lagre bildet (canvas mangler)",
+    "saveError": "Kunne ikke lagre bildet",
+    "blobError": "Blob-konvertering feilet",
+    "contextError": "Canvas context mangler"
+  },
+  "toolbar": {
+    "crop": "Beskjær",
+    "rotate": "Roter",
+    "filters": "Filtre",
+    "text": "Tekst"
+  },
+  "crop": {
+    "title": "Beskjær bilde",
+    "aspectRatio": "Sideforhold",
+    "free": "Fri",
+    "selectedArea": "Utvalgt område",
+    "help": "Velg sideforhold og klikk \"Bruk\" for å beskjære"
+  },
+  "rotate": {
+    "title": "Roter bilde",
+    "currentRotation": "Nåværende rotasjon",
+    "rotate90": "Roter 90° medurs",
+    "help": "Klikk for å rotere bildet 90° til høyre"
+  },
+  "filters": {
+    "title": "Filtre og justeringer",
+    "presets": "Filterforhåndsvisninger",
+    "brightness": "Lysstyrke",
+    "contrast": "Kontrast",
+    "saturation": "Metning",
+    "resetAdjustments": "Tilbakestill justeringer",
+    "help": "Velg filter og juster lysstyrke, kontrast og metning"
+  },
+  "text": {
+    "title": "Tekst Overlegg",
+    "textLabel": "Tekst",
+    "placeholder": "Skriv din tekst her...",
+    "fontFamily": "Skrifttype",
+    "fontSize": "Størrelse",
+    "color": "Farge",
+    "style": "Stil",
+    "alignment": "Justering",
+    "position": "Posisjon",
+    "horizontal": "Horisontal",
+    "vertical": "Vertikal",
+    "shadow": "Skygge",
+    "blur": "Uskarphet",
+    "outline": "Kontur",
+    "width": "Bredde",
+    "removeLayer": "Fjern tekstlag"
+  }
+}
