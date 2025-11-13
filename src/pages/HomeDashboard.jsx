@@ -218,10 +218,10 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
           </div>
           <div className="overflow-x-auto">
             <div className="flex gap-4 pb-4">
-              {recentPhotos.map((photo) => (
+              {recentPhotos.map((photo, index) => (
                 <div
                   key={photo.id}
-                  className="flex-shrink-0 w-48 cursor-pointer group"
+                  className={`flex-shrink-0 w-48 cursor-pointer group animate-fade-in-up stagger-${(index % 12) + 1}`}
                   onClick={() => onNavigate("albums")}
                 >
                   <LazyImage
@@ -250,11 +250,11 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
           {t("home:smartAlbums")}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {smartAlbums.map((album) => (
+          {smartAlbums.map((album, index) => (
             <button
               key={album.id}
               onClick={() => onNavigate("search")}
-              className="ripple-effect glass p-6 rounded-2xl text-left hover:scale-105 transition-transform group"
+              className={`ripple-effect glass p-6 rounded-2xl text-left hover:scale-105 transition-transform group animate-fade-in-up stagger-${index + 1}`}
             >
               <div
                 className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${album.color} mb-3`}
