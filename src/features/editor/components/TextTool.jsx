@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Type, Bold, Italic, AlignLeft, AlignCenter, AlignRight, Trash2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { FONT_FAMILIES, createTextLayer, updateTextLayer } from '../utils/textUtils'
 
 /**
@@ -12,6 +13,7 @@ const TextTool = ({
   onAddTextLayer,
   onRemoveTextLayer
 }) => {
+  const { t } = useTranslation(['editor'])
   const [localLayer, setLocalLayer] = useState(currentTextLayer || createTextLayer())
 
   // Update local state when currentTextLayer changes
@@ -71,13 +73,13 @@ const TextTool = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Type className="w-5 h-5" />
-          <h3 className="font-semibold">Tekst Overlegg</h3>
+          <h3 className="font-semibold">{t('editor:text.title')}</h3>
         </div>
         {currentTextLayer && (
           <button
             onClick={handleRemoveLayer}
             className="p-2 rounded-lg bg-red-600/20 hover:bg-red-600/40 text-red-400 transition-colors"
-            title="Fjern tekstlag"
+            title={t('editor:text.removeLayer')}
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -87,12 +89,12 @@ const TextTool = ({
       {/* Text Input */}
       <div>
         <label className="block text-sm font-medium mb-2">
-          Tekst
+          {t('editor:text.textLabel')}
         </label>
         <textarea
           value={localLayer.text}
           onChange={handleTextChange}
-          placeholder="Skriv din tekst her..."
+          placeholder={t('editor:text.placeholder')}
           className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
           rows={3}
         />
@@ -101,7 +103,7 @@ const TextTool = ({
       {/* Font Family */}
       <div>
         <label className="block text-sm font-medium mb-2">
-          Skrifttype
+          {t('editor:text.fontFamily')}
         </label>
         <select
           value={localLayer.fontFamily}
@@ -119,7 +121,7 @@ const TextTool = ({
       {/* Font Size */}
       <div>
         <label className="block text-sm font-medium mb-2">
-          Størrelse: {localLayer.fontSize}px
+          {t('editor:text.fontSize')}: {localLayer.fontSize}px
         </label>
         <input
           type="range"
@@ -135,7 +137,7 @@ const TextTool = ({
       {/* Text Color */}
       <div>
         <label className="block text-sm font-medium mb-2">
-          Farge
+          {t('editor:text.color')}
         </label>
         <div className="flex gap-2">
           <input
@@ -157,7 +159,7 @@ const TextTool = ({
       {/* Text Style */}
       <div>
         <label className="block text-sm font-medium mb-2">
-          Stil
+          {t('editor:text.style')}
         </label>
         <div className="flex gap-2">
           <button
@@ -186,7 +188,7 @@ const TextTool = ({
       {/* Text Alignment */}
       <div>
         <label className="block text-sm font-medium mb-2">
-          Justering
+          {t('editor:text.alignment')}
         </label>
         <div className="grid grid-cols-3 gap-2">
           <button
@@ -225,12 +227,12 @@ const TextTool = ({
       {/* Position */}
       <div>
         <label className="block text-sm font-medium mb-2">
-          Posisjon
+          {t('editor:text.position')}
         </label>
         <div className="space-y-2">
           <div>
             <label className="text-xs text-gray-400">
-              Horisontal: {Math.round(localLayer.x * 100)}%
+              {t('editor:text.horizontal')}: {Math.round(localLayer.x * 100)}%
             </label>
             <input
               type="range"
@@ -244,7 +246,7 @@ const TextTool = ({
           </div>
           <div>
             <label className="text-xs text-gray-400">
-              Vertikal: {Math.round(localLayer.y * 100)}%
+              {t('editor:text.vertical')}: {Math.round(localLayer.y * 100)}%
             </label>
             <input
               type="range"
@@ -263,7 +265,7 @@ const TextTool = ({
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="text-sm font-medium">
-            Skygge
+            {t('editor:text.shadow')}
           </label>
           <input
             type="checkbox"
@@ -276,7 +278,7 @@ const TextTool = ({
           <div className="space-y-2 pl-2">
             <div>
               <label className="text-xs text-gray-400">
-                Uskarphet: {localLayer.shadow.blur}px
+                {t('editor:text.blur')}: {localLayer.shadow.blur}px
               </label>
               <input
                 type="range"
@@ -296,7 +298,7 @@ const TextTool = ({
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="text-sm font-medium">
-            Kontur
+            {t('editor:text.outline')}
           </label>
           <input
             type="checkbox"
@@ -324,7 +326,7 @@ const TextTool = ({
             </div>
             <div>
               <label className="text-xs text-gray-400">
-                Bredde: {localLayer.stroke.width}px
+                {t('editor:text.width')}: {localLayer.stroke.width}px
               </label>
               <input
                 type="range"
@@ -347,7 +349,7 @@ const TextTool = ({
           className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
         >
           <Type className="w-5 h-5" />
-          Legg til tekst
+          {t('editor:buttons.addText')}
         </button>
       )}
     </div>
