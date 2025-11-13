@@ -1,0 +1,219 @@
+🇳🇴 PhotoVault – Norwegian (NO) Translation Issues
+Testet i Light Mode – 2025-11-13
+
+Tester: Roger Sørqvist
+
+1. AlbumPage (Inne på et album)
+
+Problemer sett på bildet:
+key 'filters (no)' returned an object instead of string.
+key 'categories (no)' returned an object instead of string.
+key 'aiStatus (no)' returned an object instead of string.
+
+A) Oversettingsfeil i UI
+
+Følgende vises som key errors og skyldes at norsk-noden i i18n er et objekt i stedet for en ren streng:
+
+filters (no)
+
+categories (no)
+
+aiStatus (no)
+
+Disse må være:
+
+"filters": "Filtre"
+"categories": "Kategorier"
+"aiStatus": "AI-status"
+
+Ikke objekter.
+
+B) Manglende oversettelse i dropdowns
+
+Alle bilder ({{count}}) → OK norsk, men NØKKEL bør være "allPhotos"
+
+uploadPhotos-knappen er engelsk i norsk visning → burde være Last opp bilder
+
+C) Tekster i toppfeltet
+
+aiAnalyzed → burde oversettes til AI-analysert
+
+Del album → OK
+
+Lag kollasj → OK
+
+Rediger → OK
+
+2. More → Admin (Mer → Admin)
+   A) Norsk + Engelsk blandet
+
+I Admin-seksjonen vises både norsk og engelsk:
+
+Norsk:
+
+Brukeradministrasjon
+
+Database-verktøy
+
+Admin tilgang
+
+Engelsk (burde vært norsk):
+
+Migration Tools (Developer) → Migreringsverktøy (Utvikler)
+
+Fix Albums → Reparer album
+
+Add userId to albums → Legg til userId i album
+
+Fix Photos → Reparer bilder
+
+Add userId to photos → Legg til userId i bilder
+
+B) Tekst under migrering
+
+Viser fortsatt:
+
+Fix old albums/photos missing userId field. Run once to enable delete/edit permissions.
+
+→ Burde være:
+
+Reparer gamle album/bilder som mangler userId-felt. Kjør én gang for å aktivere sletting og redigering.
+
+3. More → Information (Informasjon)
+   A) Manglende oversettelser
+
+Privacy policy → Personvernerklæring
+
+Terms of service → Bruksvilkår
+
+Help & support → Hjelp og support (denne er korrekt)
+
+B) Delvis engelsk i selve labels
+
+Privacy policy → står på engelsk selv om seksjonstittel er norsk
+
+Terms of service → engelsk
+
+4. Secure Vault Setup (Oppsett sikkerhets-side)
+
+Denne modalen er 100% engelskspråklig, ingen oversettelser er aktivert.
+
+A) Oversettelser mangler for:
+
+Set Up Secure Vault
+
+Secure Your Private Photos
+
+Hele avsnittet om AES-256 og personvern
+
+Features:
+
+Client-side encryption – your password never leaves your device
+
+Biometric unlock support
+
+Auto-lock after inactivity
+
+Hidden from main gallery
+
+Get Started
+
+Forslag (norsk):
+
+Sett opp sikker hvelv
+
+Sikre dine private bilder
+
+Vaultet bruker AES-256-kryptering for å beskytte sensitive bilder. Bare du har tilgang til dem via passordet ditt.
+
+Funksjoner:
+
+Klientside-kryptering – passordet ditt forlater aldri enheten
+
+Støtte for biometrisk opplåsing
+
+Automatisk låsing etter inaktivitet
+
+Skjult fra hovedgalleriet
+
+Kom i gang
+
+5. My Profile (Min profil)
+   A) Oversettelser mangler:
+
+My Profile → Min profil
+
+Display Name → Visningsnavn
+
+Email Address → E-postadresse
+
+Profile Photo URL → Profilbilde-URL
+
+Save Changes → Lagre endringer
+
+Changing your email will require re-authentication
+→ Endring av e-post krever ny innlogging
+
+B) Andre detaljer:
+
+FREE Account → Gratis konto
+
+Profile Information → Profilinformasjon
+
+📌 6. Generelle norsk-feil på tvers av sidene
+A) i18n-filer: Norsk node inneholder objekter
+
+Feilmeldingene:
+
+returned an object instead of string
+
+Betyr at f.eks.:
+
+"filters": {
+"no": "Filtre"
+}
+
+MÅ være:
+
+"filters": "Filtre"
+
+B) Hardkodet engelsk tekst i flere modaler
+
+Spesielt:
+
+Vault
+
+Profile page
+
+Informasjonsmodalene
+
+Admin verktøy
+
+Album/Filter-UI
+
+C) Manglende fallback for norsk der nøkler mangler
+
+Hvis en nøkkel ikke finnes → React-i18next prøver å tolke objekt, derfor feil.
+
+📌 7. Prioritert liste over hva som bør fikses (Norsk)
+Kritisk
+
+returned an object instead of string i filter-, kategori-, og AI-statusnøkler
+
+Vault-modal 100 % engelsk
+
+Admin-verktøy halvt engelsk
+
+Viktig
+
+Profil-side blanding av norsk og engelsk
+
+Informasjonsseksjon (Privacy policy, Terms) står på engelsk
+
+“uploadPhotos” uoversatt i knapper
+
+Nice to have
+
+Finjustere norske tekster for tone og konsistens
+
+Legge inn norsk feilhåndtering for Vault og migrering
