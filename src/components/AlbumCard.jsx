@@ -51,7 +51,7 @@ const AlbumCard = memo(
 
     return (
       <div
-        className="relative ripple-effect album-card glass cursor-pointer group"
+        className="relative ripple-effect card-press album-card glass cursor-pointer group"
         onClick={() => onOpen && onOpen(album)}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
@@ -79,7 +79,7 @@ const AlbumCard = memo(
                 e.stopPropagation()
                 if (onEdit) onEdit(album)
               }}
-              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition"
+              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition ripple-effect"
               title="Rediger album"
             >
               <Edit3 size={16} />
