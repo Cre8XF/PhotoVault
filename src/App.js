@@ -413,6 +413,10 @@ function AppContent() {
           currentIndex={selectedPhotoIndex}
           onClose={() => setPhotoModalOpen(false)}
           onToggleFavorite={toggleFavorite}
+          onPhotoEdited={async (newPhoto) => {
+            // Refresh photos to show the new edited photo
+            await refreshData();
+          }}
         />
       )}
 

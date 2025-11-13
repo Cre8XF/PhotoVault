@@ -50,3 +50,11 @@ export {
   measureText,
   getTextBoundingBox
 } from './utils/textUtils'
+
+// Utilities - Save & Integration
+export {
+  saveEditedPhoto,
+  generatePreviewUrl,
+  isEditedPhoto,
+  getOriginalPhotoId
+} from './utils/editorUtils'
