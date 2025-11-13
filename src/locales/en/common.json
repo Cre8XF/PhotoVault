@@ -163,6 +163,11 @@
     "photoSaved": "Photo saved! You will find the edited photo in the album.",
     "photoSaveError": "Could not save the edited photo. Please try again."
   },
+  "video": {
+    "notSupported": "Your browser does not support video playback.",
+    "duration": "Duration",
+    "resolution": "Resolution"
+  },
   "albumCard": {
     "editAlbum": "Edit album"
   }
