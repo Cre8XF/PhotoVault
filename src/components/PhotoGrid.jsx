@@ -238,6 +238,10 @@ const PhotoGrid = ({
             await toggleFavorite(photo.id, photo.favorite);
             if (refreshPhotos) await refreshPhotos();
           }}
+          onPhotoEdited={async (newPhoto) => {
+            // Refresh photos to show the new edited photo
+            if (refreshPhotos) await refreshPhotos();
+          }}
         />
       )}
     </>

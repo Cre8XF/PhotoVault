@@ -837,6 +837,19 @@ const AlbumPage = ({
           currentIndex={photoModal.index}
           onClose={() => setPhotoModal({ open: false, index: 0 })}
           onToggleFavorite={onToggleFavorite}
+          onPhotoEdited={async (newPhoto) => {
+            // Refresh data to show the new edited photo
+            if (refreshData) {
+              await refreshData()
+            }
+            // Show notification
+            if (setNotification) {
+              setNotification({
+                type: 'success',
+                message: 'Redigert bilde lagret!'
+              })
+            }
+          }}
         />
       )}
 
