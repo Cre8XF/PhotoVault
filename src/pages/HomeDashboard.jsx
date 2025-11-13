@@ -1,10 +1,11 @@
 // ============================================================================
 // PAGE: HomeDashboard.jsx – v4.1 med LazyImage + i18n + FIKSET ALBUM-OPPRETTING
 // ============================================================================
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { addAlbum } from "../firebase";
 import { auth } from "../firebase";
 import UploadModal from "../components/UploadModal";
+import { SkeletonCard, SkeletonPhoto } from "../components/SkeletonCard";
 import {
   Star,
   Clock,
@@ -22,6 +23,19 @@ import { useTranslation } from "react-i18next";
 const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, onUpload }) => {
   const { t } = useTranslation(["common", "home"]);
   const [isUploadOpen, setUploadOpen] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+  // Track initial data loading
+  useEffect(() => {
+    // Show skeleton until we have data or after a timeout
+    if ((albums && albums.length > 0) || (photos && photos.length > 0)) {
+      setIsInitialLoading(false);
+    } else {
+      // Set timeout to hide skeleton after 2 seconds even if no data
+      const timer = setTimeout(() => setIsInitialLoading(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [albums, photos]);
 
   const stats = useMemo(
     () => {
@@ -123,8 +137,30 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
         )}
       </section>
 
-      {/* Favoritter */}
-      {favoritePhotos.length > 0 && (
+      {/* Loading Skeletons */}
+      {isInitialLoading ? (
+        <>
+          <section className="mb-10">
+            <div className="h-8 w-48 bg-white/10 rounded mb-4 skeleton-premium" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {Array(8).fill(0).map((_, i) => (
+                <SkeletonPhoto key={i} />
+              ))}
+            </div>
+          </section>
+          <section className="mb-10">
+            <div className="h-8 w-56 bg-white/10 rounded mb-4 skeleton-premium" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {Array(8).fill(0).map((_, i) => (
+                <SkeletonPhoto key={i} />
+              ))}
+            </div>
+          </section>
+        </>
+      ) : (
+        <>
+          {/* Favoritter */}
+          {favoritePhotos.length > 0 && (
         <section className="mb-10 animate-scale-in">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold flex items-center gap-2">
@@ -182,10 +218,10 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
           </div>
           <div className="overflow-x-auto">
             <div className="flex gap-4 pb-4">
-              {recentPhotos.map((photo) => (
+              {recentPhotos.map((photo, index) => (
                 <div
                   key={photo.id}
-                  className="flex-shrink-0 w-48 cursor-pointer group"
+                  className={`flex-shrink-0 w-48 cursor-pointer group animate-fade-in-up stagger-${(index % 12) + 1}`}
                   onClick={() => onNavigate("albums")}
                 >
                   <LazyImage
@@ -214,11 +250,11 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
           {t("home:smartAlbums")}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {smartAlbums.map((album) => (
+          {smartAlbums.map((album, index) => (
             <button
               key={album.id}
               onClick={() => onNavigate("search")}
-              className="ripple-effect glass p-6 rounded-2xl text-left hover:scale-105 transition-transform group"
+              className={`ripple-effect glass p-6 rounded-2xl text-left hover:scale-105 transition-transform group animate-fade-in-up stagger-${index + 1}`}
             >
               <div
                 className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${album.color} mb-3`}
@@ -233,6 +269,8 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
           ))}
         </div>
       </section>
+        </>
+      )}
 
       {/* AI-verktøy */}
       <section className="mb-10">

@@ -1,10 +1,13 @@
 import React from 'react'
 import { ArrowLeft, Image as ImageIcon, Check } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Photo selector component - allows user to select photos for collage slots
  */
 const PhotoSelector = ({ photos, maxPhotos, selectedPhotos, onSelect, onBack }) => {
+  const { t } = useTranslation(['collage'])
+
   const handlePhotoClick = (photo) => {
     const isSelected = selectedPhotos.some(p => p.id === photo.id)
 
@@ -37,17 +40,17 @@ const PhotoSelector = ({ photos, maxPhotos, selectedPhotos, onSelect, onBack }) 
           className="flex items-center gap-2 text-sm opacity-70 hover:opacity-100 transition mb-3"
         >
           <ArrowLeft className="w-4 h-4" />
-          Tilbake til layouts
+          {t('collage:buttons.backToLayouts')}
         </button>
 
         <div className="flex items-center gap-2 mb-2">
           <ImageIcon className="w-5 h-5 text-purple-400" />
-          <h3 className="text-lg font-bold">Velg bilder</h3>
+          <h3 className="text-lg font-bold">{t('collage:photoSelector.title')}</h3>
         </div>
 
         <div className="flex items-center justify-between">
           <p className="text-sm opacity-70">
-            Velg {maxPhotos} bilder for din kollasj
+            {t('collage:photoSelector.selectPhotos', { count: maxPhotos })}
           </p>
           <div className="text-sm font-medium">
             <span className={selectedPhotos.length === maxPhotos ? 'text-green-400' : 'text-purple-400'}>
@@ -61,7 +64,7 @@ const PhotoSelector = ({ photos, maxPhotos, selectedPhotos, onSelect, onBack }) 
       {/* Selected photos preview */}
       {selectedPhotos.length > 0 && (
         <div className="mb-4 p-3 glass-card rounded-xl border border-white/10">
-          <p className="text-xs opacity-70 mb-2">Valgte bilder (rekkefølge):</p>
+          <p className="text-xs opacity-70 mb-2">{t('collage:photoSelector.selectedPhotos')}</p>
           <div className="flex flex-wrap gap-2">
             {selectedPhotos.map((photo, index) => (
               <div key={photo.id} className="relative w-12 h-12 rounded-lg overflow-hidden">
@@ -131,8 +134,8 @@ const PhotoSelector = ({ photos, maxPhotos, selectedPhotos, onSelect, onBack }) 
       ) : (
         <div className="flex flex-col items-center justify-center py-12 text-center opacity-70">
           <ImageIcon className="w-12 h-12 mb-3" />
-          <p>Ingen bilder tilgjengelig</p>
-          <p className="text-sm">Last opp bilder til et album først</p>
+          <p>{t('collage:photoSelector.noPhotos')}</p>
+          <p className="text-sm">{t('collage:photoSelector.uploadFirst')}</p>
         </div>
       )}
     </div>

@@ -150,5 +150,25 @@
     "contact": "Contact us at support@fotio.app to test early",
     "notify": "Notify me when ready",
     "close": "Close"
+  },
+  "grid": {
+    "confirmDelete": "Do you want to delete this photo?",
+    "noAlbum": "This photo does not belong to an album",
+    "setCoverError": "Could not set cover image",
+    "noPhotos": "No photos to display",
+    "video": "Video",
+    "coverBadge": "Cover",
+    "setAsCover": "Set as album cover",
+    "videoEditingNotSupported": "Video editing is not supported yet",
+    "photoSaved": "Photo saved! You will find the edited photo in the album.",
+    "photoSaveError": "Could not save the edited photo. Please try again."
+  },
+  "video": {
+    "notSupported": "Your browser does not support video playback.",
+    "duration": "Duration",
+    "resolution": "Resolution"
+  },
+  "albumCard": {
+    "editAlbum": "Edit album"
   }
 }

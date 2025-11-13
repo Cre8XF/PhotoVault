@@ -1,0 +1,44 @@
+{
+  "emptyState": {
+    "title": "Ingen bilder å vise",
+    "description": "Last opp bilder for å se dem organisert i tidslinjen"
+  },
+  "stats": {
+    "showing": "Viser",
+    "photo": "bilde",
+    "photo_plural": "bilder",
+    "in": "i",
+    "day": "dag",
+    "day_plural": "dager",
+    "month": "måned",
+    "month_plural": "måneder",
+    "year": "år",
+    "year_plural": "år"
+  },
+  "jumpToDate": {
+    "title": "Gå til dato",
+    "button": "Gå til"
+  },
+  "months": {
+    "january": "Januar",
+    "february": "Februar",
+    "march": "Mars",
+    "april": "April",
+    "may": "Mai",
+    "june": "Juni",
+    "july": "Juli",
+    "august": "August",
+    "september": "September",
+    "october": "Oktober",
+    "november": "November",
+    "december": "Desember"
+  },
+  "onThisDay": {
+    "title": "På denne dagen",
+    "description": "Minner fra {{date}} i tidligere år",
+    "yearsAgo": "{{count}} år siden",
+    "more": "flere",
+    "memory": "minne",
+    "memory_plural": "minner"
+  }
+}

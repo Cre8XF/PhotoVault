@@ -7,7 +7,7 @@
 // 3. Lagt til toast-melding ved handleSetCover
 // 4. Forbedret handleMovePhotos med bekreftelsesdialog og auto-refresh
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import {
   ArrowLeft,
   Trash2,
@@ -35,6 +35,7 @@ import PhotoModal from '../components/PhotoModal'
 import AlbumModal from '../components/AlbumModal'
 import QRShareModal from '../features/qr-sharing/components/QRShareModal'
 import { CollageBuilder } from '../features/collage'
+import { SkeletonPhoto } from '../components/SkeletonCard'
 import useStore from '../state/store'
 
 function getCategoryIcon(category) {
@@ -90,6 +91,17 @@ const AlbumPage = ({
   const [showFilters, setShowFilters] = useState(false)
   const [filterCategory, setFilterCategory] = useState('all')
   const [filterAI, setFilterAI] = useState('all')
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
+
+  // Track initial data loading
+  useEffect(() => {
+    if (photos && photos.length > 0) {
+      setIsInitialLoading(false)
+    } else {
+      const timer = setTimeout(() => setIsInitialLoading(false), 1500)
+      return () => clearTimeout(timer)
+    }
+  }, [photos])
 
   const albumPhotos = useMemo(() => {
     if (!album) return []
@@ -522,7 +534,7 @@ const AlbumPage = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t('albums:searchPhotos')}
-            className="w-full pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="input-premium !pl-10 !pr-10 !py-3"
           />
           {searchQuery && (
             <button
@@ -594,7 +606,7 @@ const AlbumPage = ({
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="input-premium !py-2"
               >
                 <option value="date-desc">{t('albums:sortDateDesc')}</option>
                 <option value="date-asc">{t('albums:sortDateAsc')}</option>
@@ -611,7 +623,7 @@ const AlbumPage = ({
               <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="input-premium !py-2"
               >
                 <option value="all">{t('albums:allCategories')}</option>
                 <option value="people">👥 {t('albums:categoryPeople')}</option>
@@ -633,7 +645,7 @@ const AlbumPage = ({
               <select
                 value={filterAI}
                 onChange={(e) => setFilterAI(e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="input-premium !py-2"
               >
                 <option value="all">{t('albums:allPhotos')}</option>
                 <option value="analyzed">{t('albums:aiAnalyzedOnly')}</option>
@@ -644,8 +656,17 @@ const AlbumPage = ({
         </div>
       )}
 
+      {/* Loading Skeleton */}
+      {isInitialLoading && viewMode === 'grid' && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {Array(12).fill(0).map((_, i) => (
+            <SkeletonPhoto key={i} />
+          ))}
+        </div>
+      )}
+
       {/* Photos Grid */}
-      {viewMode === 'grid' && filteredPhotos.length > 0 && (
+      {!isInitialLoading && viewMode === 'grid' && filteredPhotos.length > 0 && (
         <div
           className={`grid gap-4 ${
             gridSize === 2
@@ -658,7 +679,7 @@ const AlbumPage = ({
           {filteredPhotos.map((photo, index) => (
             <div
               key={photo.id}
-              className={`relative group aspect-square bg-black/20 rounded-xl overflow-hidden cursor-pointer transition hover:scale-105 ${
+              className={`relative group aspect-square bg-black/20 rounded-xl overflow-hidden cursor-pointer transition hover:scale-105 animate-fade-in-up stagger-${(index % 12) + 1} ${
                 isPhotoSelected(photo) ? 'ring-4 ring-purple-500' : ''
               }`}
               onClick={() => {
@@ -744,12 +765,12 @@ const AlbumPage = ({
       )}
 
       {/* Photos List View */}
-      {viewMode === 'list' && filteredPhotos.length > 0 && (
+      {!isInitialLoading && viewMode === 'list' && filteredPhotos.length > 0 && (
         <div className="space-y-2">
           {filteredPhotos.map((photo, index) => (
             <div
               key={photo.id}
-              className={`flex items-center gap-4 p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition cursor-pointer ${
+              className={`flex items-center gap-4 p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition cursor-pointer animate-fade-in-up stagger-${(index % 12) + 1} ${
                 isPhotoSelected(photo) ? 'ring-2 ring-purple-500' : ''
               }`}
               onClick={() => {
@@ -822,7 +843,7 @@ const AlbumPage = ({
       )}
 
       {/* Empty State */}
-      {filteredPhotos.length === 0 && (
+      {!isInitialLoading && filteredPhotos.length === 0 && (
         <div className="text-center py-16">
           <ImageIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
           <p className="text-xl font-medium mb-2">{t('albums:noPhotos')}</p>

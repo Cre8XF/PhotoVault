@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { X, Download, ArrowLeft, Loader, Image as ImageIcon, Type, Smile } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { getAllLayouts } from '../layouts/gridLayouts'
 import { useCollageCanvas } from '../hooks/useCollageCanvas'
 import LayoutSelector from './LayoutSelector'
@@ -12,6 +13,7 @@ import StickerPanel from './StickerPanel'
  * Three-step workflow: Layout → Photos → Preview/Edit
  */
 const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
+  const { t } = useTranslation(['collage'])
   const [step, setStep] = useState(1) // 1: layout, 2: photos, 3: preview
   const [selectedLayout, setSelectedLayout] = useState(null)
   const [selectedPhotos, setSelectedPhotos] = useState([])
@@ -109,7 +111,7 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
       }, 500)
     } catch (err) {
       console.error('❌ Error saving collage:', err)
-      alert('Kunne ikke lagre kollasjen. Prøv igjen.')
+      alert(t('collage:errors.saveError'))
       setSaving(false)
     }
   }
@@ -170,11 +172,11 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
             <X className="w-6 h-6" />
           </button>
           <div>
-            <h1 className="text-xl font-bold">Lag kollasj</h1>
+            <h1 className="text-xl font-bold">{t('collage:title')}</h1>
             <p className="text-sm opacity-70">
-              {step === 1 && 'Steg 1: Velg layout'}
-              {step === 2 && 'Steg 2: Velg bilder'}
-              {step === 3 && 'Steg 3: Forhåndsvisning'}
+              {step === 1 && t('collage:steps.step1')}
+              {step === 2 && t('collage:steps.step2')}
+              {step === 3 && t('collage:steps.step3')}
             </p>
           </div>
         </div>
@@ -189,7 +191,7 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
                 className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-xl transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Download className="w-5 h-5" />
-                <span className="hidden sm:inline">Last ned</span>
+                <span className="hidden sm:inline">{t('collage:buttons.download')}</span>
               </button>
 
               <button
@@ -200,12 +202,12 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
                 {saving ? (
                   <>
                     <Loader className="w-5 h-5 animate-spin" />
-                    <span className="hidden sm:inline">Lagrer...</span>
+                    <span className="hidden sm:inline">{t('collage:buttons.saving')}</span>
                   </>
                 ) : (
                   <>
                     <Download className="w-5 h-5" />
-                    <span className="hidden sm:inline">Lagre</span>
+                    <span className="hidden sm:inline">{t('collage:buttons.save')}</span>
                   </>
                 )}
               </button>
@@ -249,7 +251,7 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
                   }`}
                 >
                   <ImageIcon className="w-4 h-4" />
-                  <span className="text-sm font-medium">Rediger</span>
+                  <span className="text-sm font-medium">{t('collage:tabs.edit')}</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('text')}
@@ -260,7 +262,7 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
                   }`}
                 >
                   <Type className="w-4 h-4" />
-                  <span className="text-sm font-medium">Tekst</span>
+                  <span className="text-sm font-medium">{t('collage:tabs.text')}</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('stickers')}
@@ -271,7 +273,7 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
                   }`}
                 >
                   <Smile className="w-4 h-4" />
-                  <span className="text-sm font-medium">Stickers</span>
+                  <span className="text-sm font-medium">{t('collage:tabs.stickers')}</span>
                 </button>
               </div>
 
@@ -284,25 +286,25 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
                     className="w-full mb-4 px-4 py-3 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/50 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <ArrowLeft className="w-5 h-5" />
-                    <span className="font-medium">Endre bilder</span>
+                    <span className="font-medium">{t('collage:buttons.changePhotos')}</span>
                   </button>
 
                   <div className="glass-card p-4 rounded-xl border border-white/10 mb-4">
-                    <h3 className="font-bold mb-2">Layout info</h3>
+                    <h3 className="font-bold mb-2">{t('collage:layout.title')}</h3>
                     <p className="text-sm opacity-70">{selectedLayout.name}</p>
-                    <p className="text-sm opacity-70">{selectedPhotos.length} bilder</p>
+                    <p className="text-sm opacity-70">{selectedPhotos.length} {t('collage:layout.photos')}</p>
                     <p className="text-xs opacity-50 mt-2">
                       {selectedLayout.canvas.width} × {selectedLayout.canvas.height}px
                     </p>
                   </div>
 
                   <div className="glass-card p-4 rounded-xl border border-white/10">
-                    <h3 className="font-bold mb-2">Tips</h3>
+                    <h3 className="font-bold mb-2">{t('collage:tips.title')}</h3>
                     <ul className="text-sm opacity-70 space-y-1">
-                      <li>• Trykk "Last ned" for å lagre lokalt</li>
-                      <li>• Trykk "Lagre" for å legge til i album</li>
-                      <li>• Bruk "Endre bilder" for å bytte bilder</li>
-                      <li>• Legg til tekst og stickers med fanene over</li>
+                      <li>• {t('collage:tips.download')}</li>
+                      <li>• {t('collage:tips.save')}</li>
+                      <li>• {t('collage:tips.change')}</li>
+                      <li>• {t('collage:tips.addElements')}</li>
                     </ul>
                   </div>
                 </div>
@@ -333,8 +335,8 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
           {step === 1 && (
             <div className="text-center opacity-70">
               <ImageIcon className="w-16 h-16 mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-2">Velg en layout</h3>
-              <p className="text-sm">Velg en layout fra menyen til venstre for å starte</p>
+              <h3 className="text-xl font-bold mb-2">{t('collage:layout.selectPrompt')}</h3>
+              <p className="text-sm">{t('collage:layout.selectHelp')}</p>
             </div>
           )}
 
@@ -355,7 +357,7 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
                   <div className="text-center">
                     <Loader className="w-12 h-12 animate-spin mx-auto mb-3 text-purple-400" />
-                    <p className="text-sm">Laster bilder...</p>
+                    <p className="text-sm">{t('collage:loading.photos')}</p>
                   </div>
                 </div>
               )}
@@ -365,8 +367,8 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
                 <div className="absolute inset-0 flex items-center justify-center bg-black/70 rounded-lg z-10">
                   <div className="text-center glass-card p-6 rounded-xl">
                     <Loader className="w-16 h-16 animate-spin mx-auto mb-4 text-purple-400" />
-                    <h3 className="font-bold text-lg mb-2">Lagrer kollasj...</h3>
-                    <p className="text-sm opacity-70">Laster opp til Firebase Storage</p>
+                    <h3 className="font-bold text-lg mb-2">{t('collage:loading.saving')}</h3>
+                    <p className="text-sm opacity-70">{t('collage:loading.uploading')}</p>
                   </div>
                 </div>
               )}
@@ -376,7 +378,7 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
                   <div className="text-center glass-card p-6 rounded-xl max-w-sm">
                     <X className="w-12 h-12 text-red-400 mx-auto mb-3" />
-                    <h3 className="font-bold mb-2">Feil</h3>
+                    <h3 className="font-bold mb-2">{t('collage:errors.title')}</h3>
                     <p className="text-sm opacity-70">{error}</p>
                   </div>
                 </div>

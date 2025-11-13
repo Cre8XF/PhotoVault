@@ -1,0 +1,54 @@
+{
+  "title": "Create Collage",
+  "steps": {
+    "step1": "Step 1: Select layout",
+    "step2": "Step 2: Select photos",
+    "step3": "Step 3: Preview"
+  },
+  "buttons": {
+    "download": "Download",
+    "save": "Save",
+    "saving": "Saving...",
+    "changePhotos": "Change Photos",
+    "close": "Close",
+    "backToLayouts": "Back to layouts"
+  },
+  "tabs": {
+    "edit": "Edit",
+    "text": "Text",
+    "stickers": "Stickers"
+  },
+  "layout": {
+    "title": "Layout info",
+    "photos": "photos",
+    "selectPrompt": "Select a layout",
+    "selectHelp": "Select a layout from the menu on the left to start",
+    "selectTitle": "Select layout",
+    "selectDescription": "Choose how to arrange your photos",
+    "photosCount": "{{count}} photos"
+  },
+  "photoSelector": {
+    "title": "Select photos",
+    "selectPhotos": "Select {{count}} photos for your collage",
+    "selectedPhotos": "Selected photos (order):",
+    "noPhotos": "No photos available",
+    "uploadFirst": "Upload photos to an album first"
+  },
+  "tips": {
+    "title": "Tips",
+    "download": "Click \"Download\" to save locally",
+    "save": "Click \"Save\" to add to album",
+    "change": "Use \"Change Photos\" to swap photos",
+    "addElements": "Add text and stickers with the tabs above"
+  },
+  "loading": {
+    "photos": "Loading photos...",
+    "saving": "Saving collage...",
+    "uploading": "Uploading to Firebase Storage"
+  },
+  "errors": {
+    "saveError": "Could not save collage. Please try again.",
+    "exportError": "Could not export collage",
+    "title": "Error"
+  }
+}

@@ -106,6 +106,43 @@ body.light-mode .text-gray-200 {
   color: #4b5563 !important;
 }
 
+/* Override opacity classes for better contrast in light mode */
+body.light-mode .opacity-70 {
+  opacity: 0.85 !important;
+}
+
+body.light-mode .opacity-60 {
+  opacity: 0.75 !important;
+}
+
+body.light-mode .opacity-50 {
+  opacity: 0.65 !important;
+}
+
+/* Placeholder text contrast */
+body.light-mode input::placeholder,
+body.light-mode textarea::placeholder {
+  color: #6b7280 !important;
+  opacity: 0.8 !important;
+}
+
+/* Button text on colored backgrounds */
+body.light-mode .bg-purple-600,
+body.light-mode .bg-purple-500,
+body.light-mode .bg-purple-700 {
+  color: #ffffff !important;
+}
+
+/* Ensure good contrast for small text */
+body.light-mode .text-xs {
+  color: #374151 !important;
+  font-weight: 500;
+}
+
+body.light-mode .text-sm {
+  color: #1f2937 !important;
+}
+
 /* ============================================================================
    PREMIUM GLASSMORPHISM
    ============================================================================ */
@@ -275,8 +312,14 @@ body.light-mode .card-glow:hover {
   animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
 .animate-scale-in {
   animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  animation-fill-mode: both;
 }
 
 .animate-slide-in {
@@ -289,16 +332,40 @@ body.light-mode .card-glow:hover {
 
 /* Staggered animation for grids */
 .stagger-1 {
-  animation-delay: 0.1s;
+  animation-delay: 0.05s;
 }
 .stagger-2 {
-  animation-delay: 0.2s;
+  animation-delay: 0.1s;
 }
 .stagger-3 {
-  animation-delay: 0.3s;
+  animation-delay: 0.15s;
 }
 .stagger-4 {
+  animation-delay: 0.2s;
+}
+.stagger-5 {
+  animation-delay: 0.25s;
+}
+.stagger-6 {
+  animation-delay: 0.3s;
+}
+.stagger-7 {
+  animation-delay: 0.35s;
+}
+.stagger-8 {
   animation-delay: 0.4s;
+}
+.stagger-9 {
+  animation-delay: 0.45s;
+}
+.stagger-10 {
+  animation-delay: 0.5s;
+}
+.stagger-11 {
+  animation-delay: 0.55s;
+}
+.stagger-12 {
+  animation-delay: 0.6s;
 }
 
 /* ============================================================================

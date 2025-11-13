@@ -1,12 +1,15 @@
 // ============================================================================
 // COMPONENT: AlbumCard.jsx – Twilight Theme med 3D Tilt Effect og cover-støtte
 // Phase 2: Optimized with React.memo
+// Phase 3: i18n support added
 // ============================================================================
 import React, { useState, memo } from 'react'
-import { Edit3 } from 'lucide-react' // 🔹 ikon for redigering
+import { Edit3 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 const AlbumCard = memo(
   ({ album, photos = [], onOpen, onEdit }) => {
+    const { t } = useTranslation(['common'])
     const [tilt, setTilt] = useState({ x: 0, y: 0 })
 
     // Prioriter album.cover, ellers bruk første bilde i albumet
@@ -80,7 +83,7 @@ const AlbumCard = memo(
                 if (onEdit) onEdit(album)
               }}
               className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition ripple-effect"
-              title="Rediger album"
+              title={t('common:albumCard.editAlbum')}
             >
               <Edit3 size={16} />
             </button>
@@ -107,14 +110,14 @@ const AlbumCard = memo(
           <div className="album-title font-semibold">
             {typeof album.name === 'object'
               ? album.name.name || JSON.stringify(album.name)
-              : album.name || 'Uten navn'}
+              : album.name || t('common:noName')}
           </div>
 
           <div
             className="album-sub text-sm text-gray-300 opacity-80 truncate px-1 pb-1 rounded-b-xl"
             style={{ lineHeight: '1.3' }}
           >
-            {count} {count === 1 ? 'bilde' : 'bilder'}
+            {t('common:photoCount', { count })}
             {updatedStr ? ' · ' + updatedStr : ''}
           </div>
         </div>

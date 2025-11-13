@@ -6,9 +6,11 @@
 
 import React, { useState, useEffect } from 'react'
 import { Crop, Check, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { getCropAreaForRatio, constrainCropArea } from '../utils/cropUtils'
 
 const CropTool = ({ canvasDimensions, onCropApply, onCancel }) => {
+  const { t } = useTranslation(['editor'])
   const [aspectRatio, setAspectRatio] = useState('free')
   const [cropArea, setCropArea] = useState(null)
 
@@ -38,20 +40,20 @@ const CropTool = ({ canvasDimensions, onCropApply, onCancel }) => {
   }
 
   if (!cropArea) {
-    return <div className="crop-tool p-4">Loading...</div>
+    return <div className="crop-tool p-4">{t('editor:loading.processing')}</div>
   }
 
   return (
     <div className="crop-tool bg-gray-800/50 backdrop-blur-sm rounded-xl p-4">
       <h3 className="font-bold text-sm mb-3 flex items-center gap-2">
         <Crop className="w-4 h-4" />
-        Beskjær bilde
+        {t('editor:crop.title')}
       </h3>
 
       <div className="space-y-3">
         {/* Aspect Ratio Selector */}
         <div>
-          <label className="text-xs text-gray-400 mb-2 block">Sideforhold</label>
+          <label className="text-xs text-gray-400 mb-2 block">{t('editor:crop.aspectRatio')}</label>
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => handleAspectRatioChange('free')}
@@ -61,7 +63,7 @@ const CropTool = ({ canvasDimensions, onCropApply, onCancel }) => {
                   : 'bg-gray-700/50 hover:bg-gray-700'
               }`}
             >
-              Fri
+              {t('editor:crop.free')}
             </button>
             <button
               onClick={() => handleAspectRatioChange('1:1')}
@@ -98,7 +100,7 @@ const CropTool = ({ canvasDimensions, onCropApply, onCancel }) => {
 
         {/* Crop Info */}
         <div className="p-2 bg-gray-700/30 rounded-lg">
-          <p className="text-xs text-gray-400">Utvalgt område</p>
+          <p className="text-xs text-gray-400">{t('editor:crop.selectedArea')}</p>
           <p className="text-sm font-mono">
             {Math.round(cropArea.width)} × {Math.round(cropArea.height)}
           </p>
@@ -111,20 +113,20 @@ const CropTool = ({ canvasDimensions, onCropApply, onCancel }) => {
             className="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-medium transition flex items-center justify-center gap-2"
           >
             <Check className="w-5 h-5" />
-            <span>Bruk</span>
+            <span>{t('editor:buttons.apply')}</span>
           </button>
           <button
             onClick={onCancel}
             className="flex-1 px-4 py-3 bg-gray-600 hover:bg-gray-700 rounded-lg font-medium transition flex items-center justify-center gap-2"
           >
             <X className="w-5 h-5" />
-            <span>Avbryt</span>
+            <span>{t('editor:buttons.cancel')}</span>
           </button>
         </div>
 
         {/* Help Text */}
         <p className="text-xs text-gray-500 text-center">
-          Velg sideforhold og klikk "Bruk" for å beskjære
+          {t('editor:crop.help')}
         </p>
       </div>
 

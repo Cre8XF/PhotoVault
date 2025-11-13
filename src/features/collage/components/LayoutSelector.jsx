@@ -1,19 +1,22 @@
 import React from 'react'
 import { Grid } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Layout selector component - displays grid of available layouts
  */
 const LayoutSelector = ({ layouts, selectedLayout, onSelect }) => {
+  const { t } = useTranslation(['collage'])
+
   return (
     <div className="layout-selector">
       <div className="mb-4">
         <div className="flex items-center gap-2 mb-2">
           <Grid className="w-5 h-5 text-purple-400" />
-          <h3 className="text-lg font-bold">Velg layout</h3>
+          <h3 className="text-lg font-bold">{t('collage:layout.selectTitle')}</h3>
         </div>
         <p className="text-sm opacity-70">
-          Velg hvordan du vil arrangere bildene dine
+          {t('collage:layout.selectDescription')}
         </p>
       </div>
 
@@ -34,7 +37,7 @@ const LayoutSelector = ({ layouts, selectedLayout, onSelect }) => {
             <div className="flex items-center justify-between mb-3">
               <div className="text-left">
                 <h4 className="font-medium">{layout.name}</h4>
-                <p className="text-xs opacity-70">{layout.slots} bilder</p>
+                <p className="text-xs opacity-70">{t('collage:layout.photosCount', { count: layout.slots })}</p>
               </div>
               {selectedLayout?.id === layout.id && (
                 <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">

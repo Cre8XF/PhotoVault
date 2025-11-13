@@ -114,7 +114,7 @@ const PhotoModal = ({
   const handleEditClick = () => {
     // Only allow editing images, not videos
     if (photo.type === 'video') {
-      alert('Videoredigering er ikke støttet ennå')
+      alert(t('common:grid.videoEditingNotSupported'))
       return
     }
     setShowEditor(true)
@@ -142,10 +142,10 @@ const PhotoModal = ({
       setShowEditor(false)
 
       // Show success message
-      alert('Bildet er lagret! Du finner det redigerte bildet i albumet.')
+      alert(t('common:grid.photoSaved'))
     } catch (error) {
       console.error('❌ Failed to save edited photo:', error)
-      alert('Kunne ikke lagre det redigerte bildet. Prøv igjen.')
+      alert(t('common:grid.photoSaveError'))
     }
   }
 
@@ -230,13 +230,13 @@ const PhotoModal = ({
 
             {photo.type !== 'video' && (
               <button
-                aria-label="Rediger bilde"
+                aria-label={t('common:edit')}
                 onClick={(e) => {
                   e.stopPropagation()
                   handleEditClick()
                 }}
                 className="ripple-effect bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-2.5 rounded-lg transition shadow-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-                title="Rediger bilde"
+                title={t('common:edit')}
               >
                 <Edit2 className="w-5 h-5" />
               </button>
@@ -324,7 +324,7 @@ const PhotoModal = ({
             <source src={photo.url} type="video/mp4" />
             <source src={photo.url} type="video/quicktime" />
             <source src={photo.url} type="video/webm" />
-            Din nettleser støtter ikke videoavspilling.
+            {t('common:video.notSupported')}
           </video>
         ) : (
           <img
@@ -385,7 +385,7 @@ const PhotoModal = ({
               <>
                 {photo.metadata.duration && (
                   <div>
-                    <p className="text-gray-400 mb-1">Varighet</p>
+                    <p className="text-gray-400 mb-1">{t('common:video.duration')}</p>
                     <p className="text-white">
                       {formatDuration(photo.metadata.duration)}
                     </p>
@@ -393,7 +393,7 @@ const PhotoModal = ({
                 )}
                 {photo.metadata.resolution && (
                   <div>
-                    <p className="text-gray-400 mb-1">Oppløsning</p>
+                    <p className="text-gray-400 mb-1">{t('common:video.resolution')}</p>
                     <p className="text-white">{photo.metadata.resolution}</p>
                   </div>
                 )}
@@ -426,7 +426,7 @@ const PhotoModal = ({
               <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3">
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles className="w-4 h-4 text-purple-400" />
-                  <p className="text-purple-400 font-medium">AI-analysert</p>
+                  <p className="text-purple-400 font-medium">{t('common:aiAnalyzed')}</p>
                 </div>
                 {photo.analyzedAt && (
                   <p className="text-xs text-gray-400">
@@ -473,7 +473,7 @@ const PhotoModal = ({
             {/* ✨ Kategori (Fase 4.1) */}
             {photo.category && (
               <div>
-                <p className="text-gray-400 mb-1">Kategori</p>
+                <p className="text-gray-400 mb-1">{t('common:category')}</p>
                 <span className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-lg text-sm font-medium">
                   {photo.category}
                 </span>

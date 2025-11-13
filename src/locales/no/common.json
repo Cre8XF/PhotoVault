@@ -167,5 +167,25 @@
     "contact": "Kontakt oss på support@fotio.app for å teste tidlig",
     "notify": "Varsle meg når det er klart",
     "close": "Lukk"
+  },
+  "grid": {
+    "confirmDelete": "Vil du slette dette bildet?",
+    "noAlbum": "Dette bildet tilhører ikke et album",
+    "setCoverError": "Kunne ikke sette forsidebilde",
+    "noPhotos": "Ingen bilder å vise",
+    "video": "Video",
+    "coverBadge": "Forside",
+    "setAsCover": "Sett som albumforside",
+    "videoEditingNotSupported": "Videoredigering er ikke støttet ennå",
+    "photoSaved": "Bildet er lagret! Du finner det redigerte bildet i albumet.",
+    "photoSaveError": "Kunne ikke lagre det redigerte bildet. Prøv igjen."
+  },
+  "video": {
+    "notSupported": "Din nettleser støtter ikke videoavspilling.",
+    "duration": "Varighet",
+    "resolution": "Oppløsning"
+  },
+  "albumCard": {
+    "editAlbum": "Rediger album"
   }
 }
