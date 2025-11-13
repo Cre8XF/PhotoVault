@@ -97,7 +97,7 @@ const PhotoGrid = ({
         {list.map((photo, i) => (
           <div
             key={photo.id}
-            className="relative group overflow-hidden rounded-xl cursor-pointer"
+            className="relative group overflow-hidden rounded-xl cursor-pointer ripple-effect card-press"
             onClick={() =>
               onPhotoClick
                 ? onPhotoClick(photo.url)
@@ -177,7 +177,7 @@ const PhotoGrid = ({
                 <button
                   onClick={(e) => handleSetCover(e, photo)}
                   title="Sett som albumforside"
-                  className="p-1.5 rounded-full bg-yellow-500/80 hover:bg-yellow-600 text-white transition shadow-lg"
+                  className="p-1.5 rounded-full bg-yellow-500/80 hover:bg-yellow-600 text-white transition shadow-lg ripple-effect"
                 >
                   <ImageIcon className="w-4 h-4" />
                 </button>
@@ -192,7 +192,7 @@ const PhotoGrid = ({
                     photo.favorite
                       ? "bg-red-500/80 text-white"
                       : "bg-black/50 text-gray-300 hover:bg-red-500/70"
-                  } transition shadow-lg`}
+                  } transition shadow-lg ripple-effect`}
                 >
                   <Star className="w-4 h-4" fill={photo.favorite ? "currentColor" : "none"} />
                 </button>
@@ -211,7 +211,7 @@ const PhotoGrid = ({
                     loading
                       ? "bg-gray-500 cursor-not-allowed"
                       : "bg-black/50 hover:bg-red-600/70 text-white"
-                  } transition shadow-lg`}
+                  } transition shadow-lg ripple-effect`}
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
