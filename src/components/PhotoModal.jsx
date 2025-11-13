@@ -1,20 +1,23 @@
 // ============================================================================
-// COMPONENT: PhotoModal.jsx – v4.3 med Comments & Reactions (Phase 4.3)
+// COMPONENT: PhotoModal.jsx – v4.4 med Photo Editor Integration (Phase 6)
 // ============================================================================
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { X, ArrowLeft, ArrowRight, Download, Info, Star, Calendar, Tag, Sparkles, Users } from "lucide-react";
+import { X, ArrowLeft, ArrowRight, Download, Info, Star, Calendar, Tag, Sparkles, Users, Edit2 } from "lucide-react";
 // PHASE 2: Social features disabled for MVP
 // import CommentThread from "./CommentThread";
 // import ReactionPicker from "./ReactionPicker";
 import useAuth from "../hooks/useAuth";
 import { formatDuration, formatFileSize } from "../utils/videoTools";
+import { PhotoEditor } from "../features/editor";
+import { saveEditedPhoto } from "../features/editor";
 
-const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
+const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite, onPhotoEdited }) => {
   const { t } = useTranslation(['common']);
   const { user } = useAuth();
   const [index, setIndex] = useState(currentIndex);
   const [showInfo, setShowInfo] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const photo = photos[index];
   const startX = useRef(0);
@@ -90,6 +93,48 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
     }
   };
 
+  const handleEditClick = () => {
+    // Only allow editing images, not videos
+    if (photo.type === 'video') {
+      alert('Videoredigering er ikke støttet ennå');
+      return;
+    }
+    setShowEditor(true);
+  };
+
+  const handleEditSave = async (blob, originalPhoto) => {
+    try {
+      if (!user?.uid) {
+        throw new Error('User not authenticated');
+      }
+
+      console.log('💾 Saving edited photo...');
+
+      // Save edited photo to Firebase
+      const newPhoto = await saveEditedPhoto(blob, originalPhoto, user.uid);
+
+      console.log('✅ Photo saved successfully:', newPhoto.id);
+
+      // Notify parent component if callback provided
+      if (onPhotoEdited) {
+        onPhotoEdited(newPhoto);
+      }
+
+      // Close editor
+      setShowEditor(false);
+
+      // Show success message
+      alert('Bildet er lagret! Du finner det redigerte bildet i albumet.');
+    } catch (error) {
+      console.error('❌ Failed to save edited photo:', error);
+      alert('Kunne ikke lagre det redigerte bildet. Prøv igjen.');
+    }
+  };
+
+  const handleEditorClose = () => {
+    setShowEditor(false);
+  };
+
   if (!photo) return null;
 
   const formatDate = (dateStr) => {
@@ -156,6 +201,20 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
             >
               <Info className="w-5 h-5" />
             </button>
+
+            {photo.type !== 'video' && (
+              <button
+                aria-label="Rediger bilde"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEditClick();
+                }}
+                className="ripple-effect bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-2.5 rounded-lg transition shadow-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                title="Rediger bilde"
+              >
+                <Edit2 className="w-5 h-5" />
+              </button>
+            )}
 
             <button
               aria-label={t('common:download')}
@@ -423,6 +482,15 @@ const PhotoModal = ({ photos, currentIndex, onClose, onToggleFavorite }) => {
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md text-gray-900 px-6 py-3 rounded-lg font-medium shadow-lg select-none">
           {photo.name}
         </div>
+      )}
+
+      {/* Photo Editor */}
+      {showEditor && (
+        <PhotoEditor
+          photo={photo}
+          onClose={handleEditorClose}
+          onSave={handleEditSave}
+        />
       )}
     </div>
   );
