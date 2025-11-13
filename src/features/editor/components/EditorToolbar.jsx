@@ -6,13 +6,16 @@
 
 import React from 'react'
 import { Crop, RotateCw, Palette, Type, Undo2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 const EditorToolbar = ({ activeTool, onToolChange, onReset }) => {
+  const { t } = useTranslation(['editor'])
+
   const tools = [
-    { id: 'crop', label: 'Beskjær', icon: Crop },
-    { id: 'rotate', label: 'Roter', icon: RotateCw },
-    { id: 'filters', label: 'Filtre', icon: Palette },
-    { id: 'text', label: 'Tekst', icon: Type }
+    { id: 'crop', label: t('editor:toolbar.crop'), icon: Crop },
+    { id: 'rotate', label: t('editor:toolbar.rotate'), icon: RotateCw },
+    { id: 'filters', label: t('editor:toolbar.filters'), icon: Palette },
+    { id: 'text', label: t('editor:toolbar.text'), icon: Type }
   ]
 
   return (
@@ -47,7 +50,7 @@ const EditorToolbar = ({ activeTool, onToolChange, onReset }) => {
           className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 transition"
         >
           <Undo2 className="w-4 h-4" />
-          <span className="text-sm font-medium hidden sm:inline">Tilbakestill</span>
+          <span className="text-sm font-medium hidden sm:inline">{t('editor:buttons.reset')}</span>
         </button>
       </div>
     </div>
