@@ -1,5 +1,5 @@
 /**
- * Photo Editor - Phase 1 & 2: Crop, Rotate, Filters & Adjustments
+ * Photo Editor - Phase 1, 2 & 3: Crop, Rotate, Filters, Adjustments & Text
  *
  * PhotoEditor Component - Main photo editing interface
  */
@@ -11,6 +11,7 @@ import EditorToolbar from './EditorToolbar'
 import CropTool from './CropTool'
 import RotateTool from './RotateTool'
 import FilterPanel from './FilterPanel'
+import TextTool from './TextTool'
 
 const PhotoEditor = ({ photo, onClose, onSave }) => {
   const [activeTool, setActiveTool] = useState('rotate') // 'crop' | 'rotate' | 'filters'
@@ -23,10 +24,17 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
     rotation,
     currentFilter,
     currentAdjustments,
+    textLayers,
+    currentTextLayer,
     rotate90,
     crop,
     applyFilter,
     applyAdjustments,
+    addTextLayer,
+    updateTextLayer,
+    removeTextLayer,
+    selectTextLayer,
+    clearTextLayers,
     reset,
     exportImage,
     exportDataURL,
@@ -134,6 +142,15 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
             <FilterPanel
               onFilterApply={applyFilter}
               onAdjustmentsChange={applyAdjustments}
+            />
+          )}
+
+          {activeTool === 'text' && (
+            <TextTool
+              currentTextLayer={currentTextLayer}
+              onTextLayerChange={updateTextLayer}
+              onAddTextLayer={addTextLayer}
+              onRemoveTextLayer={removeTextLayer}
             />
           )}
         </div>

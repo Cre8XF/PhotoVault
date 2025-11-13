@@ -1,5 +1,5 @@
 /**
- * Photo Editor Feature - Phase 1 & 2: Crop, Rotate, Filters & Adjustments
+ * Photo Editor Feature - Phase 1, 2 & 3: Crop, Rotate, Filters, Adjustments & Text
  *
  * Main exports for the photo editor feature module
  */
@@ -11,6 +11,7 @@ export { default as PhotoEditor } from './components/PhotoEditor'
 export { default as CropTool } from './components/CropTool'
 export { default as RotateTool } from './components/RotateTool'
 export { default as FilterPanel } from './components/FilterPanel'
+export { default as TextTool } from './components/TextTool'
 export { default as EditorToolbar } from './components/EditorToolbar'
 
 // Hooks
@@ -36,3 +37,16 @@ export {
   adjustSaturation,
   applyAdjustments
 } from './utils/filterUtils'
+
+// Utilities - Text Overlay
+export {
+  DEFAULT_TEXT_LAYER,
+  FONT_FAMILIES,
+  renderTextLayer,
+  applyTextLayers,
+  generateTextLayerId,
+  createTextLayer,
+  updateTextLayer,
+  measureText,
+  getTextBoundingBox
+} from './utils/textUtils'
