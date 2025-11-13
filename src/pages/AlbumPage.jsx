@@ -7,7 +7,7 @@
 // 3. Lagt til toast-melding ved handleSetCover
 // 4. Forbedret handleMovePhotos med bekreftelsesdialog og auto-refresh
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import {
   ArrowLeft,
   Trash2,
@@ -35,6 +35,7 @@ import PhotoModal from '../components/PhotoModal'
 import AlbumModal from '../components/AlbumModal'
 import QRShareModal from '../features/qr-sharing/components/QRShareModal'
 import { CollageBuilder } from '../features/collage'
+import { SkeletonPhoto } from '../components/SkeletonCard'
 import useStore from '../state/store'
 
 function getCategoryIcon(category) {
@@ -90,6 +91,17 @@ const AlbumPage = ({
   const [showFilters, setShowFilters] = useState(false)
   const [filterCategory, setFilterCategory] = useState('all')
   const [filterAI, setFilterAI] = useState('all')
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
+
+  // Track initial data loading
+  useEffect(() => {
+    if (photos && photos.length > 0) {
+      setIsInitialLoading(false)
+    } else {
+      const timer = setTimeout(() => setIsInitialLoading(false), 1500)
+      return () => clearTimeout(timer)
+    }
+  }, [photos])
 
   const albumPhotos = useMemo(() => {
     if (!album) return []
@@ -644,8 +656,17 @@ const AlbumPage = ({
         </div>
       )}
 
+      {/* Loading Skeleton */}
+      {isInitialLoading && viewMode === 'grid' && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {Array(12).fill(0).map((_, i) => (
+            <SkeletonPhoto key={i} />
+          ))}
+        </div>
+      )}
+
       {/* Photos Grid */}
-      {viewMode === 'grid' && filteredPhotos.length > 0 && (
+      {!isInitialLoading && viewMode === 'grid' && filteredPhotos.length > 0 && (
         <div
           className={`grid gap-4 ${
             gridSize === 2
@@ -744,7 +765,7 @@ const AlbumPage = ({
       )}
 
       {/* Photos List View */}
-      {viewMode === 'list' && filteredPhotos.length > 0 && (
+      {!isInitialLoading && viewMode === 'list' && filteredPhotos.length > 0 && (
         <div className="space-y-2">
           {filteredPhotos.map((photo, index) => (
             <div
@@ -822,7 +843,7 @@ const AlbumPage = ({
       )}
 
       {/* Empty State */}
-      {filteredPhotos.length === 0 && (
+      {!isInitialLoading && filteredPhotos.length === 0 && (
         <div className="text-center py-16">
           <ImageIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
           <p className="text-xl font-medium mb-2">{t('albums:noPhotos')}</p>
