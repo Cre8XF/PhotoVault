@@ -6,6 +6,7 @@ import PhotoModal from "./PhotoModal";
 import { ImageOff, Trash2, Star, Image as ImageIcon, Play, Video } from "lucide-react";
 import { deletePhoto, toggleFavorite, setAlbumCover } from "../firebase";
 import { formatDuration } from "../utils/videoTools";
+import { useTranslation } from "react-i18next";
 
 const PhotoGrid = ({
   photos = [],
@@ -18,6 +19,7 @@ const PhotoGrid = ({
   editMode = false,
   currentAlbum = null,
 }) => {
+  const { t } = useTranslation(['common']);
   const safePhotos = Array.isArray(photos) ? photos : [];
   const list = filterUnassigned ? safePhotos.filter((p) => !p.albumId) : safePhotos;
   const [photoModal, setPhotoModal] = useState({ open: false, index: 0 });
@@ -25,7 +27,7 @@ const PhotoGrid = ({
 
   // 🔹 Håndter sletting
   const handleDelete = async (photo) => {
-    const confirmed = window.confirm("Vil du slette dette bildet?");
+    const confirmed = window.confirm(t('common:grid.confirmDelete'));
     if (!confirmed) return;
 
     setLoading(true);
@@ -54,9 +56,9 @@ const PhotoGrid = ({
   // 🖼️ Håndter sett som forside
   const handleSetCover = async (e, photo) => {
     e.stopPropagation();
-    
+
     if (!photo.albumId) {
-      alert("Dette bildet tilhører ikke et album");
+      alert(t('common:grid.noAlbum'));
       return;
     }
 
@@ -66,7 +68,7 @@ const PhotoGrid = ({
       if (refreshPhotos) await refreshPhotos();
     } catch (err) {
       console.error("Feil ved oppdatering av forside:", err);
-      alert("Kunne ikke sette forsidebilde");
+      alert(t('common:grid.setCoverError'));
     }
   };
 
@@ -74,7 +76,7 @@ const PhotoGrid = ({
     return (
       <div className="flex flex-col items-center justify-center py-16 text-gray-400">
         <ImageOff className="w-10 h-10 mb-2 opacity-60" />
-        <p className="text-sm">Ingen bilder å vise</p>
+        <p className="text-sm">{t('common:grid.noPhotos')}</p>
       </div>
     );
   }
@@ -139,7 +141,7 @@ const PhotoGrid = ({
                 {/* Video Type Badge */}
                 <div className="absolute top-2 left-2 bg-purple-600/90 text-white text-xs font-medium px-2 py-1 rounded flex items-center gap-1 backdrop-blur-sm">
                   <Video className="w-3 h-3" />
-                  <span>Video</span>
+                  <span>{t('common:grid.video')}</span>
                 </div>
               </div>
             ) : (
@@ -158,7 +160,7 @@ const PhotoGrid = ({
             {currentAlbum && currentAlbum.cover === photo.url && photo.type !== 'video' && (
               <div className="absolute top-2 left-2 bg-yellow-500 text-black px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
                 <ImageIcon className="w-3 h-3" />
-                Forside
+                {t('common:grid.coverBadge')}
               </div>
             )}
 
@@ -166,7 +168,7 @@ const PhotoGrid = ({
             {currentAlbum && currentAlbum.cover === photo.url && photo.type === 'video' && (
               <div className="absolute top-2 left-20 bg-yellow-500 text-black px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
                 <ImageIcon className="w-3 h-3" />
-                Forside
+                {t('common:grid.coverBadge')}
               </div>
             )}
 
@@ -176,7 +178,7 @@ const PhotoGrid = ({
               {editMode && photo.albumId && (
                 <button
                   onClick={(e) => handleSetCover(e, photo)}
-                  title="Sett som albumforside"
+                  title={t('common:grid.setAsCover')}
                   className="p-1.5 rounded-full bg-yellow-500/80 hover:bg-yellow-600 text-white transition shadow-lg ripple-effect"
                 >
                   <ImageIcon className="w-4 h-4" />
@@ -187,7 +189,7 @@ const PhotoGrid = ({
               {showFavoriteButton && (
                 <button
                   onClick={(e) => handleToggleFavorite(e, photo)}
-                  title={photo.favorite ? "Fjern favoritt" : "Legg til favoritt"}
+                  title={photo.favorite ? t('common:removeFavorite') : t('common:addToFavorites')}
                   className={`p-1.5 rounded-full ${
                     photo.favorite
                       ? "bg-red-500/80 text-white"
@@ -205,7 +207,7 @@ const PhotoGrid = ({
                     e.stopPropagation();
                     handleDelete(photo);
                   }}
-                  title="Slett bilde"
+                  title={t('common:notifications.deletePhotoTitle')}
                   disabled={loading}
                   className={`p-1.5 rounded-full ${
                     loading
