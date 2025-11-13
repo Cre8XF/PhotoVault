@@ -429,7 +429,7 @@ const UploadModal = ({
                     <button
                       onClick={() => removeFile(index)}
                       disabled={uploading}
-                      className="absolute top-1 right-1 p-1 bg-red-600 rounded-full opacity-0 group-hover:opacity-100 transition disabled:opacity-50"
+                      className="ripple-effect absolute top-1 right-1 p-1 bg-red-600 rounded-full opacity-0 group-hover:opacity-100 transition disabled:opacity-50"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -471,7 +471,7 @@ const UploadModal = ({
                     setSelectedAlbumId('')
                     setShowAlbums(false)
                   }}
-                  className="w-full p-3 text-left hover:bg-white/10 transition text-sm"
+                  className="ripple-effect w-full p-3 text-left hover:bg-white/10 transition text-sm"
                 >
                   {t('upload:noAlbum')}
                 </button>
@@ -482,7 +482,7 @@ const UploadModal = ({
                       setSelectedAlbumId(album.id)
                       setShowAlbums(false)
                     }}
-                    className="w-full p-3 text-left hover:bg-white/10 transition text-sm border-t border-white/5"
+                    className="ripple-effect w-full p-3 text-left hover:bg-white/10 transition text-sm border-t border-white/5"
                   >
                     {album.name}
                   </button>
