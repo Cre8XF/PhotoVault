@@ -10,7 +10,8 @@
     "save": "Save",
     "saving": "Saving...",
     "changePhotos": "Change Photos",
-    "close": "Close"
+    "close": "Close",
+    "backToLayouts": "Back to layouts"
   },
   "tabs": {
     "edit": "Edit",
@@ -21,7 +22,17 @@
     "title": "Layout info",
     "photos": "photos",
     "selectPrompt": "Select a layout",
-    "selectHelp": "Select a layout from the menu on the left to start"
+    "selectHelp": "Select a layout from the menu on the left to start",
+    "selectTitle": "Select layout",
+    "selectDescription": "Choose how to arrange your photos",
+    "photosCount": "{{count}} photos"
+  },
+  "photoSelector": {
+    "title": "Select photos",
+    "selectPhotos": "Select {{count}} photos for your collage",
+    "selectedPhotos": "Selected photos (order):",
+    "noPhotos": "No photos available",
+    "uploadFirst": "Upload photos to an album first"
   },
   "tips": {
     "title": "Tips",

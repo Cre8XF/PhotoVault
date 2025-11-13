@@ -10,7 +10,8 @@
     "save": "Lagre",
     "saving": "Lagrer...",
     "changePhotos": "Endre bilder",
-    "close": "Lukk"
+    "close": "Lukk",
+    "backToLayouts": "Tilbake til layouts"
   },
   "tabs": {
     "edit": "Rediger",
@@ -21,7 +22,17 @@
     "title": "Layout info",
     "photos": "bilder",
     "selectPrompt": "Velg en layout",
-    "selectHelp": "Velg en layout fra menyen til venstre for å starte"
+    "selectHelp": "Velg en layout fra menyen til venstre for å starte",
+    "selectTitle": "Velg layout",
+    "selectDescription": "Velg hvordan du vil arrangere bildene dine",
+    "photosCount": "{{count}} bilder"
+  },
+  "photoSelector": {
+    "title": "Velg bilder",
+    "selectPhotos": "Velg {{count}} bilder for din kollasj",
+    "selectedPhotos": "Valgte bilder (rekkefølge):",
+    "noPhotos": "Ingen bilder tilgjengelig",
+    "uploadFirst": "Last opp bilder til et album først"
   },
   "tips": {
     "title": "Tips",
