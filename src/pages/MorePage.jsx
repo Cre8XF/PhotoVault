@@ -437,28 +437,13 @@ const MorePage = ({
     }
   }
 
-  // ============================================================================
   // === EXTERNAL LINKS & INFO PAGES ===
-  // ============================================================================
   const openInfoPage = (type) => {
-    const infoPages = {
-      help: '/info/help.html',
-      security: '/info/security.html',
-      pro: '/info/pro.html',
-      about: '/info/about.html',
-      support: '/info/support.html',
-      privacy: '/info/privacy.html',
-      terms: '/info/terms.html',
-    }
+    const lang = i18n.language.startsWith('no') ? 'no' : 'en'
 
-    const url = infoPages[type]
-    if (url) {
-      // Try to open the local info page
-      window.open(url, '_blank', 'noopener,noreferrer')
-    } else {
-      // Fallback: show a modal "Page coming soon"
-      showNotification(t('info.comingSoon', 'Side kommer snart'), 'info')
-    }
+    const file = lang === 'no' ? `/info/${type}.no.html` : `/info/${type}.html`
+
+    window.open(file, '_blank', 'noopener,noreferrer')
   }
 
   // ============================================================================

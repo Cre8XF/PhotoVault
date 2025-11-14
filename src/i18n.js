@@ -52,6 +52,9 @@ import timelineEN from './locales/en/timeline.json'
 import profileNO from './locales/no/profile.json'
 import profileEN from './locales/en/profile.json'
 
+import infoNO from './locales/no/info.json'
+import infoEN from './locales/en/info.json'
+
 const resources = {
   no: {
     translation: translationNO,
@@ -68,7 +71,9 @@ const resources = {
     editor: editorNO,
     collage: collageNO,
     timeline: timelineNO,
-    profile: profileNO, // ⭐ ADDED
+    profile: profileNO,
+    info: infoNO,
+    // ⭐ ADDED
   },
   en: {
     translation: translationEN,
@@ -85,7 +90,9 @@ const resources = {
     editor: editorEN,
     collage: collageEN,
     timeline: timelineEN,
-    profile: profileEN, // ⭐ ADDED
+    profile: profileEN,
+    info: infoEN,
+    // ⭐ ADDED
   },
 }
 
@@ -111,7 +118,9 @@ i18n
       'editor',
       'collage',
       'timeline',
-      'profile', // ⭐ ADDED
+      'profile',
+      'info',
+      // ⭐ ADDED
     ],
 
     interpolation: {
