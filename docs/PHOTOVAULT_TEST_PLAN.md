@@ -165,39 +165,7 @@
 
 ```
 [Beskrive feil her]
-- Funksjonelle feil
-
-"See all ({{count}})" fungerer ikke
-
-"See all (15)" på Favorites → åpner Search Page uten filter.
-
-Forventet: Search Page åpnes med filtrering “favorites only”.
-
-Recent uploads bruker scrollbar i stedet for navigasjonspiler
-
-Scrollbar treg og lite brukervennlig.
-
-Forventet: venstre/høyre piler eller “drag to scroll” på desktop.
-
-i18n-feil
-
-Flere tekster fortsatt hardkodet på engelsk, bl.a.:
-
-“Recent uploads”
-
-“See all”
-
-“My albums”
-
-Smart Albums-tekster
-
-Light Mode – Visuelle feil
-
-Kontrast for dårlig
-
-Album-titler, count badges og enkelte labels er nesten usynlige.
-
-Favorittikon (hjerte) har for svak kontrast i light mode.
+-
 ```
 
 ---
@@ -439,64 +407,7 @@ Favorittikon (hjerte) har for svak kontrast i light mode.
 
 ```
 [Beskrive feil her]
--Funksjonelle feil
-
-Collage Builder: mangler mulighet for å flytte/omplassere tekst & stickers
-
-Under collage → tekst og stickers kan legges til, men ikke flyttes.
-
-Under Photo Editor (enkeltbilde) fungerer dette.
-
-Resultat: inkonsekvent brukeropplevelse.
-
-Set as cover:
-
-Mangler bekreftelses-toast når cover endres i edit mode.
-
-Move photos:
-
-Når bilder flyttes til annet album → albumet oppdaterer ikke før refresh.
-
-i18n-feil
-
-Flere tekster er ikke oversatt i collage builder:
-
-Layout-navn
-
-Instruksjoner
-
-Knaptitler
-
-Light Mode – Visuelle feil
-
-Flere tekster i Album Page er nesten usynlige i lys modus
-
-Spesielt knapper, dropdowns og små labels.
-
-🖼️ 3. COLLAGE BUILDER – Feil
-Inkonsekvent funksjonalitet
-
-Tekst & stickers kan ikke flyttes
-
-Kritisk funksjon mangler for ferdig collage.
-
-Forventet: samme system som Photo Editor → drag/drop + X/Y sliders.
-
-i18n-feil
-
-Mange engelske tekster hardkodet:
-
-Layout names
-
-Descriptions
-
-Empty state
-
-Step labels ("Select layout", "Customize", etc.)
-
-Light Mode – Visuelle feil
-
-Lav kontrast → tekst vanskelig å lese.
+-
 ```
 
 ---
@@ -1704,10 +1615,10 @@ Lav kontrast → tekst vanskelig å lese.
 ## 📈 TEST RESULTAT SAMMENDRAG
 
 **Totalt antall tester:** ~500+
-**Gjennomført:** **\_
-**Bestått:** \_**
-**Feilet:** **\_
-**Hoppet over:** \_**
+**Gjennomført:** **_
+**Bestått:** _**
+**Feilet:** **_
+**Hoppet over:** _**
 
 **Overall vurdering:** \_\_\_ / 10
 
@@ -1716,6 +1627,6 @@ Lav kontrast → tekst vanskelig å lese.
 ---
 
 **Testet av:** Roger
-**Dato:** **\*\***\_**\*\***
+**Dato:** ******\_******
 **Versjon:** MVP Pre-Launch
-**Byggnummer:** **\*\***\_**\*\***
+**Byggnummer:** ******\_******
