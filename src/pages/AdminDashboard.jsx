@@ -70,7 +70,7 @@ export default function AdminDashboard({ onBack }) {
       })
     } catch (error) {
       console.error('Error fetching admin stats:', error)
-      alert('Error loading admin data: ' + error.message)
+      alert(t('admin:errorLoading') + ': ' + error.message)
     } finally {
       setLoading(false)
     }
@@ -114,7 +114,9 @@ export default function AdminDashboard({ onBack }) {
           <span className="font-medium">{t('admin:backToMore')}</span>
         </button>
 
-        <h1 className="text-3xl font-bold mb-2">{t('admin:dashboard.title')}</h1>
+        <h1 className="text-3xl font-bold mb-2">
+          {t('admin:dashboard.title')}
+        </h1>
         <p className="text-gray-600 dark:text-gray-400">
           {t('admin:dashboard.subtitle')}
         </p>

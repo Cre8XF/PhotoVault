@@ -31,7 +31,9 @@
     "photos": "Photos",
     "storage": "Storage",
     "proStatus": "Pro status",
-    "actions": "Actions"
+    "actions": "Actions",
+    "errorLoading": "Error loading admin data"
+
   },
   "proStatus": {
     "pro": "PRO",
@@ -73,5 +75,19 @@
     "couldNotChangeAdmin": "Could not change Admin status",
     "couldNotDelete": "Could not delete user"
   },
+  "migration": {
+    "title": "Migration Tools (Developer)",
+    "description": "Fix old albums/photos missing userId field. Run once to enable delete/edit permissions.",
+    "fixAlbums": "Fix Albums",
+    "fixAlbumsDesc": "Add userId to albums",
+    "fixPhotos": "Fix Photos",
+    "fixPhotosDesc": "Add userId to photos",
+    "runningAlbums": "Migrating Albums...",
+    "runningPhotos": "Migrating Photos...",
+    "migrationConfirmAlbums": "This will add your userId to all albums that are missing it. Continue?",
+"migrationConfirmPhotos": "This will add your userId to all photos that are missing it. Continue?"
+
+  },
   "confirmDelete": "Delete user {{email}}?"
 }
+

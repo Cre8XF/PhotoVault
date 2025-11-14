@@ -71,7 +71,12 @@ const MorePage = ({
   onLogout,
   onNavigate,
 }) => {
-  const { t, i18n } = useTranslation(['translation', 'common', 'albums'])
+  const { t, i18n } = useTranslation([
+    'translation',
+    'common',
+    'albums',
+    'info',
+  ])
   const [expandedSection, setExpandedSection] = useState(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -360,11 +365,7 @@ const MorePage = ({
   // === MIGRATION FUNCTIONS ===
   // ============================================================================
   const handleMigrateAlbums = async () => {
-    if (
-      !window.confirm(
-        'This will add your userId to all albums that are missing it. Continue?'
-      )
-    ) {
+    if (!window.confirm(t('admin.migrationConfirmAlbums'))) {
       return
     }
 
@@ -399,11 +400,7 @@ const MorePage = ({
   }
 
   const handleMigratePhotos = async () => {
-    if (
-      !window.confirm(
-        'This will add your userId to all photos that are missing it. Continue?'
-      )
-    ) {
+    if (!window.confirm(t('admin.migrationConfirmPhotos'))) {
       return
     }
 
@@ -1056,12 +1053,12 @@ const MorePage = ({
             <div className="flex items-center gap-2 mb-3">
               <AlertCircle className="w-4 h-4 text-orange-400" />
               <h4 className="font-semibold text-sm text-orange-400">
-                🔧 Migration Tools (Developer)
+                🔧 {t('admin.migration.title')}
               </h4>
             </div>
+
             <p className="text-xs opacity-70 mb-3">
-              Fix old albums/photos missing userId field. Run once to enable
-              delete/edit permissions.
+              {t('admin.migration.description')}
             </p>
 
             <div className="grid md:grid-cols-2 gap-3">
@@ -1075,9 +1072,13 @@ const MorePage = ({
                 </div>
                 <div className="flex-1">
                   <p className="font-medium text-sm">
-                    {migrating ? 'Migrating Albums...' : 'Fix Albums'}
+                    {migrating
+                      ? t('admin.migration.runningAlbums')
+                      : t('admin.migration.fixAlbums')}
                   </p>
-                  <p className="text-xs opacity-70">Add userId to albums</p>
+                  <p className="text-xs opacity-70">
+                    {t('admin.migration.fixAlbumsDesc')}
+                  </p>
                 </div>
               </button>
 
@@ -1091,30 +1092,39 @@ const MorePage = ({
                 </div>
                 <div className="flex-1">
                   <p className="font-medium text-sm">
-                    {migrating ? 'Migrating Photos...' : 'Fix Photos'}
+                    {migrating
+                      ? t('admin.migration.runningPhotos')
+                      : t('admin.migration.fixPhotos')}
                   </p>
-                  <p className="text-xs opacity-70">Add userId to photos</p>
+                  <p className="text-xs opacity-70">
+                    {t('admin.migration.fixPhotosDesc')}
+                  </p>
                 </div>
               </button>
-            </div>
 
-            {/* Migration Result Display */}
-            {migrationResult && (
-              <div className="mt-3 bg-green-600/10 border border-green-500/30 rounded-xl p-3">
-                <div className="flex items-center gap-2 text-green-400 mb-1">
-                  <CheckCircle className="w-4 h-4" />
-                  <p className="font-semibold text-sm">Migration Complete!</p>
+              {/* Migration Result Display */}
+              {migrationResult && (
+                <div className="mt-3 bg-green-600/10 border border-green-500/30 rounded-xl p-3">
+                  <div className="flex items-center gap-2 text-green-400 mb-1">
+                    <CheckCircle className="w-4 h-4" />
+                    <p className="font-semibold text-sm">
+                      {t('admin.migration.complete')}
+                    </p>
+                  </div>
+                  <p className="text-xs opacity-70">
+                    {t('admin.migration.summary', {
+                      type: migrationResult.type,
+                      fixed: migrationResult.fixed,
+                      skipped: migrationResult.skipped,
+                      total: migrationResult.total,
+                    })}
+                  </p>
+                  <p className="text-xs opacity-70 mt-1">
+                    {t('admin.migration.refresh')}
+                  </p>
                 </div>
-                <p className="text-xs opacity-70">
-                  Type: {migrationResult.type} | Fixed: {migrationResult.fixed}{' '}
-                  | Skipped: {migrationResult.skipped} | Total:{' '}
-                  {migrationResult.total}
-                </p>
-                <p className="text-xs opacity-70 mt-1">
-                  Page will refresh in 2 seconds...
-                </p>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </section>
       )}

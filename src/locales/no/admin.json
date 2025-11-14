@@ -18,7 +18,9 @@
     "totalStorage": "Total Lagring",
     "totalUsers": "Totalt Brukere",
     "totalVideos": "Totalt Videoer",
-    "users": "Brukere"
+    "users": "Brukere",
+    "errorLoading": "Feil ved henting av admindata"
+
   },
   "title": "Adminpanel",
   "totalUsers": "Totalt: {{count}} brukere",
@@ -72,6 +74,19 @@
     "couldNotChangePro": "Kunne ikke endre Pro-status",
     "couldNotChangeAdmin": "Kunne ikke endre Admin-status",
     "couldNotDelete": "Kunne ikke slette bruker"
+  },
+  "migration": {
+    "title": "Migreringsverktøy (Utvikler)",
+    "description": "Fiks gamle album/bilder som mangler userId-felt. Kjør én gang for å aktivere slett/rediger.",
+    "fixAlbums": "Fiks album",
+    "fixAlbumsDesc": "Legg til userId i album",
+    "fixPhotos": "Fiks bilder",
+    "fixPhotosDesc": "Legg til userId i bilder",
+    "runningAlbums": "Migrerer album...",
+    "runningPhotos": "Migrerer bilder...",
+    "migrationConfirmAlbums": "Dette vil legge til userId i alle album som mangler det. Fortsette?",
+"migrationConfirmPhotos": "Dette vil legge til userId i alle bilder som mangler det. Fortsette?"
+
   },
   "confirmDelete": "Slett bruker {{email}}?"
 }
