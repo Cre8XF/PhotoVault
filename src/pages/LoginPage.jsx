@@ -3,15 +3,17 @@ import { useTranslation } from "react-i18next";
 import { Lock, Mail, Eye, EyeOff, Fingerprint } from "lucide-react";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../firebase";
-import { 
-  isBiometricAvailable, 
-  verifyBiometric, 
-  setCredentials, 
+import {
+  isBiometricAvailable,
+  verifyBiometric,
+  setCredentials,
   getCredentials,
-  getBiometricTypeText 
+  getBiometricTypeText
 } from "../utils/nativeBiometric";
 import { isNative, triggerHaptic, showToast } from "../utils/nativeUtils";
 import Particles from "../components/Particles";
+import LogoLight from '../assets/logo_light.png';
+import LogoDark from '../assets/logo_dark.png';
 const LoginPage = ({ onLogin = () => window.location.reload() }) => {
   const { t } = useTranslation('auth');
   const [isLogin, setIsLogin] = useState(true);
@@ -25,9 +27,14 @@ const LoginPage = ({ onLogin = () => window.location.reload() }) => {
   const [biometricType, setBiometricType] = useState('none');
   const [savedCredentials, setSavedCredentials] = useState(null);
   const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
   useEffect(() => {
     checkBiometric();
+    // Determine theme from localStorage or system preference
+    const savedTheme = localStorage.getItem('theme');
+    const isDark = savedTheme !== 'light';
+    setIsDarkMode(isDark);
   }, []);
 
   const handleForgotPassword = async () => {
@@ -161,8 +168,12 @@ const LoginPage = ({ onLogin = () => window.location.reload() }) => {
       <div className="glass-card w-full max-w-md p-8 rounded-2xl shadow-2xl border border-white/10 relative z-10">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-pink-600 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <Lock className="w-10 h-10 text-white" />
+          <div className="w-32 h-32 mx-auto mb-4 flex items-center justify-center">
+            <img
+              src={isDarkMode ? LogoDark : LogoLight}
+              alt={t('appName')}
+              className="w-full h-full object-contain"
+            />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">{t('appName')}</h1>
           <p className="text-gray-400">{t('tagline')}</p>
