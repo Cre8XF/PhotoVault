@@ -1,16 +1,27 @@
 {
-  "title": "Admin Panel",
-  "totalUsers": "Total: {{count}} users",
+  "additionalFeaturesInfo": "Additional admin features (user management, database tools) can be added later.",
+  "backToMore": "Back to More",
+  "dashboard": {
+    "subtitle": "PhotoVault System Overview",
+    "title": "Admin Dashboard"
+  },
+  "loadingData": "Loading admin data...",
   "noUsers": "No users found",
   "stats": {
-    "totalUsers": "{{count}} Total",
-    "users": "Users",
-    "proUsers": "Pro Users",
     "adminUsers": "Admins",
     "albums": "Albums",
     "photos": "Photos",
-    "storage": "Storage"
+    "proUsers": "Pro Users",
+    "storage": "Storage",
+    "totalAlbums": "Total Albums",
+    "totalPhotos": "Total Photos",
+    "totalStorage": "Total Storage",
+    "totalUsers": "Total Users",
+    "totalVideos": "Total Videos",
+    "users": "Users"
   },
+  "title": "Admin Panel",
+  "totalUsers": "Total: {{count}} users",
   "table": {
     "name": "Name",
     "email": "Email",

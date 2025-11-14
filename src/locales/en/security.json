@@ -139,11 +139,16 @@
     "isPrivate": "This album is private"
   },
   "lockScreen": {
-    "title": "PhotoVault",
-    "subtitle": "Enter PIN code",
+    "attemptsRemaining": "{{attempts}} attempts left before lockout",
+    "attemptsRemaining_one": "{{attempts}} attempt left before lockout",
     "enterPin": "Enter PIN to unlock",
-    "verifying": "Verifying...",
-    "unlocking": "Unlocking..."
+    "pinMinLength": "PIN must be at least {{min}} digits",
+    "subtitle": "Enter PIN code",
+    "title": "PhotoVault",
+    "unlocking": "Unlocking...",
+    "unlockWith": "Unlock with {{type}}",
+    "unlockWithBiometric": "Unlock with biometrics",
+    "verifying": "Verifying..."
   },
   "info": {
     "title": "About security",

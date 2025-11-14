@@ -1,16 +1,27 @@
 {
-  "title": "Adminpanel",
-  "totalUsers": "Totalt: {{count}} brukere",
+  "additionalFeaturesInfo": "Flere admin-funksjoner (brukeradministrasjon, databaseverktøy) kan legges til senere.",
+  "backToMore": "Tilbake til More",
+  "dashboard": {
+    "subtitle": "PhotoVault Systemoversikt",
+    "title": "Admin Dashboard"
+  },
+  "loadingData": "Laster admindata...",
   "noUsers": "Ingen brukere funnet",
   "stats": {
-    "totalUsers": "{{count}} Totalt",
-    "users": "Brukere",
-    "proUsers": "Pro-brukere",
     "adminUsers": "Administratorer",
     "albums": "Album",
     "photos": "Bilder",
-    "storage": "Lagring"
+    "proUsers": "Pro-brukere",
+    "storage": "Lagring",
+    "totalAlbums": "Totalt Album",
+    "totalPhotos": "Totalt Bilder",
+    "totalStorage": "Total Lagring",
+    "totalUsers": "Totalt Brukere",
+    "totalVideos": "Totalt Videoer",
+    "users": "Brukere"
   },
+  "title": "Adminpanel",
+  "totalUsers": "Totalt: {{count}} brukere",
   "table": {
     "name": "Navn",
     "email": "E-post",

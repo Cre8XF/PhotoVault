@@ -2,6 +2,7 @@
 // ErrorBoundary - Phase 2: Runtime Error Handling
 // ============================================================================
 import React, { Component } from 'react';
+import { withTranslation } from 'react-i18next';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 
 /**
@@ -58,6 +59,7 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       const { error, errorInfo, errorCount } = this.state;
+      const { t } = this.props;
       const isDevelopment = process.env.NODE_ENV === 'development';
 
       return (
@@ -72,19 +74,19 @@ class ErrorBoundary extends Component {
 
             {/* Error Title */}
             <h1 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-4">
-              Oops! Something went wrong
+              {t('common:errors.title')}
             </h1>
 
             {/* Error Description */}
             <p className="text-center text-gray-600 dark:text-gray-400 mb-8">
-              We encountered an unexpected error. Don't worry, your data is safe.
+              {t('common:errors.description')}
             </p>
 
             {/* Error Details (Development Only) */}
             {isDevelopment && error && (
               <div className="mb-8 p-4 bg-red-50 dark:bg-red-900/10 rounded-lg border border-red-200 dark:border-red-800">
                 <h3 className="font-semibold text-red-800 dark:text-red-300 mb-2">
-                  Error Details (Development Mode):
+                  {t('common:errors.devModeTitle')}
                 </h3>
                 <p className="text-sm text-red-700 dark:text-red-400 font-mono mb-2">
                   {error.toString()}
@@ -92,7 +94,7 @@ class ErrorBoundary extends Component {
                 {errorInfo && (
                   <details className="text-xs text-red-600 dark:text-red-500 font-mono">
                     <summary className="cursor-pointer hover:text-red-800 dark:hover:text-red-300">
-                      Component Stack
+                      {t('common:errors.componentStack')}
                     </summary>
                     <pre className="mt-2 overflow-auto max-h-40 whitespace-pre-wrap">
                       {errorInfo.componentStack}
@@ -100,7 +102,7 @@ class ErrorBoundary extends Component {
                   </details>
                 )}
                 <p className="text-xs text-red-600 dark:text-red-500 mt-2">
-                  Error count: {errorCount}
+                  {t('common:errors.errorCount')} {errorCount}
                 </p>
               </div>
             )}
@@ -112,7 +114,7 @@ class ErrorBoundary extends Component {
                 className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-medium transition shadow-lg"
               >
                 <RefreshCw className="w-5 h-5" />
-                Reload Page
+                {t('common:errors.reloadPage')}
               </button>
 
               <button
@@ -120,7 +122,7 @@ class ErrorBoundary extends Component {
                 className="flex items-center justify-center gap-2 px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg font-medium transition"
               >
                 <Home className="w-5 h-5" />
-                Go Home
+                {t('common:errors.goHome')}
               </button>
 
               {isDevelopment && (
@@ -128,14 +130,14 @@ class ErrorBoundary extends Component {
                   onClick={this.handleReset}
                   className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
                 >
-                  Try Again
+                  {t('common:errors.tryAgain')}
                 </button>
               )}
             </div>
 
             {/* Help Text */}
             <p className="text-center text-sm text-gray-500 dark:text-gray-500 mt-8">
-              If this problem persists, please try clearing your browser cache or contact support.
+              {t('common:errors.helpText')}
             </p>
           </div>
         </div>
@@ -146,4 +148,4 @@ class ErrorBoundary extends Component {
   }
 }
 
-export default ErrorBoundary;
+export default withTranslation('common')(ErrorBoundary);
