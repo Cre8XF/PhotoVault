@@ -49,17 +49,17 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
 
     // Validate name
     if (!name.trim()) {
-      setError(t('albums:enterAlbumName') || 'Album name is required')
+      setError(t('albums:needsAlbumName'))
       return false
     }
 
     if (name.length > 50) {
-      setError('Album name must be less than 50 characters')
+      setError(t('albums:errors.nameTooLong'))
       return false
     }
 
     if (description.length > 200) {
-      setError('Description must be less than 200 characters')
+      setError(t('albums:errors.descriptionTooLong'))
       return false
     }
 
@@ -92,10 +92,10 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
       onClose()
     } catch (err) {
       console.error('Error saving album:', err)
-      setError(err.message || 'Failed to save album. Please try again.')
+      setError(err.message || t('albums:errors.couldNotCreateAlbum'))
 
       if (window.showToast) {
-        window.showToast('Failed to save album', 'error')
+        window.showToast(t('albums:errors.albumCreationError'), 'error')
       }
     } finally {
       setLoading(false)
@@ -150,7 +150,7 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               className="input-premium disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <p className="text-xs text-gray-500 mt-1">
-              {name.length}/50 characters
+              {name.length}/50 {t('albums:characters')}
             </p>
           </div>
 
@@ -171,7 +171,7 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               className="input-premium disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <p className="text-xs text-gray-500 mt-1">
-              {description.length}/200 characters
+              {description.length}/200 {t('albums:characters')}
             </p>
           </div>
 
@@ -191,7 +191,7 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
             {cover && (
               <img
                 src={cover}
-                alt="Cover preview"
+                alt={t('albums:coverPreview')}
                 className="w-full h-40 object-cover rounded-xl mt-2 border border-gray-700"
               />
             )}
@@ -226,7 +226,7 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               {loading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  {editingAlbum ? 'Updating...' : 'Creating...'}
+                  {editingAlbum ? t('albums:updating') : t('albums:creating')}
                 </>
               ) : editingAlbum ? (
                 t('albums:saveChanges')

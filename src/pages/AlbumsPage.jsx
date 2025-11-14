@@ -43,12 +43,12 @@ const AlbumsPage = ({ albums, photos, onAlbumClick, onPhotoClick, refreshData, o
     const safePhotos = Array.isArray(photos) ? photos : [];
     const albumPhotos = safePhotos.filter(p => p.albumId === album.id);
     const photosNote = albumPhotos.length > 0
-      ? `Dette vil også fjerne ${albumPhotos.length} bilder fra albumet (men ikke slette dem).`
-      : 'Dette albumet er tomt.';
+      ? t('common:notifications.deleteAlbumPhotosNote', { count: albumPhotos.length })
+      : t('common:notifications.deleteAlbumEmptyNote');
 
     setConfirmModal({
-      title: t('common:confirmDelete') || 'Bekreft sletting',
-      message: `Er du sikker på at du vil slette albumet "${album.name}"? ${photosNote}`,
+      title: t('common:notifications.deleteAlbumTitle'),
+      message: t('albums:confirmDeleteAlbum', { name: album.name, photosNote }),
       onConfirm: async () => {
         try {
           setLoading(true);
@@ -98,10 +98,10 @@ const AlbumsPage = ({ albums, photos, onAlbumClick, onPhotoClick, refreshData, o
           console.error('Error code:', error.code);
           console.error('Error message:', error.message);
 
-          let errorMessage = t('common:error') || 'Feil ved sletting';
+          let errorMessage = t('common:errorOccurred');
 
           if (error.code === 'permission-denied') {
-            errorMessage = 'Permission denied. Album may be missing userId field. Check console and run migration.';
+            errorMessage = t('albums:errors.permissionDenied');
           } else if (error.message) {
             errorMessage = error.message;
           }
@@ -229,7 +229,10 @@ const AlbumsPage = ({ albums, photos, onAlbumClick, onPhotoClick, refreshData, o
             console.log(`✅ Moved ${selectedPhotos.length} photos to album ${albumId}`);
           } catch (error) {
             console.error('Error moving photos:', error);
-            alert(t('common:error') || 'Kunne ikke flytte bilder');
+            setNotification({
+              message: t('albums:errors.couldNotMovePhotos'),
+              type: 'error'
+            });
           } finally {
             setLoading(false);
           }
