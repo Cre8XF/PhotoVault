@@ -29,6 +29,17 @@
     "selectTitle": "Select layout",
     "title": "Layout info"
   },
+  "layouts": {
+    "2-photos-horizontal": "2 photos (horizontal)",
+    "2-photos-vertical": "2 photos (vertical)",
+    "3-photos-vertical": "3 photos (vertical)",
+    "3-photos-mixed": "3 photos (mixed)",
+    "4-photos-grid": "4 photos (grid)",
+    "4-photos-collage": "4 photos (collage)",
+    "5-photos-creative": "5 photos (creative)",
+    "6-photos-grid": "6 photos (grid)",
+    "9-photos-grid": "9 photos (grid)"
+  },
   "loading": {
     "photos": "Loading photos...",
     "saving": "Saving collage...",
@@ -40,6 +51,24 @@
     "selectedPhotos": "Selected photos (order):",
     "title": "Select photos",
     "uploadFirst": "Upload photos to an album first"
+  },
+  "stickerCategories": {
+    "hearts": "Hearts",
+    "celebrations": "Celebrations",
+    "travel": "Travel",
+    "seasons": "Seasons",
+    "food": "Food",
+    "animals": "Animals",
+    "nature": "Nature",
+    "weather": "Weather",
+    "symbols": "Symbols",
+    "faces": "Faces"
+  },
+  "stickerSizes": {
+    "small": "Small",
+    "medium": "Medium",
+    "large": "Large",
+    "extraLarge": "Extra Large"
   },
   "stickers": {
     "addTooltip": "Add sticker",
@@ -71,6 +100,22 @@
     "textLabel": "Text",
     "title": "Text",
     "weight": "Weight"
+  },
+  "fontWeights": {
+    "normal": "Normal",
+    "bold": "Bold"
+  },
+  "colors": {
+    "black": "Black",
+    "white": "White",
+    "red": "Red",
+    "green": "Green",
+    "blue": "Blue",
+    "yellow": "Yellow",
+    "magenta": "Magenta",
+    "cyan": "Cyan",
+    "orange": "Orange",
+    "purple": "Purple"
   },
   "tips": {
     "addElements": "Add text and stickers with the tabs above",
