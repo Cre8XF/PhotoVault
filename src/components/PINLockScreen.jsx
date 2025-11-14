@@ -7,6 +7,10 @@ import { useTranslation } from 'react-i18next';
 import { Lock, Delete, Fingerprint, Scan, AlertCircle } from 'lucide-react';
 import { useSecurityContext } from '../contexts/SecurityContext';
 import { getBiometricIcon, getBiometricDisplayName } from '../utils/biometric';
+import LogoLight from '../assets/logo_light.png';
+import LogoDark from '../assets/logo_dark.png';
+import IconLight from '../assets/icon_light.png';
+import IconDark from '../assets/icon_dark.png';
 
 const PINLockScreen = () => {
   const { t } = useTranslation(['security', 'common']);
@@ -23,12 +27,17 @@ const PINLockScreen = () => {
   const [shakeError, setShakeError] = useState(false);
   const [biometricIcon, setBiometricIcon] = useState('Fingerprint');
   const [biometricName, setBiometricName] = useState(t('security:biometric.displayNames.unknown'));
-  
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
   const pinInputRef = useRef(null);
 
-  // Load biometric info
+  // Load biometric info and theme
   useEffect(() => {
     loadBiometricInfo();
+    // Determine theme from localStorage or system preference
+    const savedTheme = localStorage.getItem('theme');
+    const isDark = savedTheme !== 'light';
+    setIsDarkMode(isDark);
   }, []);
 
   // Auto-focus on mount
@@ -123,10 +132,14 @@ const PINLockScreen = () => {
 
       {/* Lock screen content */}
       <div className="relative z-10 w-full max-w-md px-6">
-        {/* Lock icon */}
+        {/* PIXTR Icon */}
         <div className="flex justify-center mb-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center shadow-2xl">
-            <Lock className="w-10 h-10 text-white" />
+          <div className="w-20 h-20 flex items-center justify-center">
+            <img
+              src={isDarkMode ? IconDark : IconLight}
+              alt="PIXTR"
+              className="w-full h-full object-contain"
+            />
           </div>
         </div>
 

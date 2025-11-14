@@ -23,6 +23,10 @@ import VaultSetupModal from "../components/VaultSetupModal";
 import VaultSettingsModal from "../components/VaultSettingsModal";
 import useStore from "../state/store";
 import { useNavigate } from "react-router-dom";
+import LogoLight from '../assets/logo_light.png';
+import LogoDark from '../assets/logo_dark.png';
+import IconLight from '../assets/icon_light.png';
+import IconDark from '../assets/icon_dark.png';
 const VaultPage = () => {
   const { t } = useTranslation(['vault', 'common']);
   const {
@@ -53,11 +57,16 @@ const navigate = useNavigate();
   const [decryptedUrls, setDecryptedUrls] = useState({});
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
     // Check if biometric is available
     checkBiometricAvailability().then(setBiometricAvailable);
+    // Determine theme from localStorage or system preference
+    const savedTheme = localStorage.getItem('theme');
+    const isDark = savedTheme !== 'light';
+    setIsDarkMode(isDark);
   }, [checkBiometricAvailability]);
 
   useEffect(() => {
@@ -165,8 +174,12 @@ const navigate = useNavigate();
         <div className="min-h-screen flex items-center justify-center p-6">
           <div className="w-full max-w-md">
             <div className="text-center mb-8">
-              <div className="w-20 h-20 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Lock className="w-10 h-10 text-purple-400" />
+              <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                <img
+                  src={isDarkMode ? IconDark : IconLight}
+                  alt="PIXTR"
+                  className="w-full h-full object-contain"
+                />
               </div>
               <h1 className="text-3xl font-bold text-white mb-2">
                 {t('vault:locked.title', { defaultValue: 'Vault Locked' })}
