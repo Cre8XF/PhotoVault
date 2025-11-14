@@ -52,7 +52,7 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
     setSelectedLayout(layout)
     setSelectedPhotos([])
     setStep(2)
-    console.log('✅ Layout selected:', layout.name)
+    console.log('✅ Layout selected:', layout.id)
   }
 
   const handlePhotoSelection = (photos) => {
@@ -65,7 +65,7 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
     try {
       setSaving(true)
       console.log('💾 Saving collage...')
-      console.log('📊 Layout:', selectedLayout.name)
+      console.log('📊 Layout:', selectedLayout.id)
       console.log('📷 Photos:', selectedPhotos.length)
 
       // Export as blob
@@ -98,7 +98,7 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
 
       // Call parent save handler with File object
       await onSave(file, {
-        layout: selectedLayout.name,
+        layout: selectedLayout.id,
         photoCount: selectedPhotos.length,
         type: 'collage'
       })
@@ -291,7 +291,7 @@ const CollageBuilder = ({ availablePhotos, onClose, onSave }) => {
 
                   <div className="glass-card p-4 rounded-xl border border-white/10 mb-4">
                     <h3 className="font-bold mb-2">{t('collage:layout.title')}</h3>
-                    <p className="text-sm opacity-70">{selectedLayout.name}</p>
+                    <p className="text-sm opacity-70">{t(`collage:${selectedLayout.nameKey}`)}</p>
                     <p className="text-sm opacity-70">{selectedPhotos.length} {t('collage:layout.photos')}</p>
                     <p className="text-xs opacity-50 mt-2">
                       {selectedLayout.canvas.width} × {selectedLayout.canvas.height}px

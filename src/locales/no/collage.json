@@ -30,15 +30,15 @@
     "title": "Layout info"
   },
   "layouts": {
-    "2-photos-horizontal": "2 bilder (horisontal)",
-    "2-photos-vertical": "2 bilder (vertikal)",
-    "3-photos-vertical": "3 bilder (vertikal)",
-    "3-photos-mixed": "3 bilder (mikset)",
-    "4-photos-grid": "4 bilder (grid)",
-    "4-photos-collage": "4 bilder (kollasj)",
-    "5-photos-creative": "5 bilder (kreativ)",
-    "6-photos-grid": "6 bilder (grid)",
-    "9-photos-grid": "9 bilder (grid)"
+    "two_horizontal": "2 bilder (horisontal)",
+    "two_vertical": "2 bilder (vertikal)",
+    "three_vertical": "3 bilder (vertikal)",
+    "three_mixed": "3 bilder (mikset)",
+    "four_grid": "4 bilder (grid)",
+    "four_collage": "4 bilder (kollasj)",
+    "five_creative": "5 bilder (kreativ)",
+    "six_grid": "6 bilder (grid)",
+    "nine_grid": "9 bilder (grid)"
   },
   "loading": {
     "photos": "Laster bilder...",
