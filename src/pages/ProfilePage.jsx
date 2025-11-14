@@ -23,7 +23,7 @@ import {
  * Display and update user information
  */
 const ProfilePage = ({ onBack }) => {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation(['profile', 'common']);
   const { user, userProfile, fetchUserProfile } = useAuth();
   const setNotification = useStore((state) => state.setNotification);
 
@@ -106,7 +106,7 @@ const ProfilePage = ({ onBack }) => {
    * Format date for display
    */
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return t('profile:fallback.notAvailable');
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -129,7 +129,7 @@ const ProfilePage = ({ onBack }) => {
           >
             <ArrowLeft className="w-6 h-6" />
           </button>
-          <h1 className="text-2xl font-bold">My Profile</h1>
+          <h1 className="text-2xl font-bold">{t('profile:header.title')}</h1>
         </div>
       </div>
 
@@ -154,7 +154,7 @@ const ProfilePage = ({ onBack }) => {
               </button>
             </div>
             <h2 className="text-xl font-semibold">
-              {formData.displayName || 'No name set'}
+              {formData.displayName || t('profile:profileCard.noName')}
             </h2>
             <p className="text-sm text-gray-400">{formData.email}</p>
           </div>
@@ -171,20 +171,20 @@ const ProfilePage = ({ onBack }) => {
               }`}
             >
               <Shield className="w-4 h-4 inline mr-2" />
-              {userProfile?.role?.toUpperCase() || 'FREE'} Account
+              {t(`profile:roleBadge.${userProfile?.role || 'free'}`)}
             </div>
           </div>
         </div>
 
         {/* Profile Information Form */}
         <div className="glass-card p-6 mb-6">
-          <h3 className="text-lg font-semibold mb-4">Profile Information</h3>
+          <h3 className="text-lg font-semibold mb-4">{t('profile:sections.profileInfo')}</h3>
 
           {/* Display Name */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-2">
               <User className="w-4 h-4 inline mr-2" />
-              Display Name
+              {t('profile:form.displayName')}
             </label>
             <input
               type="text"
@@ -192,7 +192,7 @@ const ProfilePage = ({ onBack }) => {
               value={formData.displayName}
               onChange={handleChange}
               className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="Enter your name"
+              placeholder={t('profile:form.namePlaceholder')}
             />
           </div>
 
@@ -200,7 +200,7 @@ const ProfilePage = ({ onBack }) => {
           <div className="mb-4">
             <label className="block text-sm font-medium mb-2">
               <Mail className="w-4 h-4 inline mr-2" />
-              Email Address
+              {t('profile:form.emailAddress')}
             </label>
             <input
               type="email"
@@ -208,10 +208,10 @@ const ProfilePage = ({ onBack }) => {
               value={formData.email}
               onChange={handleChange}
               className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="Enter your email"
+              placeholder={t('profile:form.emailPlaceholder')}
             />
             <p className="text-xs text-gray-400 mt-1">
-              Changing your email will require re-authentication
+              {t('profile:form.emailWarning')}
             </p>
           </div>
 
@@ -219,7 +219,7 @@ const ProfilePage = ({ onBack }) => {
           <div className="mb-6">
             <label className="block text-sm font-medium mb-2">
               <Camera className="w-4 h-4 inline mr-2" />
-              Profile Photo URL
+              {t('profile:form.photoURL')}
             </label>
             <input
               type="url"
@@ -240,12 +240,12 @@ const ProfilePage = ({ onBack }) => {
             {loading ? (
               <span className="flex items-center justify-center gap-2">
                 <div className="spinner w-5 h-5" />
-                Saving...
+                {t('profile:form.saving')}
               </span>
             ) : (
               <span className="flex items-center justify-center gap-2">
                 <Save className="w-5 h-5" />
-                Save Changes
+                {t('profile:form.saveChanges')}
               </span>
             )}
           </button>
@@ -253,18 +253,18 @@ const ProfilePage = ({ onBack }) => {
 
         {/* Account Details */}
         <div className="glass-card p-6">
-          <h3 className="text-lg font-semibold mb-4">Account Details</h3>
+          <h3 className="text-lg font-semibold mb-4">{t('profile:sections.accountDetails')}</h3>
 
           <div className="space-y-3">
             <div className="flex justify-between items-center py-2 border-b border-white/10">
-              <span className="text-gray-400">User ID</span>
+              <span className="text-gray-400">{t('profile:accountDetails.userId')}</span>
               <span className="text-sm font-mono">{user?.uid?.substring(0, 12)}...</span>
             </div>
 
             <div className="flex justify-between items-center py-2 border-b border-white/10">
               <span className="text-gray-400">
                 <Calendar className="w-4 h-4 inline mr-2" />
-                Account Created
+                {t('profile:accountDetails.accountCreated')}
               </span>
               <span className="text-sm">
                 {formatDate(userProfile?.createdAt || user?.metadata?.creationTime)}
@@ -274,7 +274,7 @@ const ProfilePage = ({ onBack }) => {
             <div className="flex justify-between items-center py-2">
               <span className="text-gray-400">
                 <Calendar className="w-4 h-4 inline mr-2" />
-                Last Updated
+                {t('profile:accountDetails.lastUpdated')}
               </span>
               <span className="text-sm">
                 {formatDate(userProfile?.updatedAt)}

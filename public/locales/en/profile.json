@@ -1,0 +1,35 @@
+{
+  "header": {
+    "title": "My Profile"
+  },
+  "profileCard": {
+    "noName": "No name set"
+  },
+  "roleBadge": {
+    "free": "FREE Account",
+    "admin": "ADMIN Account",
+    "pro": "PRO Account"
+  },
+  "sections": {
+    "profileInfo": "Profile Information",
+    "accountDetails": "Account Details"
+  },
+  "form": {
+    "displayName": "Display Name",
+    "namePlaceholder": "Enter your name",
+    "emailAddress": "Email Address",
+    "emailPlaceholder": "Enter your email",
+    "emailWarning": "Changing your email will require re-authentication",
+    "photoURL": "Profile Photo URL",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes"
+  },
+  "accountDetails": {
+    "userId": "User ID",
+    "accountCreated": "Account Created",
+    "lastUpdated": "Last Updated"
+  },
+  "fallback": {
+    "notAvailable": "N/A"
+  }
+}
