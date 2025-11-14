@@ -17,7 +17,7 @@ import {
 
 
 const QRShareModal = ({ isOpen, onClose, album }) => {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['qrshare', 'common'])
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
   const [publicUrl, setPublicUrl] = useState('')
@@ -48,7 +48,7 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
 
     if (!user || !user.uid) {
       console.error('❌ ERROR: User or user.uid is undefined')
-      alert('Bruker ikke lastet. Vent litt og prøv igjen.')
+      alert(t('qrshare:errors.userNotLoaded'))
       return
     }
 
@@ -90,7 +90,7 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
       trackQRGenerated(album.id, user.uid)
     } catch (error) {
       console.error('❌ Error generating slug:', error)
-      alert('Kunne ikke generere delingslenke: ' + error.message)
+      alert(t('qrshare:errors.generateFailed') + error.message)
     } finally {
       setLoading(false)
     }
@@ -148,7 +148,7 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
 
     if (!user || !user.uid) {
       console.error('❌ ERROR: User or user.uid is undefined')
-      alert('Bruker ikke lastet. Vent litt og prøv igjen.')
+      alert(t('qrshare:errors.userNotLoaded'))
       return
     }
 
@@ -184,7 +184,7 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
       trackSharingToggled(album.id, newPublicState)
     } catch (error) {
       console.error('❌ Error toggling public:', error)
-      alert('Kunne ikke oppdatere innstillinger: ' + error.message)
+      alert(t('qrshare:errors.updateFailed') + error.message)
     } finally {
       setLoading(false)
     }
@@ -202,7 +202,7 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
         <div className="bg-gradient-to-b from-gray-800/90 to-gray-900/90 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
-            <p className="opacity-70">Laster brukerdata...</p>
+            <p className="opacity-70">{t('qrshare:loading.userData')}</p>
           </div>
         </div>
       </div>
@@ -226,7 +226,7 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
             <div className="p-2 bg-purple-600/20 rounded-lg">
               <Share2 className="w-5 h-5 text-purple-400" />
             </div>
-            <h2 className="text-xl font-bold">Del album</h2>
+            <h2 className="text-xl font-bold">{t('qrshare:modal.title')}</h2>
           </div>
           <button
             onClick={onClose}
@@ -243,9 +243,9 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
             <div className="flex items-center gap-3">
               <Globe className="w-5 h-5 text-blue-400" />
               <div>
-                <p className="font-medium">Offentlig tilgjengelig</p>
+                <p className="font-medium">{t('qrshare:settings.public.title')}</p>
                 <p className="text-sm opacity-70">
-                  Alle med lenken kan se albumet
+                  {t('qrshare:settings.public.description')}
                 </p>
               </div>
             </div>
@@ -267,8 +267,8 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
             <div className="flex items-center gap-3">
               <Lock className="w-5 h-5 text-green-400" />
               <div>
-                <p className="font-medium">Tillat opplasting</p>
-                <p className="text-sm opacity-70">Andre kan laste opp bilder</p>
+                <p className="font-medium">{t('qrshare:settings.upload.title')}</p>
+                <p className="text-sm opacity-70">{t('qrshare:settings.upload.description')}</p>
               </div>
             </div>
             <label className="relative inline-block w-12 h-6">
@@ -294,8 +294,8 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
             <div className="flex items-center gap-3">
               <Calendar className="w-5 h-5 text-orange-400" />
               <div>
-                <p className="font-medium">Utløpsdato</p>
-                <p className="text-sm opacity-70">Automatisk deaktivering</p>
+                <p className="font-medium">{t('qrshare:settings.expiry.title')}</p>
+                <p className="text-sm opacity-70">{t('qrshare:settings.expiry.description')}</p>
               </div>
             </div>
             <input
@@ -327,10 +327,9 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
         {/* Info */}
         {shareSettings.isPublic && (
           <div className="p-6 bg-blue-600/10 border-t border-white/10">
-            <p className="text-sm opacity-70">
-              💡 <strong>Tips:</strong> Print QR-koden og vis på event-lokalet,
-              eller del lenken i sosiale medier.
-            </p>
+            <p className="text-sm opacity-70" dangerouslySetInnerHTML={{
+              __html: t('qrshare:info.tip')
+            }} />
           </div>
         )}
       </div>

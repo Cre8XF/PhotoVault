@@ -1,4 +1,10 @@
 {
+  "navigation": {
+    "title": "Tidslinje",
+    "day": "Dag",
+    "month": "Måned",
+    "year": "År"
+  },
   "emptyState": {
     "title": "Ingen bilder å vise",
     "description": "Last opp bilder for å se dem organisert i tidslinjen"

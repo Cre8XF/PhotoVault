@@ -5,9 +5,11 @@
  */
 
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Calendar } from 'lucide-react'
 
 const DateSection = ({ date, photos, onPhotoClick }) => {
+  const { t } = useTranslation(['timeline'])
   if (!photos || photos.length === 0) {
     return null
   }
@@ -19,7 +21,7 @@ const DateSection = ({ date, photos, onPhotoClick }) => {
         <Calendar className="w-5 h-5 text-purple-400" />
         <div>
           <h2 className="text-xl font-bold">{date}</h2>
-          <p className="text-sm text-gray-400">{photos.length} {photos.length === 1 ? 'bilde' : 'bilder'}</p>
+          <p className="text-sm text-gray-400">{photos.length} {photos.length === 1 ? t('timeline:stats.photo') : t('timeline:stats.photo_plural')}</p>
         </div>
       </div>
 

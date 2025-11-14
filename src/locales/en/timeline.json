@@ -1,4 +1,10 @@
 {
+  "navigation": {
+    "title": "Timeline",
+    "day": "Day",
+    "month": "Month",
+    "year": "Year"
+  },
   "emptyState": {
     "title": "No photos to display",
     "description": "Upload photos to see them organized in the timeline"

@@ -1,0 +1,36 @@
+{
+  "modal": {
+    "title": "Del album"
+  },
+  "settings": {
+    "public": {
+      "title": "Offentlig tilgjengelig",
+      "description": "Alle med lenken kan se albumet"
+    },
+    "upload": {
+      "title": "Tillat opplasting",
+      "description": "Andre kan laste opp bilder"
+    },
+    "expiry": {
+      "title": "Utløpsdato",
+      "description": "Automatisk deaktivering"
+    }
+  },
+  "qr": {
+    "scanInstructions": "Scan QR-koden for å åpne albumet",
+    "shareLink": "Del-lenke",
+    "copyLink": "Kopier lenke",
+    "downloadButton": "Last ned QR-kode"
+  },
+  "loading": {
+    "userData": "Laster brukerdata..."
+  },
+  "errors": {
+    "userNotLoaded": "Bruker ikke lastet. Vent litt og prøv igjen.",
+    "generateFailed": "Kunne ikke generere delingslenke: ",
+    "updateFailed": "Kunne ikke oppdatere innstillinger: "
+  },
+  "info": {
+    "tip": "💡 <strong>Tips:</strong> Print QR-koden og vis på event-lokalet, eller del lenken i sosiale medier."
+  }
+}
