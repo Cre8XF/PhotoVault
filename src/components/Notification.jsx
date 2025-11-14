@@ -3,10 +3,13 @@
 // ============================================================================
 import React, { useEffect, useCallback } from "react";
 import { CheckCircle2, XCircle, Info, AlertTriangle, X } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 const Notification = ({ notification, onClose, setNotification }) => {
+  const { t } = useTranslation('common')
+
   // Safe defaults (hooks må kalles uansett)
-  const message  = notification?.message ?? "An error occurred";
+  const message  = notification?.message ?? t('errorOccurred');
   const type     = notification?.type ?? "info";
   const duration = notification?.duration ?? 3000;
 
@@ -42,13 +45,13 @@ const Notification = ({ notification, onClose, setNotification }) => {
           <IconComponent className="w-5 h-5" />
         </div>
         <p className="flex-1 text-sm font-medium text-white">
-          {message || 'An error occurred'}
+          {message}
         </p>
         <button
           onClick={handleClose}
           className="ripple-effect flex-shrink-0 p-1 hover:bg-white/10 rounded-lg transition-colors"
-          title="Close notification"
-          aria-label="Close"
+          title={t('closeNotification')}
+          aria-label={t('close')}
         >
           <X className="w-4 h-4 text-white/80" />
         </button>

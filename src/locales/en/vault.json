@@ -1,0 +1,104 @@
+{
+  "backToMore": "← Back to More Page",
+  "settings": {
+    "autoLock": {
+      "description": "Vault will automatically lock after this period of inactivity",
+      "label": "Auto-Lock Timeout",
+      "minute": "minute",
+      "minutes": "minutes",
+      "never": "Never"
+    },
+    "biometric": {
+      "description": "Use FaceID/TouchID",
+      "label": "Biometric Unlock"
+    },
+    "changePassword": {
+      "button": "Change Vault Password",
+      "confirmLabel": "Confirm New Password",
+      "currentLabel": "Current Password",
+      "mismatch": "Passwords do not match",
+      "newLabel": "New Password",
+      "submit": "Update Password"
+    },
+    "changePin": "Change PIN",
+    "dangerZone": {
+      "button": "Reset Vault",
+      "description": "Permanently delete all vault photos and reset vault settings.",
+      "title": "Danger Zone"
+    },
+    "deactivate": "Deactivate Vault",
+    "incorrectPassword": "Current password is incorrect",
+    "passwordChanged": "Password changed successfully",
+    "passwordChangeFailed": "Failed to change password",
+    "passwordMismatch": "Passwords do not match",
+    "passwordWeak": "Password is too weak",
+    "resetConfirm": {
+      "confirm": "Delete Everything",
+      "message": "This will permanently delete all vault photos and settings. This action cannot be undone.",
+      "title": "Reset Vault"
+    },
+    "saveFailed": "Failed to save settings",
+    "saveSuccess": "Settings saved",
+    "title": "Vault Settings"
+  },
+  "setup": {
+    "activate": "Activate Vault",
+    "confirmPin": "Confirm PIN",
+    "createPin": "Create PIN",
+    "enableBiometric": "Enable Biometric Unlock",
+    "enterPin": "Enter a secure 4-6 digit PIN",
+    "pinRequirements": {
+      "avoidSequential": "Avoid sequential numbers (1234, 4321)",
+      "avoidSimple": "Avoid simple patterns (1111, 0000)",
+      "digits": "Must be 4-6 digits",
+      "title": "PIN Requirements",
+      "unique": "Use a unique combination"
+    },
+    "steps": {
+      "step1": "Step 1: Create PIN",
+      "step2": "Step 2: Configure Security",
+      "step3": "Step 3: Ready to Use"
+    },
+    "title": "Set Up Your Secure Vault"
+  },
+  "setupModal": {
+    "autoLock": {
+      "label": "Auto-Lock Timeout",
+      "minute": "minute",
+      "minutes": "minutes",
+      "never": "Never"
+    },
+    "biometric": {
+      "description": "Use your fingerprint or Face ID to quickly unlock the vault without typing your password.",
+      "enable": "Enable Biometric",
+      "optional": "Optional, can be changed later",
+      "title": "Enable Biometric Unlock"
+    },
+    "complete": "Complete Setup",
+    "getStarted": "Get Started",
+    "intro": {
+      "description": "The vault uses military-grade AES-256 encryption to protect your sensitive photos. Only you can access them with your password.",
+      "feature1": "Client-side encryption - your password never leaves your device",
+      "feature2": "Biometric unlock support (FaceID/TouchID)",
+      "feature3": "Auto-lock after inactivity",
+      "feature4": "Hidden from main gallery",
+      "featuresTitle": "Features:",
+      "title": "Secure Your Private Photos"
+    },
+    "next": "Next",
+    "password": {
+      "confirmLabel": "Confirm Password",
+      "confirmPlaceholder": "Re-enter password",
+      "label": "Vault Password",
+      "mismatch": "Passwords do not match",
+      "placeholder": "Enter strong password",
+      "strong": "Strong password",
+      "warning": "Important: If you forget your password, your vault photos cannot be recovered. Write it down securely."
+    },
+    "success": {
+      "message": "Your secure vault is ready to use.",
+      "title": "Vault Setup Complete!"
+    },
+    "title": "Set Up Secure Vault"
+  }
+}

@@ -1,36 +1,68 @@
 {
-  "settings": {
-    "title": "AI-innstillinger",
-    "apiKeys": "API-nøkler",
-    "active": "Aktiv",
-    "notConfigured": "Ikke konfigurert",
-    "setupGuide": "Oppsettguide",
-    "setupInstructions": "For å aktivere AI-funksjoner, legg til API-nøkler i .env-filen:",
-    "configuration": "Konfigurasjon",
-    "autoTagging": "Auto-tagging ved opplasting",
-    "autoTaggingDesc": "Analyser bilder automatisk med AI når de lastes opp"
-  },
   "activity": {
-    "title": "AI-aktivitet",
     "analyzed": "Analysert",
-    "enhanced": "Forbedret",
     "bgRemoved": "Bakgrunn fjernet",
-    "totalRequests": "Total requests",
+    "enhanced": "Forbedret",
     "freeTier": "Gratis tier bruk",
     "needMoreSpace": "Trenger mer plass?",
+    "title": "AI-aktivitet",
+    "totalRequests": "Total requests",
     "upgradeMessage": "Oppgrader til Pro og få 100GB lagring og AI-funksjoner"
   },
+  "aiAnalyzed": "AI-analysert",
+  "aiTags": "AI-tagger",
+  "analyzing": "Analyserer med AI...",
+  "autoTagging": "AI Auto-tagging",
+  "autoTaggingDesc": "Analyser automatisk med Google Vision AI",
+  "category": "Kategori",
   "costs": {
-    "title": "Estimerte kostnader",
+    "exceeded": "Du har overskredet gratis tier. Vurder å oppgradere til betalt plan eller redusere AI-bruk.",
     "freeTier": "Gratis tier",
-    "requests": "{{count}} requests",
     "paidRequests": "{{count}} betalte requests",
     "remaining": "{{count}} igjen",
-    "totalPerMonth": "Total per måned",
-    "exceeded": "Du har overskredet gratis tier. Vurder å oppgradere til betalt plan eller redusere AI-bruk."
+    "requests": "{{count}} requests",
+    "title": "Estimerte kostnader",
+    "totalPerMonth": "Total per måned"
+  },
+  "errors": {
+    "duplicateError": "Feil ved duplikat-deteksjon",
+    "enhancementError": "Feil ved bildeforbedring",
+    "enhancementFailed": "Kunne ikke forbedre bilder",
+    "faceRecognitionError": "Feil ved ansiktsgjenkjenning",
+    "invalidJson": "Ugyldig JSON fra GPT",
+    "missingKey": "OpenAI API-nøkkel mangler",
+    "missingPicsartKey": "Picsart API-nøkkel mangler",
+    "missingVisionKey": "Google Vision API-nøkkel mangler",
+    "noCategories": "Ingen kategorier mottatt fra GPT",
+    "noPhotos": "Ingen bilder å sortere",
+    "sortingError": "Feil ved auto-sortering",
+    "sortingFailed": "Feil ved GPT-sortering",
+    "taggingError": "Feil ved smart tagging"
+  },
+  "facesDetected": "Ansikter gjenkjent",
+  "notifications": {
+    "duplicatesFound": "Fant {{count}} mulige duplikater!",
+    "enhancementComplete": "Bildeforbedring fullført!",
+    "facesDetected": "Fant {{count}} ansikter i {{photos}} bilder!",
+    "sortingComplete": "AI-sortering lagret i Firestore",
+    "tagsGenerated": "Genererte {{count}} tags!"
   },
   "providers": {
     "googleVision": "Google Cloud Vision",
     "picsart": "Picsart API"
-  }
+  },
+  "settings": {
+    "active": "Aktiv",
+    "apiKeys": "API-nøkler",
+    "autoTagging": "Auto-tagging ved opplasting",
+    "autoTaggingDesc": "Analyser bilder automatisk med AI når de lastes opp",
+    "configuration": "Konfigurasjon",
+    "notConfigured": "Ikke konfigurert",
+    "setupGuide": "Oppsettguide",
+    "setupInstructions": "For å aktivere AI-funksjoner, legg til API-nøkler i .env-filen:",
+    "title": "AI-innstillinger"
+  },
+  "subtitle": "Smart bildebehandling",
+  "successWithAI": "{{count}} bilder lastet opp og AI-analysert!",
+  "successWithAI_plural": "{{count}} bilder lastet opp og AI-analysert!"
 }

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Users, Image, Video, HardDrive } from 'lucide-react'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
 
 export default function AdminDashboard({ onBack }) {
+  const { t } = useTranslation(['admin', 'common'])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -88,7 +90,7 @@ export default function AdminDashboard({ onBack }) {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">
-            Loading admin data...
+            {t('admin:loadingData')}
           </p>
         </div>
       </div>
@@ -109,12 +111,12 @@ export default function AdminDashboard({ onBack }) {
           className="flex items-center gap-2 text-purple-600 hover:text-purple-700 mb-4"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span className="font-medium">Tilbake til More</span>
+          <span className="font-medium">{t('admin:backToMore')}</span>
         </button>
 
-        <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
+        <h1 className="text-3xl font-bold mb-2">{t('admin:dashboard.title')}</h1>
         <p className="text-gray-600 dark:text-gray-400">
-          PhotoVault System Overview
+          {t('admin:dashboard.subtitle')}
         </p>
       </div>
 
@@ -123,25 +125,25 @@ export default function AdminDashboard({ onBack }) {
         <StatCard
           icon={<Users className="w-6 h-6 text-blue-600" />}
           color="blue"
-          label="Total Users"
+          label={t('admin:stats.totalUsers')}
           value={stats.totalUsers}
         />
         <StatCard
           icon={<Image className="w-6 h-6 text-green-600" />}
           color="green"
-          label="Total Photos"
+          label={t('admin:stats.totalPhotos')}
           value={stats.totalPhotos}
         />
         <StatCard
           icon={<Video className="w-6 h-6 text-purple-600" />}
           color="purple"
-          label="Total Videos"
+          label={t('admin:stats.totalVideos')}
           value={stats.totalVideos}
         />
         <StatCard
           icon={<HardDrive className="w-6 h-6 text-orange-600" />}
           color="orange"
-          label="Total Storage"
+          label={t('admin:stats.totalStorage')}
           value={formatBytes(stats.totalStorageBytes)}
         />
       </div>
@@ -149,8 +151,7 @@ export default function AdminDashboard({ onBack }) {
       {/* Info */}
       <div className="max-w-4xl mx-auto mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
         <p className="text-sm text-blue-800 dark:text-blue-200">
-          💡 Additional admin features (user management, database tools) can be
-          added later.
+          💡 {t('admin:additionalFeaturesInfo')}
         </p>
       </div>
     </div>

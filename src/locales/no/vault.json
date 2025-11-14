@@ -1,0 +1,104 @@
+{
+  "backToMore": "← Tilbake til Mer-siden",
+  "settings": {
+    "autoLock": {
+      "description": "Hvelv låses automatisk etter denne perioden med inaktivitet",
+      "label": "Auto-lås tidtaker",
+      "minute": "minutt",
+      "minutes": "minutter",
+      "never": "Aldri"
+    },
+    "biometric": {
+      "description": "Bruk FaceID/TouchID",
+      "label": "Biometrisk opplåsing"
+    },
+    "changePassword": {
+      "button": "Endre hvelvpassord",
+      "confirmLabel": "Bekreft nytt passord",
+      "currentLabel": "Nåværende passord",
+      "mismatch": "Passordene stemmer ikke overens",
+      "newLabel": "Nytt passord",
+      "submit": "Oppdater passord"
+    },
+    "changePin": "Endre PIN",
+    "dangerZone": {
+      "button": "Tilbakestill hvelv",
+      "description": "Slett permanent alle hvelvbilder og tilbakestill hvelvinnstillinger.",
+      "title": "Faresone"
+    },
+    "deactivate": "Deaktiver hvelv",
+    "incorrectPassword": "Nåværende passord er feil",
+    "passwordChanged": "Passord endret",
+    "passwordChangeFailed": "Kunne ikke endre passord",
+    "passwordMismatch": "Passordene stemmer ikke overens",
+    "passwordWeak": "Passordet er for svakt",
+    "resetConfirm": {
+      "confirm": "Slett alt",
+      "message": "Dette vil permanent slette alle hvelvbilder og innstillinger. Denne handlingen kan ikke angres.",
+      "title": "Tilbakestill hvelv"
+    },
+    "saveFailed": "Kunne ikke lagre innstillinger",
+    "saveSuccess": "Innstillinger lagret",
+    "title": "Hvelvinnstillinger"
+  },
+  "setup": {
+    "activate": "Aktiver hvelv",
+    "confirmPin": "Bekreft PIN",
+    "createPin": "Opprett PIN",
+    "enableBiometric": "Aktiver biometrisk opplåsing",
+    "enterPin": "Skriv inn en sikker 4-6 sifret PIN",
+    "pinRequirements": {
+      "avoidSequential": "Unngå sekvensielle tall (1234, 4321)",
+      "avoidSimple": "Unngå enkle mønstre (1111, 0000)",
+      "digits": "Må være 4-6 siffer",
+      "title": "PIN-krav",
+      "unique": "Bruk en unik kombinasjon"
+    },
+    "steps": {
+      "step1": "Steg 1: Opprett PIN",
+      "step2": "Steg 2: Konfigurer sikkerhet",
+      "step3": "Steg 3: Klar til bruk"
+    },
+    "title": "Konfigurer ditt sikre hvelv"
+  },
+  "setupModal": {
+    "autoLock": {
+      "label": "Auto-lås tidtaker",
+      "minute": "minutt",
+      "minutes": "minutter",
+      "never": "Aldri"
+    },
+    "biometric": {
+      "description": "Bruk fingeravtrykk eller Face ID for å raskt låse opp hvelvet uten å skrive passordet.",
+      "enable": "Aktiver biometri",
+      "optional": "Valgfritt, kan endres senere",
+      "title": "Aktiver biometrisk opplåsing"
+    },
+    "complete": "Fullfør oppsett",
+    "getStarted": "Kom i gang",
+    "intro": {
+      "description": "Hvelvet bruker militær AES-256 kryptering for å beskytte dine sensitive bilder. Bare du kan få tilgang med passordet ditt.",
+      "feature1": "Kryptering på klientsiden - passordet forlater aldri enheten din",
+      "feature2": "Biometrisk opplåsing (FaceID/TouchID)",
+      "feature3": "Auto-lås etter inaktivitet",
+      "feature4": "Skjult fra hovedgalleriet",
+      "featuresTitle": "Funksjoner:",
+      "title": "Sikre dine private bilder"
+    },
+    "next": "Neste",
+    "password": {
+      "confirmLabel": "Bekreft passord",
+      "confirmPlaceholder": "Skriv inn passord på nytt",
+      "label": "Hvelvpassord",
+      "mismatch": "Passordene stemmer ikke overens",
+      "placeholder": "Skriv inn sterkt passord",
+      "strong": "Sterkt passord",
+      "warning": "Viktig: Hvis du glemmer passordet ditt, kan hvelvbildene dine ikke gjenopprettes. Skriv det ned sikkert."
+    },
+    "success": {
+      "message": "Ditt sikre hvelv er klart til bruk.",
+      "title": "Hvelvoppsett fullført!"
+    },
+    "title": "Konfigurer sikkert hvelv"
+  }
+}

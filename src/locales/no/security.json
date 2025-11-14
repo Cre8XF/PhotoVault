@@ -139,11 +139,16 @@
     "isPrivate": "Dette albumet er privat"
   },
   "lockScreen": {
-    "title": "PhotoVault",
-    "subtitle": "Skriv inn PIN-kode",
+    "attemptsRemaining": "{{attempts}} forsøk igjen før låsing",
+    "attemptsRemaining_one": "{{attempts}} forsøk igjen før låsing",
     "enterPin": "Skriv inn PIN for å låse opp",
-    "verifying": "Verifiserer...",
-    "unlocking": "Låser opp..."
+    "pinMinLength": "PIN må være minst {{min}} siffer",
+    "subtitle": "Skriv inn PIN-kode",
+    "title": "PhotoVault",
+    "unlocking": "Låser opp...",
+    "unlockWith": "Lås opp med {{type}}",
+    "unlockWithBiometric": "Lås opp med biometri",
+    "verifying": "Verifiserer..."
   },
   "info": {
     "title": "Om sikkerhet",

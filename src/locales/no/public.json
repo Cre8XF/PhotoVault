@@ -1,0 +1,31 @@
+{
+  "albumLoaded": "Album lastet",
+  "albumLoadError": "Album ikke tilgjengelig",
+  "albumUnavailable": "Album ikke tilgjengelig",
+  "callToAction": {
+    "createAccount": "Lag din egen konto gratis",
+    "likePhotoVault": "Liker du PhotoVault?",
+    "signUp": "Registrer deg"
+  },
+  "downloadAlbum": "Last ned album",
+  "downloadPhoto": "Last ned bilde",
+  "goToHome": "Gå til forsiden",
+  "invalidShareLink": "Ugyldig delingslenke",
+  "loading": "Laster album...",
+  "name": "Navn",
+  "next": "Neste",
+  "noPhotosInAlbum": "Ingen bilder i dette albumet ennå",
+  "openInPhotoVault": "Åpne i PhotoVault",
+  "photosCount": "{{count}} bilde",
+  "photosCount_other": "{{count}} bilder",
+  "previous": "Forrige",
+  "shareAlbum": "Del album",
+  "sharedBy": "Delt av {{name}}",
+  "size": "Størrelse",
+  "status": "Status",
+  "unknownUser": "Ukjent bruker",
+  "upload": "Last opp",
+  "uploaded": "Lastet opp",
+  "videosCount": "{{count}} video",
+  "videosCount_other": "{{count}} videoer"
+}
