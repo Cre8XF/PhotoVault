@@ -381,7 +381,7 @@ const AlbumPage = ({
 
       // Show success notification
       setNotification({
-        message: 'Kollasj lagret! 🎨',
+        message: t('albums:collageSaved'),
         type: 'success',
       })
 
@@ -389,7 +389,7 @@ const AlbumPage = ({
     } catch (error) {
       console.error('❌ Error saving collage:', error)
       setNotification({
-        message: 'Kunne ikke lagre kollasjen',
+        message: t('albums:collageSaveError'),
         type: 'error',
       })
       throw error
@@ -452,11 +452,11 @@ const AlbumPage = ({
             disabled={albumPhotos.length < 2}
             className="ripple-effect px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             title={
-              albumPhotos.length < 2 ? 'Trenger minst 2 bilder' : 'Lag kollasj'
+              albumPhotos.length < 2 ? t('albums:minTwoPhotos') : t('albums:createCollage')
             }
           >
             <Layout size={18} />
-            <span className="hidden sm:inline">Lag kollasj</span>
+            <span className="hidden sm:inline">{t('albums:createCollage')}</span>
           </button>
 
           {/* Share Album Button */}
@@ -465,7 +465,7 @@ const AlbumPage = ({
             className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 transition flex items-center gap-2"
           >
             <Share2 size={18} />
-            <span className="hidden sm:inline">Del album</span>
+            <span className="hidden sm:inline">{t('albums:shareAlbum')}</span>
           </button>
 
           {/* Edit Album Button */}
@@ -875,7 +875,7 @@ const AlbumPage = ({
             if (setNotification) {
               setNotification({
                 type: 'success',
-                message: 'Redigert bilde lagret!'
+                message: t('albums:editedPhotoSaved')
               })
             }
           }}
