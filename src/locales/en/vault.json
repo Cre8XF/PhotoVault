@@ -1,0 +1,30 @@
+{
+  "backToMore": "← Back to More Page",
+  "settings": {
+    "autoLock": "Auto-Lock Timer",
+    "biometric": "Biometric Authentication",
+    "changePin": "Change PIN",
+    "deactivate": "Deactivate Vault",
+    "title": "Vault Settings"
+  },
+  "setup": {
+    "activate": "Activate Vault",
+    "confirmPin": "Confirm PIN",
+    "createPin": "Create PIN",
+    "enableBiometric": "Enable Biometric Unlock",
+    "enterPin": "Enter a secure 4-6 digit PIN",
+    "pinRequirements": {
+      "avoidSequential": "Avoid sequential numbers (1234, 4321)",
+      "avoidSimple": "Avoid simple patterns (1111, 0000)",
+      "digits": "Must be 4-6 digits",
+      "title": "PIN Requirements",
+      "unique": "Use a unique combination"
+    },
+    "steps": {
+      "step1": "Step 1: Create PIN",
+      "step2": "Step 2: Configure Security",
+      "step3": "Step 3: Ready to Use"
+    },
+    "title": "Set Up Your Secure Vault"
+  }
+}

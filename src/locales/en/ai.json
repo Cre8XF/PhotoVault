@@ -1,36 +1,68 @@
 {
-  "settings": {
-    "title": "AI Settings",
-    "apiKeys": "API Keys",
-    "active": "Active",
-    "notConfigured": "Not configured",
-    "setupGuide": "Setup guide",
-    "setupInstructions": "To enable AI features, add API keys in the .env file:",
-    "configuration": "Configuration",
-    "autoTagging": "Auto-tagging on upload",
-    "autoTaggingDesc": "Analyze images automatically with AI when uploaded"
-  },
   "activity": {
-    "title": "AI Activity",
     "analyzed": "Analyzed",
-    "enhanced": "Enhanced",
     "bgRemoved": "Background removed",
-    "totalRequests": "Total requests",
+    "enhanced": "Enhanced",
     "freeTier": "Free tier usage",
     "needMoreSpace": "Need more space?",
+    "title": "AI Activity",
+    "totalRequests": "Total requests",
     "upgradeMessage": "Upgrade to Pro and get 100GB storage and AI features"
   },
+  "aiAnalyzed": "AI analyzed",
+  "aiTags": "AI tags",
+  "analyzing": "Analyzing with AI...",
+  "autoTagging": "AI Auto-tagging",
+  "autoTaggingDesc": "Analyze automatically with Google Vision AI",
+  "category": "Category",
   "costs": {
-    "title": "Estimated costs",
+    "exceeded": "You have exceeded the free tier. Consider upgrading to a paid plan or reducing AI usage.",
     "freeTier": "Free tier",
-    "requests": "{{count}} requests",
     "paidRequests": "{{count}} paid requests",
     "remaining": "{{count}} remaining",
-    "totalPerMonth": "Total per month",
-    "exceeded": "You have exceeded the free tier. Consider upgrading to a paid plan or reducing AI usage."
+    "requests": "{{count}} requests",
+    "title": "Estimated costs",
+    "totalPerMonth": "Total per month"
+  },
+  "errors": {
+    "duplicateError": "Error during duplicate detection",
+    "enhancementError": "Error during image enhancement",
+    "enhancementFailed": "Could not enhance images",
+    "faceRecognitionError": "Error during face recognition",
+    "invalidJson": "Invalid JSON from GPT",
+    "missingKey": "OpenAI API key missing",
+    "missingPicsartKey": "Picsart API key missing",
+    "missingVisionKey": "Google Vision API key missing",
+    "noCategories": "No categories received from GPT",
+    "noPhotos": "No photos to process",
+    "sortingError": "Error during auto-sorting",
+    "sortingFailed": "Error with GPT sorting",
+    "taggingError": "Error during smart tagging"
+  },
+  "facesDetected": "Faces detected",
+  "notifications": {
+    "duplicatesFound": "Found {{count}} possible duplicates!",
+    "enhancementComplete": "Image enhancement completed!",
+    "facesDetected": "Found {{count}} faces in {{photos}} images!",
+    "sortingComplete": "AI sorting saved to Firestore",
+    "tagsGenerated": "Generated {{count}} tags!"
   },
   "providers": {
     "googleVision": "Google Cloud Vision",
     "picsart": "Picsart API"
-  }
+  },
+  "settings": {
+    "active": "Active",
+    "apiKeys": "API Keys",
+    "autoTagging": "Auto-tagging on upload",
+    "autoTaggingDesc": "Analyze images automatically with AI when uploaded",
+    "configuration": "Configuration",
+    "notConfigured": "Not configured",
+    "setupGuide": "Setup guide",
+    "setupInstructions": "To enable AI features, add API keys in the .env file:",
+    "title": "AI Settings"
+  },
+  "subtitle": "Smart image processing",
+  "successWithAI": "{{count}} photos uploaded and AI-analyzed!",
+  "successWithAI_plural": "{{count}} photos uploaded and AI-analyzed!"
 }
