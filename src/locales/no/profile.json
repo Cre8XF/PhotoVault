@@ -1,0 +1,35 @@
+{
+  "header": {
+    "title": "Min profil"
+  },
+  "profileCard": {
+    "noName": "Ingen navn angitt"
+  },
+  "roleBadge": {
+    "free": "GRATIS Konto",
+    "admin": "ADMIN Konto",
+    "pro": "PRO Konto"
+  },
+  "sections": {
+    "profileInfo": "Profilinformasjon",
+    "accountDetails": "Kontodetaljer"
+  },
+  "form": {
+    "displayName": "Visningsnavn",
+    "namePlaceholder": "Skriv inn navnet ditt",
+    "emailAddress": "E-postadresse",
+    "emailPlaceholder": "Skriv inn e-posten din",
+    "emailWarning": "Endring av e-post krever re-autentisering",
+    "photoURL": "Profilbilde-URL",
+    "saveChanges": "Lagre endringer",
+    "saving": "Lagrer..."
+  },
+  "accountDetails": {
+    "userId": "Bruker-ID",
+    "accountCreated": "Konto opprettet",
+    "lastUpdated": "Sist oppdatert"
+  },
+  "fallback": {
+    "notAvailable": "Ikke tilgjengelig"
+  }
+}
