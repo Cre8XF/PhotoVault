@@ -5,13 +5,16 @@
  */
 
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Calendar, CalendarDays, CalendarRange } from 'lucide-react'
 
 const TimelineNavigation = ({ currentView, onViewChange, totalPhotos }) => {
+  const { t } = useTranslation(['timeline'])
+
   const views = [
-    { id: 'day', label: 'Dag', icon: Calendar },
-    { id: 'month', label: 'Måned', icon: CalendarDays },
-    { id: 'year', label: 'År', icon: CalendarRange }
+    { id: 'day', label: t('timeline:navigation.day'), icon: Calendar },
+    { id: 'month', label: t('timeline:navigation.month'), icon: CalendarDays },
+    { id: 'year', label: t('timeline:navigation.year'), icon: CalendarRange }
   ]
 
   return (
@@ -20,9 +23,9 @@ const TimelineNavigation = ({ currentView, onViewChange, totalPhotos }) => {
         <div className="flex items-center justify-between">
           {/* Title */}
           <div>
-            <h1 className="text-xl font-bold">Tidslinje</h1>
+            <h1 className="text-xl font-bold">{t('timeline:navigation.title')}</h1>
             <p className="text-sm text-gray-400">
-              {totalPhotos} {totalPhotos === 1 ? 'bilde' : 'bilder'}
+              {totalPhotos} {totalPhotos === 1 ? t('timeline:stats.photo') : t('timeline:stats.photo_plural')}
             </p>
           </div>
 

@@ -1,0 +1,36 @@
+{
+  "modal": {
+    "title": "Share Album"
+  },
+  "settings": {
+    "public": {
+      "title": "Publicly Available",
+      "description": "Anyone with the link can view the album"
+    },
+    "upload": {
+      "title": "Allow Uploads",
+      "description": "Others can upload photos"
+    },
+    "expiry": {
+      "title": "Expiration Date",
+      "description": "Automatic deactivation"
+    }
+  },
+  "qr": {
+    "scanInstructions": "Scan QR code to open the album",
+    "shareLink": "Share link",
+    "copyLink": "Copy link",
+    "downloadButton": "Download QR Code"
+  },
+  "loading": {
+    "userData": "Loading user data..."
+  },
+  "errors": {
+    "userNotLoaded": "User not loaded. Please wait a moment and try again.",
+    "generateFailed": "Could not generate share link: ",
+    "updateFailed": "Could not update settings: "
+  },
+  "info": {
+    "tip": "💡 <strong>Tip:</strong> Print the QR code and display it at your event venue, or share the link on social media."
+  }
+}

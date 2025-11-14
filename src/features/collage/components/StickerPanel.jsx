@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 import { Smile, Trash2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { getStickerCategories, STICKER_SIZES } from '../utils/stickers'
 
 /**
  * Sticker panel for adding emoji stickers to collage
  */
 const StickerPanel = ({ stickerLayers, onAddSticker, onDeleteSticker }) => {
+  const { t } = useTranslation(['collage'])
   const [selectedCategory, setSelectedCategory] = useState('hearts')
   const [selectedSize, setSelectedSize] = useState(64)
 
@@ -27,12 +29,12 @@ const StickerPanel = ({ stickerLayers, onAddSticker, onDeleteSticker }) => {
     <div className="sticker-panel">
       <div className="flex items-center gap-2 mb-4">
         <Smile className="w-5 h-5 text-purple-400" />
-        <h3 className="text-lg font-bold">Stickers</h3>
+        <h3 className="text-lg font-bold">{t('collage:stickers.title')}</h3>
       </div>
 
       {/* Size Selector */}
       <div className="mb-4">
-        <label className="text-sm opacity-70 block mb-2">Størrelse</label>
+        <label className="text-sm opacity-70 block mb-2">{t('collage:stickers.size')}</label>
         <div className="grid grid-cols-4 gap-2">
           {STICKER_SIZES.map((size) => (
             <button
@@ -84,7 +86,7 @@ const StickerPanel = ({ stickerLayers, onAddSticker, onDeleteSticker }) => {
               key={index}
               onClick={() => handleStickerClick(emoji)}
               className="aspect-square flex items-center justify-center text-4xl hover:bg-white/10 rounded-lg transition hover:scale-110"
-              title="Legg til sticker"
+              title={t('collage:stickers.addTooltip')}
             >
               {emoji}
             </button>
@@ -96,7 +98,7 @@ const StickerPanel = ({ stickerLayers, onAddSticker, onDeleteSticker }) => {
       {stickerLayers && stickerLayers.length > 0 && (
         <div className="space-y-2">
           <p className="text-sm opacity-70 mb-2">
-            {stickerLayers.length} sticker{stickerLayers.length !== 1 ? 's' : ''}
+            {t('collage:stickers.stickerCount', { count: stickerLayers.length })}
           </p>
           {stickerLayers.map((layer) => (
             <div
@@ -112,7 +114,7 @@ const StickerPanel = ({ stickerLayers, onAddSticker, onDeleteSticker }) => {
               <button
                 onClick={() => onDeleteSticker(layer.id)}
                 className="p-2 hover:bg-red-500/20 rounded-lg transition"
-                title="Slett sticker"
+                title={t('collage:stickers.deleteTooltip')}
               >
                 <Trash2 className="w-4 h-4 text-red-400" />
               </button>
@@ -123,7 +125,7 @@ const StickerPanel = ({ stickerLayers, onAddSticker, onDeleteSticker }) => {
 
       {stickerLayers && stickerLayers.length === 0 && (
         <p className="text-sm opacity-50 text-center py-4">
-          Ingen stickers lagt til ennå
+          {t('collage:stickers.noStickersAdded')}
         </p>
       )}
     </div>

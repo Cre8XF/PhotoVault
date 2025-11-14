@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 import { Type, Plus, Trash2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { FONT_FAMILIES, FONT_WEIGHTS, TEXT_COLORS } from '../utils/textUtils'
 
 /**
  * Text tool panel for adding and editing text layers
  */
 const TextToolPanel = ({ textLayers, onAddText, onUpdateText, onDeleteText }) => {
+  const { t } = useTranslation(['collage'])
   const [showAddForm, setShowAddForm] = useState(false)
   const [newText, setNewText] = useState({
     text: '',
@@ -44,7 +46,7 @@ const TextToolPanel = ({ textLayers, onAddText, onUpdateText, onDeleteText }) =>
     <div className="text-tool-panel">
       <div className="flex items-center gap-2 mb-4">
         <Type className="w-5 h-5 text-purple-400" />
-        <h3 className="text-lg font-bold">Tekst</h3>
+        <h3 className="text-lg font-bold">{t('collage:text.title')}</h3>
       </div>
 
       {/* Add Text Button */}
@@ -54,24 +56,24 @@ const TextToolPanel = ({ textLayers, onAddText, onUpdateText, onDeleteText }) =>
           className="w-full mb-4 px-4 py-3 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/50 rounded-xl transition flex items-center justify-center gap-2"
         >
           <Plus className="w-5 h-5" />
-          <span className="font-medium">Legg til tekst</span>
+          <span className="font-medium">{t('collage:text.addButton')}</span>
         </button>
       )}
 
       {/* Add Text Form */}
       {showAddForm && (
         <div className="glass-card p-4 rounded-xl border border-white/10 mb-4">
-          <h4 className="font-bold mb-3">Ny tekst</h4>
+          <h4 className="font-bold mb-3">{t('collage:text.newText')}</h4>
 
           <div className="space-y-3">
             {/* Text Input */}
             <div>
-              <label className="text-sm opacity-70 block mb-1">Tekst</label>
+              <label className="text-sm opacity-70 block mb-1">{t('collage:text.textLabel')}</label>
               <input
                 type="text"
                 value={newText.text}
                 onChange={(e) => setNewText({ ...newText, text: e.target.value })}
-                placeholder="Skriv tekst..."
+                placeholder={t('collage:text.placeholder')}
                 className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:border-purple-500 outline-none"
               />
             </div>
@@ -79,7 +81,7 @@ const TextToolPanel = ({ textLayers, onAddText, onUpdateText, onDeleteText }) =>
             {/* Font Size */}
             <div>
               <label className="text-sm opacity-70 block mb-1">
-                Størrelse: {newText.fontSize}px
+                {t('collage:text.size')}: {newText.fontSize}px
               </label>
               <input
                 type="range"
@@ -93,7 +95,7 @@ const TextToolPanel = ({ textLayers, onAddText, onUpdateText, onDeleteText }) =>
 
             {/* Font Family */}
             <div>
-              <label className="text-sm opacity-70 block mb-1">Skrift</label>
+              <label className="text-sm opacity-70 block mb-1">{t('collage:text.font')}</label>
               <select
                 value={newText.fontFamily}
                 onChange={(e) => setNewText({ ...newText, fontFamily: e.target.value })}
@@ -109,7 +111,7 @@ const TextToolPanel = ({ textLayers, onAddText, onUpdateText, onDeleteText }) =>
 
             {/* Font Weight */}
             <div>
-              <label className="text-sm opacity-70 block mb-1">Vekt</label>
+              <label className="text-sm opacity-70 block mb-1">{t('collage:text.weight')}</label>
               <select
                 value={newText.fontWeight}
                 onChange={(e) => setNewText({ ...newText, fontWeight: e.target.value })}
@@ -125,7 +127,7 @@ const TextToolPanel = ({ textLayers, onAddText, onUpdateText, onDeleteText }) =>
 
             {/* Color */}
             <div>
-              <label className="text-sm opacity-70 block mb-1">Farge</label>
+              <label className="text-sm opacity-70 block mb-1">{t('collage:text.color')}</label>
               <div className="grid grid-cols-5 gap-2">
                 {TEXT_COLORS.map((colorObj) => (
                   <button
@@ -151,7 +153,7 @@ const TextToolPanel = ({ textLayers, onAddText, onUpdateText, onDeleteText }) =>
                   onChange={(e) => setNewText({ ...newText, shadow: e.target.checked })}
                   className="w-4 h-4"
                 />
-                <span className="text-sm">Skygge</span>
+                <span className="text-sm">{t('collage:text.shadow')}</span>
               </label>
 
               <label className="flex items-center gap-2 cursor-pointer">
@@ -161,7 +163,7 @@ const TextToolPanel = ({ textLayers, onAddText, onUpdateText, onDeleteText }) =>
                   onChange={(e) => setNewText({ ...newText, stroke: e.target.checked })}
                   className="w-4 h-4"
                 />
-                <span className="text-sm">Outline</span>
+                <span className="text-sm">{t('collage:text.outline')}</span>
               </label>
             </div>
 
@@ -172,13 +174,13 @@ const TextToolPanel = ({ textLayers, onAddText, onUpdateText, onDeleteText }) =>
                 disabled={!newText.text.trim()}
                 className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition disabled:opacity-50"
               >
-                Legg til
+                {t('collage:buttons.add')}
               </button>
               <button
                 onClick={() => setShowAddForm(false)}
                 className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition"
               >
-                Avbryt
+                {t('collage:buttons.cancel')}
               </button>
             </div>
           </div>
@@ -189,7 +191,7 @@ const TextToolPanel = ({ textLayers, onAddText, onUpdateText, onDeleteText }) =>
       {textLayers && textLayers.length > 0 && (
         <div className="space-y-2">
           <p className="text-sm opacity-70 mb-2">
-            {textLayers.length} tekst{textLayers.length !== 1 ? 'er' : ''}
+            {t('collage:text.textCount', { count: textLayers.length })}
           </p>
           {textLayers.map((layer) => (
             <div
@@ -205,7 +207,7 @@ const TextToolPanel = ({ textLayers, onAddText, onUpdateText, onDeleteText }) =>
               <button
                 onClick={() => onDeleteText(layer.id)}
                 className="p-2 hover:bg-red-500/20 rounded-lg transition"
-                title="Slett tekst"
+                title={t('collage:text.deleteTooltip')}
               >
                 <Trash2 className="w-4 h-4 text-red-400" />
               </button>
@@ -216,7 +218,7 @@ const TextToolPanel = ({ textLayers, onAddText, onUpdateText, onDeleteText }) =>
 
       {textLayers && textLayers.length === 0 && !showAddForm && (
         <p className="text-sm opacity-50 text-center py-4">
-          Ingen tekst lagt til ennå
+          {t('collage:text.noTextAdded')}
         </p>
       )}
     </div>

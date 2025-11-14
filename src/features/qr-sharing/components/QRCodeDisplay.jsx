@@ -1,8 +1,10 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { QRCodeSVG } from 'qrcode.react'
 import { Download, Copy, Check } from 'lucide-react'
 
 const QRCodeDisplay = ({ url, albumName, onDownload, onCopyLink }) => {
+  const { t } = useTranslation(['qrshare'])
   const [copied, setCopied] = React.useState(false)
 
   const handleCopy = async () => {
@@ -34,13 +36,13 @@ const QRCodeDisplay = ({ url, albumName, onDownload, onCopyLink }) => {
       <div className="text-center">
         <h3 className="text-xl font-bold mb-2">{albumName}</h3>
         <p className="text-sm opacity-70">
-          Scan QR-koden for å åpne albumet
+          {t('qrshare:qr.scanInstructions')}
         </p>
       </div>
 
       {/* URL display */}
       <div className="w-full glass p-4 rounded-xl">
-        <p className="text-sm opacity-70 mb-2">Del-lenke:</p>
+        <p className="text-sm opacity-70 mb-2">{t('qrshare:qr.shareLink')}:</p>
         <div className="flex items-center gap-2">
           <input
             type="text"
@@ -51,7 +53,7 @@ const QRCodeDisplay = ({ url, albumName, onDownload, onCopyLink }) => {
           <button
             onClick={handleCopy}
             className="ripple-effect p-2 hover:bg-white/10 rounded-lg transition"
-            title="Kopier lenke"
+            title={t('qrshare:qr.copyLink')}
           >
             {copied ? (
               <Check className="w-5 h-5 text-green-400" />
@@ -69,7 +71,7 @@ const QRCodeDisplay = ({ url, albumName, onDownload, onCopyLink }) => {
           className="ripple-effect flex-1 glass p-4 rounded-xl hover:bg-white/10 transition flex items-center justify-center gap-2"
         >
           <Download className="w-5 h-5" />
-          <span>Last ned QR-kode</span>
+          <span>{t('qrshare:qr.downloadButton')}</span>
         </button>
       </div>
     </div>

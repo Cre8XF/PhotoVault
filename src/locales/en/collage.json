@@ -6,49 +6,77 @@
     "step3": "Step 3: Preview"
   },
   "buttons": {
-    "download": "Download",
-    "save": "Save",
-    "saving": "Saving...",
+    "add": "Add",
+    "backToLayouts": "Back to layouts",
+    "cancel": "Cancel",
     "changePhotos": "Change Photos",
     "close": "Close",
-    "backToLayouts": "Back to layouts"
+    "download": "Download",
+    "save": "Save",
+    "saving": "Saving..."
   },
-  "tabs": {
-    "edit": "Edit",
-    "text": "Text",
-    "stickers": "Stickers"
+  "errors": {
+    "exportError": "Could not export collage",
+    "saveError": "Could not save collage. Please try again.",
+    "title": "Error"
   },
   "layout": {
-    "title": "Layout info",
     "photos": "photos",
-    "selectPrompt": "Select a layout",
-    "selectHelp": "Select a layout from the menu on the left to start",
-    "selectTitle": "Select layout",
+    "photosCount": "{{count}} photos",
     "selectDescription": "Choose how to arrange your photos",
-    "photosCount": "{{count}} photos"
-  },
-  "photoSelector": {
-    "title": "Select photos",
-    "selectPhotos": "Select {{count}} photos for your collage",
-    "selectedPhotos": "Selected photos (order):",
-    "noPhotos": "No photos available",
-    "uploadFirst": "Upload photos to an album first"
-  },
-  "tips": {
-    "title": "Tips",
-    "download": "Click \"Download\" to save locally",
-    "save": "Click \"Save\" to add to album",
-    "change": "Use \"Change Photos\" to swap photos",
-    "addElements": "Add text and stickers with the tabs above"
+    "selectHelp": "Select a layout from the menu on the left to start",
+    "selectPrompt": "Select a layout",
+    "selectTitle": "Select layout",
+    "title": "Layout info"
   },
   "loading": {
     "photos": "Loading photos...",
     "saving": "Saving collage...",
     "uploading": "Uploading to Firebase Storage"
   },
-  "errors": {
-    "saveError": "Could not save collage. Please try again.",
-    "exportError": "Could not export collage",
-    "title": "Error"
+  "photoSelector": {
+    "noPhotos": "No photos available",
+    "selectPhotos": "Select {{count}} photos for your collage",
+    "selectedPhotos": "Selected photos (order):",
+    "title": "Select photos",
+    "uploadFirst": "Upload photos to an album first"
+  },
+  "stickers": {
+    "addTooltip": "Add sticker",
+    "deleteTooltip": "Delete sticker",
+    "noStickersAdded": "No stickers added yet",
+    "size": "Size",
+    "stickerCount_one": "{{count}} sticker",
+    "stickerCount_other": "{{count}} stickers",
+    "title": "Stickers"
+  },
+  "tabs": {
+    "edit": "Edit",
+    "stickers": "Stickers",
+    "text": "Text"
+  },
+  "text": {
+    "addButton": "Add text",
+    "color": "Color",
+    "deleteTooltip": "Delete text",
+    "font": "Font",
+    "newText": "New text",
+    "noTextAdded": "No text added yet",
+    "outline": "Outline",
+    "placeholder": "Enter text...",
+    "shadow": "Shadow",
+    "size": "Size",
+    "textCount_one": "{{count}} text",
+    "textCount_other": "{{count}} texts",
+    "textLabel": "Text",
+    "title": "Text",
+    "weight": "Weight"
+  },
+  "tips": {
+    "addElements": "Add text and stickers with the tabs above",
+    "change": "Use \"Change Photos\" to swap photos",
+    "download": "Click \"Download\" to save locally",
+    "save": "Click \"Save\" to add to album",
+    "title": "Tips"
   }
 }
