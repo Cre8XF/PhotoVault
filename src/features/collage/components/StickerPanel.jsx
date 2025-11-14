@@ -36,22 +36,25 @@ const StickerPanel = ({ stickerLayers, onAddSticker, onDeleteSticker }) => {
       <div className="mb-4">
         <label className="text-sm opacity-70 block mb-2">{t('collage:stickers.size')}</label>
         <div className="grid grid-cols-4 gap-2">
-          {STICKER_SIZES.map((size) => (
-            <button
-              key={size.value}
-              onClick={() => setSelectedSize(size.value)}
-              className={`
-                px-3 py-2 rounded-lg transition text-sm
-                ${
-                  selectedSize === size.value
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-white/5 hover:bg-white/10'
-                }
-              `}
-            >
-              {size.label}
-            </button>
-          ))}
+          {STICKER_SIZES.map((size) => {
+            const sizeKey = size.value === 32 ? 'small' : size.value === 48 ? 'medium' : size.value === 64 ? 'large' : 'extraLarge'
+            return (
+              <button
+                key={size.value}
+                onClick={() => setSelectedSize(size.value)}
+                className={`
+                  px-3 py-2 rounded-lg transition text-sm
+                  ${
+                    selectedSize === size.value
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-white/5 hover:bg-white/10'
+                  }
+                `}
+              >
+                {t(`collage:stickerSizes.${sizeKey}`)}
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -72,7 +75,7 @@ const StickerPanel = ({ stickerLayers, onAddSticker, onDeleteSticker }) => {
               `}
             >
               <span>{category.emoji}</span>
-              <span>{category.name}</span>
+              <span>{t(`collage:stickerCategories.${category.id}`)}</span>
             </button>
           ))}
         </div>

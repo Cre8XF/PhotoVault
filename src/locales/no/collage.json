@@ -29,6 +29,17 @@
     "selectTitle": "Velg layout",
     "title": "Layout info"
   },
+  "layouts": {
+    "2-photos-horizontal": "2 bilder (horisontal)",
+    "2-photos-vertical": "2 bilder (vertikal)",
+    "3-photos-vertical": "3 bilder (vertikal)",
+    "3-photos-mixed": "3 bilder (mikset)",
+    "4-photos-grid": "4 bilder (grid)",
+    "4-photos-collage": "4 bilder (kollasj)",
+    "5-photos-creative": "5 bilder (kreativ)",
+    "6-photos-grid": "6 bilder (grid)",
+    "9-photos-grid": "9 bilder (grid)"
+  },
   "loading": {
     "photos": "Laster bilder...",
     "saving": "Lagrer kollasj...",
@@ -40,6 +51,24 @@
     "selectedPhotos": "Valgte bilder (rekkefølge):",
     "title": "Velg bilder",
     "uploadFirst": "Last opp bilder til et album først"
+  },
+  "stickerCategories": {
+    "hearts": "Hjerter",
+    "celebrations": "Feiring",
+    "travel": "Reise",
+    "seasons": "Årstider",
+    "food": "Mat",
+    "animals": "Dyr",
+    "nature": "Natur",
+    "weather": "Vær",
+    "symbols": "Symboler",
+    "faces": "Ansikter"
+  },
+  "stickerSizes": {
+    "small": "Liten",
+    "medium": "Middels",
+    "large": "Stor",
+    "extraLarge": "Ekstra stor"
   },
   "stickers": {
     "addTooltip": "Legg til sticker",
@@ -71,6 +100,22 @@
     "textLabel": "Tekst",
     "title": "Tekst",
     "weight": "Vekt"
+  },
+  "fontWeights": {
+    "normal": "Normal",
+    "bold": "Fet"
+  },
+  "colors": {
+    "black": "Svart",
+    "white": "Hvit",
+    "red": "Rød",
+    "green": "Grønn",
+    "blue": "Blå",
+    "yellow": "Gul",
+    "magenta": "Magenta",
+    "cyan": "Cyan",
+    "orange": "Oransje",
+    "purple": "Lilla"
   },
   "tips": {
     "addElements": "Legg til tekst og stickers med fanene over",

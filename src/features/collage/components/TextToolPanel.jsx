@@ -119,7 +119,7 @@ const TextToolPanel = ({ textLayers, onAddText, onUpdateText, onDeleteText }) =>
               >
                 {FONT_WEIGHTS.map((weight) => (
                   <option key={weight.value} value={weight.value}>
-                    {weight.label}
+                    {t(`collage:fontWeights.${weight.value}`)}
                   </option>
                 ))}
               </select>
@@ -129,18 +129,21 @@ const TextToolPanel = ({ textLayers, onAddText, onUpdateText, onDeleteText }) =>
             <div>
               <label className="text-sm opacity-70 block mb-1">{t('collage:text.color')}</label>
               <div className="grid grid-cols-5 gap-2">
-                {TEXT_COLORS.map((colorObj) => (
-                  <button
-                    key={colorObj.value}
-                    onClick={() => setNewText({ ...newText, color: colorObj.value })}
-                    className={`
-                      w-full aspect-square rounded-lg border-2 transition
-                      ${newText.color === colorObj.value ? 'border-purple-500' : 'border-white/20'}
-                    `}
-                    style={{ backgroundColor: colorObj.value }}
-                    title={colorObj.label}
-                  />
-                ))}
+                {TEXT_COLORS.map((colorObj) => {
+                  const colorKey = colorObj.label.toLowerCase()
+                  return (
+                    <button
+                      key={colorObj.value}
+                      onClick={() => setNewText({ ...newText, color: colorObj.value })}
+                      className={`
+                        w-full aspect-square rounded-lg border-2 transition
+                        ${newText.color === colorObj.value ? 'border-purple-500' : 'border-white/20'}
+                      `}
+                      style={{ backgroundColor: colorObj.value }}
+                      title={t(`collage:colors.${colorKey}`)}
+                    />
+                  )
+                })}
               </div>
             </div>
 
