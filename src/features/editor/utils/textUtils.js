@@ -34,7 +34,7 @@
  */
 export const DEFAULT_TEXT_LAYER = {
   id: null,
-  text: 'Din tekst her',
+  text: '',
   x: 0.5, // Center
   y: 0.5, // Center
   fontSize: 48,
