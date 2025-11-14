@@ -36,7 +36,7 @@ const LayoutSelector = ({ layouts, selectedLayout, onSelect }) => {
           >
             <div className="flex items-center justify-between mb-3">
               <div className="text-left">
-                <h4 className="font-medium">{t(`collage:layouts.${layout.id}`)}</h4>
+                <h4 className="font-medium">{t(`collage:${layout.nameKey}`)}</h4>
                 <p className="text-xs opacity-70">{t('collage:layout.photosCount', { count: layout.slots })}</p>
               </div>
               {selectedLayout?.id === layout.id && (

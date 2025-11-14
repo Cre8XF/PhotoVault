@@ -4,7 +4,7 @@
 export const GRID_LAYOUTS = {
   '2-photos-horizontal': {
     id: '2-photos-horizontal',
-    name: '2 bilder (horisontal)',
+    nameKey: 'layouts.two_horizontal',
     slots: 2,
     canvas: { width: 1200, height: 600 },
     positions: [
@@ -15,7 +15,7 @@ export const GRID_LAYOUTS = {
 
   '2-photos-vertical': {
     id: '2-photos-vertical',
-    name: '2 bilder (vertikal)',
+    nameKey: 'layouts.two_vertical',
     slots: 2,
     canvas: { width: 600, height: 1200 },
     positions: [
@@ -26,7 +26,7 @@ export const GRID_LAYOUTS = {
 
   '3-photos-vertical': {
     id: '3-photos-vertical',
-    name: '3 bilder (vertikal)',
+    nameKey: 'layouts.three_vertical',
     slots: 3,
     canvas: { width: 800, height: 1200 },
     positions: [
@@ -38,7 +38,7 @@ export const GRID_LAYOUTS = {
 
   '3-photos-mixed': {
     id: '3-photos-mixed',
-    name: '3 bilder (mikset)',
+    nameKey: 'layouts.three_mixed',
     slots: 3,
     canvas: { width: 1200, height: 900 },
     positions: [
@@ -50,7 +50,7 @@ export const GRID_LAYOUTS = {
 
   '4-photos-grid': {
     id: '4-photos-grid',
-    name: '4 bilder (grid)',
+    nameKey: 'layouts.four_grid',
     slots: 4,
     canvas: { width: 1200, height: 1200 },
     positions: [
@@ -63,7 +63,7 @@ export const GRID_LAYOUTS = {
 
   '4-photos-collage': {
     id: '4-photos-collage',
-    name: '4 bilder (kollasj)',
+    nameKey: 'layouts.four_collage',
     slots: 4,
     canvas: { width: 1200, height: 1200 },
     positions: [
@@ -76,7 +76,7 @@ export const GRID_LAYOUTS = {
 
   '5-photos-creative': {
     id: '5-photos-creative',
-    name: '5 bilder (kreativ)',
+    nameKey: 'layouts.five_creative',
     slots: 5,
     canvas: { width: 1200, height: 1200 },
     positions: [
@@ -90,7 +90,7 @@ export const GRID_LAYOUTS = {
 
   '6-photos-grid': {
     id: '6-photos-grid',
-    name: '6 bilder (grid)',
+    nameKey: 'layouts.six_grid',
     slots: 6,
     canvas: { width: 1200, height: 1600 },
     positions: [
@@ -105,7 +105,7 @@ export const GRID_LAYOUTS = {
 
   '9-photos-grid': {
     id: '9-photos-grid',
-    name: '9 bilder (grid)',
+    nameKey: 'layouts.nine_grid',
     slots: 9,
     canvas: { width: 1200, height: 1200 },
     positions: [
