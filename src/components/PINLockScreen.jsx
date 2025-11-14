@@ -3,11 +3,13 @@
 // FASE 3 - Sikkerhet & Privacy
 // ============================================================================
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Lock, Delete, Fingerprint, Scan, AlertCircle } from 'lucide-react';
 import { useSecurityContext } from '../contexts/SecurityContext';
 import { getBiometricIcon, getBiometricDisplayName } from '../utils/biometric';
 
 const PINLockScreen = () => {
+  const { t } = useTranslation(['security', 'common']);
   const {
     unlockWithPIN,
     unlockWithBiometric,
@@ -20,7 +22,7 @@ const PINLockScreen = () => {
   const [loading, setLoading] = useState(false);
   const [shakeError, setShakeError] = useState(false);
   const [biometricIcon, setBiometricIcon] = useState('Fingerprint');
-  const [biometricName, setBiometricName] = useState('Biometri');
+  const [biometricName, setBiometricName] = useState(t('security:biometric.displayNames.unknown'));
   
   const pinInputRef = useRef(null);
 
@@ -71,7 +73,7 @@ const PINLockScreen = () => {
 
   const handleSubmit = async (pinToSubmit = pin) => {
     if (pinToSubmit.length < 4) {
-      setError('PIN må være minst 4 siffer');
+      setError(t('security:lockScreen.pinMinLength', { min: 4 }));
       return;
     }
 
@@ -130,10 +132,10 @@ const PINLockScreen = () => {
 
         {/* Title */}
         <h1 className="text-3xl font-bold text-white text-center mb-2">
-          PhotoVault
+          {t('security:lockScreen.title')}
         </h1>
         <p className="text-gray-300 text-center mb-8">
-          Skriv inn PIN-kode
+          {t('security:lockScreen.subtitle')}
         </p>
 
         {/* PIN dots */}
@@ -158,7 +160,7 @@ const PINLockScreen = () => {
               <p className="text-red-200 text-sm">{error}</p>
               {failedAttempts > 0 && failedAttempts < 5 && (
                 <p className="text-red-300 text-xs mt-1">
-                  {5 - failedAttempts} forsøk igjen før låsing
+                  {t('security:lockScreen.attemptsRemaining', { count: 5 - failedAttempts, attempts: 5 - failedAttempts })}
                 </p>
               )}
             </div>
@@ -184,7 +186,7 @@ const PINLockScreen = () => {
               onClick={handleBiometricUnlock}
               disabled={loading}
               className="h-16 bg-gradient-to-r from-purple-600/50 to-pink-600/50 hover:from-purple-600/70 hover:to-pink-600/70 backdrop-blur-xl rounded-xl flex items-center justify-center transition active:scale-95 disabled:opacity-50"
-              title={`Lås opp med ${biometricName}`}
+              title={t('security:lockScreen.unlockWith', { type: biometricName })}
             >
               <BiometricIcon className="w-6 h-6 text-white" />
             </button>
@@ -220,7 +222,7 @@ const PINLockScreen = () => {
             className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl font-semibold transition flex items-center justify-center gap-2 disabled:opacity-50"
           >
             <BiometricIcon className="w-5 h-5" />
-            Lås opp med {biometricName}
+            {t('security:lockScreen.unlockWith', { type: biometricName })}
           </button>
         )}
 
@@ -248,7 +250,7 @@ const PINLockScreen = () => {
 
         {/* Info text */}
         <p className="text-center text-gray-400 text-sm mt-6">
-          {loading ? 'Verifiserer...' : 'Skriv inn PIN for å låse opp'}
+          {loading ? t('security:lockScreen.verifying') : t('security:lockScreen.enterPin')}
         </p>
       </div>
 
