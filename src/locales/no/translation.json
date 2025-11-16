@@ -233,5 +233,128 @@
       "deleteDesc": "Permanent slett konto og data",
       "deleteError": "Kunne ikke slette konto"
     }
+  },
+  "collage": {
+    "title": "Lag Kollasj",
+    "createButton": "Lag Kollasj",
+    "myCollages": "Mine Kollasjer",
+    "emptyState": {
+      "title": "Ingen kollasjer ennå",
+      "description": "Lag vakre kollasjer av bildene dine",
+      "createFirst": "Lag din første kollasj"
+    },
+    "steps": {
+      "selectPhotos": "Velg Bilder",
+      "chooseLayout": "Velg Oppsett",
+      "customize": "Tilpass",
+      "save": "Lagre"
+    },
+    "selector": {
+      "title": "Velg Oppsett",
+      "subtitle": "{{count}} bilder valgt",
+      "back": "Tilbake",
+      "autoFill": "Autofyll",
+      "noLayouts": "Ingen kompatible oppsett",
+      "selectPhotos": "Vennligst velg {{min}}-{{max}} bilder",
+      "availableLayouts": "{{count}} oppsett tilgjengelig",
+      "selected": "valgt"
+    },
+    "picker": {
+      "title": "Velg Bilder",
+      "filters": {
+        "all": "Alle",
+        "favorites": "Favoritter",
+        "screenshots": "Skjermbilder",
+        "recent": "Nylige",
+        "ai": "AI"
+      },
+      "search": {
+        "placeholder": "Søk i bilder...",
+        "clear": "Tøm søk"
+      },
+      "selection": {
+        "count": "{{count}} av {{max}} valgt",
+        "selectMore": "Velg {{remaining}} flere bilder",
+        "continue": "Fortsett med {{count}} bilder",
+        "maxReached": "Maksimum {{max}} bilder valgt"
+      },
+      "groups": {
+        "today": "I dag",
+        "yesterday": "I går",
+        "thisWeek": "Denne Uken",
+        "thisMonth": "Denne Måneden",
+        "older": "Eldre"
+      },
+      "empty": {
+        "noPhotos": "Ingen bilder tilgjengelig",
+        "noResults": "Ingen bilder matcher søket",
+        "noFavorites": "Ingen favorittbilder ennå",
+        "noScreenshots": "Ingen skjermbilder oppdaget",
+        "noRecent": "Ingen nylige bilder",
+        "noAi": "Ingen AI-taggede bilder"
+      },
+      "back": "Tilbake"
+    },
+    "preview": {
+      "title": "Tilpass Din Kollasj",
+      "clickToAdjust": "Klikk på et bilde for å justere posisjon og zoom",
+      "loading": "Laster forhåndsvisning...",
+      "error": "Kunne ikke laste forhåndsvisning",
+      "empty": "Tomt felt"
+    },
+    "reposition": {
+      "title": "Juster Bilde",
+      "subtitle": "Dra for å repositionere, bruk kontroller for å zoome",
+      "zoom": "Zoom",
+      "reset": "Tilbakestill",
+      "save": "Lagre",
+      "cancel": "Avbryt",
+      "zoomIn": "Zoom inn",
+      "zoomOut": "Zoom ut",
+      "unsavedChanges": "Du har ulagrede endringer. Forkast dem?",
+      "shortcuts": {
+        "title": "Tastatursnarveier",
+        "esc": "ESC - Avbryt",
+        "enter": "ENTER - Lagre",
+        "plus": "+ - Zoom inn",
+        "minus": "- - Zoom ut",
+        "r": "R - Tilbakestill"
+      }
+    },
+    "save": {
+      "title": "Lagre Kollasj",
+      "titlePlaceholder": "Min Flotte Kollasj",
+      "titleLabel": "Kollasj Tittel",
+      "saveButton": "Lagre Kollasj",
+      "savingButton": "Lagrer...",
+      "cancel": "Avbryt"
+    },
+    "layouts": {
+      "hero_single": "Hero",
+      "hero_wide": "Hero Bred",
+      "hero_portrait": "Hero Portrett",
+      "side_by_side": "Side ved Side",
+      "stacked": "Stablet",
+      "dominant_left": "Dominant Venstre",
+      "triple_row": "Trippel Rad",
+      "l_shape": "L-Form",
+      "reverse_l": "Omvendt L",
+      "classic_grid": "Klassisk Rutenett",
+      "timeline": "Tidslinje",
+      "magazine": "Magasin",
+      "polaroid": "Polaroid"
+    },
+    "notifications": {
+      "collageSaved": "Kollasj lagret!",
+      "collageUpdated": "Kollasj oppdatert!",
+      "collageDeleted": "Kollasj slettet",
+      "saveFailed": "Kunne ikke lagre kollasj",
+      "loadFailed": "Kunne ikke laste kollasj",
+      "updateFailed": "Kunne ikke oppdatere kollasj",
+      "deleteFailed": "Kunne ikke slette kollasj"
+    },
+    "photo": {
+      "untitled": "Uten Tittel"
+    }
   }
 }

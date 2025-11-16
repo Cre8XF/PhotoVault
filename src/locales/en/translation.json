@@ -233,5 +233,128 @@
       "deleteDesc": "Permanently delete account and data",
       "deleteError": "Could not delete account"
     }
+  },
+  "collage": {
+    "title": "Create Collage",
+    "createButton": "Create Collage",
+    "myCollages": "My Collages",
+    "emptyState": {
+      "title": "No collages yet",
+      "description": "Create beautiful collages from your photos",
+      "createFirst": "Create your first collage"
+    },
+    "steps": {
+      "selectPhotos": "Select Photos",
+      "chooseLayout": "Choose Layout",
+      "customize": "Customize",
+      "save": "Save"
+    },
+    "selector": {
+      "title": "Choose Layout",
+      "subtitle": "{{count}} photos selected",
+      "back": "Back",
+      "autoFill": "Auto-Fill",
+      "noLayouts": "No compatible layouts",
+      "selectPhotos": "Please select {{min}}-{{max}} photos",
+      "availableLayouts": "{{count}} layouts available",
+      "selected": "selected"
+    },
+    "picker": {
+      "title": "Select Photos",
+      "filters": {
+        "all": "All",
+        "favorites": "Favorites",
+        "screenshots": "Screenshots",
+        "recent": "Recent",
+        "ai": "AI"
+      },
+      "search": {
+        "placeholder": "Search photos...",
+        "clear": "Clear search"
+      },
+      "selection": {
+        "count": "{{count}} of {{max}} selected",
+        "selectMore": "Select {{remaining}} more photos",
+        "continue": "Continue with {{count}} photos",
+        "maxReached": "Maximum {{max}} photos selected"
+      },
+      "groups": {
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "thisWeek": "This Week",
+        "thisMonth": "This Month",
+        "older": "Older"
+      },
+      "empty": {
+        "noPhotos": "No photos available",
+        "noResults": "No photos match your search",
+        "noFavorites": "No favorite photos yet",
+        "noScreenshots": "No screenshots detected",
+        "noRecent": "No recent photos",
+        "noAi": "No AI-tagged photos"
+      },
+      "back": "Back"
+    },
+    "preview": {
+      "title": "Customize Your Collage",
+      "clickToAdjust": "Click any photo to adjust position and zoom",
+      "loading": "Loading preview...",
+      "error": "Failed to load preview",
+      "empty": "Empty slot"
+    },
+    "reposition": {
+      "title": "Adjust Photo",
+      "subtitle": "Drag to reposition, use controls to zoom",
+      "zoom": "Zoom",
+      "reset": "Reset",
+      "save": "Save",
+      "cancel": "Cancel",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "unsavedChanges": "You have unsaved changes. Discard them?",
+      "shortcuts": {
+        "title": "Keyboard Shortcuts",
+        "esc": "ESC - Cancel",
+        "enter": "ENTER - Save",
+        "plus": "+ - Zoom in",
+        "minus": "- - Zoom out",
+        "r": "R - Reset"
+      }
+    },
+    "save": {
+      "title": "Save Collage",
+      "titlePlaceholder": "My Awesome Collage",
+      "titleLabel": "Collage Title",
+      "saveButton": "Save Collage",
+      "savingButton": "Saving...",
+      "cancel": "Cancel"
+    },
+    "layouts": {
+      "hero_single": "Hero",
+      "hero_wide": "Hero Wide",
+      "hero_portrait": "Hero Portrait",
+      "side_by_side": "Side by Side",
+      "stacked": "Stacked",
+      "dominant_left": "Dominant Left",
+      "triple_row": "Triple Row",
+      "l_shape": "L-Shape",
+      "reverse_l": "Reverse L",
+      "classic_grid": "Classic Grid",
+      "timeline": "Timeline",
+      "magazine": "Magazine",
+      "polaroid": "Polaroid"
+    },
+    "notifications": {
+      "collageSaved": "Collage saved successfully!",
+      "collageUpdated": "Collage updated!",
+      "collageDeleted": "Collage deleted",
+      "saveFailed": "Failed to save collage",
+      "loadFailed": "Failed to load collage",
+      "updateFailed": "Failed to update collage",
+      "deleteFailed": "Failed to delete collage"
+    },
+    "photo": {
+      "untitled": "Untitled Photo"
+    }
   }
 }

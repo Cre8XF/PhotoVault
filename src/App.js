@@ -27,6 +27,9 @@ import ProfilePage from './pages/ProfilePage'
 import SubscriptionPage from './pages/SubscriptionPage'
 import PublicAlbumPage from './pages/PublicAlbumPage'
 
+// Collage Builder
+import CollageBuilder from './features/collage/components/CollageBuilder'
+
 // Components
 import ErrorBoundary from './components/ErrorBoundary'
 import UploadModal from './components/UploadModal'
@@ -211,7 +214,8 @@ function AppContent() {
     currentPage !== 'security' &&
     currentPage !== 'vault' &&
     currentPage !== 'profile' &&
-    currentPage !== 'subscription'
+    currentPage !== 'subscription' &&
+    currentPage !== 'collage'
 
   return (
     <div className="min-h-screen relative">
@@ -322,6 +326,10 @@ function AppContent() {
               }}
             />
           </>
+        )}
+
+        {currentPage === 'collage' && (
+          <CollageBuilder />
         )}
       </main>
 
