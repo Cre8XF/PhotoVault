@@ -3,7 +3,70 @@
   "steps": {
     "step1": "Steg 1: Velg layout",
     "step2": "Steg 2: Velg bilder",
-    "step3": "Steg 3: Forhåndsvisning"
+    "step3": "Steg 3: Forhåndsvisning",
+    "selectPhotos": "Velg bilder",
+    "chooseLayout": "Velg layout",
+    "customize": "Tilpass",
+    "save": "Lagre"
+  },
+  "selector": {
+    "title": "Velg layout",
+    "subtitle": "Velg en layout for {{count}} bilder",
+    "back": "Tilbake",
+    "autoFill": "Velg automatisk",
+    "noLayouts": "Ingen kompatible layouts",
+    "selectPhotos": "Velg mellom {{min}} og {{max}} bilder",
+    "availableLayouts": "{{count}} layouts tilgjengelig",
+    "selected": "valgt"
+  },
+  "picker": {
+    "title": "Velg bilder",
+    "subtitle": "Velg opptil {{max}} bilder for din kollasj",
+    "back": "Tilbake",
+    "filters": {
+      "all": "Alle bilder",
+      "favorites": "Favoritter",
+      "screenshots": "Skjermbilder",
+      "recent": "Nylig",
+      "ai": "AI-merket"
+    },
+    "groups": {
+      "today": "I dag",
+      "yesterday": "I går",
+      "thisWeek": "Denne uken",
+      "thisMonth": "Denne måneden",
+      "older": "Eldre"
+    },
+    "noPhotos": "Ingen bilder funnet",
+    "noPhotosDesc": "Last opp noen bilder for å komme i gang",
+    "maxReached": "Maksimum nådd",
+    "selected": "valgt",
+    "noSearchResults": "Ingen bilder matcher \"{{query}}\"",
+    "searchResults": "{{count}} bilder matcher \"{{query}}\""
+  },
+  "preview": {
+    "title": "Forhåndsvisning",
+    "clickToAdjust": "Klikk på bilde for å justere posisjon"
+  },
+  "reposition": {
+    "title": "Juster bildeposisjon",
+    "subtitle": "Dra for å flytte, bruk slider for å zoome",
+    "instructions": "Dra bildet for å flytte • Bruk slider for å zoome inn/ut",
+    "zoom": "Zoom",
+    "reset": "Tilbakestill",
+    "save": "Lagre",
+    "back": "Tilbake",
+    "close": "Lukk",
+    "zoomIn": "Zoom inn",
+    "zoomOut": "Zoom ut",
+    "shortcuts": "Hurtigtaster",
+    "confirmClose": "Du har ulagrede endringer. Lukk likevel?"
+  },
+  "photo": {
+    "untitled": "Bilde uten tittel"
+  },
+  "hints": {
+    "clickToAdjust": "Klikk for å justere"
   },
   "buttons": {
     "add": "Legg til",
@@ -18,7 +81,8 @@
   "errors": {
     "exportError": "Kunne ikke eksportere kollasjen",
     "saveError": "Kunne ikke lagre kollasjen. Prøv igjen.",
-    "title": "Feil"
+    "title": "Feil",
+    "imageLoadFailed": "Kunne ikke laste bilde"
   },
   "layout": {
     "photos": "bilder",
@@ -43,7 +107,8 @@
   "loading": {
     "photos": "Laster bilder...",
     "saving": "Lagrer kollasj...",
-    "uploading": "Laster opp til Firebase Storage"
+    "uploading": "Laster opp til Firebase Storage",
+    "preview": "Laster forhåndsvisning..."
   },
   "photoSelector": {
     "noPhotos": "Ingen bilder tilgjengelig",

@@ -3,7 +3,70 @@
   "steps": {
     "step1": "Step 1: Select layout",
     "step2": "Step 2: Select photos",
-    "step3": "Step 3: Preview"
+    "step3": "Step 3: Preview",
+    "selectPhotos": "Select Photos",
+    "chooseLayout": "Choose Layout",
+    "customize": "Customize",
+    "save": "Save"
+  },
+  "selector": {
+    "title": "Choose Layout",
+    "subtitle": "Select a layout for {{count}} photos",
+    "back": "Back",
+    "autoFill": "Auto Select",
+    "noLayouts": "No compatible layouts",
+    "selectPhotos": "Select between {{min}} and {{max}} photos",
+    "availableLayouts": "{{count}} layouts available",
+    "selected": "selected"
+  },
+  "picker": {
+    "title": "Select Photos",
+    "subtitle": "Choose up to {{max}} photos for your collage",
+    "back": "Back",
+    "filters": {
+      "all": "All Photos",
+      "favorites": "Favorites",
+      "screenshots": "Screenshots",
+      "recent": "Recent",
+      "ai": "AI Tagged"
+    },
+    "groups": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "older": "Older"
+    },
+    "noPhotos": "No photos found",
+    "noPhotosDesc": "Upload some photos to get started",
+    "maxReached": "Maximum reached",
+    "selected": "selected",
+    "noSearchResults": "No photos match \"{{query}}\"",
+    "searchResults": "{{count}} photos match \"{{query}}\""
+  },
+  "preview": {
+    "title": "Preview",
+    "clickToAdjust": "Click photo to adjust position"
+  },
+  "reposition": {
+    "title": "Adjust Photo Position",
+    "subtitle": "Drag to reposition, use slider to zoom",
+    "instructions": "Drag photo to reposition • Use slider to zoom in/out",
+    "zoom": "Zoom",
+    "reset": "Reset",
+    "save": "Save",
+    "back": "Back",
+    "close": "Close",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "shortcuts": "Keyboard shortcuts",
+    "confirmClose": "You have unsaved changes. Close anyway?"
+  },
+  "photo": {
+    "untitled": "Untitled Photo"
+  },
+  "hints": {
+    "clickToAdjust": "Click to adjust"
   },
   "buttons": {
     "add": "Add",
@@ -18,7 +81,8 @@
   "errors": {
     "exportError": "Could not export collage",
     "saveError": "Could not save collage. Please try again.",
-    "title": "Error"
+    "title": "Error",
+    "imageLoadFailed": "Failed to load image"
   },
   "layout": {
     "photos": "photos",
@@ -43,7 +107,8 @@
   "loading": {
     "photos": "Loading photos...",
     "saving": "Saving collage...",
-    "uploading": "Uploading to Firebase Storage"
+    "uploading": "Uploading to Firebase Storage",
+    "preview": "Loading preview..."
   },
   "photoSelector": {
     "noPhotos": "No photos available",
