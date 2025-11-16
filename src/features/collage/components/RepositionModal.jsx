@@ -294,8 +294,8 @@ const RepositionModal = ({
           }}
         >
           <img
-            src={photo.downloadURL || photo.thumbnail}
-            alt={photo.filename || t('collage:photo.untitled')}
+            src={photo.url || photo.thumbnailUrl}
+            alt={photo.name || photo.filename || t('collage:photo.untitled')}
             className="max-w-full max-h-[70vh] object-contain pointer-events-none"
             draggable={false}
           />
@@ -373,8 +373,9 @@ const RepositionModal = ({
 RepositionModal.propTypes = {
   photo: PropTypes.shape({
     id: PropTypes.string.isRequired,
-    downloadURL: PropTypes.string.isRequired,
-    thumbnail: PropTypes.string,
+    url: PropTypes.string.isRequired,
+    thumbnailUrl: PropTypes.string,
+    name: PropTypes.string,
     filename: PropTypes.string
   }).isRequired,
   currentTransform: PropTypes.shape({
