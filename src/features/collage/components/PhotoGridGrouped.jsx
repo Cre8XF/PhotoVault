@@ -3,12 +3,10 @@ import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { Check, ImageIcon } from 'lucide-react'
 
+// ✅ FIKSET: Bruker korrekte feltnavn fra Firestore
 const getPhotoUrl = (photo) =>
-  photo.thumbnailURL ||
-  photo.thumbnail ||
-  photo.optimized?.thumbnail ||
-  photo.optimized?.url ||
-  photo.downloadURL ||
+  photo.thumbnailUrl || // Video thumbnail
+  photo.url || // Standard felt fra Firestore
   ''
 
 const PhotoGridGrouped = ({
@@ -78,22 +76,21 @@ const PhotoGridGrouped = ({
   }, [photos, showGrouping, t])
 
   const isSelected = (photo) => selectedPhotos.some((p) => p.id === photo.id)
-  const canSelect = (photo) => isSelected(photo) || !maxReached
 
   return (
     <div className="space-y-6">
-      {groupedPhotos.map((group, i) => (
-        <div key={i}>
+      {groupedPhotos.map((group, groupIndex) => (
+        <div key={groupIndex}>
           {group.label && (
-            <h3 className="text-sm font-semibold opacity-70 mb-3 px-1">
+            <h3 className="text-sm font-semibold opacity-60 mb-3">
               {group.label}
             </h3>
           )}
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 md:gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
             {group.photos.map((photo) => {
               const selected = isSelected(photo)
-              const selectable = canSelect(photo)
+              const selectable = !maxReached || selected
               const src = getPhotoUrl(photo)
 
               return (
@@ -101,8 +98,8 @@ const PhotoGridGrouped = ({
                   key={photo.id}
                   onClick={() => selectable && onToggle(photo)}
                   className={`
-                    relative aspect-square rounded-lg overflow-hidden
-                    border-2 transition-all cursor-pointer group
+                    group relative aspect-square rounded-lg overflow-hidden cursor-pointer
+                    border-2 transition-all duration-200
                     ${
                       selected
                         ? 'border-blue-500 scale-95 shadow-lg shadow-blue-500/20'
@@ -120,6 +117,7 @@ const PhotoGridGrouped = ({
                     alt={
                       photo.filename ||
                       photo.fileName ||
+                      photo.name ||
                       t('collage:photo.untitled')
                     }
                     className="w-full h-full object-cover"
@@ -165,6 +163,14 @@ const PhotoGridGrouped = ({
       )}
     </div>
   )
+}
+
+PhotoGridGrouped.propTypes = {
+  photos: PropTypes.array,
+  selectedPhotos: PropTypes.array,
+  onToggle: PropTypes.func.isRequired,
+  maxReached: PropTypes.bool,
+  showGrouping: PropTypes.bool,
 }
 
 export default PhotoGridGrouped

@@ -2,12 +2,10 @@ import React from 'react'
 import { ArrowLeft, Image as ImageIcon, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+// ✅ FIKSET: Bruker korrekte feltnavn fra Firestore
 const getPhotoUrl = (photo) =>
-  photo.thumbnailURL ||
-  photo.thumbnail ||
-  photo.optimized?.thumbnail ||
-  photo.optimized?.url ||
-  photo.downloadURL ||
+  photo.thumbnailUrl || // Video thumbnail
+  photo.url || // Standard felt fra Firestore
   ''
 
 const PhotoSelector = ({
