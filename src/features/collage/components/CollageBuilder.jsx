@@ -270,17 +270,11 @@ const CollageBuilder = () => {
             layout={selectedLayout}
             transforms={transforms}
             onComplete={(savedCollageId) => {
-              handleCollageComplete(savedCollageId)
-              // Navigate immediately - no setTimeout
-              if (isEditMode) {
-                navigate(`/collage/${collageId}`)
-              } else {
-                navigate('/albums')
-              }
+              handleStepComplete(4)
+              // ALWAYS exit collage mode
+              setCurrentPage('albums')
             }}
             onBack={() => setStep(3)}
-            collageId={isEditMode ? collageId : null}
-            initialTitle={isEditMode ? collageTitle : ''}
           />
         )}
       </div>
