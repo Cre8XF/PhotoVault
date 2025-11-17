@@ -331,9 +331,9 @@ function AppContent() {
         )}
       </main>
 
-      {/* Floating Notification Bell - Bottom right */}
+      {/* Floating Notification Bell - Bottom left */}
       {user && (
-        <div className="fixed z-40 bottom-20 right-4">
+        <div className="fixed bottom-24 left-4 z-30">
           <NotificationPanel onNavigateToPhoto={handleNavigateToPhoto} />
         </div>
       )}
