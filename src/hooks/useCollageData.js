@@ -17,8 +17,11 @@ import {
   orderBy,
   serverTimestamp
 } from 'firebase/firestore'
-import { db } from '../firebase'
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
+import { db, storage } from '../firebase'
 import useStore from '../state/store'
+import { renderCollageThumbnail } from '../utils/renderCollageToCanvas'
+import { LAYOUTS_V3 } from '../features/collage/layouts/layouts_v3'
 
 /**
  * Custom hook for collage data management
@@ -32,6 +35,7 @@ import useStore from '../state/store'
  *   photoIds: string[],
  *   layoutId: string,
  *   transforms: { [photoId]: { scale, translateX, translateY } },
+ *   thumbnailUrl: string,
  *   createdAt: Timestamp,
  *   updatedAt: Timestamp
  * }
@@ -50,7 +54,7 @@ export const useCollageData = () => {
 
   /**
    * Create a new collage
-   * @param {Object} collageData - { title, photoIds, layoutId, transforms }
+   * @param {Object} collageData - { title, photoIds, layoutId, transforms, photos, layout }
    * @returns {Promise<string>} - Collage ID
    */
   const createCollage = useCallback(
@@ -67,7 +71,7 @@ export const useCollageData = () => {
       setIsSaving(true)
 
       try {
-        const { title, photoIds, layoutId, transforms = {} } = collageData
+        const { title, photoIds, layoutId, transforms = {}, photos, layout } = collageData
 
         // Validate required fields
         if (!photoIds || photoIds.length === 0) {
@@ -77,6 +81,44 @@ export const useCollageData = () => {
           throw new Error('No layout selected')
         }
 
+        // Get layout if not provided
+        const collageLayout = layout || Object.values(LAYOUTS_V3).find(l => l.id === layoutId)
+        if (!collageLayout) {
+          throw new Error('Layout not found')
+        }
+
+        // Generate thumbnail
+        let thumbnailUrl = null
+        if (photos && photos.length > 0 && collageLayout) {
+          try {
+            console.log('🖼️ Generating collage thumbnail...')
+
+            // Render thumbnail
+            const thumbnailBlob = await renderCollageThumbnail({
+              layout: collageLayout,
+              photos: photos,
+              transforms: transforms,
+              maxWidth: 800
+            })
+
+            // Upload thumbnail to Storage
+            const timestamp = Date.now()
+            const thumbnailPath = `users/${user.uid}/collages/thumbnails/${timestamp}.jpg`
+            const thumbnailRef = ref(storage, thumbnailPath)
+
+            await uploadBytes(thumbnailRef, thumbnailBlob, {
+              contentType: 'image/jpeg'
+            })
+
+            thumbnailUrl = await getDownloadURL(thumbnailRef)
+
+            console.log('✅ Thumbnail uploaded:', thumbnailUrl)
+          } catch (thumbError) {
+            console.error('⚠️ Thumbnail generation failed:', thumbError)
+            // Continue without thumbnail - not critical
+          }
+        }
+
         // Prepare collage document
         const collageDoc = {
           userId: user.uid,
@@ -84,6 +126,7 @@ export const useCollageData = () => {
           photoIds: photoIds,
           layoutId: layoutId,
           transforms: transforms,
+          ...(thumbnailUrl && { thumbnailUrl }),
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         }
@@ -286,6 +329,30 @@ export const useCollageData = () => {
 
         console.log('🗑️ Deleting collage:', collageId)
 
+        // Get collage data to find thumbnail URL
+        const collageSnap = await getDoc(docRef)
+        if (collageSnap.exists()) {
+          const collageData = collageSnap.data()
+
+          // Delete thumbnail from Storage if it exists
+          if (collageData.thumbnailUrl) {
+            try {
+              // Extract path from URL or use pattern
+              const thumbnailPath = `users/${collageData.userId}/collages/thumbnails/`
+              const filename = collageData.thumbnailUrl.split('/').pop().split('?')[0]
+              const fullPath = thumbnailPath + decodeURIComponent(filename)
+
+              const thumbnailRef = ref(storage, fullPath)
+              await deleteObject(thumbnailRef)
+              console.log('🗑️ Thumbnail deleted from Storage')
+            } catch (storageError) {
+              console.warn('⚠️ Could not delete thumbnail:', storageError)
+              // Continue with collage deletion even if thumbnail deletion fails
+            }
+          }
+        }
+
+        // Delete Firestore document
         await deleteDoc(docRef)
 
         console.log('✅ Collage deleted')

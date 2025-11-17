@@ -14,14 +14,14 @@ export function BasicExample() {
   const photos = [
     {
       id: 'photo1',
-      downloadURL: 'https://example.com/photo1.jpg',
-      thumbnail: 'https://example.com/photo1_thumb.jpg',
+      url: 'https://example.com/photo1.jpg',
+      thumbnailUrl: 'https://example.com/photo1_thumb.jpg',
       filename: 'Summer Beach.jpg'
     },
     {
       id: 'photo2',
-      downloadURL: 'https://example.com/photo2.jpg',
-      thumbnail: 'https://example.com/photo2_thumb.jpg',
+      url: 'https://example.com/photo2.jpg',
+      thumbnailUrl: 'https://example.com/photo2_thumb.jpg',
       filename: 'Mountain View.jpg'
     }
   ]
@@ -41,9 +41,9 @@ export function BasicExample() {
 // ============================================================================
 export function WithTransformsExample() {
   const photos = [
-    { id: 'photo1', downloadURL: '/img1.jpg', thumbnail: '/img1_thumb.jpg' },
-    { id: 'photo2', downloadURL: '/img2.jpg', thumbnail: '/img2_thumb.jpg' },
-    { id: 'photo3', downloadURL: '/img3.jpg', thumbnail: '/img3_thumb.jpg' }
+    { id: 'photo1', url: '/img1.jpg', thumbnailUrl: '/img1_thumb.jpg' },
+    { id: 'photo2', url: '/img2.jpg', thumbnailUrl: '/img2_thumb.jpg' },
+    { id: 'photo3', url: '/img3.jpg', thumbnailUrl: '/img3_thumb.jpg' }
   ]
 
   const layout = LAYOUTS_V3.triple_row
@@ -69,10 +69,10 @@ export function InteractiveExample() {
   const [selectedPhotoId, setSelectedPhotoId] = useState(null)
 
   const photos = [
-    { id: 'photo1', downloadURL: '/img1.jpg', thumbnail: '/img1_thumb.jpg' },
-    { id: 'photo2', downloadURL: '/img2.jpg', thumbnail: '/img2_thumb.jpg' },
-    { id: 'photo3', downloadURL: '/img3.jpg', thumbnail: '/img3_thumb.jpg' },
-    { id: 'photo4', downloadURL: '/img4.jpg', thumbnail: '/img4_thumb.jpg' }
+    { id: 'photo1', url: '/img1.jpg', thumbnailUrl: '/img1_thumb.jpg' },
+    { id: 'photo2', url: '/img2.jpg', thumbnailUrl: '/img2_thumb.jpg' },
+    { id: 'photo3', url: '/img3.jpg', thumbnailUrl: '/img3_thumb.jpg' },
+    { id: 'photo4', url: '/img4.jpg', thumbnailUrl: '/img4_thumb.jpg' }
   ]
 
   const layout = LAYOUTS_V3.classic_grid
@@ -108,8 +108,8 @@ export function LoadingExample() {
   const [isLoading, setIsLoading] = useState(true)
 
   const photos = [
-    { id: 'photo1', downloadURL: '/img1.jpg', thumbnail: '/img1_thumb.jpg' },
-    { id: 'photo2', downloadURL: '/img2.jpg', thumbnail: '/img2_thumb.jpg' }
+    { id: 'photo1', url: '/img1.jpg', thumbnailUrl: '/img1_thumb.jpg' },
+    { id: 'photo2', url: '/img2.jpg', thumbnailUrl: '/img2_thumb.jpg' }
   ]
 
   const layout = LAYOUTS_V3.stacked
@@ -144,7 +144,7 @@ export function LoadingExample() {
 export function ResponsiveExample() {
   const photos = Array.from({ length: 6 }, (_, i) => ({
     id: `photo${i + 1}`,
-    downloadURL: `/img${i + 1}.jpg`,
+    url: `/img${i + 1}.jpg`,
     thumbnail: `/img${i + 1}_thumb.jpg`,
     filename: `Photo ${i + 1}.jpg`
   }))
@@ -181,16 +181,16 @@ export function ResponsiveExample() {
 // ============================================================================
 export function ErrorStatesExample() {
   const validPhotos = [
-    { id: 'photo1', downloadURL: '/img1.jpg', thumbnail: '/img1_thumb.jpg' }
+    { id: 'photo1', url: '/img1.jpg', thumbnailUrl: '/img1_thumb.jpg' }
   ]
 
   const photosWithError = [
     {
       id: 'photo1',
-      downloadURL: 'https://invalid-url.com/broken.jpg',
-      thumbnail: 'https://invalid-url.com/broken_thumb.jpg'
+      url: 'https://invalid-url.com/broken.jpg',
+      thumbnailUrl: 'https://invalid-url.com/broken_thumb.jpg'
     },
-    { id: 'photo2', downloadURL: '/img2.jpg', thumbnail: '/img2_thumb.jpg' }
+    { id: 'photo2', url: '/img2.jpg', thumbnailUrl: '/img2_thumb.jpg' }
   ]
 
   return (
@@ -240,7 +240,7 @@ export function FullWorkflowExample() {
   const addPhoto = () => {
     const newPhoto = {
       id: `photo${photos.length + 1}`,
-      downloadURL: `/img${photos.length + 1}.jpg`,
+      url: `/img${photos.length + 1}.jpg`,
       thumbnail: `/img${photos.length + 1}_thumb.jpg`,
       filename: `Photo ${photos.length + 1}.jpg`
     }
