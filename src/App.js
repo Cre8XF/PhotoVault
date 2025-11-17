@@ -48,7 +48,7 @@ import usePhotoData from './hooks/usePhotoData'
 import useStore from './state/store'
 
 // Icons
-import { Home, FolderOpen, Plus, Search, Menu } from 'lucide-react'
+import { Home, FolderOpen, Plus, Search, Menu, Bell } from 'lucide-react'
 
 /**
  * Main App Component with new architecture
@@ -226,13 +226,6 @@ function AppContent() {
     <div className="min-h-screen relative">
       <Particles />
 
-      {/* Notification Panel - Fixed top-right with mobile-responsive positioning */}
-      {user && (
-        <div className="fixed z-40 top-4 right-4 md:top-6 md:right-6">
-          <NotificationPanel onNavigateToPhoto={handleNavigateToPhoto} />
-        </div>
-      )}
-
       {/* Main content - state-based rendering */}
       <main className="relative z-10">
         {currentPage === 'home' && (
@@ -337,6 +330,13 @@ function AppContent() {
           <CollageBuilder />
         )}
       </main>
+
+      {/* Floating Notification Bell - Bottom right */}
+      {user && (
+        <div className="fixed z-40 bottom-20 right-4">
+          <NotificationPanel onNavigateToPhoto={handleNavigateToPhoto} />
+        </div>
+      )}
 
       {/* Bottom Navigation */}
       {showBottomNav && (
