@@ -146,10 +146,6 @@ const CollageBuilder = () => {
     // No navigation here - handled in onComplete callback
   }
 
-  // Handle close
-  const handleClose = () => {
-    navigate('/albums')
-  }
 
   // Show loading state when loading collage data
   if (isLoading) {
@@ -179,7 +175,7 @@ const CollageBuilder = () => {
         </h1>
 
         <button
-          onClick={handleClose}
+          onClick={() => setCurrentPage('albums')}
           className="ripple-effect p-2 hover:bg-white/10 rounded-lg transition"
           title="Close"
         >
