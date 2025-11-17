@@ -2,11 +2,14 @@
 // COMPONENT: CollageBuilder.jsx - Main Collage Builder V3
 // Complete refactor using ImagePickerV3, LayoutSelector, CollagePreview, etc.
 // ============================================================================
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import useStore from '../../../state/store'
 import { usePhotoData } from '../../../hooks/usePhotoData'
+import { useCollageData } from '../../../hooks/useCollageData'
+import { LAYOUTS_V3 } from '../layouts/layouts_v3'
 
 // V3 Components
 import StepIndicator from './StepIndicator'
@@ -25,23 +28,86 @@ import SaveCollageForm from './SaveCollageForm'
  * 2. Choose Layout (LayoutSelector)
  * 3. Customize (CollagePreview + RepositionModal)
  * 4. Save (SaveCollageForm)
+ *
+ * Edit Mode: When /collage/edit/:id is accessed, loads existing collage
+ * and starts at step 3 (customize) with pre-filled data
  */
 const CollageBuilder = () => {
+  const { id: collageId } = useParams()
+  const navigate = useNavigate()
   const { t } = useTranslation(['collage'])
   const { photos } = usePhotoData()
+  const { getCollage } = useCollageData()
   const setCurrentPage = useStore((state) => state.setCurrentPage)
 
+  // Determine if editing
+  const isEditMode = Boolean(collageId)
+
   // Workflow state
-  const [step, setStep] = useState(1)
-  const [completedSteps, setCompletedSteps] = useState([])
+  const [step, setStep] = useState(isEditMode ? 3 : 1)
+  const [completedSteps, setCompletedSteps] = useState(isEditMode ? [1, 2, 3] : [])
 
   // Data state
   const [selectedPhotos, setSelectedPhotos] = useState([])
   const [selectedLayout, setSelectedLayout] = useState(null)
   const [transforms, setTransforms] = useState({})
+  const [collageTitle, setCollageTitle] = useState('')
 
   // UI state
   const [repositionTarget, setRepositionTarget] = useState(null)
+  const [isLoading, setIsLoading] = useState(isEditMode)
+
+  // Load existing collage data if editing
+  useEffect(() => {
+    if (!isEditMode || !collageId) return
+
+    const loadCollageData = async () => {
+      setIsLoading(true)
+      try {
+        // Load collage data
+        const collageData = await getCollage(collageId)
+        if (!collageData) {
+          console.error('Collage not found')
+          navigate('/albums')
+          return
+        }
+
+        // Find matching photos
+        const collagePhotos = collageData.photoIds
+          .map(photoId => photos.find(p => p.id === photoId))
+          .filter(Boolean)
+
+        if (collagePhotos.length === 0) {
+          console.error('No photos found for collage')
+          navigate('/albums')
+          return
+        }
+
+        // Find layout
+        const layout = Object.values(LAYOUTS_V3).find(l => l.id === collageData.layoutId)
+        if (!layout) {
+          console.error('Layout not found')
+          navigate('/albums')
+          return
+        }
+
+        // Set state
+        setSelectedPhotos(collagePhotos)
+        setSelectedLayout(layout)
+        setTransforms(collageData.transforms || {})
+        setCollageTitle(collageData.title || '')
+
+        console.log('✅ Loaded collage for editing:', collageData)
+      } catch (error) {
+        console.error('Failed to load collage:', error)
+        navigate('/albums')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadCollageData()
+  }, [isEditMode, collageId, getCollage, photos, navigate])
 
   // Handle step completion
   const handleStepComplete = (stepNumber) => {
@@ -74,19 +140,35 @@ const CollageBuilder = () => {
   }
 
   // Handle collage completion
-  const handleCollageComplete = (collageId) => {
-    console.log('✅ Collage saved with ID:', collageId)
+  const handleCollageComplete = (savedCollageId) => {
+    console.log('✅ Collage saved with ID:', savedCollageId)
     handleStepComplete(4)
 
     // Navigate back to albums page after short delay
     setTimeout(() => {
-      setCurrentPage('albums')
+      if (isEditMode) {
+        navigate(`/collage/${collageId}`)
+      } else {
+        navigate('/albums')
+      }
     }, 1000)
   }
 
   // Handle close
   const handleClose = () => {
-    setCurrentPage('albums')
+    navigate('/albums')
+  }
+
+  // Show loading state when loading collage data
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-white/20 border-t-purple-500 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm opacity-60">{t('collage:loading.collage')}</p>
+        </div>
+      </div>
+    )
   }
 
   // Navigate to step (only if step is completed or current)
@@ -101,7 +183,7 @@ const CollageBuilder = () => {
       {/* Header with close button */}
       <div className="flex items-center justify-between p-4 border-b border-white/10 bg-black/20 backdrop-blur-xl">
         <h1 className="text-xl font-bold">
-          {t('collage:title')}
+          {isEditMode ? t('collage:editTitle') || 'Edit Collage' : t('collage:title')}
         </h1>
 
         <button
@@ -201,6 +283,8 @@ const CollageBuilder = () => {
             transforms={transforms}
             onComplete={handleCollageComplete}
             onBack={() => setStep(3)}
+            collageId={isEditMode ? collageId : null}
+            initialTitle={isEditMode ? collageTitle : ''}
           />
         )}
       </div>

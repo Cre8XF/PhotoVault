@@ -1,5 +1,13 @@
 {
   "title": "Create Collage",
+  "editTitle": "Edit Collage",
+  "myCollages": "My Collages",
+  "createButton": "Create Collage",
+  "emptyState": {
+    "title": "No Collages Yet",
+    "description": "Create beautiful collages from your photos",
+    "createFirst": "Create Your First Collage"
+  },
   "steps": {
     "step1": "Step 1: Select layout",
     "step2": "Step 2: Select photos",

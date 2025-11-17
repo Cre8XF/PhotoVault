@@ -63,7 +63,8 @@ function App() {
               {/* Public route - no authentication required */}
               <Route path="/share/:slug" element={<PublicAlbumPage />} />
 
-              {/* Collage view route */}
+              {/* Collage routes */}
+              <Route path="/collage/edit/:id" element={<CollageBuilder />} />
               <Route path="/collage/:id" element={<CollageView />} />
 
               {/* All other routes - authenticated */}
