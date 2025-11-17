@@ -29,6 +29,7 @@ import PublicAlbumPage from './pages/PublicAlbumPage'
 
 // Collage Builder
 import CollageBuilder from './features/collage/components/CollageBuilder'
+import CollageView from './features/collage/pages/CollageView'
 
 // Components
 import ErrorBoundary from './components/ErrorBoundary'
@@ -61,6 +62,9 @@ function App() {
             <Routes>
               {/* Public route - no authentication required */}
               <Route path="/share/:slug" element={<PublicAlbumPage />} />
+
+              {/* Collage view route */}
+              <Route path="/collage/:id" element={<CollageView />} />
 
               {/* All other routes - authenticated */}
               <Route path="*" element={<AppContent />} />

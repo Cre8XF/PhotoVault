@@ -37,7 +37,9 @@ const SaveCollageForm = ({ photos, layout, transforms, onComplete, onBack }) => 
         title: title || t('collage:save.titlePlaceholder'),
         photoIds,
         layoutId: layout.id,
-        transforms
+        transforms,
+        photos, // Pass photos for thumbnail generation
+        layout  // Pass layout for thumbnail generation
       })
 
       if (collageId) {
@@ -152,7 +154,7 @@ SaveCollageForm.propTypes = {
   photos: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
-      downloadURL: PropTypes.string.isRequired
+      url: PropTypes.string.isRequired
     })
   ).isRequired,
   layout: PropTypes.object.isRequired,

@@ -14,8 +14,8 @@ export function BasicExample() {
 
   const photo = {
     id: 'photo1',
-    downloadURL: 'https://picsum.photos/800/600',
-    thumbnail: 'https://picsum.photos/400/300',
+    url: 'https://picsum.photos/800/600',
+    thumbnailUrl: 'https://picsum.photos/400/300',
     filename: 'Beach Sunset.jpg'
   }
 
@@ -62,7 +62,7 @@ export function WithExistingTransformExample() {
 
   const photo = {
     id: 'photo2',
-    downloadURL: 'https://picsum.photos/800/600?random=2',
+    url: 'https://picsum.photos/800/600?random=2',
     filename: 'Mountain View.jpg'
   }
 
@@ -115,17 +115,17 @@ export function CollageIntegrationExample() {
   const photos = [
     {
       id: 'photo1',
-      downloadURL: 'https://picsum.photos/800/600?random=3',
+      url: 'https://picsum.photos/800/600?random=3',
       filename: 'Photo 1.jpg'
     },
     {
       id: 'photo2',
-      downloadURL: 'https://picsum.photos/800/600?random=4',
+      url: 'https://picsum.photos/800/600?random=4',
       filename: 'Photo 2.jpg'
     },
     {
       id: 'photo3',
-      downloadURL: 'https://picsum.photos/800/600?random=5',
+      url: 'https://picsum.photos/800/600?random=5',
       filename: 'Photo 3.jpg'
     }
   ]
@@ -166,7 +166,7 @@ export function CollageIntegrationExample() {
               className="relative aspect-square bg-black/20 rounded-lg overflow-hidden cursor-pointer group hover:ring-2 hover:ring-blue-500"
             >
               <img
-                src={photo.downloadURL}
+                src={photo.url}
                 alt={photo.filename}
                 className="w-full h-full object-cover"
               />
@@ -213,7 +213,7 @@ export function KeyboardShortcutsExample() {
 
   const photo = {
     id: 'photo3',
-    downloadURL: 'https://picsum.photos/800/600?random=6',
+    url: 'https://picsum.photos/800/600?random=6',
     filename: 'Test Photo.jpg'
   }
 
@@ -271,7 +271,7 @@ export function TouchGesturesExample() {
 
   const photo = {
     id: 'photo4',
-    downloadURL: 'https://picsum.photos/800/600?random=7',
+    url: 'https://picsum.photos/800/600?random=7',
     filename: 'Mobile Test.jpg'
   }
 
@@ -330,7 +330,7 @@ export function UnsavedChangesExample() {
 
   const photo = {
     id: 'photo5',
-    downloadURL: 'https://picsum.photos/800/600?random=8',
+    url: 'https://picsum.photos/800/600?random=8',
     filename: 'Unsaved Test.jpg'
   }
 
@@ -393,7 +393,7 @@ export function ZoomLimitsExample() {
 
   const photo = {
     id: 'photo6',
-    downloadURL: 'https://picsum.photos/800/600?random=9',
+    url: 'https://picsum.photos/800/600?random=9',
     filename: 'Zoom Test.jpg'
   }
 

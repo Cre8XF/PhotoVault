@@ -8,8 +8,8 @@ import ImagePickerV3 from '../ImagePickerV3'
 // Mock photo data
 const mockPhotos = Array.from({ length: 50 }, (_, i) => ({
   id: `photo${i + 1}`,
-  downloadURL: `https://picsum.photos/800/600?random=${i + 1}`,
-  thumbnail: `https://picsum.photos/400/300?random=${i + 1}`,
+  url: `https://picsum.photos/800/600?random=${i + 1}`,
+  thumbnailUrl: `https://picsum.photos/400/300?random=${i + 1}`,
   filename: `Photo ${i + 1}.jpg`,
   uploadedAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000),
   isFavorite: Math.random() > 0.7,
@@ -46,7 +46,7 @@ export function BasicExample() {
             {selectedPhotos.map(photo => (
               <img
                 key={photo.id}
-                src={photo.thumbnail}
+                src={photo.thumbnailUrl || photo.url}
                 alt={photo.filename}
                 className="w-full aspect-square object-cover rounded"
               />

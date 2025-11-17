@@ -108,7 +108,8 @@
     "photos": "Laster bilder...",
     "saving": "Lagrer kollasj...",
     "uploading": "Laster opp til Firebase Storage",
-    "preview": "Laster forhåndsvisning..."
+    "preview": "Laster forhåndsvisning...",
+    "collage": "Laster kollasj..."
   },
   "photoSelector": {
     "noPhotos": "Ingen bilder tilgjengelig",
@@ -188,5 +189,46 @@
     "download": "Trykk \"Last ned\" for å lagre lokalt",
     "save": "Trykk \"Lagre\" for å legge til i album",
     "title": "Tips"
+  },
+  "untitled": "Kollasj uten tittel",
+  "photos": "bilder",
+  "actions": {
+    "edit": "Rediger",
+    "download": "Last ned",
+    "downloading": "Laster ned...",
+    "share": "Del",
+    "delete": "Slett",
+    "adjustPhoto": "Juster bilde",
+    "replacePhoto": "Bytt bilde",
+    "cancel": "Avbryt"
+  },
+  "metadata": {
+    "title": "Kollasj-detaljer",
+    "layout": "Layout",
+    "photos": "Bilder",
+    "resolution": "Oppløsning",
+    "created": "Opprettet"
+  },
+  "delete": {
+    "confirmTitle": "Slett kollasj?",
+    "confirmMessage": "Denne handlingen kan ikke angres. Kollasjen vil bli permanent slettet.",
+    "confirmButton": "Slett"
+  },
+  "save": {
+    "title": "Lagre kollasj",
+    "titleLabel": "Kollasj-tittel",
+    "titlePlaceholder": "Min kollasj",
+    "saveButton": "Lagre kollasj",
+    "savingButton": "Lagrer...",
+    "cancel": "Avbryt"
+  },
+  "notifications": {
+    "collageSaved": "Kollasj lagret!",
+    "saveFailed": "Kunne ikke lagre kollasj. Prøv igjen.",
+    "collageUpdated": "Kollasj oppdatert!",
+    "updateFailed": "Kunne ikke oppdatere kollasj. Prøv igjen.",
+    "collageDeleted": "Kollasj slettet.",
+    "deleteFailed": "Kunne ikke slette kollasj. Prøv igjen.",
+    "loadFailed": "Kunne ikke laste kollasj. Prøv igjen."
   }
 }

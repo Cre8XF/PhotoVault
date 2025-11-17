@@ -108,7 +108,8 @@
     "photos": "Loading photos...",
     "saving": "Saving collage...",
     "uploading": "Uploading to Firebase Storage",
-    "preview": "Loading preview..."
+    "preview": "Loading preview...",
+    "collage": "Loading collage..."
   },
   "photoSelector": {
     "noPhotos": "No photos available",
@@ -188,5 +189,46 @@
     "download": "Click \"Download\" to save locally",
     "save": "Click \"Save\" to add to album",
     "title": "Tips"
+  },
+  "untitled": "Untitled Collage",
+  "photos": "photos",
+  "actions": {
+    "edit": "Edit",
+    "download": "Download",
+    "downloading": "Downloading...",
+    "share": "Share",
+    "delete": "Delete",
+    "adjustPhoto": "Adjust Photo",
+    "replacePhoto": "Replace Photo",
+    "cancel": "Cancel"
+  },
+  "metadata": {
+    "title": "Collage Details",
+    "layout": "Layout",
+    "photos": "Photos",
+    "resolution": "Resolution",
+    "created": "Created"
+  },
+  "delete": {
+    "confirmTitle": "Delete Collage?",
+    "confirmMessage": "This action cannot be undone. The collage will be permanently deleted.",
+    "confirmButton": "Delete"
+  },
+  "save": {
+    "title": "Save Collage",
+    "titleLabel": "Collage Title",
+    "titlePlaceholder": "My Collage",
+    "saveButton": "Save Collage",
+    "savingButton": "Saving...",
+    "cancel": "Cancel"
+  },
+  "notifications": {
+    "collageSaved": "Collage saved successfully!",
+    "saveFailed": "Failed to save collage. Please try again.",
+    "collageUpdated": "Collage updated successfully!",
+    "updateFailed": "Failed to update collage. Please try again.",
+    "collageDeleted": "Collage deleted successfully.",
+    "deleteFailed": "Failed to delete collage. Please try again.",
+    "loadFailed": "Failed to load collage. Please try again."
   }
 }
