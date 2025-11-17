@@ -143,15 +143,7 @@ const CollageBuilder = () => {
   const handleCollageComplete = (savedCollageId) => {
     console.log('✅ Collage saved with ID:', savedCollageId)
     handleStepComplete(4)
-
-    // Navigate back to albums page after short delay
-    setTimeout(() => {
-      if (isEditMode) {
-        navigate(`/collage/${collageId}`)
-      } else {
-        navigate('/albums')
-      }
-    }, 1000)
+    // No navigation here - handled in onComplete callback
   }
 
   // Handle close
@@ -281,7 +273,15 @@ const CollageBuilder = () => {
             photos={selectedPhotos}
             layout={selectedLayout}
             transforms={transforms}
-            onComplete={handleCollageComplete}
+            onComplete={(savedCollageId) => {
+              handleCollageComplete(savedCollageId)
+              // Navigate immediately - no setTimeout
+              if (isEditMode) {
+                navigate(`/collage/${collageId}`)
+              } else {
+                navigate('/albums')
+              }
+            }}
             onBack={() => setStep(3)}
             collageId={isEditMode ? collageId : null}
             initialTitle={isEditMode ? collageTitle : ''}
