@@ -2,6 +2,7 @@
 // Rewritten and cleaned version
 
 import React, { useState, useMemo, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   Folder,
@@ -30,6 +31,7 @@ const AlbumsPage = ({
   onDeleteAlbum = null,
   onEditAlbum = null,
 }) => {
+  const navigate = useNavigate()
   const { t } = useTranslation(['common', 'albums', 'collage'])
   const [viewMode, setViewMode] = useState('albums') // 'albums' | 'photos'
   const [selectedPhotos, setSelectedPhotos] = useState([])
@@ -268,11 +270,28 @@ const AlbumsPage = ({
                     }`}
                   >
                     <div
-                      onClick={() => console.log('View collage', collage.id)}
+                      onClick={() => navigate(`/collage/${collage.id}`)}
                       className="cursor-pointer glass-card rounded-xl overflow-hidden border border-white/10 hover:border-purple-400/50 transition-all"
                     >
-                      <div className="aspect-square bg-gradient-to-br from-purple-900/20 to-blue-900/20 flex items-center justify-center">
-                        <GridIcon className="w-16 h-16 opacity-30" />
+                      <div className="aspect-square bg-gradient-to-br from-purple-900/20 to-blue-900/20 flex items-center justify-center overflow-hidden">
+                        {collage.thumbnailUrl ? (
+                          <img
+                            src={collage.thumbnailUrl}
+                            alt={collage.title || 'Collage'}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              // Fallback to placeholder if image fails to load
+                              e.target.style.display = 'none'
+                              e.target.nextElementSibling.style.display = 'flex'
+                            }}
+                          />
+                        ) : null}
+                        <div
+                          className="w-full h-full flex items-center justify-center"
+                          style={{ display: collage.thumbnailUrl ? 'none' : 'flex' }}
+                        >
+                          <GridIcon className="w-16 h-16 opacity-30" />
+                        </div>
                       </div>
                       <div className="p-4">
                         <h3 className="font-semibold text-sm truncate">
@@ -291,7 +310,7 @@ const AlbumsPage = ({
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
-                          console.log('Edit collage', collage.id)
+                          navigate(`/collage/edit/${collage.id}`)
                         }}
                         className="p-2 bg-blue-600/90 hover:bg-blue-700 text-white rounded-lg shadow-lg transition"
                         title={t('common:edit')}

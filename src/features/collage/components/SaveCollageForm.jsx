@@ -10,19 +10,30 @@ import { useCollageData } from '../../../hooks/useCollageData'
 
 /**
  * SaveCollageForm Component
- * Final step in collage creation - save to Firestore
+ * Final step in collage creation/editing - save to Firestore
  *
  * @param {Array} photos - Selected photos array
  * @param {Object} layout - Selected layout from layouts_v3.js
  * @param {Object} transforms - Transform data { [photoId]: { scale, translateX, translateY } }
  * @param {Function} onComplete - Completion handler (collageId) => void
  * @param {Function} onBack - Back button handler
+ * @param {string} collageId - (Optional) Collage ID for editing existing collage
+ * @param {string} initialTitle - (Optional) Initial title for edit mode
  */
-const SaveCollageForm = ({ photos, layout, transforms, onComplete, onBack }) => {
+const SaveCollageForm = ({
+  photos,
+  layout,
+  transforms,
+  onComplete,
+  onBack,
+  collageId = null,
+  initialTitle = ''
+}) => {
   const { t } = useTranslation(['collage'])
-  const { createCollage, isSaving } = useCollageData()
+  const { createCollage, updateCollage, isSaving } = useCollageData()
 
-  const [title, setTitle] = useState('')
+  const isEditMode = Boolean(collageId)
+  const [title, setTitle] = useState(initialTitle)
 
   const handleSave = async () => {
     if (!photos || photos.length === 0 || !layout) {
@@ -32,19 +43,36 @@ const SaveCollageForm = ({ photos, layout, transforms, onComplete, onBack }) => 
 
     try {
       const photoIds = photos.map(p => p.id)
+      const collageTitle = title || t('collage:save.titlePlaceholder')
 
-      const collageId = await createCollage({
-        title: title || t('collage:save.titlePlaceholder'),
-        photoIds,
-        layoutId: layout.id,
-        transforms,
-        photos, // Pass photos for thumbnail generation
-        layout  // Pass layout for thumbnail generation
-      })
+      if (isEditMode) {
+        // Update existing collage
+        const success = await updateCollage(collageId, {
+          title: collageTitle,
+          photoIds,
+          layoutId: layout.id,
+          transforms
+        })
 
-      if (collageId) {
-        console.log('✅ Collage saved:', collageId)
-        onComplete(collageId)
+        if (success) {
+          console.log('✅ Collage updated:', collageId)
+          onComplete(collageId)
+        }
+      } else {
+        // Create new collage
+        const newCollageId = await createCollage({
+          title: collageTitle,
+          photoIds,
+          layoutId: layout.id,
+          transforms,
+          photos, // Pass photos for thumbnail generation
+          layout  // Pass layout for thumbnail generation
+        })
+
+        if (newCollageId) {
+          console.log('✅ Collage saved:', newCollageId)
+          onComplete(newCollageId)
+        }
       }
     } catch (error) {
       console.error('❌ Failed to save collage:', error)
@@ -160,12 +188,16 @@ SaveCollageForm.propTypes = {
   layout: PropTypes.object.isRequired,
   transforms: PropTypes.object,
   onComplete: PropTypes.func.isRequired,
-  onBack: PropTypes.func
+  onBack: PropTypes.func,
+  collageId: PropTypes.string,
+  initialTitle: PropTypes.string
 }
 
 SaveCollageForm.defaultProps = {
   transforms: {},
-  onBack: null
+  onBack: null,
+  collageId: null,
+  initialTitle: ''
 }
 
 export default SaveCollageForm

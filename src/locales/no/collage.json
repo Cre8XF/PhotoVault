@@ -1,5 +1,13 @@
 {
   "title": "Lag kollasj",
+  "editTitle": "Rediger kollasj",
+  "myCollages": "Mine kollasjer",
+  "createButton": "Lag kollasj",
+  "emptyState": {
+    "title": "Ingen kollasjer ennå",
+    "description": "Lag flotte kollasjer fra bildene dine",
+    "createFirst": "Lag din første kollasj"
+  },
   "steps": {
     "step1": "Steg 1: Velg layout",
     "step2": "Steg 2: Velg bilder",
