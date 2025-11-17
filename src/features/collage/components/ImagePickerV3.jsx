@@ -198,8 +198,8 @@ ImagePickerV3.propTypes = {
   photos: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
-      downloadURL: PropTypes.string.isRequired,
-      thumbnail: PropTypes.string,
+      url: PropTypes.string.isRequired,
+      thumbnailUrl: PropTypes.string,
       filename: PropTypes.string,
       name: PropTypes.string,
       uploadedAt: PropTypes.any,
