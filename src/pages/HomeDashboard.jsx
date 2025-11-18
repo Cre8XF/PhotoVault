@@ -22,7 +22,7 @@ import { useTranslation } from "react-i18next";
 import logoLight from "../assets/logo_light.png";
 import logoDark from "../assets/logo_dark.png";
 
-const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, onUpload }) => {
+const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, onUpload, onPhotoClick }) => {
   const { t } = useTranslation(["common", "home"]);
   const [isUploadOpen, setUploadOpen] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -203,7 +203,7 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
                 <div
                   key={photo.id}
                   className={`relative group cursor-pointer animate-scale-in ${staggerClass} free-thumbnail`}
-                  onClick={() => onNavigate("search")}
+                  onClick={() => onPhotoClick(photo)}
                 >
                   <LazyImage
                     src={photo.url}
@@ -248,7 +248,7 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
                   <div
                     key={photo.id}
                     className={`flex-shrink-0 w-32 md:w-48 cursor-pointer group animate-fade-in-up ${staggerClass} free-thumbnail free-recent-thumb`}
-                    onClick={() => onNavigate("albums")}
+                    onClick={() => onPhotoClick(photo)}
                   >
                     <LazyImage
                       src={photo.url}
