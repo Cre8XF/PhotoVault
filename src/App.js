@@ -98,6 +98,10 @@ function AppContent() {
     refreshData,
   } = usePhotoData()
 
+  // Determine user plan (FREE by default)
+  const plan = userProfile?.plan || user?.plan || 'free'
+  const isFreeUser = plan === 'free'
+
   // Security context
   const { isLocked, pinEnabled } = useSecurityContext()
 
@@ -326,13 +330,11 @@ function AppContent() {
           </>
         )}
 
-        {currentPage === 'collage' && (
-          <CollageBuilder />
-        )}
+        {currentPage === 'collage' && <CollageBuilder />}
       </main>
 
       {/* Floating Notification Bell - Bottom left */}
-      {user && user.plan !== "free" && (
+      {!isFreeUser && (
         <div className="fixed bottom-24 left-4 z-30">
           <NotificationPanel onNavigateToPhoto={handleNavigateToPhoto} />
         </div>
@@ -428,7 +430,7 @@ function AppContent() {
           onToggleFavorite={toggleFavorite}
           onPhotoEdited={async (newPhoto) => {
             // Refresh photos to show the new edited photo
-            await refreshData();
+            await refreshData()
           }}
         />
       )}
