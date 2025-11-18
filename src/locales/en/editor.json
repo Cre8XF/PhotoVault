@@ -8,7 +8,9 @@
     "apply": "Apply",
     "cancel": "Cancel",
     "reset": "Reset",
-    "addText": "Add Text"
+    "addText": "Add Text",
+    "undo": "Undo",
+    "redo": "Redo"
   },
   "loading": {
     "image": "Loading image...",
@@ -18,44 +20,87 @@
     "canvasError": "Could not save image (canvas missing)",
     "saveError": "Could not save image",
     "blobError": "Blob conversion failed",
-    "contextError": "Canvas context missing"
+    "contextError": "Canvas context missing",
+    "downloadError": "Could not download image",
+    "imageLoadError": "Could not load image"
   },
   "toolbar": {
     "crop": "Crop",
     "rotate": "Rotate",
     "filters": "Filters",
-    "text": "Text"
+    "text": "Text",
+    "adjust": "Adjust"
   },
   "crop": {
     "title": "Crop Image",
+    "subtitle": "Select aspect ratio and drag to crop",
     "aspectRatio": "Aspect Ratio",
     "free": "Free",
     "selectedArea": "Selected Area",
+    "width": "Width",
+    "height": "Height",
     "help": "Select aspect ratio and click \"Apply\" to crop"
   },
   "rotate": {
     "title": "Rotate Image",
+    "subtitle": "Adjust rotation angle or use quick rotate",
+    "angle": "Angle",
     "currentRotation": "Current Rotation",
     "rotate90": "Rotate 90° clockwise",
+    "quickRotate": "Quick Rotate",
+    "rotateLeft": "Rotate Left",
+    "rotateRight": "Rotate Right",
+    "reset": "Reset Rotation",
     "help": "Click to rotate the image 90° to the right"
   },
   "filters": {
-    "title": "Filters and Adjustments",
+    "title": "Filters",
+    "subtitle": "Choose a filter preset for your photo",
     "presets": "Filter Presets",
+    "original": "Original",
+    "warm": "Warm",
+    "cool": "Cool",
+    "vintage": "Vintage",
+    "contrast": "Contrast+",
+    "fade": "Fade",
+    "blackWhite": "B&W",
+    "brightness": "Brightness",
+    "saturation": "Saturation",
+    "resetAdjustments": "Reset Adjustments",
+    "longPressHint": "Hold to preview before/after",
+    "showingBefore": "Showing original (release to restore filter)",
+    "help": "Select filter and adjust brightness, contrast and saturation"
+  },
+  "adjust": {
+    "title": "Adjustments",
+    "subtitle": "Fine-tune your photo with precise controls",
     "brightness": "Brightness",
     "contrast": "Contrast",
     "saturation": "Saturation",
-    "resetAdjustments": "Reset Adjustments",
-    "help": "Select filter and adjust brightness, contrast and saturation"
+    "shadows": "Shadows",
+    "highlights": "Highlights",
+    "temperature": "Temperature",
+    "reset": "Reset",
+    "resetAll": "Reset All"
   },
   "text": {
     "title": "Text Overlay",
+    "subtitle": "Add and customize text on your photo",
+    "newText": "New Text",
+    "addText": "Add Text",
+    "layers": "Text Layers",
+    "delete": "Delete Layer",
+    "textContent": "Text Content",
     "textLabel": "Text",
     "placeholder": "Enter your text here...",
+    "font": "Font",
     "fontFamily": "Font Family",
+    "size": "Size",
     "fontSize": "Size",
     "color": "Color",
     "style": "Style",
+    "bold": "Bold",
+    "italic": "Italic",
     "alignment": "Alignment",
     "position": "Position",
     "horizontal": "Horizontal",
