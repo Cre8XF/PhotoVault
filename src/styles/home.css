@@ -347,21 +347,75 @@ body.light-mode .spinner-twilight {
   .album-title {
     font-size: 0.95rem;
   }
+
+  /* FREE user mobile optimizations */
+  .free-hero {
+    margin-bottom: 1.25rem !important;
+  }
+
+  .free-section {
+    margin-bottom: 1.25rem !important;
+  }
+
+  .free-fav-thumb {
+    height: 140px !important;
+  }
+
+  .free-recent-thumb {
+    width: 128px !important;
+  }
+
+  .free-recent-thumb img {
+    height: 128px !important;
+  }
+
+  .free-upload-btn {
+    height: 56px !important;
+    padding: 0.75rem 1rem !important;
+  }
+
+  /* Reduce padding around thumbnails by 20% */
+  .free-thumbnail {
+    padding: 0 !important;
+  }
+
+  /* Section spacing reduction */
+  .mb-6 {
+    margin-bottom: 1rem !important;
+  }
+
+  /* Quick Overview mobile adjustments */
+  .free-overview {
+    padding: 0.875rem 1rem !important;
+  }
+
+  .free-overview h3 {
+    margin-bottom: 0.75rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  /* Tighter grid spacing */
+  .grid.gap-3 {
+    gap: 0.625rem !important;
+  }
 }
 
 /* ============================================================================
    FREE USER SPECIFIC STYLES
    ============================================================================ */
 
-/* Smaller thumbnails for FREE users on mobile */
-@media (max-width: 768px) {
-  .free-thumbnail img,
-  .free-thumbnail .w-full {
-    height: 120px !important;
+/* Tablet and mobile refinements for FREE users */
+@media (max-width: 768px) and (min-width: 481px) {
+  .free-section {
+    margin-bottom: 1.75rem !important;
   }
 
-  .free-thumbnail.flex-shrink-0 {
-    width: 140px !important;
+  .free-fav-thumb {
+    height: 150px !important;
+  }
+
+  .free-recent-thumb {
+    width: 160px !important;
   }
 }
 
@@ -411,4 +465,43 @@ body.light-mode .free-shadow:hover {
 
 body.light-mode .free-thumbnail:hover img {
   box-shadow: 0 6px 16px rgba(139, 92, 246, 0.12) !important;
+}
+
+/* Desktop enhancements for FREE users */
+@media (min-width: 769px) {
+  .free-section h2 {
+    white-space: nowrap;
+  }
+
+  .free-upload-btn {
+    max-height: 64px;
+  }
+}
+
+/* Mobile text sizing optimizations */
+@media (max-width: 480px) {
+  .free-section h2 {
+    font-size: 1.35rem !important;
+  }
+
+  .free-section .text-sm {
+    font-size: 0.8rem !important;
+  }
+
+  /* Ensure proper bottom padding for navigation */
+  .min-h-screen {
+    padding-bottom: 5rem !important;
+  }
+}
+
+/* Additional mobile spacing for better layout */
+@media (max-width: 640px) {
+  .free-hero h1 {
+    font-size: 1.75rem !important;
+  }
+
+  .free-hero img {
+    width: 28px !important;
+    height: 28px !important;
+  }
 }

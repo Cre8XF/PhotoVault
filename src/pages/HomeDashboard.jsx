@@ -133,9 +133,9 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
   };
 
   return (
-    <div className="min-h-screen p-6 md:p-10 animate-fade-in">
+    <div className="min-h-screen p-6 md:p-10 animate-fade-in pb-20 md:pb-10">
       {/* Hero-velkomst with PIXTR Logo */}
-      <section className="mb-8">
+      <section className="mb-5 md:mb-8 free-hero">
         <div className="flex items-center gap-3 mb-2">
           <img
             src={logoLight}
@@ -182,20 +182,20 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
         <>
           {/* Favoritter */}
           {favoritePhotos.length > 0 && (
-        <section className="mb-10 animate-scale-in">
-          <div className="flex justify-between items-center mb-4">
+        <section className="mb-6 md:mb-10 animate-scale-in free-section">
+          <div className="flex justify-between items-center mb-3 md:mb-4">
             <h2 className="text-2xl font-bold flex items-center gap-2">
               <Star className="w-6 h-6 text-yellow-400" fill="currentColor" />
               {t("home:favoritesTitle")}
             </h2>
             <button
               onClick={() => onNavigate("search")}
-              className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition"
+              className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition whitespace-nowrap flex items-center"
             >
               {t("common:seeAll", { count: stats.favorites })} →
             </button>
           </div>
-          <div className={`grid grid-cols-2 md:grid-cols-${isFreeUser ? '3' : '4'} gap-4`}>
+          <div className={`grid grid-cols-2 md:grid-cols-${isFreeUser ? '3' : '4'} gap-3 md:gap-4`}>
             {favoritePhotos.map((photo, i) => {
               // Limit stagger animation to 3 for free users
               const staggerClass = isFreeUser && i >= 3 ? 'stagger-3' : `stagger-${(i % 4) + 1}`;
@@ -210,7 +210,7 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
                     thumbnail={photo.thumbnailSmall}
                     photoId={photo.id}
                     alt={photo.name || t("common:photo")}
-                    className="w-full h-40 object-contain bg-gray-900 rounded-xl transition-transform duration-300 group-hover:scale-105 border border-white/10"
+                    className="w-full h-36 md:h-40 object-contain bg-gray-900 rounded-xl transition-transform duration-300 group-hover:scale-105 border border-white/10 free-fav-thumb"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
                   <Star
@@ -226,17 +226,17 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
 
       {/* Siste opplastninger */}
       {recentPhotos.length > 0 && (
-        <section className="mb-10">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
+        <section className="mb-6 md:mb-10 free-section">
+          <div className="flex justify-between items-center mb-3 md:mb-4">
+            <h2 className="text-2xl font-bold flex items-center gap-2 whitespace-nowrap">
               <Clock className="w-6 h-6 text-purple-400" />
               {t("home:recentUploads")}
             </h2>
             <button
               onClick={() => onNavigate("albums")}
-              className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition"
+              className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition whitespace-nowrap flex items-center ml-2"
             >
-              {t("common:seeAll")} →
+              {t("common:seeAll", { count: recentPhotos.length })} →
             </button>
           </div>
           <div className="overflow-x-auto">
@@ -247,7 +247,7 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
                 return (
                   <div
                     key={photo.id}
-                    className={`flex-shrink-0 w-48 cursor-pointer group animate-fade-in-up ${staggerClass} free-thumbnail`}
+                    className={`flex-shrink-0 w-32 md:w-48 cursor-pointer group animate-fade-in-up ${staggerClass} free-thumbnail free-recent-thumb`}
                     onClick={() => onNavigate("albums")}
                   >
                     <LazyImage
@@ -255,7 +255,7 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
                       thumbnail={photo.thumbnailSmall}
                       photoId={photo.id}
                       alt={photo.name || t("common:photo")}
-                      className="w-full h-48 object-contain bg-gray-900 rounded-xl transition-transform duration-300 group-hover:scale-105 border border-white/10"
+                      className="w-full h-32 md:h-48 object-contain bg-gray-900 rounded-xl transition-transform duration-300 group-hover:scale-105 border border-white/10"
                     />
                     {photo.name && (
                       <p className="mt-2 text-sm truncate opacity-70">
@@ -273,19 +273,19 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
       {/* Upload Button - Moved here for FREE users (primary action) */}
       <button
         onClick={() => setUploadOpen(true)}
-        className="ripple-effect glass p-6 rounded-xl hover:bg-white/15 transition flex items-center justify-center gap-3 mb-10 w-full bg-purple-600/20 border-2 border-purple-500/30 hover:border-purple-400/50"
+        className="ripple-effect glass p-4 md:p-5 rounded-xl hover:bg-white/15 transition flex items-center justify-center gap-3 mb-6 md:mb-10 w-full bg-purple-600/20 border-2 border-purple-500/30 hover:border-purple-400/50 free-upload-btn"
       >
-        <ImagePlus className="w-6 h-6 text-purple-400" />
-        <span className="font-semibold text-lg">{t("home:uploadOrCreateAlbum")}</span>
+        <ImagePlus className="w-5 h-5 md:w-6 md:h-6 text-purple-400" />
+        <span className="font-semibold text-base md:text-lg">{t("home:uploadOrCreateAlbum")}</span>
       </button>
 
       {/* Smarte album */}
-      <section className="mb-10">
-        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+      <section className="mb-6 md:mb-10 free-section">
+        <h2 className="text-2xl font-bold mb-3 md:mb-4 flex items-center gap-2">
           <Sparkles className="w-6 h-6 text-purple-400" />
           {t("home:smartAlbums")}
         </h2>
-        <div className={`grid grid-cols-1 md:grid-cols-${isFreeUser ? '2' : '3'} gap-4`}>
+        <div className={`grid grid-cols-1 md:grid-cols-${isFreeUser ? '2' : '3'} gap-3 md:gap-4`}>
           {smartAlbums.map((album, index) => {
             // Limit stagger to 3 for free users
             const staggerClass = isFreeUser && index >= 3 ? 'stagger-3' : `stagger-${index + 1}`;
