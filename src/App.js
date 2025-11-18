@@ -255,6 +255,7 @@ function AppContent() {
 
         {currentPage === 'albums' && (
           <AlbumsPage
+            user={userProfile || user}
             albums={albums}
             photos={photos}
             onNavigate={setCurrentPage}

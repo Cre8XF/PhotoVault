@@ -158,6 +158,89 @@ body.light-mode .album-empty {
   border-color: rgba(139, 92, 246, 0.2);
 }
 
+/* ---------------- Stats Bar (Top Metrics) ---------------- */
+.album-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.album-stats > div {
+  background: var(--glass-bg);
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid var(--glass-border);
+}
+
+/* ---------------- Album Card Enhancements ---------------- */
+.album-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.album-card:hover {
+  transform: translateY(-4px);
+}
+
+.album-card .album-meta {
+  padding: 0.5rem;
+}
+
+.album-card .album-title {
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.album-card .album-sub {
+  font-size: 0.875rem;
+}
+
+/* ---------------- List View Styles ---------------- */
+.album-list-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-radius: 12px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.album-list-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.album-list-thumbnail {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--image-bg);
+}
+
+.album-list-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.album-list-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.album-list-meta {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
 /* ---------------- Responsivitet ---------------- */
 @media (max-width: 1024px) {
   .photo-grid {
@@ -168,5 +251,80 @@ body.light-mode .album-empty {
 @media (max-width: 768px) {
   .photo-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Reduce stats bar padding */
+  .album-stats > div {
+    padding: 0.75rem;
+  }
+
+  .album-stats > div p:first-child {
+    font-size: 0.8rem;
+  }
+
+  .album-stats > div p:last-child {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Album card optimizations for mobile */
+  .album-card {
+    padding: 0.6rem;
+  }
+
+  .album-card .photo-container-enhanced,
+  .album-card .album-thumb {
+    height: auto;
+    aspect-ratio: 16/9;
+  }
+
+  .album-card .album-meta {
+    padding: 0.4rem;
+  }
+
+  .album-card .album-title {
+    font-size: 0.9rem;
+  }
+
+  .album-card .album-sub {
+    font-size: 0.75rem;
+  }
+
+  /* Stats bar mobile optimization */
+  .album-stats {
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .album-stats > div {
+    padding: 0.6rem;
+  }
+
+  .album-stats > div p:first-child {
+    font-size: 0.75rem;
+  }
+
+  .album-stats > div p:last-child {
+    font-size: 1.4rem;
+  }
+
+  /* List view mobile optimization */
+  .album-list-thumbnail {
+    width: 64px;
+    height: 64px;
+  }
+
+  .album-list-title {
+    font-size: 0.9rem;
+  }
+
+  .album-list-meta {
+    font-size: 0.75rem;
+  }
+
+  /* Grid spacing on mobile */
+  .grid.gap-6 {
+    gap: 1rem;
   }
 }
