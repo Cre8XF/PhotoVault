@@ -332,7 +332,7 @@ function AppContent() {
       </main>
 
       {/* Floating Notification Bell - Bottom left */}
-      {user && (
+      {user && user.plan !== "free" && (
         <div className="fixed bottom-24 left-4 z-30">
           <NotificationPanel onNavigateToPhoto={handleNavigateToPhoto} />
         </div>

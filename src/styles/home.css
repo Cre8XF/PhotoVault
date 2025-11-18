@@ -357,16 +357,24 @@ body.light-mode .spinner-twilight {
     margin-bottom: 1.25rem !important;
   }
 
+  /* Favorites: 15% height reduction + reduced border-radius */
   .free-fav-thumb {
-    height: 140px !important;
+    height: 120px !important;
+    border-radius: 0.75rem !important;
   }
 
+  /* Favorites grid: reduce row spacing */
+  .free-section .grid.gap-3 {
+    row-gap: 0.5rem !important;
+  }
+
+  /* Recent uploads: reduce to 110px (target 120-130px range) */
   .free-recent-thumb {
-    width: 128px !important;
+    width: 110px !important;
   }
 
   .free-recent-thumb img {
-    height: 128px !important;
+    height: 110px !important;
   }
 
   .free-upload-btn {
@@ -384,9 +392,9 @@ body.light-mode .spinner-twilight {
     margin-bottom: 1rem !important;
   }
 
-  /* Quick Overview mobile adjustments */
+  /* Quick Overview: 10-15% padding reduction */
   .free-overview {
-    padding: 0.875rem 1rem !important;
+    padding: 0.75rem 0.875rem !important;
   }
 
   .free-overview h3 {
@@ -397,6 +405,16 @@ body.light-mode .spinner-twilight {
   /* Tighter grid spacing */
   .grid.gap-3 {
     gap: 0.625rem !important;
+  }
+
+  /* Smart albums: reduce card height proportionally */
+  .free-smart-card h3 {
+    font-size: 1rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .free-smart-card p {
+    font-size: 0.8rem !important;
   }
 }
 
