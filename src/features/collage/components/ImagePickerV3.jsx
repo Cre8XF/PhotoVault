@@ -126,9 +126,9 @@ const ImagePickerV3 = ({
   const maxReached = selectedPhotos.length >= maxPhotos
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="h-[100svh] max-h-[100svh] flex flex-col overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Header */}
-      <div className="p-4 border-b border-white/10 bg-white/5">
+      <div className="p-2 border-b border-white/10 bg-white/5">
         <div className="flex items-center gap-3 mb-4">
           {showBack && onBack && (
             <button
@@ -171,7 +171,7 @@ const ImagePickerV3 = ({
       />
 
       {/* Photo grid */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto px-3 pb-4 pt-2">
         <PhotoGridGrouped
           photos={filteredPhotos}
           selectedPhotos={selectedPhotos}
