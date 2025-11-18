@@ -23,6 +23,7 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
   const [activeTab, setActiveTab] = useState('rotate')
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [isImageLoaded, setIsImageLoaded] = useState(false)
   const [imageDimensions, setImageDimensions] = useState(null)
 
   // Transform state
@@ -201,6 +202,7 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
   // Handle image load
   const handleImageLoad = (dimensions) => {
     setImageDimensions(dimensions)
+    setIsImageLoaded(true)
     setLoading(false)
   }
 
@@ -220,6 +222,14 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
     if (activeTab === 'crop' && tab !== 'crop') {
       setCropBox(null)
     }
+
+    // Normalize transform when switching tools
+    setTransform(prev => ({
+      ...prev,
+      scale: Math.max(0.7, Math.min(4, prev.scale)),
+      offsetX: 0,
+      offsetY: 0
+    }))
 
     setActiveTab(tab)
   }
@@ -319,7 +329,7 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
         reject(new Error(t('editor:errors.imageLoadError')))
       }
 
-      img.src = photo.url
+      img.src = photo.imageUrl || photo.url
     })
   }
 
@@ -585,7 +595,7 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
           {!loading && (
             <EditorCanvas
               ref={canvasRef}
-              imageUrl={photo?.url}
+              imageUrl={photo?.imageUrl || photo?.url}
               transform={transform}
               onTransformChange={handleTransformChange}
               cropBox={activeTab === 'crop' ? cropBox : null}

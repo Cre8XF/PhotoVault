@@ -168,8 +168,9 @@
   }
 
   .editor-canvas-wrapper {
-    height: 60vh;
-    max-height: 60vh;
+    min-height: 55vh;
+    max-height: 65vh;
+    height: calc(100vh - 260px);
     flex-shrink: 0;
   }
 
@@ -177,6 +178,8 @@
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding-bottom: 4rem;
   }
 }
 
@@ -238,6 +241,7 @@
   background: rgba(17, 24, 39, 0.9);
   backdrop-filter: blur(16px);
   border-left: 1px solid rgba(255, 255, 255, 0.08);
+  overscroll-behavior: contain;
 }
 
 .editor-panel {

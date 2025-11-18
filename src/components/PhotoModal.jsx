@@ -523,7 +523,10 @@ const PhotoModal = ({
           onClick={(e) => e.stopPropagation()}
         >
           <PhotoEditor
-            photo={photo}
+            photo={{
+              ...photo,
+              imageUrl: photo.fullUrl || photo.downloadUrl || photo.url || photo.src || photo.path || ''
+            }}
             onClose={handleEditorClose}
             onSave={handleEditSave}
           />

@@ -20,11 +20,28 @@ const EditorCanvas = ({
   const [isDragging, setIsDragging] = useState(false)
   const [lastTouch, setLastTouch] = useState(null)
   const [lastPinchDistance, setLastPinchDistance] = useState(null)
+  const [containerReady, setContainerReady] = useState(false)
   const animationFrameRef = useRef(null)
+
+  // Wait for container to have size
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const checkContainerSize = () => {
+      const rect = containerRef.current?.getBoundingClientRect()
+      if (rect && rect.width > 0 && rect.height > 0) {
+        setContainerReady(true)
+      } else {
+        requestAnimationFrame(checkContainerSize)
+      }
+    }
+
+    checkContainerSize()
+  }, [])
 
   // Load image
   useEffect(() => {
-    if (!imageUrl) return
+    if (!imageUrl || !containerReady) return
 
     const img = new Image()
     img.crossOrigin = 'anonymous'
@@ -34,7 +51,8 @@ const EditorCanvas = ({
       if (onImageLoad) {
         onImageLoad({ width: img.width, height: img.height })
       }
-      renderCanvas()
+      // Force immediate render after image loads
+      setTimeout(() => renderCanvas(), 0)
     }
 
     img.onerror = (err) => {
@@ -42,7 +60,7 @@ const EditorCanvas = ({
     }
 
     img.src = imageUrl
-  }, [imageUrl])
+  }, [imageUrl, containerReady])
 
   // Render canvas with current transform
   const renderCanvas = useCallback(() => {
@@ -61,10 +79,17 @@ const EditorCanvas = ({
 
       if (!container) return
 
-      // Set canvas size to container size
+      // Set canvas size to container size with devicePixelRatio for sharpness
       const rect = container.getBoundingClientRect()
-      canvas.width = rect.width
-      canvas.height = rect.height
+      const dpr = window.devicePixelRatio || 1
+
+      canvas.width = rect.width * dpr
+      canvas.height = rect.height * dpr
+      canvas.style.width = `${rect.width}px`
+      canvas.style.height = `${rect.height}px`
+
+      // Scale context to account for devicePixelRatio
+      ctx.scale(dpr, dpr)
 
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height)
