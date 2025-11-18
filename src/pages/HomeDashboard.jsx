@@ -293,12 +293,12 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
               <button
                 key={album.id}
                 onClick={() => onNavigate("search")}
-                className={`ripple-effect glass p-6 rounded-2xl text-left hover:scale-105 transition-transform group animate-fade-in-up ${staggerClass} free-shadow`}
+                className={`ripple-effect glass p-4 md:p-6 rounded-2xl text-left hover:scale-105 transition-transform group animate-fade-in-up ${staggerClass} free-shadow free-smart-card`}
               >
                 <div
-                  className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${album.color} mb-3`}
+                  className={`inline-flex p-2 md:p-3 rounded-xl bg-gradient-to-br ${album.color} mb-2 md:mb-3`}
                 >
-                  <album.icon className="w-6 h-6 text-white" />
+                  <album.icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
                 </div>
                 <h3 className="font-semibold text-lg mb-1">{album.name}</h3>
                 <p className="text-sm opacity-70">
