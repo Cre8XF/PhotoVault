@@ -481,7 +481,7 @@ const SearchPage = ({
             <img
               src={photo.url}
               alt={photo.name}
-              onClick={() => !editMode && onPhotoClick(photo)}
+              onClick={() => !editMode && onPhotoClick(photo, filteredPhotos)}
               className="max-h-full max-w-full object-contain cursor-pointer transition-transform duration-300 group-hover:scale-[1.03]"
             />
 

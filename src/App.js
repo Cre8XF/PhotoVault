@@ -129,11 +129,21 @@ function AppContent() {
   const setSelectedAlbum = useStore((state) => state.setSelectedAlbum)
   const setTheme = useStore((state) => state.setTheme)
 
-  // Handle photo click
-  const handlePhotoClick = (photo) => {
-    const index = photos.findIndex((p) => p.id === photo.id)
+  // Context-aware photo source state
+  const [photoSourceList, setPhotoSourceList] = React.useState([])
+  const [photoSourceIndex, setPhotoSourceIndex] = React.useState(0)
+
+  // Handle photo click with context-aware source list
+  const handlePhotoClick = (photo, sourceList) => {
+    const list = Array.isArray(sourceList) ? sourceList : photos
+    setPhotoSourceList(list)
+
+    const index = list.findIndex((p) => p.id === photo.id)
+    setPhotoSourceIndex(index >= 0 ? index : 0)
+
     const setSelectedPhotoIndex = useStore.getState().setSelectedPhotoIndex
-    setSelectedPhotoIndex(index)
+    setSelectedPhotoIndex(index >= 0 ? index : 0)
+
     setPhotoModalOpen(true)
   }
 
@@ -425,8 +435,8 @@ function AppContent() {
 
       {photoModalOpen && (
         <PhotoModal
-          photos={photos}
-          currentIndex={selectedPhotoIndex}
+          photos={photoSourceList}
+          currentIndex={photoSourceIndex}
           onClose={() => setPhotoModalOpen(false)}
           onToggleFavorite={toggleFavorite}
           onPhotoEdited={async (newPhoto) => {

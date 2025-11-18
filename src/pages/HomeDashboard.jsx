@@ -203,7 +203,7 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
                 <div
                   key={photo.id}
                   className={`relative group cursor-pointer animate-scale-in ${staggerClass} free-thumbnail`}
-                  onClick={() => onPhotoClick(photo)}
+                  onClick={() => onPhotoClick(photo, favoritePhotos)}
                 >
                   <LazyImage
                     src={photo.url}
@@ -248,7 +248,7 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
                   <div
                     key={photo.id}
                     className={`flex-shrink-0 w-32 md:w-48 cursor-pointer group animate-fade-in-up ${staggerClass} free-thumbnail free-recent-thumb`}
-                    onClick={() => onPhotoClick(photo)}
+                    onClick={() => onPhotoClick(photo, recentPhotos)}
                   >
                     <LazyImage
                       src={photo.url}
