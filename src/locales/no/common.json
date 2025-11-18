@@ -77,6 +77,7 @@
     "coverBadge": "Forside",
     "noAlbum": "Dette bildet tilhører ikke et album",
     "noPhotos": "Ingen bilder å vise",
+    "noImageUrl": "Kunne ikke åpne redigereren: Ingen gyldig bilde-URL funnet",
     "photoSaveError": "Kunne ikke lagre det redigerte bildet. Prøv igjen.",
     "photoSaved": "Bildet er lagret! Du finner det redigerte bildet i albumet.",
     "setAsCover": "Sett som albumforside",

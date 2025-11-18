@@ -15,9 +15,27 @@ import EditorPanelAdjust from './EditorPanelAdjust'
 import EditorPanelText from './EditorPanelText'
 import './editor.css'
 
-const PhotoEditor = ({ photo, onClose, onSave }) => {
+const PhotoEditor = ({ photo, imageUrl: propImageUrl, onClose, onSave }) => {
   const { t } = useTranslation(['editor'])
   const canvasRef = useRef(null)
+
+  // Resolve image URL with comprehensive fallback
+  const resolvedImageUrl =
+    propImageUrl ||
+    photo?.imageUrl ||
+    photo?.fullUrl ||
+    photo?.downloadUrl ||
+    photo?.url ||
+    photo?.src ||
+    photo?.path ||
+    ''
+
+  console.log('🎨 PhotoEditor received imageUrl:', resolvedImageUrl)
+
+  // Validate URL
+  if (!resolvedImageUrl) {
+    console.error('❌ PhotoEditor: No valid image URL provided')
+  }
 
   // State
   const [activeTab, setActiveTab] = useState('rotate')
@@ -25,6 +43,7 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
   const [loading, setLoading] = useState(true)
   const [isImageLoaded, setIsImageLoaded] = useState(false)
   const [imageDimensions, setImageDimensions] = useState(null)
+  const [error, setError] = useState(resolvedImageUrl ? null : 'No image URL provided')
 
   // Transform state
   const [transform, setTransform] = useState({
@@ -329,7 +348,7 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
         reject(new Error(t('editor:errors.imageLoadError')))
       }
 
-      img.src = photo.imageUrl || photo.url
+      img.src = resolvedImageUrl
     })
   }
 
@@ -592,10 +611,10 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
             </div>
           )}
 
-          {!loading && (
+          {!loading && !error && (
             <EditorCanvas
               ref={canvasRef}
-              imageUrl={photo?.imageUrl || photo?.url}
+              imageUrl={resolvedImageUrl}
               transform={transform}
               onTransformChange={handleTransformChange}
               cropBox={activeTab === 'crop' ? cropBox : null}
@@ -603,7 +622,24 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
               adjustments={adjustments}
               textLayers={textLayers}
               onImageLoad={handleImageLoad}
+              onError={(err) => {
+                console.error('Canvas error:', err)
+                setError(err)
+                setLoading(false)
+              }}
             />
+          )}
+
+          {error && (
+            <div className="editor-loading">
+              <p className="text-red-400 text-center mb-4">❌ {error}</p>
+              <button
+                onClick={onClose}
+                className="editor-btn editor-btn-secondary"
+              >
+                {t('editor:buttons.close')}
+              </button>
+            </div>
           )}
         </div>
 
