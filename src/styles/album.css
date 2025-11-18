@@ -216,6 +216,7 @@ body.light-mode .album-empty {
 }
 
 /* ---------------- List View Styles - Compact Redesign ---------------- */
+.album-list-row,
 .album-list-item {
   display: flex;
   align-items: center;
@@ -230,11 +231,13 @@ body.light-mode .album-empty {
   transition: all 0.2s ease;
 }
 
+.album-list-row:hover,
 .album-list-item:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(139, 92, 246, 0.3);
 }
 
+.album-list-thumb,
 .list-thumb {
   width: 80px;
   height: 80px;
@@ -269,17 +272,19 @@ body.light-mode .album-empty {
 
 /* Mobile list view optimizations */
 @media (max-width: 480px) {
+  .album-list-row,
   .album-list-item {
     gap: 0.5rem;
     padding: 0.5rem;
-    max-height: 80px;
-    border-radius: 10px;
+    max-height: 72px;
+    border-radius: 8px;
   }
 
+  .album-list-thumb,
   .list-thumb {
-    width: 64px;
-    height: 64px;
-    border-radius: 10px;
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
   }
 
   .list-info {
@@ -287,7 +292,16 @@ body.light-mode .album-empty {
   }
 
   .album-meta {
-    font-size: 0.625rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* Tablet list view */
+@media (min-width: 481px) and (max-width: 768px) {
+  .album-list-thumb,
+  .list-thumb {
+    width: 64px;
+    height: 64px;
   }
 }
 
@@ -339,6 +353,12 @@ body.light-mode .album-empty {
 }
 
 @media (max-width: 480px) {
+  /* General mobile tightening */
+  .album-page {
+    padding: 1rem;
+    padding-bottom: 80px;
+  }
+
   /* Album card optimizations for mobile */
   .album-card {
     padding: 0.5rem;
@@ -389,6 +409,33 @@ body.light-mode .album-empty {
   }
 
   .album-photo-card {
+    border-radius: 8px;
+  }
+
+  /* Header spacing reduction */
+  .album-header {
+    margin-bottom: 1rem;
+  }
+
+  /* Description spacing */
+  .album-description {
+    margin: 0.75rem 0 1.5rem;
+  }
+
+  /* General section spacing reduction */
+  section {
+    margin-bottom: 1rem;
+  }
+
+  /* Card component tightening */
+  .album-cover {
+    border-radius: 12px;
+  }
+
+  /* Reduce glass card padding */
+  .album-card,
+  .photo-card {
+    padding: 0.5rem;
     border-radius: 8px;
   }
 }
