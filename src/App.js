@@ -239,6 +239,7 @@ function AppContent() {
             user={userProfile || user}
             onNavigate={setCurrentPage}
             refreshData={refreshData}
+            onPhotoClick={handlePhotoClick}
           />
         )}
 
