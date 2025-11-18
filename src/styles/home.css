@@ -339,12 +339,76 @@ body.light-mode .spinner-twilight {
   .album-grid {
     gap: 12px;
   }
-  
+
   .album-meta {
     padding: 12px 14px;
   }
-  
+
   .album-title {
     font-size: 0.95rem;
   }
+}
+
+/* ============================================================================
+   FREE USER SPECIFIC STYLES
+   ============================================================================ */
+
+/* Smaller thumbnails for FREE users on mobile */
+@media (max-width: 768px) {
+  .free-thumbnail img,
+  .free-thumbnail .w-full {
+    height: 120px !important;
+  }
+
+  .free-thumbnail.flex-shrink-0 {
+    width: 140px !important;
+  }
+}
+
+/* Reduced shadows for FREE users */
+.free-shadow {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.free-shadow:hover {
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.2) !important;
+}
+
+body.light-mode .free-shadow {
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.08) !important;
+}
+
+body.light-mode .free-shadow:hover {
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.15) !important;
+}
+
+/* Quick Overview - Two rows on mobile for FREE users */
+@media (max-width: 768px) {
+  .free-overview .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 3rem 1rem;
+  }
+}
+
+/* Reduce padding for FREE user Quick Overview */
+.free-overview {
+  padding: 1rem 1.25rem !important;
+}
+
+.free-overview h3 {
+  margin-bottom: 1rem !important;
+}
+
+/* FREE user thumbnail optimizations */
+.free-thumbnail img {
+  object-fit: cover !important;
+}
+
+.free-thumbnail:hover img {
+  transform: scale(1.03) !important;
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.15) !important;
+}
+
+body.light-mode .free-thumbnail:hover img {
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.12) !important;
 }
