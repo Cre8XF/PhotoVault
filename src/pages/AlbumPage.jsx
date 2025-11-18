@@ -405,9 +405,9 @@ const AlbumPage = ({
   }
 
   return (
-    <div className="min-h-screen p-6 md:p-10 pb-24 animate-fade-in">
+    <div className="min-h-screen p-4 md:p-8 pb-24 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-4">
           <button
             onClick={onBack}
@@ -479,29 +479,29 @@ const AlbumPage = ({
         </div>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-          <p className="text-sm text-gray-400">{t('albums:photos')}</p>
-          <p className="text-2xl font-bold">{stats.total}</p>
+      {/* Stats Row - Compressed */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+        <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+          <p className="text-xs text-gray-400 mb-1">{t('albums:photos')}</p>
+          <p className="text-2xl font-bold leading-none">{stats.total}</p>
         </div>
-        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-          <p className="text-sm text-gray-400">{t('albums:size')}</p>
-          <p className="text-2xl font-bold">{stats.totalSize} MB</p>
+        <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+          <p className="text-xs text-gray-400 mb-1">{t('albums:size')}</p>
+          <p className="text-2xl font-bold leading-none">{stats.totalSize} MB</p>
         </div>
-        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-          <p className="text-sm text-gray-400">{t('albums:aiAnalyzed')}</p>
-          <p className="text-2xl font-bold">{stats.aiAnalyzed}</p>
+        <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+          <p className="text-xs text-gray-400 mb-1">{t('albums:aiAnalyzed')}</p>
+          <p className="text-2xl font-bold leading-none">{stats.aiAnalyzed}</p>
         </div>
-        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-          <p className="text-sm text-gray-400">{t('albums:categories')}</p>
-          <p className="text-2xl font-bold">{stats.categories}</p>
+        <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+          <p className="text-xs text-gray-400 mb-1">{t('albums:categories')}</p>
+          <p className="text-2xl font-bold leading-none">{stats.categories}</p>
         </div>
       </div>
 
       {/* Action Bar */}
       {editMode && selectedPhotos.length > 0 && (
-        <div className="bg-purple-600/20 border border-purple-500/30 rounded-xl p-4 mb-6 flex items-center justify-between">
+        <div className="bg-purple-600/20 border border-purple-500/30 rounded-xl p-4 mb-4 flex items-center justify-between">
           <span className="font-medium">
             {t('albums:selectedCount', { count: selectedPhotos.length })}
           </span>
@@ -524,74 +524,48 @@ const AlbumPage = ({
         </div>
       )}
 
-      {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6">
-        {/* Search */}
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t('albums:searchPhotos')}
-            className="input-premium !pl-10 !pr-10 !py-3"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="ripple-effect absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-white/10 rounded-lg transition"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-
-        {/* View Mode */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => setViewMode('grid')}
-            className={`ripple-effect p-3 rounded-lg transition ${
-              viewMode === 'grid'
-                ? 'bg-purple-600'
-                : 'bg-white/5 hover:bg-white/10'
-            }`}
-          >
-            <Grid3x3 className="w-5 h-5" />
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            className={`ripple-effect p-3 rounded-lg transition ${
-              viewMode === 'list'
-                ? 'bg-purple-600'
-                : 'bg-white/5 hover:bg-white/10'
-            }`}
-          >
-            <List className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Filters Toggle */}
+      {/* Grid/List Toggle - Positioned below stats */}
+      <div className="flex items-center justify-end gap-2 mb-3">
         <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="ripple-effect px-4 py-3 bg-white/5 hover:bg-white/10 rounded-lg flex items-center gap-2 transition"
+          onClick={() => setViewMode('grid')}
+          className={`ripple-effect p-2.5 rounded-lg transition ${
+            viewMode === 'grid'
+              ? 'bg-purple-600'
+              : 'bg-white/5 hover:bg-white/10'
+          }`}
         >
-          <Filter className="w-5 h-5" />
-          {t('albums:filters')}
-          <ChevronDown
-            className={`w-4 h-4 transition-transform ${
-              showFilters ? 'rotate-180' : ''
-            }`}
-          />
+          <Grid3x3 className="w-5 h-5" />
         </button>
-
-        {/* Upload Button */}
         <button
-          onClick={() => setUploadOpen(true)}
-          className="ripple-effect px-4 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-2 transition font-medium"
+          onClick={() => setViewMode('list')}
+          className={`ripple-effect p-2.5 rounded-lg transition ${
+            viewMode === 'list'
+              ? 'bg-purple-600'
+              : 'bg-white/5 hover:bg-white/10'
+          }`}
         >
-          <ImageIcon className="w-5 h-5" />
-          {t('albums:uploadPhotos')}
+          <List className="w-5 h-5" />
         </button>
+      </div>
+
+      {/* Search Bar */}
+      <div className="relative mb-3">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder={t('albums:searchPhotos')}
+          className="input-premium !pl-10 !pr-10 !py-2.5"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="ripple-effect absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-white/10 rounded-lg transition"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Filters Panel */}
@@ -665,10 +639,10 @@ const AlbumPage = ({
         </div>
       )}
 
-      {/* Photos Grid */}
+      {/* Photos Grid - Compressed */}
       {!isInitialLoading && viewMode === 'grid' && filteredPhotos.length > 0 && (
         <div
-          className={`grid gap-4 ${
+          className={`grid gap-3 ${
             gridSize === 2
               ? 'grid-cols-2'
               : gridSize === 3
@@ -679,7 +653,7 @@ const AlbumPage = ({
           {filteredPhotos.map((photo, index) => (
             <div
               key={photo.id}
-              className={`relative group aspect-square bg-black/20 rounded-xl overflow-hidden cursor-pointer transition hover:scale-105 animate-fade-in-up stagger-${(index % 12) + 1} ${
+              className={`album-photo-card relative group aspect-square bg-black/20 rounded-lg overflow-hidden cursor-pointer transition hover:scale-[1.02] animate-fade-in-up stagger-${(index % 12) + 1} ${
                 isPhotoSelected(photo) ? 'ring-4 ring-purple-500' : ''
               }`}
               onClick={() => {
@@ -764,13 +738,13 @@ const AlbumPage = ({
         </div>
       )}
 
-      {/* Photos List View */}
+      {/* Photos List View - Compact Redesign */}
       {!isInitialLoading && viewMode === 'list' && filteredPhotos.length > 0 && (
         <div className="space-y-2">
           {filteredPhotos.map((photo, index) => (
             <div
               key={photo.id}
-              className={`flex items-center gap-4 p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition cursor-pointer animate-fade-in-up stagger-${(index % 12) + 1} ${
+              className={`album-list-item flex items-center gap-3 p-2.5 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition cursor-pointer animate-fade-in-up stagger-${(index % 12) + 1} ${
                 isPhotoSelected(photo) ? 'ring-2 ring-purple-500' : ''
               }`}
               onClick={() => {
@@ -784,15 +758,14 @@ const AlbumPage = ({
               <img
                 src={photo.url}
                 alt={photo.name}
-                className="w-16 h-16 object-cover rounded-lg"
+                className="list-thumb w-20 h-20 object-cover rounded-xl flex-shrink-0"
               />
 
-              <div className="flex-1 min-w-0">
-                <div className="font-medium truncate">
+              <div className="list-info flex-1 min-w-0">
+                <div className="font-medium truncate text-sm">
                   {photo.name || t('common:noName')}
                 </div>
-                <div className="text-sm text-gray-400 flex items-center gap-2 mt-1">
-                  <Calendar className="w-3 h-3" />
+                <div className="album-meta text-xs text-gray-400 flex items-center gap-1.5 mt-0.5">
                   {photo.createdAt
                     ? new Date(photo.createdAt).toLocaleDateString('no-NO')
                     : t('albums:unknownDate')}
@@ -808,13 +781,13 @@ const AlbumPage = ({
               </div>
 
               {editMode && (
-                <div className="flex gap-2">
+                <div className="flex gap-1.5">
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
                       handleSetCover(photo)
                     }}
-                    className="ripple-effect p-2 bg-yellow-500 hover:bg-yellow-600 rounded-lg transition"
+                    className="ripple-effect p-1.5 bg-yellow-500 hover:bg-yellow-600 rounded-lg transition"
                     title={t('albums:setCover')}
                   >
                     <ImageIcon className="w-4 h-4" />
@@ -824,7 +797,7 @@ const AlbumPage = ({
                       e.stopPropagation()
                       handleDelete(photo)
                     }}
-                    className="ripple-effect p-2 bg-red-500 hover:bg-red-600 rounded-lg transition"
+                    className="ripple-effect p-1.5 bg-red-500 hover:bg-red-600 rounded-lg transition"
                     title={t('common:delete')}
                   >
                     <Trash2 className="w-4 h-4" />
@@ -833,8 +806,8 @@ const AlbumPage = ({
               )}
 
               {isPhotoSelected(photo) && (
-                <div className="bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center">
-                  <Check className="w-4 h-4" />
+                <div className="bg-purple-600 text-white rounded-full w-5 h-5 flex items-center justify-center">
+                  <Check className="w-3.5 h-3.5" />
                 </div>
               )}
             </div>
@@ -858,6 +831,30 @@ const AlbumPage = ({
           </button>
         </div>
       )}
+
+      {/* Action Buttons - Filters & Upload */}
+      <div className="flex items-center gap-3 mt-6">
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className="ripple-effect px-4 py-2.5 bg-white/5 hover:bg-white/10 rounded-lg flex items-center gap-2 transition"
+        >
+          <Filter className="w-4 h-4" />
+          {t('albums:filters')}
+          <ChevronDown
+            className={`w-4 h-4 transition-transform ${
+              showFilters ? 'rotate-180' : ''
+            }`}
+          />
+        </button>
+
+        <button
+          onClick={() => setUploadOpen(true)}
+          className="ripple-effect px-4 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-2 transition font-medium"
+        >
+          <ImageIcon className="w-4 h-4" />
+          {t('albums:uploadPhotos')}
+        </button>
+      </div>
 
       {/* PhotoModal */}
       {photoModal.open && (
