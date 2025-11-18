@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import {
   Folder,
   Grid as GridIcon,
+  List,
   Move,
   Plus,
   Edit2,
@@ -23,6 +24,7 @@ import useStore from '../state/store'
 import { useCollageData } from '../hooks/useCollageData'
 
 const AlbumsPage = ({
+  user,
   albums = [],
   photos = [],
   onAlbumClick = () => {},
@@ -33,7 +35,13 @@ const AlbumsPage = ({
 }) => {
   const navigate = useNavigate()
   const { t } = useTranslation(['common', 'albums', 'collage'])
+
+  // Plan detection
+  const plan = user?.plan || 'free'
+  const isFreeUser = plan === 'free'
+
   const [viewMode, setViewMode] = useState('albums') // 'albums' | 'photos'
+  const [albumViewMode, setAlbumViewMode] = useState('grid') // 'grid' | 'list'
   const [selectedPhotos, setSelectedPhotos] = useState([])
   const [isMoveOpen, setMoveOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -222,15 +230,17 @@ const AlbumsPage = ({
             <span className="hidden sm:inline">{t('common:album')}</span>
           </button>
 
-          <button
-            onClick={() => setCurrentPage('collage')}
-            className="ripple-effect px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 flex items-center gap-2 transition"
-          >
-            <GridIcon className="w-4 h-4" />
-            <span className="hidden sm:inline">
-              {t('collage:createButton')}
-            </span>
-          </button>
+          {!isFreeUser && (
+            <button
+              onClick={() => setCurrentPage('collage')}
+              className="ripple-effect px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 flex items-center gap-2 transition"
+            >
+              <GridIcon className="w-4 h-4" />
+              <span className="hidden sm:inline">
+                {t('collage:createButton')}
+              </span>
+            </button>
+          )}
         </>
       )}
     </div>
@@ -254,8 +264,11 @@ const AlbumsPage = ({
       ) : (
         <>
           {/* Collages */}
-          {viewMode === 'albums' && collages && collages.length > 0 && (
-            <section className="mb-8">
+          {!isFreeUser &&
+            viewMode === 'albums' &&
+            collages &&
+            collages.length > 0 && (
+              <section className="mb-8">
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <GridIcon className="w-5 h-5 text-purple-400" />
                 {t('collage:myCollages')}
@@ -344,8 +357,10 @@ const AlbumsPage = ({
           )}
 
           {/* Collage empty state */}
-          {viewMode === 'albums' && (!collages || collages.length === 0) && (
-            <div className="mb-8 p-8 bg-white/5 rounded-xl border border-white/10 text-center">
+          {!isFreeUser &&
+            viewMode === 'albums' &&
+            (!collages || collages.length === 0) && (
+              <div className="mb-8 p-8 bg-white/5 rounded-xl border border-white/10 text-center">
               <GridIcon className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <h3 className="text-lg font-semibold mb-2">
                 {t('collage:emptyState.title')}
@@ -365,12 +380,42 @@ const AlbumsPage = ({
           {/* Albums list */}
           {viewMode === 'albums' && (
             <section>
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Folder className="w-5 h-5 text-blue-400" />
-                My Albums
-              </h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <Folder className="w-5 h-5 text-blue-400" />
+                  My Albums
+                </h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* View toggle buttons */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setAlbumViewMode('grid')}
+                    className={`p-2 rounded-lg transition ${
+                      albumViewMode === 'grid'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white/5 hover:bg-white/10 border border-white/10'
+                    }`}
+                    title="Grid View"
+                  >
+                    <GridIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setAlbumViewMode('list')}
+                    className={`p-2 rounded-lg transition ${
+                      albumViewMode === 'list'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white/5 hover:bg-white/10 border border-white/10'
+                    }`}
+                    title="List View"
+                  >
+                    <List className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Grid view */}
+              {albumViewMode === 'grid' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {safeAlbums.map((album, index) => (
                   <div
                     key={album.id}
@@ -412,7 +457,102 @@ const AlbumsPage = ({
                     </div>
                   </div>
                 ))}
-              </div>
+                </div>
+              )}
+
+              {/* List view */}
+              {albumViewMode === 'list' && (
+                <div className="flex flex-col gap-3">
+                  {safeAlbums.map((album, index) => {
+                    const albumPhotosList = safePhotos.filter(
+                      (p) => p.albumId === album.id
+                    )
+                    const count = albumPhotosList.length
+                    const coverUrl =
+                      album.cover || albumPhotosList[0]?.url || ''
+
+                    let updatedStr = ''
+                    const updatedAt = album.updatedAt || album.createdAt
+                    if (updatedAt) {
+                      const d = new Date(updatedAt)
+                      if (!isNaN(d.getTime())) {
+                        updatedStr = d.toLocaleDateString('no-NO', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                        })
+                      }
+                    }
+
+                    return (
+                      <div
+                        key={album.id}
+                        className={`relative group animate-fade-in-up stagger-${
+                          (index % 12) + 1
+                        } glass-card rounded-xl p-3 flex items-center gap-4 cursor-pointer hover:bg-white/10 transition`}
+                        onClick={() => onAlbumClick(album)}
+                      >
+                        {/* Thumbnail */}
+                        <div className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-gradient-to-br from-gray-900 to-indigo-900">
+                          {coverUrl ? (
+                            <img
+                              src={coverUrl}
+                              alt={album.name || 'Album'}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Folder className="w-8 h-8 opacity-30" />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-base truncate">
+                            {typeof album.name === 'object'
+                              ? album.name.name || JSON.stringify(album.name)
+                              : album.name || t('common:noName')}
+                          </h3>
+                          <p className="text-sm text-gray-400 truncate">
+                            {t('common:photoCount', { count })}
+                            {updatedStr ? ' · ' + updatedStr : ''}
+                          </p>
+                        </div>
+
+                        {/* Action buttons */}
+                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setEditingAlbum(album)
+                              setAlbumModalOpen(true)
+                              if (onEditAlbum) onEditAlbum(album)
+                            }}
+                            className="p-2 bg-blue-600/90 hover:bg-blue-700 text-white rounded-lg shadow-lg transition"
+                            title={t('common:edit')}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDeleteAlbum(album)
+                              if (onDeleteAlbum) onDeleteAlbum(album)
+                            }}
+                            className="p-2 bg-red-600/90 hover:bg-red-700 text-white rounded-lg shadow-lg transition"
+                            title={t('common:delete')}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </section>
           )}
 
