@@ -423,23 +423,23 @@ const AlbumPage = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 md:gap-2">
+        <div className="flex items-center gap-2">
           {/* Edit Mode Toggle */}
           <button
             onClick={() => {
               setEditMode(!editMode)
               setSelectedPhotos([])
             }}
-            className={`ripple-effect px-3 py-1.5 md:px-4 md:py-2 rounded-lg flex items-center gap-1.5 md:gap-2 transition ${
+            className={`ripple-effect px-3 py-2 md:px-4 md:py-2.5 rounded-lg flex items-center gap-2 transition ${
               editMode
                 ? 'bg-purple-600 text-white'
                 : 'bg-white/10 hover:bg-white/20'
             }`}
           >
             {editMode ? (
-              <Check className="w-[18px] h-[18px] md:w-5 md:h-5" />
+              <Check className="w-5 h-5" />
             ) : (
-              <Edit3 className="w-[18px] h-[18px] md:w-5 md:h-5" />
+              <Edit3 className="w-5 h-5" />
             )}
             <span className="hidden sm:inline text-sm md:text-base">
               {editMode ? t('common:done') : t('common:edit')}
@@ -450,31 +450,31 @@ const AlbumPage = ({
           <button
             onClick={() => setCollageOpen(true)}
             disabled={albumPhotos.length < 2}
-            className="ripple-effect px-3 py-1.5 md:px-4 md:py-2 rounded-lg bg-purple-600 hover:bg-purple-700 transition flex items-center gap-1.5 md:gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="ripple-effect px-3 py-2 md:px-4 md:py-2.5 rounded-lg bg-purple-600 hover:bg-purple-700 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             title={
               albumPhotos.length < 2 ? t('albums:minTwoPhotos') : t('albums:createCollage')
             }
           >
-            <Layout size={16} className="md:w-[18px] md:h-[18px]" />
+            <Layout className="w-5 h-5" />
             <span className="hidden sm:inline text-sm md:text-base">{t('albums:createCollage')}</span>
           </button>
 
           {/* Share Album Button */}
           <button
             onClick={() => setShareModalOpen(true)}
-            className="ripple-effect px-3 py-1.5 md:px-4 md:py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition flex items-center gap-1.5 md:gap-2"
+            className="ripple-effect px-3 py-2 md:px-4 md:py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 transition flex items-center gap-2"
           >
-            <Share2 size={16} className="md:w-[18px] md:h-[18px]" />
+            <Share2 className="w-5 h-5" />
             <span className="hidden sm:inline text-sm md:text-base">{t('albums:shareAlbum')}</span>
           </button>
 
           {/* Edit Album Button */}
           <button
             onClick={() => setEditingAlbum(album)}
-            className="ripple-effect p-1.5 md:p-2 hover:bg-white/10 rounded-lg transition"
+            className="ripple-effect p-2 hover:bg-white/10 rounded-lg transition"
             title={t('albums:editAlbum')}
           >
-            <Edit3 className="w-[18px] h-[18px] md:w-5 md:h-5" />
+            <Edit3 className="w-5 h-5" />
           </button>
         </div>
       </div>
@@ -549,7 +549,7 @@ const AlbumPage = ({
       </div>
 
       {/* Search Bar */}
-      <div className="relative mb-2 md:mb-2.5">
+      <div className="relative mb-3">
         <Search className="absolute left-2.5 md:left-3 top-1/2 -translate-y-1/2 w-4 md:w-5 h-4 md:h-5 text-gray-400" />
         <input
           type="text"
@@ -570,7 +570,7 @@ const AlbumPage = ({
 
       {/* Filters Panel - Compact */}
       {showFilters && (
-        <div className="bg-white/5 border border-white/10 rounded-lg p-3 md:p-4 mb-2.5 md:mb-3 space-y-3 md:space-y-4">
+        <div className="bg-white/5 border border-white/10 rounded-lg p-2.5 md:p-4 mb-3 space-y-3 md:space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
             {/* Sort */}
             <div>
@@ -744,7 +744,7 @@ const AlbumPage = ({
           {filteredPhotos.map((photo, index) => (
             <div
               key={photo.id}
-              className={`album-list-item flex items-center gap-2 md:gap-3 p-2 md:p-2.5 bg-white/5 rounded-lg md:rounded-xl border border-white/10 hover:bg-white/10 transition cursor-pointer animate-fade-in-up stagger-${(index % 12) + 1} ${
+              className={`album-list-row flex items-center gap-2 md:gap-3 p-2 md:p-2.5 bg-white/5 rounded-lg md:rounded-xl border border-white/10 hover:bg-white/10 transition cursor-pointer animate-fade-in-up stagger-${(index % 12) + 1} ${
                 isPhotoSelected(photo) ? 'ring-2 ring-purple-500' : ''
               }`}
               onClick={() => {
@@ -758,14 +758,14 @@ const AlbumPage = ({
               <img
                 src={photo.url}
                 alt={photo.name}
-                className="list-thumb w-16 md:w-20 h-16 md:h-20 object-cover rounded-lg md:rounded-xl flex-shrink-0"
+                className="album-list-thumb w-14 md:w-16 lg:w-20 h-14 md:h-16 lg:h-20 object-cover rounded-lg md:rounded-xl flex-shrink-0"
               />
 
               <div className="list-info flex-1 min-w-0">
                 <div className="font-medium truncate text-xs md:text-sm">
                   {photo.name || t('common:noName')}
                 </div>
-                <div className="album-meta text-[10px] md:text-xs text-gray-400 flex items-center gap-1 md:gap-1.5 mt-0.5">
+                <div className="album-meta text-xs text-gray-400 flex items-center gap-1 md:gap-1.5 mt-0.5">
                   {photo.createdAt
                     ? new Date(photo.createdAt).toLocaleDateString('no-NO')
                     : t('albums:unknownDate')}
@@ -787,20 +787,20 @@ const AlbumPage = ({
                       e.stopPropagation()
                       handleSetCover(photo)
                     }}
-                    className="ripple-effect p-1 md:p-1.5 bg-yellow-500 hover:bg-yellow-600 rounded-lg transition"
+                    className="ripple-effect p-1.5 bg-yellow-500 hover:bg-yellow-600 rounded-lg transition"
                     title={t('albums:setCover')}
                   >
-                    <ImageIcon className="w-3.5 md:w-4 h-3.5 md:h-4" />
+                    <ImageIcon className="w-3.5 h-3.5 md:w-4 md:h-4" style={{ transform: 'scale(0.85)' }} />
                   </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
                       handleDelete(photo)
                     }}
-                    className="ripple-effect p-1 md:p-1.5 bg-red-500 hover:bg-red-600 rounded-lg transition"
+                    className="ripple-effect p-1.5 bg-red-500 hover:bg-red-600 rounded-lg transition"
                     title={t('common:delete')}
                   >
-                    <Trash2 className="w-3.5 md:w-4 h-3.5 md:h-4" />
+                    <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" style={{ transform: 'scale(0.85)' }} />
                   </button>
                 </div>
               )}
@@ -833,7 +833,7 @@ const AlbumPage = ({
       )}
 
       {/* Action Buttons - Filters & Upload */}
-      <div className="flex items-center gap-2 md:gap-3 mt-4 md:mt-5">
+      <div className="flex items-center gap-2 md:gap-3 mt-3 md:mt-4">
         <button
           onClick={() => setShowFilters(!showFilters)}
           className="ripple-effect px-3 py-2 md:px-4 md:py-2.5 bg-white/5 hover:bg-white/10 rounded-lg flex items-center gap-1.5 md:gap-2 transition text-sm md:text-base"
@@ -849,7 +849,7 @@ const AlbumPage = ({
 
         <button
           onClick={() => setUploadOpen(true)}
-          className="ripple-effect px-3 py-2 md:px-4 md:py-2.5 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-1.5 md:gap-2 transition font-medium text-sm md:text-base"
+          className="ripple-effect flex-1 px-3 py-3 md:px-4 md:py-4 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center gap-1.5 md:gap-2 transition font-medium text-sm md:text-base"
         >
           <ImageIcon className="w-[14px] md:w-4 h-[14px] md:h-4" />
           {t('albums:uploadPhotos')}

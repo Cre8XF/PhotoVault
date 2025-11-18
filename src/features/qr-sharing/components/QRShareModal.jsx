@@ -211,7 +211,7 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3 md:p-4"
       onClick={onClose}
     >
       <div
@@ -221,35 +221,35 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
                     max-h-[90vh] overflow-y-auto"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-600/20 rounded-lg">
-              <Share2 className="w-5 h-5 text-purple-400" />
+        <div className="flex items-center justify-between p-4 md:p-6 border-b border-white/10">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="p-1.5 md:p-2 bg-purple-600/20 rounded-lg">
+              <Share2 className="w-4 h-4 md:w-5 md:h-5 text-purple-400" />
             </div>
-            <h2 className="text-xl font-bold">{t('qrshare:modal.title')}</h2>
+            <h2 className="text-lg md:text-xl font-bold">{t('qrshare:modal.title')}</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-white/10 rounded-lg transition"
+            className="p-1.5 md:p-2 hover:bg-white/10 rounded-lg transition"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 md:w-5 md:h-5" />
           </button>
         </div>
 
         {/* Settings */}
-        <div className="p-6 border-b border-white/10 space-y-4">
+        <div className="p-4 md:p-6 border-b border-white/10 space-y-3 md:space-y-4">
           {/* Public toggle */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Globe className="w-5 h-5 text-blue-400" />
-              <div>
-                <p className="font-medium">{t('qrshare:settings.public.title')}</p>
-                <p className="text-sm opacity-70">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
+              <Globe className="w-4 h-4 md:w-5 md:h-5 text-blue-400 flex-shrink-0" />
+              <div className="min-w-0">
+                <p className="font-medium text-sm md:text-base">{t('qrshare:settings.public.title')}</p>
+                <p className="text-xs md:text-sm opacity-70 truncate">
                   {t('qrshare:settings.public.description')}
                 </p>
               </div>
             </div>
-            <label className="relative inline-block w-12 h-6">
+            <label className="relative inline-block w-12 h-6 flex-shrink-0">
               <input
                 type="checkbox"
                 checked={shareSettings.isPublic}
@@ -263,15 +263,15 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
           </div>
 
           {/* Allow upload toggle */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Lock className="w-5 h-5 text-green-400" />
-              <div>
-                <p className="font-medium">{t('qrshare:settings.upload.title')}</p>
-                <p className="text-sm opacity-70">{t('qrshare:settings.upload.description')}</p>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
+              <Lock className="w-4 h-4 md:w-5 md:h-5 text-green-400 flex-shrink-0" />
+              <div className="min-w-0">
+                <p className="font-medium text-sm md:text-base">{t('qrshare:settings.upload.title')}</p>
+                <p className="text-xs md:text-sm opacity-70 truncate">{t('qrshare:settings.upload.description')}</p>
               </div>
             </div>
-            <label className="relative inline-block w-12 h-6">
+            <label className="relative inline-block w-12 h-6 flex-shrink-0">
               <input
                 type="checkbox"
                 checked={shareSettings.allowUpload}
@@ -290,12 +290,12 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
           </div>
 
           {/* Expiry date */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Calendar className="w-5 h-5 text-orange-400" />
-              <div>
-                <p className="font-medium">{t('qrshare:settings.expiry.title')}</p>
-                <p className="text-sm opacity-70">{t('qrshare:settings.expiry.description')}</p>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
+              <Calendar className="w-4 h-4 md:w-5 md:h-5 text-orange-400 flex-shrink-0" />
+              <div className="min-w-0">
+                <p className="font-medium text-sm md:text-base">{t('qrshare:settings.expiry.title')}</p>
+                <p className="text-xs md:text-sm opacity-70 truncate">{t('qrshare:settings.expiry.description')}</p>
               </div>
             </div>
             <input
@@ -309,7 +309,7 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
                 }))
               }
               disabled={!shareSettings.isPublic || loading}
-              className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50"
+              className="px-2 py-1.5 md:px-3 md:py-2 bg-white/5 border border-white/10 rounded-lg text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 flex-shrink-0"
             />
           </div>
         </div>
@@ -326,8 +326,8 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
 
         {/* Info */}
         {shareSettings.isPublic && (
-          <div className="p-6 bg-blue-600/10 border-t border-white/10">
-            <p className="text-sm opacity-70" dangerouslySetInnerHTML={{
+          <div className="p-4 md:p-6 bg-blue-600/10 border-t border-white/10">
+            <p className="text-xs md:text-sm opacity-70" dangerouslySetInnerHTML={{
               __html: t('qrshare:info.tip')
             }} />
           </div>
