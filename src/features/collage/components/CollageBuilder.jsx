@@ -181,13 +181,13 @@ const CollageBuilder = () => {
       {/* Header with close button */}
       <div className="flex items-center justify-between p-4 border-b border-white/10 bg-black/20 backdrop-blur-xl">
         <h1 className="text-xl font-bold">
-          {isEditMode ? t('collage:editTitle') || 'Edit Collage' : t('collage:title')}
+          {isEditMode ? t('collage:editTitle') : t('collage:title')}
         </h1>
 
         <button
           onClick={() => setCurrentPage('albums')}
           className="ripple-effect p-2 hover:bg-white/10 rounded-lg transition"
-          title="Close"
+          title={t('collage:buttons.close')}
         >
           <X className="w-6 h-6" />
         </button>
