@@ -8,9 +8,16 @@
     "apply": "Apply",
     "cancel": "Cancel",
     "reset": "Reset",
+    "resetAll": "Reset All",
     "addText": "Add Text",
     "undo": "Undo",
     "redo": "Redo"
+  },
+  "tabs": {
+    "crop": "Crop",
+    "adjust": "Adjust",
+    "filters": "Filters",
+    "more": "More"
   },
   "loading": {
     "image": "Loading image...",
@@ -81,7 +88,8 @@
     "highlights": "Highlights",
     "temperature": "Temperature",
     "reset": "Reset",
-    "resetAll": "Reset All"
+    "resetAll": "Reset All",
+    "help": "Drag sliders to adjust brightness, contrast, and saturation"
   },
   "text": {
     "title": "Text Overlay",
@@ -109,6 +117,8 @@
     "blur": "Blur",
     "outline": "Outline",
     "width": "Width",
-    "removeLayer": "Remove text layer"
+    "removeLayer": "Remove text layer",
+    "dragToMove": "Drag text on the canvas to reposition",
+    "layersCount": "{{count}} text layer(s)"
   }
 }
