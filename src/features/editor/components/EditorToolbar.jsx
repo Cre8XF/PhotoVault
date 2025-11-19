@@ -19,7 +19,7 @@ const EditorToolbar = ({ activeTool, onToolChange, onReset }) => {
   ]
 
   return (
-    <div className="editor-toolbar bg-gray-900/80 backdrop-blur-sm border-b border-white/10 px-4 py-3">
+    <div className="bg-transparent px-4 py-3">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Tool Buttons */}
         <div className="flex gap-2">
