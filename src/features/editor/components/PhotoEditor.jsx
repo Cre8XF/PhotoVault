@@ -7,7 +7,7 @@
 import React, { useState } from 'react'
 import { X, Download, Save, Maximize2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import './editor.css'
+import '../editor.css'
 import { usePhotoEditor } from '../hooks/usePhotoEditor'
 import EditorToolbar from './EditorToolbar'
 import CropTool from './CropTool'
