@@ -296,6 +296,7 @@ const RepositionModal = ({
           <img
             src={photo.url || photo.thumbnailUrl}
             alt={photo.name || photo.filename || t('collage:photo.untitled')}
+            decoding="async"
             className="max-w-full max-h-[70vh] object-contain pointer-events-none"
             draggable={false}
           />
