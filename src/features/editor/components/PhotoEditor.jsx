@@ -5,8 +5,9 @@
  */
 
 import React, { useState } from 'react'
-import { X, Download, Save } from 'lucide-react'
+import { X, Download, Save, Maximize2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import '../editor.css'
 import { usePhotoEditor } from '../hooks/usePhotoEditor'
 import EditorToolbar from './EditorToolbar'
 import CropTool from './CropTool'
@@ -18,6 +19,7 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
   const { t } = useTranslation(['editor'])
   const [activeTool, setActiveTool] = useState('rotate') // 'crop' | 'rotate' | 'filters' | 'text'
   const [saving, setSaving] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   const {
     canvasRef,
@@ -183,7 +185,7 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
   return (
     <div className="photo-editor fixed inset-0 bg-black z-50 flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 bg-gray-900 border-b border-white/10">
+      <div className="editor-header flex items-center justify-between p-4">
         <button
           onClick={onClose}
           className="p-2 hover:bg-white/10 rounded-lg transition"
@@ -194,6 +196,13 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
         <h1 className="text-xl font-bold">{t('editor:title')}</h1>
 
         <div className="flex gap-2">
+          <button
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className="p-2 hover:bg-white/10 rounded-lg transition"
+            title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+          >
+            <Maximize2 className="w-5 h-5" />
+          </button>
           <button
             onClick={handleDownload}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition flex items-center gap-2"
@@ -217,16 +226,18 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
       </div>
 
       {/* Toolbar */}
-      <EditorToolbar
-        activeTool={activeTool}
-        onToolChange={setActiveTool}
-        onReset={reset}
-      />
+      <div className="editor-toolbar">
+        <EditorToolbar
+          activeTool={activeTool}
+          onToolChange={setActiveTool}
+          onReset={reset}
+        />
+      </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden flex">
+      <div className="editor-main">
         {/* Sidebar */}
-        <div className="w-80 bg-gray-900 border-r border-white/10 overflow-y-auto p-4">
+        <div className="editor-sidebar">
           {activeTool === 'crop' && (
             <CropTool
               canvasDimensions={getDimensions()}
@@ -257,7 +268,7 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
         </div>
 
         {/* Canvas Preview */}
-        <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-8 overflow-auto">
+        <div className={`editor-canvas-container ${isFullscreen ? 'fullscreen' : ''}`}>
           {loading && (
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
