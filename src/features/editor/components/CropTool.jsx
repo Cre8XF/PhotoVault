@@ -57,7 +57,7 @@ const CropTool = ({ canvasDimensions, onCropApply, onCancel }) => {
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => handleAspectRatioChange('free')}
-              className={`px-3 py-2 rounded-lg text-sm transition ${
+              className={`min-h-[44px] min-w-[44px] px-4 py-3 rounded-lg text-sm transition touch-target ${
                 aspectRatio === 'free'
                   ? 'bg-purple-600 text-white'
                   : 'bg-gray-700/50 hover:bg-gray-700'
@@ -67,7 +67,7 @@ const CropTool = ({ canvasDimensions, onCropApply, onCancel }) => {
             </button>
             <button
               onClick={() => handleAspectRatioChange('1:1')}
-              className={`px-3 py-2 rounded-lg text-sm transition ${
+              className={`min-h-[44px] min-w-[44px] px-4 py-3 rounded-lg text-sm transition touch-target ${
                 aspectRatio === '1:1'
                   ? 'bg-purple-600 text-white'
                   : 'bg-gray-700/50 hover:bg-gray-700'
@@ -77,7 +77,7 @@ const CropTool = ({ canvasDimensions, onCropApply, onCancel }) => {
             </button>
             <button
               onClick={() => handleAspectRatioChange('4:3')}
-              className={`px-3 py-2 rounded-lg text-sm transition ${
+              className={`min-h-[44px] min-w-[44px] px-4 py-3 rounded-lg text-sm transition touch-target ${
                 aspectRatio === '4:3'
                   ? 'bg-purple-600 text-white'
                   : 'bg-gray-700/50 hover:bg-gray-700'
@@ -87,7 +87,7 @@ const CropTool = ({ canvasDimensions, onCropApply, onCancel }) => {
             </button>
             <button
               onClick={() => handleAspectRatioChange('16:9')}
-              className={`px-3 py-2 rounded-lg text-sm transition ${
+              className={`min-h-[44px] min-w-[44px] px-4 py-3 rounded-lg text-sm transition touch-target ${
                 aspectRatio === '16:9'
                   ? 'bg-purple-600 text-white'
                   : 'bg-gray-700/50 hover:bg-gray-700'
@@ -110,14 +110,14 @@ const CropTool = ({ canvasDimensions, onCropApply, onCancel }) => {
         <div className="flex gap-2">
           <button
             onClick={handleApplyCrop}
-            className="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-medium transition flex items-center justify-center gap-2"
+            className="flex-1 min-h-[44px] px-4 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-medium transition flex items-center justify-center gap-2 touch-target"
           >
             <Check className="w-5 h-5" />
             <span>{t('editor:buttons.apply')}</span>
           </button>
           <button
             onClick={onCancel}
-            className="flex-1 px-4 py-3 bg-gray-600 hover:bg-gray-700 rounded-lg font-medium transition flex items-center justify-center gap-2"
+            className="flex-1 min-h-[44px] px-4 py-3 bg-gray-600 hover:bg-gray-700 rounded-lg font-medium transition flex items-center justify-center gap-2 touch-target"
           >
             <X className="w-5 h-5" />
             <span>{t('editor:buttons.cancel')}</span>

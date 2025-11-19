@@ -29,7 +29,7 @@ const RotateTool = ({ onRotate, rotation = 0 }) => {
         <div className="grid grid-cols-1 gap-2">
           <button
             onClick={onRotate}
-            className="w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium transition flex items-center justify-center gap-2"
+            className="w-full min-h-[44px] px-4 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium transition flex items-center justify-center gap-2 touch-target"
           >
             <RotateCw className="w-5 h-5" />
             <span>{t('editor:rotate.rotate90')}</span>

@@ -68,23 +68,39 @@ const TextTool = ({
   }
 
   return (
-    <div className="text-tool p-4 space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Type className="w-5 h-5" />
-          <h3 className="font-semibold">{t('editor:text.title')}</h3>
+    <>
+      <style>{`
+        .text-tool input[type="range"] {
+          height: 8px;
+        }
+        .text-tool input[type="range"]::-webkit-slider-thumb {
+          width: 24px;
+          height: 24px;
+          cursor: pointer;
+        }
+        .text-tool input[type="range"]::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          cursor: pointer;
+        }
+      `}</style>
+      <div className="text-tool p-4 space-y-4">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Type className="w-5 h-5" />
+            <h3 className="font-semibold">{t('editor:text.title')}</h3>
+          </div>
+          {currentTextLayer && (
+            <button
+              onClick={handleRemoveLayer}
+              className="min-h-[44px] min-w-[44px] p-2 rounded-lg bg-red-600/20 hover:bg-red-600/40 text-red-400 transition-colors touch-target"
+              title={t('editor:text.removeLayer')}
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
         </div>
-        {currentTextLayer && (
-          <button
-            onClick={handleRemoveLayer}
-            className="p-2 rounded-lg bg-red-600/20 hover:bg-red-600/40 text-red-400 transition-colors"
-            title={t('editor:text.removeLayer')}
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        )}
-      </div>
 
       {/* Text Input */}
       <div>
@@ -164,7 +180,7 @@ const TextTool = ({
         <div className="flex gap-2">
           <button
             onClick={() => handlePropertyChange('bold', !localLayer.bold)}
-            className={`flex-1 p-2 rounded-lg border transition-colors ${
+            className={`flex-1 min-h-[44px] min-w-[44px] p-3 rounded-lg border transition-colors touch-target ${
               localLayer.bold
                 ? 'bg-purple-600 border-purple-500 text-white'
                 : 'bg-gray-700/50 border-gray-600 text-gray-300 hover:bg-gray-700'
@@ -174,7 +190,7 @@ const TextTool = ({
           </button>
           <button
             onClick={() => handlePropertyChange('italic', !localLayer.italic)}
-            className={`flex-1 p-2 rounded-lg border transition-colors ${
+            className={`flex-1 min-h-[44px] min-w-[44px] p-3 rounded-lg border transition-colors touch-target ${
               localLayer.italic
                 ? 'bg-purple-600 border-purple-500 text-white'
                 : 'bg-gray-700/50 border-gray-600 text-gray-300 hover:bg-gray-700'
@@ -193,7 +209,7 @@ const TextTool = ({
         <div className="grid grid-cols-3 gap-2">
           <button
             onClick={() => handlePropertyChange('align', 'left')}
-            className={`p-2 rounded-lg border transition-colors ${
+            className={`min-h-[44px] min-w-[44px] p-3 rounded-lg border transition-colors touch-target ${
               localLayer.align === 'left'
                 ? 'bg-purple-600 border-purple-500 text-white'
                 : 'bg-gray-700/50 border-gray-600 text-gray-300 hover:bg-gray-700'
@@ -203,7 +219,7 @@ const TextTool = ({
           </button>
           <button
             onClick={() => handlePropertyChange('align', 'center')}
-            className={`p-2 rounded-lg border transition-colors ${
+            className={`min-h-[44px] min-w-[44px] p-3 rounded-lg border transition-colors touch-target ${
               localLayer.align === 'center'
                 ? 'bg-purple-600 border-purple-500 text-white'
                 : 'bg-gray-700/50 border-gray-600 text-gray-300 hover:bg-gray-700'
@@ -213,7 +229,7 @@ const TextTool = ({
           </button>
           <button
             onClick={() => handlePropertyChange('align', 'right')}
-            className={`p-2 rounded-lg border transition-colors ${
+            className={`min-h-[44px] min-w-[44px] p-3 rounded-lg border transition-colors touch-target ${
               localLayer.align === 'right'
                 ? 'bg-purple-600 border-purple-500 text-white'
                 : 'bg-gray-700/50 border-gray-600 text-gray-300 hover:bg-gray-700'
@@ -346,13 +362,14 @@ const TextTool = ({
       {!currentTextLayer && (
         <button
           onClick={handleAddLayer}
-          className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+          className="w-full min-h-[44px] py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-target"
         >
           <Type className="w-5 h-5" />
           {t('editor:buttons.addText')}
         </button>
       )}
-    </div>
+      </div>
+    </>
   )
 }
 
