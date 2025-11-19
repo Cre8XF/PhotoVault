@@ -21,7 +21,7 @@ import {
 // import ReactionPicker from "./ReactionPicker";
 import useAuth from '../hooks/useAuth'
 import { formatDuration, formatFileSize } from '../utils/videoTools'
-import { PhotoEditor } from '../photoEditor'
+import PhotoEditor from '../features/editor/components/PhotoEditor'
 import { saveEditedPhoto } from '../features/editor'
 
 const PhotoModal = ({
