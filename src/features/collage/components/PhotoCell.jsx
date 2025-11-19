@@ -2,7 +2,7 @@
 // COMPONENT: PhotoCell.jsx - Individual photo cell in collage preview
 // Handles image rendering with transforms, click interactions, and loading states
 // ============================================================================
-import React, { useState } from 'react'
+import React, { useState, memo } from 'react'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { ImageIcon } from 'lucide-react'
@@ -68,6 +68,8 @@ const PhotoCell = ({ photo, slot, transform, onClick, isLoading = false }) => {
       {normalizedPhoto && !imageError && (
         <img
           src={photoUrl}
+          loading="lazy"
+          decoding="async"
           alt={normalizedPhoto.filename || normalizedPhoto.name || t('collage:photo.untitled')}
           onLoad={handleImageLoad}
           onError={handleImageError}
@@ -154,4 +156,5 @@ PhotoCell.propTypes = {
   isLoading: PropTypes.bool,
 }
 
-export default PhotoCell
+// Memoize component to prevent unnecessary re-renders
+export default memo(PhotoCell)

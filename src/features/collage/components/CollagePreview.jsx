@@ -2,7 +2,7 @@
 // COMPONENT: CollagePreview.jsx - Collage preview with layout grid
 // Main preview component for displaying photos in selected layout
 // ============================================================================
-import React from 'react'
+import React, { useMemo } from 'react'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import PhotoCell from './PhotoCell'
@@ -29,8 +29,15 @@ const CollagePreview = ({
 }) => {
   const { t } = useTranslation(['collage'])
 
-  // Normalize photo field names for consistent access
-  const normalizedPhotos = normalizePhotosArray(photos)
+  // Normalize photo field names for consistent access (memoized)
+  const normalizedPhotos = useMemo(() => normalizePhotosArray(photos), [photos])
+
+  // Memoize grid style to prevent recalculation on every render
+  const gridStyle = useMemo(() => ({
+    gridTemplateColumns: layout.grid.desktop,
+    gridTemplateRows: layout.grid.desktop,
+    gap: `${layout.gap || 8}px`,
+  }), [layout.grid.desktop, layout.gap])
 
   // Validate photo count matches layout requirements
   const photoCount = normalizedPhotos.length
@@ -52,11 +59,7 @@ const CollagePreview = ({
         {/* Grid layout */}
         <div
           className="grid w-full h-full p-2"
-          style={{
-            gridTemplateColumns: layout.grid.desktop,
-            gridTemplateRows: layout.grid.desktop,
-            gap: `${layout.gap || 8}px`,
-          }}
+          style={gridStyle}
         >
           {layout.slots.map((slot, index) => {
             const photo = normalizedPhotos[index] || null
