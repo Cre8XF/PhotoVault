@@ -22,6 +22,7 @@ import { getFirestore, doc, updateDoc } from 'firebase/firestore'
 import { deletePhoto, setAlbumCover, updateAlbumPhotoCount } from '../firebase'
 import MoveModal from '../components/MoveModal'
 import ConfirmModal from '../components/ConfirmModal'
+import PhotoModal from '../components/PhotoModal'
 
 const SearchPage = ({
   photos = [],
@@ -78,6 +79,9 @@ const SearchPage = ({
   // Bekreftelsesdialog for sletting
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [photoToDelete, setPhotoToDelete] = useState(null)
+
+  // PhotoModal state
+  const [photoModal, setPhotoModal] = useState({ open: false, index: 0 })
 
   // 🔒 SIKRET: Kategorier med array-guard
   const categories = useMemo(() => {
@@ -473,7 +477,7 @@ const SearchPage = ({
 
       {/* 🔒 SIKRET: Resultater med array-guard */}
       <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-        {filteredPhotos.map((photo) => (
+        {filteredPhotos.map((photo, index) => (
           <div
             key={photo.id}
             className="relative group aspect-[4/5] bg-black/10 rounded-lg flex items-center justify-center overflow-hidden"
@@ -481,7 +485,7 @@ const SearchPage = ({
             <img
               src={photo.url}
               alt={photo.name}
-              onClick={() => !editMode && onPhotoClick(photo, filteredPhotos)}
+              onClick={() => !editMode && setPhotoModal({ open: true, index })}
               className="max-h-full max-w-full object-contain cursor-pointer transition-transform duration-300 group-hover:scale-[1.03]"
             />
 
@@ -564,6 +568,22 @@ const SearchPage = ({
         confirmLabel={t('search:confirmDelete.confirm')}
         cancelLabel={t('search:confirmDelete.cancel')}
       />
+
+      {/* PhotoModal */}
+      {photoModal.open && (
+        <PhotoModal
+          photos={filteredPhotos}
+          currentIndex={photoModal.index}
+          onClose={() => setPhotoModal({ open: false, index: 0 })}
+          onToggleFavorite={toggleFavorite}
+          onPhotoEdited={async () => {
+            // Refresh data to show the edited photo
+            if (refreshData) {
+              await refreshData()
+            }
+          }}
+        />
+      )}
     </div>
   )
 }
