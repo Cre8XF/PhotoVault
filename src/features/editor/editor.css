@@ -95,3 +95,22 @@
   max-height: 100vh;
   max-width: 100vw;
 }
+
+/* Mobile touch optimization */
+@media (max-width: 768px) {
+  .editor-sidebar {
+    padding: 1.5rem;
+  }
+
+  .editor-sidebar > * + * {
+    margin-top: 1.5rem;
+  }
+
+  button,
+  .filter-chip,
+  .tool-button,
+  .touch-target {
+    min-height: 48px;
+    min-width: 48px;
+  }
+}

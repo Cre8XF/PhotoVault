@@ -52,12 +52,28 @@ const FilterPanel = ({ onFilterApply, onAdjustmentsChange }) => {
   }
 
   return (
-    <div className="filter-panel bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 space-y-4">
-      {/* Header */}
-      <h3 className="font-bold text-sm flex items-center gap-2">
-        <Palette className="w-4 h-4" />
-        {t('editor:filters.title')}
-      </h3>
+    <>
+      <style>{`
+        .filter-panel input[type="range"] {
+          height: 8px;
+        }
+        .filter-panel input[type="range"]::-webkit-slider-thumb {
+          width: 24px;
+          height: 24px;
+          cursor: pointer;
+        }
+        .filter-panel input[type="range"]::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          cursor: pointer;
+        }
+      `}</style>
+      <div className="filter-panel bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 space-y-4">
+        {/* Header */}
+        <h3 className="font-bold text-sm flex items-center gap-2">
+          <Palette className="w-4 h-4" />
+          {t('editor:filters.title')}
+        </h3>
 
       {/* Filter Presets */}
       <div>
@@ -71,7 +87,7 @@ const FilterPanel = ({ onFilterApply, onAdjustmentsChange }) => {
               <button
                 key={filterKey}
                 onClick={() => handleFilterSelect(filterKey)}
-                className={`px-3 py-2 rounded-lg text-sm transition ${
+                className={`min-h-[44px] min-w-[44px] px-4 py-3 rounded-lg text-sm transition touch-target ${
                   isSelected
                     ? 'bg-purple-600 text-white'
                     : 'bg-gray-700/50 hover:bg-gray-700'
@@ -155,7 +171,7 @@ const FilterPanel = ({ onFilterApply, onAdjustmentsChange }) => {
       {/* Reset Button */}
       <button
         onClick={resetAdjustments}
-        className="w-full px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm transition"
+        className="w-full min-h-[44px] px-4 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm transition touch-target"
       >
         {t('editor:filters.resetAdjustments')}
       </button>
@@ -164,7 +180,8 @@ const FilterPanel = ({ onFilterApply, onAdjustmentsChange }) => {
       <p className="text-xs text-gray-500 text-center">
         {t('editor:filters.help')}
       </p>
-    </div>
+      </div>
+    </>
   )
 }
 
