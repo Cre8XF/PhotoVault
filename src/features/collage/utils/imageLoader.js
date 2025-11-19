@@ -3,13 +3,16 @@
  * Handles CORS, caching, and error handling
  */
 
-// Load single image with CORS handling
+// Load single image
 export const loadImage = (url) => {
   return new Promise((resolve, reject) => {
+    console.log('🖼️ loadImage(): starting...', url)
+
     const img = new Image()
-    img.crossOrigin = 'anonymous'
+    // REMOVED: img.crossOrigin = 'anonymous' - causes Firebase Storage images to fail silently
 
     img.onload = () => {
+      console.log('✅ loadImage(): image loaded')
       console.log('✅ Image loaded:', url.substring(0, 50) + '...')
       resolve(img)
     }
