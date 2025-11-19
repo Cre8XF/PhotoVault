@@ -167,10 +167,14 @@ export const rotateCropArea90 = (cropArea, canvasWidth, canvasHeight) => {
  */
 export const loadImageToCanvas = (imageUrl) => {
   return new Promise((resolve, reject) => {
+    console.log('🖼️ loadImageToCanvas(): starting...', imageUrl)
+
     const img = new Image()
-    img.crossOrigin = 'anonymous'
+    // REMOVED: img.crossOrigin = 'anonymous' - causes Firebase Storage images to fail silently
 
     img.onload = () => {
+      console.log('✅ loadImageToCanvas(): image loaded')
+
       const canvas = document.createElement('canvas')
       canvas.width = img.width
       canvas.height = img.height
@@ -183,7 +187,7 @@ export const loadImageToCanvas = (imageUrl) => {
     }
 
     img.onerror = (error) => {
-      console.error('Failed to load image:', error)
+      console.error('❌ loadImageToCanvas(): Failed to load image:', imageUrl, error)
       reject(error)
     }
 
