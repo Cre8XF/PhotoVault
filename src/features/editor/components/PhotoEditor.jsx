@@ -14,7 +14,7 @@ import RotateTool from './RotateTool'
 import FilterPanel from './FilterPanel'
 import TextTool from './TextTool'
 
-const PhotoEditor = ({ photo, onClose, onSave }) => {
+const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
   const { t } = useTranslation(['editor'])
   const [activeTool, setActiveTool] = useState('rotate') // 'crop' | 'rotate' | 'filters' | 'text'
   const [saving, setSaving] = useState(false)
@@ -41,7 +41,11 @@ const PhotoEditor = ({ photo, onClose, onSave }) => {
     // exportImage,
     // exportDataURL,
     getDimensions,
-  } = usePhotoEditor(photo?.url)
+  } = usePhotoEditor(
+    imageUrl ||
+    photo?.imageUrl ||
+    photo?.url
+  )
 
   const handleCropApply = (cropArea) => {
     const success = crop(cropArea)
