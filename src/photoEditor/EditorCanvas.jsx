@@ -12,7 +12,8 @@ const EditorCanvas = ({
   filters,
   adjustments,
   textLayers,
-  onImageLoad
+  onImageLoad,
+  onError
 }) => {
   const canvasRef = useRef(null)
   const containerRef = useRef(null)
@@ -22,6 +23,7 @@ const EditorCanvas = ({
   const [lastPinchDistance, setLastPinchDistance] = useState(null)
   const [containerReady, setContainerReady] = useState(false)
   const animationFrameRef = useRef(null)
+  const loadTimeoutRef = useRef(null)
 
   // Wait for container to have size
   useEffect(() => {
@@ -41,12 +43,38 @@ const EditorCanvas = ({
 
   // Load image
   useEffect(() => {
-    if (!imageUrl || !containerReady) return
+    if (!containerReady) return
+
+    // Validate imageUrl
+    if (!imageUrl) {
+      console.error('❌ EditorCanvas received EMPTY imageUrl')
+      if (onError) {
+        onError('No image URL provided')
+      }
+      return
+    }
+
+    console.log('🖼️ EditorCanvas loading image:', imageUrl)
+
+    // Set 2-second timeout for image loading
+    loadTimeoutRef.current = setTimeout(() => {
+      console.error('❌ Image load timeout after 2 seconds')
+      if (onError) {
+        onError('Failed to load image (timeout)')
+      }
+    }, 2000)
 
     const img = new Image()
     img.crossOrigin = 'anonymous'
 
     img.onload = () => {
+      // Clear timeout on successful load
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current)
+        loadTimeoutRef.current = null
+      }
+
+      console.log('✅ Image loaded successfully:', img.width, 'x', img.height)
       imageRef.current = img
       if (onImageLoad) {
         onImageLoad({ width: img.width, height: img.height })
@@ -56,10 +84,26 @@ const EditorCanvas = ({
     }
 
     img.onerror = (err) => {
-      console.error('Failed to load image:', err)
+      // Clear timeout on error
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current)
+        loadTimeoutRef.current = null
+      }
+
+      console.error('❌ Failed to load image:', err)
+      if (onError) {
+        onError('Failed to load image')
+      }
     }
 
     img.src = imageUrl
+
+    // Cleanup timeout on unmount
+    return () => {
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current)
+      }
+    }
   }, [imageUrl, containerReady])
 
   // Render canvas with current transform

@@ -77,6 +77,7 @@
     "coverBadge": "Cover",
     "noAlbum": "This photo does not belong to an album",
     "noPhotos": "No photos to display",
+    "noImageUrl": "Could not open editor: No valid image URL found",
     "photoSaveError": "Could not save the edited photo. Please try again.",
     "photoSaved": "Photo saved! You will find the edited photo in the album.",
     "setAsCover": "Set as album cover",

@@ -117,6 +117,23 @@ const PhotoModal = ({
       alert(t('common:grid.videoEditingNotSupported'))
       return
     }
+
+    // Resolve image URL with comprehensive fallback
+    const resolvedUrl =
+      photo.fullUrl ||
+      photo.downloadUrl ||
+      photo.url ||
+      photo.src ||
+      photo.path ||
+      ''
+
+    console.log('📸 Opening editor with URL:', resolvedUrl)
+    if (!resolvedUrl) {
+      console.error('❌ No valid image URL found for photo:', photo)
+      alert(t('common:grid.noImageUrl'))
+      return
+    }
+
     setShowEditor(true)
   }
 
@@ -517,21 +534,33 @@ const PhotoModal = ({
       )}
 
       {/* Photo Editor – ligger over ALT */}
-      {showEditor && (
-        <div
-          className="absolute inset-0 z-[999] flex items-center justify-center bg-black/80 backdrop-blur-md"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <PhotoEditor
-            photo={{
-              ...photo,
-              imageUrl: photo.fullUrl || photo.downloadUrl || photo.url || photo.src || photo.path || ''
-            }}
-            onClose={handleEditorClose}
-            onSave={handleEditSave}
-          />
-        </div>
-      )}
+      {showEditor && (() => {
+        // Resolve image URL with comprehensive fallback
+        const resolvedImageUrl =
+          photo.fullUrl ||
+          photo.downloadUrl ||
+          photo.url ||
+          photo.src ||
+          photo.path ||
+          ''
+
+        return (
+          <div
+            className="absolute inset-0 z-[999] flex items-center justify-center bg-black/80 backdrop-blur-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <PhotoEditor
+              photo={{
+                ...photo,
+                imageUrl: resolvedImageUrl
+              }}
+              imageUrl={resolvedImageUrl}
+              onClose={handleEditorClose}
+              onSave={handleEditSave}
+            />
+          </div>
+        )
+      })()}
     </div>
   )
 }
