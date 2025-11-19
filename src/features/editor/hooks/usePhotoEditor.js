@@ -5,7 +5,12 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { loadImageToCanvas, rotateCanvas90, applyCrop, canvasToBlob } from '../utils/cropUtils'
+import {
+  loadImageToCanvas,
+  rotateCanvas90,
+  applyCrop,
+  canvasToBlob,
+} from '../utils/cropUtils'
 import { applyFilter, applyAdjustments } from '../utils/filterUtils'
 import { applyTextLayers } from '../utils/textUtils'
 
@@ -17,7 +22,7 @@ export const usePhotoEditor = (initialImageUrl) => {
   const [currentAdjustments, setCurrentAdjustments] = useState({
     brightness: 0,
     contrast: 1.0,
-    saturation: 1.0
+    saturation: 1.0,
   })
   const [textLayers, setTextLayers] = useState([]) // Array of text layers
   const [currentTextLayer, setCurrentTextLayer] = useState(null) // Currently editing text layer
@@ -136,7 +141,10 @@ export const usePhotoEditor = (initialImageUrl) => {
       return false
     }
 
-    const adjustedCanvas = applyAdjustments(currentCanvasRef.current, adjustments)
+    const adjustedCanvas = applyAdjustments(
+      currentCanvasRef.current,
+      adjustments
+    )
 
     if (adjustedCanvas) {
       currentCanvasRef.current = adjustedCanvas
@@ -201,10 +209,13 @@ export const usePhotoEditor = (initialImageUrl) => {
   /**
    * Select a text layer for editing
    */
-  const selectTextLayer = useCallback((layerId) => {
-    const layer = textLayers.find((l) => l.id === layerId)
-    setCurrentTextLayer(layer || null)
-  }, [textLayers])
+  const selectTextLayer = useCallback(
+    (layerId) => {
+      const layer = textLayers.find((l) => l.id === layerId)
+      setCurrentTextLayer(layer || null)
+    },
+    [textLayers]
+  )
 
   /**
    * Clear all text layers
@@ -231,7 +242,7 @@ export const usePhotoEditor = (initialImageUrl) => {
       setCurrentAdjustments({
         brightness: 0,
         contrast: 1.0,
-        saturation: 1.0
+        saturation: 1.0,
       })
       setTextLayers([])
       setCurrentTextLayer(null)
@@ -270,16 +281,19 @@ export const usePhotoEditor = (initialImageUrl) => {
   /**
    * Export current canvas as blob
    */
-  const exportImage = useCallback(async (type = 'image/jpeg', quality = 0.95) => {
-    if (!currentCanvasRef.current) {
-      throw new Error('No image to export')
-    }
+  const exportImage = useCallback(
+    async (type = 'image/jpeg', quality = 0.95) => {
+      if (!currentCanvasRef.current) {
+        throw new Error('No image to export')
+      }
 
-    const blob = await canvasToBlob(currentCanvasRef.current, type, quality)
-    console.log('📤 Image exported:', blob.size, 'bytes')
+      const blob = await canvasToBlob(currentCanvasRef.current, type, quality)
+      console.log('📤 Image exported:', blob.size, 'bytes')
 
-    return blob
-  }, [])
+      return blob
+    },
+    []
+  )
 
   /**
    * Export current canvas as data URL
@@ -305,7 +319,7 @@ export const usePhotoEditor = (initialImageUrl) => {
 
     return {
       width: currentCanvasRef.current.width,
-      height: currentCanvasRef.current.height
+      height: currentCanvasRef.current.height,
     }
   }, [])
 
@@ -338,6 +352,6 @@ export const usePhotoEditor = (initialImageUrl) => {
     exportImage,
     exportDataURL,
     getDimensions,
-    currentCanvas: currentCanvasRef.current
+    currentCanvas: currentCanvasRef.current,
   }
 }
