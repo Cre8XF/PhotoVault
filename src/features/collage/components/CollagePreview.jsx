@@ -6,6 +6,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import PhotoCell from './PhotoCell'
+import { normalizePhotosArray } from '../../../utils/photoHelpers'
 
 /**
  * CollagePreview Component
@@ -28,8 +29,11 @@ const CollagePreview = ({
 }) => {
   const { t } = useTranslation(['collage'])
 
+  // Normalize photo field names for consistent access
+  const normalizedPhotos = normalizePhotosArray(photos)
+
   // Validate photo count matches layout requirements
-  const photoCount = photos.length
+  const photoCount = normalizedPhotos.length
   const minPhotos = layout.minPhotos
   const maxPhotos = layout.maxPhotos
 
@@ -55,7 +59,7 @@ const CollagePreview = ({
           }}
         >
           {layout.slots.map((slot, index) => {
-            const photo = photos[index] || null
+            const photo = normalizedPhotos[index] || null
             const transform =
               photo && transforms[photo.id] ? transforms[photo.id] : null
 

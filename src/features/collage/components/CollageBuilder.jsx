@@ -2,7 +2,7 @@
 // COMPONENT: CollageBuilder.jsx - Main Collage Builder V3
 // Complete refactor using ImagePickerV3, LayoutSelector, CollagePreview, etc.
 // ============================================================================
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
@@ -10,6 +10,7 @@ import useStore from '../../../state/store'
 import { usePhotoData } from '../../../hooks/usePhotoData'
 import { useCollageData } from '../../../hooks/useCollageData'
 import { LAYOUTS_V3 } from '../layouts/layouts_v3'
+import { normalizePhotosArray } from '../../../utils/photoHelpers'
 
 // V3 Components
 import StepIndicator from './StepIndicator'
@@ -39,6 +40,9 @@ const CollageBuilder = () => {
   const { photos } = usePhotoData()
   const { getCollage } = useCollageData()
   const setCurrentPage = useStore((state) => state.setCurrentPage)
+
+  // Normalize photos for consistent field access across all collage components
+  const normalizedPhotos = useMemo(() => normalizePhotosArray(photos), [photos])
 
   // Determine if editing
   const isEditMode = Boolean(collageId)
@@ -74,14 +78,14 @@ const CollageBuilder = () => {
           return
         }
 
-        // Find matching photos
+        // Find matching photos (use normalized photos)
         const collagePhotos = collageData.photoIds
-          .map(photoId => photos.find(p => p.id === photoId))
+          .map(photoId => normalizedPhotos.find(p => p.id === photoId))
           .filter(Boolean)
 
         console.log('🖼️ Loaded collage photos:', collagePhotos)
         console.log('📊 Photo IDs from collage:', collageData.photoIds)
-        console.log('📚 Available photos:', photos.length)
+        console.log('📚 Available photos:', normalizedPhotos.length)
 
         if (collagePhotos.length === 0) {
           console.error('No photos found for collage')
@@ -113,7 +117,7 @@ const CollageBuilder = () => {
     }
 
     loadCollageData()
-  }, [isEditMode, collageId, getCollage, photos, navigate])
+  }, [isEditMode, collageId, getCollage, normalizedPhotos, navigate])
 
   // Handle step completion
   const handleStepComplete = (stepNumber) => {
@@ -202,7 +206,7 @@ const CollageBuilder = () => {
         {/* Step 1: Photo Selection */}
         {step === 1 && (
           <ImagePickerV3
-            photos={photos}
+            photos={normalizedPhotos}
             onSelect={handlePhotoSelection}
             maxPhotos={6}
             initialSelection={selectedPhotos}
