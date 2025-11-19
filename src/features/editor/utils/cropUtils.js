@@ -176,7 +176,7 @@ export const loadImageToCanvas = (imageUrl) => {
       console.log('✅ loadImageToCanvas(): image loaded')
       console.log(
         "🟢 cropUtils: image loaded:",
-        url,
+        imageUrl,
         img.width,
         img.height
       );
