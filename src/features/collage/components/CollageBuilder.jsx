@@ -66,6 +66,8 @@ const CollageBuilder = () => {
       try {
         // Load collage data
         const collageData = await getCollage(collageId)
+        console.log('🧩 Loaded collage in editor:', collageData)
+
         if (!collageData) {
           console.error('Collage not found')
           navigate('/albums')
@@ -76,6 +78,10 @@ const CollageBuilder = () => {
         const collagePhotos = collageData.photoIds
           .map(photoId => photos.find(p => p.id === photoId))
           .filter(Boolean)
+
+        console.log('🖼️ Loaded collage photos:', collagePhotos)
+        console.log('📊 Photo IDs from collage:', collageData.photoIds)
+        console.log('📚 Available photos:', photos.length)
 
         if (collagePhotos.length === 0) {
           console.error('No photos found for collage')
@@ -97,7 +103,7 @@ const CollageBuilder = () => {
         setTransforms(collageData.transforms || {})
         setCollageTitle(collageData.title || '')
 
-        console.log('✅ Loaded collage for editing:', collageData)
+        console.log('✅ Loaded collage for editing - Photos:', collagePhotos.length, 'Layout:', layout.name)
       } catch (error) {
         console.error('Failed to load collage:', error)
         navigate('/albums')
@@ -269,10 +275,13 @@ const CollageBuilder = () => {
             photos={selectedPhotos}
             layout={selectedLayout}
             transforms={transforms}
+            collageId={isEditMode ? collageId : null}
+            initialTitle={collageTitle}
             onComplete={(savedCollageId) => {
+              console.log('✅ Collage saved/updated:', savedCollageId)
               handleStepComplete(4)
-              // ALWAYS exit collage mode
-              setCurrentPage('albums')
+              // Navigate to collage view page
+              navigate(`/collage/${savedCollageId}`)
             }}
             onBack={() => setStep(3)}
           />
