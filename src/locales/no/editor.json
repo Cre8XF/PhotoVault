@@ -8,9 +8,16 @@
     "apply": "Bruk",
     "cancel": "Avbryt",
     "reset": "Tilbakestill",
+    "resetAll": "Tilbakestill alle",
     "addText": "Legg til tekst",
     "undo": "Angre",
     "redo": "Gjør om"
+  },
+  "tabs": {
+    "crop": "Beskjær",
+    "adjust": "Juster",
+    "filters": "Filtre",
+    "more": "Mer"
   },
   "loading": {
     "image": "Laster bilde...",
@@ -81,7 +88,8 @@
     "highlights": "Høylys",
     "temperature": "Temperatur",
     "reset": "Tilbakestill",
-    "resetAll": "Tilbakestill alle"
+    "resetAll": "Tilbakestill alle",
+    "help": "Dra glidebrytere for å justere lysstyrke, kontrast og metning"
   },
   "text": {
     "title": "Tekst Overlegg",
@@ -109,6 +117,8 @@
     "blur": "Uskarphet",
     "outline": "Kontur",
     "width": "Bredde",
-    "removeLayer": "Fjern tekstlag"
+    "removeLayer": "Fjern tekstlag",
+    "dragToMove": "Dra teksten på lerretet for å endre posisjon",
+    "layersCount": "{{count}} tekstlag"
   }
 }
