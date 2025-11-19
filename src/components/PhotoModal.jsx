@@ -87,8 +87,15 @@ const PhotoModal = ({
     }
   }, [])
 
-  const handleTouchStart = (e) => (startX.current = e.touches[0].clientX)
+  const handleTouchStart = (e) => {
+    // Skip hvis editor er åpen
+    if (showEditor) return
+    startX.current = e.touches[0].clientX
+  }
+
   const handleTouchEnd = (e) => {
+    // Skip hvis editor er åpen
+    if (showEditor) return
     const diff = e.changedTouches[0].clientX - startX.current
     if (diff > 50) prevPhoto()
     if (diff < -50) nextPhoto()
