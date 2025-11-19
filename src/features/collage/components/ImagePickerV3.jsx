@@ -10,6 +10,7 @@ import FilterTabs from './FilterTabs'
 import SearchBar from './SearchBar'
 import SelectionCounter from './SelectionCounter'
 import PhotoGridGrouped from './PhotoGridGrouped'
+import { normalizePhotosArray } from '../../../utils/photoHelpers'
 
 /**
  * ImagePickerV3 Component
@@ -32,6 +33,9 @@ const ImagePickerV3 = ({
 }) => {
   const { t } = useTranslation(['collage'])
 
+  // Normalize all photos for consistent field access
+  const normalizedPhotos = useMemo(() => normalizePhotosArray(photos), [photos])
+
   // State
   const [selectedPhotos, setSelectedPhotos] = useState(initialSelection)
   const [activeFilter, setActiveFilter] = useState('all')
@@ -40,47 +44,47 @@ const ImagePickerV3 = ({
   // Calculate photo counts per filter
   const photoCounts = useMemo(() => {
     return {
-      all: photos.length,
-      favorites: photos.filter(p => p.isFavorite || p.favorite).length,
-      screenshots: photos.filter(p => p.isScreenshot).length,
-      recent: photos.filter(p => {
+      all: normalizedPhotos.length,
+      favorites: normalizedPhotos.filter(p => p.isFavorite || p.favorite).length,
+      screenshots: normalizedPhotos.filter(p => p.isScreenshot).length,
+      recent: normalizedPhotos.filter(p => {
         const uploadDate = new Date(p.uploadedAt || p.createdAt)
         const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000)
         return uploadDate.getTime() >= thirtyDaysAgo
       }).length,
-      ai: photos.filter(p => Array.isArray(p.aiTags) && p.aiTags.length > 0).length
+      ai: normalizedPhotos.filter(p => Array.isArray(p.aiTags) && p.aiTags.length > 0).length
     }
-  }, [photos])
+  }, [normalizedPhotos])
 
   // Filter photos by active filter
   const filteredByCategory = useMemo(() => {
-    let result = photos
+    let result = normalizedPhotos
 
     switch (activeFilter) {
       case 'favorites':
-        result = photos.filter(p => p.isFavorite || p.favorite)
+        result = normalizedPhotos.filter(p => p.isFavorite || p.favorite)
         break
       case 'screenshots':
-        result = photos.filter(p => p.isScreenshot)
+        result = normalizedPhotos.filter(p => p.isScreenshot)
         break
       case 'recent':
-        result = photos.filter(p => {
+        result = normalizedPhotos.filter(p => {
           const uploadDate = new Date(p.uploadedAt || p.createdAt)
           const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000)
           return uploadDate.getTime() >= thirtyDaysAgo
         })
         break
       case 'ai':
-        result = photos.filter(p => Array.isArray(p.aiTags) && p.aiTags.length > 0)
+        result = normalizedPhotos.filter(p => Array.isArray(p.aiTags) && p.aiTags.length > 0)
         break
       case 'all':
       default:
-        result = photos
+        result = normalizedPhotos
         break
     }
 
     return result
-  }, [photos, activeFilter])
+  }, [normalizedPhotos, activeFilter])
 
   // Filter by search query
   const filteredPhotos = useMemo(() => {

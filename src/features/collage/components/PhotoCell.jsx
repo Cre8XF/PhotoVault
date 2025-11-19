@@ -6,6 +6,7 @@ import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { ImageIcon } from 'lucide-react'
+import { normalizePhotoFields } from '../../../utils/photoHelpers'
 
 /**
  * PhotoCell Component
@@ -21,6 +22,9 @@ const PhotoCell = ({ photo, slot, transform, onClick, isLoading = false }) => {
   const { t } = useTranslation(['collage'])
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
+
+  // Normalize photo field names at component level
+  const normalizedPhoto = normalizePhotoFields(photo)
 
   // Extract transform values with defaults
   const scale = transform?.scale || 1
@@ -41,30 +45,30 @@ const PhotoCell = ({ photo, slot, transform, onClick, isLoading = false }) => {
 
   // Handle cell click
   const handleClick = () => {
-    if (onClick && photo && !isLoading) {
-      onClick(photo.id)
+    if (onClick && normalizedPhoto && !isLoading) {
+      onClick(normalizedPhoto.id)
     }
   }
 
   // Grid area from slot configuration
   const gridArea = slot?.area || 'auto'
 
-  // ✅ FIKSET: Bruker korrekte Firestore feltnavn
-  const photoUrl = photo?.thumbnailUrl || photo?.url || ''
+  // Use normalized field names for image URL
+  const photoUrl = normalizedPhoto?.thumbnailUrl || normalizedPhoto?.url || ''
 
   return (
     <div
       style={{ gridArea }}
       className={`relative overflow-hidden bg-black/20 ${
-        onClick && photo && !isLoading ? 'cursor-pointer' : ''
+        onClick && normalizedPhoto && !isLoading ? 'cursor-pointer' : ''
       } group transition-all duration-300`}
       onClick={handleClick}
     >
       {/* Photo image */}
-      {photo && !imageError && (
+      {normalizedPhoto && !imageError && (
         <img
           src={photoUrl}
-          alt={photo.filename || photo.name || t('collage:photo.untitled')}
+          alt={normalizedPhoto.filename || normalizedPhoto.name || t('collage:photo.untitled')}
           onLoad={handleImageLoad}
           onError={handleImageError}
           className={`w-full h-full transition-all duration-200 ${
@@ -97,14 +101,14 @@ const PhotoCell = ({ photo, slot, transform, onClick, isLoading = false }) => {
       )}
 
       {/* Empty slot placeholder */}
-      {!photo && !isLoading && (
+      {!normalizedPhoto && !isLoading && (
         <div className="absolute inset-0 flex items-center justify-center border-2 border-dashed border-white/20">
           <ImageIcon className="w-8 h-8 opacity-20" />
         </div>
       )}
 
       {/* Click hint (on hover) */}
-      {onClick && photo && !isLoading && (
+      {onClick && normalizedPhoto && !isLoading && (
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
           <p className="text-xs text-white bg-black/60 px-3 py-1 rounded-full">
             {t('collage:hints.clickToAdjust')}
@@ -113,7 +117,7 @@ const PhotoCell = ({ photo, slot, transform, onClick, isLoading = false }) => {
       )}
 
       {/* Transform indicator (shows zoom %) */}
-      {photo &&
+      {normalizedPhoto &&
         transform &&
         (transform.scale !== 1 ||
           transform.translateX !== 0 ||
