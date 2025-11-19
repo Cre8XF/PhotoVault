@@ -174,6 +174,12 @@ export const loadImageToCanvas = (imageUrl) => {
 
     img.onload = () => {
       console.log('✅ loadImageToCanvas(): image loaded')
+      console.log(
+        "🟢 cropUtils: image loaded:",
+        imageUrl,
+        img.width,
+        img.height
+      );
 
       const canvas = document.createElement('canvas')
       canvas.width = img.width

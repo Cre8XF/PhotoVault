@@ -15,6 +15,7 @@ import { applyFilter, applyAdjustments } from '../utils/filterUtils'
 import { applyTextLayers } from '../utils/textUtils'
 
 export const usePhotoEditor = (initialImageUrl) => {
+  console.log("🎯 usePhotoEditor initialImageUrl:", initialImageUrl);
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [rotation, setRotation] = useState(0) // 0, 90, 180, 270
@@ -41,17 +42,24 @@ export const usePhotoEditor = (initialImageUrl) => {
       return
     }
 
+    console.log("⏳ usePhotoEditor: starting load of:", initialImageUrl);
     setLoading(true)
     setError(null)
 
     loadImageToCanvas(initialImageUrl)
       .then((canvas) => {
+        console.log(
+          "🟢 usePhotoEditor: loadImageToCanvas resolved:",
+          canvas?.width,
+          canvas?.height
+        );
         originalCanvasRef.current = canvas
         currentCanvasRef.current = canvas
         setLoading(false)
         console.log('✅ Image loaded in editor')
       })
       .catch((err) => {
+        console.log("🟥 usePhotoEditor: loadImageToCanvas rejected:", err);
         console.error('Failed to load image:', err)
         setError('Failed to load image')
         setLoading(false)
