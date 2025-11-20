@@ -61,6 +61,11 @@ const DraggableText = ({
   onSelect,
 }) => {
   const textRef = useRef(null)
+  const dragStateRef = useRef({
+    startX: 0,
+    startY: 0,
+    hasMoved: false,
+  })
 
   useEffect(() => {
     const element = textRef.current
@@ -71,6 +76,14 @@ const DraggableText = ({
       console.log('📱 Touch start on layer:', layer.id)
       e.preventDefault()
       e.stopPropagation()
+
+      // Store start position
+      dragStateRef.current = {
+        startX: e.touches[0].clientX,
+        startY: e.touches[0].clientY,
+        hasMoved: false,
+      }
+
       onDragStart(e.touches[0].clientX, e.touches[0].clientY, layer.id)
     }
 
@@ -78,16 +91,53 @@ const DraggableText = ({
       if (!isDragging) return
       e.preventDefault()
       e.stopPropagation()
+
+      // Calculate distance moved
+      const deltaX = Math.abs(
+        e.touches[0].clientX - dragStateRef.current.startX
+      )
+      const deltaY = Math.abs(
+        e.touches[0].clientY - dragStateRef.current.startY
+      )
+
+      // If moved more than 10px, it's a drag (not a tap)
+      if (deltaX > 10 || deltaY > 10) {
+        dragStateRef.current.hasMoved = true
+      }
+
       onDragMove(e.touches[0].clientX, e.touches[0].clientY, layer.id)
     }
 
     const handleTouchEnd = (e) => {
       if (!isDragging) return
-      console.log('📱 Touch end on layer:', layer.id)
+      console.log(
+        '📱 Touch end on layer:',
+        layer.id,
+        'hasMoved:',
+        dragStateRef.current.hasMoved
+      )
       e.preventDefault()
       e.stopPropagation()
+
       const touch = e.changedTouches[0]
+
+      // If it was a drag (not a tap), prevent keyboard
+      if (dragStateRef.current.hasMoved) {
+        console.log('🚫 Preventing focus - was a drag')
+        // Blur any active element to ensure keyboard doesn't show
+        if (document.activeElement) {
+          document.activeElement.blur()
+        }
+      } else {
+        console.log('✅ Allowing focus - was a tap')
+        // It was a tap, allow selection
+        onSelect(layer)
+      }
+
       onDragEnd(touch.clientX, touch.clientY, layer.id)
+
+      // Reset
+      dragStateRef.current.hasMoved = false
     }
 
     // Add listeners with passive: false
@@ -101,7 +151,7 @@ const DraggableText = ({
       element.removeEventListener('touchmove', handleTouchMove)
       element.removeEventListener('touchend', handleTouchEnd)
     }
-  }, [layer.id, isDragging, onDragStart, onDragMove, onDragEnd])
+  }, [layer.id, isDragging, onDragStart, onDragMove, onDragEnd, onSelect])
 
   return (
     <div
@@ -110,25 +160,41 @@ const DraggableText = ({
       onMouseDown={(e) => {
         e.preventDefault()
         e.stopPropagation()
+
+        dragStateRef.current = {
+          startX: e.clientX,
+          startY: e.clientY,
+          hasMoved: false,
+        }
+
         onDragStart(e.clientX, e.clientY, layer.id)
       }}
       onMouseMove={(e) => {
         if (!isDragging) return
         e.preventDefault()
         e.stopPropagation()
+
+        const deltaX = Math.abs(e.clientX - dragStateRef.current.startX)
+        const deltaY = Math.abs(e.clientY - dragStateRef.current.startY)
+
+        if (deltaX > 5 || deltaY > 5) {
+          dragStateRef.current.hasMoved = true
+        }
+
         onDragMove(e.clientX, e.clientY, layer.id)
       }}
       onMouseUp={(e) => {
         if (!isDragging) return
         e.preventDefault()
         e.stopPropagation()
-        onDragEnd(e.clientX, e.clientY, layer.id)
-      }}
-      onClick={(e) => {
-        if (!isDragging) {
-          e.stopPropagation()
+
+        // If was just a click (not drag), select layer
+        if (!dragStateRef.current.hasMoved) {
           onSelect(layer)
         }
+
+        onDragEnd(e.clientX, e.clientY, layer.id)
+        dragStateRef.current.hasMoved = false
       }}
       className={`
         absolute select-none transition-opacity
@@ -139,6 +205,7 @@ const DraggableText = ({
             : ''
         }
       `}
+      tabIndex={-1}
       style={{
         left: `${layer.x * canvasRect.width}px`,
         top: `${layer.y * canvasRect.height}px`,
@@ -164,6 +231,7 @@ const DraggableText = ({
         userSelect: 'none',
         WebkitUserSelect: 'none',
         WebkitTouchCallout: 'none',
+        outline: 'none', // Remove focus outline
       }}
     >
       {layer.text}
@@ -190,6 +258,13 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
     currentX: 0,
     currentY: 0,
   })
+
+  // Blur any focused element when changing tabs to prevent keyboard issues
+  useEffect(() => {
+    if (document.activeElement && document.activeElement !== document.body) {
+      document.activeElement.blur()
+    }
+  }, [activeTab])
 
   // usePhotoEditor hook
   const {
