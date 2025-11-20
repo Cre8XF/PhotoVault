@@ -1,12 +1,12 @@
 /**
  * Photo Editor V2 - Mobile-First with Bottom Tabs
- * FIXED: Touch-compatible text dragging for mobile devices
+ * FIXED v2: Proper touch support for real mobile devices
  *
  * PhotoEditor Component - Main photo editing interface
- * Refactored to mobile-first layout with bottom navigation tabs
+ * Uses explicit event listeners with passive: false for touch support
  */
 
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import {
   ArrowLeft,
   Download,
@@ -46,6 +46,132 @@ const TabButton = ({ active, onClick, icon: Icon, label }) => (
 )
 
 /**
+ * DraggableText Component
+ * Separate component for each text layer with explicit touch handling
+ */
+const DraggableText = ({
+  layer,
+  canvasRect,
+  canvasWidth,
+  isActive,
+  isDragging,
+  onDragStart,
+  onDragMove,
+  onDragEnd,
+  onSelect,
+}) => {
+  const textRef = useRef(null)
+
+  useEffect(() => {
+    const element = textRef.current
+    if (!element) return
+
+    // Touch handlers with passive: false to allow preventDefault
+    const handleTouchStart = (e) => {
+      console.log('📱 Touch start on layer:', layer.id)
+      e.preventDefault()
+      e.stopPropagation()
+      onDragStart(e.touches[0].clientX, e.touches[0].clientY, layer.id)
+    }
+
+    const handleTouchMove = (e) => {
+      if (!isDragging) return
+      e.preventDefault()
+      e.stopPropagation()
+      onDragMove(e.touches[0].clientX, e.touches[0].clientY, layer.id)
+    }
+
+    const handleTouchEnd = (e) => {
+      if (!isDragging) return
+      console.log('📱 Touch end on layer:', layer.id)
+      e.preventDefault()
+      e.stopPropagation()
+      const touch = e.changedTouches[0]
+      onDragEnd(touch.clientX, touch.clientY, layer.id)
+    }
+
+    // Add listeners with passive: false
+    element.addEventListener('touchstart', handleTouchStart, { passive: false })
+    element.addEventListener('touchmove', handleTouchMove, { passive: false })
+    element.addEventListener('touchend', handleTouchEnd, { passive: false })
+
+    // Cleanup
+    return () => {
+      element.removeEventListener('touchstart', handleTouchStart)
+      element.removeEventListener('touchmove', handleTouchMove)
+      element.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [layer.id, isDragging, onDragStart, onDragMove, onDragEnd])
+
+  return (
+    <div
+      ref={textRef}
+      // Mouse events for desktop
+      onMouseDown={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        onDragStart(e.clientX, e.clientY, layer.id)
+      }}
+      onMouseMove={(e) => {
+        if (!isDragging) return
+        e.preventDefault()
+        e.stopPropagation()
+        onDragMove(e.clientX, e.clientY, layer.id)
+      }}
+      onMouseUp={(e) => {
+        if (!isDragging) return
+        e.preventDefault()
+        e.stopPropagation()
+        onDragEnd(e.clientX, e.clientY, layer.id)
+      }}
+      onClick={(e) => {
+        if (!isDragging) {
+          e.stopPropagation()
+          onSelect(layer)
+        }
+      }}
+      className={`
+        absolute select-none transition-opacity
+        ${isDragging ? 'opacity-70 z-50' : 'opacity-100 z-40'}
+        ${
+          isActive
+            ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-black/50'
+            : ''
+        }
+      `}
+      style={{
+        left: `${layer.x * canvasRect.width}px`,
+        top: `${layer.y * canvasRect.height}px`,
+        fontSize: `${
+          (layer.fontSize || 48) * (canvasRect.width / (canvasWidth || 1))
+        }px`,
+        fontFamily: layer.fontFamily || 'Arial',
+        color: layer.color || '#ffffff',
+        fontWeight: layer.bold ? 'bold' : 'normal',
+        fontStyle: layer.italic ? 'italic' : 'normal',
+        textAlign: layer.align || 'center',
+        transform: 'translate(-50%, -50%)',
+        textShadow: layer.shadow?.enabled
+          ? `${layer.shadow.offsetX ?? 2}px ${layer.shadow.offsetY ?? 2}px ${
+              layer.shadow.blur ?? 4
+            }px ${layer.shadow.color || 'rgba(0,0,0,0.5)'}`
+          : 'none',
+        WebkitTextStroke: layer.stroke?.enabled
+          ? `${layer.stroke.width || 2}px ${layer.stroke.color || '#000000'}`
+          : 'none',
+        cursor: isDragging ? 'grabbing' : 'grab',
+        touchAction: 'none',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        WebkitTouchCallout: 'none',
+      }}
+    >
+      {layer.text}
+    </div>
+  )
+}
+
+/**
  * PhotoEditor Component
  */
 const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
@@ -54,10 +180,16 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
   const [saving, setSaving] = useState(false)
   const [cropArea, setCropArea] = useState(null)
 
-  // Touch/Drag state
+  // Drag state
   const [draggedTextId, setDraggedTextId] = useState(null)
-  const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 })
-  const canvasContainerRef = useRef(null)
+  const dragStateRef = useRef({
+    isDragging: false,
+    layerId: null,
+    startX: 0,
+    startY: 0,
+    currentX: 0,
+    currentY: 0,
+  })
 
   // usePhotoEditor hook
   const {
@@ -100,18 +232,34 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
   )
 
   /**
-   * Get relative position from mouse/touch event
+   * Get relative position from client coordinates
    */
   const getRelativePosition = useCallback(
     (clientX, clientY) => {
       const canvas = canvasRef.current
-      if (!canvas) return null
+      if (!canvas) {
+        console.error('❌ No canvas ref')
+        return null
+      }
 
       const rect = canvas.getBoundingClientRect()
       const x = (clientX - rect.left) / rect.width
       const y = (clientY - rect.top) / rect.height
 
-      // Constrain to canvas bounds
+      console.log('📍 Position calculation:', {
+        clientX,
+        clientY,
+        rect: {
+          left: rect.left,
+          top: rect.top,
+          width: rect.width,
+          height: rect.height,
+        },
+        x,
+        y,
+      })
+
+      // Constrain to canvas bounds (0-1)
       const constrainedX = Math.max(0, Math.min(1, x))
       const constrainedY = Math.max(0, Math.min(1, y))
 
@@ -121,41 +269,47 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
   )
 
   /**
-   * Handle text drag/touch start
+   * Handle drag start
    */
-  const handleTextDragStart = useCallback((e, layerId, isTouch = false) => {
-    console.log('🖱️ Drag/Touch started for layer:', layerId)
+  const handleDragStart = useCallback((clientX, clientY, layerId) => {
+    console.log('🎯 Drag START:', { layerId, clientX, clientY })
 
-    e.preventDefault()
-    e.stopPropagation()
+    dragStateRef.current = {
+      isDragging: true,
+      layerId,
+      startX: clientX,
+      startY: clientY,
+      currentX: clientX,
+      currentY: clientY,
+    }
 
     setDraggedTextId(layerId)
-
-    const clientX = isTouch ? e.touches[0].clientX : e.clientX
-    const clientY = isTouch ? e.touches[0].clientY : e.clientY
-
-    setDragStartPos({ x: clientX, y: clientY })
   }, [])
 
   /**
-   * Handle text drag/touch move
+   * Handle drag move
    */
-  const handleTextDragMove = useCallback(
-    (e, layerId, isTouch = false) => {
-      if (draggedTextId !== layerId) return
+  const handleDragMove = useCallback(
+    (clientX, clientY, layerId) => {
+      if (
+        !dragStateRef.current.isDragging ||
+        dragStateRef.current.layerId !== layerId
+      ) {
+        return
+      }
 
-      e.preventDefault()
-      e.stopPropagation()
+      console.log('🎯 Drag MOVE:', { layerId, clientX, clientY })
 
-      const clientX = isTouch ? e.touches[0].clientX : e.clientX
-      const clientY = isTouch ? e.touches[0].clientY : e.clientY
+      dragStateRef.current.currentX = clientX
+      dragStateRef.current.currentY = clientY
 
       const pos = getRelativePosition(clientX, clientY)
       if (!pos) return
 
-      // Find layer and update position in real-time
+      // Find and update layer
       const layer = textLayers.find((l) => l.id === layerId)
       if (layer) {
+        console.log('✅ Updating layer position:', pos)
         updateTextLayer({
           ...layer,
           x: pos.x,
@@ -163,43 +317,57 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
         })
       }
     },
-    [draggedTextId, textLayers, updateTextLayer, getRelativePosition]
+    [textLayers, updateTextLayer, getRelativePosition]
   )
 
   /**
-   * Handle text drag/touch end
+   * Handle drag end
    */
-  const handleTextDragEnd = useCallback(
-    (e, layerId, isTouch = false) => {
-      console.log('🖱️ Drag/Touch ended for layer:', layerId)
+  const handleDragEnd = useCallback(
+    (clientX, clientY, layerId) => {
+      console.log('🎯 Drag END:', { layerId, clientX, clientY })
 
-      e.preventDefault()
-      e.stopPropagation()
-
-      const clientX = isTouch ? e.changedTouches[0].clientX : e.clientX
-      const clientY = isTouch ? e.changedTouches[0].clientY : e.clientY
-
-      const pos = getRelativePosition(clientX, clientY)
-      if (!pos) {
-        setDraggedTextId(null)
+      if (!dragStateRef.current.isDragging) {
         return
       }
 
-      // Final position update
-      const layer = textLayers.find((l) => l.id === layerId)
-      if (layer) {
-        console.log('✅ Final position:', pos)
-        updateTextLayer({
-          ...layer,
-          x: pos.x,
-          y: pos.y,
-        })
+      const pos = getRelativePosition(clientX, clientY)
+      if (pos) {
+        const layer = textLayers.find((l) => l.id === layerId)
+        if (layer) {
+          console.log('✅ Final position:', pos)
+          updateTextLayer({
+            ...layer,
+            x: pos.x,
+            y: pos.y,
+          })
+        }
+      }
+
+      // Reset drag state
+      dragStateRef.current = {
+        isDragging: false,
+        layerId: null,
+        startX: 0,
+        startY: 0,
+        currentX: 0,
+        currentY: 0,
       }
 
       setDraggedTextId(null)
-      setDragStartPos({ x: 0, y: 0 })
     },
     [textLayers, updateTextLayer, getRelativePosition]
+  )
+
+  /**
+   * Handle text layer selection
+   */
+  const handleSelectLayer = useCallback(
+    (layer) => {
+      console.log('🎯 Selected layer:', layer.id)
+      updateTextLayer(layer)
+    },
+    [updateTextLayer]
   )
 
   /**
@@ -398,10 +566,7 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
         )}
 
         {!loading && !error && (
-          <div
-            ref={canvasContainerRef}
-            className="absolute inset-0 flex items-center justify-center p-4"
-          >
+          <div className="absolute inset-0 flex items-center justify-center p-4">
             {/* Canvas */}
             <div className="relative max-w-full max-h-full">
               <canvas
@@ -432,9 +597,10 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
                 </div>
               )}
 
-              {/* Text overlays - draggable/touchable when More tab is active */}
+              {/* Text overlays - draggable when More tab is active */}
               {activeTab === 'more' &&
                 textLayers &&
+                canvasRef.current &&
                 textLayers.map((layer) => {
                   const canvas = canvasRef.current
                   if (!canvas) return null
@@ -442,78 +608,18 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
                   const rect = canvas.getBoundingClientRect()
 
                   return (
-                    <div
+                    <DraggableText
                       key={layer.id}
-                      // Mouse events
-                      onMouseDown={(e) =>
-                        handleTextDragStart(e, layer.id, false)
-                      }
-                      onMouseMove={(e) =>
-                        handleTextDragMove(e, layer.id, false)
-                      }
-                      onMouseUp={(e) => handleTextDragEnd(e, layer.id, false)}
-                      onMouseLeave={(e) => {
-                        if (draggedTextId === layer.id) {
-                          handleTextDragEnd(e, layer.id, false)
-                        }
-                      }}
-                      // Touch events
-                      onTouchStart={(e) =>
-                        handleTextDragStart(e, layer.id, true)
-                      }
-                      onTouchMove={(e) => handleTextDragMove(e, layer.id, true)}
-                      onTouchEnd={(e) => handleTextDragEnd(e, layer.id, true)}
-                      className={`
-                      absolute select-none transition-opacity
-                      ${
-                        draggedTextId === layer.id
-                          ? 'cursor-grabbing opacity-70'
-                          : 'cursor-grab opacity-100'
-                      }
-                      ${
-                        currentTextLayer?.id === layer.id
-                          ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-black/50'
-                          : ''
-                      }
-                    `}
-                      style={{
-                        left: `${layer.x * rect.width}px`,
-                        top: `${layer.y * rect.height}px`,
-                        fontSize: `${
-                          (layer.fontSize || 48) *
-                          (rect.width / (canvas.width || 1))
-                        }px`,
-                        fontFamily: layer.fontFamily || 'Arial',
-                        color: layer.color || '#ffffff',
-                        fontWeight: layer.bold ? 'bold' : 'normal',
-                        fontStyle: layer.italic ? 'italic' : 'normal',
-                        textAlign: layer.align || 'center',
-                        transform: 'translate(-50%, -50%)',
-                        textShadow: layer.shadow?.enabled
-                          ? `${layer.shadow.offsetX ?? 2}px ${
-                              layer.shadow.offsetY ?? 2
-                            }px ${layer.shadow.blur ?? 4}px ${
-                              layer.shadow.color || 'rgba(0,0,0,0.5)'
-                            }`
-                          : 'none',
-                        WebkitTextStroke: layer.stroke?.enabled
-                          ? `${layer.stroke.width || 2}px ${
-                              layer.stroke.color || '#000000'
-                            }`
-                          : 'none',
-                        pointerEvents: 'all',
-                        touchAction: 'none', // Prevents scrolling while dragging
-                        userSelect: 'none',
-                        WebkitUserSelect: 'none',
-                      }}
-                      onClick={() => {
-                        if (!draggedTextId) {
-                          updateTextLayer(layer)
-                        }
-                      }}
-                    >
-                      {layer.text}
-                    </div>
+                      layer={layer}
+                      canvasRect={rect}
+                      canvasWidth={canvas.width}
+                      isActive={currentTextLayer?.id === layer.id}
+                      isDragging={draggedTextId === layer.id}
+                      onDragStart={handleDragStart}
+                      onDragMove={handleDragMove}
+                      onDragEnd={handleDragEnd}
+                      onSelect={handleSelectLayer}
+                    />
                   )
                 })}
             </div>
