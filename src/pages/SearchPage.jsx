@@ -610,16 +610,12 @@ const SearchPage = ({
       )}
 
       {/* Modals */}
-      {isMoveOpen && (
-        <MoveModal
-          photos={selectedPhotos.map((id) =>
-            safePhotos.find((p) => p.id === id)
-          )}
-          albums={safeAlbums}
-          onClose={() => setMoveOpen(false)}
-          onMove={handleMovePhotos}
-        />
-      )}
+      <MoveModal
+        isOpen={isMoveOpen}
+        onClose={() => setMoveOpen(false)}
+        albums={safeAlbums}
+        onConfirm={handleMovePhotos}
+      />
 
       {confirmOpen && (
         <ConfirmModal
