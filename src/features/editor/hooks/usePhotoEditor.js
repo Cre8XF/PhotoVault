@@ -256,22 +256,42 @@ export const usePhotoEditor = (initialImageUrl) => {
    * Reset to original image
    */
   const reset = useCallback(() => {
-    if (originalCanvasRef.current) {
-      currentCanvasRef.current = originalCanvasRef.current
-      setRotation(0)
-      setCurrentFilter('none')
-      setCurrentAdjustments({
-        brightness: 0,
-        contrast: 1.0,
-        saturation: 1.0,
-      })
-      setTextLayers([])
-      setCurrentTextLayer(null)
-      console.log('↩️ Reset to original')
+    console.log('🔄 Reset called')
 
-      if (canvasRef.current) {
-        renderCurrentCanvas()
-      }
+    if (!originalCanvasRef.current) {
+      console.error('❌ No original canvas to reset to!')
+      return
+    }
+
+    // Reset current canvas to original
+    currentCanvasRef.current = originalCanvasRef.current
+
+    // Reset all state
+    setRotation(0)
+    setCurrentFilter('none')
+    setCurrentAdjustments({
+      brightness: 0,
+      contrast: 1.0,
+      saturation: 1.0,
+    })
+    setTextLayers([])
+    setCurrentTextLayer(null)
+
+    console.log('✅ State reset to original')
+
+    // CRITICAL: Explicitly update display canvas
+    if (canvasRef.current) {
+      const displayCanvas = canvasRef.current
+      const sourceCanvas = originalCanvasRef.current
+
+      displayCanvas.width = sourceCanvas.width
+      displayCanvas.height = sourceCanvas.height
+
+      const ctx = displayCanvas.getContext('2d')
+      ctx.clearRect(0, 0, displayCanvas.width, displayCanvas.height)
+      ctx.drawImage(sourceCanvas, 0, 0)
+
+      console.log('✅ Display canvas reset to original')
     }
   }, [])
 
