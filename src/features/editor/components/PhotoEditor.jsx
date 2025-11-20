@@ -91,30 +91,44 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
    * Handle text drag
    */
   const handleTextDragStart = useCallback((e, layerId) => {
+    console.log('🖱️ Drag started for layer:', layerId)
     setDraggedTextId(layerId)
     e.dataTransfer.effectAllowed = 'move'
   }, [])
 
   const handleTextDragEnd = useCallback((e, layerId) => {
+    console.log('🖱️ Drag ended for layer:', layerId)
+    console.log('🖱️ Drop position:', e.clientX, e.clientY)
+
     const canvas = canvasRef.current
-    if (!canvas) return
+    if (!canvas) {
+      console.error('❌ No canvas ref for drag')
+      return
+    }
 
     const rect = canvas.getBoundingClientRect()
     const x = (e.clientX - rect.left) / rect.width
     const y = (e.clientY - rect.top) / rect.height
 
+    console.log('🖱️ Calculated relative position:', { x, y })
+
     // Constrain to canvas bounds
     const constrainedX = Math.max(0, Math.min(1, x))
     const constrainedY = Math.max(0, Math.min(1, y))
 
+    console.log('🖱️ Constrained position:', { x: constrainedX, y: constrainedY })
+
     // Find layer and update position
     const layer = textLayers.find(l => l.id === layerId)
     if (layer) {
+      console.log('✅ Found layer to update:', layer.id)
       updateTextLayer({
         ...layer,
         x: constrainedX,
         y: constrainedY
       })
+    } else {
+      console.error('❌ Layer not found:', layerId)
     }
 
     setDraggedTextId(null)
