@@ -1,5 +1,5 @@
 // ============================================================================
-// PAGE: SearchPage.jsx – v5.6 MED ARRAY-GUARDS FIKSET
+// PAGE: SearchPage.jsx – v5.7 MED MULTISELECT + VELG ALLE
 // ============================================================================
 import React, { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -17,6 +17,8 @@ import {
   Trash2,
   Edit3,
   Check,
+  CheckSquare,
+  Square,
 } from 'lucide-react'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
 import { deletePhoto, setAlbumCover, updateAlbumPhotoCount } from '../firebase'
@@ -156,6 +158,41 @@ const SearchPage = ({
     return Object.values(activeFilters).filter(Boolean).length
   }, [activeFilters])
 
+  // --- Toggle photo selection ---
+  const togglePhotoSelection = (photoId) => {
+    setSelectedPhotos((prev) => {
+      if (prev.includes(photoId)) {
+        return prev.filter((id) => id !== photoId)
+      } else {
+        return [...prev, photoId]
+      }
+    })
+  }
+
+  // --- Select all / deselect all ---
+  const selectAllPhotos = () => {
+    const allIds = filteredPhotos.map((p) => p.id)
+    setSelectedPhotos(allIds)
+  }
+
+  const deselectAllPhotos = () => {
+    setSelectedPhotos([])
+  }
+
+  // --- Clear filters ---
+  const clearFilters = () => {
+    setActiveFilters({
+      favorites: false,
+      withFaces: false,
+      withTags: false,
+      aiAnalyzed: false,
+      dateRange: null,
+      albumId: null,
+      category: null,
+    })
+    setSearchQuery('')
+  }
+
   // --- Sletting ---
   const requestDelete = (photo) => {
     setPhotoToDelete(photo)
@@ -189,62 +226,45 @@ const SearchPage = ({
     try {
       const db = getFirestore()
       const safeSelected = Array.isArray(selectedPhotos) ? selectedPhotos : []
-      const selectedIds = safeSelected.map((sp) =>
-        typeof sp === 'string' ? sp : sp?.id || sp?.docId
-      )
 
-      const ops = selectedIds.map(async (photoId) => {
-        const ref = doc(db, 'photos', photoId)
-        await updateDoc(ref, { albumId: targetAlbumId })
-      })
-      await Promise.all(ops)
+      for (const id of safeSelected) {
+        const docRef = doc(db, 'photos', id)
+        await updateDoc(docRef, { albumId: targetAlbumId })
+      }
 
-      const targetBefore = safePhotos.filter(
-        (p) => p.albumId === targetAlbumId
-      ).length
-      await updateAlbumPhotoCount(
-        targetAlbumId,
-        targetBefore + selectedIds.length
-      )
+      await updateAlbumPhotoCount(targetAlbumId)
+      setSelectedPhotos([])
+      setMoveOpen(false)
+      setEditMode(false)
 
       if (refreshData) await refreshData()
-      setSelectedPhotos([])
-    } catch (e) {
-      console.error('Move error:', e)
-      alert(
-        t(
-          'search:errors.couldNotMove',
-          'Kunne ikke flytte bildene. Prøv igjen.'
-        )
-      )
+    } catch (error) {
+      console.error('Move error:', error)
+      alert(t('search:errors.couldNotMove', 'Kunne ikke flytte bilder.'))
     }
   }
 
-  // --- Nullstill filtre ---
-  const clearFilters = () => {
-    setActiveFilters({
-      favorites: false,
-      withFaces: false,
-      withTags: false,
-      aiAnalyzed: false,
-      dateRange: null,
-      albumId: null,
-      category: null,
-    })
-    setSearchQuery('')
-  }
-
   return (
-    <div className="min-h-screen p-6 md:p-10 pb-24 animate-fade-in">
+    <div className="container-premium max-w-7xl mx-auto p-4">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
-        <h1 className="text-3xl font-bold">{t('search:title')}</h1>
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-3">
+          <SearchIcon className="w-7 h-7" />
+          {t('search:title')}
+        </h1>
+
+        <div className="flex gap-2">
           <button
-            onClick={() => setEditMode(!editMode)}
-            title={t('search:clickToManage')}
+            onClick={() => {
+              setEditMode(!editMode)
+              if (editMode) {
+                setSelectedPhotos([])
+              }
+            }}
             className={`ripple-effect px-4 py-2 rounded-xl flex items-center gap-2 transition ${
-              editMode ? 'btn-edit-active' : 'bg-white/10 hover:bg-white/20'
+              editMode
+                ? 'bg-purple-600 hover:bg-purple-700'
+                : 'bg-white/10 hover:bg-white/20'
             }`}
           >
             {editMode && (
@@ -268,17 +288,61 @@ const SearchPage = ({
               </span>
             )}
           </button>
-
-          {selectedPhotos.length > 0 && (
-            <button
-              onClick={() => setMoveOpen(true)}
-              className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
-            >
-              <Move size={18} /> {t('search:move')}
-            </button>
-          )}
         </div>
       </div>
+
+      {/* Edit mode action bar */}
+      {editMode && (
+        <div className="glass rounded-2xl p-3 mb-4 flex flex-wrap gap-2 items-center justify-between">
+          <div className="flex gap-2 items-center">
+            <span className="text-sm opacity-70">
+              {selectedPhotos.length} {t('search:selected')}
+            </span>
+            <button
+              onClick={selectAllPhotos}
+              className="ripple-effect px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 flex items-center gap-2 text-sm"
+            >
+              <CheckSquare size={16} />
+              {t('search:selectAll')}
+            </button>
+            {selectedPhotos.length > 0 && (
+              <button
+                onClick={deselectAllPhotos}
+                className="ripple-effect px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 flex items-center gap-2 text-sm"
+              >
+                <Square size={16} />
+                {t('search:deselectAll')}
+              </button>
+            )}
+          </div>
+
+          {selectedPhotos.length > 0 && (
+            <div className="flex gap-2">
+              <button
+                onClick={() => setMoveOpen(true)}
+                className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
+              >
+                <Move size={18} /> {t('search:move')}
+              </button>
+              <button
+                onClick={() => {
+                  if (selectedPhotos.length === 1) {
+                    const photo = safePhotos.find(
+                      (p) => p.id === selectedPhotos[0]
+                    )
+                    if (photo) requestDelete(photo)
+                  } else {
+                    alert(t('search:errors.multiDeleteNotSupported'))
+                  }
+                }}
+                className="ripple-effect px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 flex items-center gap-2"
+              >
+                <Trash2 size={18} /> {t('search:delete')}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Søkefelt */}
       <div className="glass rounded-2xl p-4 mb-4">
@@ -371,19 +435,17 @@ const SearchPage = ({
                     ? 'noAlbum'
                     : activeFilters.albumId || ''
                 }
-                onChange={(e) => {
-                  const value = e.target.value
-                  if (value === 'noAlbum') {
-                    setActiveFilters((f) => ({ ...f, albumId: 'noAlbum' }))
-                  } else {
-                    setActiveFilters((f) => ({ ...f, albumId: value || null }))
-                  }
-                }}
-                className="flex-1 bg-transparent border border-white/10 rounded-lg px-3 py-2"
+                onChange={(e) =>
+                  setActiveFilters((f) => ({
+                    ...f,
+                    albumId: e.target.value || null,
+                  }))
+                }
+                className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 outline-none"
               >
                 <option value="">{t('search:filterOptions.allAlbums')}</option>
                 <option value="noAlbum">
-                  {t('search:filterOptions.noAlbum', 'Uten album')}
+                  {t('search:filterOptions.noAlbum')}
                 </option>
                 {safeAlbums.map((a) => (
                   <option key={a.id} value={a.id}>
@@ -404,7 +466,7 @@ const SearchPage = ({
                     category: e.target.value || null,
                   }))
                 }
-                className="flex-1 bg-transparent border border-white/10 rounded-lg px-3 py-2"
+                className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 outline-none"
               >
                 <option value="">
                   {t('search:filterOptions.allCategories')}
@@ -428,30 +490,29 @@ const SearchPage = ({
                     dateRange: e.target.value || null,
                   }))
                 }
-                className="flex-1 bg-transparent border border-white/10 rounded-lg px-3 py-2"
+                className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 outline-none"
               >
                 <option value="">{t('search:filterOptions.allDates')}</option>
-                <option value="today">{t('search:dateRanges.today')}</option>
-                <option value="week">{t('search:dateRanges.week')}</option>
-                <option value="month">{t('search:dateRanges.month')}</option>
-                <option value="year">{t('search:dateRanges.year')}</option>
+                <option value="today">{t('search:filterOptions.today')}</option>
+                <option value="week">{t('search:filterOptions.week')}</option>
+                <option value="month">{t('search:filterOptions.month')}</option>
+                <option value="year">{t('search:filterOptions.year')}</option>
               </select>
             </label>
           </div>
 
-          {/* 🔒 SIKRET: Populære AI-tags med array-guard */}
+          {/* Populære AI-tagger */}
           {popularTags.length > 0 && (
             <div>
-              <div className="text-sm opacity-70 mb-2">
-                {t('search:popularTags')}
-              </div>
+              <p className="text-sm opacity-70 mb-2">
+                {t('search:popularAITags')}:
+              </p>
               <div className="flex flex-wrap gap-2">
                 {popularTags.map(({ tag, count }) => (
                   <button
                     key={tag}
                     onClick={() => setSearchQuery(tag)}
-                    className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-sm"
-                    title={t('search:hits', { count })}
+                    className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-sm"
                   >
                     #{tag}
                   </button>
@@ -482,6 +543,29 @@ const SearchPage = ({
             key={photo.id}
             className="relative group aspect-[4/5] bg-black/10 rounded-lg flex items-center justify-center overflow-hidden"
           >
+            {/* Checkbox overlay in edit mode */}
+            {editMode && (
+              <div
+                className="absolute inset-0 z-10 cursor-pointer"
+                onClick={() => togglePhotoSelection(photo.id)}
+              >
+                <div
+                  className={`absolute top-2 right-2 w-6 h-6 rounded border-2 flex items-center justify-center transition ${
+                    selectedPhotos.includes(photo.id)
+                      ? 'bg-purple-600 border-purple-600'
+                      : 'bg-black/60 border-white/60'
+                  }`}
+                >
+                  {selectedPhotos.includes(photo.id) && (
+                    <Check className="w-4 h-4 text-white" />
+                  )}
+                </div>
+                {selectedPhotos.includes(photo.id) && (
+                  <div className="absolute inset-0 bg-purple-600/20 border-2 border-purple-600 rounded-lg" />
+                )}
+              </div>
+            )}
+
             <img
               src={photo.url}
               alt={photo.name}
@@ -513,75 +597,48 @@ const SearchPage = ({
                 />
               </button>
             )}
-
-            {editMode && (
-              <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition">
-                <button
-                  onClick={() => handleSetCover(photo)}
-                  className="bg-black/60 hover:bg-yellow-500 text-white p-1.5 rounded-full"
-                  title={t('search:setCover')}
-                >
-                  <Star className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => requestDelete(photo)}
-                  className="bg-black/60 hover:bg-red-600 text-white p-1.5 rounded-full"
-                  title={t('search:deletePhoto')}
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
           </div>
         ))}
       </div>
 
-      {/* Tom tilstand */}
+      {/* No results */}
       {filteredPhotos.length === 0 && (
-        <div className="text-center py-20 text-gray-400">
-          <SearchIcon className="w-16 h-16 mx-auto mb-4 opacity-50" />
+        <div className="text-center py-12 opacity-60">
+          <SearchIcon className="w-12 h-12 mx-auto mb-3" />
           <p>{t('search:noResults')}</p>
-          <button
-            onClick={clearFilters}
-            className="mt-4 ripple-effect px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition"
-          >
-            {t('search:resetFilters')}
-          </button>
         </div>
       )}
 
-      {/* Flytt-modal */}
-      <MoveModal
-        isOpen={isMoveOpen}
-        onClose={() => setMoveOpen(false)}
-        albums={safeAlbums}
-        onConfirm={handleMovePhotos}
-      />
+      {/* Modals */}
+      {isMoveOpen && (
+        <MoveModal
+          photos={selectedPhotos.map((id) =>
+            safePhotos.find((p) => p.id === id)
+          )}
+          albums={safeAlbums}
+          onClose={() => setMoveOpen(false)}
+          onMove={handleMovePhotos}
+        />
+      )}
 
-      {/* Bekreft sletting */}
-      <ConfirmModal
-        isOpen={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
-        onConfirm={handleConfirmDelete}
-        title={t('search:confirmDelete.title')}
-        message={t('search:confirmDelete.message')}
-        confirmLabel={t('search:confirmDelete.confirm')}
-        cancelLabel={t('search:confirmDelete.cancel')}
-      />
+      {confirmOpen && (
+        <ConfirmModal
+          title={t('search:confirmDelete')}
+          message={t('search:confirmDeleteMessage')}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => {
+            setConfirmOpen(false)
+            setPhotoToDelete(null)
+          }}
+        />
+      )}
 
-      {/* PhotoModal */}
       {photoModal.open && (
         <PhotoModal
           photos={filteredPhotos}
-          currentIndex={photoModal.index}
+          initialIndex={photoModal.index}
           onClose={() => setPhotoModal({ open: false, index: 0 })}
-          onToggleFavorite={toggleFavorite}
-          onPhotoEdited={async () => {
-            // Refresh data to show the edited photo
-            if (refreshData) {
-              await refreshData()
-            }
-          }}
+          toggleFavorite={toggleFavorite}
         />
       )}
     </div>
