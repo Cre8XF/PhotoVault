@@ -201,11 +201,30 @@ export const usePhotoEditor = (initialImageUrl) => {
    * Update a text layer
    */
   const updateTextLayer = useCallback((updatedLayer) => {
-    setTextLayers((prev) =>
-      prev.map((layer) => (layer.id === updatedLayer.id ? updatedLayer : layer))
-    )
+    console.log('📝 usePhotoEditor.updateTextLayer called')
+    console.log('📝 Updated layer ID:', updatedLayer?.id)
+    console.log('📝 Updated layer:', updatedLayer)
+
+    setTextLayers((prev) => {
+      console.log('📝 Current layers:', prev)
+      console.log('📝 Current layers count:', prev.length)
+
+      const newLayers = prev.map((layer) => {
+        if (layer.id === updatedLayer.id) {
+          console.log(`✅ Found matching layer ${layer.id}, REPLACING with updated layer`)
+          return updatedLayer
+        }
+        return layer
+      })
+
+      console.log('📝 New layers after update:', newLayers)
+      console.log('📝 New layers count:', newLayers.length)
+
+      return newLayers
+    })
+
     setCurrentTextLayer(updatedLayer)
-    console.log('✍️ Text layer updated:', updatedLayer.id)
+    console.log('✅ Text layer updated successfully:', updatedLayer.id)
 
     // Trigger re-render
     if (canvasRef.current) {

@@ -41,10 +41,22 @@ const MorePanel = ({
 
   // Handle property change
   const handlePropertyChange = (property, value) => {
+    console.log('🔤 MorePanel.handlePropertyChange:', property, '=', value)
+    console.log('🔤 Current localLayer.id:', localLayer?.id)
+    console.log('🔤 Current localLayer:', localLayer)
+
     const updated = updateTextLayer(localLayer, property, value)
+
+    console.log('🔤 Updated layer.id:', updated?.id)
+    console.log('🔤 Updated layer:', updated)
+
     setLocalLayer(updated)
+
     if (onUpdateText) {
+      console.log('✅ Calling onUpdateText with layer:', updated.id)
       onUpdateText(updated)
+    } else {
+      console.error('❌ onUpdateText callback is not defined!')
     }
   }
 
