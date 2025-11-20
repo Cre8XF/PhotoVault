@@ -1,14 +1,27 @@
 /**
- * Photo Editor V2 - MorePanel Component
+ * Photo Editor V4 - MorePanel Component FIX
  *
- * Text editing tools and additional options
- * Text position is now handled by drag-and-drop overlay in PhotoEditor
+ * Text editing tools with keyboard prevention on sliders
  */
 
 import React, { useState, useEffect } from 'react'
-import { Type, Plus, Trash2, RotateCcw, Bold, Italic, AlignLeft, AlignCenter, AlignRight } from 'lucide-react'
+import {
+  Type,
+  Plus,
+  Trash2,
+  RotateCcw,
+  Bold,
+  Italic,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { FONT_FAMILIES, createTextLayer, updateTextLayer } from '../utils/textUtils'
+import {
+  FONT_FAMILIES,
+  createTextLayer,
+  updateTextLayer,
+} from '../utils/textUtils'
 
 const MorePanel = ({
   textLayers,
@@ -16,18 +29,13 @@ const MorePanel = ({
   onAddText,
   onUpdateText,
   onRemoveText,
-  onReset
+  onReset,
 }) => {
   const { t } = useTranslation(['editor'])
-  const [localLayer, setLocalLayer] = useState(currentLayer || createTextLayer())
+  const [localLayer, setLocalLayer] = useState(
+    currentLayer || createTextLayer()
+  )
   const [showAddForm, setShowAddForm] = useState(false)
-
-  // DEBUG: Log component render
-  console.log('🎨 MorePanel RENDER')
-  console.log('🎨 Props:', { textLayers, currentLayer, onAddText, onUpdateText, onRemoveText, onReset })
-  console.log('🎨 State:', { localLayer, showAddForm })
-  console.log('🎨 textLayers count:', textLayers?.length || 0)
-  console.log('🎨 currentLayer:', currentLayer)
 
   // Update local state when currentLayer changes
   useEffect(() => {
@@ -48,38 +56,39 @@ const MorePanel = ({
 
   // Handle property change
   const handlePropertyChange = (property, value) => {
-    console.log('🔤 MorePanel.handlePropertyChange:', property, '=', value)
-    console.log('🔤 Current localLayer.id:', localLayer?.id)
-    console.log('🔤 Current localLayer:', localLayer)
-
     const updated = updateTextLayer(localLayer, property, value)
-
-    console.log('🔤 Updated layer.id:', updated?.id)
-    console.log('🔤 Updated layer:', updated)
-
     setLocalLayer(updated)
-
     if (onUpdateText) {
-      console.log('✅ Calling onUpdateText with layer:', updated.id)
       onUpdateText(updated)
-    } else {
-      console.error('❌ onUpdateText callback is not defined!')
     }
+  }
+
+  // Handle slider change with keyboard prevention
+  const handleSliderChange = (property, value) => {
+    const updated = updateTextLayer(localLayer, property, value)
+    setLocalLayer(updated)
+    if (onUpdateText) {
+      onUpdateText(updated)
+    }
+
+    // Prevent keyboard from showing after slider interaction
+    setTimeout(() => {
+      if (
+        document.activeElement &&
+        document.activeElement.tagName === 'INPUT'
+      ) {
+        document.activeElement.blur()
+      }
+    }, 10)
   }
 
   // Handle add new text layer
   const handleAddLayer = () => {
-    console.log('➕ handleAddLayer called')
     const newLayer = createTextLayer()
-    console.log('➕ New layer created:', newLayer)
     setLocalLayer(newLayer)
     setShowAddForm(true)
-    console.log('➕ showAddForm set to true')
     if (onAddText) {
-      console.log('➕ Calling onAddText with new layer')
       onAddText(newLayer)
-    } else {
-      console.error('❌ onAddText callback is not defined!')
     }
   }
 
@@ -137,16 +146,16 @@ const MorePanel = ({
             className="w-full min-h-[44px] py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition flex items-center justify-center gap-2 touch-target"
           >
             <Plus className="w-5 h-5" />
-            {t('editor:buttons.addText')}
+            {t('editor:text.addText')}
           </button>
         )}
 
-        {/* Text Editor Form */}
+        {/* Text Layer Form */}
         {showAddForm && (
           <div className="space-y-4">
             {/* Text Input */}
             <div>
-              <label className="block text-xs font-medium mb-2 text-gray-400">
+              <label className="block text-xs font-medium text-gray-400 mb-2">
                 {t('editor:text.textLabel')}
               </label>
               <textarea
@@ -160,85 +169,109 @@ const MorePanel = ({
 
             {/* Font Family */}
             <div>
-              <label className="block text-xs font-medium mb-2 text-gray-400">
+              <label className="block text-xs font-medium text-gray-400 mb-2">
                 {t('editor:text.fontFamily')}
               </label>
               <select
                 value={localLayer.fontFamily}
-                onChange={(e) => handlePropertyChange('fontFamily', e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 touch-target"
+                onChange={(e) =>
+                  handlePropertyChange('fontFamily', e.target.value)
+                }
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                {FONT_FAMILIES.map(font => (
-                  <option key={font.value} value={font.value} className="bg-gray-900">
+                {FONT_FAMILIES.map((font) => (
+                  <option
+                    key={font.value}
+                    value={font.value}
+                    style={{ fontFamily: font.value }}
+                  >
                     {font.label}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Font Size */}
+            {/* Font Size Slider - WITH KEYBOARD PREVENTION */}
             <div>
-              <label className="block text-xs font-medium mb-2 text-gray-400">
+              <label className="block text-xs font-medium text-gray-400 mb-2">
                 {t('editor:text.fontSize')}: {localLayer.fontSize}px
               </label>
               <input
                 type="range"
                 min="12"
                 max="120"
-                step="2"
+                step="1"
                 value={localLayer.fontSize}
-                onChange={(e) => handlePropertyChange('fontSize', parseInt(e.target.value))}
-                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                onChange={(e) =>
+                  handleSliderChange('fontSize', parseInt(e.target.value))
+                }
+                onTouchEnd={() => {
+                  // Extra protection for touch devices
+                  setTimeout(() => {
+                    if (document.activeElement) {
+                      document.activeElement.blur()
+                    }
+                  }, 50)
+                }}
+                className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer slider"
               />
             </div>
 
-            {/* Color */}
+            {/* Color Picker */}
             <div>
-              <label className="block text-xs font-medium mb-2 text-gray-400">
+              <label className="block text-xs font-medium text-gray-400 mb-2">
                 {t('editor:text.color')}
               </label>
               <div className="flex gap-2">
                 <input
                   type="color"
                   value={localLayer.color}
-                  onChange={(e) => handlePropertyChange('color', e.target.value)}
-                  className="w-12 h-10 rounded cursor-pointer bg-gray-700 border border-white/10 touch-target"
+                  onChange={(e) =>
+                    handlePropertyChange('color', e.target.value)
+                  }
+                  className="w-12 h-10 rounded cursor-pointer bg-white/5 border border-white/10"
                 />
                 <input
                   type="text"
                   value={localLayer.color}
-                  onChange={(e) => handlePropertyChange('color', e.target.value)}
+                  onChange={(e) =>
+                    handlePropertyChange('color', e.target.value)
+                  }
                   className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="#ffffff"
                 />
               </div>
             </div>
 
-            {/* Text Style */}
+            {/* Style Buttons */}
             <div>
-              <label className="block text-xs font-medium mb-2 text-gray-400">
+              <label className="block text-xs font-medium text-gray-400 mb-2">
                 {t('editor:text.style')}
               </label>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => handlePropertyChange('bold', !localLayer.bold)}
                   className={`
-                    flex-1 min-h-[44px] p-3 rounded-lg border transition touch-target
-                    ${localLayer.bold
-                      ? 'bg-purple-600 border-purple-500 text-white'
-                      : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
+                    min-h-[44px] p-3 rounded-lg border transition touch-target
+                    ${
+                      localLayer.bold
+                        ? 'bg-purple-600 border-purple-500 text-white'
+                        : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
                     }
                   `}
                 >
                   <Bold className="w-5 h-5 mx-auto" />
                 </button>
                 <button
-                  onClick={() => handlePropertyChange('italic', !localLayer.italic)}
+                  onClick={() =>
+                    handlePropertyChange('italic', !localLayer.italic)
+                  }
                   className={`
-                    flex-1 min-h-[44px] p-3 rounded-lg border transition touch-target
-                    ${localLayer.italic
-                      ? 'bg-purple-600 border-purple-500 text-white'
-                      : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
+                    min-h-[44px] p-3 rounded-lg border transition touch-target
+                    ${
+                      localLayer.italic
+                        ? 'bg-purple-600 border-purple-500 text-white'
+                        : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
                     }
                   `}
                 >
@@ -247,9 +280,9 @@ const MorePanel = ({
               </div>
             </div>
 
-            {/* Text Alignment */}
+            {/* Alignment */}
             <div>
-              <label className="block text-xs font-medium mb-2 text-gray-400">
+              <label className="block text-xs font-medium text-gray-400 mb-2">
                 {t('editor:text.alignment')}
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -257,9 +290,10 @@ const MorePanel = ({
                   onClick={() => handlePropertyChange('align', 'left')}
                   className={`
                     min-h-[44px] p-3 rounded-lg border transition touch-target
-                    ${localLayer.align === 'left'
-                      ? 'bg-purple-600 border-purple-500 text-white'
-                      : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
+                    ${
+                      localLayer.align === 'left'
+                        ? 'bg-purple-600 border-purple-500 text-white'
+                        : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
                     }
                   `}
                 >
@@ -269,9 +303,10 @@ const MorePanel = ({
                   onClick={() => handlePropertyChange('align', 'center')}
                   className={`
                     min-h-[44px] p-3 rounded-lg border transition touch-target
-                    ${localLayer.align === 'center'
-                      ? 'bg-purple-600 border-purple-500 text-white'
-                      : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
+                    ${
+                      localLayer.align === 'center'
+                        ? 'bg-purple-600 border-purple-500 text-white'
+                        : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
                     }
                   `}
                 >
@@ -281,9 +316,10 @@ const MorePanel = ({
                   onClick={() => handlePropertyChange('align', 'right')}
                   className={`
                     min-h-[44px] p-3 rounded-lg border transition touch-target
-                    ${localLayer.align === 'right'
-                      ? 'bg-purple-600 border-purple-500 text-white'
-                      : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
+                    ${
+                      localLayer.align === 'right'
+                        ? 'bg-purple-600 border-purple-500 text-white'
+                        : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
                     }
                   `}
                 >
@@ -301,8 +337,10 @@ const MorePanel = ({
                 <input
                   type="checkbox"
                   checked={localLayer.shadow?.enabled || false}
-                  onChange={(e) => handlePropertyChange('shadow.enabled', e.target.checked)}
-                  className="w-5 h-5 rounded bg-gray-700 border-gray-600 text-purple-600 focus:ring-purple-500 cursor-pointer"
+                  onChange={(e) =>
+                    handlePropertyChange('shadow.enabled', e.target.checked)
+                  }
+                  className="w-5 h-5 rounded bg-white/5 border-white/10 text-purple-600 focus:ring-purple-500 cursor-pointer"
                 />
               </div>
             </div>
@@ -316,8 +354,10 @@ const MorePanel = ({
                 <input
                   type="checkbox"
                   checked={localLayer.stroke?.enabled || false}
-                  onChange={(e) => handlePropertyChange('stroke.enabled', e.target.checked)}
-                  className="w-5 h-5 rounded bg-gray-700 border-gray-600 text-purple-600 focus:ring-purple-500 cursor-pointer"
+                  onChange={(e) =>
+                    handlePropertyChange('stroke.enabled', e.target.checked)
+                  }
+                  className="w-5 h-5 rounded bg-white/5 border-white/10 text-purple-600 focus:ring-purple-500 cursor-pointer"
                 />
               </div>
             </div>
