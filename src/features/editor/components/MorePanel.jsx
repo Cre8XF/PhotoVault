@@ -22,6 +22,13 @@ const MorePanel = ({
   const [localLayer, setLocalLayer] = useState(currentLayer || createTextLayer())
   const [showAddForm, setShowAddForm] = useState(false)
 
+  // DEBUG: Log component render
+  console.log('🎨 MorePanel RENDER')
+  console.log('🎨 Props:', { textLayers, currentLayer, onAddText, onUpdateText, onRemoveText, onReset })
+  console.log('🎨 State:', { localLayer, showAddForm })
+  console.log('🎨 textLayers count:', textLayers?.length || 0)
+  console.log('🎨 currentLayer:', currentLayer)
+
   // Update local state when currentLayer changes
   useEffect(() => {
     if (currentLayer) {
@@ -62,11 +69,17 @@ const MorePanel = ({
 
   // Handle add new text layer
   const handleAddLayer = () => {
+    console.log('➕ handleAddLayer called')
     const newLayer = createTextLayer()
+    console.log('➕ New layer created:', newLayer)
     setLocalLayer(newLayer)
     setShowAddForm(true)
+    console.log('➕ showAddForm set to true')
     if (onAddText) {
+      console.log('➕ Calling onAddText with new layer')
       onAddText(newLayer)
+    } else {
+      console.error('❌ onAddText callback is not defined!')
     }
   }
 
