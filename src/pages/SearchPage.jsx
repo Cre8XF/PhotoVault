@@ -1,7 +1,7 @@
 // ============================================================================
 // PAGE: SearchPage.jsx – v5.7 MED MULTISELECT + VELG ALLE
 // ============================================================================
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Search as SearchIcon,
@@ -84,6 +84,13 @@ const SearchPage = ({
 
   // PhotoModal state
   const [photoModal, setPhotoModal] = useState({ open: false, index: 0 })
+
+  // Debug: Track isMoveOpen changes
+  useEffect(() => {
+    console.log('📊 isMoveOpen changed:', isMoveOpen)
+    console.log('📊 Selected photos:', selectedPhotos.length)
+    console.log('📊 Albums available:', safeAlbums.length)
+  }, [isMoveOpen, selectedPhotos.length, safeAlbums.length])
 
   // 🔒 SIKRET: Kategorier med array-guard
   const categories = useMemo(() => {
@@ -319,8 +326,25 @@ const SearchPage = ({
           {selectedPhotos.length > 0 && (
             <div className="flex gap-2">
               <button
-                onClick={() => setMoveOpen(true)}
-                className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  console.log('🔵 Move button clicked!', {
+                    selectedCount: selectedPhotos.length,
+                    albumsCount: safeAlbums.length,
+                  })
+                  // Temporary debug alert
+                  alert(`Move clicked! ${selectedPhotos.length} photos selected`)
+                  setMoveOpen(true)
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  console.log('📱 Move button touched!')
+                  setMoveOpen(true)
+                }}
+                className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center gap-2 touch-target"
+                style={{ touchAction: 'manipulation' }}
               >
                 <Move size={18} /> {t('search:move')}
               </button>
@@ -335,7 +359,7 @@ const SearchPage = ({
                     alert(t('search:errors.multiDeleteNotSupported'))
                   }
                 }}
-                className="ripple-effect px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 flex items-center gap-2"
+                className="ripple-effect px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 flex items-center gap-2 touch-target"
               >
                 <Trash2 size={18} /> {t('search:delete')}
               </button>
