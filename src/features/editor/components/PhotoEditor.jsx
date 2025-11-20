@@ -431,7 +431,15 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
 
           {activeTab === 'adjust' && (
             <AdjustPanel
-              onAdjust={applyAdjustments}
+              onAdjust={(adjustments) => {
+                console.log('📸 PhotoEditor received adjustments:', adjustments)
+
+                if (applyAdjustments) {
+                  applyAdjustments(adjustments)
+                } else {
+                  console.error('❌ applyAdjustments not defined!')
+                }
+              }}
             />
           )}
 
