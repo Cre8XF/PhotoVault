@@ -1,12 +1,20 @@
 /**
  * Photo Editor V2 - Mobile-First with Bottom Tabs
+ * FIXED: Touch-compatible text dragging for mobile devices
  *
  * PhotoEditor Component - Main photo editing interface
  * Refactored to mobile-first layout with bottom navigation tabs
  */
 
-import React, { useState, useCallback } from 'react'
-import { ArrowLeft, Download, Crop, Sliders, Palette, MoreHorizontal, RotateCw } from 'lucide-react'
+import React, { useState, useCallback, useRef } from 'react'
+import {
+  ArrowLeft,
+  Download,
+  Crop,
+  Sliders,
+  Palette,
+  MoreHorizontal,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import '../editor.css'
 import { usePhotoEditor } from '../hooks/usePhotoEditor'
@@ -25,9 +33,10 @@ const TabButton = ({ active, onClick, icon: Icon, label }) => (
     className={`
       flex flex-col items-center gap-1 px-4 py-2 rounded-lg
       min-h-[44px] min-w-[60px] transition-colors touch-target
-      ${active
-        ? 'bg-purple-600 text-white'
-        : 'text-gray-400 hover:text-white hover:bg-white/5'
+      ${
+        active
+          ? 'bg-purple-600 text-white'
+          : 'text-gray-400 hover:text-white hover:bg-white/5'
       }
     `}
   >
@@ -44,9 +53,13 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
   const [activeTab, setActiveTab] = useState('adjust')
   const [saving, setSaving] = useState(false)
   const [cropArea, setCropArea] = useState(null)
-  const [draggedTextId, setDraggedTextId] = useState(null)
 
-  // usePhotoEditor hook - UNCHANGED, keeping existing architecture
+  // Touch/Drag state
+  const [draggedTextId, setDraggedTextId] = useState(null)
+  const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 })
+  const canvasContainerRef = useRef(null)
+
+  // usePhotoEditor hook
   const {
     canvasRef,
     loading,
@@ -63,11 +76,7 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
     removeTextLayer,
     reset,
     getDimensions,
-  } = usePhotoEditor(
-    imageUrl ||
-    photo?.imageUrl ||
-    photo?.url
-  )
+  } = usePhotoEditor(imageUrl || photo?.imageUrl || photo?.url)
 
   /**
    * Handle crop area change (for live preview)
@@ -79,60 +88,119 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
   /**
    * Handle crop apply
    */
-  const handleCropApply = useCallback((applyCropArea) => {
-    const success = crop(applyCropArea)
-    if (success) {
-      setCropArea(null)
-      setActiveTab('adjust')
-    }
-  }, [crop])
+  const handleCropApply = useCallback(
+    (applyCropArea) => {
+      const success = crop(applyCropArea)
+      if (success) {
+        setCropArea(null)
+        setActiveTab('adjust')
+      }
+    },
+    [crop]
+  )
 
   /**
-   * Handle text drag
+   * Get relative position from mouse/touch event
    */
-  const handleTextDragStart = useCallback((e, layerId) => {
-    console.log('🖱️ Drag started for layer:', layerId)
+  const getRelativePosition = useCallback(
+    (clientX, clientY) => {
+      const canvas = canvasRef.current
+      if (!canvas) return null
+
+      const rect = canvas.getBoundingClientRect()
+      const x = (clientX - rect.left) / rect.width
+      const y = (clientY - rect.top) / rect.height
+
+      // Constrain to canvas bounds
+      const constrainedX = Math.max(0, Math.min(1, x))
+      const constrainedY = Math.max(0, Math.min(1, y))
+
+      return { x: constrainedX, y: constrainedY }
+    },
+    [canvasRef]
+  )
+
+  /**
+   * Handle text drag/touch start
+   */
+  const handleTextDragStart = useCallback((e, layerId, isTouch = false) => {
+    console.log('🖱️ Drag/Touch started for layer:', layerId)
+
+    e.preventDefault()
+    e.stopPropagation()
+
     setDraggedTextId(layerId)
-    e.dataTransfer.effectAllowed = 'move'
+
+    const clientX = isTouch ? e.touches[0].clientX : e.clientX
+    const clientY = isTouch ? e.touches[0].clientY : e.clientY
+
+    setDragStartPos({ x: clientX, y: clientY })
   }, [])
 
-  const handleTextDragEnd = useCallback((e, layerId) => {
-    console.log('🖱️ Drag ended for layer:', layerId)
-    console.log('🖱️ Drop position:', e.clientX, e.clientY)
+  /**
+   * Handle text drag/touch move
+   */
+  const handleTextDragMove = useCallback(
+    (e, layerId, isTouch = false) => {
+      if (draggedTextId !== layerId) return
 
-    const canvas = canvasRef.current
-    if (!canvas) {
-      console.error('❌ No canvas ref for drag')
-      return
-    }
+      e.preventDefault()
+      e.stopPropagation()
 
-    const rect = canvas.getBoundingClientRect()
-    const x = (e.clientX - rect.left) / rect.width
-    const y = (e.clientY - rect.top) / rect.height
+      const clientX = isTouch ? e.touches[0].clientX : e.clientX
+      const clientY = isTouch ? e.touches[0].clientY : e.clientY
 
-    console.log('🖱️ Calculated relative position:', { x, y })
+      const pos = getRelativePosition(clientX, clientY)
+      if (!pos) return
 
-    // Constrain to canvas bounds
-    const constrainedX = Math.max(0, Math.min(1, x))
-    const constrainedY = Math.max(0, Math.min(1, y))
+      // Find layer and update position in real-time
+      const layer = textLayers.find((l) => l.id === layerId)
+      if (layer) {
+        updateTextLayer({
+          ...layer,
+          x: pos.x,
+          y: pos.y,
+        })
+      }
+    },
+    [draggedTextId, textLayers, updateTextLayer, getRelativePosition]
+  )
 
-    console.log('🖱️ Constrained position:', { x: constrainedX, y: constrainedY })
+  /**
+   * Handle text drag/touch end
+   */
+  const handleTextDragEnd = useCallback(
+    (e, layerId, isTouch = false) => {
+      console.log('🖱️ Drag/Touch ended for layer:', layerId)
 
-    // Find layer and update position
-    const layer = textLayers.find(l => l.id === layerId)
-    if (layer) {
-      console.log('✅ Found layer to update:', layer.id)
-      updateTextLayer({
-        ...layer,
-        x: constrainedX,
-        y: constrainedY
-      })
-    } else {
-      console.error('❌ Layer not found:', layerId)
-    }
+      e.preventDefault()
+      e.stopPropagation()
 
-    setDraggedTextId(null)
-  }, [canvasRef, textLayers, updateTextLayer])
+      const clientX = isTouch ? e.changedTouches[0].clientX : e.clientX
+      const clientY = isTouch ? e.changedTouches[0].clientY : e.clientY
+
+      const pos = getRelativePosition(clientX, clientY)
+      if (!pos) {
+        setDraggedTextId(null)
+        return
+      }
+
+      // Final position update
+      const layer = textLayers.find((l) => l.id === layerId)
+      if (layer) {
+        console.log('✅ Final position:', pos)
+        updateTextLayer({
+          ...layer,
+          x: pos.x,
+          y: pos.y,
+        })
+      }
+
+      setDraggedTextId(null)
+      setDragStartPos({ x: 0, y: 0 })
+    },
+    [textLayers, updateTextLayer, getRelativePosition]
+  )
 
   /**
    * Draw text layers on canvas
@@ -263,37 +331,42 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col">
       {/* TOP BAR */}
-      <div className="flex items-center justify-between p-3 md:p-4 bg-gray-900/90 backdrop-blur border-b border-white/10">
+      <div className="flex items-center justify-between p-4 border-b border-white/10 bg-gray-900/95 backdrop-blur">
         <button
           onClick={onClose}
-          className="p-2 hover:bg-white/10 rounded-lg transition touch-target"
-          aria-label={t('editor:buttons.close')}
+          className="min-h-[44px] min-w-[44px] p-2 hover:bg-white/10 rounded-lg transition touch-target"
         >
           <ArrowLeft className="w-6 h-6" />
         </button>
 
-        <h2 className="text-sm md:text-lg font-semibold truncate max-w-[150px] md:max-w-[300px]">
+        <h1 className="text-lg font-semibold truncate flex-1 mx-4">
           {photo?.name || t('editor:title')}
-        </h2>
+        </h1>
 
         <div className="flex gap-2">
           <button
             onClick={handleDownload}
-            className="p-2 hover:bg-white/10 rounded-lg transition touch-target"
-            aria-label={t('editor:buttons.download')}
+            className="min-h-[44px] px-4 py-2 hover:bg-white/10 rounded-lg transition flex items-center gap-2 touch-target"
+            title={t('editor:buttons.download')}
           >
             <Download className="w-5 h-5" />
+            <span className="hidden sm:inline text-sm">
+              {t('editor:buttons.download')}
+            </span>
           </button>
 
-          {onSave && (
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="px-3 md:px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium min-w-[70px] md:min-w-[80px] transition disabled:opacity-50 touch-target"
-            >
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="min-h-[44px] px-6 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 rounded-lg font-medium transition touch-target"
+          >
+            <span className="hidden sm:inline">
               {saving ? t('editor:buttons.saving') : t('editor:buttons.save')}
-            </button>
-          )}
+            </span>
+            <span className="sm:hidden">
+              {saving ? t('editor:buttons.saving') : t('editor:buttons.save')}
+            </span>
+          </button>
         </div>
       </div>
 
@@ -302,7 +375,7 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4" />
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent mx-auto mb-4"></div>
               <p className="text-gray-400">{t('editor:loading.image')}</p>
             </div>
           </div>
@@ -310,11 +383,13 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
 
         {error && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-red-400 mb-2">❌ {error}</p>
+            <div className="text-center max-w-md p-6">
+              <p className="text-red-400 mb-4">
+                {t('editor:errors.loadError')}
+              </p>
               <button
                 onClick={onClose}
-                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg touch-target"
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition"
               >
                 {t('editor:buttons.close')}
               </button>
@@ -323,7 +398,10 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
         )}
 
         {!loading && !error && (
-          <div className="absolute inset-0 flex items-center justify-center p-4">
+          <div
+            ref={canvasContainerRef}
+            className="absolute inset-0 flex items-center justify-center p-4"
+          >
             {/* Canvas */}
             <div className="relative max-w-full max-h-full">
               <canvas
@@ -354,48 +432,90 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
                 </div>
               )}
 
-              {/* Text overlays - draggable when More tab is active */}
-              {activeTab === 'more' && textLayers && textLayers.map(layer => {
-                const canvas = canvasRef.current
-                if (!canvas) return null
+              {/* Text overlays - draggable/touchable when More tab is active */}
+              {activeTab === 'more' &&
+                textLayers &&
+                textLayers.map((layer) => {
+                  const canvas = canvasRef.current
+                  if (!canvas) return null
 
-                const rect = canvas.getBoundingClientRect()
+                  const rect = canvas.getBoundingClientRect()
 
-                return (
-                  <div
-                    key={layer.id}
-                    draggable
-                    onDragStart={(e) => handleTextDragStart(e, layer.id)}
-                    onDragEnd={(e) => handleTextDragEnd(e, layer.id)}
-                    className={`
-                      absolute cursor-move select-none
-                      ${draggedTextId === layer.id ? 'opacity-50' : 'opacity-100'}
-                      ${currentTextLayer?.id === layer.id ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-black/50' : ''}
+                  return (
+                    <div
+                      key={layer.id}
+                      // Mouse events
+                      onMouseDown={(e) =>
+                        handleTextDragStart(e, layer.id, false)
+                      }
+                      onMouseMove={(e) =>
+                        handleTextDragMove(e, layer.id, false)
+                      }
+                      onMouseUp={(e) => handleTextDragEnd(e, layer.id, false)}
+                      onMouseLeave={(e) => {
+                        if (draggedTextId === layer.id) {
+                          handleTextDragEnd(e, layer.id, false)
+                        }
+                      }}
+                      // Touch events
+                      onTouchStart={(e) =>
+                        handleTextDragStart(e, layer.id, true)
+                      }
+                      onTouchMove={(e) => handleTextDragMove(e, layer.id, true)}
+                      onTouchEnd={(e) => handleTextDragEnd(e, layer.id, true)}
+                      className={`
+                      absolute select-none transition-opacity
+                      ${
+                        draggedTextId === layer.id
+                          ? 'cursor-grabbing opacity-70'
+                          : 'cursor-grab opacity-100'
+                      }
+                      ${
+                        currentTextLayer?.id === layer.id
+                          ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-black/50'
+                          : ''
+                      }
                     `}
-                    style={{
-                      left: `${layer.x * rect.width}px`,
-                      top: `${layer.y * rect.height}px`,
-                      fontSize: `${(layer.fontSize || 48) * (rect.width / (canvas.width || 1))}px`,
-                      fontFamily: layer.fontFamily || 'Arial',
-                      color: layer.color || '#ffffff',
-                      fontWeight: layer.bold ? 'bold' : 'normal',
-                      fontStyle: layer.italic ? 'italic' : 'normal',
-                      textAlign: layer.align || 'center',
-                      transform: 'translate(-50%, -50%)',
-                      textShadow: layer.shadow?.enabled
-                        ? `${layer.shadow.offsetX ?? 2}px ${layer.shadow.offsetY ?? 2}px ${layer.shadow.blur ?? 4}px ${layer.shadow.color || 'rgba(0,0,0,0.5)'}`
-                        : 'none',
-                      WebkitTextStroke: layer.stroke?.enabled
-                        ? `${layer.stroke.width || 2}px ${layer.stroke.color || '#000000'}`
-                        : 'none',
-                      pointerEvents: 'all',
-                    }}
-                    onClick={() => updateTextLayer(layer)}
-                  >
-                    {layer.text}
-                  </div>
-                )
-              })}
+                      style={{
+                        left: `${layer.x * rect.width}px`,
+                        top: `${layer.y * rect.height}px`,
+                        fontSize: `${
+                          (layer.fontSize || 48) *
+                          (rect.width / (canvas.width || 1))
+                        }px`,
+                        fontFamily: layer.fontFamily || 'Arial',
+                        color: layer.color || '#ffffff',
+                        fontWeight: layer.bold ? 'bold' : 'normal',
+                        fontStyle: layer.italic ? 'italic' : 'normal',
+                        textAlign: layer.align || 'center',
+                        transform: 'translate(-50%, -50%)',
+                        textShadow: layer.shadow?.enabled
+                          ? `${layer.shadow.offsetX ?? 2}px ${
+                              layer.shadow.offsetY ?? 2
+                            }px ${layer.shadow.blur ?? 4}px ${
+                              layer.shadow.color || 'rgba(0,0,0,0.5)'
+                            }`
+                          : 'none',
+                        WebkitTextStroke: layer.stroke?.enabled
+                          ? `${layer.stroke.width || 2}px ${
+                              layer.stroke.color || '#000000'
+                            }`
+                          : 'none',
+                        pointerEvents: 'all',
+                        touchAction: 'none', // Prevents scrolling while dragging
+                        userSelect: 'none',
+                        WebkitUserSelect: 'none',
+                      }}
+                      onClick={() => {
+                        if (!draggedTextId) {
+                          updateTextLayer(layer)
+                        }
+                      }}
+                    >
+                      {layer.text}
+                    </div>
+                  )
+                })}
             </div>
           </div>
         )}
