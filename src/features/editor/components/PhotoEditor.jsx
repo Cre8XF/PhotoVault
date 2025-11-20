@@ -445,7 +445,14 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
 
           {activeTab === 'filters' && (
             <FiltersPanel
-              onFilter={applyFilter}
+              onFilter={(filterName) => {
+                console.log('📸 Applying filter:', filterName)
+                applyFilter(filterName)
+              }}
+              onReset={() => {
+                console.log('📸 Resetting to original')
+                reset()
+              }}
             />
           )}
 

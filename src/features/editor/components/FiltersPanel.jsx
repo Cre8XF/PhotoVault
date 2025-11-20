@@ -9,16 +9,26 @@ import { Palette } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { FILTERS } from '../utils/filterUtils'
 
-const FiltersPanel = ({ onFilter }) => {
+const FiltersPanel = ({ onFilter, onReset }) => {
   const { t, i18n } = useTranslation(['editor'])
   const [selectedFilter, setSelectedFilter] = useState('none')
 
   const handleFilterSelect = (filterName) => {
+    console.log('🎨 Filter clicked:', filterName)
     setSelectedFilter(filterName)
-    if (onFilter) {
-      onFilter(filterName)
+
+    // CRITICAL: Reset to original if 'none' is selected
+    if (filterName === 'none') {
+      console.log('🔄 Resetting to original')
+      if (onReset) {
+        onReset()
+      }
+    } else {
+      console.log('🎨 Applying filter:', filterName)
+      if (onFilter) {
+        onFilter(filterName)
+      }
     }
-    console.log(`🎨 Selected filter: ${filterName}`)
   }
 
   return (
