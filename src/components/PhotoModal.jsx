@@ -553,7 +553,7 @@ const PhotoModal = ({
 
         return (
           <div
-            className="absolute inset-0 z-[999] flex items-center justify-center bg-black/80 backdrop-blur-md"
+            className="absolute inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-md"
             onClick={(e) => e.stopPropagation()}
           >
             <PhotoEditor
