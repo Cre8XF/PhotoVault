@@ -305,6 +305,9 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
         ctx.strokeStyle = layer.stroke.color || '#000000'
         ctx.lineJoin = 'round'
         ctx.strokeText(layer.text, x, y)
+      } else {
+        // Explicitly set lineWidth to 0 to ensure outline is removed
+        ctx.lineWidth = 0
       }
 
       // Fill text
@@ -485,8 +488,8 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
                   // Calculate transform based on alignment to prevent visual duplication
                   const align = layer.align || 'center'
                   let transformX = '-50%' // default center
-                  if (align === 'left') transformX = '0%'
-                  if (align === 'right') transformX = '-100%'
+                  if (align === 'left') transformX = '-100%'  // Move div to the left
+                  if (align === 'right') transformX = '0%'    // Move div to the right
 
                   return (
                     <div
@@ -558,11 +561,11 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
                               layer.shadow.color || 'rgba(0,0,0,0.5)'
                             }`
                           : 'none',
-                        WebkitTextStroke: layer.stroke?.enabled
-                          ? `${layer.stroke.width || 2}px ${
+                        WebkitTextStroke: layer.stroke?.enabled && layer.stroke.width > 0
+                          ? `${layer.stroke.width}px ${
                               layer.stroke.color || '#000000'
                             }`
-                          : 'none',
+                          : '0px transparent',
                         touchAction: 'none',
                         userSelect: 'none',
                         WebkitUserSelect: 'none',
