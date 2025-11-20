@@ -2,6 +2,8 @@
   {
     "origin": [
       "http://localhost:3000",
+      "http://localhost:5173",
+      "http://localhost:5174",
       "https://cre8web-photovault.netlify.app",
       "https://photovault-app-a0946.web.app",
       "https://photovault-app-a0946.firebaseapp.com",

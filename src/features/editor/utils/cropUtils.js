@@ -170,7 +170,11 @@ export const loadImageToCanvas = (imageUrl) => {
     console.log('🖼️ loadImageToCanvas(): starting...', imageUrl)
 
     const img = new Image()
-    // REMOVED: img.crossOrigin = 'anonymous' - causes Firebase Storage images to fail silently
+
+    // CRITICAL: Set crossOrigin BEFORE src to enable pixel manipulation
+    // Without this, getImageData() throws SecurityError: "canvas tainted by cross-origin data"
+    // This requires Firebase Storage CORS to be configured correctly
+    img.crossOrigin = 'anonymous'
 
     img.onload = () => {
       console.log('✅ loadImageToCanvas(): image loaded')
@@ -194,9 +198,11 @@ export const loadImageToCanvas = (imageUrl) => {
 
     img.onerror = (error) => {
       console.error('❌ loadImageToCanvas(): Failed to load image:', imageUrl, error)
+      console.error('💡 If image fails to load, check Firebase Storage CORS configuration')
       reject(error)
     }
 
+    // Set src AFTER crossOrigin
     img.src = imageUrl
   })
 }
