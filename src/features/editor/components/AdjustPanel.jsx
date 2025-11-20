@@ -23,7 +23,9 @@ const AdjustPanel = ({ onAdjust }) => {
     }
     setAdjustments(newAdjustments)
 
+    // VIKTIG: Call parent immediately for real-time update
     if (onAdjust) {
+      console.log('🔍 AdjustPanel calling onAdjust:', newAdjustments)
       onAdjust(newAdjustments)
     }
   }

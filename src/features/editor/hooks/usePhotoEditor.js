@@ -144,29 +144,42 @@ export const usePhotoEditor = (initialImageUrl) => {
    * Apply adjustments (brightness, contrast, saturation) to current canvas
    */
   const applyAdjustmentsToCanvas = useCallback((adjustments) => {
+    console.log('🎨 usePhotoEditor.applyAdjustments:', adjustments)
+
     if (!currentCanvasRef.current) {
-      console.warn('No canvas to apply adjustments')
+      console.error('❌ No current canvas!')
       return false
     }
 
+    if (!originalCanvasRef.current) {
+      console.error('❌ No original canvas!')
+      return false
+    }
+
+    // CRITICAL: Always apply adjustments to ORIGINAL canvas, not current
+    // This prevents cumulative adjustments
     const adjustedCanvas = applyAdjustments(
-      currentCanvasRef.current,
+      originalCanvasRef.current,
       adjustments
     )
 
     if (adjustedCanvas) {
       currentCanvasRef.current = adjustedCanvas
       setCurrentAdjustments(adjustments)
-      console.log('🔧 Adjustments applied:', adjustments)
+      console.log('✅ Applied adjustments to working canvas')
 
-      // Trigger re-render
+      // Render to display canvas
       if (canvasRef.current) {
-        renderCurrentCanvas()
+        const ctx = canvasRef.current.getContext('2d')
+        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+        ctx.drawImage(adjustedCanvas, 0, 0)
+        console.log('✅ Display canvas updated')
       }
 
       return true
     }
 
+    console.error('❌ Failed to apply adjustments')
     return false
   }, [])
 
