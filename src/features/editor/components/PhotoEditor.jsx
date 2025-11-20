@@ -482,6 +482,12 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
 
                   const rect = canvas.getBoundingClientRect()
 
+                  // Calculate transform based on alignment to prevent visual duplication
+                  const align = layer.align || 'center'
+                  let transformX = '-50%' // default center
+                  if (align === 'left') transformX = '0%'
+                  if (align === 'right') transformX = '-100%'
+
                   return (
                     <div
                       key={layer.id}
@@ -543,8 +549,8 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
                         color: layer.color || '#ffffff',
                         fontWeight: layer.bold ? 'bold' : 'normal',
                         fontStyle: layer.italic ? 'italic' : 'normal',
-                        textAlign: layer.align || 'center',
-                        transform: 'translate(-50%, -50%)',
+                        textAlign: align,
+                        transform: `translate(${transformX}, -50%)`,
                         textShadow: layer.shadow?.enabled
                           ? `${layer.shadow.offsetX ?? 2}px ${
                               layer.shadow.offsetY ?? 2
@@ -561,6 +567,7 @@ const PhotoEditor = ({ photo, imageUrl, onClose, onSave }) => {
                         userSelect: 'none',
                         WebkitUserSelect: 'none',
                         WebkitTouchCallout: 'none',
+                        whiteSpace: 'nowrap',
                       }}
                     >
                       {layer.text}
