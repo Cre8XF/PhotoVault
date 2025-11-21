@@ -54,19 +54,28 @@ export function useUpload() {
     for (const file of files) {
       const fileErrors = []
       const fileType = file.type.toLowerCase()
-      const isVideo = fileType.startsWith('video/')
+
+      // ✅ IMPROVED: Check both MIME and extension for videos
+      const hasMimeType = fileType && fileType.startsWith('video/')
+      const hasVideoExtension = /\.(mp4|mov|webm|avi|mkv|m4v|3gp|flv)$/i.test(file.name)
+      const isVideo = hasMimeType || hasVideoExtension
       const isImage = fileType.startsWith('image/')
 
-      // ✅ VIDEO VALIDATION BASED ON TIER
+      console.log(`🔍 Validating: ${file.name}, MIME: ${file.type}, isVideo: ${isVideo}, canUploadVideo: ${canUploadVideo}`)
+
+      // ✅ VIDEO TIER CHECK
       if (isVideo) {
         if (!canUploadVideo) {
+          const tierName = tier === 'GRATIS' ? 'GRATIS' : 'LITE'
           fileErrors.push(
             tier === 'GRATIS'
-              ? t('errors.videoNotAllowedGratis') || 'Video upload ikke tilgjengelig på GRATIS. Oppgrader til PRO.'
-              : t('errors.videoNotAllowedLite') || 'Video upload ikke tilgjengelig på LITE. Oppgrader til PRO.'
+              ? 'Video-opplasting er ikke tilgjengelig på GRATIS-kontoen. Oppgrader til PRO.'
+              : 'Video-opplasting er ikke tilgjengelig på LITE-kontoen. Oppgrader til PRO.'
           )
-        } else if (!ALLOWED_VIDEO_TYPES.includes(fileType)) {
+          console.log(`❌ Video blocked: ${file.name} (tier: ${tier})`)
+        } else if (!ALLOWED_VIDEO_TYPES.includes(fileType) && !hasVideoExtension) {
           fileErrors.push(t('errors.unsupportedVideoType') || 'Videoformat ikke støttet')
+          console.log(`❌ Unsupported video type: ${file.name} (${file.type})`)
         }
       }
 
@@ -77,15 +86,17 @@ export function useUpload() {
 
       // File size check
       if (file.size > MAX_FILE_SIZE) {
-        fileErrors.push(t('errors.fileTooLarge', { size: '100MB' }))
+        fileErrors.push(t('errors.fileTooLarge', { size: '100MB' }) || 'Fil for stor (maks 100MB)')
       }
 
       // Add to results
       if (fileErrors.length > 0) {
         errors.push({ file: file.name, errors: fileErrors })
+        console.log(`❌ File validation failed: ${file.name}`, fileErrors)
       } else {
         file.fileType = isVideo ? 'video' : 'photo'
         validFiles.push(file)
+        console.log(`✅ File validated: ${file.name} (${file.fileType})`)
 
         // Warn about large files
         if (file.size > 10 * 1024 * 1024) {
@@ -97,6 +108,7 @@ export function useUpload() {
       }
     }
 
+    console.log(`📊 Validation complete: ${validFiles.length} valid, ${errors.length} errors`)
     return { validFiles, errors, warnings }
   }
 
