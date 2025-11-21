@@ -72,7 +72,7 @@ const UploadModal = ({
   const [showAlbums, setShowAlbums] = useState(false)
   const [autoCompress, setAutoCompress] = useState(() => {
     // FREE users cannot compress - always false
-    if (tier === 'GRATIS') return false
+    if (tier() === 'GRATIS') return false
 
     // LITE/PRO users - read from localStorage
     const saved = localStorage.getItem('autoCompress')
@@ -92,7 +92,7 @@ const UploadModal = ({
 
   // Update localStorage when autoCompress changes (only for LITE/PRO users)
   useEffect(() => {
-    if (tier !== 'GRATIS') {
+    if (tier() !== 'GRATIS') {
       localStorage.setItem('autoCompress', autoCompress)
     }
   }, [autoCompress, tier])
@@ -149,9 +149,9 @@ const UploadModal = ({
     let filesToValidate = files
     let blockedVideos = []
 
-    if (!canUploadVideo) {
+    if (!canUploadVideo()) {
       filesToValidate = []
-      files.forEach(file => {
+      files.forEach((file) => {
         const isVideo = file.type.startsWith('video/')
         if (isVideo) {
           blockedVideos.push(file.name)
@@ -162,14 +162,19 @@ const UploadModal = ({
 
       // Show feedback if videos were blocked
       if (blockedVideos.length > 0) {
-        const tierName = tier === 'GRATIS' ? 'GRATIS' : 'LITE'
-        const message = tier === 'GRATIS'
-          ? `Video upload er ikke tilgjengelig på GRATIS-kontoen. Oppgrader til PRO for å laste opp videoer.\n\nBlokerte filer:\n${blockedVideos.join('\n')}`
-          : `Video upload er ikke tilgjengelig på LITE-kontoen. Oppgrader til PRO for å laste opp videoer.\n\nBlokerte filer:\n${blockedVideos.join('\n')}`
+        const tierName = tier() === 'GRATIS' ? 'GRATIS' : 'LITE'
+        const message =
+          tier() === 'GRATIS'
+            ? `Video upload er ikke tilgjengelig på GRATIS-kontoen. Oppgrader til PRO for å laste opp videoer.\n\nBlokerte filer:\n${blockedVideos.join(
+                '\n'
+              )}`
+            : `Video upload er ikke tilgjengelig på LITE-kontoen. Oppgrader til PRO for å laste opp videoer.\n\nBlokerte filer:\n${blockedVideos.join(
+                '\n'
+              )}`
 
         setNotification({
           message,
-          type: 'error'
+          type: 'error',
         })
       }
 
@@ -178,7 +183,9 @@ const UploadModal = ({
       }
     }
 
-    const { validFiles, errors, warnings } = await validateFiles(filesToValidate)
+    const { validFiles, errors, warnings } = await validateFiles(
+      filesToValidate
+    )
 
     // Show errors
     if (errors.length > 0) {
@@ -270,7 +277,7 @@ const UploadModal = ({
 
   // Toggle compression (disabled for GRATIS users)
   const handleCompressToggle = () => {
-    if (tier === 'GRATIS') return // Cannot toggle for FREE users
+    if (tier() === 'GRATIS') return // Cannot toggle for FREE users
     const newValue = !autoCompress
     setAutoCompress(newValue)
     localStorage.setItem('autoCompress', newValue.toString())
@@ -543,34 +550,40 @@ const UploadModal = ({
           {/* Options */}
           <div className="mt-6 space-y-3">
             {/* Auto Compress Toggle */}
-            <div className={`rounded-xl p-4 border ${
-              tier === 'GRATIS'
-                ? 'bg-gray-600/10 border-gray-600/20'
-                : 'bg-green-500/10 border-green-500/20'
-            }`}>
+            <div
+              className={`rounded-xl p-4 border ${
+                tier() === 'GRATIS'
+                  ? 'bg-gray-600/10 border-gray-600/20'
+                  : 'bg-green-500/10 border-green-500/20'
+              }`}
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${
-                    tier === 'GRATIS'
-                      ? 'bg-gray-600/20'
-                      : 'bg-green-600/30'
-                  }`}>
-                    <Zap className={`w-5 h-5 ${
-                      tier === 'GRATIS'
-                        ? 'text-gray-400'
-                        : 'text-green-400'
-                    }`} />
+                  <div
+                    className={`p-2 rounded-lg ${
+                      tier() === 'GRATIS' ? 'bg-gray-600/20' : 'bg-green-600/30'
+                    }`}
+                  >
+                    <Zap
+                      className={`w-5 h-5 ${
+                        tier() === 'GRATIS' ? 'text-gray-400' : 'text-green-400'
+                      }`}
+                    />
                   </div>
                   <div>
-                    <p className={`font-medium ${
-                      tier === 'GRATIS' ? 'text-gray-400' : ''
-                    }`}>
+                    <p
+                      className={`font-medium ${
+                        tier() === 'GRATIS' ? 'text-gray-400' : ''
+                      }`}
+                    >
                       {t('upload:autoCompress')}
                     </p>
-                    <p className={`text-xs ${
-                      tier === 'GRATIS' ? 'text-gray-500' : 'text-gray-400'
-                    }`}>
-                      {tier === 'GRATIS'
+                    <p
+                      className={`text-xs ${
+                        tier() === 'GRATIS' ? 'text-gray-500' : 'text-gray-400'
+                      }`}
+                    >
+                      {tier() === 'GRATIS'
                         ? 'Original kvalitet (GRATIS tier)'
                         : t('upload:autoCompressDesc')}
                     </p>
@@ -580,9 +593,9 @@ const UploadModal = ({
                 {/* Toggle switch */}
                 <button
                   onClick={handleCompressToggle}
-                  disabled={uploading || tier === 'GRATIS'}
+                  disabled={uploading || tier() === 'GRATIS'}
                   className={`relative w-14 h-7 rounded-full transition ${
-                    tier === 'GRATIS'
+                    tier() === 'GRATIS'
                       ? 'bg-gray-700 cursor-not-allowed'
                       : autoCompress
                       ? 'bg-green-600'
@@ -591,30 +604,35 @@ const UploadModal = ({
                 >
                   <div
                     className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                      autoCompress && tier !== 'GRATIS' ? 'translate-x-7' : 'translate-x-0'
+                      autoCompress && tier() !== 'GRATIS'
+                        ? 'translate-x-7'
+                        : 'translate-x-0'
                     }`}
                   />
                 </button>
               </div>
 
               {/* Info badge for FREE users */}
-              {tier === 'GRATIS' && (
+              {tier() === 'GRATIS' && (
                 <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                   <p className="text-xs text-blue-400">
-                    💡 GRATIS-brukere får original bildekvalitet uten komprimering.
-                    Oppgrader til LITE eller PRO for bildekomprimering som sparer lagring.
+                    💡 GRATIS-brukere får original bildekvalitet uten
+                    komprimering. Oppgrader til LITE eller PRO for
+                    bildekomprimering som sparer lagring.
                   </p>
                 </div>
               )}
 
               {/* Compression stats - only show if tier allows compression */}
-              {tier !== 'GRATIS' && compressionStats && (
+              {tier() !== 'GRATIS' && compressionStats && (
                 <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
                   <p className="text-sm text-green-400 font-medium">
-                    {t('upload:compressionSaved')}: {compressionStats.savingsPercent?.toFixed(1) || 0}%
+                    {t('upload:compressionSaved')}:{' '}
+                    {compressionStats.savingsPercent?.toFixed(1) || 0}%
                   </p>
                   <p className="text-xs opacity-60">
-                    {formatFileSize(compressionStats.originalSize)} → {formatFileSize(compressionStats.compressedSize)}
+                    {formatFileSize(compressionStats.originalSize)} →{' '}
+                    {formatFileSize(compressionStats.compressedSize)}
                   </p>
                 </div>
               )}
