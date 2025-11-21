@@ -1,42 +1,45 @@
 // ============================================================================
 // COMPONENT: Notification.jsx – Premium toast notifications
 // ============================================================================
-import React, { useEffect, useCallback } from "react";
-import { CheckCircle2, XCircle, Info, AlertTriangle, X } from "lucide-react";
-import { useTranslation } from 'react-i18next';
+import React, { useEffect, useCallback } from 'react'
+import { CheckCircle2, XCircle, Info, AlertTriangle, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 const Notification = ({ notification, onClose, setNotification }) => {
   const { t } = useTranslation('common')
 
   // Safe defaults (hooks må kalles uansett)
-  const message  = notification?.message ?? t('errorOccurred');
-  const type     = notification?.type ?? "info";
-  const duration = notification?.duration ?? 3000;
+  const message = notification?.message ?? t('errorOccurred')
+  const type = notification?.type ?? 'info'
+
+  // Varighet basert på type: error/warning = 10 sek, andre = 3 sek
+  const defaultDuration = type === 'error' || type === 'warning' ? 10000 : 3000
+  const duration = notification?.duration ?? defaultDuration
 
   // Robust lukker
   const handleClose = useCallback(() => {
-    if (typeof onClose === "function") onClose();
-    else if (typeof setNotification === "function") setNotification(null);
-  }, [onClose, setNotification]);
+    if (typeof onClose === 'function') onClose()
+    else if (typeof setNotification === 'function') setNotification(null)
+  }, [onClose, setNotification])
 
   // Auto-close kun når det faktisk finnes et varsel
   useEffect(() => {
-    if (!notification) return;
-    const t = setTimeout(handleClose, duration);
-    return () => clearTimeout(t);
-  }, [notification, duration, handleClose]);
+    if (!notification) return
+    const t = setTimeout(handleClose, duration)
+    return () => clearTimeout(t)
+  }, [notification, duration, handleClose])
 
-  if (!notification) return null;
+  if (!notification) return null
 
   // Icon mapping with enhanced styling
   const iconConfig = {
-    success: { icon: CheckCircle2, color: "text-green-400" },
-    error:   { icon: XCircle, color: "text-red-400" },
-    info:    { icon: Info, color: "text-blue-400" },
-    warning: { icon: AlertTriangle, color: "text-yellow-400" },
-  };
+    success: { icon: CheckCircle2, color: 'text-green-400' },
+    error: { icon: XCircle, color: 'text-red-400' },
+    info: { icon: Info, color: 'text-blue-400' },
+    warning: { icon: AlertTriangle, color: 'text-yellow-400' },
+  }
 
-  const { icon: IconComponent, color } = iconConfig[type] || iconConfig.info;
+  const { icon: IconComponent, color } = iconConfig[type] || iconConfig.info
 
   return (
     <div className="fixed top-20 right-6 z-[99999] animate-slideIn">
@@ -44,9 +47,7 @@ const Notification = ({ notification, onClose, setNotification }) => {
         <div className={`flex-shrink-0 ${color}`}>
           <IconComponent className="w-5 h-5" />
         </div>
-        <p className="flex-1 text-sm font-medium text-white">
-          {message}
-        </p>
+        <p className="flex-1 text-sm font-medium text-white">{message}</p>
         <button
           onClick={handleClose}
           className="ripple-effect flex-shrink-0 p-1 hover:bg-white/10 rounded-lg transition-colors"
@@ -57,7 +58,7 @@ const Notification = ({ notification, onClose, setNotification }) => {
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Notification;
+export default Notification
