@@ -27,6 +27,7 @@ import {
   Share2,
   Layout,
   Video,
+  Presentation,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
@@ -461,6 +462,25 @@ const AlbumPage = ({
             <Layout className="w-5 h-5" />
             <span className="hidden sm:inline text-sm md:text-base">{t('albums:createCollage')}</span>
           </button>
+
+          {/* Start Slideshow */}
+          {filteredPhotos.length > 0 && (
+            <button
+              onClick={() => {
+                setPhotoModal({ open: true, index: 0 })
+                // Trigger slideshow mode after a short delay
+                setTimeout(() => {
+                  // This will be handled by PhotoModal's internal state
+                  const event = new CustomEvent('startSlideshow')
+                  window.dispatchEvent(event)
+                }, 100)
+              }}
+              className="ripple-effect px-3 py-1.5 md:px-4 md:py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 flex items-center gap-1.5 md:gap-2 text-sm md:text-base"
+            >
+              <Presentation className="w-4 md:w-5 h-4 md:h-5" />
+              <span className="hidden sm:inline">{t('common:slideshow.start')}</span>
+            </button>
+          )}
 
           {/* Share Album Button */}
           <button

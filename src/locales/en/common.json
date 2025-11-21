@@ -184,6 +184,15 @@
   "selectAll": "Select all",
   "showInfo": "Show info",
   "size": "Size",
+  "slideshow": {
+    "start": "Start slideshow",
+    "exit": "Exit slideshow",
+    "interval": "Interval",
+    "playing": "Playing",
+    "paused": "Paused"
+  },
+  "play": "Play",
+  "pause": "Pause",
   "status": "Status",
   "storage": "Storage",
   "total": "Total",

@@ -15,6 +15,7 @@ import {
   Sparkles,
   Users,
   Edit2,
+  Presentation,
 } from 'lucide-react'
 // PHASE 2: Social features disabled for MVP
 // import CommentThread from "./CommentThread";
@@ -23,6 +24,7 @@ import useAuth from '../hooks/useAuth'
 import { formatDuration, formatFileSize } from '../utils/videoTools'
 import PhotoEditor from '../features/editor/components/PhotoEditor'
 import { saveEditedPhoto } from '../features/editor'
+import SlideshowControls from './SlideshowControls'
 
 const PhotoModal = ({
   photos,
@@ -44,6 +46,11 @@ const PhotoModal = ({
   const [captionValue, setCaptionValue] = useState(photo.caption || '')
   const [isEditingCaption, setIsEditingCaption] = useState(false)
   const [isSavingCaption, setIsSavingCaption] = useState(false)
+
+  // Slideshow state
+  const [slideshowActive, setSlideshowActive] = useState(false)
+  const [slideshowPlaying, setSlideshowPlaying] = useState(false)
+  const [slideshowInterval, setSlideshowInterval] = useState(3) // seconds
 
   const nextPhoto = () => {
     setImageLoaded(false)
@@ -97,6 +104,51 @@ const PhotoModal = ({
     setCaptionValue(photo.caption || '')
     setIsEditingCaption(false)
   }, [photo.id])
+
+  // Slideshow auto-advance
+  useEffect(() => {
+    if (!slideshowActive || !slideshowPlaying) return
+
+    const timer = setTimeout(() => {
+      nextPhoto()
+    }, slideshowInterval * 1000)
+
+    return () => clearTimeout(timer)
+  }, [slideshowActive, slideshowPlaying, slideshowInterval, index])
+
+  // Keyboard shortcuts for slideshow
+  useEffect(() => {
+    if (!slideshowActive) return
+
+    const handleKeyPress = (e) => {
+      switch (e.key) {
+        case ' ':
+          e.preventDefault()
+          setSlideshowPlaying((prev) => !prev)
+          break
+        case 'Escape':
+          setSlideshowActive(false)
+          setSlideshowPlaying(false)
+          break
+        default:
+          break
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [slideshowActive])
+
+  // Listen for external slideshow trigger
+  useEffect(() => {
+    const handleStartSlideshow = () => {
+      setSlideshowActive(true)
+      setSlideshowPlaying(true)
+    }
+
+    window.addEventListener('startSlideshow', handleStartSlideshow)
+    return () => window.removeEventListener('startSlideshow', handleStartSlideshow)
+  }, [])
 
   const handleTouchStart = (e) => {
     // Skip hvis editor er åpen
@@ -291,6 +343,19 @@ const PhotoModal = ({
               title={t('common:showInfo')}
             >
               <Info className="w-5 h-5" />
+            </button>
+
+            {/* Slideshow button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setSlideshowActive(true)
+                setSlideshowPlaying(true)
+              }}
+              className="ripple-effect backdrop-blur-md bg-white/20 hover:bg-white/30 text-white p-2.5 rounded-lg transition shadow-lg"
+              title={t('common:slideshow.start')}
+            >
+              <Presentation className="w-5 h-5" />
             </button>
 
             {photo.type !== 'video' && (
@@ -640,6 +705,22 @@ const PhotoModal = ({
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md text-gray-900 px-6 py-3 rounded-lg font-medium shadow-lg select-none z-20">
           {photo.name}
         </div>
+      )}
+
+      {/* Slideshow controls */}
+      {slideshowActive && (
+        <SlideshowControls
+          isPlaying={slideshowPlaying}
+          onTogglePlay={() => setSlideshowPlaying((prev) => !prev)}
+          onPrevious={prevPhoto}
+          onNext={nextPhoto}
+          onExit={() => {
+            setSlideshowActive(false)
+            setSlideshowPlaying(false)
+          }}
+          interval={slideshowInterval}
+          onIntervalChange={setSlideshowInterval}
+        />
       )}
 
       {/* Photo Editor – ligger over ALT */}
