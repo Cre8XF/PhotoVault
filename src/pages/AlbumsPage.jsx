@@ -468,8 +468,13 @@ const AlbumsPage = ({
                       (p) => p.albumId === album.id
                     )
                     const count = albumPhotosList.length
-                    const coverUrl =
-                      album.cover || albumPhotosList[0]?.url || ''
+
+                    // Handle video thumbnails for album cover
+                    const firstPhoto = albumPhotosList[0]
+                    const fallbackUrl = firstPhoto?.type === 'video'
+                      ? (firstPhoto.thumbnailUrl || firstPhoto.url)
+                      : firstPhoto?.url
+                    const coverUrl = album.cover || fallbackUrl || ''
 
                     let updatedStr = ''
                     const updatedAt = album.updatedAt || album.createdAt
