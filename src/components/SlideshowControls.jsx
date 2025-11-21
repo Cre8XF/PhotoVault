@@ -65,13 +65,14 @@ const SlideshowControls = ({
           </select>
         </div>
 
-        {/* Exit */}
+        {/* Exit Slideshow */}
         <button
           onClick={onExit}
-          className="p-2 hover:bg-red-500/20 rounded-lg transition ml-4 pl-4 border-l border-white/20"
-          title={t('common:slideshow.exit')}
+          className="px-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition ml-4 pl-4 border-l border-white/20 flex items-center gap-2"
+          title={t('common:slideshow.exitSlideshow')}
         >
           <X className="w-5 h-5" />
+          <span className="text-sm font-medium">{t('common:slideshow.exitSlideshow')}</span>
         </button>
       </div>
     </div>
