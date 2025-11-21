@@ -21,14 +21,18 @@ claude-code
 ```
 I'm implementing missing features for the FREE tier of Pixtr before moving to LITE and PRO tiers.
 
-Please read this implementation guide carefully:
-[Paste the entire content of PIXTR_FREE_TIER_IMPLEMENTATION.md here]
+Please start by reading these documentation files in order:
+1. docs/INDEX.md - for overview
+2. docs/PIXTR_FREE_TIER_IMPLEMENTATION.md - for complete implementation guide
 
-Then implement PHASE 1 (Captions) first. Start by reading all the files listed in the "PRE-FLIGHT CHECKLIST" section, then follow the implementation steps exactly.
+Then implement PHASE 1 (Captions) from the implementation guide:
+- Read all files in the PRE-FLIGHT CHECKLIST section first
+- Follow the implementation steps exactly as documented
+- Implement the Firebase function, UI updates, and translations
 
-After Phase 1 is complete and tested, we'll move to Phase 2 (Slideshow).
+After Phase 1 is complete and tested, I'll ask you to implement Phase 2 (Slideshow).
 
-Let me know if you need any clarification before starting.
+Let me know when you've read the docs and are ready to start.
 ```
 
 ### Steg 3: La Claude Code jobbe
@@ -53,9 +57,15 @@ Test caption-funksjonalitet:
 
 Gi Claude Code denne follow-up prompten:
 ```
-Phase 1 (Captions) is complete and tested. Now let's implement Phase 2 (Slideshow).
+Phase 1 (Captions) is complete and tested. 
 
-Please implement all the steps in PHASE 2 from the implementation guide, starting with creating the SlideshowControls component.
+Now please implement PHASE 2 (Slideshow) from docs/PIXTR_FREE_TIER_IMPLEMENTATION.md:
+- Create SlideshowControls component
+- Add slideshow logic to PhotoModal
+- Add translations
+- Add "Start Slideshow" button to AlbumPage
+
+Follow the steps exactly as documented in the implementation guide.
 ```
 
 ---
