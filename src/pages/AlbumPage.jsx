@@ -26,12 +26,15 @@ import {
   ChevronDown,
   Share2,
   Layout,
+  Video,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
+import { formatDuration } from '../utils/videoTools'
 import UploadModal from '../components/UploadModal'
 import MoveModal from '../components/MoveModal'
 import PhotoModal from '../components/PhotoModal'
+import PhotoGrid from '../components/PhotoGrid'
 import AlbumModal from '../components/AlbumModal'
 import QRShareModal from '../features/qr-sharing/components/QRShareModal'
 import { CollageBuilder } from '../features/collage'
@@ -639,103 +642,31 @@ const AlbumPage = ({
         </div>
       )}
 
-      {/* Photos Grid - Compressed */}
+      {/* Photos Grid - Using PhotoGrid component for video thumbnail support */}
       {!isInitialLoading && viewMode === 'grid' && filteredPhotos.length > 0 && (
-        <div
-          className={`grid gap-2 md:gap-3 ${
-            gridSize === 2
-              ? 'grid-cols-2'
-              : gridSize === 3
-              ? 'grid-cols-2 sm:grid-cols-3'
-              : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'
-          }`}
-        >
-          {filteredPhotos.map((photo, index) => (
-            <div
-              key={photo.id}
-              className={`album-photo-card relative group aspect-square bg-black/20 rounded-lg md:rounded-xl overflow-hidden cursor-pointer transition hover:scale-[1.02] animate-fade-in-up stagger-${(index % 12) + 1} ${
-                isPhotoSelected(photo) ? 'ring-4 ring-purple-500' : ''
-              }`}
-              onClick={() => {
-                if (editMode) {
-                  togglePhotoSelection(photo)
-                } else {
-                  setPhotoModal({ open: true, index })
+        <PhotoGrid
+          photos={filteredPhotos}
+          compact={gridSize === 2}
+          editMode={editMode}
+          currentAlbum={album}
+          refreshPhotos={async () => {
+            if (refreshData) {
+              await refreshData()
+            }
+          }}
+          onPhotoClick={
+            editMode
+              ? null // In edit mode, don't open modal (use PhotoGrid's built-in edit buttons)
+              : (url) => {
+                  const index = filteredPhotos.findIndex(
+                    (p) => p.url === url || p.thumbnailUrl === url
+                  )
+                  if (index !== -1) {
+                    setPhotoModal({ open: true, index })
+                  }
                 }
-              }}
-            >
-              <img
-                src={photo.url}
-                alt={photo.name}
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition" />
-
-              {/* Info */}
-              <div className="absolute bottom-0 left-0 right-0 p-3 text-white opacity-0 group-hover:opacity-100 transition">
-                <div className="text-xs space-y-1">
-                  {photo.name && (
-                    <p className="font-medium truncate">{photo.name}</p>
-                  )}
-                  <div className="flex items-center gap-2 text-xs text-gray-300">
-                    <Calendar className="w-3 h-3" />
-                    {photo.createdAt
-                      ? new Date(photo.createdAt).toLocaleDateString('no-NO')
-                      : t('albums:unknownDate')}
-                    {photo.category && (
-                      <>
-                        <span>•</span>
-                        <span>
-                          {getCategoryIcon(photo.category)} {photo.category}
-                        </span>
-                      </>
-                    )}
-                    {photo.aiAnalyzed && (
-                      <>
-                        <span>•</span>
-                        <span>🤖 AI</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {editMode && (
-                <div className="absolute top-2 right-2 flex gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleSetCover(photo)
-                    }}
-                    className="ripple-effect p-2 bg-yellow-500 hover:bg-yellow-600 rounded-lg transition"
-                    title={t('albums:setCover')}
-                  >
-                    <ImageIcon className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleDelete(photo)
-                    }}
-                    className="ripple-effect p-2 bg-red-500 hover:bg-red-600 rounded-lg transition"
-                    title={t('common:delete')}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-
-              {isPhotoSelected(photo) && (
-                <div className="absolute top-2 left-2 bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center">
-                  <Check className="w-4 h-4" />
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+          }
+        />
       )}
 
       {/* Photos List View - Compact Redesign */}
@@ -756,7 +687,7 @@ const AlbumPage = ({
               }}
             >
               <img
-                src={photo.url}
+                src={photo.type === 'video' ? photo.thumbnailUrl || photo.url : photo.url}
                 alt={photo.name}
                 className="album-list-thumb w-14 md:w-16 lg:w-20 h-14 md:h-16 lg:h-20 object-cover rounded-lg md:rounded-xl flex-shrink-0"
               />
@@ -766,6 +697,17 @@ const AlbumPage = ({
                   {photo.name || t('common:noName')}
                 </div>
                 <div className="album-meta text-xs text-gray-400 flex items-center gap-1 md:gap-1.5 mt-0.5">
+                  {photo.type === 'video' && (
+                    <>
+                      <span className="flex items-center gap-0.5 text-purple-400">
+                        <Video className="w-3 h-3" />
+                        {photo.metadata?.duration && (
+                          <span>{formatDuration(photo.metadata.duration)}</span>
+                        )}
+                      </span>
+                      <span>•</span>
+                    </>
+                  )}
                   {photo.createdAt
                     ? new Date(photo.createdAt).toLocaleDateString('no-NO')
                     : t('albums:unknownDate')}
