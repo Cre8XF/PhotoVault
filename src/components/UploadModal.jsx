@@ -25,7 +25,8 @@ import {
 import { triggerHaptic, showToast } from '../utils/nativeUtils'
 import { useTranslation } from 'react-i18next'
 import { useUpload } from '../hooks/useUpload'
-import useAuth from '../hooks/useAuth' // ✅ ADD
+import useAuth from '../hooks/useAuth'
+import useStore from '../state/store' // ✅ ADD
 import { auth, addAlbum } from '../firebase'
 
 const formatFileSize = (bytes) => {
@@ -44,7 +45,22 @@ const UploadModal = ({
   albums = [],
   selectedAlbum = null,
 }) => {
-  // UI State
+  // ✅ FIRST: Get all hook values that provide data
+  const isNative = isNativePlatform()
+  const { t } = useTranslation(['common', 'upload'])
+  const { tier, canUploadVideo, shouldCompress } = useAuth()
+  const setNotification = useStore((state) => state.setNotification) // ✅ ADD
+  const {
+    uploading,
+    processingProgress,
+    compressionStats,
+    uploadCount,
+    totalFiles,
+    validateFiles,
+    uploadFiles,
+  } = useUpload()
+
+  // ✅ THEN: Initialize state that depends on those values
   const [showAlbumModal, setShowAlbumModal] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState([])
   const [selectedAlbumId, setSelectedAlbumId] = useState(selectedAlbum || '')
@@ -68,20 +84,6 @@ const UploadModal = ({
   // Refs
   const fileInputRef = useRef(null)
   const modalRef = useRef(null)
-
-  // Hooks
-  const isNative = isNativePlatform()
-  const { t } = useTranslation(['common', 'upload'])
-  const { tier, canUploadVideo, shouldCompress } = useAuth() // ✅ ADD
-  const {
-    uploading,
-    processingProgress,
-    compressionStats,
-    uploadCount, // ✅ NY
-    totalFiles,
-    validateFiles,
-    uploadFiles,
-  } = useUpload()
 
   // Permission check for native platforms
   useEffect(() => {
@@ -160,11 +162,15 @@ const UploadModal = ({
 
       // Show feedback if videos were blocked
       if (blockedVideos.length > 0) {
+        const tierName = tier === 'GRATIS' ? 'GRATIS' : 'LITE'
         const message = tier === 'GRATIS'
-          ? `Video upload er ikke tilgjengelig på GRATIS-kontoen. Oppgrader til PRO for å laste opp videoer.\n\nBlokket: ${blockedVideos.join(', ')}`
-          : `Video upload er ikke tilgjengelig på LITE-kontoen. Oppgrader til PRO for å laste opp videoer.\n\nBlokket: ${blockedVideos.join(', ')}`
+          ? `Video upload er ikke tilgjengelig på GRATIS-kontoen. Oppgrader til PRO for å laste opp videoer.\n\nBlokerte filer:\n${blockedVideos.join('\n')}`
+          : `Video upload er ikke tilgjengelig på LITE-kontoen. Oppgrader til PRO for å laste opp videoer.\n\nBlokerte filer:\n${blockedVideos.join('\n')}`
 
-        await showToast(message, 'error')
+        setNotification({
+          message,
+          type: 'error'
+        })
       }
 
       if (filesToValidate.length === 0) {
