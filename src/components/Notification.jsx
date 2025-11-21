@@ -39,7 +39,7 @@ const Notification = ({ notification, onClose, setNotification }) => {
   const { icon: IconComponent, color } = iconConfig[type] || iconConfig.info;
 
   return (
-    <div className="fixed top-20 right-6 z-[9999] animate-slideIn">
+    <div className="fixed top-20 right-6 z-[99999] animate-slideIn">
       <div className={`toast ${type} flex items-center gap-3`}>
         <div className={`flex-shrink-0 ${color}`}>
           <IconComponent className="w-5 h-5" />
