@@ -43,7 +43,7 @@ const PhotoModal = ({
   const startX = useRef(0)
 
   // Caption state
-  const [captionValue, setCaptionValue] = useState(photo.caption || '')
+  const [captionValue, setCaptionValue] = useState(photo?.caption || '')
   const [isEditingCaption, setIsEditingCaption] = useState(false)
   const [isSavingCaption, setIsSavingCaption] = useState(false)
 
@@ -101,9 +101,9 @@ const PhotoModal = ({
 
   // Update caption value when photo changes
   useEffect(() => {
-    setCaptionValue(photo.caption || '')
+    setCaptionValue(photo?.caption || '')
     setIsEditingCaption(false)
-  }, [photo.id])
+  }, [photo?.id])
 
   // Slideshow auto-advance
   useEffect(() => {
