@@ -178,15 +178,11 @@ const UploadModal = ({
 
       // Show feedback if videos were blocked
       if (blockedVideos.length > 0) {
-        const tierName = tier() === 'GRATIS' ? 'GRATIS' : 'LITE'
-        const message =
-          tier() === 'GRATIS'
-            ? `Video upload er ikke tilgjengelig på GRATIS-kontoen. Oppgrader til PRO for å laste opp videoer.\n\nBlokerte filer:\n${blockedVideos.join(
-                '\n'
-              )}`
-            : `Video upload er ikke tilgjengelig på LITE-kontoen. Oppgrader til PRO for å laste opp videoer.\n\nBlokerte filer:\n${blockedVideos.join(
-                '\n'
-              )}`
+        const baseMessage = tier() === 'GRATIS'
+          ? t('upload:errors.videoNotAllowedGratis')
+          : t('upload:errors.videoNotAllowedLite')
+
+        const message = `${baseMessage}\n\n${t('upload:errors.blockedFiles')}\n${blockedVideos.join('\n')}`
 
         setNotification({
           message,

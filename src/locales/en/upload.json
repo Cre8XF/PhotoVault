@@ -35,9 +35,19 @@
     "unsupportedVideoType": "Video format not supported",
     "videoNotAllowedGratis": "Video upload is not available on FREE account. Upgrade to PRO to upload videos.",
     "videoNotAllowedLite": "Video upload is not available on LITE account. Upgrade to PRO to upload videos.",
-    "uploadFailed": "Upload failed"
+    "uploadFailed": "Upload failed",
+    "blockedFiles": "Blocked files:",
+    "blockedFilesMessage": "{{message}}\n\n{{label}}\n{{files}}"
   },
   "warnings": {
     "largeFile": "Large file - may take time to upload"
-  }
+  },
+  "permissions": {
+    "cameraRequired": "Camera access required",
+    "photosRequired": "Gallery access required"
+  },
+  "browse": "Browse files",
+  "gallery": "Gallery",
+  "supportedFormats": "Supports JPG, PNG, GIF, WebP, MP4, MOV",
+  "selectedFiles": "Selected files"
 }

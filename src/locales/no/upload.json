@@ -35,9 +35,19 @@
     "unsupportedVideoType": "Videoformat ikke støttet",
     "videoNotAllowedGratis": "Video upload er ikke tilgjengelig på GRATIS-kontoen. Oppgrader til PRO for å laste opp videoer.",
     "videoNotAllowedLite": "Video upload er ikke tilgjengelig på LITE-kontoen. Oppgrader til PRO for å laste opp videoer.",
-    "uploadFailed": "Opplasting feilet"
+    "uploadFailed": "Opplasting feilet",
+    "blockedFiles": "Blokerte filer:",
+    "blockedFilesMessage": "{{message}}\n\n{{label}}\n{{files}}"
   },
   "warnings": {
     "largeFile": "Stor fil - kan ta tid å laste opp"
-  }
+  },
+  "permissions": {
+    "cameraRequired": "Kamera-tilgang kreves",
+    "photosRequired": "Galleri-tilgang kreves"
+  },
+  "browse": "Velg filer",
+  "gallery": "Galleri",
+  "supportedFormats": "Støtter JPG, PNG, GIF, WebP, MP4, MOV",
+  "selectedFiles": "Valgte filer"
 }
