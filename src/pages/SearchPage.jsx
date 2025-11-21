@@ -656,9 +656,9 @@ const SearchPage = ({
       {photoModal.open && (
         <PhotoModal
           photos={filteredPhotos}
-          initialIndex={photoModal.index}
+          currentIndex={photoModal.index}
           onClose={() => setPhotoModal({ open: false, index: 0 })}
-          toggleFavorite={toggleFavorite}
+          onToggleFavorite={toggleFavorite}
         />
       )}
     </div>
