@@ -135,7 +135,9 @@ export const useAuth = () => {
   const isGratis = useCallback(() => {
     if (!userProfile) return true // Default for new users
     if (userProfile.role === 'admin') return false
-    return userProfile.subscriptionTier === 'GRATIS' || !userProfile.subscriptionTier
+    return (
+      userProfile.subscriptionTier === 'GRATIS' || !userProfile.subscriptionTier
+    )
   }, [userProfile])
 
   /**
@@ -172,21 +174,21 @@ export const useAuth = () => {
       return {
         limit: null,
         unlimited: true,
-        tier: 'ADMIN'
+        tier: 'ADMIN',
       }
     }
 
     const tier = userProfile?.subscriptionTier || 'GRATIS'
     const limits = {
-      'GRATIS': 1073741824,     // 1GB
-      'LITE': 5368709120,        // 5GB
-      'PRO': 53687091200         // 50GB
+      GRATIS: 1073741824, // 1GB
+      LITE: 5368709120, // 5GB
+      PRO: 53687091200, // 50GB
     }
 
     return {
       limit: userProfile?.storageLimit || limits[tier] || limits.GRATIS,
       unlimited: false,
-      tier
+      tier,
     }
   }, [userProfile, isAdmin])
 
@@ -215,16 +217,16 @@ export const useAuth = () => {
     fetchUserProfile,
 
     // Tier checks
-    isGratis: isGratis(),
-    isLite: isLite(),
-    isPro: isPro(),
-    isAdmin: isAdmin(),
-    tier: getTier(),
+    isGratis,
+    isLite,
+    isPro,
+    isAdmin,
+    tier: getTier,
 
     // Capabilities
-    canUploadVideo: canUploadVideo(),
-    shouldCompress: shouldCompress(),
-    storageQuota: getStorageQuota(),
+    canUploadVideo,
+    shouldCompress,
+    storageQuota: getStorageQuota,
 
     // Legacy
     isAuthenticated: !!user,
