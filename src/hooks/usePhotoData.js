@@ -14,6 +14,7 @@ import {
   deletePhoto,
   setAlbumCover,
   updateAlbumPhotoCount,
+  updatePhotoCaption,
 } from '../firebase'
 import { db } from '../firebase'
 import useStore from '../state/store'
@@ -523,6 +524,39 @@ export const usePhotoData = () => {
   )
 
   /**
+   * Update photo caption
+   */
+  const updateCaption = useCallback(
+    async (photoId, caption) => {
+      try {
+        await updatePhotoCaption(photoId, caption, user?.uid)
+
+        // Update local state
+        setPhotos((prev) => {
+          const safePrev = Array.isArray(prev) ? prev : []
+          return safePrev.map((p) =>
+            p.id === photoId
+              ? { ...p, caption, captionUpdatedAt: new Date().toISOString() }
+              : p
+          )
+        })
+
+        setNotification({
+          message: t('common:captionSaved'),
+          type: 'success',
+        })
+      } catch (error) {
+        console.error('Error updating caption:', error)
+        setNotification({
+          message: t('common:errorOccurred'),
+          type: 'error',
+        })
+      }
+    },
+    [user?.uid, setPhotos, setNotification, t]
+  )
+
+  /**
    * Get photos by album ID
    */
   const getPhotosByAlbum = useCallback(
@@ -661,6 +695,7 @@ export const usePhotoData = () => {
     handleSetAlbumCover,
     handleUpdatePhotoCount,
     toggleFavorite,
+    updateCaption,
 
     // Utilities
     getPhotosByAlbum,

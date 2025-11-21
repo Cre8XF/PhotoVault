@@ -40,6 +40,11 @@ const PhotoModal = ({
   const photo = photos[index]
   const startX = useRef(0)
 
+  // Caption state
+  const [captionValue, setCaptionValue] = useState(photo.caption || '')
+  const [isEditingCaption, setIsEditingCaption] = useState(false)
+  const [isSavingCaption, setIsSavingCaption] = useState(false)
+
   const nextPhoto = () => {
     setImageLoaded(false)
     setIndex((i) => (i + 1) % photos.length)
@@ -86,6 +91,12 @@ const PhotoModal = ({
       modal.style.justifyContent = 'center'
     }
   }, [])
+
+  // Update caption value when photo changes
+  useEffect(() => {
+    setCaptionValue(photo.caption || '')
+    setIsEditingCaption(false)
+  }, [photo.id])
 
   const handleTouchStart = (e) => {
     // Skip hvis editor er åpen
@@ -175,6 +186,36 @@ const PhotoModal = ({
 
   const handleEditorClose = () => {
     setShowEditor(false)
+  }
+
+  // Handle caption save
+  const handleSaveCaption = async () => {
+    if (isSavingCaption) return
+
+    setIsSavingCaption(true)
+    try {
+      const { updatePhotoCaption } = await import('../firebase')
+      await updatePhotoCaption(photo.id, captionValue, user.uid)
+
+      // Update local state
+      photo.caption = captionValue
+
+      setIsEditingCaption(false)
+
+      // Optional: Show toast notification
+      // setNotification({ message: t('common:captionSaved'), type: 'success' })
+    } catch (error) {
+      console.error('Error saving caption:', error)
+      alert('Could not save caption. Please try again.')
+    } finally {
+      setIsSavingCaption(false)
+    }
+  }
+
+  // Handle caption cancel
+  const handleCancelCaption = () => {
+    setCaptionValue(photo.caption || '')
+    setIsEditingCaption(false)
   }
 
   if (!photo) return null
@@ -443,6 +484,67 @@ const PhotoModal = ({
                   </span>
                 )}
               </div>
+            </div>
+
+            {/* Caption/Notes */}
+            <div className="border-t border-white/10 pt-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-gray-400">{t('common:caption')}</p>
+                {!isEditingCaption && (
+                  <button
+                    onClick={() => setIsEditingCaption(true)}
+                    className="text-xs text-purple-400 hover:text-purple-300 transition"
+                  >
+                    {photo.caption ? t('common:edit') : t('common:addCaption')}
+                  </button>
+                )}
+              </div>
+
+              {isEditingCaption ? (
+                <div className="space-y-2">
+                  <textarea
+                    value={captionValue}
+                    onChange={(e) => setCaptionValue(e.target.value)}
+                    autoFocus
+                    rows={3}
+                    maxLength={500}
+                    placeholder={t('common:captionPlaceholder')}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-purple-400 transition resize-none"
+                  />
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500">
+                      {captionValue.length}/500
+                    </span>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleCancelCaption}
+                        disabled={isSavingCaption}
+                        className="px-3 py-1 text-xs rounded-lg bg-white/5 hover:bg-white/10 transition disabled:opacity-50"
+                      >
+                        {t('common:cancel')}
+                      </button>
+                      <button
+                        onClick={handleSaveCaption}
+                        disabled={isSavingCaption}
+                        className="px-3 py-1 text-xs rounded-lg bg-purple-600 hover:bg-purple-700 transition disabled:opacity-50"
+                      >
+                        {isSavingCaption ? t('common:saving') : t('common:save')}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p
+                  className="text-white text-sm cursor-pointer hover:bg-white/5 rounded-lg p-2 transition min-h-[40px]"
+                  onClick={() => setIsEditingCaption(true)}
+                >
+                  {photo.caption || (
+                    <span className="text-gray-500 italic">
+                      {t('common:addCaption')}
+                    </span>
+                  )}
+                </p>
+              )}
             </div>
 
             {/* ✨ AI-status (Fase 4.1) */}
