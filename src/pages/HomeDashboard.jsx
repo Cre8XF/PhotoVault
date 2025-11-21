@@ -206,7 +206,7 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
                   onClick={() => onPhotoClick(photo, favoritePhotos)}
                 >
                   <LazyImage
-                    src={photo.url}
+                    src={photo.type === 'video' ? (photo.thumbnailUrl || photo.url) : photo.url}
                     thumbnail={photo.thumbnailSmall}
                     photoId={photo.id}
                     alt={photo.name || t("common:photo")}
@@ -251,7 +251,7 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
                     onClick={() => onPhotoClick(photo, recentPhotos)}
                   >
                     <LazyImage
-                      src={photo.url}
+                      src={photo.type === 'video' ? (photo.thumbnailUrl || photo.url) : photo.url}
                       thumbnail={photo.thumbnailSmall}
                       photoId={photo.id}
                       alt={photo.name || t("common:photo")}

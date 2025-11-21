@@ -591,7 +591,7 @@ const SearchPage = ({
             )}
 
             <img
-              src={photo.url}
+              src={photo.type === 'video' ? (photo.thumbnailUrl || photo.url) : photo.url}
               alt={photo.name}
               onClick={() => !editMode && setPhotoModal({ open: true, index })}
               className="max-h-full max-w-full object-contain cursor-pointer transition-transform duration-300 group-hover:scale-[1.03]"

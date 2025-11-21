@@ -12,10 +12,13 @@ const AlbumCard = memo(
     const { t } = useTranslation(['common'])
     const [tilt, setTilt] = useState({ x: 0, y: 0 })
 
-    // Prioriter album.cover, ellers bruk første bilde i albumet
+    // Prioriter album.cover, ellers bruk første bilde i albumet (handle video thumbnails)
     const safePhotos = Array.isArray(photos) ? photos : [];
-    const coverUrl =
-      album.cover || safePhotos.find((p) => p.albumId === album.id)?.url || ''
+    const firstPhoto = safePhotos.find((p) => p.albumId === album.id)
+    const fallbackUrl = firstPhoto?.type === 'video'
+      ? (firstPhoto.thumbnailUrl || firstPhoto.url)
+      : firstPhoto?.url
+    const coverUrl = album.cover || fallbackUrl || ''
 
     const count = safePhotos.filter((p) => p.albumId === album.id).length
 
