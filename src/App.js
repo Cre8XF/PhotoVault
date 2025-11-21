@@ -118,6 +118,7 @@ function AppContent() {
   const selectedAlbum = useStore((state) => state.selectedAlbum)
   const storageUsed = useStore((state) => state.storageUsed)
   const storageLimit = useStore((state) => state.storageLimit)
+  const isFullscreen = useStore((state) => state.isFullscreen)
 
   const setUploadModalOpen = useStore((state) => state.setUploadModalOpen)
   const setAlbumModalOpen = useStore((state) => state.setAlbumModalOpen)
@@ -228,6 +229,8 @@ function AppContent() {
 
   // Determine if we should show bottom navigation
   const showBottomNav =
+    !photoModalOpen &&
+    !isFullscreen &&
     currentPage !== 'album' &&
     currentPage !== 'admin' &&
     currentPage !== 'security' &&

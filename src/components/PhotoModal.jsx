@@ -1,5 +1,5 @@
 // ============================================================================
-// COMPONENT: PhotoModal.jsx – v4.4 med Photo Editor Integration (Phase 6)
+// COMPONENT: PhotoModal.jsx – v5.0 Google Photos-Style Redesign
 // ============================================================================
 import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -16,13 +16,9 @@ import {
   Users,
   Edit2,
   Presentation,
-  Maximize2,
-  Minimize2,
 } from 'lucide-react'
-// PHASE 2: Social features disabled for MVP
-// import CommentThread from "./CommentThread";
-// import ReactionPicker from "./ReactionPicker";
 import useAuth from '../hooks/useAuth'
+import useStore from '../state/store'
 import { formatDuration, formatFileSize } from '../utils/videoTools'
 import PhotoEditor from '../features/editor/components/PhotoEditor'
 import { saveEditedPhoto } from '../features/editor'
@@ -54,22 +50,80 @@ const PhotoModal = ({
   const [slideshowPlaying, setSlideshowPlaying] = useState(false)
   const [slideshowInterval, setSlideshowInterval] = useState(3) // seconds
 
-  // Fullscreen state
-  const [isFullscreen, setIsFullscreen] = useState(false)
+  // Global fullscreen state from Zustand
+  const isFullscreen = useStore((state) => state.isFullscreen)
+  const setIsFullscreen = useStore((state) => state.setIsFullscreen)
+
+  // Auto-hide UI state (Google Photos style)
+  const [uiVisible, setUiVisible] = useState(true)
+  const uiTimerRef = useRef(null)
+
+  // Auto-hide UI after 3 seconds of inactivity
+  const resetUiTimer = () => {
+    setUiVisible(true)
+
+    if (uiTimerRef.current) {
+      clearTimeout(uiTimerRef.current)
+    }
+
+    uiTimerRef.current = setTimeout(() => {
+      setUiVisible(false)
+    }, 3000)
+  }
+
+  // Handle tap/click on image to toggle UI
+  const handleToggleUi = () => {
+    if (uiVisible) {
+      // Hide immediately
+      setUiVisible(false)
+      if (uiTimerRef.current) {
+        clearTimeout(uiTimerRef.current)
+      }
+    } else {
+      // Show and start timer
+      resetUiTimer()
+    }
+  }
+
+  // Reset UI timer when slideshow is active and UI should auto-hide
+  useEffect(() => {
+    if (slideshowActive || isFullscreen) {
+      resetUiTimer()
+    }
+
+    return () => {
+      if (uiTimerRef.current) {
+        clearTimeout(uiTimerRef.current)
+      }
+    }
+  }, [slideshowActive, isFullscreen])
 
   const nextPhoto = () => {
     setImageLoaded(false)
     setIndex((i) => (i + 1) % photos.length)
+    resetUiTimer()
   }
 
   const prevPhoto = () => {
     setImageLoaded(false)
     setIndex((i) => (i - 1 + photos.length) % photos.length)
+    resetUiTimer()
+  }
+
+  // Handle close - clear fullscreen state
+  const handleClose = () => {
+    setIsFullscreen(false)
+    setSlideshowActive(false)
+    setSlideshowPlaying(false)
+    onClose()
   }
 
   useEffect(() => {
     const handleKey = (e) => {
       if (!photo) return
+
+      // Don't handle keys if editor is open
+      if (showEditor) return
 
       switch (e.key) {
         case 'ArrowRight':
@@ -83,8 +137,9 @@ const PhotoModal = ({
           if (slideshowActive) {
             setSlideshowActive(false)
             setSlideshowPlaying(false)
+            setIsFullscreen(false)
           } else {
-            onClose()
+            handleClose()
           }
           break
         case 'i':
@@ -104,17 +159,7 @@ const PhotoModal = ({
 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [photo, photos.length, onClose, slideshowActive, isFullscreen])
-
-  useEffect(() => {
-    const modal = document.querySelector('.photo-modal-wrapper')
-    if (modal) {
-      modal.style.position = 'relative'
-      modal.style.display = 'flex'
-      modal.style.alignItems = 'center'
-      modal.style.justifyContent = 'center'
-    }
-  }, [])
+  }, [photo, photos.length, slideshowActive, isFullscreen, showEditor])
 
   // Update caption value when photo changes
   useEffect(() => {
@@ -122,7 +167,7 @@ const PhotoModal = ({
     setIsEditingCaption(false)
   }, [photo?.id])
 
-  // Slideshow auto-advance
+  // Slideshow auto-advance (only when playing)
   useEffect(() => {
     if (!slideshowActive || !slideshowPlaying) return
 
@@ -148,6 +193,7 @@ const PhotoModal = ({
       if (e.key === ' ') {
         e.preventDefault()
         setSlideshowPlaying((prev) => !prev)
+        resetUiTimer()
       }
     }
 
@@ -167,13 +213,11 @@ const PhotoModal = ({
   }, [])
 
   const handleTouchStart = (e) => {
-    // Skip hvis editor er åpen
     if (showEditor) return
     startX.current = e.touches[0].clientX
   }
 
   const handleTouchEnd = (e) => {
-    // Skip hvis editor er åpen
     if (showEditor) return
     const diff = e.changedTouches[0].clientX - startX.current
     if (diff > 50) prevPhoto()
@@ -198,13 +242,11 @@ const PhotoModal = ({
   }
 
   const handleEditClick = () => {
-    // Only allow editing images, not videos
     if (photo.type === 'video') {
       alert(t('common:grid.videoEditingNotSupported'))
       return
     }
 
-    // Resolve image URL with comprehensive fallback
     const resolvedUrl =
       photo.fullUrl ||
       photo.downloadUrl ||
@@ -230,21 +272,14 @@ const PhotoModal = ({
       }
 
       console.log('💾 Saving edited photo...')
-
-      // Save edited photo to Firebase
       const newPhoto = await saveEditedPhoto(blob, originalPhoto, user.uid)
-
       console.log('✅ Photo saved successfully:', newPhoto.id)
 
-      // Notify parent component if callback provided
       if (onPhotoEdited) {
         onPhotoEdited(newPhoto)
       }
 
-      // Close editor
       setShowEditor(false)
-
-      // Show success message
       alert(t('common:grid.photoSaved'))
     } catch (error) {
       console.error('❌ Failed to save edited photo:', error)
@@ -256,7 +291,6 @@ const PhotoModal = ({
     setShowEditor(false)
   }
 
-  // Handle caption save
   const handleSaveCaption = async () => {
     if (isSavingCaption) return
 
@@ -265,13 +299,8 @@ const PhotoModal = ({
       const { updatePhotoCaption } = await import('../firebase')
       await updatePhotoCaption(photo.id, captionValue, user.uid)
 
-      // Update local state
       photo.caption = captionValue
-
       setIsEditingCaption(false)
-
-      // Optional: Show toast notification
-      // setNotification({ message: t('common:captionSaved'), type: 'success' })
     } catch (error) {
       console.error('Error saving caption:', error)
       alert('Could not save caption. Please try again.')
@@ -280,7 +309,6 @@ const PhotoModal = ({
     }
   }
 
-  // Handle caption cancel
   const handleCancelCaption = () => {
     setCaptionValue(photo.caption || '')
     setIsEditingCaption(false)
@@ -302,14 +330,30 @@ const PhotoModal = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center select-none animate-fade-in"
-      onClick={onClose}
+      className="fixed inset-0 bg-black/95 z-[9999] flex items-center justify-center select-none"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Topbar - Hidden in fullscreen */}
-      {!isFullscreen && (
-        <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/90 via-black/60 to-transparent p-4 z-10">
+      {/* ===================================================================== */}
+      {/* CLOSE BUTTON - Always visible, top-right */}
+      {/* ===================================================================== */}
+      <button
+        className="fixed top-4 right-4 z-[10000] p-3 rounded-full bg-black/40 dark:bg-black/60 backdrop-blur-md text-white drop-shadow-md active:scale-95 transition"
+        onClick={handleClose}
+        aria-label={t('common:close')}
+      >
+        <X className="w-6 h-6" />
+      </button>
+
+      {/* ===================================================================== */}
+      {/* TOP BAR - Auto-hide in fullscreen/slideshow */}
+      {/* ===================================================================== */}
+      {!isFullscreen && !slideshowActive && (
+        <div
+          className={`absolute top-0 left-0 right-0 bg-gradient-to-b from-black/90 via-black/60 to-transparent p-4 z-[9998] transition-opacity duration-300 ${
+            uiVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
+        >
           <div className="flex items-center justify-between max-w-7xl mx-auto">
             <div
               className="bg-white/90 backdrop-blur-md text-gray-900 text-sm font-semibold px-4 py-2 rounded-lg shadow-lg select-none"
@@ -329,11 +373,12 @@ const PhotoModal = ({
                   onClick={(e) => {
                     e.stopPropagation()
                     onToggleFavorite(photo)
+                    resetUiTimer()
                   }}
-                  className={`ripple-effect backdrop-blur-md text-white p-2.5 rounded-lg transition shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
+                  className={`p-3 rounded-full backdrop-blur-md text-white drop-shadow-md active:scale-95 transition ${
                     photo.favorite
                       ? 'bg-yellow-500/90 hover:bg-yellow-600'
-                      : 'bg-white/20 hover:bg-white/30'
+                      : 'bg-black/40 dark:bg-black/60 hover:bg-black/50'
                   }`}
                   title={
                     photo.favorite
@@ -353,92 +398,73 @@ const PhotoModal = ({
                 onClick={(e) => {
                   e.stopPropagation()
                   setShowInfo(!showInfo)
+                  resetUiTimer()
                 }}
-                className={`ripple-effect backdrop-blur-md text-white p-2.5 rounded-lg transition shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-400 ${
-                  showInfo ? 'bg-purple-600/90' : 'bg-white/20 hover:bg-white/30'
+                className={`p-3 rounded-full backdrop-blur-md text-white drop-shadow-md active:scale-95 transition ${
+                  showInfo
+                    ? 'bg-purple-600/90 hover:bg-purple-700'
+                    : 'bg-black/40 dark:bg-black/60 hover:bg-black/50'
                 }`}
                 title={t('common:showInfo')}
               >
                 <Info className="w-5 h-5" />
               </button>
 
-              {/* Fullscreen toggle button */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setIsFullscreen(!isFullscreen)
-                }}
-                className="ripple-effect backdrop-blur-md bg-white/20 hover:bg-white/30 text-white p-2.5 rounded-lg transition shadow-lg"
-                title={isFullscreen ? t('common:exitFullscreen') : t('common:fullscreen')}
-              >
-                {isFullscreen ? (
-                  <Minimize2 className="w-5 h-5" />
-                ) : (
-                  <Maximize2 className="w-5 h-5" />
-                )}
-              </button>
-
-              {/* Slideshow button */}
               <button
                 onClick={(e) => {
                   e.stopPropagation()
                   setSlideshowActive(true)
                   setSlideshowPlaying(true)
                 }}
-                className="ripple-effect backdrop-blur-md bg-white/20 hover:bg-white/30 text-white p-2.5 rounded-lg transition shadow-lg"
+                className="p-3 rounded-full bg-black/40 dark:bg-black/60 backdrop-blur-md hover:bg-black/50 text-white drop-shadow-md active:scale-95 transition"
                 title={t('common:slideshow.start')}
               >
                 <Presentation className="w-5 h-5" />
               </button>
 
-            {photo.type !== 'video' && (
+              {photo.type !== 'video' && (
+                <button
+                  aria-label={t('common:edit')}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleEditClick()
+                  }}
+                  className="p-3 rounded-full bg-black/40 dark:bg-black/60 backdrop-blur-md hover:bg-black/50 text-white drop-shadow-md active:scale-95 transition"
+                  title={t('common:edit')}
+                >
+                  <Edit2 className="w-5 h-5" />
+                </button>
+              )}
+
               <button
-                aria-label={t('common:edit')}
+                aria-label={t('common:download')}
                 onClick={(e) => {
                   e.stopPropagation()
-                  handleEditClick()
+                  handleDownload()
                 }}
-                className="ripple-effect bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-2.5 rounded-lg transition shadow-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-                title={t('common:edit')}
+                className="p-3 rounded-full bg-black/40 dark:bg-black/60 backdrop-blur-md hover:bg-black/50 text-white drop-shadow-md active:scale-95 transition"
+                title={t('common:download')}
               >
-                <Edit2 className="w-5 h-5" />
+                <Download className="w-5 h-5" />
               </button>
-            )}
-
-            <button
-              aria-label={t('common:download')}
-              onClick={(e) => {
-                e.stopPropagation()
-                handleDownload()
-              }}
-              className="ripple-effect bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-2.5 rounded-lg transition shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              title={t('common:download')}
-            >
-              <Download className="w-5 h-5" />
-            </button>
-
-            <button
-              aria-label={t('common:close')}
-              onClick={onClose}
-              className="ripple-effect bg-red-600/90 backdrop-blur-md hover:bg-red-700 text-white p-2.5 rounded-lg transition shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-              title={t('common:close')}
-            >
-              <X className="w-5 h-5" />
-            </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Navigasjonsknapper */}
-      {photos.length > 1 && (
+      {/* ===================================================================== */}
+      {/* NAVIGATION BUTTONS - Auto-hide */}
+      {/* ===================================================================== */}
+      {photos.length > 1 && !showEditor && (
         <>
           <button
             aria-label={t('common:previous')}
-            className="hidden sm:flex ripple-effect absolute left-4 top-1/2 -translate-y-1/2
-                       bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-4
-                       rounded-full transition shadow-2xl z-10 border-2 border-white/30
-                       focus:outline-none focus:ring-2 focus:ring-white"
+            className={`hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2
+                       p-4 rounded-full bg-black/40 dark:bg-black/60 backdrop-blur-md
+                       hover:bg-black/50 text-white drop-shadow-md active:scale-95
+                       transition-all z-[9998] ${
+                         uiVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                       }`}
             onClick={(e) => {
               e.stopPropagation()
               prevPhoto()
@@ -450,10 +476,12 @@ const PhotoModal = ({
 
           <button
             aria-label={t('common:next')}
-            className="hidden sm:flex ripple-effect absolute right-4 top-1/2 -translate-y-1/2
-                       bg-white/20 backdrop-blur-md hover:bg-white/30 text-white p-4
-                       rounded-full transition shadow-2xl z-10 border-2 border-white/30
-                       focus:outline-none focus:ring-2 focus:ring-white"
+            className={`hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2
+                       p-4 rounded-full bg-black/40 dark:bg-black/60 backdrop-blur-md
+                       hover:bg-black/50 text-white drop-shadow-md active:scale-95
+                       transition-all z-[9998] ${
+                         uiVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                       }`}
             onClick={(e) => {
               e.stopPropagation()
               nextPhoto()
@@ -465,12 +493,12 @@ const PhotoModal = ({
         </>
       )}
 
-      {/* Hovedbilde/Video */}
+      {/* ===================================================================== */}
+      {/* MAIN IMAGE/VIDEO - Tap to toggle UI */}
+      {/* ===================================================================== */}
       <div
-        onClick={(e) => e.stopPropagation()}
-        className={`max-w-[95vw] flex items-center justify-center relative ${
-          isFullscreen ? 'max-h-[95vh]' : 'max-h-[85vh]'
-        }`}
+        onClick={handleToggleUi}
+        className="max-w-full max-h-full flex items-center justify-center relative px-4"
       >
         {!imageLoaded && (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -483,9 +511,7 @@ const PhotoModal = ({
             key={photo.id}
             controls
             poster={photo.thumbnailUrl}
-            className={`max-w-full rounded-xl shadow-2xl ${
-              isFullscreen ? 'max-h-[93vh]' : 'max-h-[80vh]'
-            }`}
+            className="max-w-full max-h-[95vh] object-contain shadow-2xl"
             onLoadedData={() => setImageLoaded(true)}
             autoPlay
           >
@@ -498,9 +524,7 @@ const PhotoModal = ({
           <img
             src={photo.url}
             alt={photo.name || ''}
-            className={`max-w-full rounded-xl shadow-2xl object-contain transition-opacity duration-300 ${
-              isFullscreen ? 'max-h-[93vh]' : 'max-h-[80vh]'
-            } ${
+            className={`max-w-full max-h-[95vh] object-contain shadow-2xl transition-opacity duration-300 ${
               imageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
             onLoad={() => setImageLoaded(true)}
@@ -508,13 +532,15 @@ const PhotoModal = ({
         )}
       </div>
 
-      {/* Info-panel - Hidden in fullscreen */}
-      {showInfo && !isFullscreen && (
+      {/* ===================================================================== */}
+      {/* INFO PANEL - Hidden in fullscreen */}
+      {/* ===================================================================== */}
+      {showInfo && !isFullscreen && !slideshowActive && (
         <div
           role="dialog"
           tabIndex="0"
           aria-label={t('common:photoInfo')}
-          className="absolute right-4 top-20 bottom-4 w-80 bg-gray-900/95 backdrop-blur-xl rounded-2xl p-6 overflow-y-auto animate-slide-in shadow-2xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          className="absolute right-4 top-20 bottom-4 w-80 bg-gray-900/95 backdrop-blur-xl rounded-2xl p-6 overflow-y-auto shadow-2xl border border-white/10 z-[9998]"
           onClick={(e) => e.stopPropagation()}
         >
           <h3 className="text-lg font-semibold mb-4 text-white">
@@ -522,7 +548,7 @@ const PhotoModal = ({
           </h3>
 
           <div className="space-y-4 text-sm">
-            {/* Navn */}
+            {/* Name */}
             <div>
               <p className="text-gray-400 mb-1">{t('common:name')}</p>
               <p className="text-white font-medium">
@@ -530,19 +556,16 @@ const PhotoModal = ({
               </p>
             </div>
 
-            {/* Dato */}
+            {/* Date */}
             <div className="flex items-start gap-2">
-              <Calendar
-                aria-hidden="true"
-                className="w-4 h-4 text-gray-400 mt-0.5"
-              />
+              <Calendar className="w-4 h-4 text-gray-400 mt-0.5" />
               <div>
                 <p className="text-gray-400 mb-1">{t('common:uploaded')}</p>
                 <p className="text-white">{formatDate(photo.createdAt)}</p>
               </div>
             </div>
 
-            {/* Størrelse */}
+            {/* Size */}
             {photo.size && (
               <div>
                 <p className="text-gray-400 mb-1">{t('common:size')}</p>
@@ -570,17 +593,13 @@ const PhotoModal = ({
               </>
             )}
 
-            {/* Favoritt */}
+            {/* Favorite */}
             <div>
               <p className="text-gray-400 mb-1">{t('common:status')}</p>
               <div className="flex items-center gap-2">
                 {photo.favorite ? (
                   <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded text-xs flex items-center gap-1">
-                    <Star
-                      aria-hidden="true"
-                      className="w-3 h-3"
-                      fill="currentColor"
-                    />
+                    <Star className="w-3 h-3" fill="currentColor" />
                     {t('common:favorite')}
                   </span>
                 ) : (
@@ -591,7 +610,7 @@ const PhotoModal = ({
               </div>
             </div>
 
-            {/* Caption/Notes */}
+            {/* Caption */}
             <div className="border-t border-white/10 pt-4">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-gray-400">{t('common:caption')}</p>
@@ -614,7 +633,7 @@ const PhotoModal = ({
                     rows={3}
                     maxLength={500}
                     placeholder={t('common:captionPlaceholder')}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-purple-400 transition resize-none"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-purple-400 transition resize-none"
                   />
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-500">
@@ -652,7 +671,7 @@ const PhotoModal = ({
               )}
             </div>
 
-            {/* ✨ AI-status (Fase 4.1) */}
+            {/* AI status */}
             {photo.aiAnalyzed && (
               <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3">
                 <div className="flex items-center gap-2 mb-2">
@@ -667,11 +686,11 @@ const PhotoModal = ({
               </div>
             )}
 
-            {/* ✨ AI-tags (Fase 4.1) */}
+            {/* AI tags */}
             {photo.aiTags && photo.aiTags.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Tag aria-hidden="true" className="w-4 h-4 text-purple-400" />
+                  <Tag className="w-4 h-4 text-purple-400" />
                   <p className="text-gray-400">{t('common:aiTags')}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -687,7 +706,7 @@ const PhotoModal = ({
               </div>
             )}
 
-            {/* ✨ Ansikter (Fase 4.1) */}
+            {/* Faces */}
             {photo.faces > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-1">
@@ -701,7 +720,7 @@ const PhotoModal = ({
               </div>
             )}
 
-            {/* ✨ Kategori (Fase 4.1) */}
+            {/* Category */}
             {photo.category && (
               <div>
                 <p className="text-gray-400 mb-1">{t('common:category')}</p>
@@ -711,7 +730,7 @@ const PhotoModal = ({
               </div>
             )}
 
-            {/* Filsti */}
+            {/* File path */}
             <div>
               <p className="text-gray-400 mb-1">{t('common:filePath')}</p>
               <p className="text-white text-xs break-all opacity-60">
@@ -722,9 +741,11 @@ const PhotoModal = ({
         </div>
       )}
 
-      {/* ✨ AI-badges på bildet (Fase 4.1) */}
-      {!showInfo && (
-        <div className="absolute top-20 left-4 flex flex-col gap-2 z-10">
+      {/* ===================================================================== */}
+      {/* AI BADGES - Hidden in fullscreen */}
+      {/* ===================================================================== */}
+      {!showInfo && !isFullscreen && !slideshowActive && (
+        <div className="absolute top-20 left-4 flex flex-col gap-2 z-[9998]">
           {photo.aiAnalyzed && (
             <div className="bg-purple-600/90 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1 shadow-lg">
               <Sparkles className="w-3 h-3" />
@@ -740,32 +761,49 @@ const PhotoModal = ({
         </div>
       )}
 
-      {/* Bildetittel nederst */}
-      {photo.name && !showInfo && !showEditor && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md text-gray-900 px-6 py-3 rounded-lg font-medium shadow-lg select-none z-20">
+      {/* ===================================================================== */}
+      {/* PHOTO TITLE - Bottom center */}
+      {/* ===================================================================== */}
+      {photo.name && !showInfo && !showEditor && !slideshowActive && (
+        <div
+          className={`absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md text-gray-900 px-6 py-3 rounded-lg font-medium shadow-lg select-none z-[9998] transition-opacity duration-300 ${
+            uiVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
+        >
           {photo.name}
         </div>
       )}
 
-      {/* Slideshow controls */}
+      {/* ===================================================================== */}
+      {/* SLIDESHOW CONTROLS */}
+      {/* ===================================================================== */}
       {slideshowActive && (
         <SlideshowControls
           isPlaying={slideshowPlaying}
-          onTogglePlay={() => setSlideshowPlaying((prev) => !prev)}
+          onTogglePlay={() => {
+            setSlideshowPlaying((prev) => !prev)
+            resetUiTimer()
+          }}
           onPrevious={prevPhoto}
           onNext={nextPhoto}
           onExit={() => {
             setSlideshowActive(false)
             setSlideshowPlaying(false)
+            setIsFullscreen(false)
           }}
           interval={slideshowInterval}
-          onIntervalChange={setSlideshowInterval}
+          onIntervalChange={(newInterval) => {
+            setSlideshowInterval(newInterval)
+            resetUiTimer()
+          }}
+          uiVisible={uiVisible}
         />
       )}
 
-      {/* Photo Editor – ligger over ALT */}
+      {/* ===================================================================== */}
+      {/* PHOTO EDITOR - Highest z-index */}
+      {/* ===================================================================== */}
       {showEditor && (() => {
-        // Resolve image URL with comprehensive fallback
         const resolvedImageUrl =
           photo.fullUrl ||
           photo.downloadUrl ||
@@ -776,7 +814,7 @@ const PhotoModal = ({
 
         return (
           <div
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95"
+            className="fixed inset-0 z-[10001] flex items-center justify-center bg-black/95"
             onClick={(e) => e.stopPropagation()}
           >
             <PhotoEditor

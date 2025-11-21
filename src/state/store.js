@@ -186,12 +186,14 @@ const useStore = create(
         photoModalOpen: false,
         confirmModal: null,
         editingAlbum: null,
+        isFullscreen: false,
 
         setUploadModalOpen: (open) => set({ uploadModalOpen: open }),
         setAlbumModalOpen: (open) => set({ albumModalOpen: open }),
         setPhotoModalOpen: (open) => set({ photoModalOpen: open }),
         setConfirmModal: (modal) => set({ confirmModal: modal }),
         setEditingAlbum: (album) => set({ editingAlbum: album }),
+        setIsFullscreen: (fullscreen) => set({ isFullscreen: fullscreen }),
 
         openUploadModal: () => set({ uploadModalOpen: true }),
         closeUploadModal: () => set({ uploadModalOpen: false }),
@@ -214,7 +216,7 @@ const useStore = create(
             selectedPhotoIndex: photoIndex,
           }),
 
-        closePhotoModal: () => set({ photoModalOpen: false }),
+        closePhotoModal: () => set({ photoModalOpen: false, isFullscreen: false }),
 
         // =====================================================================
         // UI STATE
