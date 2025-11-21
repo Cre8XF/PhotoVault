@@ -460,11 +460,7 @@ function AppContent() {
       )}
 
       {notification && (
-        <Notification
-          message={notification.message}
-          type={notification.type}
-          onClose={clearNotification}
-        />
+        <Notification notification={notification} onClose={clearNotification} />
       )}
     </div>
   )
