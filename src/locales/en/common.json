@@ -72,11 +72,13 @@
     "title": "Oops! Something went wrong",
     "tryAgain": "Try Again"
   },
+  "exitFullscreen": "Exit fullscreen",
   "facesDetected": "Faces detected",
   "favorite": "Favorite",
   "favorites": "Favorites",
   "filePath": "File path",
   "filters": "Filters",
+  "fullscreen": "Fullscreen",
   "grid": {
     "confirmDelete": "Do you want to delete this photo?",
     "coverBadge": "Cover",
@@ -187,6 +189,7 @@
   "slideshow": {
     "start": "Start slideshow",
     "exit": "Exit slideshow",
+    "exitSlideshow": "Exit Slideshow",
     "interval": "Interval",
     "playing": "Playing",
     "paused": "Paused"

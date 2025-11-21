@@ -72,11 +72,13 @@
     "title": "Oops! Noe gikk galt",
     "tryAgain": "Prøv igjen"
   },
+  "exitFullscreen": "Avslutt fullskjerm",
   "facesDetected": "Ansikter gjenkjent",
   "favorite": "Favoritt",
   "favorites": "Favoritter",
   "filePath": "Filsti",
   "filters": "Filtre",
+  "fullscreen": "Fullskjerm",
   "grid": {
     "confirmDelete": "Vil du slette dette bildet?",
     "coverBadge": "Forside",
@@ -187,6 +189,7 @@
   "slideshow": {
     "start": "Start lysbildefremvisning",
     "exit": "Avslutt lysbildefremvisning",
+    "exitSlideshow": "Avslutt lysbildefremvisning",
     "interval": "Intervall",
     "playing": "Spiller av",
     "paused": "Pauset"

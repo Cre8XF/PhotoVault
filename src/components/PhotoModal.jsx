@@ -16,6 +16,8 @@ import {
   Users,
   Edit2,
   Presentation,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react'
 // PHASE 2: Social features disabled for MVP
 // import CommentThread from "./CommentThread";
@@ -52,6 +54,9 @@ const PhotoModal = ({
   const [slideshowPlaying, setSlideshowPlaying] = useState(false)
   const [slideshowInterval, setSlideshowInterval] = useState(3) // seconds
 
+  // Fullscreen state
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
   const nextPhoto = () => {
     setImageLoaded(false)
     setIndex((i) => (i + 1) % photos.length)
@@ -74,11 +79,23 @@ const PhotoModal = ({
           prevPhoto()
           break
         case 'Escape':
-          onClose()
+          // If slideshow is active, exit slideshow but keep modal open
+          if (slideshowActive) {
+            setSlideshowActive(false)
+            setSlideshowPlaying(false)
+          } else {
+            onClose()
+          }
           break
         case 'i':
         case 'I':
-          setShowInfo((s) => !s)
+          if (!isFullscreen) {
+            setShowInfo((s) => !s)
+          }
+          break
+        case 'f':
+        case 'F':
+          setIsFullscreen((prev) => !prev)
           break
         default:
           break
@@ -87,7 +104,7 @@ const PhotoModal = ({
 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [photo, photos.length, onClose])
+  }, [photo, photos.length, onClose, slideshowActive, isFullscreen])
 
   useEffect(() => {
     const modal = document.querySelector('.photo-modal-wrapper')
@@ -116,22 +133,21 @@ const PhotoModal = ({
     return () => clearTimeout(timer)
   }, [slideshowActive, slideshowPlaying, slideshowInterval, index])
 
-  // Keyboard shortcuts for slideshow
+  // Auto-enable fullscreen when slideshow starts
+  useEffect(() => {
+    if (slideshowActive) {
+      setIsFullscreen(true)
+    }
+  }, [slideshowActive])
+
+  // Keyboard shortcuts for slideshow - Spacebar to pause/play
   useEffect(() => {
     if (!slideshowActive) return
 
     const handleKeyPress = (e) => {
-      switch (e.key) {
-        case ' ':
-          e.preventDefault()
-          setSlideshowPlaying((prev) => !prev)
-          break
-        case 'Escape':
-          setSlideshowActive(false)
-          setSlideshowPlaying(false)
-          break
-        default:
-          break
+      if (e.key === ' ') {
+        e.preventDefault()
+        setSlideshowPlaying((prev) => !prev)
       }
     }
 
@@ -291,72 +307,89 @@ const PhotoModal = ({
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Topbar */}
-      <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/90 via-black/60 to-transparent p-4 z-10">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <div
-            className="bg-white/90 backdrop-blur-md text-gray-900 text-sm font-semibold px-4 py-2 rounded-lg shadow-lg select-none"
-            aria-label={`${index + 1} av ${photos.length} bilder`}
-          >
-            {index + 1} / {photos.length}
-          </div>
+      {/* Topbar - Hidden in fullscreen */}
+      {!isFullscreen && (
+        <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/90 via-black/60 to-transparent p-4 z-10">
+          <div className="flex items-center justify-between max-w-7xl mx-auto">
+            <div
+              className="bg-white/90 backdrop-blur-md text-gray-900 text-sm font-semibold px-4 py-2 rounded-lg shadow-lg select-none"
+              aria-label={`${index + 1} av ${photos.length} bilder`}
+            >
+              {index + 1} / {photos.length}
+            </div>
 
-          <div className="flex items-center gap-2">
-            {onToggleFavorite && (
+            <div className="flex items-center gap-2">
+              {onToggleFavorite && (
+                <button
+                  aria-label={
+                    photo.favorite
+                      ? t('common:removeFavorite')
+                      : t('common:addToFavorites')
+                  }
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onToggleFavorite(photo)
+                  }}
+                  className={`ripple-effect backdrop-blur-md text-white p-2.5 rounded-lg transition shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
+                    photo.favorite
+                      ? 'bg-yellow-500/90 hover:bg-yellow-600'
+                      : 'bg-white/20 hover:bg-white/30'
+                  }`}
+                  title={
+                    photo.favorite
+                      ? t('common:removeFavorite')
+                      : t('common:addToFavorites')
+                  }
+                >
+                  <Star
+                    className="w-5 h-5"
+                    fill={photo.favorite ? 'currentColor' : 'none'}
+                  />
+                </button>
+              )}
+
               <button
-                aria-label={
-                  photo.favorite
-                    ? t('common:removeFavorite')
-                    : t('common:addToFavorites')
-                }
+                aria-label={t('common:showInfo')}
                 onClick={(e) => {
                   e.stopPropagation()
-                  onToggleFavorite(photo)
+                  setShowInfo(!showInfo)
                 }}
-                className={`ripple-effect backdrop-blur-md text-white p-2.5 rounded-lg transition shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
-                  photo.favorite
-                    ? 'bg-yellow-500/90 hover:bg-yellow-600'
-                    : 'bg-white/20 hover:bg-white/30'
+                className={`ripple-effect backdrop-blur-md text-white p-2.5 rounded-lg transition shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-400 ${
+                  showInfo ? 'bg-purple-600/90' : 'bg-white/20 hover:bg-white/30'
                 }`}
-                title={
-                  photo.favorite
-                    ? t('common:removeFavorite')
-                    : t('common:addToFavorites')
-                }
+                title={t('common:showInfo')}
               >
-                <Star
-                  className="w-5 h-5"
-                  fill={photo.favorite ? 'currentColor' : 'none'}
-                />
+                <Info className="w-5 h-5" />
               </button>
-            )}
 
-            <button
-              aria-label={t('common:showInfo')}
-              onClick={(e) => {
-                e.stopPropagation()
-                setShowInfo(!showInfo)
-              }}
-              className={`ripple-effect backdrop-blur-md text-white p-2.5 rounded-lg transition shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-400 ${
-                showInfo ? 'bg-purple-600/90' : 'bg-white/20 hover:bg-white/30'
-              }`}
-              title={t('common:showInfo')}
-            >
-              <Info className="w-5 h-5" />
-            </button>
+              {/* Fullscreen toggle button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setIsFullscreen(!isFullscreen)
+                }}
+                className="ripple-effect backdrop-blur-md bg-white/20 hover:bg-white/30 text-white p-2.5 rounded-lg transition shadow-lg"
+                title={isFullscreen ? t('common:exitFullscreen') : t('common:fullscreen')}
+              >
+                {isFullscreen ? (
+                  <Minimize2 className="w-5 h-5" />
+                ) : (
+                  <Maximize2 className="w-5 h-5" />
+                )}
+              </button>
 
-            {/* Slideshow button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                setSlideshowActive(true)
-                setSlideshowPlaying(true)
-              }}
-              className="ripple-effect backdrop-blur-md bg-white/20 hover:bg-white/30 text-white p-2.5 rounded-lg transition shadow-lg"
-              title={t('common:slideshow.start')}
-            >
-              <Presentation className="w-5 h-5" />
-            </button>
+              {/* Slideshow button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setSlideshowActive(true)
+                  setSlideshowPlaying(true)
+                }}
+                className="ripple-effect backdrop-blur-md bg-white/20 hover:bg-white/30 text-white p-2.5 rounded-lg transition shadow-lg"
+                title={t('common:slideshow.start')}
+              >
+                <Presentation className="w-5 h-5" />
+              </button>
 
             {photo.type !== 'video' && (
               <button
@@ -392,9 +425,10 @@ const PhotoModal = ({
             >
               <X className="w-5 h-5" />
             </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Navigasjonsknapper */}
       {photos.length > 1 && (
@@ -434,7 +468,9 @@ const PhotoModal = ({
       {/* Hovedbilde/Video */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className="max-w-[90vw] max-h-[85vh] flex items-center justify-center relative"
+        className={`max-w-[95vw] flex items-center justify-center relative ${
+          isFullscreen ? 'max-h-[95vh]' : 'max-h-[85vh]'
+        }`}
       >
         {!imageLoaded && (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -447,7 +483,9 @@ const PhotoModal = ({
             key={photo.id}
             controls
             poster={photo.thumbnailUrl}
-            className="max-h-[80vh] max-w-full rounded-xl shadow-2xl"
+            className={`max-w-full rounded-xl shadow-2xl ${
+              isFullscreen ? 'max-h-[93vh]' : 'max-h-[80vh]'
+            }`}
             onLoadedData={() => setImageLoaded(true)}
             autoPlay
           >
@@ -460,7 +498,9 @@ const PhotoModal = ({
           <img
             src={photo.url}
             alt={photo.name || ''}
-            className={`max-h-[80vh] max-w-full rounded-xl shadow-2xl object-contain transition-opacity duration-300 ${
+            className={`max-w-full rounded-xl shadow-2xl object-contain transition-opacity duration-300 ${
+              isFullscreen ? 'max-h-[93vh]' : 'max-h-[80vh]'
+            } ${
               imageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
             onLoad={() => setImageLoaded(true)}
@@ -468,8 +508,8 @@ const PhotoModal = ({
         )}
       </div>
 
-      {/* Info-panel */}
-      {showInfo && (
+      {/* Info-panel - Hidden in fullscreen */}
+      {showInfo && !isFullscreen && (
         <div
           role="dialog"
           tabIndex="0"
