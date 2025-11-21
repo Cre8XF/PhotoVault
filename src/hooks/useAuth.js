@@ -44,8 +44,10 @@ export const useAuth = () => {
             uid,
             userId: uid,
             role: 'user',
-            storageLimit: 524288000, // 500 MB
+            subscriptionTier: 'GRATIS', // ✅ Default tier
+            storageLimit: 1073741824, // ✅ 1GB for GRATIS
             createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
           }
 
           // Forsøk å skrive dokumentet (håndter permissions trygt)
@@ -116,31 +118,94 @@ export const useAuth = () => {
     return () => unsubscribe()
   }, [auth, setUser, setLoading, setUserProfile, fetchUserProfile])
 
+  // ==========================================
+  // ✅ TIER-BASED HELPERS
+  // ==========================================
+
   /**
-   * Determine admin and pro status
+   * Check if user is admin
    */
   const isAdmin = useCallback(() => {
-    // Accept both Firestore role and specific email
     return userProfile?.role === 'admin' || user?.email === 'rogsor80@gmail.com'
   }, [userProfile, user])
 
-  const isPro = useCallback(() => {
-    return (
-      userProfile?.isPro === true ||
-      userProfile?.role === 'pro' ||
-      userProfile?.role === 'admin'
-    )
+  /**
+   * Check if user is on GRATIS tier
+   */
+  const isGratis = useCallback(() => {
+    if (!userProfile) return true // Default for new users
+    if (userProfile.role === 'admin') return false
+    return userProfile.subscriptionTier === 'GRATIS' || !userProfile.subscriptionTier
   }, [userProfile])
 
   /**
-   * Get user's storage quota
+   * Check if user is on LITE tier
+   */
+  const isLite = useCallback(() => {
+    if (!userProfile) return false
+    if (userProfile.role === 'admin') return false
+    return userProfile.subscriptionTier === 'LITE'
+  }, [userProfile])
+
+  /**
+   * Check if user is on PRO tier
+   */
+  const isPro = useCallback(() => {
+    if (!userProfile) return false
+    if (userProfile.role === 'admin') return true // Admins = PRO
+    return userProfile.subscriptionTier === 'PRO'
+  }, [userProfile])
+
+  /**
+   * Get current subscription tier
+   */
+  const getTier = useCallback(() => {
+    if (isAdmin()) return 'ADMIN'
+    return userProfile?.subscriptionTier || 'GRATIS'
+  }, [userProfile, isAdmin])
+
+  /**
+   * Get storage quota based on tier
    */
   const getStorageQuota = useCallback(() => {
+    if (isAdmin()) {
+      return {
+        limit: null,
+        unlimited: true,
+        tier: 'ADMIN'
+      }
+    }
+
+    const tier = userProfile?.subscriptionTier || 'GRATIS'
+    const limits = {
+      'GRATIS': 1073741824,     // 1GB
+      'LITE': 5368709120,        // 5GB
+      'PRO': 53687091200         // 50GB
+    }
+
     return {
-      limit: userProfile?.storageLimit || 524288000, // 500 MB default
-      unlimited: isAdmin(),
+      limit: userProfile?.storageLimit || limits[tier] || limits.GRATIS,
+      unlimited: false,
+      tier
     }
   }, [userProfile, isAdmin])
+
+  /**
+   * Check if video upload is allowed
+   */
+  const canUploadVideo = useCallback(() => {
+    if (isAdmin()) return true
+    return isPro() // Only PRO tier
+  }, [isAdmin, isPro])
+
+  /**
+   * Check if compression should be applied
+   */
+  const shouldCompress = useCallback(() => {
+    if (isAdmin()) return true // Admin can choose
+    if (isGratis()) return false // GRATIS: Original quality
+    return true // LITE and PRO: Compress
+  }, [isAdmin, isGratis])
 
   return {
     user,
@@ -148,9 +213,20 @@ export const useAuth = () => {
     loading,
     handleLogout,
     fetchUserProfile,
-    isAdmin: isAdmin(),
+
+    // Tier checks
+    isGratis: isGratis(),
+    isLite: isLite(),
     isPro: isPro(),
+    isAdmin: isAdmin(),
+    tier: getTier(),
+
+    // Capabilities
+    canUploadVideo: canUploadVideo(),
+    shouldCompress: shouldCompress(),
     storageQuota: getStorageQuota(),
+
+    // Legacy
     isAuthenticated: !!user,
   }
 }

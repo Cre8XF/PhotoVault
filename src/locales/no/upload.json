@@ -28,5 +28,16 @@
   "autoCompress": "Auto-komprimering",
   "autoCompressDesc": "Reduser filstørrelse automatisk",
   "aiAutoTagging": "AI Auto-tagging",
-  "aiAutoTaggingDesc": "Analyser bilder med Google Vision AI"
+  "aiAutoTaggingDesc": "Analyser bilder med Google Vision AI",
+  "errors": {
+    "fileTooLarge": "Filen er for stor (maks {{size}})",
+    "unsupportedImageType": "Bildeformat ikke støttet",
+    "unsupportedVideoType": "Videoformat ikke støttet",
+    "videoNotAllowedGratis": "Video upload er ikke tilgjengelig på GRATIS-kontoen. Oppgrader til PRO for å laste opp videoer.",
+    "videoNotAllowedLite": "Video upload er ikke tilgjengelig på LITE-kontoen. Oppgrader til PRO for å laste opp videoer.",
+    "uploadFailed": "Opplasting feilet"
+  },
+  "warnings": {
+    "largeFile": "Stor fil - kan ta tid å laste opp"
+  }
 }

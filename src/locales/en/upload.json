@@ -28,5 +28,16 @@
   "autoCompress": "Auto-compression",
   "autoCompressDesc": "Automatically reduce file size",
   "aiAutoTagging": "AI Auto-tagging",
-  "aiAutoTaggingDesc": "Analyze images with Google Vision AI"
+  "aiAutoTaggingDesc": "Analyze images with Google Vision AI",
+  "errors": {
+    "fileTooLarge": "File too large (max {{size}})",
+    "unsupportedImageType": "Image format not supported",
+    "unsupportedVideoType": "Video format not supported",
+    "videoNotAllowedGratis": "Video upload is not available on FREE account. Upgrade to PRO to upload videos.",
+    "videoNotAllowedLite": "Video upload is not available on LITE account. Upgrade to PRO to upload videos.",
+    "uploadFailed": "Upload failed"
+  },
+  "warnings": {
+    "largeFile": "Large file - may take time to upload"
+  }
 }

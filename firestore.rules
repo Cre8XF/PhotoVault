@@ -19,6 +19,12 @@ service cloud.firestore {
       return isAuthenticated() && request.resource.data.userId == request.auth.uid;
     }
 
+    // ✅ NEW: Validate subscriptionTier field
+    function isValidTier() {
+      return !('subscriptionTier' in request.resource.data) ||
+             request.resource.data.subscriptionTier in ['GRATIS', 'LITE', 'PRO'];
+    }
+
     // ===== ALBUMS =====
     match /albums/{albumId} {
       // Alle kan lese hvis albumet er offentlig
@@ -45,7 +51,9 @@ service cloud.firestore {
     // ===== BRUKER-BASERT STRUKTUR =====
     match /users/{userId} {
       allow read: if isAuthenticated();
-      allow write: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidTier();
+      allow update: if (isOwner(userId) || isAdmin()) && isValidTier();
+      allow delete: if isOwner(userId) || isAdmin();
 
       // 🔹 Bilder under users/{userId}/photos
       match /photos/{photoId} {
