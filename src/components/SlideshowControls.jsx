@@ -16,8 +16,8 @@ const SlideshowControls = ({
 
   return (
     <div
-      className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[9999] transition-all duration-300 ${
-        uiVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      className={`fixed inset-x-0 bottom-6 z-[10000] flex justify-center transition-opacity duration-300 ${
+        uiVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
       }`}
     >
       <div className="flex items-center gap-4 bg-black/60 dark:bg-black/70 backdrop-blur-md px-6 py-4 rounded-full shadow-2xl border border-white/10">

@@ -338,7 +338,7 @@ const PhotoModal = ({
       {/* CLOSE BUTTON - Always visible, top-right */}
       {/* ===================================================================== */}
       <button
-        className="fixed top-4 right-4 z-[10000] p-3 rounded-full bg-black/40 dark:bg-black/60 backdrop-blur-md text-white drop-shadow-md active:scale-95 transition"
+        className="fixed top-4 right-4 z-[10001] p-3 rounded-full bg-black/40 dark:bg-black/60 backdrop-blur-md text-white drop-shadow-md active:scale-95 transition"
         onClick={handleClose}
         aria-label={t('common:close')}
       >
@@ -350,11 +350,11 @@ const PhotoModal = ({
       {/* ===================================================================== */}
       {!isFullscreen && !slideshowActive && (
         <div
-          className={`absolute top-0 left-0 right-0 bg-gradient-to-b from-black/90 via-black/60 to-transparent p-4 z-[9998] transition-opacity duration-300 ${
+          className={`absolute top-0 left-0 right-0 bg-gradient-to-b from-black/90 via-black/60 to-transparent px-4 py-4 z-[9998] transition-opacity duration-300 ${
             uiVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
         >
-          <div className="flex items-center justify-between max-w-7xl mx-auto">
+          <div className="flex items-center justify-between w-full">
             <div
               className="bg-white/90 backdrop-blur-md text-gray-900 text-sm font-semibold px-4 py-2 rounded-lg shadow-lg select-none"
               aria-label={`${index + 1} av ${photos.length} bilder`}
@@ -498,7 +498,7 @@ const PhotoModal = ({
       {/* ===================================================================== */}
       <div
         onClick={handleToggleUi}
-        className="max-w-full max-h-full flex items-center justify-center relative px-4"
+        className="w-full h-full flex items-center justify-center"
       >
         {!imageLoaded && (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -814,7 +814,7 @@ const PhotoModal = ({
 
         return (
           <div
-            className="fixed inset-0 z-[10001] flex items-center justify-center bg-black/95"
+            className="fixed inset-0 z-[10002] flex items-center justify-center bg-black/95"
             onClick={(e) => e.stopPropagation()}
           >
             <PhotoEditor
