@@ -25,6 +25,7 @@ import {
 import { triggerHaptic, showToast } from '../utils/nativeUtils'
 import { useTranslation } from 'react-i18next'
 import { useUpload } from '../hooks/useUpload'
+import useAuth from '../hooks/useAuth' // ✅ ADD
 import { auth, addAlbum } from '../firebase'
 
 const formatFileSize = (bytes) => {
@@ -54,8 +55,12 @@ const UploadModal = ({
   })
   const [showAlbums, setShowAlbums] = useState(false)
   const [autoCompress, setAutoCompress] = useState(() => {
+    // FREE users cannot compress - always false
+    if (tier === 'GRATIS') return false
+
+    // LITE/PRO users - read from localStorage
     const saved = localStorage.getItem('autoCompress')
-    return saved !== 'false'
+    return saved !== 'false' // Default true for LITE/PRO
   })
   const [aiTagging] = useState(false) // Always false for MVP
   const [isCreatingAlbum, setIsCreatingAlbum] = useState(false) // Reentrancy guard
@@ -67,6 +72,7 @@ const UploadModal = ({
   // Hooks
   const isNative = isNativePlatform()
   const { t } = useTranslation(['common', 'upload'])
+  const { tier, canUploadVideo, shouldCompress } = useAuth() // ✅ ADD
   const {
     uploading,
     processingProgress,
@@ -81,6 +87,13 @@ const UploadModal = ({
   useEffect(() => {
     if (isNative) checkPermissionsAsync()
   }, [isNative])
+
+  // Update localStorage when autoCompress changes (only for LITE/PRO users)
+  useEffect(() => {
+    if (tier !== 'GRATIS') {
+      localStorage.setItem('autoCompress', autoCompress)
+    }
+  }, [autoCompress, tier])
 
   const checkPermissionsAsync = async () => {
     const perms = await checkCameraPermissions()
@@ -130,7 +143,36 @@ const UploadModal = ({
 
   // File validation and preview generation
   const handleFilesAsync = async (files) => {
-    const { validFiles, errors, warnings } = await validateFiles(files)
+    // ✅ Filter video files first if user cannot upload videos
+    let filesToValidate = files
+    let blockedVideos = []
+
+    if (!canUploadVideo) {
+      filesToValidate = []
+      files.forEach(file => {
+        const isVideo = file.type.startsWith('video/')
+        if (isVideo) {
+          blockedVideos.push(file.name)
+        } else {
+          filesToValidate.push(file)
+        }
+      })
+
+      // Show feedback if videos were blocked
+      if (blockedVideos.length > 0) {
+        const message = tier === 'GRATIS'
+          ? `Video upload er ikke tilgjengelig på GRATIS-kontoen. Oppgrader til PRO for å laste opp videoer.\n\nBlokket: ${blockedVideos.join(', ')}`
+          : `Video upload er ikke tilgjengelig på LITE-kontoen. Oppgrader til PRO for å laste opp videoer.\n\nBlokket: ${blockedVideos.join(', ')}`
+
+        await showToast(message, 'error')
+      }
+
+      if (filesToValidate.length === 0) {
+        return // No valid files to process
+      }
+    }
+
+    const { validFiles, errors, warnings } = await validateFiles(filesToValidate)
 
     // Show errors
     if (errors.length > 0) {
@@ -220,8 +262,9 @@ const UploadModal = ({
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
   }
 
-  // Toggle compression
+  // Toggle compression (disabled for GRATIS users)
   const handleCompressToggle = () => {
+    if (tier === 'GRATIS') return // Cannot toggle for FREE users
     const newValue = !autoCompress
     setAutoCompress(newValue)
     localStorage.setItem('autoCompress', newValue.toString())
@@ -494,33 +537,81 @@ const UploadModal = ({
           {/* Options */}
           <div className="mt-6 space-y-3">
             {/* Auto Compress Toggle */}
-            <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4">
+            <div className={`rounded-xl p-4 border ${
+              tier === 'GRATIS'
+                ? 'bg-gray-600/10 border-gray-600/20'
+                : 'bg-green-500/10 border-green-500/20'
+            }`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-600/30 rounded-lg">
-                    <Zap className="w-5 h-5 text-green-400" />
+                  <div className={`p-2 rounded-lg ${
+                    tier === 'GRATIS'
+                      ? 'bg-gray-600/20'
+                      : 'bg-green-600/30'
+                  }`}>
+                    <Zap className={`w-5 h-5 ${
+                      tier === 'GRATIS'
+                        ? 'text-gray-400'
+                        : 'text-green-400'
+                    }`} />
                   </div>
                   <div>
-                    <p className="font-medium">{t('upload:autoCompress')}</p>
-                    <p className="text-xs text-gray-400">
-                      {t('upload:autoCompressDesc')}
+                    <p className={`font-medium ${
+                      tier === 'GRATIS' ? 'text-gray-400' : ''
+                    }`}>
+                      {t('upload:autoCompress')}
+                    </p>
+                    <p className={`text-xs ${
+                      tier === 'GRATIS' ? 'text-gray-500' : 'text-gray-400'
+                    }`}>
+                      {tier === 'GRATIS'
+                        ? 'Original kvalitet (GRATIS tier)'
+                        : t('upload:autoCompressDesc')}
                     </p>
                   </div>
                 </div>
+
+                {/* Toggle switch */}
                 <button
                   onClick={handleCompressToggle}
-                  disabled={uploading}
+                  disabled={uploading || tier === 'GRATIS'}
                   className={`relative w-14 h-7 rounded-full transition ${
-                    autoCompress ? 'bg-green-600' : 'bg-gray-600'
+                    tier === 'GRATIS'
+                      ? 'bg-gray-700 cursor-not-allowed'
+                      : autoCompress
+                      ? 'bg-green-600'
+                      : 'bg-gray-600'
                   } ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <div
                     className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                      autoCompress ? 'translate-x-7' : 'translate-x-0'
+                      autoCompress && tier !== 'GRATIS' ? 'translate-x-7' : 'translate-x-0'
                     }`}
                   />
                 </button>
               </div>
+
+              {/* Info badge for FREE users */}
+              {tier === 'GRATIS' && (
+                <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                  <p className="text-xs text-blue-400">
+                    💡 GRATIS-brukere får original bildekvalitet uten komprimering.
+                    Oppgrader til LITE eller PRO for bildekomprimering som sparer lagring.
+                  </p>
+                </div>
+              )}
+
+              {/* Compression stats - only show if tier allows compression */}
+              {tier !== 'GRATIS' && compressionStats && (
+                <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                  <p className="text-sm text-green-400 font-medium">
+                    {t('upload:compressionSaved')}: {compressionStats.savingsPercent?.toFixed(1) || 0}%
+                  </p>
+                  <p className="text-xs opacity-60">
+                    {formatFileSize(compressionStats.originalSize)} → {formatFileSize(compressionStats.compressedSize)}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -550,20 +641,6 @@ const UploadModal = ({
                     : t('upload:uploadingFiles', 'Laster opp bilder...')}
                 </p>
               )}
-            </div>
-          )}
-
-          {/* Compression Stats */}
-          {compressionStats && (
-            <div className="mt-4 p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
-              <p className="text-sm text-green-400 font-medium">
-                {t('upload:compressionSaved')}:{' '}
-                {compressionStats.savedPercentage}%
-              </p>
-              <p className="text-xs text-gray-400 mt-1">
-                {formatFileSize(compressionStats.originalSize)} →{' '}
-                {formatFileSize(compressionStats.compressedSize)}
-              </p>
             </div>
           )}
         </div>
