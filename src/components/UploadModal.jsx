@@ -37,6 +37,20 @@ const formatFileSize = (bytes) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
 }
 
+/**
+ * ✅ ROBUST video detection that works on mobile and desktop
+ * Checks both MIME type AND file extension to catch edge cases
+ */
+const detectVideo = (file) => {
+  const name = file.name?.toLowerCase() || ""
+  const extMatch = /\.(mp4|mov|m4v|webm|avi|3gp|mkv|flv)$/i.test(name)
+
+  const mime = file.type?.toLowerCase() || ""
+  const mimeMatch = mime.startsWith("video/")
+
+  return extMatch || mimeMatch
+}
+
 const UploadModal = ({
   isOpen,
   onClose,
@@ -152,7 +166,9 @@ const UploadModal = ({
     if (!canUploadVideo()) {
       filesToValidate = []
       files.forEach((file) => {
-        const isVideo = file.type.startsWith('video/')
+        // ✅ FIXED: Use robust video detection
+        const isVideo = detectVideo(file)
+        console.log(`🔍 Video check: ${file.name}, MIME: ${file.type}, isVideo: ${isVideo}`)
         if (isVideo) {
           blockedVideos.push(file.name)
         } else {
