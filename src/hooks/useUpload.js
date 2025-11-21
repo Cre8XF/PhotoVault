@@ -66,27 +66,26 @@ export function useUpload() {
       // ✅ VIDEO TIER CHECK
       if (isVideo) {
         if (!canUploadVideo) {
-          const tierName = tier === 'GRATIS' ? 'GRATIS' : 'LITE'
           fileErrors.push(
             tier === 'GRATIS'
-              ? 'Video-opplasting er ikke tilgjengelig på GRATIS-kontoen. Oppgrader til PRO.'
-              : 'Video-opplasting er ikke tilgjengelig på LITE-kontoen. Oppgrader til PRO.'
+              ? t('errors.videoNotAllowedGratis')
+              : t('errors.videoNotAllowedLite')
           )
           console.log(`❌ Video blocked: ${file.name} (tier: ${tier})`)
         } else if (!ALLOWED_VIDEO_TYPES.includes(fileType) && !hasVideoExtension) {
-          fileErrors.push(t('errors.unsupportedVideoType') || 'Videoformat ikke støttet')
+          fileErrors.push(t('errors.unsupportedVideoType'))
           console.log(`❌ Unsupported video type: ${file.name} (${file.type})`)
         }
       }
 
       // Image validation
       if (isImage && !ALLOWED_IMAGE_TYPES.includes(fileType)) {
-        fileErrors.push(t('errors.unsupportedImageType') || 'Bildeformat ikke støttet')
+        fileErrors.push(t('errors.unsupportedImageType'))
       }
 
       // File size check
       if (file.size > MAX_FILE_SIZE) {
-        fileErrors.push(t('errors.fileTooLarge', { size: '100MB' }) || 'Fil for stor (maks 100MB)')
+        fileErrors.push(t('errors.fileTooLarge', { size: '100MB' }))
       }
 
       // Add to results
@@ -102,7 +101,7 @@ export function useUpload() {
         if (file.size > 10 * 1024 * 1024) {
           warnings.push({
             file: file.name,
-            message: t('warnings.largeFile') || 'Stor fil - kan ta tid å laste opp',
+            message: t('warnings.largeFile'),
           })
         }
       }
