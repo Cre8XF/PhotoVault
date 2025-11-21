@@ -308,6 +308,43 @@ export async function updatePhoto(photoId, updates) {
   }
 }
 
+/**
+ * Update photo caption
+ * @param {string} photoId - Photo ID
+ * @param {string} caption - New caption text (or null to remove)
+ * @param {string} userId - User ID (for security)
+ * @returns {Promise<{success: boolean}>}
+ */
+export async function updatePhotoCaption(photoId, caption, userId) {
+  try {
+    const refDoc = doc(db, 'photos', photoId)
+
+    // Security check: Verify photo belongs to user
+    const photoSnap = await getDoc(refDoc)
+    if (!photoSnap.exists()) {
+      throw new Error('Photo not found')
+    }
+
+    const photoData = photoSnap.data()
+    if (photoData.userId !== userId) {
+      throw new Error('Permission denied')
+    }
+
+    // Update caption
+    await updateDoc(refDoc, {
+      caption: caption || null,
+      captionUpdatedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    })
+
+    console.log(`📝 Caption updated for photo ${photoId}`)
+    return { success: true }
+  } catch (err) {
+    console.error('🔥 updatePhotoCaption error:', err)
+    throw err
+  }
+}
+
 // ⭐ Toggle favoritt-status
 export async function toggleFavorite(photoId, currentStatus) {
   try {
