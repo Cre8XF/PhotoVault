@@ -13,9 +13,11 @@ import {
   generateThumbnail,
   compressVideo,
 } from '../utils/videoTools'
+import useAuth from './useAuth' // ✅ ADD
 
 export function useUpload() {
   const { t } = useTranslation(['upload'])
+  const { tier, canUploadVideo, shouldCompress } = useAuth() // ✅ ADD
   const [uploading, setUploading] = useState(false)
   const [processingProgress, setProcessingProgress] = useState(0)
   const [compressionStats, setCompressionStats] = useState(null)
@@ -29,7 +31,7 @@ export function useUpload() {
    */
   const validateFiles = async (files) => {
     const MAX_FILE_SIZE = 100 * 1024 * 1024 // 100MB
-    const ALLOWED_TYPES = [
+    const ALLOWED_IMAGE_TYPES = [
       'image/jpeg',
       'image/jpg',
       'image/png',
@@ -37,6 +39,8 @@ export function useUpload() {
       'image/webp',
       'image/heic',
       'image/heif',
+    ]
+    const ALLOWED_VIDEO_TYPES = [
       'video/mp4',
       'video/quicktime',
       'video/x-msvideo',
@@ -49,19 +53,31 @@ export function useUpload() {
 
     for (const file of files) {
       const fileErrors = []
-
-      // Check file size
-      if (file.size > MAX_FILE_SIZE) {
-        fileErrors.push(t('errors.fileTooLarge', { size: '100MB' }))
-      }
-
-      // Check file type
       const fileType = file.type.toLowerCase()
       const isVideo = fileType.startsWith('video/')
       const isImage = fileType.startsWith('image/')
 
-      if (!ALLOWED_TYPES.includes(fileType) && !isVideo && !isImage) {
-        fileErrors.push(t('errors.unsupportedType'))
+      // ✅ VIDEO VALIDATION BASED ON TIER
+      if (isVideo) {
+        if (!canUploadVideo) {
+          fileErrors.push(
+            tier === 'GRATIS'
+              ? t('errors.videoNotAllowedGratis') || 'Video upload ikke tilgjengelig på GRATIS. Oppgrader til PRO.'
+              : t('errors.videoNotAllowedLite') || 'Video upload ikke tilgjengelig på LITE. Oppgrader til PRO.'
+          )
+        } else if (!ALLOWED_VIDEO_TYPES.includes(fileType)) {
+          fileErrors.push(t('errors.unsupportedVideoType') || 'Videoformat ikke støttet')
+        }
+      }
+
+      // Image validation
+      if (isImage && !ALLOWED_IMAGE_TYPES.includes(fileType)) {
+        fileErrors.push(t('errors.unsupportedImageType') || 'Bildeformat ikke støttet')
+      }
+
+      // File size check
+      if (file.size > MAX_FILE_SIZE) {
+        fileErrors.push(t('errors.fileTooLarge', { size: '100MB' }))
       }
 
       // Add to results
@@ -75,7 +91,7 @@ export function useUpload() {
         if (file.size > 10 * 1024 * 1024) {
           warnings.push({
             file: file.name,
-            message: t('warnings.largeFile'),
+            message: t('warnings.largeFile') || 'Stor fil - kan ta tid å laste opp',
           })
         }
       }
@@ -113,36 +129,40 @@ export function useUpload() {
       for (let i = 0; i < selectedFiles.length; i++) {
         const fileObj = selectedFiles[i]
         const file = fileObj.file
-        const autoCompress = localStorage.getItem('autoCompress') !== 'false'
 
         totalOriginalSize += file.size
 
-        // Process videos
+        // ✅ TIER-AWARE VIDEO PROCESSING
         if (fileObj.type === 'video') {
+          // Double-check video permission (should be caught in validation)
+          if (!canUploadVideo) {
+            console.warn('Video upload blocked for tier:', tier)
+            continue
+          }
+
           let videoToUpload = file
           let thumbnailBlob = null
           let metadata = null
 
           try {
-            // Extract metadata
             metadata = await extractVideoMetadata(file)
-
-            // Generate thumbnail
             thumbnailBlob = await generateThumbnail(file, 2.0)
 
-            // Compress if enabled and file > 50MB
-            if (autoCompress && file.size > 50 * 1024 * 1024) {
+            // ✅ Compress video only if tier allows AND file > 50MB
+            if (shouldCompress && file.size > 50 * 1024 * 1024) {
               const compressedVideo = await compressVideo(file)
-              videoToUpload = new File([compressedVideo], file.name, {
-                type: file.type,
-                lastModified: Date.now(),
-              })
-              console.log(
-                `📹 Video compressed: ${(file.size / 1024 / 1024).toFixed(
-                  1
-                )}MB → ${(videoToUpload.size / 1024 / 1024).toFixed(1)}MB`
-              )
-              totalCompressedSize += videoToUpload.size
+              if (compressedVideo) {
+                videoToUpload = new File([compressedVideo], file.name, {
+                  type: file.type,
+                  lastModified: Date.now(),
+                })
+                console.log(
+                  `📹 Video compressed: ${(file.size / 1024 / 1024).toFixed(1)}MB → ${(videoToUpload.size / 1024 / 1024).toFixed(1)}MB`
+                )
+                totalCompressedSize += videoToUpload.size
+              } else {
+                totalCompressedSize += file.size
+              }
             } else {
               totalCompressedSize += file.size
             }
@@ -169,9 +189,10 @@ export function useUpload() {
             Math.round(((i + 1) / selectedFiles.length) * 50)
           )
         }
-        // Process images
+        // ✅ TIER-AWARE IMAGE PROCESSING
         else {
-          if (autoCompress) {
+          if (shouldCompress) {
+            // LITE and PRO: Compress images
             const compressedBlob = await compressImage(file, {
               maxWidth: 1920,
               maxHeight: 1080,
@@ -192,15 +213,24 @@ export function useUpload() {
               size: compressedFile.size,
               type: 'photo',
             })
+
+            console.log(
+              `🖼️ Image compressed: ${(file.size / 1024 / 1024).toFixed(1)}MB → ${(compressedFile.size / 1024 / 1024).toFixed(1)}MB`
+            )
           } else {
+            // GRATIS: Original quality, no compression
             totalCompressedSize += file.size
             processedFiles.push({
-              file: file,
+              file: file, // ✅ Original file
               preview: fileObj.preview,
               name: file.name,
               size: file.size,
               type: 'photo',
             })
+
+            console.log(
+              `🖼️ Image uploaded (original): ${(file.size / 1024 / 1024).toFixed(1)}MB`
+            )
           }
 
           setProcessingProgress(
@@ -209,15 +239,22 @@ export function useUpload() {
         }
       }
 
-      // Set compression stats
-      if (totalOriginalSize > 0) {
-        const savedPercentage = Math.round(
-          ((totalOriginalSize - totalCompressedSize) / totalOriginalSize) * 100
-        )
+      // Store compression stats
+      if (shouldCompress) {
         setCompressionStats({
           originalSize: totalOriginalSize,
           compressedSize: totalCompressedSize,
-          savedPercentage,
+          savings: totalOriginalSize - totalCompressedSize,
+          savingsPercent:
+            ((totalOriginalSize - totalCompressedSize) / totalOriginalSize) * 100,
+        })
+      } else {
+        setCompressionStats({
+          originalSize: totalOriginalSize,
+          compressedSize: totalOriginalSize,
+          savings: 0,
+          savingsPercent: 0,
+          message: 'Original quality (GRATIS tier)'
         })
       }
 
