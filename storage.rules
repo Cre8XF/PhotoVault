@@ -33,6 +33,12 @@ service firebase.storage {
       return request.resource.size < 200 * 1024 * 1024; // 200 MB
     }
 
+    // ✅ NEW: Check if user can upload video (PRO or ADMIN only)
+    function canUploadVideo() {
+      return isAdmin() ||
+             request.auth.token.subscriptionTier == 'PRO';
+    }
+
     // -----------------------------
     // USERS
     // -----------------------------
@@ -40,7 +46,7 @@ service firebase.storage {
       allow read: if isOwner(userId) || isAdmin();
       allow create: if (isOwner(userId) || isAdmin()) &&
                       ((isImage() && isValidImageSize()) ||
-                       (isVideo() && isValidVideoSize()));
+                       (isVideo() && isValidVideoSize() && canUploadVideo()));
       allow delete: if isOwner(userId) || isAdmin();
     }
 
@@ -51,7 +57,7 @@ service firebase.storage {
       allow read: if isOwner(userId) || isAdmin();
       allow create: if (isOwner(userId) || isAdmin()) &&
                       ((isImage() && isValidImageSize()) ||
-                       (isVideo() && isValidVideoSize()));
+                       (isVideo() && isValidVideoSize() && canUploadVideo()));
       allow delete: if isOwner(userId) || isAdmin();
     }
 
@@ -92,7 +98,7 @@ service firebase.storage {
       allow read: if isOwner(userId) || isAdmin();
       allow create: if (isOwner(userId) || isAdmin()) &&
                       ((isImage() && isValidImageSize()) ||
-                       (isVideo() && isValidVideoSize()));
+                       (isVideo() && isValidVideoSize() && canUploadVideo()));
       allow delete: if isOwner(userId) || isAdmin();
     }
 
