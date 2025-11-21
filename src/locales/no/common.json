@@ -184,6 +184,15 @@
   "selectAll": "Velg alle",
   "showInfo": "Vis info",
   "size": "Størrelse",
+  "slideshow": {
+    "start": "Start lysbildefremvisning",
+    "exit": "Avslutt lysbildefremvisning",
+    "interval": "Intervall",
+    "playing": "Spiller av",
+    "paused": "Pauset"
+  },
+  "play": "Spill av",
+  "pause": "Pause",
   "status": "Status",
   "storage": "Lagring",
   "total": "Totalt",
