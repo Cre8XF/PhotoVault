@@ -44,7 +44,21 @@ const UploadModal = ({
   albums = [],
   selectedAlbum = null,
 }) => {
-  // UI State
+  // ✅ FIRST: Get all hook values that provide data
+  const isNative = isNativePlatform()
+  const { t } = useTranslation(['common', 'upload'])
+  const { tier, canUploadVideo, shouldCompress } = useAuth()
+  const {
+    uploading,
+    processingProgress,
+    compressionStats,
+    uploadCount,
+    totalFiles,
+    validateFiles,
+    uploadFiles,
+  } = useUpload()
+
+  // ✅ THEN: Initialize state that depends on those values
   const [showAlbumModal, setShowAlbumModal] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState([])
   const [selectedAlbumId, setSelectedAlbumId] = useState(selectedAlbum || '')
@@ -68,20 +82,6 @@ const UploadModal = ({
   // Refs
   const fileInputRef = useRef(null)
   const modalRef = useRef(null)
-
-  // Hooks
-  const isNative = isNativePlatform()
-  const { t } = useTranslation(['common', 'upload'])
-  const { tier, canUploadVideo, shouldCompress } = useAuth() // ✅ ADD
-  const {
-    uploading,
-    processingProgress,
-    compressionStats,
-    uploadCount, // ✅ NY
-    totalFiles,
-    validateFiles,
-    uploadFiles,
-  } = useUpload()
 
   // Permission check for native platforms
   useEffect(() => {
