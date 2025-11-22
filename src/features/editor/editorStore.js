@@ -34,7 +34,17 @@ const useEditorStore = create((set, get) => ({
     rotate: 0,          // 0, 90, 180, 270
     flipH: false,       // horizontal flip
     flipV: false,       // vertical flip
-    crop: null,         // { x, y, width, height } or null
+    crop: null,         // { x, y, width, height, aspectRatio } or null
+    filter: null,       // filter preset ID or null
+  },
+
+  // Zoom & Pan state (Phase 7A)
+  zoom: {
+    currentZoom: 1,
+    minZoom: 0.5,
+    maxZoom: 3,
+    panX: 0,
+    panY: 0,
   },
 
   // UI state
@@ -63,6 +73,14 @@ const useEditorStore = create((set, get) => ({
         flipH: false,
         flipV: false,
         crop: null,
+        filter: null,
+      },
+      zoom: {
+        currentZoom: 1,
+        minZoom: 0.5,
+        maxZoom: 3,
+        panX: 0,
+        panY: 0,
       },
       activeMode: null,
       isDirty: false,
@@ -113,8 +131,70 @@ const useEditorStore = create((set, get) => ({
         flipH: false,
         flipV: false,
         crop: null,
+        filter: null,
+      },
+      zoom: {
+        currentZoom: 1,
+        minZoom: 0.5,
+        maxZoom: 3,
+        panX: 0,
+        panY: 0,
       },
       isDirty: false,
+    });
+  },
+
+  /**
+   * Set zoom level
+   */
+  setZoom: (zoomValue) => {
+    const currentZoom = get().zoom;
+    const newZoom = Math.max(currentZoom.minZoom, Math.min(currentZoom.maxZoom, zoomValue));
+    set({
+      zoom: { ...currentZoom, currentZoom: newZoom },
+      isDirty: true,
+    });
+  },
+
+  /**
+   * Set pan position
+   */
+  setPan: (panX, panY) => {
+    const currentZoom = get().zoom;
+    set({
+      zoom: { ...currentZoom, panX, panY },
+      isDirty: true,
+    });
+  },
+
+  /**
+   * Reset zoom and pan
+   */
+  resetZoomPan: () => {
+    const currentZoom = get().zoom;
+    set({
+      zoom: { ...currentZoom, currentZoom: 1, panX: 0, panY: 0 },
+    });
+  },
+
+  /**
+   * Set crop box
+   */
+  setCrop: (cropBox) => {
+    const currentTransform = get().transform;
+    set({
+      transform: { ...currentTransform, crop: cropBox },
+      isDirty: true,
+    });
+  },
+
+  /**
+   * Reset crop
+   */
+  resetCrop: () => {
+    const currentTransform = get().transform;
+    set({
+      transform: { ...currentTransform, crop: null },
     });
   },
 
@@ -157,6 +237,14 @@ const useEditorStore = create((set, get) => ({
         flipH: false,
         flipV: false,
         crop: null,
+        filter: null,
+      },
+      zoom: {
+        currentZoom: 1,
+        minZoom: 0.5,
+        maxZoom: 3,
+        panX: 0,
+        panY: 0,
       },
       activeMode: null,
       isDirty: false,
@@ -185,7 +273,8 @@ const useEditorStore = create((set, get) => ({
       t.rotate !== 0 ||
       t.flipH !== false ||
       t.flipV !== false ||
-      t.crop !== null
+      t.crop !== null ||
+      t.filter !== null
     );
   },
 }));
