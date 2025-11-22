@@ -273,10 +273,12 @@ const useStore = create(
         },
 
         // =====================================================================
-        // AI QUEUE STATE
+        // AI QUEUE STATE - Phase 5
         // =====================================================================
         aiQueue: [],
         processingAI: false,
+        aiEnabled: false, // Phase 5: Controls AI feature visibility
+        aiMockMode: true, // Phase 5: Always true until Phase 7
 
         addToAIQueue: (task) =>
           set((state) => ({
@@ -299,6 +301,10 @@ const useStore = create(
           })),
 
         setProcessingAI: (processing) => set({ processingAI: processing }),
+
+        // Phase 5: AI feature toggles
+        setAIEnabled: (enabled) => set({ aiEnabled: enabled }),
+        setAIMockMode: (mockMode) => set({ aiMockMode: mockMode }),
 
         // =====================================================================
         // STORAGE STATE

@@ -11,6 +11,13 @@ export const ROUTES = {
   PHOTO: '/photo/:id',
   SLIDESHOW: '/slideshow/:id',
   EDITOR: '/editor/:id',
+  // Phase 5: AI Tools World
+  AI_TOOLS: '/tools/ai',
+  AI_ENHANCE: '/tools/ai/enhance',
+  AI_REMOVE_BG: '/tools/ai/remove-bg',
+  AI_PORTRAIT: '/tools/ai/portrait',
+  AI_COLOR: '/tools/ai/color',
+  AI_UPSCALE: '/tools/ai/upscale',
 };
 
 // Helper function to generate route with params

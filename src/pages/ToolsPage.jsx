@@ -50,8 +50,8 @@ export default function ToolsPage() {
       description: 'Enhance and transform photos with AI',
       icon: Sparkles,
       gradient: 'from-orange-500 to-red-500',
-      available: false,
-      onClick: null,
+      available: true, // Phase 5: AI Tools now available
+      onClick: () => navigate(ROUTES.AI_TOOLS),
     },
   ];
 
