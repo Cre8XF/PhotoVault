@@ -140,7 +140,7 @@ const CropOverlay = ({
   const handleSizeTouch = 20; // Larger for touch
 
   return (
-    <div className={`absolute inset-0 z-20 pointer-events-none ${className}`}>
+    <div className={`crop-overlay-root absolute inset-0 z-20 pointer-events-none ${className}`}>
       {/* Dimmed overlay outside crop */}
       <div
         className="absolute inset-0 bg-black/60 pointer-events-none"

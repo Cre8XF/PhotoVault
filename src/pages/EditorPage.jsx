@@ -423,6 +423,8 @@ const EditorPage = () => {
             hasTransforms={hasTransforms}
             onModeChange={handleModeChange}
             onReset={handleReset}
+            onBack={handleBack}
+            onSave={handleSave}
             renderPanel={renderPanel}
           />
         ) : (
