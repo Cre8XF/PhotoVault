@@ -2,6 +2,7 @@
 // PAGE: SearchPage.jsx – v5.7 MED MULTISELECT + VELG ALLE
 // ============================================================================
 import React, { useState, useMemo, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   Search as SearchIcon,
@@ -25,6 +26,7 @@ import { deletePhoto, setAlbumCover, updateAlbumPhotoCount } from '../firebase'
 import MoveModal from '../components/MoveModal'
 import ConfirmModal from '../components/ConfirmModal'
 import PhotoModal from '../components/PhotoModal'
+import useStore from '../state/store'
 
 const SearchPage = ({
   photos = [],
@@ -34,6 +36,14 @@ const SearchPage = ({
   refreshData,
 }) => {
   const { t } = useTranslation(['search', 'common'])
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  // Photo context setters - Phase 2A
+  const setCurrentPhotoId = useStore((state) => state.setCurrentPhotoId)
+  const setPhotoContext = useStore((state) => state.setPhotoContext)
+  const setPhotoOrder = useStore((state) => state.setPhotoOrder)
+  const setPhotoIndex = useStore((state) => state.setPhotoIndex)
 
   // 🔒 SIKRE AT PROPS ER ARRAYS
   const safePhotos = useMemo(() => {
@@ -184,6 +194,19 @@ const SearchPage = ({
 
   const deselectAllPhotos = () => {
     setSelectedPhotos([])
+  }
+
+  // Phase 2A: Navigate to PhotoPage
+  const handlePhotoClick = (photo, index) => {
+    // Set global photo context state
+    const photoIds = filteredPhotos.map((p) => p.id)
+    setCurrentPhotoId(photo.id)
+    setPhotoContext('search')
+    setPhotoOrder(photoIds)
+    setPhotoIndex(index)
+
+    // Navigate to PhotoPage
+    navigate(`/photo/${photo.id}`, { state: { from: location } })
   }
 
   // --- Clear filters ---
@@ -593,7 +616,7 @@ const SearchPage = ({
             <img
               src={photo.type === 'video' ? (photo.thumbnailUrl || photo.url) : photo.url}
               alt={photo.name}
-              onClick={() => !editMode && setPhotoModal({ open: true, index })}
+              onClick={() => !editMode && handlePhotoClick(photo, index)}
               className="max-h-full max-w-full object-contain cursor-pointer transition-transform duration-300 group-hover:scale-[1.03]"
             />
 
