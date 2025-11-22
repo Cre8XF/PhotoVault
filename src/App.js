@@ -2,7 +2,7 @@
 // APP.js – v6.0 Phase 2: Modern Architecture with Zustand & Hooks
 // ============================================================================
 import React from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import i18n from './i18n'
 
@@ -103,6 +103,8 @@ function App() {
  */
 function AppContent() {
   const { t } = useTranslation(['common', 'nav'])
+  const navigate = useNavigate()
+  const location = useLocation()
 
   // Custom hooks
   const { user, userProfile, loading, handleLogout, isAdmin } = useAuth()
@@ -152,22 +154,47 @@ function AppContent() {
   const setSelectedAlbum = useStore((state) => state.setSelectedAlbum)
   const setTheme = useStore((state) => state.setTheme)
 
+  // Photo context setters - Phase 2A
+  const setCurrentPhotoId = useStore((state) => state.setCurrentPhotoId)
+  const setPhotoContext = useStore((state) => state.setPhotoContext)
+  const setPhotoOrder = useStore((state) => state.setPhotoOrder)
+  const setPhotoIndex = useStore((state) => state.setPhotoIndex)
+
   // Context-aware photo source state
   const [photoSourceList, setPhotoSourceList] = React.useState([])
   const [photoSourceIndex, setPhotoSourceIndex] = React.useState(0)
 
-  // Handle photo click with context-aware source list
+  // Phase 2A: Handle photo click - Navigate to PhotoPage
   const handlePhotoClick = (photo, sourceList) => {
     const list = Array.isArray(sourceList) ? sourceList : photos
-    setPhotoSourceList(list)
-
     const index = list.findIndex((p) => p.id === photo.id)
-    setPhotoSourceIndex(index >= 0 ? index : 0)
+    const photoIndex = index >= 0 ? index : 0
+    const photoIds = list.map((p) => p.id)
 
-    const setSelectedPhotoIndex = useStore.getState().setSelectedPhotoIndex
-    setSelectedPhotoIndex(index >= 0 ? index : 0)
+    // Determine context based on current page
+    let context = 'all'
+    if (currentPage === 'albums' || selectedAlbum) {
+      context = 'album'
+    } else if (currentPage === 'search') {
+      context = 'search'
+    } else if (currentPage === 'home') {
+      // Check if it's favorites by seeing if sourceList is favoritePhotos
+      const isFavorites = list.every((p) => p.favorite)
+      context = isFavorites ? 'favorites' : 'all'
+    }
 
-    setPhotoModalOpen(true)
+    // Set global photo context state
+    setCurrentPhotoId(photo.id)
+    setPhotoContext(context)
+    setPhotoOrder(photoIds)
+    setPhotoIndex(photoIndex)
+
+    // Keep legacy state for backward compatibility
+    setPhotoSourceList(list)
+    setPhotoSourceIndex(photoIndex)
+
+    // Navigate to PhotoPage instead of opening modal
+    navigate(`/photo/${photo.id}`, { state: { from: location } })
   }
 
   // Handle album click

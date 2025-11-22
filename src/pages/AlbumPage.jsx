@@ -8,6 +8,7 @@
 // 4. Forbedret handleMovePhotos med bekreftelsesdialog og auto-refresh
 
 import React, { useState, useMemo, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
   ArrowLeft,
   Trash2,
@@ -74,6 +75,9 @@ const AlbumPage = ({
   onToggleFavorite,
 }) => {
   const { t } = useTranslation(['common', 'albums'])
+  const navigate = useNavigate()
+  const location = useLocation()
+
   const [editMode, setEditMode] = useState(false)
   const [selectedPhotos, setSelectedPhotos] = useState([])
   const [isMoveOpen, setMoveOpen] = useState(false)
@@ -86,6 +90,13 @@ const AlbumPage = ({
   // Zustand store
   const setNotification = useStore((state) => state.setNotification)
   const setConfirmModal = useStore((state) => state.setConfirmModal)
+
+  // Photo context setters - Phase 2A
+  const setCurrentPhotoId = useStore((state) => state.setCurrentPhotoId)
+  const setPhotoContext = useStore((state) => state.setPhotoContext)
+  const setPhotoOrder = useStore((state) => state.setPhotoOrder)
+  const setPhotoIndex = useStore((state) => state.setPhotoIndex)
+  const setCurrentAlbumId = useStore((state) => state.setCurrentAlbumId)
 
   // States for sorting and view
   const [sortBy, setSortBy] = useState('date-desc')
@@ -187,6 +198,20 @@ const AlbumPage = ({
       categories: categories.length,
     }
   }, [albumPhotos])
+
+  // Phase 2A: Navigate to PhotoPage
+  const handlePhotoClick = (photo, index) => {
+    // Set global photo context state
+    const photoIds = filteredPhotos.map((p) => p.id)
+    setCurrentPhotoId(photo.id)
+    setPhotoContext('album')
+    setPhotoOrder(photoIds)
+    setPhotoIndex(index)
+    setCurrentAlbumId(album?.id || null)
+
+    // Navigate to PhotoPage
+    navigate(`/photo/${photo.id}`, { state: { from: location } })
+  }
 
   const handleSetCover = async (photo) => {
     try {
@@ -682,7 +707,8 @@ const AlbumPage = ({
                     (p) => p.url === url || p.thumbnailUrl === url
                   )
                   if (index !== -1) {
-                    setPhotoModal({ open: true, index })
+                    const photo = filteredPhotos[index]
+                    handlePhotoClick(photo, index)
                   }
                 }
           }
@@ -702,7 +728,7 @@ const AlbumPage = ({
                 if (editMode) {
                   togglePhotoSelection(photo)
                 } else {
-                  setPhotoModal({ open: true, index })
+                  handlePhotoClick(photo, index)
                 }
               }}
             >
