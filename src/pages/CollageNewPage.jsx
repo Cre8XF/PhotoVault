@@ -1,124 +1,347 @@
 // ============================================================================
-// CollageNewPage - Phase 3A: Receives template ID (builder in Phase 3B)
+// PAGE: CollageNewPage.jsx - New Collage Builder World (Phase 3B)
 // ============================================================================
-import React, { useEffect, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Loader } from 'lucide-react';
-import { PageWrapper } from '../components/layout/PageWrapper';
-import useStore from '../state/store';
-import { ROUTES } from '../routes';
-import { getTemplateById } from '../features/collage/collageTemplates';
 
-export default function CollageNewPage() {
-  const setIsWorldView = useStore((state) => state.setIsWorldView);
+import React, { useEffect, useState, useCallback } from 'react';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { ArrowLeft, Save, AlertCircle } from 'lucide-react';
+import { collection, addDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase';
+import useStore from '../state/store';
+import useCollageStore from '../features/collage/collageStore';
+import { getTemplateById, expandTemplate } from '../features/collage/templateEngine';
+import { serializeCollage, validateCollageData } from '../features/collage/collageUtils';
+import CollageCanvas from '../features/collage/components/CollageCanvas';
+import PhotoPickerPanel from '../features/collage/components/PhotoPickerPanel';
+import CollageToolbar from '../features/collage/components/CollageToolbar';
+import { PageWrapper } from '../components/layout/PageWrapper';
+
+/**
+ * CollageNewPage - New Collage Builder World
+ *
+ * Full-featured collage builder with:
+ * - Template-based grid layout
+ * - Photo selection and placement
+ * - Slot transformations (rotate, scale, position)
+ * - Auto-save warning
+ * - Firestore integration
+ */
+const CollageNewPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
 
-  // Get template ID from query string
+  // Global store
+  const { setIsWorldView, photos } = useStore();
+
+  // Collage store
+  const {
+    template,
+    slots,
+    selectedSlotIndex,
+    isPhotoPickerOpen,
+    isDirty,
+    initializeFromTemplate,
+    setSlotPhoto,
+    removeSlotPhoto,
+    rotateSlotPhoto,
+    setSelectedSlot,
+    openPhotoPicker,
+    closePhotoPicker,
+    markAsSaved,
+    reset,
+    getCollageData,
+    isReadyToSave,
+  } = useCollageStore();
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+  const [showExitWarning, setShowExitWarning] = useState(false);
+
+  // Get template ID from query params
   const templateId = searchParams.get('template');
 
-  // Find the template
-  const template = useMemo(() => {
-    if (!templateId) return null;
-    return getTemplateById(templateId);
-  }, [templateId]);
+  // ============================================================================
+  // INITIALIZATION
+  // ============================================================================
 
   useEffect(() => {
     setIsWorldView(true);
-    return () => setIsWorldView(false);
-  }, [setIsWorldView]);
 
-  const handleBack = () => {
-    navigate(ROUTES.COLLAGE_TEMPLATES);
-  };
+    // Load template and initialize collage
+    if (templateId) {
+      const templateData = getTemplateById(templateId);
+      if (templateData) {
+        const expandedTemplate = expandTemplate(templateData);
+        initializeFromTemplate(expandedTemplate);
+      }
+    }
 
-  // No template selected
-  if (!templateId) {
-    return (
-      <PageWrapper
-        title="New Collage"
-        error="No template selected. Please choose a template first."
-      >
-        <button
-          onClick={handleBack}
-          className="mt-4 px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition"
-        >
-          Choose template
-        </button>
-      </PageWrapper>
-    );
-  }
+    return () => {
+      setIsWorldView(false);
+      reset();
+    };
+  }, [setIsWorldView, templateId, initializeFromTemplate, reset]);
 
-  // Template not found
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
+
+  const handleBack = useCallback(() => {
+    if (isDirty) {
+      setShowExitWarning(true);
+    } else {
+      navigate(-1);
+    }
+  }, [isDirty, navigate]);
+
+  const handleSlotClick = useCallback(
+    (slotIndex) => {
+      setSelectedSlot(slotIndex);
+    },
+    [setSelectedSlot]
+  );
+
+  const handleSlotRotate = useCallback(
+    (slotIndex) => {
+      rotateSlotPhoto(slotIndex);
+    },
+    [rotateSlotPhoto]
+  );
+
+  const handleSlotRemove = useCallback(
+    (slotIndex) => {
+      removeSlotPhoto(slotIndex);
+    },
+    [removeSlotPhoto]
+  );
+
+  const handleSlotAddPhoto = useCallback(
+    (slotIndex) => {
+      openPhotoPicker(slotIndex);
+    },
+    [openPhotoPicker]
+  );
+
+  const handlePhotoSelect = useCallback(
+    (photo) => {
+      if (selectedSlotIndex !== null) {
+        setSlotPhoto(selectedSlotIndex, photo);
+        closePhotoPicker();
+      }
+    },
+    [selectedSlotIndex, setSlotPhoto, closePhotoPicker]
+  );
+
+  const handleSave = useCallback(async () => {
+    if (!isReadyToSave()) {
+      setSaveError(t('collage.errors.noPhotos', 'Add at least one photo before saving'));
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      setSaveError(null);
+
+      const collageData = getCollageData();
+      const validation = validateCollageData(collageData);
+
+      if (!validation.valid) {
+        setSaveError(validation.error);
+        return;
+      }
+
+      const serialized = serializeCollage(collageData);
+
+      // Save to Firestore
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('Not authenticated');
+      }
+
+      const collagesRef = collection(db, 'users', user.uid, 'collages');
+      const docRef = await addDoc(collagesRef, {
+        ...serialized,
+        userId: user.uid,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      markAsSaved(docRef.id);
+
+      // Show success message
+      console.log('✅ Collage saved:', docRef.id);
+
+      // Navigate back or to collage list
+      navigate(-1);
+    } catch (error) {
+      console.error('Error saving collage:', error);
+      setSaveError(t('collage.errors.saveFailed', 'Failed to save collage'));
+    } finally {
+      setIsSaving(false);
+    }
+  }, [
+    isReadyToSave,
+    getCollageData,
+    markAsSaved,
+    navigate,
+    t,
+  ]);
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
+
   if (!template) {
     return (
-      <PageWrapper
-        title="New Collage"
-        error={`Template "${templateId}" not found.`}
-      >
-        <button
-          onClick={handleBack}
-          className="mt-4 px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition"
-        >
-          Choose different template
-        </button>
+      <PageWrapper>
+        <div className="min-h-screen flex items-center justify-center p-6">
+          <div className="text-center">
+            <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-400" />
+            <h2 className="text-xl font-bold mb-2">
+              {t('collage.errors.noTemplate', 'No template selected')}
+            </h2>
+            <p className="text-sm opacity-70 mb-4">
+              {t('collage.errors.selectTemplate', 'Please select a template to create a collage')}
+            </p>
+            <button
+              onClick={() => navigate('/tools/collage/templates')}
+              className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition"
+            >
+              {t('collage.selectTemplate', 'Select Template')}
+            </button>
+          </div>
+        </div>
       </PageWrapper>
     );
   }
 
-  // Template selected - Placeholder for Phase 3B
+  const selectedSlot = selectedSlotIndex !== null ? slots[selectedSlotIndex] : null;
+  const hasSelectedPhoto = selectedSlot?.photo !== null;
+
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
-      {/* Header */}
-      <header className="px-4 pt-4 pb-3 border-b border-border/40">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleBack}
-            className="p-2 hover:bg-muted rounded-full transition"
-            aria-label="Go back"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div className="flex-1">
-            <h1 className="text-xl font-semibold">New Collage</h1>
-            <p className="text-xs text-muted-foreground">{template.name}</p>
+    <PageWrapper>
+      <div className="min-h-screen flex flex-col pb-20">
+        {/* Top Bar */}
+        <div className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/10">
+          <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            {/* Left: Back Button */}
+            <button
+              onClick={handleBack}
+              className="flex items-center gap-2 px-3 py-2 hover:bg-white/10 rounded-lg transition"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span className="text-sm font-medium">
+                {t('common:back', 'Back')}
+              </span>
+            </button>
+
+            {/* Center: Title */}
+            <div className="text-center">
+              <h1 className="font-bold text-lg">
+                {t('collage.new.title', 'New Collage')}
+              </h1>
+              <p className="text-xs opacity-50">{template.name}</p>
+            </div>
+
+            {/* Right: Save Button */}
+            <button
+              onClick={handleSave}
+              disabled={isSaving || !isReadyToSave()}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition font-medium"
+            >
+              <Save className="w-4 h-4" />
+              <span className="text-sm">
+                {isSaving ? t('common:saving', 'Saving...') : t('common:save', 'Save')}
+              </span>
+            </button>
+          </div>
+
+          {/* Error Banner */}
+          {saveError && (
+            <div className="bg-red-500/20 border-t border-red-500/30 px-4 py-2 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-red-400" />
+              <span className="text-sm text-red-400">{saveError}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 pt-20 p-4 md:p-8">
+          <div className="max-w-4xl mx-auto">
+            <CollageCanvas
+              template={template}
+              slots={slots}
+              selectedSlotIndex={selectedSlotIndex}
+              onSlotClick={handleSlotClick}
+              onSlotRotate={handleSlotRotate}
+              onSlotRemove={handleSlotRemove}
+              onSlotAddPhoto={handleSlotAddPhoto}
+            />
+
+            {/* Helper Text */}
+            <div className="mt-6 text-center">
+              <p className="text-sm opacity-50">
+                {t('collage.builder.helpText', 'Tap a slot to add or edit photos')}
+              </p>
+            </div>
           </div>
         </div>
-      </header>
 
-      {/* Placeholder Content - Phase 3B will add the actual builder */}
-      <main className="flex-1 flex items-center justify-center px-4">
-        <div className="text-center max-w-md">
-          <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
-            <Loader className="w-10 h-10 text-white animate-spin" />
+        {/* Toolbar */}
+        <CollageToolbar
+          selectedSlotIndex={selectedSlotIndex}
+          hasPhoto={hasSelectedPhoto}
+          onReplace={() => openPhotoPicker(selectedSlotIndex)}
+          onRotate={() => handleSlotRotate(selectedSlotIndex)}
+          onRemove={() => handleSlotRemove(selectedSlotIndex)}
+          canSwap={false} // Future feature
+        />
+
+        {/* Photo Picker Panel */}
+        <PhotoPickerPanel
+          isOpen={isPhotoPickerOpen}
+          onClose={closePhotoPicker}
+          photos={photos}
+          onSelectPhoto={handlePhotoSelect}
+          selectedSlotIndex={selectedSlotIndex}
+        />
+
+        {/* Exit Warning Modal */}
+        {showExitWarning && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-fade-in">
+            <div className="glass rounded-2xl p-6 max-w-md w-full border-2 border-yellow-500/30 animate-scale-in">
+              <div className="flex items-center gap-3 mb-4">
+                <AlertCircle className="w-6 h-6 text-yellow-400" />
+                <h3 className="text-xl font-bold">
+                  {t('collage.unsavedChanges', 'Unsaved Changes')}
+                </h3>
+              </div>
+              <p className="opacity-70 mb-6">
+                {t('collage.unsavedWarning', 'You have unsaved changes. Are you sure you want to leave?')}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowExitWarning(false)}
+                  className="flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-xl font-semibold transition"
+                >
+                  {t('common:cancel', 'Cancel')}
+                </button>
+                <button
+                  onClick={() => navigate(-1)}
+                  className="flex-1 bg-red-600 hover:bg-red-700 py-3 rounded-xl font-semibold transition"
+                >
+                  {t('collage.discardChanges', 'Discard')}
+                </button>
+              </div>
+            </div>
           </div>
-
-          <h2 className="text-2xl font-bold mb-2">Collage Builder Coming Soon</h2>
-          <p className="text-muted-foreground mb-6">
-            Phase 3A complete! Template "{template.name}" selected successfully.
-          </p>
-
-          <div className="bg-muted/50 rounded-lg p-4 text-sm text-left space-y-2 mb-6">
-            <p><strong>Template ID:</strong> {template.id}</p>
-            <p><strong>Photos needed:</strong> {template.minPhotos === template.maxPhotos
-              ? template.minPhotos
-              : `${template.minPhotos}–${template.maxPhotos}`}</p>
-            <p><strong>Aspect ratio:</strong> {template.aspectRatio}:1</p>
-            <p><strong>Slots:</strong> {template.previewSlots.length}</p>
-          </div>
-
-          <p className="text-xs text-muted-foreground">
-            The full collage builder will be implemented in Phase 3B.
-          </p>
-
-          <button
-            onClick={handleBack}
-            className="mt-6 px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition"
-          >
-            Choose different template
-          </button>
-        </div>
-      </main>
-    </div>
+        )}
+      </div>
+    </PageWrapper>
   );
-}
+};
+
+export default CollageNewPage;

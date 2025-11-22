@@ -8,6 +8,39 @@
     "description": "Create beautiful collages from your photos",
     "createFirst": "Create Your First Collage"
   },
+  "new": {
+    "title": "New Collage"
+  },
+  "edit": {
+    "title": "Edit Collage"
+  },
+  "builder": {
+    "addPhoto": "Add photo",
+    "helpText": "Tap a slot to add or edit photos",
+    "rotate": "Rotate",
+    "remove": "Remove"
+  },
+  "toolbar": {
+    "slot": "Slot",
+    "replace": "Replace",
+    "add": "Add",
+    "rotate": "Rotate 90°",
+    "swap": "Swap with another slot",
+    "remove": "Remove photo"
+  },
+  "photoPicker": {
+    "title": "Select Photo",
+    "forSlot": "For slot",
+    "search": "Search photos...",
+    "all": "All",
+    "favorites": "Favorites",
+    "noPhotos": "No photos found",
+    "hint": "Tap a photo to add it to the selected slot"
+  },
+  "selectTemplate": "Select Template",
+  "unsavedChanges": "Unsaved Changes",
+  "unsavedWarning": "You have unsaved changes. Are you sure you want to leave?",
+  "discardChanges": "Discard",
   "steps": {
     "step1": "Step 1: Select layout",
     "step2": "Step 2: Select photos",
@@ -90,7 +123,12 @@
     "exportError": "Could not export collage",
     "saveError": "Could not save collage. Please try again.",
     "title": "Error",
-    "imageLoadFailed": "Failed to load image"
+    "imageLoadFailed": "Failed to load image",
+    "noTemplate": "No template selected",
+    "selectTemplate": "Please select a template to create a collage",
+    "loadFailed": "Failed to load collage",
+    "noPhotos": "Add at least one photo before saving",
+    "saveFailed": "Failed to save collage"
   },
   "layout": {
     "photos": "photos",
@@ -112,7 +150,8 @@
     "six_grid": "6 photos (grid)",
     "nine_grid": "9 photos (grid)"
   },
-  "loading": {
+  "loading": "Loading collage...",
+  "loadingDetails": {
     "photos": "Loading photos...",
     "saving": "Saving collage...",
     "uploading": "Uploading to Firebase Storage",
