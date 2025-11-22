@@ -21,6 +21,7 @@ const EditorPreview = ({ photo, transform, activeMode, className = '' }) => {
   const imageRef = useRef(null);
   const containerRef = useRef(null);
   const [imageBounds, setImageBounds] = useState(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [isPanning, setIsPanning] = useState(false);
   const panStartRef = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
 
@@ -38,26 +39,34 @@ const EditorPreview = ({ photo, transform, activeMode, className = '' }) => {
 
   // Update image bounds when image loads or zoom changes
   const updateImageBounds = useCallback(() => {
-    if (imageRef.current && containerRef.current) {
-      const img = imageRef.current;
-      const container = containerRef.current;
-      const imgRect = img.getBoundingClientRect();
-      const containerRect = container.getBoundingClientRect();
+    if (!imageLoaded || !imageRef.current || !containerRef.current) return;
 
-      setImageBounds({
-        x: imgRect.left - containerRect.left,
-        y: imgRect.top - containerRect.top,
-        width: imgRect.width,
-        height: imgRect.height,
-      });
+    const img = imageRef.current;
+    const container = containerRef.current;
+    const imgRect = img.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+
+    setImageBounds({
+      x: imgRect.left - containerRect.left,
+      y: imgRect.top - containerRect.top,
+      width: imgRect.width,
+      height: imgRect.height,
+    });
+  }, [imageLoaded]);
+
+  // Update bounds when image loads, mode changes, or zoom changes
+  useEffect(() => {
+    if (imageLoaded) {
+      updateImageBounds();
     }
-  }, []);
+  }, [imageLoaded, updateImageBounds, activeMode, zoom.currentZoom, transform.crop]);
 
   useEffect(() => {
-    updateImageBounds();
+    if (!imageLoaded) return;
+
     window.addEventListener('resize', updateImageBounds);
     return () => window.removeEventListener('resize', updateImageBounds);
-  }, [updateImageBounds, zoom.currentZoom]);
+  }, [imageLoaded, updateImageBounds]);
 
   // Handle zoom (wheel or pinch)
   const handleWheel = useCallback(
@@ -183,7 +192,10 @@ const EditorPreview = ({ photo, transform, activeMode, className = '' }) => {
             ...previewStyle,
             transform: `${previewStyle.transform || ''} scale(${zoom.currentZoom}) translate(${zoom.panX}px, ${zoom.panY}px)`,
           }}
-          onLoad={updateImageBounds}
+          onLoad={() => {
+            setImageLoaded(true);
+            updateImageBounds();
+          }}
         />
       </div>
 
@@ -198,8 +210,8 @@ const EditorPreview = ({ photo, transform, activeMode, className = '' }) => {
         />
       )}
 
-      {/* Interactive Crop Overlay (Phase 7A) */}
-      {activeMode === 'crop' && transform.crop && imageBounds && (
+      {/* Interactive Crop Overlay (Phase 7A) - Only show when image is loaded */}
+      {activeMode === 'crop' && imageLoaded && transform.crop && imageBounds && (
         <CropOverlay
           cropBox={transform.crop}
           onCropChange={handleCropChange}
