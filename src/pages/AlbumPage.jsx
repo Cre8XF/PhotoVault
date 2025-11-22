@@ -35,13 +35,12 @@ import { getFirestore, doc, updateDoc } from 'firebase/firestore'
 import { formatDuration } from '../utils/videoTools'
 import UploadModal from '../components/UploadModal'
 import MoveModal from '../components/MoveModal'
-import PhotoModal from '../components/PhotoModal'
 import PhotoGrid from '../components/PhotoGrid'
 import AlbumModal from '../components/AlbumModal'
 import QRShareModal from '../features/qr-sharing/components/QRShareModal'
-import { CollageBuilder } from '../features/collage'
 import { SkeletonPhoto } from '../components/SkeletonCard'
 import useStore from '../state/store'
+import { ROUTES } from '../routes'
 
 function getCategoryIcon(category) {
   const icons = {
@@ -82,10 +81,8 @@ const AlbumPage = ({
   const [selectedPhotos, setSelectedPhotos] = useState([])
   const [isMoveOpen, setMoveOpen] = useState(false)
   const [isUploadOpen, setUploadOpen] = useState(false)
-  const [photoModal, setPhotoModal] = useState({ open: false, index: 0 })
   const [editingAlbum, setEditingAlbum] = useState(null)
   const [isShareModalOpen, setShareModalOpen] = useState(false)
-  const [isCollageOpen, setCollageOpen] = useState(false)
 
   // Zustand store
   const setNotification = useStore((state) => state.setNotification)
@@ -371,60 +368,6 @@ const AlbumPage = ({
     return selectedPhotos.some((p) => p.id === photo.id)
   }
 
-  // Save collage as a new photo in the album
-  const handleSaveCollage = async (file, metadata) => {
-    try {
-      console.log('💾 Saving collage to album...', metadata)
-      console.log('📄 File received:', {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-      })
-
-      // Verify file has type property (should be set by CollageBuilder)
-      if (!file.type) {
-        console.error('❌ File type is missing!')
-        throw new Error('File object missing type property')
-      }
-
-      // CRITICAL FIX: handleUpload expects array of objects with .file property
-      // Not just raw File objects
-      await handleUpload(
-        [
-          {
-            file: file,
-            thumbnail: null,
-            metadata: metadata,
-          },
-        ],
-        album.id,
-        false
-      )
-
-      console.log('✅ Upload complete, refreshing data...')
-
-      // Refresh data to show the new collage
-      if (refreshData && user?.uid) {
-        await refreshData(user.uid)
-      }
-
-      // Show success notification
-      setNotification({
-        message: t('albums:collageSaved'),
-        type: 'success',
-      })
-
-      console.log('✅ Collage saved and data refreshed')
-    } catch (error) {
-      console.error('❌ Error saving collage:', error)
-      setNotification({
-        message: t('albums:collageSaveError'),
-        type: 'error',
-      })
-      throw error
-    }
-  }
-
   if (!album) {
     return (
       <div className="p-6">
@@ -475,9 +418,9 @@ const AlbumPage = ({
             </span>
           </button>
 
-          {/* Create Collage Button */}
+          {/* Create Collage Button - Phase 6: Navigate to CollageNewPage */}
           <button
-            onClick={() => setCollageOpen(true)}
+            onClick={() => navigate(ROUTES.COLLAGE_NEW)}
             disabled={albumPhotos.length < 2}
             className="ripple-effect px-3 py-2 md:px-4 md:py-2.5 rounded-lg bg-purple-600 hover:bg-purple-700 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             title={
@@ -846,29 +789,6 @@ const AlbumPage = ({
         </button>
       </div>
 
-      {/* PhotoModal */}
-      {photoModal.open && (
-        <PhotoModal
-          photos={filteredPhotos}
-          currentIndex={photoModal.index}
-          onClose={() => setPhotoModal({ open: false, index: 0 })}
-          onToggleFavorite={onToggleFavorite}
-          onPhotoEdited={async (newPhoto) => {
-            // Refresh data to show the new edited photo
-            if (refreshData) {
-              await refreshData()
-            }
-            // Show notification
-            if (setNotification) {
-              setNotification({
-                type: 'success',
-                message: t('albums:editedPhotoSaved')
-              })
-            }
-          }}
-        />
-      )}
-
       {/* Modals */}
       <UploadModal
         isOpen={isUploadOpen}
@@ -903,14 +823,6 @@ const AlbumPage = ({
         album={album}
       />
 
-      {/* Collage Builder */}
-      {isCollageOpen && (
-        <CollageBuilder
-          availablePhotos={albumPhotos}
-          onClose={() => setCollageOpen(false)}
-          onSave={handleSaveCollage}
-        />
-      )}
     </div>
   )
 }

@@ -44,8 +44,7 @@ import AIPortraitPage from './pages/ai/AIPortraitPage'
 import AIColorPage from './pages/ai/AIColorPage'
 import AIUpscalePage from './pages/ai/AIUpscalePage'
 
-// Collage Builder
-import CollageBuilder from './features/collage/components/CollageBuilder'
+// Collage View (for viewing saved collages)
 import CollageView from './features/collage/pages/CollageView'
 
 // Route map
@@ -54,7 +53,6 @@ import { ROUTES } from './routes'
 // Components
 import ErrorBoundary from './components/ErrorBoundary'
 import UploadModal from './components/UploadModal'
-import PhotoModal from './components/PhotoModal'
 import AlbumModal from './components/AlbumModal'
 import ConfirmModal from './components/ConfirmModal'
 import Notification from './components/Notification'
@@ -100,8 +98,7 @@ function App() {
               <Route path={ROUTES.AI_COLOR} element={<AIColorPage />} />
               <Route path={ROUTES.AI_UPSCALE} element={<AIUpscalePage />} />
 
-              {/* Collage routes */}
-              <Route path="/collage/edit/:id" element={<CollageBuilder />} />
+              {/* Collage view route (for viewing saved collages) */}
               <Route path="/collage/:id" element={<CollageView />} />
 
               {/* All other routes - authenticated */}
@@ -147,7 +144,6 @@ function AppContent() {
   // Zustand store
   const uploadModalOpen = useStore((state) => state.uploadModalOpen)
   const albumModalOpen = useStore((state) => state.albumModalOpen)
-  const photoModalOpen = useStore((state) => state.photoModalOpen)
   const confirmModal = useStore((state) => state.confirmModal)
   const notification = useStore((state) => state.notification)
   const editingAlbum = useStore((state) => state.editingAlbum)
@@ -163,7 +159,6 @@ function AppContent() {
   const setUploadModalOpen = useStore((state) => state.setUploadModalOpen)
   const setAlbumModalOpen = useStore((state) => state.setAlbumModalOpen)
   const setEditingAlbum = useStore((state) => state.setEditingAlbum)
-  const setPhotoModalOpen = useStore((state) => state.setPhotoModalOpen)
   const setConfirmModal = useStore((state) => state.setConfirmModal)
   const clearNotification = useStore((state) => state.clearNotification)
   const setCurrentPage = useStore((state) => state.setCurrentPage)
@@ -296,7 +291,6 @@ function AppContent() {
   // Phase 1: Hide bottom nav when in any "world view"
   const showBottomNav =
     !isWorldView &&
-    !photoModalOpen &&
     !isFullscreen &&
     currentPage !== 'album' &&
     currentPage !== 'admin' &&
@@ -411,8 +405,6 @@ function AppContent() {
             />
           </>
         )}
-
-        {currentPage === 'collage' && <CollageBuilder />}
       </main>
 
       {/* Floating Notification Bell - Bottom left */}
@@ -501,19 +493,6 @@ function AppContent() {
             setEditingAlbum(null)
           }}
           onSave={(albumData) => handleAlbumSave(albumData, editingAlbum)}
-        />
-      )}
-
-      {photoModalOpen && (
-        <PhotoModal
-          photos={photoSourceList}
-          currentIndex={photoSourceIndex}
-          onClose={() => setPhotoModalOpen(false)}
-          onToggleFavorite={toggleFavorite}
-          onPhotoEdited={async (newPhoto) => {
-            // Refresh photos to show the new edited photo
-            await refreshData()
-          }}
         />
       )}
 

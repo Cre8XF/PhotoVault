@@ -2,7 +2,6 @@
 // COMPONENT: PhotoGrid.jsx – v2.3 med forbedret video-visning
 // ============================================================================
 import React, { useState } from "react";
-import PhotoModal from "./PhotoModal";
 import { ImageOff, Trash2, Star, Image as ImageIcon, Play, Video } from "lucide-react";
 import { deletePhoto, toggleFavorite, setAlbumCover } from "../firebase";
 import { formatDuration } from "../utils/videoTools";
@@ -229,23 +228,6 @@ const PhotoGrid = ({
           </div>
         ))}
       </div>
-
-      {/* Lysboks (PhotoModal) */}
-      {!onPhotoClick && photoModal.open && (
-        <PhotoModal
-          photos={list}
-          currentIndex={photoModal.index}
-          onClose={() => setPhotoModal({ open: false, index: 0 })}
-          onToggleFavorite={async (photo) => {
-            await toggleFavorite(photo.id, photo.favorite);
-            if (refreshPhotos) await refreshPhotos();
-          }}
-          onPhotoEdited={async (newPhoto) => {
-            // Refresh photos to show the new edited photo
-            if (refreshPhotos) await refreshPhotos();
-          }}
-        />
-      )}
     </>
   );
 };

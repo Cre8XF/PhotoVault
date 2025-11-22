@@ -1,18 +1,12 @@
 /**
- * Photo Editor Feature - Phase 1, 2 & 3: Crop, Rotate, Filters, Adjustments & Text
+ * Photo Editor Feature - Phase 6: Function Worlds Architecture
  *
  * Main exports for the photo editor feature module
+ * Note: Old modal-based editor components removed in Phase 6 cleanup
  */
 
-// Main Component
-export { default as PhotoEditor } from './components/PhotoEditor'
-
-// Sub-components
-export { default as CropTool } from './components/CropTool'
-export { default as RotateTool } from './components/RotateTool'
-export { default as FilterPanel } from './components/FilterPanel'
-export { default as TextTool } from './components/TextTool'
-export { default as EditorToolbar } from './components/EditorToolbar'
+// Components (Phase 1+: Function Worlds only)
+export { default as EditorPreview } from './components/EditorPreview'
 
 // Hooks
 export { usePhotoEditor } from './hooks/usePhotoEditor'
