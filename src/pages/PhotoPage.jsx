@@ -3,7 +3,7 @@
 // ============================================================================
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Heart, Info, MoreVertical } from 'lucide-react';
+import { ArrowLeft, Heart, Info, MoreVertical, Presentation } from 'lucide-react';
 import { format } from 'date-fns';
 import useStore from '../state/store';
 import { usePhotoById } from '../hooks/usePhotoById';
@@ -120,6 +120,13 @@ export default function PhotoPage() {
 
     resetUiTimer();
   }, [photo, updatePhoto, resetUiTimer]);
+
+  // Start slideshow - Phase 2B
+  const handleStartSlideshow = useCallback(() => {
+    if (!photo) return;
+    // Navigate to slideshow page with current photo
+    navigate(`/slideshow/${photo.id}`, { state: { from: location } });
+  }, [photo, navigate, location]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -300,6 +307,17 @@ export default function PhotoPage() {
                 fill={photo.favorite ? 'currentColor' : 'none'}
               />
             </button>
+
+            {/* Slideshow button - Phase 2B */}
+            {photoOrder && photoOrder.length > 1 && (
+              <button
+                onClick={handleStartSlideshow}
+                className="text-white hover:bg-white/10 p-2 rounded-full transition active:scale-95"
+                aria-label="Start slideshow"
+              >
+                <Presentation className="w-5 h-5" />
+              </button>
+            )}
 
             {/* Info button */}
             <button
