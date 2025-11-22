@@ -162,9 +162,23 @@ const useStore = create(
         selectedAlbum: null,
         selectedPhotoIndex: 0,
 
+        // Function Worlds - Phase 1
+        currentPhotoId: null,
+        currentAlbumId: null,
+        slideshowActive: false,
+        collageEditId: null,
+        isWorldView: false,
+
         setCurrentPage: (page) => set({ currentPage: page }),
         setSelectedAlbum: (album) => set({ selectedAlbum: album }),
         setSelectedPhotoIndex: (index) => set({ selectedPhotoIndex: index }),
+
+        // Function Worlds setters
+        setCurrentPhotoId: (id) => set({ currentPhotoId: id }),
+        setCurrentAlbumId: (id) => set({ currentAlbumId: id }),
+        setSlideshowActive: (active) => set({ slideshowActive: active }),
+        setCollageEditId: (id) => set({ collageEditId: id }),
+        setIsWorldView: (value) => set({ isWorldView: value }),
 
         navigateToAlbum: (album) =>
           set({
