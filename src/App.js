@@ -27,9 +27,21 @@ import ProfilePage from './pages/ProfilePage'
 import SubscriptionPage from './pages/SubscriptionPage'
 import PublicAlbumPage from './pages/PublicAlbumPage'
 
+// Function Worlds - Phase 1
+import ToolsPage from './pages/ToolsPage'
+import CollageTemplatesPage from './pages/CollageTemplatesPage'
+import CollageNewPage from './pages/CollageNewPage'
+import CollageEditPage from './pages/CollageEditPage'
+import PhotoPage from './pages/PhotoPage'
+import SlideshowPage from './pages/SlideshowPage'
+import EditorPage from './pages/EditorPage'
+
 // Collage Builder
 import CollageBuilder from './features/collage/components/CollageBuilder'
 import CollageView from './features/collage/pages/CollageView'
+
+// Route map
+import { ROUTES } from './routes'
 
 // Components
 import ErrorBoundary from './components/ErrorBoundary'
@@ -62,6 +74,15 @@ function App() {
             <Routes>
               {/* Public route - no authentication required */}
               <Route path="/share/:slug" element={<PublicAlbumPage />} />
+
+              {/* Function Worlds - Phase 1 */}
+              <Route path={ROUTES.TOOLS} element={<ToolsPage />} />
+              <Route path={ROUTES.COLLAGE_TEMPLATES} element={<CollageTemplatesPage />} />
+              <Route path={ROUTES.COLLAGE_NEW} element={<CollageNewPage />} />
+              <Route path={ROUTES.COLLAGE_EDIT} element={<CollageEditPage />} />
+              <Route path={ROUTES.PHOTO} element={<PhotoPage />} />
+              <Route path={ROUTES.SLIDESHOW} element={<SlideshowPage />} />
+              <Route path={ROUTES.EDITOR} element={<EditorPage />} />
 
               {/* Collage routes */}
               <Route path="/collage/edit/:id" element={<CollageBuilder />} />
@@ -119,6 +140,7 @@ function AppContent() {
   const storageUsed = useStore((state) => state.storageUsed)
   const storageLimit = useStore((state) => state.storageLimit)
   const isFullscreen = useStore((state) => state.isFullscreen)
+  const isWorldView = useStore((state) => state.isWorldView)
 
   const setUploadModalOpen = useStore((state) => state.setUploadModalOpen)
   const setAlbumModalOpen = useStore((state) => state.setAlbumModalOpen)
@@ -228,7 +250,9 @@ function AppContent() {
   }
 
   // Determine if we should show bottom navigation
+  // Phase 1: Hide bottom nav when in any "world view"
   const showBottomNav =
+    !isWorldView &&
     !photoModalOpen &&
     !isFullscreen &&
     currentPage !== 'album' &&
