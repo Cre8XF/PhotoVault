@@ -1,5 +1,13 @@
 {
   "title": "Rediger bilde",
+  "save": "Lagre",
+  "saveCopy": "Lagre en kopi",
+  "replaceOriginal": "Erstatt original",
+  "saveOptions": "Lagringsalternativer",
+  "unsavedChanges": "Ulagrede endringer",
+  "unsavedWarning": "Du har ulagrede endringer. Er du sikker på at du vil gå ut?",
+  "discardChanges": "Forkast",
+  "loading": "Laster editor...",
   "buttons": {
     "download": "Last ned",
     "save": "Lagre",
@@ -26,6 +34,8 @@
   "errors": {
     "canvasError": "Kunne ikke lagre bildet (canvas mangler)",
     "saveError": "Kunne ikke lagre bildet",
+    "saveFailed": "Kunne ikke lagre bildet",
+    "loadFailed": "Kunne ikke laste bildet",
     "blobError": "Blob-konvertering feilet",
     "contextError": "Canvas context mangler",
     "downloadError": "Kunne ikke laste ned bildet",
@@ -48,7 +58,11 @@
     "height": "Høyde",
     "help": "Velg sideforhold og klikk \"Bruk\" for å beskjære"
   },
-  "rotate": {
+  "rotate": "Roter",
+  "flipHorizontal": "Speilvend horisontalt",
+  "flipVertical": "Speilvend vertikalt",
+  "rotate90": "Roter 90°",
+  "rotatePanel": {
     "title": "Roter bilde",
     "subtitle": "Juster rotasjonsvinkel eller bruk hurtigrotasjon",
     "angle": "Vinkel",
@@ -60,14 +74,20 @@
     "reset": "Tilbakestill rotasjon",
     "help": "Klikk for å rotere bildet 90° til høyre"
   },
-  "filters": {
+  "filters": "Filtre",
+  "crop": "Beskjær",
+  "filtersPanel": {
     "title": "Filtre",
     "subtitle": "Velg et filterforhåndsvisning for bildet ditt",
     "presets": "Filterforhåndsvisninger",
+    "none": "Original",
     "original": "Original",
     "warm": "Varm",
     "cool": "Kjølig",
     "vintage": "Vintage",
+    "bright": "Lys",
+    "bw": "Svart/hvitt",
+    "cinematic": "Kinematisk",
     "contrast": "Kontrast+",
     "fade": "Falmet",
     "blackWhite": "Svart/hvit",
@@ -78,7 +98,15 @@
     "showingBefore": "Viser original (slipp for å gjenopprette filter)",
     "help": "Velg filter og juster lysstyrke, kontrast og metning"
   },
-  "adjust": {
+  "adjust": "Juster",
+  "brightness": "Lysstyrke",
+  "contrast": "Kontrast",
+  "saturation": "Metning",
+  "temperature": "Temperatur",
+  "blur": "Uskarphet",
+  "vignette": "Vignett",
+  "reset": "Tilbakestill",
+  "adjustPanel": {
     "title": "Justeringer",
     "subtitle": "Finjuster bildet ditt med presise kontroller",
     "brightness": "Lysstyrke",

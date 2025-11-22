@@ -3,7 +3,7 @@
 // ============================================================================
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Heart, Info, MoreVertical, Presentation } from 'lucide-react';
+import { ArrowLeft, Heart, Info, MoreVertical, Presentation, Edit2 } from 'lucide-react';
 import { format } from 'date-fns';
 import useStore from '../state/store';
 import { usePhotoById } from '../hooks/usePhotoById';
@@ -126,6 +126,13 @@ export default function PhotoPage() {
     if (!photo) return;
     // Navigate to slideshow page with current photo
     navigate(`/slideshow/${photo.id}`, { state: { from: location } });
+  }, [photo, navigate, location]);
+
+  // Open editor - Phase 4
+  const handleEdit = useCallback(() => {
+    if (!photo) return;
+    // Navigate to editor page
+    navigate(`/editor/${photo.id}`, { state: { from: location } });
   }, [photo, navigate, location]);
 
   // Keyboard navigation
@@ -316,6 +323,17 @@ export default function PhotoPage() {
                 aria-label="Start slideshow"
               >
                 <Presentation className="w-5 h-5" />
+              </button>
+            )}
+
+            {/* Edit button - Phase 4 */}
+            {photo.type !== 'video' && (
+              <button
+                onClick={handleEdit}
+                className="text-white hover:bg-white/10 p-2 rounded-full transition active:scale-95"
+                aria-label="Edit photo"
+              >
+                <Edit2 className="w-5 h-5" />
               </button>
             )}
 

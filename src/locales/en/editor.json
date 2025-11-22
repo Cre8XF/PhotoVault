@@ -1,5 +1,13 @@
 {
   "title": "Edit Photo",
+  "save": "Save",
+  "saveCopy": "Save a Copy",
+  "replaceOriginal": "Replace Original",
+  "saveOptions": "Save Options",
+  "unsavedChanges": "Unsaved Changes",
+  "unsavedWarning": "You have unsaved changes. Are you sure you want to leave?",
+  "discardChanges": "Discard",
+  "loading": "Loading editor...",
   "buttons": {
     "download": "Download",
     "save": "Save",
@@ -26,6 +34,8 @@
   "errors": {
     "canvasError": "Could not save image (canvas missing)",
     "saveError": "Could not save image",
+    "saveFailed": "Failed to save photo",
+    "loadFailed": "Failed to load photo",
     "blobError": "Blob conversion failed",
     "contextError": "Canvas context missing",
     "downloadError": "Could not download image",
@@ -48,7 +58,11 @@
     "height": "Height",
     "help": "Select aspect ratio and click \"Apply\" to crop"
   },
-  "rotate": {
+  "rotate": "Rotate",
+  "flipHorizontal": "Flip Horizontal",
+  "flipVertical": "Flip Vertical",
+  "rotate90": "Rotate 90°",
+  "rotatePanel": {
     "title": "Rotate Image",
     "subtitle": "Adjust rotation angle or use quick rotate",
     "angle": "Angle",
@@ -60,14 +74,20 @@
     "reset": "Reset Rotation",
     "help": "Click to rotate the image 90° to the right"
   },
-  "filters": {
+  "filters": "Filters",
+  "crop": "Crop",
+  "filtersPanel": {
     "title": "Filters",
     "subtitle": "Choose a filter preset for your photo",
     "presets": "Filter Presets",
+    "none": "Original",
     "original": "Original",
     "warm": "Warm",
     "cool": "Cool",
     "vintage": "Vintage",
+    "bright": "Bright",
+    "bw": "Black & White",
+    "cinematic": "Cinematic",
     "contrast": "Contrast+",
     "fade": "Fade",
     "blackWhite": "B&W",
@@ -78,7 +98,15 @@
     "showingBefore": "Showing original (release to restore filter)",
     "help": "Select filter and adjust brightness, contrast and saturation"
   },
-  "adjust": {
+  "adjust": "Adjust",
+  "brightness": "Brightness",
+  "contrast": "Contrast",
+  "saturation": "Saturation",
+  "temperature": "Temperature",
+  "blur": "Blur",
+  "vignette": "Vignette",
+  "reset": "Reset",
+  "adjustPanel": {
     "title": "Adjustments",
     "subtitle": "Fine-tune your photo with precise controls",
     "brightness": "Brightness",

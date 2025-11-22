@@ -2,6 +2,7 @@
 // COMPONENT: PhotoModal.jsx – v5.0 Google Photos-Style Redesign
 // ============================================================================
 import React, { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   X,
@@ -31,6 +32,7 @@ const PhotoModal = ({
   onToggleFavorite,
   onPhotoEdited,
 }) => {
+  const navigate = useNavigate()
   const { t } = useTranslation(['common'])
   const { user } = useAuth()
   const [index, setIndex] = useState(currentIndex)
@@ -247,22 +249,8 @@ const PhotoModal = ({
       return
     }
 
-    const resolvedUrl =
-      photo.fullUrl ||
-      photo.downloadUrl ||
-      photo.url ||
-      photo.src ||
-      photo.path ||
-      ''
-
-    console.log('📸 Opening editor with URL:', resolvedUrl)
-    if (!resolvedUrl) {
-      console.error('❌ No valid image URL found for photo:', photo)
-      alert(t('common:grid.noImageUrl'))
-      return
-    }
-
-    setShowEditor(true)
+    // Phase 4: Navigate to Editor World instead of opening modal
+    navigate(`/editor/${photo.id}`)
   }
 
   const handleEditSave = async (blob, originalPhoto) => {
