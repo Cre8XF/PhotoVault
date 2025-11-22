@@ -488,17 +488,19 @@ const AlbumPage = ({
             <span className="hidden sm:inline text-sm md:text-base">{t('albums:createCollage')}</span>
           </button>
 
-          {/* Start Slideshow */}
+          {/* Start Slideshow - Phase 2B */}
           {filteredPhotos.length > 0 && (
             <button
               onClick={() => {
-                setPhotoModal({ open: true, index: 0 })
-                // Trigger slideshow mode after a short delay
-                setTimeout(() => {
-                  // This will be handled by PhotoModal's internal state
-                  const event = new CustomEvent('startSlideshow')
-                  window.dispatchEvent(event)
-                }, 100)
+                // Navigate to SlideshowPage with first photo
+                const firstPhoto = filteredPhotos[0]
+                const photoIds = filteredPhotos.map((p) => p.id)
+                setCurrentPhotoId(firstPhoto.id)
+                setPhotoContext('album')
+                setPhotoOrder(photoIds)
+                setPhotoIndex(0)
+                setCurrentAlbumId(album?.id || null)
+                navigate(`/slideshow/${firstPhoto.id}`, { state: { from: location } })
               }}
               className="ripple-effect px-3 py-1.5 md:px-4 md:py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 flex items-center gap-1.5 md:gap-2 text-sm md:text-base"
             >
