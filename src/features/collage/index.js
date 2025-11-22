@@ -1,11 +1,9 @@
 /**
  * Collage Maker Feature - Phase 1 & 2: Canvas Engine, Layouts, Text & Stickers
+ * Phase 6: Migrated to Function Worlds (CollageNewPage, CollageEditPage)
  *
  * Main exports for the collage maker feature module
  */
-
-// Main component
-export { default as CollageBuilder } from './components/CollageBuilder'
 
 // Sub-components
 export { default as LayoutSelector } from './components/LayoutSelector'

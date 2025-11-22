@@ -25,7 +25,6 @@ import { getFirestore, doc, updateDoc } from 'firebase/firestore'
 import { deletePhoto, setAlbumCover, updateAlbumPhotoCount } from '../firebase'
 import MoveModal from '../components/MoveModal'
 import ConfirmModal from '../components/ConfirmModal'
-import PhotoModal from '../components/PhotoModal'
 import useStore from '../state/store'
 
 const SearchPage = ({
@@ -91,9 +90,6 @@ const SearchPage = ({
   // Bekreftelsesdialog for sletting
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [photoToDelete, setPhotoToDelete] = useState(null)
-
-  // PhotoModal state
-  const [photoModal, setPhotoModal] = useState({ open: false, index: 0 })
 
   // Debug: Track isMoveOpen changes
   useEffect(() => {
@@ -673,15 +669,6 @@ const SearchPage = ({
             setConfirmOpen(false)
             setPhotoToDelete(null)
           }}
-        />
-      )}
-
-      {photoModal.open && (
-        <PhotoModal
-          photos={filteredPhotos}
-          currentIndex={photoModal.index}
-          onClose={() => setPhotoModal({ open: false, index: 0 })}
-          onToggleFavorite={toggleFavorite}
         />
       )}
     </div>

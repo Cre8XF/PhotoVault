@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { usePublicAlbum } from '../features/qr-sharing/hooks/usePublicAlbum'
 import { trackPublicView } from '../features/qr-sharing/utils/analytics'
 import { Upload, Image as ImageIcon } from 'lucide-react'
-import PhotoModal from '../components/PhotoModal'
 import UploadModal from '../components/UploadModal'
 
 const PublicAlbumPage = () => {
@@ -12,7 +11,6 @@ const PublicAlbumPage = () => {
   const { slug } = useParams()
   const navigate = useNavigate()
   const { album, photos, loading, error } = usePublicAlbum(slug)
-  const [photoModal, setPhotoModal] = useState({ open: false, index: 0 })
   const [uploadOpen, setUploadOpen] = useState(false)
 
   // Track analytics when album loads
@@ -87,8 +85,7 @@ const PublicAlbumPage = () => {
             {photos.map((photo, index) => (
               <div
                 key={photo.id}
-                onClick={() => setPhotoModal({ open: true, index })}
-                className="relative aspect-square bg-black/10 rounded-lg overflow-hidden cursor-pointer hover:scale-105 transition"
+                className="relative aspect-square bg-black/10 rounded-lg overflow-hidden"
               >
                 <img
                   src={photo.url}
@@ -100,16 +97,6 @@ const PublicAlbumPage = () => {
           </div>
         )}
       </div>
-
-      {/* Photo Modal */}
-      {photoModal.open && (
-        <PhotoModal
-          photos={photos}
-          currentIndex={photoModal.index}
-          onClose={() => setPhotoModal({ open: false, index: 0 })}
-          readOnly={true}
-        />
-      )}
 
       {/* Upload Modal */}
       {album.publicSettings?.allowUpload && (
