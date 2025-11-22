@@ -173,7 +173,7 @@ const EditorPreview = ({ photo, transform, activeMode, className = '' }) => {
       style={{ cursor: isPanning ? 'grabbing' : zoom.currentZoom > 1 && activeMode === 'crop' ? 'grab' : 'default' }}
     >
       {/* Main Photo */}
-      <div className="w-full h-full flex items-center justify-center">
+      <div className="w-full h-full relative overflow-hidden flex items-center justify-center">
         <img
           ref={imageRef}
           src={photo.url}
