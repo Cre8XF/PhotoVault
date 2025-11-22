@@ -10,6 +10,7 @@ import { PageWrapper } from '../components/layout/PageWrapper';
 import useStore from '../state/store';
 import useEditorStore from '../features/editor/editorStore';
 import EditorPreview from '../features/editor/components/EditorPreview';
+import MobileEditorLayout from '../features/editor/components/MobileEditorLayout';
 import { getFilterPreset } from '../features/editor/utils/filterPresets';
 import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
@@ -415,56 +416,15 @@ const EditorPage = () => {
 
         {/* MOBILE LAYOUT */}
         {isMobile ? (
-          <div className="flex flex-col w-full h-full relative">
-            {/* Preview Section (always visible on mobile) */}
-            <div className="editor-preview-mobile relative overflow-hidden">
-              <EditorPreview
-                photo={originalPhoto}
-                transform={transform}
-                activeMode={activeMode}
-              />
-            </div>
-
-            {/* Toolbar – fixed on mobile */}
-            <div className="editor-toolbar-mobile fixed left-0 right-0 z-50">
-              <div className="flex items-center justify-center gap-2 bg-black/90 backdrop-blur-xl border-t border-white/20 px-4 py-3">
-                {modes.map((mode) => {
-                  const Icon = mode.icon;
-                  const isActive = activeMode === mode.id;
-                  return (
-                    <button
-                      key={mode.id}
-                      onClick={() => handleModeChange(mode.id)}
-                      className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
-                        isActive ? 'bg-purple-600 text-white' : 'hover:bg-white/10 text-white/70 hover:text-white'
-                      }`}
-                    >
-                      <Icon className="w-5 h-5" />
-                      <span className="text-[10px] font-medium">{mode.label}</span>
-                    </button>
-                  );
-                })}
-
-                <div className="w-px h-10 bg-white/20 mx-1" />
-
-                <button
-                  onClick={handleReset}
-                  disabled={!hasTransforms()}
-                  className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg hover:bg-white/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed text-white/70 hover:text-white"
-                >
-                  <RotateCcw className="w-5 h-5" />
-                  <span className="text-[10px] font-medium">{t('editor.reset', 'Reset')}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Bottom Sheet Panel */}
-            {activeMode && (
-              <div className="editor-panel-mobile fixed bottom-0 left-0 right-0 bg-black/95 rounded-t-2xl overflow-y-auto z-40 p-4">
-                {renderPanel()}
-              </div>
-            )}
-          </div>
+          <MobileEditorLayout
+            originalPhoto={originalPhoto}
+            transform={transform}
+            activeMode={activeMode}
+            hasTransforms={hasTransforms}
+            onModeChange={handleModeChange}
+            onReset={handleReset}
+            renderPanel={renderPanel}
+          />
         ) : (
           /* DESKTOP LAYOUT (unchanged) */
           <>
