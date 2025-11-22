@@ -2,6 +2,7 @@
 // PAGE: MorePage.jsx – v7.1 MED ARRAY-GUARDS FIKSET
 // ============================================================================
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   User,
@@ -41,7 +42,9 @@ import {
   Lock,
   Folder,
   Image,
+  Layout,
 } from 'lucide-react'
+import { ROUTES } from '../routes'
 import { useSecurityContext } from '../contexts/SecurityContext'
 import {
   getFirestore,
@@ -71,6 +74,7 @@ const MorePage = ({
   onLogout,
   onNavigate,
 }) => {
+  const navigate = useNavigate()
   const { t, i18n } = useTranslation([
     'translation',
     'common',
@@ -569,6 +573,16 @@ const MorePage = ({
       {/* === QUICK ACTIONS === */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <button
+          onClick={() => navigate(ROUTES.TOOLS)}
+          className="ripple-effect glass rounded-xl p-4 hover:bg-white/10 transition flex flex-col items-center gap-2 text-center"
+        >
+          <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">
+            <Layout className="w-6 h-6 text-white" />
+          </div>
+          <span className="text-sm font-medium">Create</span>
+        </button>
+
+        <button
           onClick={() => onNavigate('security')}
           className="ripple-effect glass rounded-xl p-4 hover:bg-white/10 transition flex flex-col items-center gap-2 text-center"
         >
@@ -597,16 +611,6 @@ const MorePage = ({
             <Share2 className="w-6 h-6 text-pink-400" />
           </div>
           <span className="text-sm font-medium">{t('buttons.share')}</span>
-        </button>
-
-        <button
-          onClick={() => openInfoPage('help')}
-          className="ripple-effect glass rounded-xl p-4 hover:bg-white/10 transition flex flex-col items-center gap-2 text-center"
-        >
-          <div className="p-3 bg-green-600/20 rounded-xl">
-            <HelpCircle className="w-6 h-6 text-green-400" />
-          </div>
-          <span className="text-sm font-medium">{t('buttons.help')}</span>
         </button>
       </div>
 
