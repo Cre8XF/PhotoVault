@@ -297,6 +297,98 @@ const EditorPage = () => {
                 </div>
               )}
 
+              {/* Crop Panel */}
+              {activeMode === 'crop' && (
+                <div className="space-y-4">
+                  <p className="text-sm opacity-70 mb-4">
+                    {t('editor.crop.instructions', 'Drag handles to adjust crop area')}
+                  </p>
+
+                  {/* Zoom Controls */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      {t('editor.crop.zoomIn', 'Zoom')} ({(useEditorStore.getState().zoom.currentZoom * 100).toFixed(0)}%)
+                    </label>
+                    <input
+                      type="range"
+                      min={50}
+                      max={300}
+                      value={useEditorStore.getState().zoom.currentZoom * 100}
+                      onChange={(e) => useEditorStore.getState().setZoom(Number(e.target.value) / 100)}
+                      className="w-full"
+                    />
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        onClick={() => useEditorStore.getState().setZoom(useEditorStore.getState().zoom.currentZoom - 0.1)}
+                        className="flex-1 px-3 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition text-sm"
+                      >
+                        {t('editor.crop.zoomOut', 'Zoom Out')}
+                      </button>
+                      <button
+                        onClick={() => useEditorStore.getState().setZoom(useEditorStore.getState().zoom.currentZoom + 0.1)}
+                        className="flex-1 px-3 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition text-sm"
+                      >
+                        {t('editor.crop.zoomIn', 'Zoom In')}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Reset Zoom */}
+                  <button
+                    onClick={() => useEditorStore.getState().resetZoomPan()}
+                    disabled={useEditorStore.getState().zoom.currentZoom === 1}
+                    className="w-full px-4 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {t('editor.crop.resetZoom', 'Reset Zoom')}
+                  </button>
+
+                  {/* Aspect Ratio Presets */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      {t('editor.crop.aspectRatio', 'Aspect Ratio')}
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => {
+                          const crop = transform.crop;
+                          if (crop) applyTransform('crop', { ...crop, aspectRatio: null });
+                        }}
+                        className="px-3 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition text-sm"
+                      >
+                        {t('editor.crop.free', 'Free')}
+                      </button>
+                      <button
+                        onClick={() => {
+                          const crop = transform.crop;
+                          if (crop) applyTransform('crop', { ...crop, aspectRatio: 1 });
+                        }}
+                        className="px-3 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition text-sm"
+                      >
+                        {t('editor.crop.square', 'Square')}
+                      </button>
+                      <button
+                        onClick={() => {
+                          const crop = transform.crop;
+                          if (crop) applyTransform('crop', { ...crop, aspectRatio: 4/5 });
+                        }}
+                        className="px-3 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition text-sm"
+                      >
+                        {t('editor.crop.portrait', 'Portrait')}
+                      </button>
+                      <button
+                        onClick={() => {
+                          const crop = transform.crop;
+                          if (crop) applyTransform('crop', { ...crop, aspectRatio: 16/9 });
+                        }}
+                        className="px-3 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition text-sm"
+                      >
+                        {t('editor.crop.landscape', 'Landscape')}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Rotate Panel */}
               {activeMode === 'rotate' && (
                 <div className="space-y-4">
