@@ -115,23 +115,78 @@
   }
 }
 
-/* Phase 7A.1: Mobile bottom sheet panel */
+/* ============================================================================
+   MOBILE EDITOR LAYOUT (Phase 7A.1 - Refactored)
+   ============================================================================ */
+
 @media (max-width: 640px) {
-  .editor-preview-mobile {
-    height: 55vh !important;
-  }
-
-  .editor-panel-mobile {
-    height: 40vh !important;
-    backdrop-filter: blur(12px);
-  }
-
-  .editor-toolbar-mobile {
-    height: 68px;
+  /* Container */
+  .mobile-editor-layout {
+    position: fixed;
+    inset: 0;
+    top: 60px; /* Below topbar */
     display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    bottom: 40vh;
+    flex-direction: column;
+    background: #000;
+    isolation: isolate; /* Create stacking context */
+  }
+
+  /* Preview - Fixed height, never changes */
+  .mobile-editor-preview {
+    position: relative;
+    height: calc(100dvh - 60px - 68px); /* viewport - topbar - toolbar */
+    width: 100%;
+    overflow: hidden;
+    background: #000;
+    z-index: 1;
+  }
+
+  /* Toolbar - Fixed at bottom, always visible */
+  .mobile-editor-toolbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 68px;
+    z-index: 50;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Bottom Sheet Panel - Overlays preview bottom */
+  .mobile-editor-panel {
+    position: fixed;
+    bottom: 68px; /* Above toolbar */
+    left: 0;
+    right: 0;
+    height: 280px;
+    max-height: 40vh; /* Limit on small screens */
+    z-index: 40;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(12px);
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    overflow-y: auto;
+    padding: 16px;
+    transform: translateY(calc(100% + 68px)); /* Hidden by default */
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .mobile-editor-panel.active {
+    transform: translateY(0); /* Slide up */
+  }
+
+  /* Compact panel content */
+  .mobile-editor-panel .space-y-4 > * + * {
+    margin-top: 12px; /* Tighter spacing */
+  }
+
+  .mobile-editor-panel button {
+    min-height: 44px; /* Touch-friendly */
+  }
+
+  .mobile-editor-panel input[type="range"] {
+    height: 44px; /* Touch-friendly */
   }
 }
