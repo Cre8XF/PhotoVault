@@ -169,6 +169,11 @@ const useStore = create(
         collageEditId: null,
         isWorldView: false,
 
+        // Photo Context - Phase 2A
+        photoContext: null, // 'album' | 'search' | 'favorites' | 'all'
+        photoOrder: [], // array of photo IDs in current context
+        photoIndex: 0, // current index in photoOrder
+
         setCurrentPage: (page) => set({ currentPage: page }),
         setSelectedAlbum: (album) => set({ selectedAlbum: album }),
         setSelectedPhotoIndex: (index) => set({ selectedPhotoIndex: index }),
@@ -179,6 +184,11 @@ const useStore = create(
         setSlideshowActive: (active) => set({ slideshowActive: active }),
         setCollageEditId: (id) => set({ collageEditId: id }),
         setIsWorldView: (value) => set({ isWorldView: value }),
+
+        // Photo Context setters - Phase 2A
+        setPhotoContext: (context) => set({ photoContext: context }),
+        setPhotoOrder: (order) => set({ photoOrder: order }),
+        setPhotoIndex: (index) => set({ photoIndex: index }),
 
         navigateToAlbum: (album) =>
           set({
