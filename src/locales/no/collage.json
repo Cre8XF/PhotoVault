@@ -8,6 +8,39 @@
     "description": "Lag flotte kollasjer fra bildene dine",
     "createFirst": "Lag din første kollasj"
   },
+  "new": {
+    "title": "Ny kollasj"
+  },
+  "edit": {
+    "title": "Rediger kollasj"
+  },
+  "builder": {
+    "addPhoto": "Legg til bilde",
+    "helpText": "Trykk på en rute for å legge til eller redigere bilder",
+    "rotate": "Roter",
+    "remove": "Fjern"
+  },
+  "toolbar": {
+    "slot": "Rute",
+    "replace": "Bytt",
+    "add": "Legg til",
+    "rotate": "Roter 90°",
+    "swap": "Bytt med annen rute",
+    "remove": "Fjern bilde"
+  },
+  "photoPicker": {
+    "title": "Velg bilde",
+    "forSlot": "For rute",
+    "search": "Søk bilder...",
+    "all": "Alle",
+    "favorites": "Favoritter",
+    "noPhotos": "Ingen bilder funnet",
+    "hint": "Trykk på et bilde for å legge det til i valgt rute"
+  },
+  "selectTemplate": "Velg mal",
+  "unsavedChanges": "Ulagrede endringer",
+  "unsavedWarning": "Du har ulagrede endringer. Er du sikker på at du vil gå tilbake?",
+  "discardChanges": "Forkast",
   "steps": {
     "step1": "Steg 1: Velg layout",
     "step2": "Steg 2: Velg bilder",
@@ -90,7 +123,12 @@
     "exportError": "Kunne ikke eksportere kollasjen",
     "saveError": "Kunne ikke lagre kollasjen. Prøv igjen.",
     "title": "Feil",
-    "imageLoadFailed": "Kunne ikke laste bilde"
+    "imageLoadFailed": "Kunne ikke laste bilde",
+    "noTemplate": "Ingen mal valgt",
+    "selectTemplate": "Vennligst velg en mal for å lage en kollasj",
+    "loadFailed": "Kunne ikke laste kollasj",
+    "noPhotos": "Legg til minst ett bilde før lagring",
+    "saveFailed": "Kunne ikke lagre kollasj"
   },
   "layout": {
     "photos": "bilder",
@@ -112,7 +150,8 @@
     "six_grid": "6 bilder (grid)",
     "nine_grid": "9 bilder (grid)"
   },
-  "loading": {
+  "loading": "Laster kollasj...",
+  "loadingDetails": {
     "photos": "Laster bilder...",
     "saving": "Lagrer kollasj...",
     "uploading": "Laster opp til Firebase Storage",

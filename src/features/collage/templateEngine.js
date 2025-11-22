@@ -1,0 +1,156 @@
+// ============================================================================
+// MODULE: templateEngine.js - Template expansion and utilities
+// ============================================================================
+
+/**
+ * Template Engine
+ *
+ * Handles:
+ * - Template loading and validation
+ * - Slot expansion from template definitions
+ * - Grid calculations
+ * - Template metadata helpers
+ */
+
+import { collageTemplates } from './collageTemplates';
+
+/**
+ * Get template by ID
+ */
+export const getTemplateById = (templateId) => {
+  return collageTemplates.find((t) => t.id === templateId);
+};
+
+/**
+ * Expand template into full slot structure
+ * Converts previewSlots into detailed slot objects
+ */
+export const expandTemplate = (template) => {
+  if (!template || !template.previewSlots) {
+    throw new Error('Invalid template: missing previewSlots');
+  }
+
+  return {
+    ...template,
+    slots: template.previewSlots.map((slot, index) => ({
+      id: slot.id,
+      slotIndex: index,
+      row: slot.row,
+      col: slot.col,
+      rowSpan: slot.rowSpan,
+      colSpan: slot.colSpan,
+    })),
+  };
+};
+
+/**
+ * Calculate grid dimensions from template
+ */
+export const calculateGridDimensions = (template) => {
+  if (!template || !template.previewSlots) {
+    return { rows: 1, cols: 1 };
+  }
+
+  const maxRow = Math.max(
+    ...template.previewSlots.map((s) => s.row + s.rowSpan - 1)
+  );
+  const maxCol = Math.max(
+    ...template.previewSlots.map((s) => s.col + s.colSpan - 1)
+  );
+
+  return {
+    rows: maxRow,
+    cols: maxCol,
+  };
+};
+
+/**
+ * Get aspect ratio as decimal (e.g., 1 for square, 1.5 for 3:2)
+ */
+export const getTemplateAspectRatio = (template) => {
+  return template?.aspectRatio || 1;
+};
+
+/**
+ * Validate template structure
+ */
+export const validateTemplate = (template) => {
+  if (!template) return false;
+  if (!template.id || !template.name) return false;
+  if (!template.previewSlots || !Array.isArray(template.previewSlots)) {
+    return false;
+  }
+  if (template.previewSlots.length === 0) return false;
+
+  // Validate each slot has required properties
+  for (const slot of template.previewSlots) {
+    if (!slot.id) return false;
+    if (typeof slot.row !== 'number') return false;
+    if (typeof slot.col !== 'number') return false;
+    if (typeof slot.rowSpan !== 'number') return false;
+    if (typeof slot.colSpan !== 'number') return false;
+  }
+
+  return true;
+};
+
+/**
+ * Get all available templates
+ */
+export const getAllTemplates = () => {
+  return collageTemplates;
+};
+
+/**
+ * Get template display name (for i18n)
+ */
+export const getTemplateDisplayName = (template, t) => {
+  // Future: support i18n keys like t(`collage.templates.${template.id}`)
+  // For now, return template name
+  return template.name;
+};
+
+/**
+ * Check if photo count is valid for template
+ */
+export const isPhotoCountValid = (template, photoCount) => {
+  if (!template) return false;
+  const min = template.minPhotos || 0;
+  const max = template.maxPhotos || Infinity;
+  return photoCount >= min && photoCount <= max;
+};
+
+/**
+ * Get slot at specific grid position
+ */
+export const getSlotAtPosition = (template, row, col) => {
+  if (!template || !template.previewSlots) return null;
+
+  return template.previewSlots.find(
+    (slot) =>
+      row >= slot.row &&
+      row < slot.row + slot.rowSpan &&
+      col >= slot.col &&
+      col < slot.col + slot.colSpan
+  );
+};
+
+/**
+ * Calculate canvas size based on template and container
+ */
+export const calculateCanvasSize = (template, maxWidth, maxHeight) => {
+  const aspectRatio = getTemplateAspectRatio(template);
+
+  let width = maxWidth;
+  let height = width / aspectRatio;
+
+  if (height > maxHeight) {
+    height = maxHeight;
+    width = height * aspectRatio;
+  }
+
+  return {
+    width: Math.floor(width),
+    height: Math.floor(height),
+  };
+};
