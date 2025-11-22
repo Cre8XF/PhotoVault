@@ -36,6 +36,14 @@ import PhotoPage from './pages/PhotoPage'
 import SlideshowPage from './pages/SlideshowPage'
 import EditorPage from './pages/EditorPage'
 
+// AI Tools - Phase 5
+import AIToolsPage from './pages/ai/AIToolsPage'
+import AIEnhancePage from './pages/ai/AIEnhancePage'
+import AIRemoveBgPage from './pages/ai/AIRemoveBgPage'
+import AIPortraitPage from './pages/ai/AIPortraitPage'
+import AIColorPage from './pages/ai/AIColorPage'
+import AIUpscalePage from './pages/ai/AIUpscalePage'
+
 // Collage Builder
 import CollageBuilder from './features/collage/components/CollageBuilder'
 import CollageView from './features/collage/pages/CollageView'
@@ -83,6 +91,14 @@ function App() {
               <Route path={ROUTES.PHOTO} element={<PhotoPage />} />
               <Route path={ROUTES.SLIDESHOW} element={<SlideshowPage />} />
               <Route path={ROUTES.EDITOR} element={<EditorPage />} />
+
+              {/* AI Tools - Phase 5 */}
+              <Route path={ROUTES.AI_TOOLS} element={<AIToolsPage />} />
+              <Route path={ROUTES.AI_ENHANCE} element={<AIEnhancePage />} />
+              <Route path={ROUTES.AI_REMOVE_BG} element={<AIRemoveBgPage />} />
+              <Route path={ROUTES.AI_PORTRAIT} element={<AIPortraitPage />} />
+              <Route path={ROUTES.AI_COLOR} element={<AIColorPage />} />
+              <Route path={ROUTES.AI_UPSCALE} element={<AIUpscalePage />} />
 
               {/* Collage routes */}
               <Route path="/collage/edit/:id" element={<CollageBuilder />} />
