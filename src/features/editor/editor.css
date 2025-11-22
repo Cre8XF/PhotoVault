@@ -114,3 +114,24 @@
     min-width: 48px;
   }
 }
+
+/* Phase 7A.1: Mobile bottom sheet panel */
+@media (max-width: 640px) {
+  .editor-preview-mobile {
+    height: 55vh !important;
+  }
+
+  .editor-panel-mobile {
+    height: 40vh !important;
+    backdrop-filter: blur(12px);
+  }
+
+  .editor-toolbar-mobile {
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    bottom: 40vh;
+  }
+}
