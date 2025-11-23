@@ -1,0 +1,128 @@
+/**
+ * Canvas Rendering Utilities - Phase 8B-1
+ *
+ * Core canvas rendering functions with HiDPI support
+ */
+
+/**
+ * Get device pixel ratio for HiDPI displays
+ */
+export const getDevicePixelRatio = () => {
+  return window.devicePixelRatio || 1;
+};
+
+/**
+ * Set canvas size with DPR scaling
+ * @param {HTMLCanvasElement} canvas - Canvas element
+ * @param {number} displayWidth - CSS display width in pixels
+ * @param {number} displayHeight - CSS display height in pixels
+ */
+export const setCanvasSize = (canvas, displayWidth, displayHeight) => {
+  const dpr = getDevicePixelRatio();
+
+  // Set actual canvas buffer size (scaled by DPR)
+  canvas.width = displayWidth * dpr;
+  canvas.height = displayHeight * dpr;
+
+  // Set CSS display size
+  canvas.style.width = `${displayWidth}px`;
+  canvas.style.height = `${displayHeight}px`;
+
+  // Scale context to match DPR
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  return { width: displayWidth, height: displayHeight, dpr };
+};
+
+/**
+ * Load image from URL
+ * @param {string} url - Image URL
+ * @returns {Promise<HTMLImageElement>} Loaded image
+ */
+export const loadImage = (url) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous'; // Enable CORS for canvas manipulation
+
+    img.onload = () => resolve(img);
+    img.onerror = (err) => reject(new Error(`Failed to load image: ${err}`));
+
+    img.src = url;
+  });
+};
+
+/**
+ * Calculate scale to fit image in container (contain mode)
+ * @param {number} imageWidth - Natural image width
+ * @param {number} imageHeight - Natural image height
+ * @param {number} containerWidth - Container width
+ * @param {number} containerHeight - Container height
+ * @returns {number} Scale factor
+ */
+export const calculateFitScale = (imageWidth, imageHeight, containerWidth, containerHeight) => {
+  const scaleX = containerWidth / imageWidth;
+  const scaleY = containerHeight / imageHeight;
+
+  // Use smaller scale to ensure entire image fits (contain behavior)
+  return Math.min(scaleX, scaleY);
+};
+
+/**
+ * Draw image centered in canvas
+ * Phase 8B-1: No transforms, just centered rendering
+ *
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {HTMLImageElement} image - Image to draw
+ * @param {number} canvasWidth - Canvas display width
+ * @param {number} canvasHeight - Canvas display height
+ */
+export const drawImageCentered = (ctx, image, canvasWidth, canvasHeight) => {
+  // Clear canvas
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+  // Calculate scale to fit image in canvas
+  const scale = calculateFitScale(
+    image.naturalWidth,
+    image.naturalHeight,
+    canvasWidth,
+    canvasHeight
+  );
+
+  // Calculate scaled dimensions
+  const scaledWidth = image.naturalWidth * scale;
+  const scaledHeight = image.naturalHeight * scale;
+
+  // Calculate position to center image
+  const x = (canvasWidth - scaledWidth) / 2;
+  const y = (canvasHeight - scaledHeight) / 2;
+
+  // Enable smooth rendering
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
+  // Draw image
+  ctx.drawImage(
+    image,
+    0, 0, image.naturalWidth, image.naturalHeight, // Source rectangle
+    x, y, scaledWidth, scaledHeight                // Destination rectangle
+  );
+};
+
+/**
+ * Initialize GPU-accelerated canvas context
+ * @param {HTMLCanvasElement} canvas - Canvas element
+ * @returns {CanvasRenderingContext2D} Context with optimal settings
+ */
+export const initCanvasContext = (canvas) => {
+  const ctx = canvas.getContext('2d', {
+    alpha: false,           // No transparency needed, better performance
+    desynchronized: true,   // Better for animations
+  });
+
+  // Enable GPU acceleration
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
+  return ctx;
+};
