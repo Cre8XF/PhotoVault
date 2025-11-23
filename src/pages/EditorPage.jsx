@@ -2,7 +2,7 @@
 // PAGE: EditorPage.jsx - Photo Editor World (Phase 7C-1 - Foundation)
 // ============================================================================
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Save, AlertCircle, Loader, Sliders, Crop as CropIcon, RotateCw, Sparkles, RotateCcw } from 'lucide-react';
@@ -48,6 +48,9 @@ const EditorPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [activeTool, setActiveTool] = useState('none');
+
+  // Viewport ref for zoom/pan controls (Phase 8B-2)
+  const viewportRef = useRef(null);
 
   // ============================================================================
   // INITIALIZATION - World Pattern
@@ -95,10 +98,14 @@ const EditorPage = () => {
   );
 
   const handleReset = useCallback(() => {
-    // Phase 8A: Reset editor store transforms
+    // Phase 8B-2: Reset viewport transforms
+    if (viewportRef.current) {
+      viewportRef.current.resetTransform();
+    }
+    // Reset editor store transforms
     const { resetToOriginal } = useEditorStore.getState();
     resetToOriginal();
-    console.log('✅ Phase 8A: Reset to original');
+    console.log('✅ Phase 8B-2: Reset zoom, pan, and transforms');
   }, []);
 
   const handleSave = useCallback(() => {
@@ -176,8 +183,9 @@ const EditorPage = () => {
         </div>
       </div>
 
-      {/* Viewport Shell - Phase 8A: Simple Layout */}
+      {/* Viewport Shell - Phase 8B-2: Canvas with Zoom/Pan */}
       <EditorViewport
+        ref={viewportRef}
         photo={originalPhoto}
         hasActivePanel={activeTool !== 'none'}
       >

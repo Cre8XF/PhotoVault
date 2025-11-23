@@ -110,6 +110,58 @@ export const drawImageCentered = (ctx, image, canvasWidth, canvasHeight) => {
 };
 
 /**
+ * Draw image with transforms (Phase 8B-2)
+ * Applies zoom and pan transforms
+ *
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {HTMLImageElement} image - Image to draw
+ * @param {number} canvasWidth - Canvas display width
+ * @param {number} canvasHeight - Canvas display height
+ * @param {Object} transform - Transform state { zoom, panX, panY }
+ */
+export const drawImageWithTransform = (ctx, image, canvasWidth, canvasHeight, transform) => {
+  const { zoom = 1, panX = 0, panY = 0 } = transform;
+
+  // Clear canvas
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+  // Calculate base scale to fit image in canvas
+  const fitScale = calculateFitScale(
+    image.naturalWidth,
+    image.naturalHeight,
+    canvasWidth,
+    canvasHeight
+  );
+
+  // Calculate scaled dimensions at zoom level 1
+  const baseWidth = image.naturalWidth * fitScale;
+  const baseHeight = image.naturalHeight * fitScale;
+
+  // Apply zoom
+  const scaledWidth = baseWidth * zoom;
+  const scaledHeight = baseHeight * zoom;
+
+  // Calculate center position
+  const centerX = canvasWidth / 2;
+  const centerY = canvasHeight / 2;
+
+  // Calculate position with pan offset
+  const x = centerX - (scaledWidth / 2) + panX;
+  const y = centerY - (scaledHeight / 2) + panY;
+
+  // Enable smooth rendering
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
+  // Draw image with transforms
+  ctx.drawImage(
+    image,
+    0, 0, image.naturalWidth, image.naturalHeight, // Source rectangle
+    x, y, scaledWidth, scaledHeight                // Destination rectangle
+  );
+};
+
+/**
  * Initialize GPU-accelerated canvas context
  * @param {HTMLCanvasElement} canvas - Canvas element
  * @returns {CanvasRenderingContext2D} Context with optimal settings
