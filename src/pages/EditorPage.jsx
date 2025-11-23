@@ -2,13 +2,13 @@
 // PAGE: EditorPage.jsx - Photo Editor World (Phase 7C-1 - Foundation)
 // ============================================================================
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Save, AlertCircle, Loader, Sliders, Crop as CropIcon, RotateCw, Sparkles, RotateCcw } from 'lucide-react';
 import useStore from '../state/store';
 import useEditorStore from '../features/editor/editorStore';
-import EditorPreview from '../features/editor/components/EditorPreview';
+import EditorViewport from '../features/editor/viewport/EditorViewport';
 import PanelShell from '../features/editor/panels/PanelShell';
 import '../features/editor/editor.css';
 
@@ -50,6 +50,7 @@ const EditorPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [activeTool, setActiveTool] = useState('none');
+  const viewportRef = useRef(null);
 
   // ============================================================================
   // INITIALIZATION - World Pattern
@@ -97,14 +98,32 @@ const EditorPage = () => {
   );
 
   const handleReset = useCallback(() => {
-    // Reset button - no logic in Phase 7C-1
-    console.log('Reset will be implemented in future phases');
+    // Reset viewport to original state
+    if (viewportRef.current) {
+      viewportRef.current.resetView();
+    }
+    // Reset editor store transforms
+    const { resetToOriginal } = useEditorStore.getState();
+    resetToOriginal();
+    console.log('✅ Reset to original');
   }, []);
 
   const handleSave = useCallback(() => {
-    // Save button - no logic in Phase 7C-1
-    console.log('Save will be implemented in future phases');
-  }, []);
+    // Get crop result from viewport if in crop mode
+    if (activeTool === 'crop' && viewportRef.current) {
+      const cropResult = viewportRef.current.getCropResult();
+      console.log('📐 Crop result:', cropResult);
+    }
+
+    // Get current transforms from viewport
+    if (viewportRef.current) {
+      const currentTransforms = viewportRef.current.getTransforms();
+      console.log('🎨 Current transforms:', currentTransforms);
+    }
+
+    // Save functionality will be implemented in future phases
+    console.log('💾 Save will be implemented in future phases');
+  }, [activeTool]);
 
   // ============================================================================
   // TOOLBAR CONFIGURATION
@@ -176,12 +195,18 @@ const EditorPage = () => {
         </div>
       </div>
 
-      {/* Fixed Preview Container */}
+      {/* Fixed Preview Container - Phase 8: New Viewport Engine */}
       <div className="editor-preview-container">
-        <EditorPreview
+        <EditorViewport
+          ref={viewportRef}
           photo={originalPhoto}
-          transform={transform}
           activeMode={activeTool}
+          editorTransform={transform}
+          onTransformChange={(updates) => {
+            // Handle transform updates from viewport
+            console.log('🔄 Transform updated:', updates);
+          }}
+          debug={false}
         />
       </div>
 
