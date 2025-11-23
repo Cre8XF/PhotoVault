@@ -22,6 +22,7 @@ import useEditorStore from '../editorStore';
 const EditorPreview = ({ photo, transform, activeMode }) => {
   const imageRef = useRef(null);
   const containerRef = useRef(null);
+  const wrapperRef = useRef(null);
   const [imageBounds, setImageBounds] = useState(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isPanning, setIsPanning] = useState(false);
@@ -41,18 +42,18 @@ const EditorPreview = ({ photo, transform, activeMode }) => {
 
   // Update image bounds when image loads or zoom changes
   const updateImageBounds = useCallback(() => {
-    if (!imageLoaded || !imageRef.current || !containerRef.current) return;
+    if (!imageLoaded || !wrapperRef.current || !containerRef.current) return;
 
-    const img = imageRef.current;
+    const wrapper = wrapperRef.current;
     const container = containerRef.current;
-    const imgRect = img.getBoundingClientRect();
+    const wrapperRect = wrapper.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
 
     setImageBounds({
-      x: imgRect.left - containerRect.left,
-      y: imgRect.top - containerRect.top,
-      width: imgRect.width,
-      height: imgRect.height,
+      x: wrapperRect.left - containerRect.left,
+      y: wrapperRect.top - containerRect.top,
+      width: wrapperRect.width,
+      height: wrapperRect.height,
     });
   }, [imageLoaded]);
 
@@ -177,27 +178,30 @@ const EditorPreview = ({ photo, transform, activeMode }) => {
   return (
     <div
       ref={containerRef}
-      className="w-full h-full flex items-center justify-center overflow-hidden bg-black relative"
+      className="w-full h-full overflow-hidden bg-black relative"
       onWheel={handleWheel}
       onMouseDown={activeMode === 'crop' && zoom.currentZoom > 1 ? handlePanStart : undefined}
       onTouchStart={activeMode === 'crop' && zoom.currentZoom > 1 ? handlePanStart : undefined}
       style={{ cursor: isPanning ? 'grabbing' : zoom.currentZoom > 1 && activeMode === 'crop' ? 'grab' : 'default' }}
     >
-      {/* Main Photo - ALWAYS VISIBLE */}
-      <img
-        ref={imageRef}
-        src={photo.url}
-        alt={photo.name || 'Photo'}
-        className="max-w-full max-h-full object-contain transition-transform duration-200"
-        style={{
-          ...previewStyle,
-          transform: `${previewStyle.transform || ''} scale(${zoom.currentZoom}) translate(${zoom.panX}px, ${zoom.panY}px)`,
-        }}
-        onLoad={() => {
-          setImageLoaded(true);
-          updateImageBounds();
-        }}
-      />
+      {/* Wrapper for absolute centering - provides stable coordinate system */}
+      <div ref={wrapperRef} className="editor-preview-wrapper">
+        {/* Main Photo - ALWAYS VISIBLE */}
+        <img
+          ref={imageRef}
+          src={photo.url}
+          alt={photo.name || 'Photo'}
+          className="max-w-full max-h-full object-contain transition-transform duration-200"
+          style={{
+            ...previewStyle,
+            transform: `${previewStyle.transform || ''} scale(${zoom.currentZoom}) translate(${zoom.panX}px, ${zoom.panY}px)`,
+          }}
+          onLoad={() => {
+            setImageLoaded(true);
+            updateImageBounds();
+          }}
+        />
+      </div>
 
       {/* Vignette Overlay */}
       {transform.vignette > 0 && (
