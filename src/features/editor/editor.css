@@ -45,6 +45,9 @@
   left: 0;
   right: 0;
   bottom: 72px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   overflow: hidden;
   isolation: isolate;
   background: black;
