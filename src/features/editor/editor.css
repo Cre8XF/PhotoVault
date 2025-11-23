@@ -1,3 +1,144 @@
+/* ============================================================================
+   PHASE 7B: EDITOR WORLD - PhotoPage Architecture Model
+   ============================================================================
+
+   This CSS follows the World Architecture Masterplan for consistent
+   world-based layout across PhotoVault.
+
+   Structure:
+   - Fixed topbar (56px)
+   - Fixed preview container (fills space between topbar and toolbar)
+   - Fixed toolbar (72px)
+   - Fixed panel sheet (220px, slides up/down)
+
+   All worlds follow the same pattern for predictable, stable UX.
+   ============================================================================ */
+
+/* ============================================================================
+   EDITOR WORLD - Root Container
+   ============================================================================ */
+
+.editor-world {
+  position: fixed;
+  inset: 0;
+  background: black;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.editor-topbar {
+  height: 56px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.96);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.editor-preview-container {
+  position: fixed;
+  top: 56px;
+  left: 0;
+  right: 0;
+  bottom: 72px;
+  overflow: hidden;
+  isolation: isolate;
+  background: black;
+}
+
+.editor-toolbar {
+  height: 72px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  background: rgba(0, 0, 0, 0.98);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.editor-panel-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 72px;
+  height: 220px;
+  z-index: 40;
+  transform: translateY(100%);
+  transition: transform 0.25s ease;
+  background: rgba(0, 0, 0, 0.96);
+  backdrop-filter: blur(16px);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  overflow-y: auto;
+}
+
+.editor-panel-sheet.active {
+  transform: translateY(0%);
+}
+
+/* ============================================================================
+   PANEL CONTENT
+   ============================================================================ */
+
+.editor-panel-content {
+  padding: 16px;
+  height: 100%;
+}
+
+/* Compact panel spacing */
+.editor-panel-content .space-y-4 > * + * {
+  margin-top: 12px;
+}
+
+/* Touch-friendly controls */
+.editor-panel-content button {
+  min-height: 44px;
+}
+
+.editor-panel-content input[type="range"] {
+  height: 44px;
+}
+
+/* ============================================================================
+   DESKTOP LAYOUT (min-width: 900px)
+   ============================================================================ */
+
+@media (min-width: 900px) {
+  .editor-world {
+    /* Desktop uses same fixed layout */
+  }
+
+  .editor-topbar {
+    height: 60px;
+  }
+
+  .editor-preview-container {
+    top: 60px;
+    bottom: 80px;
+  }
+
+  .editor-toolbar {
+    height: 80px;
+  }
+
+  .editor-panel-sheet {
+    bottom: 80px;
+    height: 320px;
+    max-height: 50vh;
+  }
+}
+
+/* ============================================================================
+   LEGACY STYLES (DEPRECATED - To be removed after Phase 7B)
+   ============================================================================ */
+
 /* Mobile-first base */
 .photo-editor {
   display: flex;
@@ -11,15 +152,6 @@
   top: 0;
   z-index: 50;
   background: rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.editor-toolbar {
-  position: sticky;
-  top: 60px;
-  z-index: 40;
-  background: rgba(17, 24, 39, 0.95);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -70,7 +202,7 @@
     max-height: none;
     border-top: none;
     border-right: 1px solid rgba(255, 255, 255, 0.1);
-    order: -1; /* Sidebar on left */
+    order: -1;
   }
 
   .editor-canvas-container {
@@ -112,133 +244,5 @@
   .touch-target {
     min-height: 48px;
     min-width: 48px;
-  }
-}
-
-/* ============================================================================
-   MOBILE EDITOR LAYOUT - Google Photos Style (Fixed Overlays)
-   ============================================================================ */
-
-@media (max-width: 640px) {
-  /* Root container */
-  .mobile-editor-root {
-    position: relative;
-    width: 100%;
-    height: 100dvh; /* dynamic viewport height for mobile */
-    overflow: hidden;
-    background: #000;
-  }
-
-  /* Fixed Topbar */
-  .mobile-editor-topbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    gap: 8px;
-    z-index: 9000;
-    background: rgba(0, 0, 0, 0.96);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  /* Fixed Preview - Always visible between topbar and toolbar */
-  .mobile-editor-preview {
-    position: fixed;
-    top: 56px;       /* Topbar height */
-    left: 0;
-    right: 0;
-    bottom: 72px;    /* Toolbar height */
-    height: calc(100dvh - 56px - 72px) !important; /* Explicit height calculation */
-    z-index: 100;    /* Below overlays/panel */
-    overflow: hidden;
-    background: #000;
-  }
-
-  /* Inner preview container */
-  .mobile-editor-preview-inner {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #000;
-  }
-
-  .mobile-editor-preview-image {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-  }
-
-  /* Fixed Toolbar */
-  .mobile-editor-toolbar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 72px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 8px;
-    z-index: 9500;
-    background: rgba(0, 0, 0, 0.98);
-    backdrop-filter: blur(16px);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  /* Fixed Bottom Sheet Panel */
-  .mobile-editor-panel {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 72px; /* Above toolbar */
-    height: 280px !important; /* Strict height limit */
-    max-height: 40vh; /* Fallback for very small screens */
-    z-index: 9200;
-    border-radius: 16px 16px 0 0;
-    background: rgba(0, 0, 0, 0.96);
-    backdrop-filter: blur(16px);
-    overflow: hidden;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  .mobile-editor-panel-inner {
-    padding: 16px;
-    overflow-y: auto;
-    height: 100%;
-    max-height: 280px;
-  }
-
-  /* Compact panel content */
-  .mobile-editor-panel .space-y-4 > * + * {
-    margin-top: 12px; /* Tighter spacing */
-  }
-
-  .mobile-editor-panel button {
-    min-height: 44px; /* Touch-friendly */
-  }
-
-  .mobile-editor-panel input[type="range"] {
-    height: 44px; /* Touch-friendly */
-  }
-
-  /* CropOverlay root */
-  .crop-overlay-root {
-    pointer-events: none;
-    position: absolute;
-    inset: 0;
-    z-index: 200; /* Over image, under panel/toolbar */
-  }
-
-  .crop-handle,
-  .crop-overlay-root .cursor-move {
-    pointer-events: auto;
   }
 }

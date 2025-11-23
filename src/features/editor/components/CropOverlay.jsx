@@ -1,5 +1,5 @@
 // ============================================================================
-// COMPONENT: CropOverlay.jsx - Interactive Crop Overlay (Phase 7A)
+// COMPONENT: CropOverlay.jsx - Interactive Crop Overlay (Phase 7B - Masterplan Aligned)
 // ============================================================================
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
@@ -7,13 +7,14 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 /**
  * CropOverlay Component
  *
- * Interactive crop overlay with draggable handles
- * - 4 corner handles
- * - 4 edge handles
+ * Interactive crop overlay with draggable handles inside EditorPreview
+ * - 4 corner handles (nw, ne, sw, se)
+ * - 4 edge handles (n, s, e, w)
  * - Draggable crop box
  * - Touch and mouse support
  * - Constrained within image bounds
  * - Optional aspect ratio lock
+ * - Transparent dimmed area using 4 separate divs (browser compatible)
  */
 const CropOverlay = ({
   cropBox,
@@ -21,7 +22,6 @@ const CropOverlay = ({
   imageBounds,
   aspectRatio = null,
   zoom = 1,
-  className = '',
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragType, setDragType] = useState(null); // 'move' | 'nw' | 'ne' | 'sw' | 'se' | 'n' | 's' | 'e' | 'w'
@@ -140,8 +140,9 @@ const CropOverlay = ({
   const handleSizeTouch = 20; // Larger for touch
 
   return (
-    <div className={`crop-overlay-root absolute inset-0 z-20 pointer-events-none ${className}`}>
-      {/* Dimmed overlay outside crop - Using 4 separate divs for better browser compatibility */}
+    <div className="absolute inset-0 z-20 pointer-events-none">
+      {/* Dimmed overlay outside crop - Using 4 separate divs for browser compatibility */}
+
       {/* Top dimmed area */}
       <div
         className="absolute left-0 right-0 bg-black/60 pointer-events-none"
@@ -150,6 +151,7 @@ const CropOverlay = ({
           height: `${cropBox.y}px`,
         }}
       />
+
       {/* Bottom dimmed area */}
       <div
         className="absolute left-0 right-0 bg-black/60 pointer-events-none"
@@ -158,6 +160,7 @@ const CropOverlay = ({
           bottom: 0,
         }}
       />
+
       {/* Left dimmed area */}
       <div
         className="absolute bg-black/60 pointer-events-none"
@@ -168,6 +171,7 @@ const CropOverlay = ({
           height: `${cropBox.height}px`,
         }}
       />
+
       {/* Right dimmed area */}
       <div
         className="absolute bg-black/60 pointer-events-none"
@@ -191,7 +195,7 @@ const CropOverlay = ({
         onMouseDown={(e) => handlePointerDown(e, 'move')}
         onTouchStart={(e) => handlePointerDown(e, 'move')}
       >
-        {/* Grid lines */}
+        {/* Grid lines (rule of thirds) */}
         <div className="absolute inset-0 pointer-events-none grid grid-cols-3 grid-rows-3">
           {[...Array(9)].map((_, i) => (
             <div key={i} className="border border-white/30" />
