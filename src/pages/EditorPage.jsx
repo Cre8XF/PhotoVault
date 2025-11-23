@@ -1,16 +1,14 @@
 // ============================================================================
-// PAGE: EditorPage.jsx - Photo Editor World (Phase 4)
+// PAGE: EditorPage.jsx - Photo Editor World (Phase 7B - Masterplan Aligned)
 // ============================================================================
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Save, AlertCircle, Loader, Sliders, Crop as CropIcon, RotateCw, Sparkles, RotateCcw } from 'lucide-react';
-import { PageWrapper } from '../components/layout/PageWrapper';
 import useStore from '../state/store';
 import useEditorStore from '../features/editor/editorStore';
 import EditorPreview from '../features/editor/components/EditorPreview';
-import MobileEditorLayout from '../features/editor/components/MobileEditorLayout';
 import { getFilterPreset } from '../features/editor/utils/filterPresets';
 import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
@@ -19,18 +17,20 @@ import '../features/editor/editor.css';
 /**
  * EditorPage - Photo Editor World
  *
- * Full-featured photo editor as a function world
- * - Non-destructive editing with CSS transforms
- * - Adjust, Crop, Rotate, Filters modes
- * - Save copy or replace original
- * - Exit guard on unsaved changes
+ * Architecture follows PhotoPage world model:
+ * - isWorldView = true
+ * - Fixed topbar (56px)
+ * - Fixed preview container (fills space)
+ * - Fixed toolbar (72px)
+ * - Bottom sheet panel slides up/down
+ * - Back navigation: navigate(-1)
  */
 const EditorPage = () => {
   const navigate = useNavigate();
   const { id: photoId } = useParams();
   const { t } = useTranslation();
 
-  // Global store
+  // Global store - World pattern
   const { setIsWorldView, setCurrentPhotoId, photos } = useStore();
 
   // Editor store
@@ -54,20 +54,12 @@ const EditorPage = () => {
   const [showExitWarning, setShowExitWarning] = useState(false);
   const [showSaveOptions, setShowSaveOptions] = useState(false);
 
-  // Mobile detection (Phase 7A.1)
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
-
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 640);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
   // ============================================================================
-  // INITIALIZATION
+  // INITIALIZATION - World Pattern
   // ============================================================================
 
   useEffect(() => {
+    // Set isWorldView = true (masterplan requirement)
     setIsWorldView(true);
     setCurrentPhotoId(photoId);
 
@@ -82,6 +74,7 @@ const EditorPage = () => {
       setIsLoading(false);
     }
 
+    // Cleanup: Set isWorldView = false (masterplan requirement)
     return () => {
       setIsWorldView(false);
       setCurrentPhotoId(null);
@@ -97,12 +90,14 @@ const EditorPage = () => {
     if (isDirty) {
       setShowExitWarning(true);
     } else {
+      // Simple back navigation (masterplan requirement)
       navigate(-1);
     }
   }, [isDirty, navigate]);
 
   const handleModeChange = useCallback(
     (mode) => {
+      // Toggle mode: clicking same mode closes it
       setActiveMode(activeMode === mode ? null : mode);
     },
     [activeMode, setActiveMode]
@@ -177,7 +172,7 @@ const EditorPage = () => {
   // PANEL RENDERING
   // ============================================================================
 
-  const renderPanel = () => {
+  const renderPanelContent = () => {
     if (!activeMode) return null;
 
     return (
@@ -216,7 +211,7 @@ const EditorPage = () => {
             {/* Zoom Controls */}
             <div>
               <label className="text-sm font-medium mb-2 block">
-                {t('editor.crop.zoomIn', 'Zoom')} ({(useEditorStore.getState().zoom.currentZoom * 100).toFixed(0)}%)
+                {t('editor.crop.zoom', 'Zoom')} ({(useEditorStore.getState().zoom.currentZoom * 100).toFixed(0)}%)
               </label>
               <input
                 type="range"
@@ -351,193 +346,175 @@ const EditorPage = () => {
   ];
 
   // ============================================================================
-  // RENDER
+  // RENDER - World Pattern
   // ============================================================================
 
   if (isLoading) {
     return (
-      <PageWrapper>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <Loader className="w-12 h-12 mx-auto mb-4 animate-spin text-purple-500" />
-            <p className="text-sm opacity-70">{t('editor.loading', 'Loading editor...')}</p>
-          </div>
+      <div className="fixed inset-0 bg-black flex items-center justify-center z-[9999]">
+        <div className="text-center">
+          <Loader className="w-12 h-12 mx-auto mb-4 animate-spin text-purple-500" />
+          <p className="text-sm opacity-70 text-white">{t('editor.loading', 'Loading editor...')}</p>
         </div>
-      </PageWrapper>
+      </div>
     );
   }
 
   if (loadError) {
     return (
-      <PageWrapper>
-        <div className="min-h-screen flex items-center justify-center p-6">
-          <div className="text-center">
-            <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-400" />
-            <h2 className="text-xl font-bold mb-2">{t('editor.errors.loadFailed', 'Failed to load photo')}</h2>
-            <p className="text-sm opacity-70 mb-4">{loadError}</p>
-            <button
-              onClick={() => navigate(-1)}
-              className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition"
-            >
-              {t('common:back', 'Back')}
-            </button>
-          </div>
+      <div className="fixed inset-0 bg-black flex items-center justify-center p-6 z-[9999]">
+        <div className="text-center">
+          <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-400" />
+          <h2 className="text-xl font-bold mb-2 text-white">{t('editor.errors.loadFailed', 'Failed to load photo')}</h2>
+          <p className="text-sm opacity-70 mb-4 text-white">{loadError}</p>
+          <button
+            onClick={() => navigate(-1)}
+            className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition text-white font-medium"
+          >
+            {t('common:back', 'Back')}
+          </button>
         </div>
-      </PageWrapper>
+      </div>
     );
   }
 
   return (
-    <PageWrapper>
-      <div className="min-h-screen flex flex-col bg-black">
-        {/* Top Bar */}
-        <div className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-xl border-b border-white/10">
-          <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-            <button
-              onClick={handleBack}
-              className="flex items-center gap-2 px-3 py-2 hover:bg-white/10 rounded-lg transition"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="text-sm font-medium">{t('common:back', 'Back')}</span>
-            </button>
+    <div className="editor-world">
+      {/* Fixed Topbar */}
+      <div className="editor-topbar">
+        <div className="flex items-center justify-between h-full px-4">
+          <button
+            onClick={handleBack}
+            className="flex items-center gap-2 px-2 py-2 hover:bg-white/10 rounded-lg transition text-white"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="text-sm font-medium hidden sm:inline">{t('common:back', 'Back')}</span>
+          </button>
 
-            <h1 className="font-bold text-lg">{t('editor.title', 'Edit Photo')}</h1>
+          <h1 className="font-bold text-base text-white">{t('editor.title', 'Edit Photo')}</h1>
 
-            <button
-              onClick={handleSave}
-              disabled={!hasTransforms()}
-              className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition font-medium"
-            >
-              <Save className="w-4 h-4" />
-              <span className="text-sm">{t('editor.save', 'Save')}</span>
-            </button>
-          </div>
+          <button
+            onClick={handleSave}
+            disabled={!hasTransforms()}
+            className="flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition font-medium text-white text-sm"
+          >
+            <Save className="w-4 h-4" />
+            <span className="hidden sm:inline">{t('editor.save', 'Save')}</span>
+          </button>
         </div>
+      </div>
 
-        {/* MOBILE LAYOUT */}
-        {isMobile ? (
-          <MobileEditorLayout
-            originalPhoto={originalPhoto}
-            transform={transform}
-            activeMode={activeMode}
-            hasTransforms={hasTransforms}
-            onModeChange={handleModeChange}
-            onReset={handleReset}
-            onBack={handleBack}
-            onSave={handleSave}
-            renderPanel={renderPanel}
-          />
-        ) : (
-          /* DESKTOP LAYOUT (unchanged) */
-          <>
-            {/* Main Editor Area */}
-            <div className="flex-1 pt-16 pb-32">
-              <EditorPreview photo={originalPhoto} transform={transform} activeMode={activeMode} className="h-full" />
-            </div>
+      {/* Fixed Preview Container */}
+      <div className="editor-preview-container">
+        <EditorPreview
+          photo={originalPhoto}
+          transform={transform}
+          activeMode={activeMode}
+        />
+      </div>
 
-            {/* Floating Toolbar */}
-            <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-xl border border-white/20 rounded-full px-4 py-3 shadow-2xl z-30">
-              {modes.map((mode) => {
-                const Icon = mode.icon;
-                const isActive = activeMode === mode.id;
-                return (
-                  <button
-                    key={mode.id}
-                    onClick={() => handleModeChange(mode.id)}
-                    className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
-                      isActive ? 'bg-purple-600 text-white' : 'hover:bg-white/10 text-white/70 hover:text-white'
-                    }`}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span className="text-[10px] font-medium">{mode.label}</span>
-                  </button>
-                );
-              })}
-
-              <div className="w-px h-10 bg-white/20 mx-1" />
-
+      {/* Fixed Toolbar */}
+      <div className="editor-toolbar">
+        <div className="flex items-center justify-center gap-1 h-full px-2">
+          {modes.map((mode) => {
+            const Icon = mode.icon;
+            const isActive = activeMode === mode.id;
+            return (
               <button
-                onClick={handleReset}
-                disabled={!hasTransforms()}
-                className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg hover:bg-white/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed text-white/70 hover:text-white"
+                key={mode.id}
+                onClick={() => handleModeChange(mode.id)}
+                className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg transition-all ${
+                  isActive
+                    ? 'bg-purple-600 text-white'
+                    : 'hover:bg-white/10 text-white/70 hover:text-white'
+                }`}
               >
-                <RotateCcw className="w-5 h-5" />
-                <span className="text-[10px] font-medium">{t('editor.reset', 'Reset')}</span>
+                <Icon className="w-5 h-5" />
+                <span className="text-[9px] font-medium">{mode.label}</span>
+              </button>
+            );
+          })}
+
+          <div className="w-px h-8 bg-white/20 mx-1" />
+
+          <button
+            onClick={handleReset}
+            disabled={!hasTransforms()}
+            className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg hover:bg-white/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed text-white/70 hover:text-white"
+          >
+            <RotateCcw className="w-5 h-5" />
+            <span className="text-[9px] font-medium">{t('editor.reset', 'Reset')}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Bottom Sheet Panel */}
+      <div className={`editor-panel-sheet ${activeMode ? 'active' : ''}`}>
+        <div className="editor-panel-content">
+          {renderPanelContent()}
+        </div>
+      </div>
+
+      {/* Save Options Modal */}
+      {showSaveOptions && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="bg-gray-900 rounded-2xl p-6 max-w-md w-full border-2 border-purple-500/30">
+            <h3 className="text-xl font-bold mb-4 text-white">{t('editor.saveOptions', 'Save Options')}</h3>
+            <div className="space-y-3">
+              <button
+                onClick={handleSaveCopy}
+                disabled={isSaving}
+                className="w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg transition font-medium disabled:opacity-50 text-white"
+              >
+                {t('editor.saveCopy', 'Save a Copy')}
+              </button>
+              <button
+                onClick={handleReplaceOriginal}
+                disabled={isSaving}
+                className="w-full px-4 py-3 bg-white/10 hover:bg-white/20 rounded-lg transition font-medium disabled:opacity-50 text-white"
+              >
+                {t('editor.replaceOriginal', 'Replace Original')}
+              </button>
+              <button
+                onClick={() => setShowSaveOptions(false)}
+                className="w-full px-4 py-3 bg-white/5 hover:bg-white/10 rounded-lg transition font-medium text-white"
+              >
+                {t('common:cancel', 'Cancel')}
               </button>
             </div>
+          </div>
+        </div>
+      )}
 
-            {/* Editor Panel (Right Side / Bottom) */}
-            {activeMode && (
-              <div className="fixed right-0 top-16 bottom-0 md:w-80 w-full bg-black/95 backdrop-blur-xl border-l border-white/10 z-40 overflow-y-auto">
-                <div className="p-6">
-                  {renderPanel()}
-                </div>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Save Options Modal */}
-        {showSaveOptions && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-            <div className="glass rounded-2xl p-6 max-w-md w-full border-2 border-purple-500/30">
-              <h3 className="text-xl font-bold mb-4">{t('editor.saveOptions', 'Save Options')}</h3>
-              <div className="space-y-3">
-                <button
-                  onClick={handleSaveCopy}
-                  disabled={isSaving}
-                  className="w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg transition font-medium disabled:opacity-50"
-                >
-                  {t('editor.saveCopy', 'Save a Copy')}
-                </button>
-                <button
-                  onClick={handleReplaceOriginal}
-                  disabled={isSaving}
-                  className="w-full px-4 py-3 bg-white/10 hover:bg-white/20 rounded-lg transition font-medium disabled:opacity-50"
-                >
-                  {t('editor.replaceOriginal', 'Replace Original')}
-                </button>
-                <button
-                  onClick={() => setShowSaveOptions(false)}
-                  className="w-full px-4 py-3 bg-white/5 hover:bg-white/10 rounded-lg transition font-medium"
-                >
-                  {t('common:cancel', 'Cancel')}
-                </button>
-              </div>
+      {/* Exit Warning Modal */}
+      {showExitWarning && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="bg-gray-900 rounded-2xl p-6 max-w-md w-full border-2 border-yellow-500/30">
+            <div className="flex items-center gap-3 mb-4">
+              <AlertCircle className="w-6 h-6 text-yellow-400" />
+              <h3 className="text-xl font-bold text-white">{t('editor.unsavedChanges', 'Unsaved Changes')}</h3>
+            </div>
+            <p className="opacity-70 mb-6 text-white">
+              {t('editor.unsavedWarning', 'You have unsaved changes. Are you sure you want to leave?')}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowExitWarning(false)}
+                className="flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-xl font-semibold transition text-white"
+              >
+                {t('common:cancel', 'Cancel')}
+              </button>
+              <button
+                onClick={() => navigate(-1)}
+                className="flex-1 bg-red-600 hover:bg-red-700 py-3 rounded-xl font-semibold transition text-white"
+              >
+                {t('editor.discardChanges', 'Discard')}
+              </button>
             </div>
           </div>
-        )}
-
-        {/* Exit Warning Modal */}
-        {showExitWarning && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-            <div className="glass rounded-2xl p-6 max-w-md w-full border-2 border-yellow-500/30">
-              <div className="flex items-center gap-3 mb-4">
-                <AlertCircle className="w-6 h-6 text-yellow-400" />
-                <h3 className="text-xl font-bold">{t('editor.unsavedChanges', 'Unsaved Changes')}</h3>
-              </div>
-              <p className="opacity-70 mb-6">
-                {t('editor.unsavedWarning', 'You have unsaved changes. Are you sure you want to leave?')}
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowExitWarning(false)}
-                  className="flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-xl font-semibold transition"
-                >
-                  {t('common:cancel', 'Cancel')}
-                </button>
-                <button
-                  onClick={() => navigate(-1)}
-                  className="flex-1 bg-red-600 hover:bg-red-700 py-3 rounded-xl font-semibold transition"
-                >
-                  {t('editor.discardChanges', 'Discard')}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </PageWrapper>
+        </div>
+      )}
+    </div>
   );
 };
 

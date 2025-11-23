@@ -1,5 +1,5 @@
 // ============================================================================
-// COMPONENT: EditorPreview.jsx - Photo preview with transforms (Phase 7A Enhanced)
+// COMPONENT: EditorPreview.jsx - Photo Preview (Phase 7B - Masterplan Aligned)
 // ============================================================================
 
 import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
@@ -10,14 +10,16 @@ import useEditorStore from '../editorStore';
 /**
  * EditorPreview Component
  *
- * Renders photo with all applied transforms
+ * Renders photo inside fixed preview container with all applied transforms
+ * - Container is fixed position, fills space between topbar and toolbar
+ * - Image always visible, centered within container
  * - CSS filters for color adjustments
  * - CSS transform for rotation and flipping
  * - Vignette overlay
- * - Interactive crop overlay (Phase 7A)
- * - Zoom and pan support (Phase 7A)
+ * - Interactive crop overlay
+ * - Zoom and pan support
  */
-const EditorPreview = ({ photo, transform, activeMode, className = '' }) => {
+const EditorPreview = ({ photo, transform, activeMode }) => {
   const imageRef = useRef(null);
   const containerRef = useRef(null);
   const [imageBounds, setImageBounds] = useState(null);
@@ -166,8 +168,8 @@ const EditorPreview = ({ photo, transform, activeMode, className = '' }) => {
 
   if (!photo) {
     return (
-      <div className={`w-full h-full flex items-center justify-center bg-black/50 ${className}`}>
-        <p className="text-sm opacity-50">No photo loaded</p>
+      <div className="w-full h-full flex items-center justify-center bg-black">
+        <p className="text-sm opacity-50 text-white">No photo loaded</p>
       </div>
     );
   }
@@ -175,29 +177,27 @@ const EditorPreview = ({ photo, transform, activeMode, className = '' }) => {
   return (
     <div
       ref={containerRef}
-      className={`relative w-full h-full overflow-hidden bg-black ${className}`}
+      className="w-full h-full flex items-center justify-center overflow-hidden bg-black relative"
       onWheel={handleWheel}
       onMouseDown={activeMode === 'crop' && zoom.currentZoom > 1 ? handlePanStart : undefined}
       onTouchStart={activeMode === 'crop' && zoom.currentZoom > 1 ? handlePanStart : undefined}
       style={{ cursor: isPanning ? 'grabbing' : zoom.currentZoom > 1 && activeMode === 'crop' ? 'grab' : 'default' }}
     >
-      {/* Main Photo */}
-      <div className="w-full h-full relative overflow-hidden flex items-center justify-center">
-        <img
-          ref={imageRef}
-          src={photo.url}
-          alt={photo.name || 'Photo'}
-          className="max-w-full max-h-full object-contain transition-transform duration-200"
-          style={{
-            ...previewStyle,
-            transform: `${previewStyle.transform || ''} scale(${zoom.currentZoom}) translate(${zoom.panX}px, ${zoom.panY}px)`,
-          }}
-          onLoad={() => {
-            setImageLoaded(true);
-            updateImageBounds();
-          }}
-        />
-      </div>
+      {/* Main Photo - ALWAYS VISIBLE */}
+      <img
+        ref={imageRef}
+        src={photo.url}
+        alt={photo.name || 'Photo'}
+        className="max-w-full max-h-full object-contain transition-transform duration-200"
+        style={{
+          ...previewStyle,
+          transform: `${previewStyle.transform || ''} scale(${zoom.currentZoom}) translate(${zoom.panX}px, ${zoom.panY}px)`,
+        }}
+        onLoad={() => {
+          setImageLoaded(true);
+          updateImageBounds();
+        }}
+      />
 
       {/* Vignette Overlay */}
       {transform.vignette > 0 && (
@@ -210,7 +210,7 @@ const EditorPreview = ({ photo, transform, activeMode, className = '' }) => {
         />
       )}
 
-      {/* Interactive Crop Overlay (Phase 7A) - Only show when image is loaded */}
+      {/* Interactive Crop Overlay - Only show when image is loaded */}
       {activeMode === 'crop' && imageLoaded && transform.crop && imageBounds && (
         <CropOverlay
           cropBox={transform.crop}
