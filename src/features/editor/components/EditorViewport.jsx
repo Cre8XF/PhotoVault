@@ -1,15 +1,18 @@
 /**
- * EditorViewport - Phase 8A: Simple Layout Foundation
+ * EditorViewport - Phase 8B-1: Canvas Engine Foundation
  *
- * Simple viewport component that displays photo with CSS-based layout.
- * - Uses <img> tag (canvas comes in Phase 8B)
+ * Canvas-based viewport with HiDPI support and auto-sizing.
+ * - Uses <canvas> instead of <img> (Phase 8B-1)
  * - Responds to panel state (shrinks when panel opens)
  * - Google Photos behavior: entire image always visible
+ * - GPU-accelerated rendering
+ * - Auto-resize on window/orientation change
  *
- * Phase 8A: DOM + CSS only, no transforms yet
+ * Phase 8B-1: Canvas rendering, no transforms yet
  */
 
 import React from 'react';
+import { useCanvasRenderer } from '../hooks/useCanvasRenderer';
 
 /**
  * EditorViewport Component
@@ -19,6 +22,8 @@ import React from 'react';
  * @param {React.ReactNode} children - Child components (e.g., CropOverlay in future phases)
  */
 export function EditorViewport({ photo, hasActivePanel, children }) {
+  const { canvasRef, containerRef } = useCanvasRenderer(photo);
+
   if (!photo) {
     return (
       <div className="editor-viewport-shell">
@@ -32,16 +37,16 @@ export function EditorViewport({ photo, hasActivePanel, children }) {
   return (
     <div className="editor-viewport-shell">
       <div
+        ref={containerRef}
         className={
           hasActivePanel
             ? 'editor-viewport-inner editor-viewport-inner--with-panel'
             : 'editor-viewport-inner'
         }
       >
-        <img
-          src={photo.url}
-          alt={photo.name || 'Photo'}
-          className="editor-viewport-image"
+        <canvas
+          ref={canvasRef}
+          className="editor-viewport-canvas"
         />
         {children /* CropOverlay will be added in Phase 8C */}
       </div>
