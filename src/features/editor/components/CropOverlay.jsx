@@ -141,22 +141,41 @@ const CropOverlay = ({
 
   return (
     <div className={`crop-overlay-root absolute inset-0 z-20 pointer-events-none ${className}`}>
-      {/* Dimmed overlay outside crop */}
+      {/* Dimmed overlay outside crop - Using 4 separate divs for better browser compatibility */}
+      {/* Top dimmed area */}
       <div
-        className="absolute inset-0 bg-black/60 pointer-events-none"
+        className="absolute left-0 right-0 bg-black/60 pointer-events-none"
         style={{
-          clipPath: `polygon(
-            0% 0%,
-            0% 100%,
-            100% 100%,
-            100% 0%,
-            0% 0%,
-            ${cropBox.x}px ${cropBox.y}px,
-            ${cropBox.x}px ${cropBox.y + cropBox.height}px,
-            ${cropBox.x + cropBox.width}px ${cropBox.y + cropBox.height}px,
-            ${cropBox.x + cropBox.width}px ${cropBox.y}px,
-            ${cropBox.x}px ${cropBox.y}px
-          )`,
+          top: 0,
+          height: `${cropBox.y}px`,
+        }}
+      />
+      {/* Bottom dimmed area */}
+      <div
+        className="absolute left-0 right-0 bg-black/60 pointer-events-none"
+        style={{
+          top: `${cropBox.y + cropBox.height}px`,
+          bottom: 0,
+        }}
+      />
+      {/* Left dimmed area */}
+      <div
+        className="absolute bg-black/60 pointer-events-none"
+        style={{
+          top: `${cropBox.y}px`,
+          left: 0,
+          width: `${cropBox.x}px`,
+          height: `${cropBox.height}px`,
+        }}
+      />
+      {/* Right dimmed area */}
+      <div
+        className="absolute bg-black/60 pointer-events-none"
+        style={{
+          top: `${cropBox.y}px`,
+          left: `${cropBox.x + cropBox.width}px`,
+          right: 0,
+          height: `${cropBox.height}px`,
         }}
       />
 

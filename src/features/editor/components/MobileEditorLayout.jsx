@@ -2,7 +2,7 @@
 // COMPONENT: MobileEditorLayout.jsx - Google Photos-style mobile editor
 // ============================================================================
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Save, Sliders, Crop as CropIcon, RotateCw, Sparkles, RotateCcw } from 'lucide-react';
 import EditorPreview from './EditorPreview';
@@ -29,15 +29,6 @@ const MobileEditorLayout = ({
   renderPanel
 }) => {
   const { t } = useTranslation();
-
-  // Force preview remount when mode changes (prevents black screen bug)
-  const [previewKey, setPreviewKey] = useState(0);
-
-  const handleModeChange = (mode) => {
-    const newMode = activeMode === mode ? null : mode;
-    onModeChange(newMode);
-    setPreviewKey((prev) => prev + 1);
-  };
 
   const modes = [
     { id: 'adjust', label: t('editor.adjust', 'Adjust'), icon: Sliders },
@@ -71,7 +62,6 @@ const MobileEditorLayout = ({
       {/* Fixed Preview - ALWAYS VISIBLE */}
       <div className="mobile-editor-preview">
         <EditorPreview
-          key={previewKey}
           photo={originalPhoto}
           transform={transform}
           activeMode={activeMode}
@@ -87,7 +77,7 @@ const MobileEditorLayout = ({
             return (
               <button
                 key={mode.id}
-                onClick={() => handleModeChange(mode.id)}
+                onClick={() => onModeChange(activeMode === mode.id ? null : mode.id)}
                 className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg transition-all ${
                   isActive
                     ? 'bg-purple-600 text-white'

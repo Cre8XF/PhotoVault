@@ -153,6 +153,7 @@
     left: 0;
     right: 0;
     bottom: 72px;    /* Toolbar height */
+    height: calc(100dvh - 56px - 72px) !important; /* Explicit height calculation */
     z-index: 100;    /* Below overlays/panel */
     overflow: hidden;
     background: #000;
@@ -198,8 +199,8 @@
     left: 0;
     right: 0;
     bottom: 72px; /* Above toolbar */
-    height: auto;
-    max-height: 280px;
+    height: 280px !important; /* Strict height limit */
+    max-height: 40vh; /* Fallback for very small screens */
     z-index: 9200;
     border-radius: 16px 16px 0 0;
     background: rgba(0, 0, 0, 0.96);
@@ -211,6 +212,7 @@
   .mobile-editor-panel-inner {
     padding: 16px;
     overflow-y: auto;
+    height: 100%;
     max-height: 280px;
   }
 
