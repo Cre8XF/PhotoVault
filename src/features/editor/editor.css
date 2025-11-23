@@ -1,17 +1,20 @@
 /* ============================================================================
-   PHASE 7B: EDITOR WORLD - PhotoPage Architecture Model
+   PHASE 8A: EDITOR VIEWPORT - Simple Layout Foundation
    ============================================================================
 
-   This CSS follows the World Architecture Masterplan for consistent
-   world-based layout across PhotoVault.
+   This CSS implements the Phase 8A viewport system following the World
+   Architecture Masterplan.
 
    Structure:
-   - Fixed topbar (56px)
-   - Fixed preview container (fills space between topbar and toolbar)
-   - Fixed toolbar (72px)
+   - Fixed topbar (56px) - flex: 0 0 56px
+   - Viewport shell (flexible) - flex: 1 1 auto
+   - Fixed toolbar (72px) - flex: 0 0 72px
    - Fixed panel sheet (220px, slides up/down)
 
-   All worlds follow the same pattern for predictable, stable UX.
+   Key behavior:
+   - When panel opens: viewport-inner gets padding-bottom: 220px
+   - This causes image to scale down smoothly (Google Photos style)
+   - Entire image always visible
    ============================================================================ */
 
 /* ============================================================================
@@ -21,50 +24,76 @@
 .editor-world {
   position: fixed;
   inset: 0;
-  background: black;
+  background: #000;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  z-index: 30; /* over normal app */
 }
 
+/* ============================================================================
+   TOPBAR
+   ============================================================================ */
+
 .editor-topbar {
-  height: 56px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 20;
+  flex: 0 0 56px;
   background: rgba(0, 0, 0, 0.96);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 20;
 }
 
-.editor-preview-container {
+/* ============================================================================
+   VIEWPORT SHELL - Phase 8A
+   ============================================================================ */
+
+/* Viewport shell – the area between topbar and toolbar */
+.editor-viewport-shell {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background: #000;
+}
+
+/* Inner container that adjusts height when panel is active */
+.editor-viewport-inner {
   position: relative;
   width: 100%;
-  height: calc(100vh - 56px - 72px); /* topbar + toolbar */
-  overflow: hidden;
-  background: black;
-  isolation: isolate;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #000;
+  transition: padding-bottom 0.25s ease;
 }
 
-.editor-preview-wrapper {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+/* When panel is active, reserve space at bottom */
+.editor-viewport-inner--with-panel {
+  padding-bottom: 220px; /* same height as panel */
 }
+
+/* The actual image */
+.editor-viewport-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* ============================================================================
+   TOOLBAR
+   ============================================================================ */
 
 .editor-toolbar {
-  height: 72px;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 30;
+  flex: 0 0 72px;
   background: rgba(0, 0, 0, 0.98);
   backdrop-filter: blur(16px);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 30;
 }
 
 .editor-panel-sheet {
@@ -116,20 +145,21 @@
    ============================================================================ */
 
 @media (min-width: 900px) {
-  .editor-world {
-    /* Desktop uses same fixed layout */
-  }
-
   .editor-topbar {
-    height: 60px;
-  }
-
-  .editor-preview-container {
-    height: calc(100vh - 60px - 80px); /* topbar + toolbar on desktop */
+    flex: 0 0 60px;
   }
 
   .editor-toolbar {
-    height: 80px;
+    flex: 0 0 80px;
+  }
+
+  .editor-viewport-shell {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .editor-viewport-inner--with-panel {
+    padding-bottom: 320px; /* larger panel on desktop */
   }
 
   .editor-panel-sheet {
