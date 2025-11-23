@@ -2,32 +2,30 @@
 // PAGE: EditorPage.jsx - Photo Editor World (Phase 7C-1 - Foundation)
 // ============================================================================
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Save, AlertCircle, Loader, Sliders, Crop as CropIcon, RotateCw, Sparkles, RotateCcw } from 'lucide-react';
 import useStore from '../state/store';
 import useEditorStore from '../features/editor/editorStore';
-import EditorViewport from '../features/editor/viewport/EditorViewport';
+import { EditorViewport } from '../features/editor/components/EditorViewport';
 import PanelShell from '../features/editor/panels/PanelShell';
 import '../features/editor/editor.css';
 
 /**
- * EditorPage - Photo Editor World (Phase 7C-1)
+ * EditorPage - Photo Editor World (Phase 8A)
  *
- * Architecture follows PhotoPage world model:
+ * Architecture follows World Masterplan:
  * - isWorldView = true
- * - Fixed topbar (56px)
- * - Fixed preview container (fills space)
- * - Fixed toolbar (72px)
+ * - Fixed topbar (56px) - flex: 0 0 56px
+ * - Viewport shell (flexible) - flex: 1 1 auto
+ * - Fixed toolbar (72px) - flex: 0 0 72px
  * - Bottom sheet panel slides up/down
- * - Back navigation: navigate(-1)
  *
- * Phase 7C-1: Foundation only
- * - Toolbar with tool buttons
- * - Tool state machine (activeTool)
- * - PanelShell with text placeholders
- * - NO functionality yet (comes in 7C-2 through 7C-5)
+ * Phase 8A: Simple viewport with Google Photos behavior
+ * - Image scales down when panel opens (padding-bottom approach)
+ * - Entire image always visible
+ * - CSS-based layout (no canvas yet - that's Phase 8B)
  */
 const EditorPage = () => {
   const navigate = useNavigate();
@@ -50,7 +48,6 @@ const EditorPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [activeTool, setActiveTool] = useState('none');
-  const viewportRef = useRef(null);
 
   // ============================================================================
   // INITIALIZATION - World Pattern
@@ -98,32 +95,16 @@ const EditorPage = () => {
   );
 
   const handleReset = useCallback(() => {
-    // Reset viewport to original state
-    if (viewportRef.current) {
-      viewportRef.current.resetView();
-    }
-    // Reset editor store transforms
+    // Phase 8A: Reset editor store transforms
     const { resetToOriginal } = useEditorStore.getState();
     resetToOriginal();
-    console.log('✅ Reset to original');
+    console.log('✅ Phase 8A: Reset to original');
   }, []);
 
   const handleSave = useCallback(() => {
-    // Get crop result from viewport if in crop mode
-    if (activeTool === 'crop' && viewportRef.current) {
-      const cropResult = viewportRef.current.getCropResult();
-      console.log('📐 Crop result:', cropResult);
-    }
-
-    // Get current transforms from viewport
-    if (viewportRef.current) {
-      const currentTransforms = viewportRef.current.getTransforms();
-      console.log('🎨 Current transforms:', currentTransforms);
-    }
-
-    // Save functionality will be implemented in future phases
-    console.log('💾 Save will be implemented in future phases');
-  }, [activeTool]);
+    // Phase 8A: Save functionality will be implemented in 8B/8C
+    console.log('💾 Phase 8A: Save will be implemented in Phase 8B/8C');
+  }, []);
 
   // ============================================================================
   // TOOLBAR CONFIGURATION
@@ -195,20 +176,13 @@ const EditorPage = () => {
         </div>
       </div>
 
-      {/* Fixed Preview Container - Phase 8: New Viewport Engine */}
-      <div className="editor-preview-container">
-        <EditorViewport
-          ref={viewportRef}
-          photo={originalPhoto}
-          activeMode={activeTool}
-          editorTransform={transform}
-          onTransformChange={(updates) => {
-            // Handle transform updates from viewport
-            console.log('🔄 Transform updated:', updates);
-          }}
-          debug={false}
-        />
-      </div>
+      {/* Viewport Shell - Phase 8A: Simple Layout */}
+      <EditorViewport
+        photo={originalPhoto}
+        hasActivePanel={activeTool !== 'none'}
+      >
+        {/* TODO Phase 8C: CropOverlay will be added here */}
+      </EditorViewport>
 
       {/* Fixed Toolbar */}
       <div className="editor-toolbar">
