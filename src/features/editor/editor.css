@@ -40,17 +40,19 @@
 }
 
 .editor-preview-container {
-  position: fixed;
-  top: 56px;
-  left: 0;
-  right: 0;
-  bottom: 72px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 56px - 72px); /* topbar + toolbar */
   overflow: hidden;
-  isolation: isolate;
   background: black;
+  isolation: isolate;
+}
+
+.editor-preview-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .editor-toolbar {
@@ -123,8 +125,7 @@
   }
 
   .editor-preview-container {
-    top: 60px;
-    bottom: 80px;
+    height: calc(100vh - 60px - 80px); /* topbar + toolbar on desktop */
   }
 
   .editor-toolbar {
