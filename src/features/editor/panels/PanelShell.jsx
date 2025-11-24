@@ -5,6 +5,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import useEditorStore from '../editorStore';
+import { applyCropAspectRatio, clampCropRect } from '../utils/cropTransformBridge';
 import AdjustPanel from './AdjustPanel';
 import RotatePanel from './RotatePanel';
 import FiltersPanel from './FiltersPanel';
@@ -117,10 +118,13 @@ const PanelShell = ({ activeTool, viewportRef, photo }) => {
                 {t('editor.crop.aspectRatio', 'Aspect Ratio')}
               </label>
               <div className="grid grid-cols-2 gap-2">
+                {/* Free aspect ratio */}
                 <button
                   onClick={() => {
                     const crop = transform.crop;
-                    if (crop) applyTransform('crop', { ...crop, aspectRatio: null });
+                    if (crop) {
+                      applyTransform('crop', { ...crop, aspectRatio: null });
+                    }
                   }}
                   className={`px-3 py-2 rounded-lg transition text-sm text-white ${
                     transform.crop?.aspectRatio === null
@@ -130,10 +134,16 @@ const PanelShell = ({ activeTool, viewportRef, photo }) => {
                 >
                   {t('editor.crop.free', 'Free')}
                 </button>
+
+                {/* Square 1:1 */}
                 <button
                   onClick={() => {
                     const crop = transform.crop;
-                    if (crop) applyTransform('crop', { ...crop, aspectRatio: 1 });
+                    if (crop) {
+                      const newCrop = applyCropAspectRatio(crop, 1, 'center');
+                      const clampedCrop = clampCropRect(newCrop);
+                      applyTransform('crop', { ...clampedCrop, aspectRatio: 1 });
+                    }
                   }}
                   className={`px-3 py-2 rounded-lg transition text-sm text-white ${
                     transform.crop?.aspectRatio === 1
@@ -143,10 +153,16 @@ const PanelShell = ({ activeTool, viewportRef, photo }) => {
                 >
                   {t('editor.crop.square', '1:1')}
                 </button>
+
+                {/* Portrait 4:5 */}
                 <button
                   onClick={() => {
                     const crop = transform.crop;
-                    if (crop) applyTransform('crop', { ...crop, aspectRatio: 4/5 });
+                    if (crop) {
+                      const newCrop = applyCropAspectRatio(crop, 4/5, 'center');
+                      const clampedCrop = clampCropRect(newCrop);
+                      applyTransform('crop', { ...clampedCrop, aspectRatio: 4/5 });
+                    }
                   }}
                   className={`px-3 py-2 rounded-lg transition text-sm text-white ${
                     transform.crop?.aspectRatio === 4/5
@@ -156,10 +172,16 @@ const PanelShell = ({ activeTool, viewportRef, photo }) => {
                 >
                   {t('editor.crop.portrait', '4:5')}
                 </button>
+
+                {/* Landscape 16:9 */}
                 <button
                   onClick={() => {
                     const crop = transform.crop;
-                    if (crop) applyTransform('crop', { ...crop, aspectRatio: 16/9 });
+                    if (crop) {
+                      const newCrop = applyCropAspectRatio(crop, 16/9, 'center');
+                      const clampedCrop = clampCropRect(newCrop);
+                      applyTransform('crop', { ...clampedCrop, aspectRatio: 16/9 });
+                    }
                   }}
                   className={`px-3 py-2 rounded-lg transition text-sm text-white ${
                     transform.crop?.aspectRatio === 16/9

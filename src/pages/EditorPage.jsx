@@ -150,6 +150,30 @@ const EditorPage = () => {
   const handleCropChange = useCallback((newCropRect) => {
     const { applyTransform } = useEditorStore.getState();
     applyTransform('crop', newCropRect);
+
+    // Force CropOverlay re-render by updating viewport dimensions
+    if (viewportRef.current) {
+      const updateDimensions = () => {
+        const imageSize = viewportRef.current.getImageSize();
+        const canvas = viewportRef.current.canvasRef?.current;
+        const container = viewportRef.current.containerRef?.current;
+
+        if (imageSize && canvas && container) {
+          const rect = container.getBoundingClientRect();
+          const scaleX = rect.width / imageSize.width;
+          const scaleY = rect.height / imageSize.height;
+          const fitScale = Math.min(scaleX, scaleY);
+
+          setViewportDimensions({
+            canvasWidth: rect.width,
+            canvasHeight: rect.height,
+            imageWidth: imageSize.width * fitScale,
+            imageHeight: imageSize.height * fitScale,
+          });
+        }
+      };
+      updateDimensions();
+    }
   }, []);
 
   // Update viewport dimensions when crop tool is active (Phase 8C-3)
