@@ -160,6 +160,32 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
   );
 
   /**
+   * Emit custom event when transform changes (Phase 8C-5 FIX)
+   * Used by CropOverlay for real-time sync without polling
+   */
+  const emitTransformUpdate = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const event = new CustomEvent('transformUpdate', {
+        detail: {
+          zoom: transform.zoom,
+          panX: transform.panX,
+          panY: transform.panY,
+          rotation: transform.rotation,
+          flipX: transform.flipX,
+          flipY: transform.flipY,
+        }
+      });
+      canvas.dispatchEvent(event);
+    }
+  }, [transform]);
+
+  // Emit event whenever transform changes
+  useEffect(() => {
+    emitTransformUpdate();
+  }, [transform.zoom, transform.panX, transform.panY, transform.rotation, transform.flipX, transform.flipY, emitTransformUpdate]);
+
+  /**
    * Set pan with bounds clamping (Phase 8B-3: rotation-aware)
    */
   const setPan = useCallback(
