@@ -131,14 +131,15 @@ const EditorPage = () => {
   );
 
   const handleReset = useCallback(() => {
-    // Phase 8B-2: Reset viewport transforms
+    // Phase 8C-4: Reset viewport transforms AND adjust values
     if (viewportRef.current) {
       viewportRef.current.resetTransform();
+      viewportRef.current.resetAdjustValues();
     }
     // Reset editor store transforms
     const { resetToOriginal } = useEditorStore.getState();
     resetToOriginal();
-    console.log('✅ Phase 8B-2: Reset zoom, pan, and transforms');
+    console.log('✅ Phase 8C-4: Reset zoom, pan, adjust, and all transforms');
   }, []);
 
   const handleSave = useCallback(() => {

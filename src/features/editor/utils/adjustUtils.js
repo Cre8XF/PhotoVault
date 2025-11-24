@@ -183,8 +183,8 @@ export const buildCSSAdjustString = (adjust = DEFAULT_ADJUST) => {
     filters.push(`blur(${blur.toFixed(1)}px)`);
   }
 
-  // Vignette: Not supported by CSS filter alone
-  // Will need canvas overlay in Phase 8C-2
+  // Vignette: Implemented as radial gradient overlay in canvasUtils.js (Phase 8C-4)
+  // Not included in CSS filter string - applied separately via drawVignetteOverlay()
 
   return filters.length > 0 ? filters.join(' ') : 'none';
 };

@@ -168,11 +168,50 @@ export const drawImageWithTransform = (ctx, image, canvasWidth, canvasHeight, tr
 };
 
 /**
- * Draw image with full transforms (Phase 8C-1)
- * Applies rotation, flip, zoom, pan, and adjust filters using canvas transform matrix
+ * Draw vignette overlay (Phase 8C-4)
+ * Applies a radial gradient darkening effect from edges to center
+ *
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {number} canvasWidth - Canvas width
+ * @param {number} canvasHeight - Canvas height
+ * @param {number} vignetteAmount - Vignette intensity (0-100)
+ */
+export const drawVignetteOverlay = (ctx, canvasWidth, canvasHeight, vignetteAmount) => {
+  if (vignetteAmount <= 0) return;
+
+  // Calculate vignette parameters
+  const centerX = canvasWidth / 2;
+  const centerY = canvasHeight / 2;
+
+  // Radius extends to corners for full coverage
+  const radius = Math.sqrt(centerX * centerX + centerY * centerY);
+
+  // Inner radius (where fade starts) - smaller = more pronounced vignette
+  const innerRadius = radius * (1 - vignetteAmount / 100 * 0.6);
+
+  // Create radial gradient from center to edges
+  const gradient = ctx.createRadialGradient(
+    centerX, centerY, innerRadius,  // Inner circle (transparent)
+    centerX, centerY, radius         // Outer circle (dark)
+  );
+
+  // Gradient stops: transparent center → dark edges
+  const opacity = vignetteAmount / 100 * 0.7; // Max 70% opacity
+  gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  gradient.addColorStop(0.5, `rgba(0, 0, 0, ${opacity * 0.3})`);
+  gradient.addColorStop(1, `rgba(0, 0, 0, ${opacity})`);
+
+  // Draw vignette overlay
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+};
+
+/**
+ * Draw image with full transforms (Phase 8C-4)
+ * Applies rotation, flip, zoom, pan, adjust filters, and vignette overlay
  *
  * Transform order: translate (center) → rotate → flip → scale → pan
- * Filters: Apply adjust filters (brightness, contrast, etc.)
+ * Filters: Apply adjust filters (brightness, contrast, etc.) + vignette overlay
  *
  * @param {CanvasRenderingContext2D} ctx - Canvas context
  * @param {HTMLImageElement} image - Image to draw
@@ -202,7 +241,7 @@ export const drawImageWithFullTransform = (ctx, image, canvasWidth, canvasHeight
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
 
-  // Apply adjust filters (Phase 8C-1)
+  // Apply adjust filters (Phase 8C-1) - excluding vignette
   if (adjust) {
     const filterString = buildCanvasAdjustString(adjust);
     ctx.filter = filterString;
@@ -248,8 +287,17 @@ export const drawImageWithFullTransform = (ctx, image, canvasWidth, canvasHeight
     baseWidth, baseHeight                            // Destination size
   );
 
-  // Restore context state
+  // Restore context state (resets transforms and filter)
   ctx.restore();
+
+  // Reset filter explicitly
+  ctx.filter = 'none';
+
+  // 7. Apply vignette overlay (Phase 8C-4)
+  // Must be drawn AFTER restoring context to avoid transform issues
+  if (adjust && adjust.vignette > 0) {
+    drawVignetteOverlay(ctx, canvasWidth, canvasHeight, adjust.vignette);
+  }
 };
 
 /**
@@ -271,7 +319,7 @@ export const initCanvasContext = (canvas) => {
 };
 
 /**
- * Draw cropped image to canvas (Phase 8C-3)
+ * Draw cropped image to canvas (Phase 8C-4)
  * Renders only the selected crop region, centered and scaled to fit canvas
  * No transforms applied - this represents the final cropped result
  *
@@ -308,7 +356,7 @@ export const drawCroppedImageToCanvas = (ctx, image, canvasWidth, canvasHeight, 
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
 
-  // Apply adjust filters if provided
+  // Apply adjust filters if provided (excluding vignette)
   if (adjust) {
     const filterString = buildCanvasAdjustString(adjust);
     ctx.filter = filterString;
@@ -324,4 +372,9 @@ export const drawCroppedImageToCanvas = (ctx, image, canvasWidth, canvasHeight, 
 
   // Reset filter
   ctx.filter = 'none';
+
+  // Apply vignette overlay (Phase 8C-4)
+  if (adjust && adjust.vignette > 0) {
+    drawVignetteOverlay(ctx, canvasWidth, canvasHeight, adjust.vignette);
+  }
 };
