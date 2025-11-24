@@ -215,27 +215,33 @@ const EditorPage = () => {
     }
   }, [activeTool]);
 
-  // Sync viewport transform for CropOverlay (Phase 8C-4)
+  // Sync viewport transform for CropOverlay (Phase 8C-5 FIX: Event-based)
   useEffect(() => {
-    if (activeTool === 'crop' && viewportRef.current) {
-      const syncTransform = () => {
-        const currentTransform = viewportRef.current.getTransform();
-        if (currentTransform) {
-          setViewportTransform({
-            zoom: currentTransform.zoom,
-            panX: currentTransform.panX,
-            panY: currentTransform.panY,
-          });
-        }
+    if (activeTool !== 'crop' || !viewportRef.current) return;
+
+    // Initial sync
+    const initialTransform = viewportRef.current.getTransform();
+    if (initialTransform) {
+      setViewportTransform({
+        zoom: initialTransform.zoom,
+        panX: initialTransform.panX,
+        panY: initialTransform.panY,
+      });
+    }
+
+    // Listen for transform changes via custom event
+    const handleTransformChange = (event) => {
+      const { zoom, panX, panY } = event.detail;
+      setViewportTransform({ zoom, panX, panY });
+    };
+
+    const canvas = viewportRef.current.canvasRef?.current;
+    if (canvas) {
+      canvas.addEventListener('transformUpdate', handleTransformChange);
+
+      return () => {
+        canvas.removeEventListener('transformUpdate', handleTransformChange);
       };
-
-      // Sync immediately
-      syncTransform();
-
-      // Poll for transform changes (simple approach for Phase 8C-4)
-      const interval = setInterval(syncTransform, 100);
-
-      return () => clearInterval(interval);
     }
   }, [activeTool]);
 
