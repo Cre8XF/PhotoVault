@@ -1,20 +1,21 @@
 /* ============================================================================
-   PHASE 8A: EDITOR VIEWPORT - Simple Layout Foundation
+   PHASE 8C-5 HOTFIX: EDITOR VIEWPORT - Proper Overlay Structure
    ============================================================================
 
-   This CSS implements the Phase 8A viewport system following the World
-   Architecture Masterplan.
+   CRITICAL FIX: Remove nested flex containers that break viewport dimensions
 
    Structure:
-   - Fixed topbar (56px) - flex: 0 0 56px
-   - Viewport shell (flexible) - flex: 1 1 auto
-   - Fixed toolbar (72px) - flex: 0 0 72px
-   - Fixed panel sheet (220px, slides up/down)
+   - Fixed overlay container (z-index: 9999)
+   - Fixed topbar (56px)
+   - Flex-grow viewport (fills remaining space)
+   - Fixed toolbar (72px)
+   - Absolute positioned panels (overlay, don't push layout)
 
    Key behavior:
-   - When panel opens: viewport-inner gets padding-bottom: 220px
-   - This causes image to scale down smoothly (Google Photos style)
-   - Entire image always visible
+   - Viewport uses flex-grow to fill available space
+   - Panels are absolute overlays, NOT layout children
+   - No nested flex containers above canvas
+   - Canvas fills 100% of viewport container
    ============================================================================ */
 
 /* ============================================================================
@@ -44,37 +45,33 @@
 }
 
 /* ============================================================================
-   VIEWPORT SHELL - Phase 8A
+   VIEWPORT SHELL - HOTFIX: Use flex-grow, not nested flex
    ============================================================================ */
 
-/* Viewport shell – the area between topbar and toolbar */
+/* Viewport shell – fills space between topbar and toolbar */
 .editor-viewport-shell {
-  flex: 1 1 auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  flex: 1 1 0%;
+  position: relative;
   overflow: hidden;
   background: #000;
+  /* REMOVED: display: flex, justify-content, align-items */
+  /* These were breaking height calculations */
 }
 
-/* Inner container that adjusts height when panel is active */
+/* Inner container - SIMPLIFIED: Just a positioned container for canvas */
 .editor-viewport-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #000;
-  transition: padding-bottom 0.25s ease;
+  position: absolute;
+  inset: 0;
+  /* REMOVED: width: 100%, height: 100% - inset: 0 replaces these */
+  /* REMOVED: display: flex, justify-content, align-items */
+  /* REMOVED: transition: padding-bottom */
+  /* Panels now overlay instead of pushing layout */
 }
 
-/* When panel is active, reserve space at bottom */
-.editor-viewport-inner--with-panel {
-  padding-bottom: 220px; /* same height as panel */
-}
+/* REMOVED: .editor-viewport-inner--with-panel class */
+/* Panels no longer push viewport, they overlay it */
 
-/* Phase 8B-1: Canvas replaces img tag */
+/* Canvas - fills its container completely */
 .editor-viewport-canvas {
   width: 100%;
   height: 100%;
@@ -95,12 +92,16 @@
   z-index: 30;
 }
 
+/* ============================================================================
+   PANEL SHEET - HOTFIX: Absolute overlay within editor-world, not fixed to viewport
+   ============================================================================ */
+
 .editor-panel-sheet {
-  position: fixed;
+  position: absolute; /* CHANGED from fixed - now relative to editor-world */
   left: 0;
   right: 0;
-  bottom: 72px;
-  height: 220px;
+  bottom: 72px; /* Above toolbar */
+  height: 280px; /* INCREASED from 220px for better mobile UX */
   z-index: 40;
   transform: translateY(100%);
   transition: transform 0.25s ease;
