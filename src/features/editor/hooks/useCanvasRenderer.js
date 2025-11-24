@@ -1,12 +1,12 @@
 /**
- * useCanvasRenderer - Phase 8B-2
+ * useCanvasRenderer - Phase 8B-3
  *
- * React hook for canvas rendering with transform support
+ * React hook for canvas rendering with full transform support
  * - Auto-sizes canvas to container
  * - Handles window resize and device rotation
  * - HiDPI support
  * - Image loading and rendering
- * - Zoom and pan transforms
+ * - Zoom, pan, rotation, and flip transforms
  * - Mouse wheel, touch pinch, and drag support
  */
 
@@ -14,18 +14,19 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import {
   setCanvasSize,
   loadImage,
-  drawImageWithTransform,
+  drawImageWithFullTransform,
   initCanvasContext,
   calculateFitScale,
 } from '../utils/canvasUtils';
 import {
   createInitialTransform,
-  calculatePanBounds,
+  calculatePanBoundsWithRotation,
   clampPan,
   zoomAroundPoint,
   clamp,
   getTouchDistance,
   getTouchMidpoint,
+  normalizeRotation,
 } from '../utils/transformUtils';
 
 /**
@@ -75,7 +76,7 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
   }, []);
 
   /**
-   * Render current image to canvas with transforms
+   * Render current image to canvas with transforms (Phase 8B-3)
    */
   const render = useCallback(() => {
     const canvas = canvasRef.current;
@@ -93,12 +94,12 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
     // Use external transform if provided, otherwise use internal
     const activeTransform = externalTransform || transform;
 
-    // Draw image with transforms
-    drawImageWithTransform(ctx, image, width, height, activeTransform);
+    // Draw image with full transforms (zoom, pan, rotation, flip)
+    drawImageWithFullTransform(ctx, image, width, height, activeTransform);
   }, [transform, externalTransform]);
 
   /**
-   * Set zoom level with pan clamping
+   * Set zoom level with pan clamping (Phase 8B-3: rotation-aware)
    */
   const setZoom = useCallback(
     (newZoom, pointerX = 0, pointerY = 0) => {
@@ -124,13 +125,14 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
         );
       }
 
-      // Calculate and apply pan bounds
-      const bounds = calculatePanBounds(
+      // Calculate and apply pan bounds (rotation-aware)
+      const bounds = calculatePanBoundsWithRotation(
         canvasWidth,
         canvasHeight,
         imageWidth,
         imageHeight,
-        clampedZoom
+        clampedZoom,
+        transform.rotation
       );
 
       const clampedPan = clampPan(newPan.panX, newPan.panY, bounds);
@@ -146,7 +148,7 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
   );
 
   /**
-   * Set pan with bounds clamping
+   * Set pan with bounds clamping (Phase 8B-3: rotation-aware)
    */
   const setPan = useCallback(
     (newPanX, newPanY) => {
@@ -155,13 +157,14 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
 
       const { canvasWidth, canvasHeight, imageWidth, imageHeight } = dimensions;
 
-      // Calculate pan bounds
-      const bounds = calculatePanBounds(
+      // Calculate pan bounds (rotation-aware)
+      const bounds = calculatePanBoundsWithRotation(
         canvasWidth,
         canvasHeight,
         imageWidth,
         imageHeight,
-        transform.zoom
+        transform.zoom,
+        transform.rotation
       );
 
       // Clamp pan to bounds
@@ -173,7 +176,7 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
         panY: clampedPan.panY,
       }));
     },
-    [transform.zoom, getImageDimensions]
+    [transform.zoom, transform.rotation, getImageDimensions]
   );
 
   /**
@@ -181,6 +184,56 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
    */
   const resetTransform = useCallback(() => {
     setTransform(createInitialTransform());
+  }, []);
+
+  /**
+   * Rotate clockwise by 90 degrees (Phase 8B-3)
+   */
+  const rotateClockwise = useCallback(() => {
+    setTransform((prev) => ({
+      ...prev,
+      rotation: normalizeRotation(prev.rotation + 90),
+      // Reset pan to center after rotation
+      panX: 0,
+      panY: 0,
+      // Reset zoom to 1 to auto-fit rotated image
+      zoom: 1.0,
+    }));
+  }, []);
+
+  /**
+   * Rotate counter-clockwise by 90 degrees (Phase 8B-3)
+   */
+  const rotateCounterClockwise = useCallback(() => {
+    setTransform((prev) => ({
+      ...prev,
+      rotation: normalizeRotation(prev.rotation - 90),
+      // Reset pan to center after rotation
+      panX: 0,
+      panY: 0,
+      // Reset zoom to 1 to auto-fit rotated image
+      zoom: 1.0,
+    }));
+  }, []);
+
+  /**
+   * Flip horizontal (Phase 8B-3)
+   */
+  const flipHorizontal = useCallback(() => {
+    setTransform((prev) => ({
+      ...prev,
+      flipX: !prev.flipX,
+    }));
+  }, []);
+
+  /**
+   * Flip vertical (Phase 8B-3)
+   */
+  const flipVertical = useCallback(() => {
+    setTransform((prev) => ({
+      ...prev,
+      flipY: !prev.flipY,
+    }));
   }, []);
 
   /**
@@ -443,6 +496,10 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
     setZoom,
     setPan,
     resetTransform,
+    rotateClockwise,
+    rotateCounterClockwise,
+    flipHorizontal,
+    flipVertical,
     render,
   };
 };
