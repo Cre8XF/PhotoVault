@@ -83,7 +83,7 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
 
   /**
    * Render current image to canvas with transforms (Phase 8C-3)
-   * Uses crop mode if appliedCropBox is set
+   * Uses crop mode if appliedCropBox is set OR if external crop preview exists
    */
   const render = useCallback(() => {
     const canvas = canvasRef.current;
@@ -103,7 +103,17 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
 
     // Crop mode (Phase 8C-3): render only cropped portion
     if (appliedCropBox) {
+      // Final applied crop - locked and permanent
       drawCroppedImageToCanvas(ctx, image, width, height, appliedCropBox, activeTransform.adjust);
+    } else if (externalTransform?.crop && !appliedCropBox) {
+      // Real-time crop preview (Phase 8C-5 FIX #3) - while adjusting crop handles
+      const previewCropBox = getEffectiveCropBox(externalTransform.crop, {
+        width: image.naturalWidth,
+        height: image.naturalHeight,
+      });
+      if (previewCropBox) {
+        drawCroppedImageToCanvas(ctx, image, width, height, previewCropBox, activeTransform.adjust);
+      }
     } else {
       // Normal mode: draw image with full transforms (zoom, pan, rotation, flip)
       drawImageWithFullTransform(ctx, image, width, height, activeTransform);
