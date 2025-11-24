@@ -49,6 +49,7 @@ const EditorPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [activeTool, setActiveTool] = useState('none');
+  const [isCropApplied, setIsCropApplied] = useState(false);
   const [viewportDimensions, setViewportDimensions] = useState(null);
   const [viewportTransform, setViewportTransform] = useState({ zoom: 1, panX: 0, panY: 0 });
 
@@ -115,6 +116,13 @@ const EditorPage = () => {
 
   const handleToolChange = useCallback(
     (tool) => {
+      // Clear applied crop when switching tools
+      if (isCropApplied && viewportRef.current) {
+        viewportRef.current.clearCrop();
+        setIsCropApplied(false);
+        console.log('🔷 Cleared applied crop when switching tools');
+      }
+
       // Toggle tool: clicking same tool closes it
       const newTool = activeTool === tool ? 'none' : tool;
       setActiveTool(newTool);
@@ -127,7 +135,7 @@ const EditorPage = () => {
         applyTransform('crop', defaultCrop);
       }
     },
-    [activeTool, transform.crop]
+    [activeTool, transform.crop, isCropApplied]
   );
 
   const handleReset = useCallback(() => {
@@ -372,7 +380,16 @@ const EditorPage = () => {
       </div>
 
       {/* Panel Shell - Slides up when tool is active (Phase 8B-5: photo prop) */}
-      <PanelShell activeTool={activeTool} viewportRef={viewportRef} photo={originalPhoto} />
+      <PanelShell
+        activeTool={activeTool}
+        viewportRef={viewportRef}
+        photo={originalPhoto}
+        onCropApplied={() => {
+          setIsCropApplied(true);
+          setActiveTool('none');
+          console.log('✅ Crop applied - closing crop tool');
+        }}
+      />
     </div>
   );
 };

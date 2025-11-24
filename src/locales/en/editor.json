@@ -64,7 +64,9 @@
     "zoomIn": "Zoom In",
     "zoomOut": "Zoom Out",
     "resetZoom": "Reset Zoom",
-    "help": "Select aspect ratio and click \"Apply\" to crop"
+    "help": "Select aspect ratio and click \"Apply\" to crop",
+    "apply": "Apply Crop",
+    "clear": "Clear Crop"
   },
   "rotate": "Rotate",
   "flipHorizontal": "Flip Horizontal",
