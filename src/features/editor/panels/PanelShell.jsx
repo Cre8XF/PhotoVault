@@ -26,7 +26,7 @@ import '../editor.css';
  * @param {React.RefObject} viewportRef - Reference to EditorViewport (Phase 8B-4, 8C-1)
  * @param {Object} photo - Photo object for filter thumbnails (Phase 8B-5)
  */
-const PanelShell = ({ activeTool, viewportRef, photo }) => {
+const PanelShell = ({ activeTool, viewportRef, photo, onCropApplied }) => {
   const { t } = useTranslation();
   const { transform, applyTransform } = useEditorStore();
 
@@ -194,13 +194,18 @@ const PanelShell = ({ activeTool, viewportRef, photo }) => {
               </div>
             </div>
 
-            {/* Apply Crop Button (Phase 8C-3) */}
+            {/* Apply Crop Button */}
             <button
               onClick={() => {
                 const cropRect = transform.crop;
                 if (cropRect && viewportRef?.current) {
                   viewportRef.current.applyCrop(cropRect);
                   console.log('🔷 Crop applied to canvas');
+
+                  // Notify parent that crop is applied
+                  if (typeof onCropApplied === 'function') {
+                    onCropApplied();
+                  }
                 }
               }}
               disabled={!transform.crop}
@@ -208,6 +213,21 @@ const PanelShell = ({ activeTool, viewportRef, photo }) => {
             >
               {t('editor.crop.apply', 'Apply Crop')}
             </button>
+
+            {/* Clear Crop Button - shown only when crop is applied */}
+            {viewportRef?.current?.getAppliedCrop() && (
+              <button
+                onClick={() => {
+                  if (viewportRef?.current) {
+                    viewportRef.current.clearCrop();
+                    console.log('🔷 Crop cleared - back to full image');
+                  }
+                }}
+                className="w-full px-4 py-2.5 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium text-sm"
+              >
+                {t('editor.crop.clear', 'Clear Crop')}
+              </button>
+            )}
 
             {/* Instructions */}
             <p className="text-xs text-white/60 text-center mt-2">

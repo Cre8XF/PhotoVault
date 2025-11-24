@@ -64,7 +64,9 @@
     "zoomIn": "Zoom inn",
     "zoomOut": "Zoom ut",
     "resetZoom": "Tilbakestill zoom",
-    "help": "Velg sideforhold og klikk \"Bruk\" for å beskjære"
+    "help": "Velg sideforhold og klikk \"Bruk\" for å beskjære",
+    "apply": "Bruk beskjæring",
+    "clear": "Fjern beskjæring"
   },
   "rotate": "Roter",
   "flipHorizontal": "Speilvend horisontalt",
