@@ -557,10 +557,7 @@
     margin: 0 auto;
   }
 
-  .editor-viewport-inner--with-panel {
-    padding-bottom: 320px; /* larger panel on desktop */
-  }
-
+  /* Panel overlay - larger on desktop */
   .editor-panel-sheet {
     bottom: 80px;
     height: 320px;
