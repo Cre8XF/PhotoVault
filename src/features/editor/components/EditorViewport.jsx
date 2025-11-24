@@ -44,7 +44,7 @@ export const EditorViewport = forwardRef(({ photo, hasActivePanel, children }, r
     render,
   } = useCanvasRenderer(photo);
 
-  // Expose imperative API to parent (Phase 8C-1)
+  // Expose imperative API to parent (Phase 8C-2)
   useImperativeHandle(ref, () => ({
     // Transform controls
     setZoom: (zoom) => setZoom(zoom),
@@ -72,9 +72,13 @@ export const EditorViewport = forwardRef(({ photo, hasActivePanel, children }, r
     getFlip: () => ({ flipX: transform.flipX, flipY: transform.flipY }),
     getAdjust: () => transform.adjust,
 
+    // Refs (Phase 8C-2: for CropOverlay)
+    canvasRef,
+    containerRef,
+
     // Manual render (if needed)
     render,
-  }), [transform, setZoom, setPan, resetTransform, rotateClockwise, rotateCounterClockwise, flipHorizontal, flipVertical, setAdjustValue, resetAdjustValues, getAdjustState, render]);
+  }), [transform, setZoom, setPan, resetTransform, rotateClockwise, rotateCounterClockwise, flipHorizontal, flipVertical, setAdjustValue, resetAdjustValues, getAdjustState, canvasRef, containerRef, render]);
 
   if (!photo) {
     return (

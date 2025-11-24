@@ -1,127 +1,228 @@
 // ============================================================================
-// COMPONENT: CropOverlay.jsx - Interactive Crop Overlay (Phase 7B - Masterplan Aligned)
+// COMPONENT: CropOverlay.jsx - Transform-Aware Crop Overlay (Phase 8C-2)
 // ============================================================================
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import {
+  screenToImageCoords,
+  imageToScreenCoords,
+  normalizeCropRect,
+  clampCropRect,
+  applyCropAspectRatio,
+  getCropHandleAtPoint,
+} from '../utils/cropTransformBridge';
 
 /**
- * CropOverlay Component
+ * CropOverlay Component (Phase 8C-2)
  *
- * Interactive crop overlay with draggable handles inside EditorPreview
- * - 4 corner handles (nw, ne, sw, se)
- * - 4 edge handles (n, s, e, w)
- * - Draggable crop box
- * - Touch and mouse support
- * - Constrained within image bounds
- * - Optional aspect ratio lock
- * - Transparent dimmed area using 4 separate divs (browser compatible)
+ * Transform-aware interactive crop overlay that works correctly with zoom/pan/rotate.
+ * - Uses normalized 0-1 coordinate space internally
+ * - Converts to screen space for rendering via imageToScreenCoords()
+ * - Converts from screen space for interaction via screenToImageCoords()
+ * - Fully stateless (crop state managed by parent)
+ * - Works correctly with all transform combinations
+ *
+ * @param {Object} cropRect - Normalized crop rect { x1, y1, x2, y2, aspectRatio }
+ * @param {Function} onCropChange - Callback when crop changes (receives normalized rect)
+ * @param {React.RefObject} viewportRef - Reference to EditorViewport
+ * @param {number} canvasWidth - Canvas width in pixels
+ * @param {number} canvasHeight - Canvas height in pixels
+ * @param {number} imageWidth - Base image width (at zoom=1)
+ * @param {number} imageHeight - Base image height (at zoom=1)
+ * @param {Object} transform - Current transform state
  */
 const CropOverlay = ({
-  cropBox,
+  cropRect,
   onCropChange,
-  imageBounds,
-  aspectRatio = null,
-  zoom = 1,
+  viewportRef,
+  canvasWidth,
+  canvasHeight,
+  imageWidth,
+  imageHeight,
+  transform,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [dragType, setDragType] = useState(null); // 'move' | 'nw' | 'ne' | 'sw' | 'se' | 'n' | 's' | 'e' | 'w'
-  const dragStartRef = useRef({ x: 0, y: 0, cropBox: null });
+  const [dragHandle, setDragHandle] = useState(null); // 'tl', 'tr', 'bl', 'br', 'edge-t', etc., or 'move'
+  const dragStartRef = useRef({ screenX: 0, screenY: 0, cropRect: null });
 
-  // Handle mouse/touch down
+  // Don't render if no crop rect or missing dimensions
+  if (!cropRect || !canvasWidth || !canvasHeight || !imageWidth || !imageHeight) {
+    return null;
+  }
+
+  /**
+   * Convert crop rect to screen coordinates for rendering
+   */
+  const getScreenRect = useCallback(() => {
+    const topLeft = imageToScreenCoords(
+      cropRect.x1,
+      cropRect.y1,
+      transform,
+      canvasWidth,
+      canvasHeight,
+      imageWidth,
+      imageHeight
+    );
+
+    const bottomRight = imageToScreenCoords(
+      cropRect.x2,
+      cropRect.y2,
+      transform,
+      canvasWidth,
+      canvasHeight,
+      imageWidth,
+      imageHeight
+    );
+
+    return {
+      x1: topLeft.x,
+      y1: topLeft.y,
+      x2: bottomRight.x,
+      y2: bottomRight.y,
+      width: bottomRight.x - topLeft.x,
+      height: bottomRight.y - topLeft.y,
+    };
+  }, [cropRect, transform, canvasWidth, canvasHeight, imageWidth, imageHeight]);
+
+  const screenRect = getScreenRect();
+
+  /**
+   * Handle pointer down (start drag)
+   */
   const handlePointerDown = useCallback(
-    (e, type) => {
+    (e, handle) => {
       e.preventDefault();
       e.stopPropagation();
 
       const point = e.touches ? e.touches[0] : e;
+
       dragStartRef.current = {
-        x: point.clientX,
-        y: point.clientY,
-        cropBox: { ...cropBox },
+        screenX: point.clientX,
+        screenY: point.clientY,
+        cropRect: { ...cropRect },
       };
 
       setIsDragging(true);
-      setDragType(type);
+      setDragHandle(handle);
     },
-    [cropBox]
+    [cropRect]
   );
 
-  // Handle mouse/touch move
+  /**
+   * Handle pointer move (drag)
+   */
   const handlePointerMove = useCallback(
     (e) => {
-      if (!isDragging || !dragType) return;
+      if (!isDragging || !dragHandle) return;
 
       const point = e.touches ? e.touches[0] : e;
-      const deltaX = (point.clientX - dragStartRef.current.x) / zoom;
-      const deltaY = (point.clientY - dragStartRef.current.y) / zoom;
-      const startBox = dragStartRef.current.cropBox;
+      const currentScreenX = point.clientX;
+      const currentScreenY = point.clientY;
 
-      let newBox = { ...startBox };
+      // Get canvas-relative coordinates
+      const canvas = viewportRef?.current?.canvasRef?.current;
+      if (!canvas) return;
 
-      // Calculate new box based on drag type
-      if (dragType === 'move') {
-        // Move entire box
-        newBox.x = startBox.x + deltaX;
-        newBox.y = startBox.y + deltaY;
-      } else if (dragType.includes('n')) {
-        // North edge
-        newBox.y = startBox.y + deltaY;
-        newBox.height = startBox.height - deltaY;
-      } else if (dragType.includes('s')) {
-        // South edge
-        newBox.height = startBox.height + deltaY;
+      const rect = canvas.getBoundingClientRect();
+      const startCanvasX = dragStartRef.current.screenX - rect.left;
+      const startCanvasY = dragStartRef.current.screenY - rect.top;
+      const currentCanvasX = currentScreenX - rect.left;
+      const currentCanvasY = currentScreenY - rect.top;
+
+      // Convert both to image coords
+      const startImg = screenToImageCoords(
+        startCanvasX,
+        startCanvasY,
+        transform,
+        canvasWidth,
+        canvasHeight,
+        imageWidth,
+        imageHeight
+      );
+
+      const currentImg = screenToImageCoords(
+        currentCanvasX,
+        currentCanvasY,
+        transform,
+        canvasWidth,
+        canvasHeight,
+        imageWidth,
+        imageHeight
+      );
+
+      const deltaX = currentImg.x - startImg.x;
+      const deltaY = currentImg.y - startImg.y;
+
+      const startCrop = dragStartRef.current.cropRect;
+      let newCrop = { ...startCrop };
+
+      // Apply delta based on handle type
+      if (dragHandle === 'move') {
+        // Move entire rect
+        newCrop.x1 = startCrop.x1 + deltaX;
+        newCrop.y1 = startCrop.y1 + deltaY;
+        newCrop.x2 = startCrop.x2 + deltaX;
+        newCrop.y2 = startCrop.y2 + deltaY;
+      } else if (dragHandle === 'tl') {
+        newCrop.x1 = startCrop.x1 + deltaX;
+        newCrop.y1 = startCrop.y1 + deltaY;
+      } else if (dragHandle === 'tr') {
+        newCrop.x2 = startCrop.x2 + deltaX;
+        newCrop.y1 = startCrop.y1 + deltaY;
+      } else if (dragHandle === 'bl') {
+        newCrop.x1 = startCrop.x1 + deltaX;
+        newCrop.y2 = startCrop.y2 + deltaY;
+      } else if (dragHandle === 'br') {
+        newCrop.x2 = startCrop.x2 + deltaX;
+        newCrop.y2 = startCrop.y2 + deltaY;
+      } else if (dragHandle === 'edge-t') {
+        newCrop.y1 = startCrop.y1 + deltaY;
+      } else if (dragHandle === 'edge-b') {
+        newCrop.y2 = startCrop.y2 + deltaY;
+      } else if (dragHandle === 'edge-l') {
+        newCrop.x1 = startCrop.x1 + deltaX;
+      } else if (dragHandle === 'edge-r') {
+        newCrop.x2 = startCrop.x2 + deltaX;
       }
 
-      if (dragType.includes('w')) {
-        // West edge
-        newBox.x = startBox.x + deltaX;
-        newBox.width = startBox.width - deltaX;
-      } else if (dragType.includes('e')) {
-        // East edge
-        newBox.width = startBox.width + deltaX;
+      // Normalize and clamp
+      newCrop = normalizeCropRect(newCrop);
+
+      // Apply aspect ratio if set
+      if (cropRect.aspectRatio && dragHandle !== 'move') {
+        newCrop = applyCropAspectRatio(newCrop, cropRect.aspectRatio, 'center');
       }
 
-      // Aspect ratio constraint
-      if (aspectRatio && dragType !== 'move') {
-        const ratio = aspectRatio;
-        if (dragType.includes('n') || dragType.includes('s')) {
-          // Adjust width to maintain aspect ratio
-          newBox.width = newBox.height * ratio;
-          if (dragType.includes('w')) {
-            newBox.x = startBox.x + startBox.width - newBox.width;
-          }
-        } else if (dragType.includes('e') || dragType.includes('w')) {
-          // Adjust height to maintain aspect ratio
-          newBox.height = newBox.width / ratio;
-          if (dragType.includes('n')) {
-            newBox.y = startBox.y + startBox.height - newBox.height;
-          }
-        }
+      // Clamp to 0-1 bounds
+      newCrop = clampCropRect(newCrop);
+
+      // Ensure minimum size (2% of image)
+      const minSize = 0.02;
+      if (newCrop.x2 - newCrop.x1 < minSize || newCrop.y2 - newCrop.y1 < minSize) {
+        return; // Don't update if too small
       }
 
-      // Constrain to image bounds
-      const minSize = 50; // Minimum crop size
-      newBox.width = Math.max(minSize, Math.min(newBox.width, imageBounds.width));
-      newBox.height = Math.max(minSize, Math.min(newBox.height, imageBounds.height));
-      newBox.x = Math.max(imageBounds.x, Math.min(newBox.x, imageBounds.x + imageBounds.width - newBox.width));
-      newBox.y = Math.max(imageBounds.y, Math.min(newBox.y, imageBounds.y + imageBounds.height - newBox.height));
+      // Keep aspect ratio property
+      newCrop.aspectRatio = cropRect.aspectRatio;
 
-      onCropChange(newBox);
+      onCropChange(newCrop);
     },
-    [isDragging, dragType, onCropChange, imageBounds, aspectRatio, zoom]
+    [isDragging, dragHandle, cropRect, transform, canvasWidth, canvasHeight, imageWidth, imageHeight, viewportRef, onCropChange]
   );
 
-  // Handle mouse/touch up
+  /**
+   * Handle pointer up (end drag)
+   */
   const handlePointerUp = useCallback(() => {
     setIsDragging(false);
-    setDragType(null);
+    setDragHandle(null);
   }, []);
 
-  // Add global listeners
+  // Add global listeners when dragging
   useEffect(() => {
     if (isDragging) {
       window.addEventListener('mousemove', handlePointerMove);
-      window.addEventListener('touchmove', handlePointerMove);
+      window.addEventListener('touchmove', handlePointerMove, { passive: false });
       window.addEventListener('mouseup', handlePointerUp);
       window.addEventListener('touchend', handlePointerUp);
 
@@ -134,52 +235,49 @@ const CropOverlay = ({
     }
   }, [isDragging, handlePointerMove, handlePointerUp]);
 
-  if (!cropBox) return null;
-
-  const handleSize = 12; // Size of drag handles
-  const handleSizeTouch = 20; // Larger for touch
+  const handleSize = 12;
+  const handleHitArea = 24; // Larger touch target
 
   return (
     <div className="absolute inset-0 z-20 pointer-events-none">
-      {/* Dimmed overlay outside crop - Using 4 separate divs for browser compatibility */}
-
-      {/* Top dimmed area */}
+      {/* Dimmed overlay (4 sections) */}
+      {/* Top */}
       <div
         className="absolute left-0 right-0 bg-black/60 pointer-events-none"
         style={{
           top: 0,
-          height: `${cropBox.y}px`,
+          height: Math.max(0, screenRect.y1),
         }}
       />
 
-      {/* Bottom dimmed area */}
+      {/* Bottom */}
       <div
         className="absolute left-0 right-0 bg-black/60 pointer-events-none"
         style={{
-          top: `${cropBox.y + cropBox.height}px`,
+          top: screenRect.y2,
           bottom: 0,
         }}
       />
 
-      {/* Left dimmed area */}
+      {/* Left */}
       <div
         className="absolute bg-black/60 pointer-events-none"
         style={{
-          top: `${cropBox.y}px`,
+          top: screenRect.y1,
           left: 0,
-          width: `${cropBox.x}px`,
-          height: `${cropBox.height}px`,
+          width: Math.max(0, screenRect.x1),
+          height: screenRect.height,
         }}
       />
 
-      {/* Right dimmed area */}
+      {/* Right */}
       <div
         className="absolute bg-black/60 pointer-events-none"
         style={{
-          top: `${cropBox.y}px`,
-          left: `${cropBox.x + cropBox.width}px`,
+          top: screenRect.y1,
+          left: screenRect.x2,
           right: 0,
-          height: `${cropBox.height}px`,
+          height: screenRect.height,
         }}
       />
 
@@ -187,10 +285,10 @@ const CropOverlay = ({
       <div
         className="absolute border-2 border-white cursor-move pointer-events-auto"
         style={{
-          left: cropBox.x,
-          top: cropBox.y,
-          width: cropBox.width,
-          height: cropBox.height,
+          left: screenRect.x1,
+          top: screenRect.y1,
+          width: screenRect.width,
+          height: screenRect.height,
         }}
         onMouseDown={(e) => handlePointerDown(e, 'move')}
         onTouchStart={(e) => handlePointerDown(e, 'move')}
@@ -203,62 +301,44 @@ const CropOverlay = ({
         </div>
 
         {/* Corner handles */}
-        {['nw', 'ne', 'sw', 'se'].map((corner) => {
-          const isNorth = corner.includes('n');
-          const isWest = corner.includes('w');
-          const cursorClass =
-            corner === 'nw' || corner === 'se' ? 'cursor-nwse-resize' : 'cursor-nesw-resize';
-
-          return (
-            <div
-              key={corner}
-              className={`absolute bg-white border-2 border-blue-500 ${cursorClass} pointer-events-auto`}
-              style={{
-                width: handleSize,
-                height: handleSize,
-                [isNorth ? 'top' : 'bottom']: -handleSize / 2,
-                [isWest ? 'left' : 'right']: -handleSize / 2,
-                // Larger touch target
-                padding: handleSizeTouch / 2 - handleSize / 2,
-              }}
-              onMouseDown={(e) => handlePointerDown(e, corner)}
-              onTouchStart={(e) => handlePointerDown(e, corner)}
-            />
-          );
-        })}
+        {[
+          { handle: 'tl', top: -handleSize/2, left: -handleSize/2, cursor: 'cursor-nwse-resize' },
+          { handle: 'tr', top: -handleSize/2, right: -handleSize/2, cursor: 'cursor-nesw-resize' },
+          { handle: 'bl', bottom: -handleSize/2, left: -handleSize/2, cursor: 'cursor-nesw-resize' },
+          { handle: 'br', bottom: -handleSize/2, right: -handleSize/2, cursor: 'cursor-nwse-resize' },
+        ].map(({ handle, cursor, ...pos }) => (
+          <div
+            key={handle}
+            className={`absolute bg-white border-2 border-blue-500 ${cursor} pointer-events-auto`}
+            style={{
+              width: handleSize,
+              height: handleSize,
+              ...pos,
+              padding: (handleHitArea - handleSize) / 2,
+            }}
+            onMouseDown={(e) => handlePointerDown(e, handle)}
+            onTouchStart={(e) => handlePointerDown(e, handle)}
+          />
+        ))}
 
         {/* Edge handles */}
-        {['n', 's', 'e', 'w'].map((edge) => {
-          const isVertical = edge === 'n' || edge === 's';
-          const cursorClass = isVertical ? 'cursor-ns-resize' : 'cursor-ew-resize';
-          const style = isVertical
-            ? {
-                width: '50%',
-                height: handleSize,
-                left: '25%',
-                [edge === 'n' ? 'top' : 'bottom']: -handleSize / 2,
-              }
-            : {
-                width: handleSize,
-                height: '50%',
-                top: '25%',
-                [edge === 'w' ? 'left' : 'right']: -handleSize / 2,
-              };
-
-          return (
-            <div
-              key={edge}
-              className={`absolute bg-white border-2 border-blue-500 ${cursorClass} pointer-events-auto`}
-              style={{
-                ...style,
-                // Larger touch target
-                padding: handleSizeTouch / 2 - handleSize / 2,
-              }}
-              onMouseDown={(e) => handlePointerDown(e, edge)}
-              onTouchStart={(e) => handlePointerDown(e, edge)}
-            />
-          );
-        })}
+        {[
+          { handle: 'edge-t', top: -handleSize/2, left: '25%', width: '50%', height: handleSize, cursor: 'cursor-ns-resize' },
+          { handle: 'edge-b', bottom: -handleSize/2, left: '25%', width: '50%', height: handleSize, cursor: 'cursor-ns-resize' },
+          { handle: 'edge-l', left: -handleSize/2, top: '25%', width: handleSize, height: '50%', cursor: 'cursor-ew-resize' },
+          { handle: 'edge-r', right: -handleSize/2, top: '25%', width: handleSize, height: '50%', cursor: 'cursor-ew-resize' },
+        ].map(({ handle, cursor, ...style }) => (
+          <div
+            key={handle}
+            className={`absolute bg-white border-2 border-blue-500 ${cursor} pointer-events-auto`}
+            style={{
+              ...style,
+              padding: (handleHitArea - handleSize) / 2,
+            }}
+            onMouseDown={(e) => handlePointerDown(e, handle)}
+            onTouchStart={(e) => handlePointerDown(e, handle)}
+          />
+        ))}
       </div>
     </div>
   );
