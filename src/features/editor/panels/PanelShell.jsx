@@ -1,11 +1,12 @@
 // ============================================================================
-// COMPONENT: PanelShell.jsx - Editor Panel Container (Phase 8B-4)
+// COMPONENT: PanelShell.jsx - Editor Panel Container (Phase 8B-5)
 // ============================================================================
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import useEditorStore from '../editorStore';
 import RotatePanel from './RotatePanel';
+import FiltersPanel from './FiltersPanel';
 import '../editor.css';
 
 /**
@@ -13,14 +14,16 @@ import '../editor.css';
  *
  * Phase 7C-2: Crop controls implemented
  * Phase 8B-4: Rotate & Flip controls implemented
+ * Phase 8B-5: Filters presets implemented
  * Future phases will add:
  * - 7C-3: Adjust sliders
- * - 7C-5: Filter presets
+ * - 8C: Real filter rendering
  *
  * @param {string} activeTool - Current active tool ("adjust", "crop", "rotate", "filters", or "none")
  * @param {React.RefObject} viewportRef - Reference to EditorViewport (Phase 8B-4)
+ * @param {Object} photo - Photo object for filter thumbnails (Phase 8B-5)
  */
-const PanelShell = ({ activeTool, viewportRef }) => {
+const PanelShell = ({ activeTool, viewportRef, photo }) => {
   const { t } = useTranslation();
   const { zoom, transform, setZoom, resetZoomPan, applyTransform } = useEditorStore();
 
@@ -153,12 +156,7 @@ const PanelShell = ({ activeTool, viewportRef }) => {
         return <RotatePanel viewportRef={viewportRef} />;
 
       case 'filters':
-        return (
-          <div className="text-center">
-            <h3 className="text-lg font-bold text-white mb-2">Filters</h3>
-            <p className="text-sm text-white/60">Filter presets will appear here in Phase 7C-5</p>
-          </div>
-        );
+        return <FiltersPanel viewportRef={viewportRef} photo={photo} />;
 
       default:
         return null;

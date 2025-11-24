@@ -227,8 +227,8 @@ const EditorPage = () => {
         </div>
       </div>
 
-      {/* Panel Shell - Slides up when tool is active (Phase 8B-4: viewportRef) */}
-      <PanelShell activeTool={activeTool} viewportRef={viewportRef} />
+      {/* Panel Shell - Slides up when tool is active (Phase 8B-5: photo prop) */}
+      <PanelShell activeTool={activeTool} viewportRef={viewportRef} photo={originalPhoto} />
     </div>
   );
 };
