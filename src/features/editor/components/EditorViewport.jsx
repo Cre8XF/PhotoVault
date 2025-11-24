@@ -103,19 +103,12 @@ export const EditorViewport = forwardRef(({ photo, hasActivePanel, children }, r
 
   return (
     <div className="editor-viewport-shell">
-      <div
-        ref={containerRef}
-        className={
-          hasActivePanel
-            ? 'editor-viewport-inner editor-viewport-inner--with-panel'
-            : 'editor-viewport-inner'
-        }
-      >
+      <div ref={containerRef} className="editor-viewport-inner">
         <canvas
           ref={canvasRef}
           className="editor-viewport-canvas"
         />
-        {children /* CropOverlay will be added in Phase 8C */}
+        {children /* CropOverlay renders here - Phase 8C-5 HOTFIX: No padding transition */}
       </div>
     </div>
   );
