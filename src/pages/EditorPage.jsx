@@ -59,6 +59,27 @@ const EditorPage = () => {
   // INITIALIZATION - World Pattern
   // ============================================================================
 
+  // ============================================================================
+  // SCROLL LOCK (Phase 8C-5: Critical Overlay Isolation)
+  // ============================================================================
+
+  useEffect(() => {
+    // Lock background scroll when editor is mounted
+    const previousOverflow = document.body.style.overflow;
+    const previousPosition = document.body.style.position;
+
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+
+    return () => {
+      // Restore previous scroll behavior
+      document.body.style.overflow = previousOverflow;
+      document.body.style.position = previousPosition;
+      document.body.style.width = '';
+    };
+  }, []);
+
   useEffect(() => {
     // Set isWorldView = true (masterplan requirement)
     setIsWorldView(true);

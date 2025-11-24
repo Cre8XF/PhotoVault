@@ -92,12 +92,17 @@ const CropOverlay = ({
 
   /**
    * Handle pointer down (start drag)
+   * Phase 8C-5: Don't call preventDefault here to avoid passive event warning
+   * preventDefault is handled in the global touchmove listener with passive: false
    */
   const handlePointerDown = useCallback(
     (e, handle) => {
       if (!cropRect) return;
 
-      e.preventDefault();
+      // Only preventDefault for mouse events (not touch to avoid passive warning)
+      if (e.type === 'mousedown') {
+        e.preventDefault();
+      }
       e.stopPropagation();
 
       const point = e.touches ? e.touches[0] : e;
