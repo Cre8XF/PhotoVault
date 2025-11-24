@@ -178,14 +178,34 @@ const useEditorStore = create((set, get) => ({
   },
 
   /**
-   * Set crop box
+   * Set crop box (Phase 8C-2: normalized coordinates)
+   * @param {Object} cropRect - Normalized crop rect { x1, y1, x2, y2, aspectRatio }
    */
-  setCrop: (cropBox) => {
+  setCrop: (cropRect) => {
     const currentTransform = get().transform;
     set({
-      transform: { ...currentTransform, crop: cropBox },
+      transform: { ...currentTransform, crop: cropRect },
       isDirty: true,
     });
+  },
+
+  /**
+   * Set crop aspect ratio (Phase 8C-2)
+   * @param {number|null} aspectRatio - Aspect ratio or null for free
+   */
+  setCropAspectRatio: (aspectRatio) => {
+    const currentTransform = get().transform;
+    const currentCrop = currentTransform.crop;
+
+    if (currentCrop) {
+      set({
+        transform: {
+          ...currentTransform,
+          crop: { ...currentCrop, aspectRatio },
+        },
+        isDirty: true,
+      });
+    }
   },
 
   /**
