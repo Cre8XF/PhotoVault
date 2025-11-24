@@ -27,11 +27,44 @@ import '../editor.css';
  */
 const PanelShell = ({ activeTool, viewportRef, photo }) => {
   const { t } = useTranslation();
-  const { zoom, transform, setZoom, resetZoomPan, applyTransform } = useEditorStore();
+  const { transform, applyTransform } = useEditorStore();
 
   if (!activeTool || activeTool === 'none') {
     return null;
   }
+
+  // Get current zoom from viewport (Phase 8C-4)
+  const currentZoom = viewportRef?.current?.getZoom() || 1.0;
+  const currentTransform = viewportRef?.current?.getTransform() || { zoom: 1, panX: 0, panY: 0 };
+
+  // Zoom control handlers wired to viewportRef (Phase 8C-4)
+  const handleZoomChange = (newZoom) => {
+    if (viewportRef?.current) {
+      viewportRef.current.setZoom(newZoom);
+    }
+  };
+
+  const handleZoomIn = () => {
+    if (viewportRef?.current) {
+      const current = viewportRef.current.getZoom();
+      const newZoom = Math.min(3, current + 0.1);
+      viewportRef.current.setZoom(newZoom);
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (viewportRef?.current) {
+      const current = viewportRef.current.getZoom();
+      const newZoom = Math.max(0.5, current - 0.1);
+      viewportRef.current.setZoom(newZoom);
+    }
+  };
+
+  const handleResetTransform = () => {
+    if (viewportRef?.current) {
+      viewportRef.current.resetTransform();
+    }
+  };
 
   const renderContent = () => {
     switch (activeTool) {
@@ -40,28 +73,28 @@ const PanelShell = ({ activeTool, viewportRef, photo }) => {
           <div className="space-y-3">
             <h3 className="text-lg font-bold text-white mb-3">{t('editor.crop', 'Crop')}</h3>
 
-            {/* Zoom Controls */}
+            {/* Zoom Controls (Phase 8C-4: wired to viewportRef) */}
             <div>
               <label className="text-sm font-medium mb-2 block text-white">
-                {t('editor.crop.zoom', 'Zoom')} ({(zoom.currentZoom * 100).toFixed(0)}%)
+                {t('editor.crop.zoom', 'Zoom')} ({(currentZoom * 100).toFixed(0)}%)
               </label>
               <input
                 type="range"
                 min={50}
                 max={300}
-                value={zoom.currentZoom * 100}
-                onChange={(e) => setZoom(Number(e.target.value) / 100)}
+                value={currentZoom * 100}
+                onChange={(e) => handleZoomChange(Number(e.target.value) / 100)}
                 className="w-full"
               />
               <div className="flex gap-2 mt-2">
                 <button
-                  onClick={() => setZoom(Math.max(0.5, zoom.currentZoom - 0.1))}
+                  onClick={handleZoomOut}
                   className="flex-1 px-3 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition text-sm text-white"
                 >
                   {t('editor.crop.zoomOut', 'Zoom Out')}
                 </button>
                 <button
-                  onClick={() => setZoom(Math.min(3, zoom.currentZoom + 0.1))}
+                  onClick={handleZoomIn}
                   className="flex-1 px-3 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition text-sm text-white"
                 >
                   {t('editor.crop.zoomIn', 'Zoom In')}
@@ -69,10 +102,10 @@ const PanelShell = ({ activeTool, viewportRef, photo }) => {
               </div>
             </div>
 
-            {/* Reset Zoom */}
+            {/* Reset Zoom (Phase 8C-4: wired to viewportRef) */}
             <button
-              onClick={resetZoomPan}
-              disabled={zoom.currentZoom === 1 && zoom.panX === 0 && zoom.panY === 0}
+              onClick={handleResetTransform}
+              disabled={currentTransform.zoom === 1 && currentTransform.panX === 0 && currentTransform.panY === 0}
               className="w-full px-4 py-2.5 bg-purple-600 rounded-lg hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium text-sm"
             >
               {t('editor.crop.resetZoom', 'Reset Zoom & Pan')}

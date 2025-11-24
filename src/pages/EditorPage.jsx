@@ -50,6 +50,7 @@ const EditorPage = () => {
   const [loadError, setLoadError] = useState(null);
   const [activeTool, setActiveTool] = useState('none');
   const [viewportDimensions, setViewportDimensions] = useState(null);
+  const [viewportTransform, setViewportTransform] = useState({ zoom: 1, panX: 0, panY: 0 });
 
   // Viewport ref for zoom/pan controls (Phase 8B-2)
   const viewportRef = useRef(null);
@@ -168,6 +169,30 @@ const EditorPage = () => {
     }
   }, [activeTool]);
 
+  // Sync viewport transform for CropOverlay (Phase 8C-4)
+  useEffect(() => {
+    if (activeTool === 'crop' && viewportRef.current) {
+      const syncTransform = () => {
+        const currentTransform = viewportRef.current.getTransform();
+        if (currentTransform) {
+          setViewportTransform({
+            zoom: currentTransform.zoom,
+            panX: currentTransform.panX,
+            panY: currentTransform.panY,
+          });
+        }
+      };
+
+      // Sync immediately
+      syncTransform();
+
+      // Poll for transform changes (simple approach for Phase 8C-4)
+      const interval = setInterval(syncTransform, 100);
+
+      return () => clearInterval(interval);
+    }
+  }, [activeTool]);
+
   // ============================================================================
   // TOOLBAR CONFIGURATION
   // ============================================================================
@@ -238,13 +263,13 @@ const EditorPage = () => {
         </div>
       </div>
 
-      {/* Viewport Shell - Phase 8C-3: Canvas with Crop Support */}
+      {/* Viewport Shell - Phase 8C-4: Canvas with Crop Support */}
       <EditorViewport
         ref={viewportRef}
         photo={originalPhoto}
         hasActivePanel={activeTool !== 'none'}
       >
-        {/* CropOverlay - Phase 8C-3 */}
+        {/* CropOverlay - Phase 8C-4: synced with viewport transform */}
         {activeTool === 'crop' && transform.crop && viewportDimensions && (
           <CropOverlay
             cropRect={transform.crop}
@@ -254,7 +279,7 @@ const EditorPage = () => {
             canvasHeight={viewportDimensions.canvasHeight}
             imageWidth={viewportDimensions.imageWidth}
             imageHeight={viewportDimensions.imageHeight}
-            transform={viewportRef.current?.getTransform() || { zoom: 1, panX: 0, panY: 0 }}
+            transform={viewportTransform}
           />
         )}
       </EditorViewport>
