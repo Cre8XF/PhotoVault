@@ -14,6 +14,20 @@ import PanelShell from '../features/editor/panels/PanelShell';
 import '../features/editor/editor.css';
 
 /**
+ * Create centered default crop rect (80% of image, centered)
+ */
+const createCenteredCrop = () => {
+  const margin = 0.1; // 10% margin on each side
+  return {
+    x1: margin,
+    y1: margin,
+    x2: 1 - margin,
+    y2: 1 - margin,
+    aspectRatio: null,
+  };
+};
+
+/**
  * EditorPage - Photo Editor World (Phase 8A)
  *
  * Architecture follows World Masterplan:
@@ -129,10 +143,10 @@ const EditorPage = () => {
 
       // Initialize default crop when crop tool is activated (Phase 8C-3)
       if (newTool === 'crop' && !transform.crop) {
-        const { createDefaultCropRect } = require('../features/editor/utils/cropTransformBridge');
-        const defaultCrop = createDefaultCropRect();
+        const centeredCrop = createCenteredCrop();
         const { applyTransform } = useEditorStore.getState();
-        applyTransform('crop', defaultCrop);
+        applyTransform('crop', centeredCrop);
+        console.log('🎯 Initialized centered crop:', centeredCrop);
       }
     },
     [activeTool, transform.crop, isCropApplied]
