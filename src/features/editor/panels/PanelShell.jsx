@@ -1,24 +1,26 @@
 // ============================================================================
-// COMPONENT: PanelShell.jsx - Editor Panel Container (Phase 7C-2)
+// COMPONENT: PanelShell.jsx - Editor Panel Container (Phase 8B-4)
 // ============================================================================
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import useEditorStore from '../editorStore';
+import RotatePanel from './RotatePanel';
 import '../editor.css';
 
 /**
  * PanelShell - Bottom-sheet panel for editor tools
  *
  * Phase 7C-2: Crop controls implemented
+ * Phase 8B-4: Rotate & Flip controls implemented
  * Future phases will add:
  * - 7C-3: Adjust sliders
- * - 7C-4: Rotate buttons
  * - 7C-5: Filter presets
  *
  * @param {string} activeTool - Current active tool ("adjust", "crop", "rotate", "filters", or "none")
+ * @param {React.RefObject} viewportRef - Reference to EditorViewport (Phase 8B-4)
  */
-const PanelShell = ({ activeTool }) => {
+const PanelShell = ({ activeTool, viewportRef }) => {
   const { t } = useTranslation();
   const { zoom, transform, setZoom, resetZoomPan, applyTransform } = useEditorStore();
 
@@ -148,12 +150,7 @@ const PanelShell = ({ activeTool }) => {
         );
 
       case 'rotate':
-        return (
-          <div className="text-center">
-            <h3 className="text-lg font-bold text-white mb-2">Rotate</h3>
-            <p className="text-sm text-white/60">Rotate controls will appear here in Phase 7C-4</p>
-          </div>
-        );
+        return <RotatePanel viewportRef={viewportRef} />;
 
       case 'filters':
         return (
