@@ -41,19 +41,25 @@ const CropOverlay = ({
   imageHeight,
   transform,
 }) => {
+  // ============================================================================
+  // STATE & REFS (must be at top level, before any early returns)
+  // ============================================================================
   const [isDragging, setIsDragging] = useState(false);
   const [dragHandle, setDragHandle] = useState(null); // 'tl', 'tr', 'bl', 'br', 'edge-t', etc., or 'move'
   const dragStartRef = useRef({ screenX: 0, screenY: 0, cropRect: null });
 
-  // Don't render if no crop rect or missing dimensions
-  if (!cropRect || !canvasWidth || !canvasHeight || !imageWidth || !imageHeight) {
-    return null;
-  }
+  // ============================================================================
+  // CALLBACKS (must be at top level, before any early returns)
+  // ============================================================================
 
   /**
    * Convert crop rect to screen coordinates for rendering
    */
   const getScreenRect = useCallback(() => {
+    if (!cropRect || !canvasWidth || !canvasHeight || !imageWidth || !imageHeight) {
+      return { x1: 0, y1: 0, x2: 0, y2: 0, width: 0, height: 0 };
+    }
+
     const topLeft = imageToScreenCoords(
       cropRect.x1,
       cropRect.y1,
@@ -84,13 +90,13 @@ const CropOverlay = ({
     };
   }, [cropRect, transform, canvasWidth, canvasHeight, imageWidth, imageHeight]);
 
-  const screenRect = getScreenRect();
-
   /**
    * Handle pointer down (start drag)
    */
   const handlePointerDown = useCallback(
     (e, handle) => {
+      if (!cropRect) return;
+
       e.preventDefault();
       e.stopPropagation();
 
@@ -113,7 +119,7 @@ const CropOverlay = ({
    */
   const handlePointerMove = useCallback(
     (e) => {
-      if (!isDragging || !dragHandle) return;
+      if (!isDragging || !dragHandle || !cropRect) return;
 
       const point = e.touches ? e.touches[0] : e;
       const currentScreenX = point.clientX;
@@ -218,23 +224,41 @@ const CropOverlay = ({
     setDragHandle(null);
   }, []);
 
+  // ============================================================================
+  // EFFECTS (must be at top level, before any early returns)
+  // ============================================================================
+
   // Add global listeners when dragging
   useEffect(() => {
-    if (isDragging) {
-      window.addEventListener('mousemove', handlePointerMove);
-      window.addEventListener('touchmove', handlePointerMove, { passive: false });
-      window.addEventListener('mouseup', handlePointerUp);
-      window.addEventListener('touchend', handlePointerUp);
+    if (!isDragging) return;
 
-      return () => {
-        window.removeEventListener('mousemove', handlePointerMove);
-        window.removeEventListener('touchmove', handlePointerMove);
-        window.removeEventListener('mouseup', handlePointerUp);
-        window.removeEventListener('touchend', handlePointerUp);
-      };
-    }
+    window.addEventListener('mousemove', handlePointerMove);
+    window.addEventListener('touchmove', handlePointerMove, { passive: false });
+    window.addEventListener('mouseup', handlePointerUp);
+    window.addEventListener('touchend', handlePointerUp);
+
+    return () => {
+      window.removeEventListener('mousemove', handlePointerMove);
+      window.removeEventListener('touchmove', handlePointerMove);
+      window.removeEventListener('mouseup', handlePointerUp);
+      window.removeEventListener('touchend', handlePointerUp);
+    };
   }, [isDragging, handlePointerMove, handlePointerUp]);
 
+  // ============================================================================
+  // EARLY RETURN CHECK (after all hooks)
+  // ============================================================================
+
+  // Don't render if no crop rect or missing dimensions
+  if (!cropRect || !canvasWidth || !canvasHeight || !imageWidth || !imageHeight) {
+    return null;
+  }
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
+
+  const screenRect = getScreenRect();
   const handleSize = 12;
   const handleHitArea = 24; // Larger touch target
 

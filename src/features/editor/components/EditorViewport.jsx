@@ -1,18 +1,19 @@
 /**
- * EditorViewport - Phase 8C-1: Adjust Engine
+ * EditorViewport - Phase 8C-3: Crop Rendering
  *
  * Canvas-based viewport with full transform support.
  * - Canvas rendering with GPU acceleration (Phase 8B-1)
  * - Zoom and pan transforms (Phase 8B-2)
  * - Rotation and flip transforms (Phase 8B-3)
  * - Adjust filters (brightness, contrast, etc.) (Phase 8C-1)
+ * - Crop rendering with high-quality preview (Phase 8C-3)
  * - Mouse wheel zoom
  * - Touch pinch zoom
  * - Drag to pan (when zoomed)
  * - Responds to panel state (shrinks when panel opens)
  * - Google Photos behavior: entire image always visible
  *
- * Phase 8C-1: Adjust engine with real-time sliders
+ * Phase 8C-3: Crop rendering engine with applyCrop API
  */
 
 import React, { forwardRef, useImperativeHandle } from 'react';
@@ -41,10 +42,14 @@ export const EditorViewport = forwardRef(({ photo, hasActivePanel, children }, r
     setAdjustValue,
     resetAdjustValues,
     getAdjustState,
+    applyCrop,
+    clearCrop,
+    getAppliedCrop,
+    getImageSize,
     render,
   } = useCanvasRenderer(photo);
 
-  // Expose imperative API to parent (Phase 8C-2)
+  // Expose imperative API to parent (Phase 8C-3)
   useImperativeHandle(ref, () => ({
     // Transform controls
     setZoom: (zoom) => setZoom(zoom),
@@ -64,6 +69,12 @@ export const EditorViewport = forwardRef(({ photo, hasActivePanel, children }, r
     resetAdjustValues,
     getAdjustState,
 
+    // Crop controls (Phase 8C-3)
+    applyCrop,
+    clearCrop,
+    getAppliedCrop,
+    getImageSize,
+
     // Get current state
     getTransform: () => transform,
     getZoom: () => transform.zoom,
@@ -78,7 +89,7 @@ export const EditorViewport = forwardRef(({ photo, hasActivePanel, children }, r
 
     // Manual render (if needed)
     render,
-  }), [transform, setZoom, setPan, resetTransform, rotateClockwise, rotateCounterClockwise, flipHorizontal, flipVertical, setAdjustValue, resetAdjustValues, getAdjustState, canvasRef, containerRef, render]);
+  }), [transform, setZoom, setPan, resetTransform, rotateClockwise, rotateCounterClockwise, flipHorizontal, flipVertical, setAdjustValue, resetAdjustValues, getAdjustState, applyCrop, clearCrop, getAppliedCrop, getImageSize, canvasRef, containerRef, render]);
 
   if (!photo) {
     return (

@@ -281,3 +281,56 @@ export const getCropHandleAtPoint = (x, y, rect, threshold = 20) => {
 
   return null;
 };
+
+// ============================================================================
+// CROP RENDERING (Phase 8C-3)
+// ============================================================================
+
+/**
+ * Get effective crop box in image pixel coordinates
+ * Converts normalized crop rect (0-1) to pixel coordinates clamped to image bounds
+ *
+ * @param {Object} cropRect - Normalized crop rect { x1, y1, x2, y2 } in 0-1 space
+ * @param {Object} imageSize - Image dimensions { width, height } in pixels
+ * @returns {Object} Crop box { x, y, width, height } in pixels, or null if invalid
+ */
+export const getEffectiveCropBox = (cropRect, imageSize) => {
+  if (!cropRect || !imageSize) return null;
+
+  const { x1, y1, x2, y2 } = cropRect;
+  const { width, height } = imageSize;
+
+  // Normalize to ensure x1 < x2, y1 < y2
+  const normX1 = Math.min(x1, x2);
+  const normX2 = Math.max(x1, x2);
+  const normY1 = Math.min(y1, y2);
+  const normY2 = Math.max(y1, y2);
+
+  // Convert to pixel coordinates
+  const pixelX1 = normX1 * width;
+  const pixelY1 = normY1 * height;
+  const pixelX2 = normX2 * width;
+  const pixelY2 = normY2 * height;
+
+  // Clamp to image bounds
+  const clampedX1 = Math.max(0, Math.min(width, pixelX1));
+  const clampedY1 = Math.max(0, Math.min(height, pixelY1));
+  const clampedX2 = Math.max(0, Math.min(width, pixelX2));
+  const clampedY2 = Math.max(0, Math.min(height, pixelY2));
+
+  // Calculate final dimensions
+  const cropWidth = clampedX2 - clampedX1;
+  const cropHeight = clampedY2 - clampedY1;
+
+  // Return null if crop area is too small (< 1px)
+  if (cropWidth < 1 || cropHeight < 1) {
+    return null;
+  }
+
+  return {
+    x: Math.round(clampedX1),
+    y: Math.round(clampedY1),
+    width: Math.round(cropWidth),
+    height: Math.round(cropHeight),
+  };
+};

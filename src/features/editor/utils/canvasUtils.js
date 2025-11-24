@@ -269,3 +269,59 @@ export const initCanvasContext = (canvas) => {
 
   return ctx;
 };
+
+/**
+ * Draw cropped image to canvas (Phase 8C-3)
+ * Renders only the selected crop region, centered and scaled to fit canvas
+ * No transforms applied - this represents the final cropped result
+ *
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {HTMLImageElement} image - Source image
+ * @param {number} canvasWidth - Canvas display width
+ * @param {number} canvasHeight - Canvas display height
+ * @param {Object} cropBox - Crop box in image pixels { x, y, width, height }
+ * @param {Object} adjust - Optional adjust filters
+ */
+export const drawCroppedImageToCanvas = (ctx, image, canvasWidth, canvasHeight, cropBox, adjust = null) => {
+  if (!cropBox || cropBox.width < 1 || cropBox.height < 1) {
+    console.warn('Invalid crop box:', cropBox);
+    return;
+  }
+
+  const { x, y, width, height } = cropBox;
+
+  // Clear canvas
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+  // Calculate scale to fit cropped region in canvas
+  const fitScale = calculateFitScale(width, height, canvasWidth, canvasHeight);
+
+  // Calculate scaled dimensions
+  const scaledWidth = width * fitScale;
+  const scaledHeight = height * fitScale;
+
+  // Calculate position to center cropped image
+  const destX = (canvasWidth - scaledWidth) / 2;
+  const destY = (canvasHeight - scaledHeight) / 2;
+
+  // Enable smooth rendering
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
+  // Apply adjust filters if provided
+  if (adjust) {
+    const filterString = buildCanvasAdjustString(adjust);
+    ctx.filter = filterString;
+  }
+
+  // Draw only the cropped portion of the image
+  // ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+  ctx.drawImage(
+    image,
+    x, y, width, height,              // Source rectangle (crop region)
+    destX, destY, scaledWidth, scaledHeight  // Destination rectangle (centered)
+  );
+
+  // Reset filter
+  ctx.filter = 'none';
+};
