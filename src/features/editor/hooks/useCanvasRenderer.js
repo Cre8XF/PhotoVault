@@ -1,5 +1,5 @@
 /**
- * useCanvasRenderer - Phase 8B-3
+ * useCanvasRenderer - Phase 8C-3
  *
  * React hook for canvas rendering with full transform support
  * - Auto-sizes canvas to container
@@ -8,6 +8,7 @@
  * - Image loading and rendering
  * - Zoom, pan, rotation, and flip transforms
  * - Mouse wheel, touch pinch, and drag support
+ * - Crop mode with high-quality rendering (Phase 8C-3)
  */
 
 import { useEffect, useRef, useCallback, useState } from 'react';
@@ -15,6 +16,7 @@ import {
   setCanvasSize,
   loadImage,
   drawImageWithFullTransform,
+  drawCroppedImageToCanvas,
   initCanvasContext,
   calculateFitScale,
 } from '../utils/canvasUtils';
@@ -28,6 +30,7 @@ import {
   getTouchMidpoint,
   normalizeRotation,
 } from '../utils/transformUtils';
+import { getEffectiveCropBox } from '../utils/cropTransformBridge';
 
 /**
  * useCanvasRenderer Hook
@@ -44,6 +47,9 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
 
   // Transform state
   const [transform, setTransform] = useState(createInitialTransform());
+
+  // Crop state (Phase 8C-3)
+  const [appliedCropBox, setAppliedCropBox] = useState(null);
 
   // Gesture state
   const isDraggingRef = useRef(false);
@@ -76,7 +82,8 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
   }, []);
 
   /**
-   * Render current image to canvas with transforms (Phase 8B-3)
+   * Render current image to canvas with transforms (Phase 8C-3)
+   * Uses crop mode if appliedCropBox is set
    */
   const render = useCallback(() => {
     const canvas = canvasRef.current;
@@ -94,9 +101,14 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
     // Use external transform if provided, otherwise use internal
     const activeTransform = externalTransform || transform;
 
-    // Draw image with full transforms (zoom, pan, rotation, flip)
-    drawImageWithFullTransform(ctx, image, width, height, activeTransform);
-  }, [transform, externalTransform]);
+    // Crop mode (Phase 8C-3): render only cropped portion
+    if (appliedCropBox) {
+      drawCroppedImageToCanvas(ctx, image, width, height, appliedCropBox, activeTransform.adjust);
+    } else {
+      // Normal mode: draw image with full transforms (zoom, pan, rotation, flip)
+      drawImageWithFullTransform(ctx, image, width, height, activeTransform);
+    }
+  }, [transform, externalTransform, appliedCropBox]);
 
   /**
    * Set zoom level with pan clamping (Phase 8B-3: rotation-aware)
@@ -277,6 +289,76 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
   const getAdjustState = useCallback(() => {
     return transform.adjust;
   }, [transform.adjust]);
+
+  /**
+   * Apply crop (Phase 8C-3)
+   * Converts normalized crop rect to pixel coordinates and switches to crop mode
+   * Resets transform to zoom=1, pan=0 for clean crop view
+   *
+   * @param {Object} cropRect - Normalized crop rect { x1, y1, x2, y2 } in 0-1 space
+   */
+  const applyCrop = useCallback((cropRect) => {
+    const image = imageRef.current;
+    if (!image) {
+      console.warn('Cannot apply crop: no image loaded');
+      return;
+    }
+
+    // Convert normalized crop rect to pixel coordinates
+    const cropBox = getEffectiveCropBox(cropRect, {
+      width: image.naturalWidth,
+      height: image.naturalHeight,
+    });
+
+    if (!cropBox) {
+      console.warn('Invalid crop rect:', cropRect);
+      return;
+    }
+
+    console.log('🔷 Applying crop:', cropBox);
+
+    // Set crop box
+    setAppliedCropBox(cropBox);
+
+    // Reset transform to clean state (zoom=1, pan=0)
+    setTransform((prev) => ({
+      ...prev,
+      zoom: 1.0,
+      panX: 0,
+      panY: 0,
+    }));
+  }, []);
+
+  /**
+   * Clear crop (Phase 8C-3)
+   * Returns to normal transform mode
+   */
+  const clearCrop = useCallback(() => {
+    console.log('🔷 Clearing crop');
+    setAppliedCropBox(null);
+  }, []);
+
+  /**
+   * Get current applied crop box (Phase 8C-3)
+   * @returns {Object|null} Crop box in pixels or null
+   */
+  const getAppliedCrop = useCallback(() => {
+    return appliedCropBox;
+  }, [appliedCropBox]);
+
+  /**
+   * Get image size (Phase 8C-3)
+   * @returns {Object|null} { width, height } in natural pixels or null
+   */
+  const getImageSize = useCallback(() => {
+    const image = imageRef.current;
+    if (!image) return null;
+
+    return {
+      width: image.naturalWidth,
+      height: image.naturalHeight,
+    };
+  }, []);
 
   /**
    * Handle mouse wheel zoom
@@ -545,6 +627,10 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
     setAdjustValue,
     resetAdjustValues,
     getAdjustState,
+    applyCrop,
+    clearCrop,
+    getAppliedCrop,
+    getImageSize,
     render,
   };
 };

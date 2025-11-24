@@ -9,6 +9,7 @@ import { ArrowLeft, Save, AlertCircle, Loader, Sliders, Crop as CropIcon, Rotate
 import useStore from '../state/store';
 import useEditorStore from '../features/editor/editorStore';
 import { EditorViewport } from '../features/editor/components/EditorViewport';
+import CropOverlay from '../features/editor/components/CropOverlay';
 import PanelShell from '../features/editor/panels/PanelShell';
 import '../features/editor/editor.css';
 
@@ -48,6 +49,7 @@ const EditorPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [activeTool, setActiveTool] = useState('none');
+  const [viewportDimensions, setViewportDimensions] = useState(null);
 
   // Viewport ref for zoom/pan controls (Phase 8B-2)
   const viewportRef = useRef(null);
@@ -92,9 +94,18 @@ const EditorPage = () => {
   const handleToolChange = useCallback(
     (tool) => {
       // Toggle tool: clicking same tool closes it
-      setActiveTool(activeTool === tool ? 'none' : tool);
+      const newTool = activeTool === tool ? 'none' : tool;
+      setActiveTool(newTool);
+
+      // Initialize default crop when crop tool is activated (Phase 8C-3)
+      if (newTool === 'crop' && !transform.crop) {
+        const { createDefaultCropRect } = require('../features/editor/utils/cropTransformBridge');
+        const defaultCrop = createDefaultCropRect();
+        const { applyTransform } = useEditorStore.getState();
+        applyTransform('crop', defaultCrop);
+      }
     },
-    [activeTool]
+    [activeTool, transform.crop]
   );
 
   const handleReset = useCallback(() => {
@@ -112,6 +123,50 @@ const EditorPage = () => {
     // Phase 8A: Save functionality will be implemented in 8B/8C
     console.log('💾 Phase 8A: Save will be implemented in Phase 8B/8C');
   }, []);
+
+  const handleCropChange = useCallback((newCropRect) => {
+    const { applyTransform } = useEditorStore.getState();
+    applyTransform('crop', newCropRect);
+  }, []);
+
+  // Update viewport dimensions when crop tool is active (Phase 8C-3)
+  useEffect(() => {
+    if (activeTool === 'crop' && viewportRef.current) {
+      const updateDimensions = () => {
+        const imageSize = viewportRef.current.getImageSize();
+        const canvas = viewportRef.current.canvasRef?.current;
+        const container = viewportRef.current.containerRef?.current;
+
+        if (imageSize && canvas && container) {
+          const rect = container.getBoundingClientRect();
+
+          // Calculate fitted dimensions (base size at zoom=1)
+          const scaleX = rect.width / imageSize.width;
+          const scaleY = rect.height / imageSize.height;
+          const fitScale = Math.min(scaleX, scaleY);
+
+          const fittedWidth = imageSize.width * fitScale;
+          const fittedHeight = imageSize.height * fitScale;
+
+          setViewportDimensions({
+            canvasWidth: rect.width,
+            canvasHeight: rect.height,
+            imageWidth: fittedWidth,
+            imageHeight: fittedHeight,
+          });
+        }
+      };
+
+      // Update immediately
+      updateDimensions();
+
+      // Update on resize
+      const handleResize = () => updateDimensions();
+      window.addEventListener('resize', handleResize);
+
+      return () => window.removeEventListener('resize', handleResize);
+    }
+  }, [activeTool]);
 
   // ============================================================================
   // TOOLBAR CONFIGURATION
@@ -183,13 +238,25 @@ const EditorPage = () => {
         </div>
       </div>
 
-      {/* Viewport Shell - Phase 8B-2: Canvas with Zoom/Pan */}
+      {/* Viewport Shell - Phase 8C-3: Canvas with Crop Support */}
       <EditorViewport
         ref={viewportRef}
         photo={originalPhoto}
         hasActivePanel={activeTool !== 'none'}
       >
-        {/* TODO Phase 8C: CropOverlay will be added here */}
+        {/* CropOverlay - Phase 8C-3 */}
+        {activeTool === 'crop' && transform.crop && viewportDimensions && (
+          <CropOverlay
+            cropRect={transform.crop}
+            onCropChange={handleCropChange}
+            viewportRef={viewportRef}
+            canvasWidth={viewportDimensions.canvasWidth}
+            canvasHeight={viewportDimensions.canvasHeight}
+            imageWidth={viewportDimensions.imageWidth}
+            imageHeight={viewportDimensions.imageHeight}
+            transform={viewportRef.current?.getTransform() || { zoom: 1, panX: 0, panY: 0 }}
+          />
+        )}
       </EditorViewport>
 
       {/* Fixed Toolbar */}

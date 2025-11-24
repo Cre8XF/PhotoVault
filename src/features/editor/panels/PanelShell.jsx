@@ -139,9 +139,24 @@ const PanelShell = ({ activeTool, viewportRef, photo }) => {
               </div>
             </div>
 
+            {/* Apply Crop Button (Phase 8C-3) */}
+            <button
+              onClick={() => {
+                const cropRect = transform.crop;
+                if (cropRect && viewportRef?.current) {
+                  viewportRef.current.applyCrop(cropRect);
+                  console.log('🔷 Crop applied to canvas');
+                }
+              }}
+              disabled={!transform.crop}
+              className="w-full px-4 py-2.5 bg-green-600 rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium text-sm"
+            >
+              {t('editor.crop.apply', 'Apply Crop')}
+            </button>
+
             {/* Instructions */}
             <p className="text-xs text-white/60 text-center mt-2">
-              {t('editor.crop.instructions', 'Drag handles to adjust crop area. Pinch or scroll to zoom.')}
+              {t('editor.crop.instructions', 'Drag handles to adjust crop area. Pinch or scroll to zoom. Click Apply to render crop.')}
             </p>
           </div>
         );
