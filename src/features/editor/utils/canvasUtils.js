@@ -1,11 +1,14 @@
 /**
- * Canvas Rendering Utilities - Phase 8B-3
+ * Canvas Rendering Utilities - Phase 8C-1
  *
  * Core canvas rendering functions with HiDPI support
  * Phase 8B-1: Basic canvas rendering
  * Phase 8B-2: Zoom and pan transforms
  * Phase 8B-3: Rotation and flip transforms
+ * Phase 8C-1: Adjust filters (brightness, contrast, etc.)
  */
+
+import { buildCanvasAdjustString } from './adjustUtils';
 
 /**
  * Get device pixel ratio for HiDPI displays
@@ -165,19 +168,20 @@ export const drawImageWithTransform = (ctx, image, canvasWidth, canvasHeight, tr
 };
 
 /**
- * Draw image with full transforms (Phase 8B-3)
- * Applies rotation, flip, zoom, and pan transforms using canvas transform matrix
+ * Draw image with full transforms (Phase 8C-1)
+ * Applies rotation, flip, zoom, pan, and adjust filters using canvas transform matrix
  *
  * Transform order: translate (center) → rotate → flip → scale → pan
+ * Filters: Apply adjust filters (brightness, contrast, etc.)
  *
  * @param {CanvasRenderingContext2D} ctx - Canvas context
  * @param {HTMLImageElement} image - Image to draw
  * @param {number} canvasWidth - Canvas display width
  * @param {number} canvasHeight - Canvas display height
- * @param {Object} transform - Transform state { zoom, panX, panY, rotation, flipX, flipY }
+ * @param {Object} transform - Transform state { zoom, panX, panY, rotation, flipX, flipY, adjust }
  */
 export const drawImageWithFullTransform = (ctx, image, canvasWidth, canvasHeight, transform) => {
-  const { zoom = 1, panX = 0, panY = 0, rotation = 0, flipX = false, flipY = false } = transform;
+  const { zoom = 1, panX = 0, panY = 0, rotation = 0, flipX = false, flipY = false, adjust } = transform;
 
   // Clear canvas
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -197,6 +201,12 @@ export const drawImageWithFullTransform = (ctx, image, canvasWidth, canvasHeight
   // Enable smooth rendering
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
+
+  // Apply adjust filters (Phase 8C-1)
+  if (adjust) {
+    const filterString = buildCanvasAdjustString(adjust);
+    ctx.filter = filterString;
+  }
 
   // Save context state
   ctx.save();
