@@ -1,7 +1,10 @@
 /**
- * Canvas Rendering Utilities - Phase 8B-1
+ * Canvas Rendering Utilities - Phase 8B-3
  *
  * Core canvas rendering functions with HiDPI support
+ * Phase 8B-1: Basic canvas rendering
+ * Phase 8B-2: Zoom and pan transforms
+ * Phase 8B-3: Rotation and flip transforms
  */
 
 /**
@@ -159,6 +162,84 @@ export const drawImageWithTransform = (ctx, image, canvasWidth, canvasHeight, tr
     0, 0, image.naturalWidth, image.naturalHeight, // Source rectangle
     x, y, scaledWidth, scaledHeight                // Destination rectangle
   );
+};
+
+/**
+ * Draw image with full transforms (Phase 8B-3)
+ * Applies rotation, flip, zoom, and pan transforms using canvas transform matrix
+ *
+ * Transform order: translate (center) → rotate → flip → scale → pan
+ *
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {HTMLImageElement} image - Image to draw
+ * @param {number} canvasWidth - Canvas display width
+ * @param {number} canvasHeight - Canvas display height
+ * @param {Object} transform - Transform state { zoom, panX, panY, rotation, flipX, flipY }
+ */
+export const drawImageWithFullTransform = (ctx, image, canvasWidth, canvasHeight, transform) => {
+  const { zoom = 1, panX = 0, panY = 0, rotation = 0, flipX = false, flipY = false } = transform;
+
+  // Clear canvas
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+  // Calculate base scale to fit image in canvas
+  const fitScale = calculateFitScale(
+    image.naturalWidth,
+    image.naturalHeight,
+    canvasWidth,
+    canvasHeight
+  );
+
+  // Calculate scaled dimensions at zoom level 1
+  const baseWidth = image.naturalWidth * fitScale;
+  const baseHeight = image.naturalHeight * fitScale;
+
+  // Enable smooth rendering
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
+  // Save context state
+  ctx.save();
+
+  // 1. Translate to canvas center
+  const centerX = canvasWidth / 2;
+  const centerY = canvasHeight / 2;
+  ctx.translate(centerX, centerY);
+
+  // 2. Apply rotation around center
+  if (rotation !== 0) {
+    const rotationRadians = (rotation * Math.PI) / 180;
+    ctx.rotate(rotationRadians);
+  }
+
+  // 3. Apply flip (scale by -1 flips the axis)
+  const scaleX = flipX ? -1 : 1;
+  const scaleY = flipY ? -1 : 1;
+  if (flipX || flipY) {
+    ctx.scale(scaleX, scaleY);
+  }
+
+  // 4. Apply zoom
+  if (zoom !== 1) {
+    ctx.scale(zoom, zoom);
+  }
+
+  // 5. Apply pan offset
+  if (panX !== 0 || panY !== 0) {
+    ctx.translate(panX, panY);
+  }
+
+  // 6. Draw image centered at origin
+  // After all transforms, the origin is where we want the center of the image
+  ctx.drawImage(
+    image,
+    0, 0, image.naturalWidth, image.naturalHeight,  // Source rectangle
+    -baseWidth / 2, -baseHeight / 2,                 // Destination position (centered)
+    baseWidth, baseHeight                            // Destination size
+  );
+
+  // Restore context state
+  ctx.restore();
 };
 
 /**
