@@ -1,17 +1,18 @@
 /**
- * EditorViewport - Phase 8B-3: Full Transform Engine
+ * EditorViewport - Phase 8C-1: Adjust Engine
  *
  * Canvas-based viewport with full transform support.
  * - Canvas rendering with GPU acceleration (Phase 8B-1)
  * - Zoom and pan transforms (Phase 8B-2)
  * - Rotation and flip transforms (Phase 8B-3)
+ * - Adjust filters (brightness, contrast, etc.) (Phase 8C-1)
  * - Mouse wheel zoom
  * - Touch pinch zoom
  * - Drag to pan (when zoomed)
  * - Responds to panel state (shrinks when panel opens)
  * - Google Photos behavior: entire image always visible
  *
- * Phase 8B-3: Rotation + Flip engine
+ * Phase 8C-1: Adjust engine with real-time sliders
  */
 
 import React, { forwardRef, useImperativeHandle } from 'react';
@@ -37,10 +38,13 @@ export const EditorViewport = forwardRef(({ photo, hasActivePanel, children }, r
     rotateCounterClockwise,
     flipHorizontal,
     flipVertical,
+    setAdjustValue,
+    resetAdjustValues,
+    getAdjustState,
     render,
   } = useCanvasRenderer(photo);
 
-  // Expose imperative API to parent (Phase 8B-3)
+  // Expose imperative API to parent (Phase 8C-1)
   useImperativeHandle(ref, () => ({
     // Transform controls
     setZoom: (zoom) => setZoom(zoom),
@@ -55,16 +59,22 @@ export const EditorViewport = forwardRef(({ photo, hasActivePanel, children }, r
     flipHorizontal,
     flipVertical,
 
+    // Adjust controls (Phase 8C-1)
+    setAdjustValue,
+    resetAdjustValues,
+    getAdjustState,
+
     // Get current state
     getTransform: () => transform,
     getZoom: () => transform.zoom,
     getPan: () => ({ panX: transform.panX, panY: transform.panY }),
     getRotation: () => transform.rotation,
     getFlip: () => ({ flipX: transform.flipX, flipY: transform.flipY }),
+    getAdjust: () => transform.adjust,
 
     // Manual render (if needed)
     render,
-  }), [transform, setZoom, setPan, resetTransform, rotateClockwise, rotateCounterClockwise, flipHorizontal, flipVertical, render]);
+  }), [transform, setZoom, setPan, resetTransform, rotateClockwise, rotateCounterClockwise, flipHorizontal, flipVertical, setAdjustValue, resetAdjustValues, getAdjustState, render]);
 
   if (!photo) {
     return (

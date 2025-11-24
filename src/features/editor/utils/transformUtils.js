@@ -182,7 +182,7 @@ export const getTouchMidpoint = (touch1, touch2) => {
 };
 
 /**
- * Create initial transform state (Phase 8B-3)
+ * Create initial transform state (Phase 8C-1)
  */
 export const createInitialTransform = () => ({
   zoom: 1.0,
@@ -193,6 +193,17 @@ export const createInitialTransform = () => ({
   flipY: false,     // Vertical flip
   minZoom: 0.5,
   maxZoom: 4.0,
+  adjust: {         // Phase 8C-1: Adjust sliders
+    brightness: 0,
+    contrast: 0,
+    saturation: 0,
+    warmth: 0,
+    highlights: 0,
+    shadows: 0,
+    clarity: 0,
+    blur: 0,
+    vignette: 0,
+  },
 });
 
 /**

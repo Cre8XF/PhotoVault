@@ -237,6 +237,48 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
   }, []);
 
   /**
+   * Set individual adjust value (Phase 8C-1)
+   * @param {string} key - Adjust key (brightness, contrast, etc.)
+   * @param {number} value - Adjust value
+   */
+  const setAdjustValue = useCallback((key, value) => {
+    setTransform((prev) => ({
+      ...prev,
+      adjust: {
+        ...prev.adjust,
+        [key]: value,
+      },
+    }));
+  }, []);
+
+  /**
+   * Reset all adjust values to defaults (Phase 8C-1)
+   */
+  const resetAdjustValues = useCallback(() => {
+    setTransform((prev) => ({
+      ...prev,
+      adjust: {
+        brightness: 0,
+        contrast: 0,
+        saturation: 0,
+        warmth: 0,
+        highlights: 0,
+        shadows: 0,
+        clarity: 0,
+        blur: 0,
+        vignette: 0,
+      },
+    }));
+  }, []);
+
+  /**
+   * Get current adjust state (Phase 8C-1)
+   */
+  const getAdjustState = useCallback(() => {
+    return transform.adjust;
+  }, [transform.adjust]);
+
+  /**
    * Handle mouse wheel zoom
    */
   const handleWheel = useCallback(
@@ -500,6 +542,9 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
     rotateCounterClockwise,
     flipHorizontal,
     flipVertical,
+    setAdjustValue,
+    resetAdjustValues,
+    getAdjustState,
     render,
   };
 };

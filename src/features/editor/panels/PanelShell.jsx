@@ -1,10 +1,11 @@
 // ============================================================================
-// COMPONENT: PanelShell.jsx - Editor Panel Container (Phase 8B-5)
+// COMPONENT: PanelShell.jsx - Editor Panel Container (Phase 8C-1)
 // ============================================================================
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import useEditorStore from '../editorStore';
+import AdjustPanel from './AdjustPanel';
 import RotatePanel from './RotatePanel';
 import FiltersPanel from './FiltersPanel';
 import '../editor.css';
@@ -15,12 +16,13 @@ import '../editor.css';
  * Phase 7C-2: Crop controls implemented
  * Phase 8B-4: Rotate & Flip controls implemented
  * Phase 8B-5: Filters presets implemented
+ * Phase 8C-1: Adjust sliders implemented
  * Future phases will add:
- * - 7C-3: Adjust sliders
- * - 8C: Real filter rendering
+ * - 8C-2: Real filter rendering
+ * - 8C-3: Crop compute engine
  *
  * @param {string} activeTool - Current active tool ("adjust", "crop", "rotate", "filters", or "none")
- * @param {React.RefObject} viewportRef - Reference to EditorViewport (Phase 8B-4)
+ * @param {React.RefObject} viewportRef - Reference to EditorViewport (Phase 8B-4, 8C-1)
  * @param {Object} photo - Photo object for filter thumbnails (Phase 8B-5)
  */
 const PanelShell = ({ activeTool, viewportRef, photo }) => {
@@ -145,12 +147,7 @@ const PanelShell = ({ activeTool, viewportRef, photo }) => {
         );
 
       case 'adjust':
-        return (
-          <div className="text-center">
-            <h3 className="text-lg font-bold text-white mb-2">Adjust</h3>
-            <p className="text-sm text-white/60">Adjust controls will appear here in Phase 7C-3</p>
-          </div>
-        );
+        return <AdjustPanel viewportRef={viewportRef} />;
 
       case 'rotate':
         return <RotatePanel viewportRef={viewportRef} />;
