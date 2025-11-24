@@ -18,7 +18,7 @@
    ============================================================================ */
 
 /* ============================================================================
-   EDITOR WORLD - Root Container
+   EDITOR WORLD - Root Container (Phase 8C-5: Critical Overlay Isolation)
    ============================================================================ */
 
 .editor-world {
@@ -28,7 +28,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  z-index: 30; /* over normal app */
+  z-index: 9999; /* Phase 8C-5: Above all app elements including bottom nav */
 }
 
 /* ============================================================================
