@@ -65,17 +65,20 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
 
     if (!image || !container) return null;
 
-    const rect = container.getBoundingClientRect();
+    // Use clientWidth/clientHeight for accurate container size
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+
     const fitScale = calculateFitScale(
       image.naturalWidth,
       image.naturalHeight,
-      rect.width,
-      rect.height
+      containerWidth,
+      containerHeight
     );
 
     return {
-      canvasWidth: rect.width,
-      canvasHeight: rect.height,
+      canvasWidth: containerWidth,
+      canvasHeight: containerHeight,
       imageWidth: image.naturalWidth * fitScale,
       imageHeight: image.naturalHeight * fitScale,
     };
@@ -93,10 +96,9 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
     if (!canvas || !container || !image) return;
 
     const ctx = canvas.getContext('2d');
-    const rect = container.getBoundingClientRect();
 
-    // Auto-size canvas to container
-    const { width, height } = setCanvasSize(canvas, rect.width, rect.height);
+    // Auto-size canvas to container (use clientWidth/clientHeight for accuracy)
+    const { width, height } = setCanvasSize(canvas, container.clientWidth, container.clientHeight);
 
     // Use external transform if provided, otherwise use internal
     const activeTransform = externalTransform || transform;

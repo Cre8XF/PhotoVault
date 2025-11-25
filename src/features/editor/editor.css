@@ -51,50 +51,36 @@
 }
 
 /* ============================================================================
-   VIEWPORT SHELL - HOTFIX: Use flex-grow, not nested flex
+   VIEWPORT SHELL - Pure CSS sizing (Phase 1A cleanup)
    ============================================================================ */
 
-/* Viewport shell – fixed positioning with dynamic bottom inset */
+/* Viewport shell – pure CSS sizing */
 .editor-viewport-shell {
   position: fixed;
-  top: 60px;
+  top: 56px;     /* below topbar */
   left: 0;
   right: 0;
-  bottom: 72px;
+  bottom: 0;     /* fill to bottom by default */
   overflow: hidden;
   background: #000;
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1;
-  transition: bottom 0.25s ease;
+  touch-action: none;
 }
 
+/* When panel is active, leave space for it */
 .editor-viewport-shell.has-active-panel {
-  bottom: calc(72px + 280px); /* toolbar + panel */
+  bottom: 150px; /* collapsed panel height */
 }
 
-/* Inner container - SIMPLIFIED: Just a positioned container for canvas */
-.editor-viewport-inner {
-  position: absolute;
-  inset: 0;
-  /* REMOVED: width: 100%, height: 100% - inset: 0 replaces these */
-  /* REMOVED: display: flex, justify-content, align-items */
-  /* REMOVED: transition: padding-bottom */
-  /* Panels now overlay instead of pushing layout */
-}
-
-/* REMOVED: .editor-viewport-inner--with-panel class */
-/* Panels no longer push viewport, they overlay it */
-
-/* Canvas - auto-scales with object-fit */
+/* Canvas - fills entire viewport container */
 .editor-viewport-canvas {
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
-  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
+  display: block;
   user-select: none;
   touch-action: none;
 }
@@ -120,8 +106,8 @@
   left: 0;
   right: 0;
   bottom: 72px; /* Above toolbar */
-  height: 280px; /* INCREASED from 220px for better mobile UX */
-  max-height: 280px; /* Prevent growth */
+  height: 280px;
+  max-height: 280px;
   z-index: 40;
   transform: translateY(100%);
   transition: transform 0.25s ease;
