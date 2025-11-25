@@ -16,8 +16,12 @@
  * Phase 8C-3: Crop rendering engine with applyCrop API
  */
 
-import React, { forwardRef, useImperativeHandle } from 'react';
+import React, { forwardRef, useImperativeHandle, useEffect, useState } from 'react';
 import { useCanvasRenderer } from '../hooks/useCanvasRenderer';
+
+const PANEL_HEIGHT = 280; // Panel height in pixels
+const TOOLBAR_HEIGHT = 72; // Toolbar height in pixels
+const TOPBAR_HEIGHT = 60; // Topbar height in pixels
 
 /**
  * EditorViewport Component
@@ -48,6 +52,23 @@ export const EditorViewport = forwardRef(({ photo, hasActivePanel, children }, r
     getImageSize,
     render,
   } = useCanvasRenderer(photo);
+
+  const [availableHeight, setAvailableHeight] = useState(0);
+
+  // Calculate available height based on panel state
+  useEffect(() => {
+    const calculateHeight = () => {
+      const viewportHeight = window.innerHeight;
+      const usedHeight = TOPBAR_HEIGHT + TOOLBAR_HEIGHT + (hasActivePanel ? PANEL_HEIGHT : 0);
+      const available = viewportHeight - usedHeight;
+      setAvailableHeight(available);
+      console.log('📐 Available height:', available, '(Panel:', hasActivePanel ? 'open' : 'closed', ')');
+    };
+
+    calculateHeight();
+    window.addEventListener('resize', calculateHeight);
+    return () => window.removeEventListener('resize', calculateHeight);
+  }, [hasActivePanel]);
 
   // Expose imperative API to parent (Phase 8C-3)
   useImperativeHandle(ref, () => ({
@@ -102,7 +123,13 @@ export const EditorViewport = forwardRef(({ photo, hasActivePanel, children }, r
   }
 
   return (
-    <div className="editor-viewport-shell">
+    <div
+      className="editor-viewport-shell"
+      style={{
+        height: availableHeight > 0 ? `${availableHeight}px` : 'auto',
+        transition: 'height 0.25s ease',
+      }}
+    >
       <div ref={containerRef} className="editor-viewport-inner">
         <canvas
           ref={canvasRef}
