@@ -322,6 +322,13 @@
   white-space: nowrap;
 }
 
+/* Active filter styling (Phase 1A) */
+.filter-item.active {
+  outline: 3px solid #a855f7;
+  outline-offset: -3px;
+  border-radius: 14px;
+}
+
 /* Mobile optimization */
 @media (max-width: 768px) {
   .filters-row {

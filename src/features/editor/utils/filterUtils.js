@@ -5,6 +5,34 @@
  */
 
 /**
+ * Get CSS filter string for named filter (Phase 1A)
+ * @param {string} name - Filter name ('original', 'bright', 'warm', 'cool', 'vintage', 'bw', 'fade', 'mono')
+ * @returns {string} CSS filter string
+ */
+export const getCssFilter = (name) => {
+  switch (name) {
+    case 'original':
+      return 'none';
+    case 'bright':
+      return 'brightness(1.2) contrast(1.05)';
+    case 'warm':
+      return 'brightness(1.05) sepia(0.3) saturate(1.2)';
+    case 'cool':
+      return 'brightness(0.95) saturate(1.3) hue-rotate(10deg)';
+    case 'fade':
+      return 'contrast(0.85) brightness(1.1) saturate(0.8)';
+    case 'mono':
+      return 'grayscale(1) contrast(1.1)';
+    case 'vintage':
+      return 'sepia(0.4) contrast(0.9) brightness(0.95)';
+    case 'bw':
+      return 'grayscale(1) contrast(1.1)';
+    default:
+      return 'none';
+  }
+};
+
+/**
  * CSS Filter Presets
  */
 export const FILTERS = {

@@ -6,9 +6,12 @@
  * Phase 8B-2: Zoom and pan transforms
  * Phase 8B-3: Rotation and flip transforms
  * Phase 8C-1: Adjust filters (brightness, contrast, etc.)
+ * Phase 1A: Named filter support
  */
 
 import { buildCanvasAdjustString } from './adjustUtils';
+import { getCssFilter } from './filterUtils';
+import useEditorStore from '../editorStore';
 
 /**
  * Get device pixel ratio for HiDPI displays
@@ -241,10 +244,17 @@ export const drawImageWithFullTransform = (ctx, image, canvasWidth, canvasHeight
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
 
-  // Apply adjust filters (Phase 8C-1) - excluding vignette
+  // Phase 1A: Apply named filter + adjust filters
+  const { filter } = useEditorStore.getState();
+  const namedFilterCss = (filter && filter !== 'original') ? getCssFilter(filter) : '';
+
   if (adjust) {
-    const filterString = buildCanvasAdjustString(adjust);
-    ctx.filter = filterString;
+    const adjustString = buildCanvasAdjustString(adjust);
+    // Combine named filter + adjust filters
+    ctx.filter = namedFilterCss ? `${namedFilterCss} ${adjustString}` : adjustString;
+  } else if (namedFilterCss) {
+    // Only named filter, no adjust filters
+    ctx.filter = namedFilterCss;
   }
 
   // Save context state
@@ -356,10 +366,17 @@ export const drawCroppedImageToCanvas = (ctx, image, canvasWidth, canvasHeight, 
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
 
-  // Apply adjust filters if provided (excluding vignette)
+  // Phase 1A: Apply named filter + adjust filters
+  const { filter } = useEditorStore.getState();
+  const namedFilterCss = (filter && filter !== 'original') ? getCssFilter(filter) : '';
+
   if (adjust) {
-    const filterString = buildCanvasAdjustString(adjust);
-    ctx.filter = filterString;
+    const adjustString = buildCanvasAdjustString(adjust);
+    // Combine named filter + adjust filters
+    ctx.filter = namedFilterCss ? `${namedFilterCss} ${adjustString}` : adjustString;
+  } else if (namedFilterCss) {
+    // Only named filter, no adjust filters
+    ctx.filter = namedFilterCss;
   }
 
   // Draw only the cropped portion of the image
