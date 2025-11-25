@@ -47,7 +47,7 @@ export const EditorViewport = forwardRef(({ photo, hasActivePanel, children }, r
     getAppliedCrop,
     getImageSize,
     render,
-  } = useCanvasRenderer(photo, null, hasActivePanel);
+  } = useCanvasRenderer(photo, null);
 
   // Expose imperative API to parent (Phase 8C-3)
   useImperativeHandle(ref, () => ({
