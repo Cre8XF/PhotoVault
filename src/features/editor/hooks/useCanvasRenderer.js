@@ -37,10 +37,9 @@ import { getEffectiveCropBox } from '../utils/cropTransformBridge';
  *
  * @param {Object} photo - Photo object with url
  * @param {Object} externalTransform - External transform state (optional)
- * @param {boolean} hasActivePanel - Whether a panel is open (triggers re-render)
  * @returns {Object} Canvas ref, container ref, transform controls
  */
-export const useCanvasRenderer = (photo, externalTransform = null, hasActivePanel = false) => {
+export const useCanvasRenderer = (photo, externalTransform = null) => {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const imageRef = useRef(null); // Cached loaded image
@@ -649,21 +648,6 @@ export const useCanvasRenderer = (photo, externalTransform = null, hasActivePane
       initCanvasContext(canvasRef.current);
     }
   }, []);
-
-  /**
-   * Re-render canvas when panel state changes (viewport resizes)
-   */
-  useEffect(() => {
-    if (!containerRef.current || !canvasRef.current) return;
-
-    // Wait for CSS transition to complete (250ms + buffer)
-    const timer = setTimeout(() => {
-      render();
-      console.log('Canvas resized - panel:', hasActivePanel ? 'open' : 'closed');
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [hasActivePanel, render]);
 
   return {
     canvasRef,
