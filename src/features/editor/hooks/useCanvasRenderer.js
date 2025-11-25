@@ -97,6 +97,7 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
 
     // Auto-size canvas to container
     const { width, height } = setCanvasSize(canvas, rect.width, rect.height);
+    console.log('🖼️ Canvas sized:', width, 'x', height, '| Container rect:', rect.width, 'x', rect.height);
 
     // Use external transform if provided, otherwise use internal
     const activeTransform = externalTransform || transform;

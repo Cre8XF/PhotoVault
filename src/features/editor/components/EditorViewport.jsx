@@ -72,15 +72,33 @@ export const EditorViewport = forwardRef(({ photo, hasActivePanel, children }, r
 
   // Re-render canvas when viewport height changes (Phase 8C-5 REFACTOR - Fase 1)
   useEffect(() => {
-    if (availableHeight > 0) {
-      // Small delay to allow CSS transition to start
-      const timer = setTimeout(() => {
+    if (availableHeight > 0 && containerRef.current) {
+      const container = containerRef.current;
+
+      // Listen for transition end, then re-render with new dimensions
+      const handleTransitionEnd = () => {
+        const rect = container.getBoundingClientRect();
+        console.log('🎨 Transition complete - Container size:', rect.width, 'x', rect.height);
         render();
-        console.log('🎨 Canvas re-rendered for new viewport height:', availableHeight);
-      }, 50);
-      return () => clearTimeout(timer);
+      };
+
+      // Also render immediately in case there's no transition
+      const timer = requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const rect = container.getBoundingClientRect();
+          console.log('🎨 Canvas re-render - Container size:', rect.width, 'x', rect.height);
+          render();
+        });
+      });
+
+      container.addEventListener('transitionend', handleTransitionEnd);
+
+      return () => {
+        container.removeEventListener('transitionend', handleTransitionEnd);
+        cancelAnimationFrame(timer);
+      };
     }
-  }, [availableHeight, render]);
+  }, [availableHeight, render, containerRef]);
 
   // Expose imperative API to parent (Phase 8C-3)
   useImperativeHandle(ref, () => ({
