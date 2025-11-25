@@ -10,10 +10,11 @@
  * - Mouse wheel zoom
  * - Touch pinch zoom
  * - Drag to pan (when zoomed)
- * - Responds to panel state (shrinks when panel opens)
- * - Google Photos behavior: entire image always visible
+ * - Pure CSS viewport sizing
+ * - No dynamic height calculations
  *
- * Phase 8C-3: Crop rendering engine with applyCrop API
+ * Phase 8C-3: Crop rendering
+ * Phase 1A: Viewport sizing cleanup
  */
 
 import React, { forwardRef, useImperativeHandle } from 'react';
@@ -93,23 +94,25 @@ export const EditorViewport = forwardRef(({ photo, hasActivePanel, children }, r
 
   if (!photo) {
     return (
-      <div className={`editor-viewport-shell ${hasActivePanel ? 'has-active-panel' : ''}`}>
-        <div className="editor-viewport-inner">
-          <p className="text-sm opacity-50 text-white">No photo loaded</p>
-        </div>
+      <div
+        ref={containerRef}
+        className={`editor-viewport-shell ${hasActivePanel ? 'has-active-panel' : ''}`}
+      >
+        <p className="text-sm opacity-50 text-white">No photo loaded</p>
       </div>
     );
   }
 
   return (
-    <div className={`editor-viewport-shell ${hasActivePanel ? 'has-active-panel' : ''}`}>
-      <div ref={containerRef} className="editor-viewport-inner">
-        <canvas
-          ref={canvasRef}
-          className="editor-viewport-canvas"
-        />
-        {children /* CropOverlay renders here */}
-      </div>
+    <div
+      ref={containerRef}
+      className={`editor-viewport-shell ${hasActivePanel ? 'has-active-panel' : ''}`}
+    >
+      <canvas
+        ref={canvasRef}
+        className="editor-viewport-canvas"
+      />
+      {children /* CropOverlay renders here */}
     </div>
   );
 });
