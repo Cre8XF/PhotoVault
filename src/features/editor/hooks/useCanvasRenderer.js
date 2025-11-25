@@ -12,6 +12,8 @@
  */
 
 import { useEffect, useRef, useCallback, useState } from 'react';
+import useEditorStore from '../editorStore';
+
 import {
   setCanvasSize,
   loadImage,
