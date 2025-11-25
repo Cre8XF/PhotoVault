@@ -17,8 +17,8 @@
  * Phase 1A: Viewport sizing cleanup
  */
 
-import React, { forwardRef, useImperativeHandle } from 'react';
-import { useCanvasRenderer } from '../hooks/useCanvasRenderer';
+import React, { forwardRef, useImperativeHandle } from 'react'
+import { useCanvasRenderer } from '../hooks/useCanvasRenderer'
 
 /**
  * EditorViewport Component
@@ -28,95 +28,120 @@ import { useCanvasRenderer } from '../hooks/useCanvasRenderer';
  * @param {React.ReactNode} children - Child components (e.g., CropOverlay in future phases)
  * @param {React.Ref} ref - Forward ref for imperative API
  */
-export const EditorViewport = forwardRef(({ photo, hasActivePanel, children }, ref) => {
-  const {
-    canvasRef,
-    containerRef,
-    transform,
-    setZoom,
-    setPan,
-    resetTransform,
-    rotateClockwise,
-    rotateCounterClockwise,
-    flipHorizontal,
-    flipVertical,
-    setAdjustValue,
-    resetAdjustValues,
-    getAdjustState,
-    applyCrop,
-    clearCrop,
-    getAppliedCrop,
-    getImageSize,
-    render,
-  } = useCanvasRenderer(photo, null);
+export const EditorViewport = forwardRef(
+  ({ photo, hasActivePanel, children }, ref) => {
+    const {
+      canvasRef,
+      containerRef,
+      transform,
+      setZoom,
+      setPan,
+      resetTransform,
+      rotateClockwise,
+      rotateCounterClockwise,
+      flipHorizontal,
+      flipVertical,
+      setAdjustValue,
+      resetAdjustValues,
+      getAdjustState,
+      applyCrop,
+      clearCrop,
+      getAppliedCrop,
+      getImageSize,
+      render,
+    } = useCanvasRenderer(photo, null)
 
-  // Expose imperative API to parent (Phase 8C-3)
-  useImperativeHandle(ref, () => ({
-    // Transform controls
-    setZoom: (zoom) => setZoom(zoom),
-    setPan: (panX, panY) => setPan(panX, panY),
-    resetTransform,
+    // Expose imperative API to parent (Phase 8C-3)
+    useImperativeHandle(
+      ref,
+      () => ({
+        // Transform controls
+        setZoom: (zoom) => setZoom(zoom),
+        setPan: (panX, panY) => setPan(panX, panY),
+        resetTransform,
 
-    // Rotation controls (Phase 8B-3)
-    rotateClockwise,
-    rotateCounterClockwise,
+        // Rotation controls (Phase 8B-3)
+        rotateClockwise,
+        rotateCounterClockwise,
 
-    // Flip controls (Phase 8B-3)
-    flipHorizontal,
-    flipVertical,
+        // Flip controls (Phase 8B-3)
+        flipHorizontal,
+        flipVertical,
 
-    // Adjust controls (Phase 8C-1)
-    setAdjustValue,
-    resetAdjustValues,
-    getAdjustState,
+        // Adjust controls (Phase 8C-1)
+        setAdjustValue,
+        resetAdjustValues,
+        getAdjustState,
 
-    // Crop controls (Phase 8C-3)
-    applyCrop,
-    clearCrop,
-    getAppliedCrop,
-    getImageSize,
+        // Crop controls (Phase 8C-3)
+        applyCrop,
+        clearCrop,
+        getAppliedCrop,
+        getImageSize,
 
-    // Get current state
-    getTransform: () => transform,
-    getZoom: () => transform.zoom,
-    getPan: () => ({ panX: transform.panX, panY: transform.panY }),
-    getRotation: () => transform.rotation,
-    getFlip: () => ({ flipX: transform.flipX, flipY: transform.flipY }),
-    getAdjust: () => transform.adjust,
+        // Get current state
+        getTransform: () => transform,
+        getZoom: () => transform.zoom,
+        getPan: () => ({ panX: transform.panX, panY: transform.panY }),
+        getRotation: () => transform.rotation,
+        getFlip: () => ({ flipX: transform.flipX, flipY: transform.flipY }),
+        getAdjust: () => transform.adjust,
 
-    // Refs (Phase 8C-2: for CropOverlay)
-    canvasRef,
-    containerRef,
+        // Refs (Phase 8C-2: for CropOverlay)
+        canvasRef,
+        containerRef,
 
-    // Manual render (if needed)
-    render,
-  }), [transform, setZoom, setPan, resetTransform, rotateClockwise, rotateCounterClockwise, flipHorizontal, flipVertical, setAdjustValue, resetAdjustValues, getAdjustState, applyCrop, clearCrop, getAppliedCrop, getImageSize, canvasRef, containerRef, render]);
+        // Manual render (if needed)
+        render,
+      }),
+      [
+        transform,
+        setZoom,
+        setPan,
+        resetTransform,
+        rotateClockwise,
+        rotateCounterClockwise,
+        flipHorizontal,
+        flipVertical,
+        setAdjustValue,
+        resetAdjustValues,
+        getAdjustState,
+        applyCrop,
+        clearCrop,
+        getAppliedCrop,
+        getImageSize,
+        canvasRef,
+        containerRef,
+        render,
+      ]
+    )
 
-  if (!photo) {
+    if (!photo) {
+      return (
+        <div
+          className={`editor-viewport-shell ${
+            hasActivePanel ? 'has-active-panel' : ''
+          }`}
+        >
+          <p className="text-sm opacity-50 text-white">No photo loaded</p>
+        </div>
+      )
+    }
+
     return (
       <div
         ref={containerRef}
-        className={`editor-viewport-shell ${hasActivePanel ? 'has-active-panel' : ''}`}
+        className={`editor-viewport-shell ${
+          hasActivePanel ? 'has-active-panel' : ''
+        }`}
       >
-        <p className="text-sm opacity-50 text-white">No photo loaded</p>
+        <canvas ref={canvasRef} className="editor-viewport-canvas" />
+        {children /* CropOverlay renders here */}
       </div>
-    );
+    )
   }
+)
 
-  return (
-    <div
-      ref={containerRef}
-      className={`editor-viewport-shell ${hasActivePanel ? 'has-active-panel' : ''}`}
-    >
-      <canvas
-        ref={canvasRef}
-        className="editor-viewport-canvas"
-      />
-      {children /* CropOverlay renders here */}
-    </div>
-  );
-});
+EditorViewport.displayName = 'EditorViewport'
 
-EditorViewport.displayName = 'EditorViewport';
-
-export default EditorViewport;
+export default EditorViewport
