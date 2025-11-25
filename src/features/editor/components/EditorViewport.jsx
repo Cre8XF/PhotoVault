@@ -70,6 +70,18 @@ export const EditorViewport = forwardRef(({ photo, hasActivePanel, children }, r
     return () => window.removeEventListener('resize', calculateHeight);
   }, [hasActivePanel]);
 
+  // Re-render canvas when viewport height changes (Phase 8C-5 REFACTOR - Fase 1)
+  useEffect(() => {
+    if (availableHeight > 0) {
+      // Small delay to allow CSS transition to start
+      const timer = setTimeout(() => {
+        render();
+        console.log('🎨 Canvas re-rendered for new viewport height:', availableHeight);
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [availableHeight, render]);
+
   // Expose imperative API to parent (Phase 8C-3)
   useImperativeHandle(ref, () => ({
     // Transform controls
