@@ -46,6 +46,7 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
   const containerRef = useRef(null)
   const imageRef = useRef(null) // Cached loaded image
   const animationFrameRef = useRef(null)
+  const filter = useEditorStore((state) => state.filter)
 
   // Transform state
   const [transform, setTransform] = useState(createInitialTransform())
@@ -607,13 +608,14 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
   }, [photo, render])
 
   /**
-   * Re-render when transform changes
+   * Re-render when transform OR filter changes (Phase 1A - CRITICAL FIX)
    */
   useEffect(() => {
     if (imageRef.current) {
       render()
     }
-  }, [transform, externalTransform, transform.filter, render])
+  }, [transform, externalTransform, filter, render])
+  //                              ^^^^^^ FIXED! Leser filter fra store
 
   /**
    * Handle resize events
