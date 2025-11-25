@@ -16,12 +16,8 @@
  * Phase 8C-3: Crop rendering engine with applyCrop API
  */
 
-import React, { forwardRef, useImperativeHandle, useEffect, useState } from 'react';
+import React, { forwardRef, useImperativeHandle } from 'react';
 import { useCanvasRenderer } from '../hooks/useCanvasRenderer';
-
-const PANEL_HEIGHT = 280; // Panel height in pixels
-const TOOLBAR_HEIGHT = 72; // Toolbar height in pixels
-const TOPBAR_HEIGHT = 60; // Topbar height in pixels
 
 /**
  * EditorViewport Component
@@ -52,40 +48,6 @@ export const EditorViewport = forwardRef(({ photo, hasActivePanel, children }, r
     getImageSize,
     render,
   } = useCanvasRenderer(photo);
-
-  const [availableHeight, setAvailableHeight] = useState(0);
-
-  // Calculate available height based on panel state
-  useEffect(() => {
-    const calculateHeight = () => {
-      const viewportHeight = window.innerHeight;
-      const usedHeight = TOPBAR_HEIGHT + TOOLBAR_HEIGHT + (hasActivePanel ? PANEL_HEIGHT : 0);
-      const available = viewportHeight - usedHeight;
-      setAvailableHeight(available);
-      console.log('📐 Available height:', available, '(Panel:', hasActivePanel ? 'open' : 'closed', ')');
-    };
-
-    calculateHeight();
-    window.addEventListener('resize', calculateHeight);
-    return () => window.removeEventListener('resize', calculateHeight);
-  }, [hasActivePanel]);
-
-  // Re-render canvas when viewport height changes (Phase 8C-5 REFACTOR - Fase 1)
-  useEffect(() => {
-    if (availableHeight > 0 && containerRef.current) {
-      // Wait for CSS transition to complete (250ms + 50ms buffer = 300ms)
-      const timer = setTimeout(() => {
-        if (containerRef.current) {
-          const rect = containerRef.current.getBoundingClientRect();
-          console.log('📏 Container after transition:', rect.width, 'x', rect.height);
-          console.log('📏 Expected height:', availableHeight);
-          render();
-        }
-      }, 300);
-
-      return () => clearTimeout(timer);
-    }
-  }, [availableHeight, render, containerRef]);
 
   // Expose imperative API to parent (Phase 8C-3)
   useImperativeHandle(ref, () => ({
@@ -131,7 +93,7 @@ export const EditorViewport = forwardRef(({ photo, hasActivePanel, children }, r
 
   if (!photo) {
     return (
-      <div className="editor-viewport-shell">
+      <div className={`editor-viewport-shell ${hasActivePanel ? 'has-active-panel' : ''}`}>
         <div className="editor-viewport-inner">
           <p className="text-sm opacity-50 text-white">No photo loaded</p>
         </div>
@@ -140,19 +102,13 @@ export const EditorViewport = forwardRef(({ photo, hasActivePanel, children }, r
   }
 
   return (
-    <div
-      className="editor-viewport-shell"
-      style={{
-        height: availableHeight > 0 ? `${availableHeight}px` : 'auto',
-        transition: 'height 0.25s ease',
-      }}
-    >
+    <div className={`editor-viewport-shell ${hasActivePanel ? 'has-active-panel' : ''}`}>
       <div ref={containerRef} className="editor-viewport-inner">
         <canvas
           ref={canvasRef}
           className="editor-viewport-canvas"
         />
-        {children /* CropOverlay renders here - Phase 8C-5 HOTFIX: No padding transition */}
+        {children /* CropOverlay renders here */}
       </div>
     </div>
   );
