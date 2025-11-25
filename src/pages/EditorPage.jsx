@@ -278,6 +278,10 @@ const EditorPage = () => {
     { id: 'filters', icon: Sparkles, label: t('editor.filters', 'Filters') },
   ];
 
+  // Phase 1.1 (v2): Detect mobile and hide toolbar in crop mode
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const shouldHideToolbar = activeTool === 'crop' && isMobile;
+
   // ============================================================================
   // RENDER - World Pattern
   // ============================================================================
@@ -358,40 +362,42 @@ const EditorPage = () => {
         )}
       </EditorViewport>
 
-      {/* Fixed Toolbar */}
-      <div className="editor-toolbar">
-        <div className="flex items-center justify-center gap-1 h-full px-2">
-          {tools.map((tool) => {
-            const Icon = tool.icon;
-            const isActive = activeTool === tool.id;
-            return (
-              <button
-                key={tool.id}
-                onClick={() => handleToolChange(tool.id)}
-                className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg transition-all ${
-                  isActive
-                    ? 'bg-purple-600 text-white'
-                    : 'hover:bg-white/10 text-white/70 hover:text-white'
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                <span className="text-[9px] font-medium">{tool.label}</span>
-              </button>
-            );
-          })}
+      {/* Fixed Toolbar - Phase 1.1 (v2): Hidden on mobile during crop mode */}
+      {!shouldHideToolbar && (
+        <div className="editor-toolbar">
+          <div className="flex items-center justify-center gap-1 h-full px-2">
+            {tools.map((tool) => {
+              const Icon = tool.icon;
+              const isActive = activeTool === tool.id;
+              return (
+                <button
+                  key={tool.id}
+                  onClick={() => handleToolChange(tool.id)}
+                  className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg transition-all ${
+                    isActive
+                      ? 'bg-purple-600 text-white'
+                      : 'hover:bg-white/10 text-white/70 hover:text-white'
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="text-[9px] font-medium">{tool.label}</span>
+                </button>
+              );
+            })}
 
-          <div className="w-px h-8 bg-white/20 mx-1" />
+            <div className="w-px h-8 bg-white/20 mx-1" />
 
-          <button
-            onClick={handleReset}
-            disabled={!hasTransforms()}
-            className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg hover:bg-white/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed text-white/70 hover:text-white"
-          >
-            <RotateCcw className="w-5 h-5" />
-            <span className="text-[9px] font-medium">{t('editor.reset', 'Reset')}</span>
-          </button>
+            <button
+              onClick={handleReset}
+              disabled={!hasTransforms()}
+              className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg hover:bg-white/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed text-white/70 hover:text-white"
+            >
+              <RotateCcw className="w-5 h-5" />
+              <span className="text-[9px] font-medium">{t('editor.reset', 'Reset')}</span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Panel Shell - Slides up when tool is active (Phase 8B-5: photo prop) */}
       <PanelShell
