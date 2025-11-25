@@ -35,8 +35,10 @@ const useEditorStore = create((set, get) => ({
     flipH: false,       // horizontal flip
     flipV: false,       // vertical flip
     crop: null,         // { x, y, width, height, aspectRatio } or null
-    filter: null,       // filter preset ID or null
   },
+
+  // Filter state (Phase 1A)
+  filter: 'original',   // 'original', 'bright', 'warm', 'cool', 'vintage', 'bw', 'fade', 'mono'
 
   // Zoom & Pan state (Phase 7A)
   zoom: {
@@ -73,8 +75,8 @@ const useEditorStore = create((set, get) => ({
         flipH: false,
         flipV: false,
         crop: null,
-        filter: null,
       },
+      filter: 'original',
       zoom: {
         currentZoom: 1,
         minZoom: 0.5,
@@ -116,6 +118,16 @@ const useEditorStore = create((set, get) => ({
   },
 
   /**
+   * Set filter (Phase 1A)
+   */
+  setFilter: (filterName) => {
+    set({
+      filter: filterName,
+      isDirty: true,
+    });
+  },
+
+  /**
    * Reset to original (clear all transforms)
    */
   resetToOriginal: () => {
@@ -131,8 +143,8 @@ const useEditorStore = create((set, get) => ({
         flipH: false,
         flipV: false,
         crop: null,
-        filter: null,
       },
+      filter: 'original',
       zoom: {
         currentZoom: 1,
         minZoom: 0.5,
@@ -257,8 +269,8 @@ const useEditorStore = create((set, get) => ({
         flipH: false,
         flipV: false,
         crop: null,
-        filter: null,
       },
+      filter: 'original',
       zoom: {
         currentZoom: 1,
         minZoom: 0.5,
@@ -283,6 +295,7 @@ const useEditorStore = create((set, get) => ({
    */
   hasTransforms: () => {
     const t = get().transform;
+    const f = get().filter;
     return (
       t.brightness !== 0 ||
       t.contrast !== 0 ||
@@ -294,7 +307,7 @@ const useEditorStore = create((set, get) => ({
       t.flipH !== false ||
       t.flipV !== false ||
       t.crop !== null ||
-      t.filter !== null
+      f !== 'original'
     );
   },
 }));
