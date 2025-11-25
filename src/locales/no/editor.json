@@ -60,7 +60,7 @@
     "selectedArea": "Utvalgt område",
     "width": "Bredde",
     "height": "Høyde",
-    "instructions": "Dra håndtak for å justere beskjæringsområdet",
+    "instructions": "Dra håndtakene for å beskjære. Pinch for å zoome. Trykk Bruk når du er klar.",
     "zoomIn": "Zoom inn",
     "zoomOut": "Zoom ut",
     "resetZoom": "Tilbakestill zoom",

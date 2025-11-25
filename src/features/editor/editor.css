@@ -102,6 +102,7 @@
   right: 0;
   bottom: 72px; /* Above toolbar */
   height: 280px; /* INCREASED from 220px for better mobile UX */
+  max-height: 280px; /* Prevent growth */
   z-index: 40;
   transform: translateY(100%);
   transition: transform 0.25s ease;
@@ -674,5 +675,32 @@
   .touch-target {
     min-height: 48px;
     min-width: 48px;
+  }
+}
+
+/* ============================================================================
+   MOBILE TOUCH OPTIMIZATION - PATCH #2 (Phase 8C-5 FIX #2)
+   ============================================================================ */
+
+@media (max-width: 640px) {
+  /* Compact panel spacing */
+  .editor-panel-content {
+    padding: 12px 16px;
+  }
+
+  /* Tighter spacing between sections */
+  .editor-panel-content .space-y-3 > * + * {
+    margin-top: 10px;
+  }
+
+  /* Touch-friendly buttons - minimum 44px */
+  .editor-panel-content button {
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+
+  /* Aspect ratio grid - compact */
+  .editor-panel-content .grid-cols-2 {
+    gap: 8px;
   }
 }

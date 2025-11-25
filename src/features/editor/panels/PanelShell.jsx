@@ -74,44 +74,6 @@ const PanelShell = ({ activeTool, viewportRef, photo, onCropApplied }) => {
           <div className="space-y-3">
             <h3 className="text-lg font-bold text-white mb-3">{t('editor.crop', 'Crop')}</h3>
 
-            {/* Zoom Controls (Phase 8C-4: wired to viewportRef) */}
-            <div>
-              <label className="text-sm font-medium mb-2 block text-white">
-                {t('editor.crop.zoom', 'Zoom')} ({(currentZoom * 100).toFixed(0)}%)
-              </label>
-              <input
-                type="range"
-                min={50}
-                max={300}
-                value={currentZoom * 100}
-                onChange={(e) => handleZoomChange(Number(e.target.value) / 100)}
-                className="w-full"
-              />
-              <div className="flex gap-2 mt-2">
-                <button
-                  onClick={handleZoomOut}
-                  className="flex-1 px-3 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition text-sm text-white"
-                >
-                  {t('editor.crop.zoomOut', 'Zoom Out')}
-                </button>
-                <button
-                  onClick={handleZoomIn}
-                  className="flex-1 px-3 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition text-sm text-white"
-                >
-                  {t('editor.crop.zoomIn', 'Zoom In')}
-                </button>
-              </div>
-            </div>
-
-            {/* Reset Zoom (Phase 8C-4: wired to viewportRef) */}
-            <button
-              onClick={handleResetTransform}
-              disabled={currentTransform.zoom === 1 && currentTransform.panX === 0 && currentTransform.panY === 0}
-              className="w-full px-4 py-2.5 bg-purple-600 rounded-lg hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium text-sm"
-            >
-              {t('editor.crop.resetZoom', 'Reset Zoom & Pan')}
-            </button>
-
             {/* Aspect Ratio Presets */}
             <div>
               <label className="text-sm font-medium mb-2 block text-white">
@@ -209,7 +171,7 @@ const PanelShell = ({ activeTool, viewportRef, photo, onCropApplied }) => {
                 }
               }}
               disabled={!transform.crop}
-              className="w-full px-4 py-2.5 bg-green-600 rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium text-sm"
+              className="w-full px-4 py-3 bg-green-600 rounded-lg hover:bg-green-700 active:bg-green-800 transition disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-base shadow-lg"
             >
               {t('editor.crop.apply', 'Apply Crop')}
             </button>
@@ -231,7 +193,7 @@ const PanelShell = ({ activeTool, viewportRef, photo, onCropApplied }) => {
 
             {/* Instructions */}
             <p className="text-xs text-white/60 text-center mt-2">
-              {t('editor.crop.instructions', 'Drag handles to adjust crop area. Pinch or scroll to zoom. Click Apply to render crop.')}
+              {t('editor.crop.instructions', 'Drag handles to crop. Pinch to zoom. Tap Apply when ready.')}
             </p>
           </div>
         );

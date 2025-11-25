@@ -60,7 +60,7 @@
     "selectedArea": "Selected Area",
     "width": "Width",
     "height": "Height",
-    "instructions": "Drag handles to adjust crop area",
+    "instructions": "Drag handles to crop. Pinch to zoom. Tap Apply when ready.",
     "zoomIn": "Zoom In",
     "zoomOut": "Zoom Out",
     "resetZoom": "Reset Zoom",
