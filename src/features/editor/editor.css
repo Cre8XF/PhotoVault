@@ -48,16 +48,24 @@
    VIEWPORT SHELL - HOTFIX: Use flex-grow, not nested flex
    ============================================================================ */
 
-/* Viewport shell – fills space between topbar and toolbar */
+/* Viewport shell – fixed positioning with dynamic bottom inset */
 .editor-viewport-shell {
-  flex: 1 1 0%;
-  position: relative;
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 72px;
   overflow: hidden;
   background: #000;
-  will-change: height; /* Performance hint for smooth transitions */
-  contain: layout; /* Optimize rendering */
-  /* REMOVED: display: flex, justify-content, align-items */
-  /* These were breaking height calculations */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+  transition: bottom 0.25s ease;
+}
+
+.editor-viewport-shell.has-active-panel {
+  bottom: calc(72px + 280px); /* toolbar + panel */
 }
 
 /* Inner container - SIMPLIFIED: Just a positioned container for canvas */
@@ -73,16 +81,16 @@
 /* REMOVED: .editor-viewport-inner--with-panel class */
 /* Panels no longer push viewport, they overlay it */
 
-/* Canvas - fills its container completely */
+/* Canvas - auto-scales with object-fit */
 .editor-viewport-canvas {
   max-width: 100%;
   max-height: 100%;
   width: auto;
   height: auto;
   display: block;
+  object-fit: contain;
   user-select: none;
-  touch-action: none; /* Prevent default touch behavior */
-  object-fit: contain; /* Ensure image scales properly */
+  touch-action: none;
 }
 
 /* ============================================================================
