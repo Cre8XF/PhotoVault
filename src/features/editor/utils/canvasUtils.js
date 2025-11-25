@@ -248,17 +248,28 @@ export const drawImageWithFullTransform = (ctx, image, canvasWidth, canvasHeight
   const { filter } = useEditorStore.getState();
   const namedFilterCss = (filter && filter !== 'original') ? getCssFilter(filter) : '';
 
+  // DEBUG: Check filter from store
+  console.log('[DEBUG drawImageWithFullTransform] Filter from store:', filter);
+  console.log('[DEBUG drawImageWithFullTransform] Named filter CSS:', namedFilterCss);
+  console.log('[DEBUG drawImageWithFullTransform] Has adjust?', !!adjust);
+
   if (adjust) {
     const adjustString = buildCanvasAdjustString(adjust);
     // Combine named filter + adjust filters
     ctx.filter = namedFilterCss ? `${namedFilterCss} ${adjustString}` : adjustString;
+    console.log('[DEBUG] Setting ctx.filter (with adjust):', ctx.filter);
   } else if (namedFilterCss) {
     // Only named filter, no adjust filters
     ctx.filter = namedFilterCss;
+    console.log('[DEBUG] Setting ctx.filter (no adjust):', ctx.filter);
+  } else {
+    console.log('[DEBUG] No filter to apply');
   }
 
   // Save context state
+  console.log('[DEBUG] BEFORE ctx.save() - ctx.filter:', ctx.filter);
   ctx.save();
+  console.log('[DEBUG] AFTER ctx.save() - ctx.filter:', ctx.filter);
 
   // 1. Translate to canvas center
   const centerX = canvasWidth / 2;
@@ -288,6 +299,9 @@ export const drawImageWithFullTransform = (ctx, image, canvasWidth, canvasHeight
     ctx.translate(panX, panY);
   }
 
+  // DEBUG: Check filter state before drawImage
+  console.log('[DEBUG] BEFORE ctx.drawImage() - ctx.filter:', ctx.filter);
+
   // 6. Draw image centered at origin
   // After all transforms, the origin is where we want the center of the image
   ctx.drawImage(
@@ -297,11 +311,18 @@ export const drawImageWithFullTransform = (ctx, image, canvasWidth, canvasHeight
     baseWidth, baseHeight                            // Destination size
   );
 
+  // DEBUG: Check filter state after drawImage
+  console.log('[DEBUG] AFTER ctx.drawImage() - ctx.filter:', ctx.filter);
+
   // Restore context state (resets transforms and filter)
+  console.log('[DEBUG] BEFORE ctx.restore() - ctx.filter:', ctx.filter);
   ctx.restore();
+  console.log('[DEBUG] AFTER ctx.restore() - ctx.filter:', ctx.filter);
 
   // Reset filter explicitly
+  console.log('[DEBUG] BEFORE explicit reset - ctx.filter:', ctx.filter);
   ctx.filter = 'none';
+  console.log('[DEBUG] AFTER explicit reset - ctx.filter:', ctx.filter);
 
   // 7. Apply vignette overlay (Phase 8C-4)
   // Must be drawn AFTER restoring context to avoid transform issues
@@ -370,14 +391,26 @@ export const drawCroppedImageToCanvas = (ctx, image, canvasWidth, canvasHeight, 
   const { filter } = useEditorStore.getState();
   const namedFilterCss = (filter && filter !== 'original') ? getCssFilter(filter) : '';
 
+  // DEBUG: Check filter from store (crop mode)
+  console.log('[DEBUG drawCroppedImageToCanvas] Filter from store:', filter);
+  console.log('[DEBUG drawCroppedImageToCanvas] Named filter CSS:', namedFilterCss);
+  console.log('[DEBUG drawCroppedImageToCanvas] Has adjust?', !!adjust);
+
   if (adjust) {
     const adjustString = buildCanvasAdjustString(adjust);
     // Combine named filter + adjust filters
     ctx.filter = namedFilterCss ? `${namedFilterCss} ${adjustString}` : adjustString;
+    console.log('[DEBUG CROP] Setting ctx.filter (with adjust):', ctx.filter);
   } else if (namedFilterCss) {
     // Only named filter, no adjust filters
     ctx.filter = namedFilterCss;
+    console.log('[DEBUG CROP] Setting ctx.filter (no adjust):', ctx.filter);
+  } else {
+    console.log('[DEBUG CROP] No filter to apply');
   }
+
+  // DEBUG: Check filter state before drawImage (crop)
+  console.log('[DEBUG CROP] BEFORE ctx.drawImage() - ctx.filter:', ctx.filter);
 
   // Draw only the cropped portion of the image
   // ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
@@ -387,8 +420,13 @@ export const drawCroppedImageToCanvas = (ctx, image, canvasWidth, canvasHeight, 
     destX, destY, scaledWidth, scaledHeight  // Destination rectangle (centered)
   );
 
+  // DEBUG: Check filter state after drawImage (crop)
+  console.log('[DEBUG CROP] AFTER ctx.drawImage() - ctx.filter:', ctx.filter);
+
   // Reset filter
+  console.log('[DEBUG CROP] BEFORE explicit reset - ctx.filter:', ctx.filter);
   ctx.filter = 'none';
+  console.log('[DEBUG CROP] AFTER explicit reset - ctx.filter:', ctx.filter);
 
   // Apply vignette overlay (Phase 8C-4)
   if (adjust && adjust.vignette > 0) {

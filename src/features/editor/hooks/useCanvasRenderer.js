@@ -95,6 +95,16 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
 
     if (!canvas || !container || !image) return;
 
+    // DEBUG: Check what's in the store before rendering
+    const currentStore = useEditorStore.getState();
+    console.log('═══════════════════════════════════════════════════════');
+    console.log('[DEBUG RENDER START]');
+    console.log('  Store filter:', currentStore.filter);
+    console.log('  Store transform:', currentStore.transform);
+    console.log('  Applied crop box:', appliedCropBox);
+    console.log('  External transform crop:', externalTransform?.crop);
+    console.log('═══════════════════════════════════════════════════════');
+
     const ctx = canvas.getContext('2d');
 
     // Auto-size canvas to container (use clientWidth/clientHeight for accuracy)
@@ -105,9 +115,11 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
 
     // Crop mode (Phase 8C-3): render only cropped portion
     if (appliedCropBox) {
+      console.log('[DEBUG] Rendering mode: APPLIED CROP');
       // Final applied crop - locked and permanent
       drawCroppedImageToCanvas(ctx, image, width, height, appliedCropBox, activeTransform.adjust);
     } else if (externalTransform?.crop && !appliedCropBox) {
+      console.log('[DEBUG] Rendering mode: CROP PREVIEW');
       // Real-time crop preview (Phase 8C-5 FIX #3) - while adjusting crop handles
       const previewCropBox = getEffectiveCropBox(externalTransform.crop, {
         width: image.naturalWidth,
@@ -117,9 +129,13 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
         drawCroppedImageToCanvas(ctx, image, width, height, previewCropBox, activeTransform.adjust);
       }
     } else {
+      console.log('[DEBUG] Rendering mode: FULL TRANSFORM');
       // Normal mode: draw image with full transforms (zoom, pan, rotation, flip)
       drawImageWithFullTransform(ctx, image, width, height, activeTransform);
     }
+
+    console.log('[DEBUG RENDER END]');
+    console.log('═══════════════════════════════════════════════════════');
   }, [transform, externalTransform, appliedCropBox]);
 
   /**
