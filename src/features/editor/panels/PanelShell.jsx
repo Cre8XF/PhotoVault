@@ -9,6 +9,7 @@ import { applyCropAspectRatio, clampCropRect } from '../utils/cropTransformBridg
 import AdjustPanel from './AdjustPanel';
 import RotatePanel from './RotatePanel';
 import FiltersPanel from './FiltersPanel';
+import CropPanelMobile from './CropPanelMobile';
 import '../editor.css';
 
 /**
@@ -18,6 +19,7 @@ import '../editor.css';
  * Phase 8B-4: Rotate & Flip controls implemented
  * Phase 8B-5: Filters presets implemented
  * Phase 8C-1: Adjust sliders implemented
+ * Phase 1 (v2): Mobile collapsible crop panel
  * Future phases will add:
  * - 8C-2: Real filter rendering
  * - 8C-3: Crop compute engine
@@ -29,6 +31,14 @@ import '../editor.css';
 const PanelShell = ({ activeTool, viewportRef, photo, onCropApplied }) => {
   const { t } = useTranslation();
   const { transform, applyTransform } = useEditorStore();
+
+  // Detect mobile (Phase 1 - v2)
+  const isMobile = window.innerWidth < 768;
+
+  // Phase 1 (v2): Use mobile crop panel on mobile devices
+  if (activeTool === 'crop' && isMobile) {
+    return <CropPanelMobile viewportRef={viewportRef} onCropApplied={onCropApplied} />;
+  }
 
   if (!activeTool || activeTool === 'none') {
     return null;
