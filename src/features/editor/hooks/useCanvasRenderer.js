@@ -37,9 +37,10 @@ import { getEffectiveCropBox } from '../utils/cropTransformBridge';
  *
  * @param {Object} photo - Photo object with url
  * @param {Object} externalTransform - External transform state (optional)
+ * @param {boolean} hasActivePanel - Whether a panel is open (triggers re-render)
  * @returns {Object} Canvas ref, container ref, transform controls
  */
-export const useCanvasRenderer = (photo, externalTransform = null) => {
+export const useCanvasRenderer = (photo, externalTransform = null, hasActivePanel = false) => {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const imageRef = useRef(null); // Cached loaded image
@@ -97,7 +98,6 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
 
     // Auto-size canvas to container
     const { width, height } = setCanvasSize(canvas, rect.width, rect.height);
-    console.log('🖼️ Canvas sized:', width, 'x', height, '| Container rect:', rect.width, 'x', rect.height);
 
     // Use external transform if provided, otherwise use internal
     const activeTransform = externalTransform || transform;
@@ -352,7 +352,7 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
       return;
     }
 
-    console.log('🔷 Applying crop:', cropBox);
+    console.log('Applying crop');
 
     // Set crop box
     setAppliedCropBox(cropBox);
@@ -371,7 +371,7 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
    * Returns to normal transform mode
    */
   const clearCrop = useCallback(() => {
-    console.log('🔷 Clearing crop');
+    console.log('Clearing crop');
     setAppliedCropBox(null);
   }, []);
 
@@ -565,7 +565,7 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
         imageRef.current = img;
         render();
 
-        console.log('✅ Image loaded:', img.naturalWidth, 'x', img.naturalHeight);
+        console.log('Image loaded:', img.naturalWidth + 'x' + img.naturalHeight);
       })
       .catch((err) => {
         if (cancelled) return;
@@ -649,6 +649,21 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
       initCanvasContext(canvasRef.current);
     }
   }, []);
+
+  /**
+   * Re-render canvas when panel state changes (viewport resizes)
+   */
+  useEffect(() => {
+    if (!containerRef.current || !canvasRef.current) return;
+
+    // Wait for CSS transition to complete (250ms + buffer)
+    const timer = setTimeout(() => {
+      render();
+      console.log('Canvas resized - panel:', hasActivePanel ? 'open' : 'closed');
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [hasActivePanel, render]);
 
   return {
     canvasRef,
