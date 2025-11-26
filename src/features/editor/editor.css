@@ -613,4 +613,20 @@
   }
 }
 
+.editor-unified-footer {
+  outline: 3px solid red !important;
+}
+
+.tool-selector-row {
+  outline: 2px solid yellow !important;
+}
+
+.panel-content-wrapper {
+  outline: 2px solid green !important;
+}
+
+.action-buttons-row {
+  outline: 2px solid blue !important;
+}
+
 /* LEGACY STYLES REMOVED - Unified footer now handles all layouts */
