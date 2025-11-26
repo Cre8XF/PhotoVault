@@ -79,11 +79,11 @@
 }
 
 /* ============================================================================
-   UNIFIED FOOTER - Compact Mode (316px total)
+   UNIFIED FOOTER - Ultra-Compact Mode (300px total)
    ============================================================================ */
 
 .editor-unified-footer {
-  flex: 0 0 316px; /* COMPACT: 48px + 220px + 48px */
+  flex: 0 0 300px; /* ULTRA-COMPACT: 48px + 204px + 48px */
   display: flex;
   flex-direction: column;
   background: rgba(0, 0, 0, 0.98);
@@ -103,9 +103,9 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Row 2: Panel Content Wrapper - 220px compact */
+/* Row 2: Panel Content Wrapper - 204px ultra-compact */
 .panel-content-wrapper {
-  flex: 0 0 220px;
+  flex: 0 0 204px;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 10px 12px;
@@ -596,7 +596,7 @@
   }
 
   .editor-unified-footer {
-    flex: 0 0 340px; /* Desktop compact: 52 + 236 + 52 */
+    flex: 0 0 324px; /* Desktop ultra-compact: 52 + 220 + 52 */
   }
 
   .tool-selector-row {
@@ -605,7 +605,7 @@
   }
 
   .panel-content-wrapper {
-    flex: 0 0 236px; /* Desktop compact */
+    flex: 0 0 220px; /* Desktop ultra-compact */
   }
 
   .action-buttons-row {
@@ -613,141 +613,4 @@
   }
 }
 
-/* ============================================================================
-   LEGACY STYLES (DEPRECATED - To be removed after Phase 7B)
-   ============================================================================ */
-
-/* Mobile-first base */
-.photo-editor {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background: #000;
-}
-
-.editor-header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.editor-main {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow: hidden;
-}
-
-.editor-canvas-container {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 60vh;
-  background: linear-gradient(135deg, #0d0f17 0%, #1a1f2e 100%);
-  padding: 1rem;
-  overflow: auto;
-}
-
-.editor-canvas-container canvas {
-  max-width: 100%;
-  max-height: calc(100vh - 300px);
-  object-fit: contain;
-  border-radius: 8px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-}
-
-.editor-sidebar {
-  width: 100%;
-  background: #111827;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 1rem;
-  max-height: 40vh;
-  overflow-y: auto;
-}
-
-/* Desktop breakpoint */
-@media (min-width: 900px) {
-  .editor-main {
-    flex-direction: row;
-  }
-
-  .editor-sidebar {
-    width: 320px;
-    max-height: none;
-    border-top: none;
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-    order: -1;
-  }
-
-  .editor-canvas-container {
-    min-height: 500px;
-  }
-
-  .editor-canvas-container canvas {
-    max-height: calc(100vh - 200px);
-  }
-}
-
-/* Fullscreen mode */
-.editor-canvas-container.fullscreen {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  min-height: 100vh;
-  max-height: 100vh;
-}
-
-.editor-canvas-container.fullscreen canvas {
-  max-height: 100vh;
-  max-width: 100vw;
-}
-
-/* Mobile touch optimization */
-@media (max-width: 768px) {
-  .editor-sidebar {
-    padding: 1.5rem;
-  }
-
-  .editor-sidebar > * + * {
-    margin-top: 1.5rem;
-  }
-
-  button,
-  .filter-chip,
-  .tool-button,
-  .touch-target {
-    min-height: 48px;
-    min-width: 48px;
-  }
-}
-
-/* ============================================================================
-   MOBILE TOUCH OPTIMIZATION - PATCH #2 (Phase 8C-5 FIX #2)
-   ============================================================================ */
-
-@media (max-width: 640px) {
-  /* Compact panel spacing */
-  .editor-panel-content {
-    padding: 12px 16px;
-  }
-
-  /* Tighter spacing between sections */
-  .editor-panel-content .space-y-3 > * + * {
-    margin-top: 10px;
-  }
-
-  /* Touch-friendly buttons - minimum 44px */
-  .editor-panel-content button {
-    min-height: 44px;
-    padding: 10px 12px;
-  }
-
-  /* Aspect ratio grid - compact */
-  .editor-panel-content .grid-cols-2 {
-    gap: 8px;
-  }
-}
+/* LEGACY STYLES REMOVED - Unified footer now handles all layouts */
