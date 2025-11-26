@@ -381,8 +381,8 @@ const EditorPage = () => {
           </button>
         </div>
 
-        {/* Row 2: Tool Panel Area */}
-        <div className="tool-panel-area">
+        {/* Row 2: Panel Content Wrapper - Fixed 260px */}
+        <div className="panel-content-wrapper">
           <PanelShell
             activeTool={activeTool}
             viewportRef={viewportRef}
