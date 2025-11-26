@@ -39,11 +39,14 @@
 }
 
 /* ============================================================================
-   TOPBAR
+   MINIMAL HEADER - Back button only (40px)
    ============================================================================ */
 
-.editor-topbar {
-  flex: 0 0 56px;
+.editor-minimal-header {
+  flex: 0 0 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
   background: rgba(0, 0, 0, 0.96);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -51,28 +54,18 @@
 }
 
 /* ============================================================================
-   VIEWPORT SHELL - Pure CSS sizing (Phase 1A cleanup)
+   VIEWPORT AREA - Fills space between header and footer
    ============================================================================ */
 
-/* Viewport shell – pure CSS sizing */
 .editor-viewport-shell {
-  position: fixed;
-  top: 56px;     /* below topbar */
-  left: 0;
-  right: 0;
-  bottom: 0;     /* fill to bottom by default */
+  flex: 1 1 auto;
   overflow: hidden;
   background: #000;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1;
+  position: relative;
   touch-action: none;
-}
-
-/* When panel is active, leave space for it */
-.editor-viewport-shell.has-active-panel {
-  bottom: 150px; /* collapsed panel height */
 }
 
 /* Canvas - fills entire viewport container */
@@ -86,50 +79,63 @@
 }
 
 /* ============================================================================
-   TOOLBAR
+   UNIFIED FOOTER - 3 rows: tools | panel | actions
    ============================================================================ */
 
-.editor-toolbar {
-  flex: 0 0 72px;
+.editor-unified-footer {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
   background: rgba(0, 0, 0, 0.98);
   backdrop-filter: blur(16px);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   z-index: 30;
 }
 
-/* ============================================================================
-   PANEL SHEET - HOTFIX: Absolute overlay within editor-world, not fixed to viewport
-   ============================================================================ */
+/* Row 1: Tool Selector (60px) */
+.tool-selector-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 60px;
+  padding: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
 
-.editor-panel-sheet {
-  position: absolute; /* CHANGED from fixed - now relative to editor-world */
-  left: 0;
-  right: 0;
-  bottom: 72px; /* Above toolbar */
-  height: 280px;
-  max-height: 280px;
-  z-index: 40;
-  transform: translateY(100%);
-  transition: transform 0.25s ease;
-  background: rgba(0, 0, 0, 0.96);
-  backdrop-filter: blur(16px);
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+/* Row 2: Tool Panel Area (0-260px dynamic) */
+.tool-panel-area {
+  max-height: 260px;
   overflow-y: auto;
+  transition: max-height 0.3s ease;
 }
 
-.editor-panel-sheet.active {
-  transform: translateY(0%);
+.tool-panel-area:empty {
+  max-height: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.tool-panel-area .editor-panel-content {
+  padding: 0;
+}
+
+/* Row 3: Action Buttons (60px) */
+.action-buttons-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  padding: 8px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* ============================================================================
-   PANEL CONTENT
+   PANEL CONTENT - Now rendered inside tool-panel-area
    ============================================================================ */
 
 .editor-panel-content {
-  padding: 16px;
-  height: 100%;
+  width: 100%;
 }
 
 /* Compact panel spacing */
@@ -557,24 +563,21 @@
    ============================================================================ */
 
 @media (min-width: 900px) {
-  .editor-topbar {
-    flex: 0 0 60px;
+  .editor-minimal-header {
+    flex: 0 0 48px;
   }
 
-  .editor-toolbar {
-    flex: 0 0 80px;
+  .tool-selector-row {
+    height: 64px;
+    gap: 8px;
   }
 
-  .editor-viewport-shell {
-    max-width: 900px;
-    margin: 0 auto;
+  .tool-panel-area {
+    max-height: 320px;
   }
 
-  /* Panel overlay - larger on desktop */
-  .editor-panel-sheet {
-    bottom: 80px;
-    height: 320px;
-    max-height: 50vh;
+  .action-buttons-row {
+    height: 64px;
   }
 }
 

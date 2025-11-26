@@ -1,20 +1,13 @@
 /* ============================================================================
    CROP PANEL MOBILE - Google Photos Style Collapsible Panel
-   EditorWorld v2 - Phase 1
+   EditorWorld v2 - Phase 1 (Updated for unified footer layout)
    ============================================================================ */
 
 .crop-panel-mobile {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
   width: 100%;
-  background: #000;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
+  background: transparent;
   color: white;
   overflow: hidden;
-  z-index: 9999;
   transition: height 0.25s ease, transform 0.2s ease;
 }
 
