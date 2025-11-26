@@ -79,11 +79,11 @@
 }
 
 /* ============================================================================
-   UNIFIED FOOTER - Ultra-Compact Mode (300px total)
+   UNIFIED FOOTER - Aggressive Compact Mode (288px total)
    ============================================================================ */
 
 .editor-unified-footer {
-  flex: 0 0 300px; /* ULTRA-COMPACT: 48px + 204px + 48px */
+  flex: 0 0 288px; /* AGGRESSIVE: 44px + 204px + 40px */
   display: flex;
   flex-direction: column;
   background: rgba(0, 0, 0, 0.98);
@@ -92,9 +92,9 @@
   z-index: 30;
 }
 
-/* Row 1: Tool Selector - 48px compact */
+/* Row 1: Tool Selector - 44px aggressive */
 .tool-selector-row {
-  flex: 0 0 48px;
+  flex: 0 0 44px;
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -127,9 +127,9 @@
   border-radius: 2px;
 }
 
-/* Row 3: Action Buttons - 48px compact */
+/* Row 3: Action Buttons - 40px aggressive */
 .action-buttons-row {
-  flex: 0 0 48px;
+  flex: 0 0 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -141,9 +141,9 @@
 .action-buttons-row button {
   flex: 1;
   max-width: 120px;
-  height: 40px;
+  height: 36px;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   transition: all 0.2s ease;
   cursor: pointer;
@@ -159,7 +159,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
 }
 
 .editor-panel-content {
@@ -168,7 +168,7 @@
 
 /* Compact panel spacing */
 .editor-panel-content .space-y-4 > * + * {
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
 /* Touch-friendly controls */
@@ -188,8 +188,8 @@
 .rotate-panel-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 12px;
+  gap: 10px;
+  margin-top: 8px;
 }
 
 /* Individual rotate/flip button */
@@ -198,12 +198,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 16px 12px;
-  min-height: 80px;
+  gap: 6px;
+  padding: 12px 8px;
+  min-height: 68px;
   background: rgba(255, 255, 255, 0.1);
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   color: white;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -224,8 +224,8 @@
 /* Mobile optimization */
 @media (max-width: 768px) {
   .rotate-panel-button {
-    min-height: 72px;
-    padding: 12px 8px;
+    min-height: 64px;
+    padding: 10px 6px;
   }
 }
 
@@ -248,11 +248,11 @@
 /* Horizontal scrollable filter row */
 .filters-row {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   overflow-x: auto;
   overflow-y: hidden;
   padding-bottom: 8px;
-  margin: 12px -4px;
+  margin: 8px -4px;
   padding-left: 4px;
   padding-right: 4px;
   -webkit-overflow-scrolling: touch;
@@ -283,16 +283,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 8px;
+  gap: 4px;
+  padding: 6px;
   background: transparent;
   border: 2px solid transparent;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  min-width: 80px;
+  min-width: 68px;
   flex-shrink: 0;
 }
 
@@ -313,9 +313,9 @@
 
 /* Filter thumbnail preview */
 .filter-thumbnail {
-  width: 64px;
-  height: 64px;
-  border-radius: 8px;
+  width: 56px;
+  height: 56px;
+  border-radius: 6px;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.05);
   display: flex;
@@ -352,22 +352,22 @@
 /* Mobile optimization */
 @media (max-width: 768px) {
   .filters-row {
-    gap: 10px;
-    margin: 10px -4px;
+    gap: 8px;
+    margin: 6px -4px;
   }
 
   .filter-item {
-    min-width: 72px;
-    padding: 6px;
+    min-width: 64px;
+    padding: 5px;
   }
 
   .filter-thumbnail {
-    width: 56px;
-    height: 56px;
+    width: 52px;
+    height: 52px;
   }
 
   .filter-name {
-    font-size: 10px;
+    font-size: 9px;
   }
 }
 
@@ -472,7 +472,7 @@
 .adjust-slider-item {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
 }
 
 /* Slider label row (name + value) */
@@ -596,11 +596,11 @@
   }
 
   .editor-unified-footer {
-    flex: 0 0 324px; /* Desktop ultra-compact: 52 + 220 + 52 */
+    flex: 0 0 308px; /* Desktop aggressive: 48 + 220 + 40 */
   }
 
   .tool-selector-row {
-    flex: 0 0 52px;
+    flex: 0 0 48px;
     gap: 8px;
   }
 
@@ -609,7 +609,7 @@
   }
 
   .action-buttons-row {
-    flex: 0 0 52px;
+    flex: 0 0 40px;
   }
 }
 
