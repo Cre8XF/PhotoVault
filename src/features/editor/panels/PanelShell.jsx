@@ -223,10 +223,8 @@ const PanelShell = ({ activeTool, viewportRef, photo, onCropApplied }) => {
   };
 
   return (
-    <div className={`editor-panel-sheet ${activeTool && activeTool !== 'none' ? 'active' : ''}`}>
-      <div className="editor-panel-content">
-        {renderContent()}
-      </div>
+    <div className="editor-panel-content">
+      {renderContent()}
     </div>
   );
 };
