@@ -98,62 +98,64 @@ const AdjustPanel = ({ viewportRef }) => {
   });
 
   return (
-    <div className="adjust-panel">
-      {/* Header */}
-      <div className="adjust-panel-header">
-        <h3 className="text-lg font-bold text-white">
-          {t('editor.adjust.title', 'Adjust')}
-        </h3>
+    <div className="panel-inner">
+      <div className="adjust-panel">
+        {/* Header */}
+        <div className="adjust-panel-header">
+          <h3 className="text-lg font-bold text-white">
+            {t('editor.adjust.title', 'Adjust')}
+          </h3>
 
-        {/* Reset All Button */}
-        {hasChanges && (
-          <button
-            onClick={handleResetAll}
-            className="adjust-reset-btn"
-            aria-label={t('editor.adjust.resetAll', 'Reset All')}
-          >
-            <RotateCcw className="w-4 h-4" />
-            {t('editor.adjust.resetAll', 'Reset All')}
-          </button>
-        )}
-      </div>
+          {/* Reset All Button */}
+          {hasChanges && (
+            <button
+              onClick={handleResetAll}
+              className="adjust-reset-btn"
+              aria-label={t('editor.adjust.resetAll', 'Reset All')}
+            >
+              <RotateCcw className="w-4 h-4" />
+              {t('editor.adjust.resetAll', 'Reset All')}
+            </button>
+          )}
+        </div>
 
-      {/* Sliders */}
-      <div className="adjust-sliders-list">
-        {ADJUST_SLIDERS.map((slider) => (
-          <div key={slider.key} className="adjust-slider-item">
-            {/* Label + Value */}
-            <div className="adjust-slider-label">
-              <span className="text-sm font-medium text-white">
-                {t(`editor.adjust.${slider.key}`, slider.label)}
-              </span>
-              <span className="text-xs text-white/60">
-                {sliderValues[slider.key]}
-              </span>
+        {/* Sliders */}
+        <div className="adjust-sliders-list">
+          {ADJUST_SLIDERS.map((slider) => (
+            <div key={slider.key} className="adjust-slider-item">
+              {/* Label + Value */}
+              <div className="adjust-slider-label">
+                <span className="text-sm font-medium text-white">
+                  {t(`editor.adjust.${slider.key}`, slider.label)}
+                </span>
+                <span className="text-xs text-white/60">
+                  {sliderValues[slider.key]}
+                </span>
+              </div>
+
+              {/* Slider */}
+              <input
+                type="range"
+                min={slider.min}
+                max={slider.max}
+                step={slider.step}
+                value={sliderValues[slider.key]}
+                onChange={(e) => handleSliderChange(slider.key, e.target.value)}
+                className="adjust-slider"
+                aria-label={slider.label}
+              />
             </div>
+          ))}
+        </div>
 
-            {/* Slider */}
-            <input
-              type="range"
-              min={slider.min}
-              max={slider.max}
-              step={slider.step}
-              value={sliderValues[slider.key]}
-              onChange={(e) => handleSliderChange(slider.key, e.target.value)}
-              className="adjust-slider"
-              aria-label={slider.label}
-            />
-          </div>
-        ))}
+        {/* Instructions */}
+        <p className="text-xs text-white/60 text-center mt-3">
+          {t(
+            'editor.adjust.instructions',
+            'Drag sliders to adjust. Changes apply instantly. Use Reset All to undo.'
+          )}
+        </p>
       </div>
-
-      {/* Instructions */}
-      <p className="text-xs text-white/60 text-center mt-3">
-        {t(
-          'editor.adjust.instructions',
-          'Drag sliders to adjust. Changes apply instantly. Use Reset All to undo.'
-        )}
-      </p>
     </div>
   );
 };

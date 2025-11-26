@@ -49,66 +49,68 @@ const RotatePanel = ({ viewportRef }) => {
   };
 
   return (
-    <div className="space-y-3">
-      <h3 className="text-lg font-bold text-white mb-3">
-        {t('editor.rotate.title', 'Rotate & Flip')}
-      </h3>
+    <div className="panel-inner">
+      <div className="space-y-3">
+        <h3 className="text-lg font-bold text-white mb-3">
+          {t('editor.rotate.title', 'Rotate & Flip')}
+        </h3>
 
-      {/* Rotate & Flip Grid - 2x2 */}
-      <div className="rotate-panel-grid">
-        {/* Rotate Left */}
-        <button
-          onClick={handleRotateLeft}
-          className="rotate-panel-button"
-          aria-label={t('editor.rotate.rotateLeft', 'Rotate Left')}
-        >
-          <RotateCcw className="w-6 h-6" />
-          <span className="text-sm font-medium">
-            {t('editor.rotate.rotateLeft', 'Rotate Left')}
-          </span>
-        </button>
+        {/* Rotate & Flip Grid - 2x2 */}
+        <div className="rotate-panel-grid">
+          {/* Rotate Left */}
+          <button
+            onClick={handleRotateLeft}
+            className="rotate-panel-button"
+            aria-label={t('editor.rotate.rotateLeft', 'Rotate Left')}
+          >
+            <RotateCcw className="w-6 h-6" />
+            <span className="text-sm font-medium">
+              {t('editor.rotate.rotateLeft', 'Rotate Left')}
+            </span>
+          </button>
 
-        {/* Rotate Right */}
-        <button
-          onClick={handleRotateRight}
-          className="rotate-panel-button"
-          aria-label={t('editor.rotate.rotateRight', 'Rotate Right')}
-        >
-          <RotateCw className="w-6 h-6" />
-          <span className="text-sm font-medium">
-            {t('editor.rotate.rotateRight', 'Rotate Right')}
-          </span>
-        </button>
+          {/* Rotate Right */}
+          <button
+            onClick={handleRotateRight}
+            className="rotate-panel-button"
+            aria-label={t('editor.rotate.rotateRight', 'Rotate Right')}
+          >
+            <RotateCw className="w-6 h-6" />
+            <span className="text-sm font-medium">
+              {t('editor.rotate.rotateRight', 'Rotate Right')}
+            </span>
+          </button>
 
-        {/* Flip Horizontal */}
-        <button
-          onClick={handleFlipHorizontal}
-          className="rotate-panel-button"
-          aria-label={t('editor.rotate.flipHorizontal', 'Flip Horizontal')}
-        >
-          <FlipHorizontal className="w-6 h-6" />
-          <span className="text-sm font-medium">
-            {t('editor.rotate.flipHorizontal', 'Flip Horizontal')}
-          </span>
-        </button>
+          {/* Flip Horizontal */}
+          <button
+            onClick={handleFlipHorizontal}
+            className="rotate-panel-button"
+            aria-label={t('editor.rotate.flipHorizontal', 'Flip Horizontal')}
+          >
+            <FlipHorizontal className="w-6 h-6" />
+            <span className="text-sm font-medium">
+              {t('editor.rotate.flipHorizontal', 'Flip Horizontal')}
+            </span>
+          </button>
 
-        {/* Flip Vertical */}
-        <button
-          onClick={handleFlipVertical}
-          className="rotate-panel-button"
-          aria-label={t('editor.rotate.flipVertical', 'Flip Vertical')}
-        >
-          <FlipVertical className="w-6 h-6" />
-          <span className="text-sm font-medium">
-            {t('editor.rotate.flipVertical', 'Flip Vertical')}
-          </span>
-        </button>
+          {/* Flip Vertical */}
+          <button
+            onClick={handleFlipVertical}
+            className="rotate-panel-button"
+            aria-label={t('editor.rotate.flipVertical', 'Flip Vertical')}
+          >
+            <FlipVertical className="w-6 h-6" />
+            <span className="text-sm font-medium">
+              {t('editor.rotate.flipVertical', 'Flip Vertical')}
+            </span>
+          </button>
+        </div>
+
+        {/* Instructions */}
+        <p className="text-xs text-white/60 text-center mt-3">
+          {t('editor.rotate.instructions', 'Tap buttons to rotate or flip the image. Use Reset to undo all changes.')}
+        </p>
       </div>
-
-      {/* Instructions */}
-      <p className="text-xs text-white/60 text-center mt-3">
-        {t('editor.rotate.instructions', 'Tap buttons to rotate or flip the image. Use Reset to undo all changes.')}
-      </p>
     </div>
   );
 };

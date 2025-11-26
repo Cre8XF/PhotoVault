@@ -81,8 +81,9 @@ const PanelShell = ({ activeTool, viewportRef, photo, onCropApplied }) => {
     switch (activeTool) {
       case 'crop':
         return (
-          <div className="space-y-3">
-            <h3 className="text-lg font-bold text-white mb-3">{t('editor.crop', 'Crop')}</h3>
+          <div className="panel-inner">
+            <div className="space-y-3">
+              <h3 className="text-lg font-bold text-white mb-3">{t('editor.crop', 'Crop')}</h3>
 
             {/* Aspect Ratio Presets */}
             <div>
@@ -205,6 +206,7 @@ const PanelShell = ({ activeTool, viewportRef, photo, onCropApplied }) => {
             <p className="text-xs text-white/60 text-center mt-2">
               {t('editor.crop.instructions', 'Drag handles to crop. Pinch to zoom. Tap Apply when ready.')}
             </p>
+            </div>
           </div>
         );
 
