@@ -83,7 +83,7 @@
    ============================================================================ */
 
 .editor-unified-footer {
-  flex: 0 0 316px; /* COMPACT: 48px + 220px + 48px */
+  flex: 0 0 250px; /* ULTRA-COMPACT: 38px + 176px + 36px */
   display: flex;
   flex-direction: column;
   background: rgba(0, 0, 0, 0.98);
@@ -92,9 +92,9 @@
   z-index: 30;
 }
 
-/* Row 1: Tool Selector - 48px compact */
+/* Row 1: Tool Selector - 38px ultra-compact */
 .tool-selector-row {
-  flex: 0 0 48px;
+  flex: 0 0 38px;
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -103,9 +103,9 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Row 2: Panel Content Wrapper - 220px compact */
+/* Row 2: Panel Content Wrapper - 176px ultra-compact */
 .panel-content-wrapper {
-  flex: 0 0 220px;
+  flex: 0 0 176px;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 10px 12px;
@@ -127,9 +127,9 @@
   border-radius: 2px;
 }
 
-/* Row 3: Action Buttons - 48px compact */
+/* Row 3: Action Buttons - 36px ultra-compact */
 .action-buttons-row {
-  flex: 0 0 48px;
+  flex: 0 0 36px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -596,7 +596,7 @@
   }
 
   .editor-unified-footer {
-    flex: 0 0 340px; /* Desktop compact: 52 + 236 + 52 */
+    flex: 0 0 308px; /* Desktop ultra-compact: 52 + 220 + 36 */
   }
 
   .tool-selector-row {
@@ -605,11 +605,11 @@
   }
 
   .panel-content-wrapper {
-    flex: 0 0 236px; /* Desktop compact */
+    flex: 0 0 220px; /* Desktop ultra-compact */
   }
 
   .action-buttons-row {
-    flex: 0 0 52px;
+    flex: 0 0 36px;
   }
 }
 
