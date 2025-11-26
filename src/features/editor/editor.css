@@ -79,11 +79,11 @@
 }
 
 /* ============================================================================
-   UNIFIED FOOTER - Fixed Height System (380px total)
+   UNIFIED FOOTER - Compact Mode (316px total)
    ============================================================================ */
 
 .editor-unified-footer {
-  flex: 0 0 380px; /* FIXED: 60px + 260px + 60px */
+  flex: 0 0 316px; /* COMPACT: 48px + 220px + 48px */
   display: flex;
   flex-direction: column;
   background: rgba(0, 0, 0, 0.98);
@@ -92,23 +92,23 @@
   z-index: 30;
 }
 
-/* Row 1: Tool Selector - 60px fixed */
+/* Row 1: Tool Selector - 48px compact */
 .tool-selector-row {
-  flex: 0 0 60px;
+  flex: 0 0 48px;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  gap: 4px;
-  padding: 8px 16px;
+  gap: 2px;
+  padding: 4px 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Row 2: Panel Content Wrapper - 260px FIXED */
+/* Row 2: Panel Content Wrapper - 220px compact */
 .panel-content-wrapper {
-  flex: 0 0 260px;
+  flex: 0 0 220px;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 16px;
+  padding: 10px 12px;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
 }
@@ -127,31 +127,31 @@
   border-radius: 2px;
 }
 
-/* Row 3: Action Buttons - 60px fixed */
+/* Row 3: Action Buttons - 48px compact */
 .action-buttons-row {
-  flex: 0 0 60px;
+  flex: 0 0 48px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 16px;
-  gap: 12px;
+  padding: 4px 12px;
+  gap: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .action-buttons-row button {
   flex: 1;
-  max-width: 180px;
-  height: 44px;
-  border-radius: 8px;
-  font-weight: 600;
+  max-width: 120px;
+  height: 40px;
+  border-radius: 6px;
   font-size: 14px;
+  font-weight: 600;
   transition: all 0.2s ease;
   cursor: pointer;
   border: none;
 }
 
 /* ============================================================================
-   PANEL INNER WRAPPER - Consistent structure for all panels
+   PANEL INNER WRAPPER - Compact spacing
    ============================================================================ */
 
 .panel-inner {
@@ -159,7 +159,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .editor-panel-content {
@@ -168,7 +168,7 @@
 
 /* Compact panel spacing */
 .editor-panel-content .space-y-4 > * + * {
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
 /* Touch-friendly controls */
@@ -400,7 +400,7 @@
 .adjust-panel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 /* Header with title and reset button */
@@ -408,7 +408,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 /* Reset All button */
@@ -416,12 +416,12 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 5px 10px;
   background: rgba(255, 255, 255, 0.1);
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   color: white;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -442,8 +442,8 @@
 .adjust-sliders-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  max-height: 160px;
+  gap: 12px;
+  max-height: 140px;
   overflow-y: auto;
   padding-right: 4px;
   -webkit-overflow-scrolling: touch;
@@ -472,7 +472,7 @@
 .adjust-slider-item {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
 /* Slider label row (name + value) */
@@ -596,20 +596,20 @@
   }
 
   .editor-unified-footer {
-    flex: 0 0 400px; /* Desktop: slightly taller */
+    flex: 0 0 340px; /* Desktop compact: 52 + 236 + 52 */
   }
 
   .tool-selector-row {
-    flex: 0 0 64px;
+    flex: 0 0 52px;
     gap: 8px;
   }
 
   .panel-content-wrapper {
-    flex: 0 0 272px; /* Desktop: slightly taller */
+    flex: 0 0 236px; /* Desktop compact */
   }
 
   .action-buttons-row {
-    flex: 0 0 64px;
+    flex: 0 0 52px;
   }
 }
 
