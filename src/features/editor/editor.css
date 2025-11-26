@@ -83,7 +83,7 @@
    ============================================================================ */
 
 .editor-unified-footer {
-  flex: 0 0 288px; /* AGGRESSIVE: 44px + 204px + 40px */
+  flex: 0 0 250px; /* ULTRA-COMPACT: 38px + 176px + 36px */
   display: flex;
   flex-direction: column;
   background: rgba(0, 0, 0, 0.98);
@@ -92,9 +92,9 @@
   z-index: 30;
 }
 
-/* Row 1: Tool Selector - 44px aggressive */
+/* Row 1: Tool Selector - 38px ultra-compact */
 .tool-selector-row {
-  flex: 0 0 44px;
+  flex: 0 0 38px;
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -103,9 +103,9 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Row 2: Panel Content Wrapper - 204px ultra-compact */
+/* Row 2: Panel Content Wrapper - 176px ultra-compact */
 .panel-content-wrapper {
-  flex: 0 0 204px;
+  flex: 0 0 176px;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 10px 12px;
@@ -127,9 +127,9 @@
   border-radius: 2px;
 }
 
-/* Row 3: Action Buttons - 40px aggressive */
+/* Row 3: Action Buttons - 36px ultra-compact */
 .action-buttons-row {
-  flex: 0 0 40px;
+  flex: 0 0 36px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -596,7 +596,7 @@
   }
 
   .editor-unified-footer {
-    flex: 0 0 308px; /* Desktop aggressive: 48 + 220 + 40 */
+    flex: 0 0 308px; /* Desktop ultra-compact: 52 + 220 + 36 */
   }
 
   .tool-selector-row {
@@ -609,7 +609,7 @@
   }
 
   .action-buttons-row {
-    flex: 0 0 40px;
+    flex: 0 0 36px;
   }
 }
 
