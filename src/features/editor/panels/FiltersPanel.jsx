@@ -6,6 +6,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import useEditorStore from '../editorStore';
+import { getCssFilter } from '../utils/filterUtils';
 
 /**
  * FiltersPanel - Filter Preset Selection (Phase 8B-5)
@@ -87,7 +88,7 @@ const FiltersPanel = ({ viewportRef, photo }) => {
                   style={{
                     // Phase 1A: Real filter preview
                     opacity: 1,
-                    filter: getPreviewFilter(filterItem.id),
+                    filter: getCssFilter(filterItem.id),
                   }}
                 />
               ) : (
@@ -115,30 +116,6 @@ const FiltersPanel = ({ viewportRef, photo }) => {
       </p>
     </div>
   );
-};
-
-/**
- * Get CSS filter for preview (Phase 1A)
- */
-const getPreviewFilter = (filterId) => {
-  switch (filterId) {
-    case 'original':
-      return 'none';
-    case 'bright':
-      return 'brightness(1.2) contrast(1.05)';
-    case 'warm':
-      return 'brightness(1.05) sepia(0.3) saturate(1.2)';
-    case 'cool':
-      return 'brightness(0.95) saturate(1.3) hue-rotate(10deg)';
-    case 'fade':
-      return 'contrast(0.85) brightness(1.1) saturate(0.8)';
-    case 'mono':
-      return 'grayscale(1) contrast(1.1)';
-    case 'vintage':
-      return 'sepia(0.4) contrast(0.9) brightness(0.95)';
-    default:
-      return 'none';
-  }
 };
 
 export default FiltersPanel;
