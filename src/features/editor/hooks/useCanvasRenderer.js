@@ -141,7 +141,7 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
       // Normal mode: draw image with full transforms (zoom, pan, rotation, flip)
       drawImageWithFullTransform(ctx, image, width, height, activeTransform)
     }
-  }, [transform, externalTransform, appliedCropBox])
+  }, [transform, externalTransform, appliedCropBox, filter])
 
   /**
    * Set zoom level with pan clamping (Phase 8B-3: rotation-aware)
