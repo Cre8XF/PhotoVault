@@ -250,8 +250,15 @@ export const drawImageWithFullTransform = (ctx, image, canvasWidth, canvasHeight
 
   if (adjust) {
     const adjustString = buildCanvasAdjustString(adjust);
-    // Combine named filter + adjust filters
-    ctx.filter = namedFilterCss ? `${namedFilterCss} ${adjustString}` : adjustString;
+
+    // FIX: Don't concatenate if adjustString is 'none'
+    if (adjustString === 'none') {
+      ctx.filter = namedFilterCss || 'none';
+    } else if (namedFilterCss) {
+      ctx.filter = `${namedFilterCss} ${adjustString}`;
+    } else {
+      ctx.filter = adjustString;
+    }
   } else if (namedFilterCss) {
     // Only named filter, no adjust filters
     ctx.filter = namedFilterCss;
@@ -372,8 +379,15 @@ export const drawCroppedImageToCanvas = (ctx, image, canvasWidth, canvasHeight, 
 
   if (adjust) {
     const adjustString = buildCanvasAdjustString(adjust);
-    // Combine named filter + adjust filters
-    ctx.filter = namedFilterCss ? `${namedFilterCss} ${adjustString}` : adjustString;
+
+    // FIX: Don't concatenate if adjustString is 'none'
+    if (adjustString === 'none') {
+      ctx.filter = namedFilterCss || 'none';
+    } else if (namedFilterCss) {
+      ctx.filter = `${namedFilterCss} ${adjustString}`;
+    } else {
+      ctx.filter = adjustString;
+    }
   } else if (namedFilterCss) {
     // Only named filter, no adjust filters
     ctx.filter = namedFilterCss;
