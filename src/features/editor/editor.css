@@ -1273,3 +1273,23 @@
   padding: 16px 18px 22px 18px;
   row-gap: 10px;
 }
+/* Adjust Panel Layout Upgrade */
+.adjust-content {
+  display: grid;
+  grid-template-columns: 1fr 40px; /* Right column: scroll-safe zone */
+  height: 100%;
+  width: 100%;
+}
+
+.adjust-sliders-list {
+  padding-right: 12px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.adjust-scrollzone {
+  touch-action: pan-y;
+  background: transparent;
+  width: 100%;
+  height: 100%;
+}
