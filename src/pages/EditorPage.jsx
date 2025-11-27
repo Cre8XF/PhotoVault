@@ -315,7 +315,7 @@ const EditorPage = () => {
   return (
     <div className="editor-world">
       {/* Minimal Header - Back button only */}
-      <div className="editor-minimal-header bg-[rgba(0,0,0,0.85)] backdrop-blur-xl border-b border-white/10 py-3">
+      <header className="editor-minimal-header bg-[rgba(0,0,0,0.85)] backdrop-blur-xl border-b border-white/10 py-3">
         <button
           onClick={handleBack}
           className="flex items-center gap-2 px-3 py-2 hover:bg-white/10 rounded-lg transition text-white"
@@ -323,7 +323,7 @@ const EditorPage = () => {
           <ArrowLeft className="w-5 h-5" />
           <span className="text-sm font-medium">{t('common:back', 'Back')}</span>
         </button>
-      </div>
+      </header>
 
       {/* Viewport Shell - Phase 8C-4: Canvas with Crop Support */}
       <EditorViewport
@@ -357,14 +357,10 @@ const EditorPage = () => {
               <button
                 key={tool.id}
                 onClick={() => handleToolChange(tool.id)}
-                className={`tool-button ${
-                  isActive
-                    ? 'tool-button--active opacity-100 scale-[1.08] text-purple-400 font-semibold'
-                    : 'opacity-70 hover:opacity-100 transition'
-                }`}
+                className={`tool-button ${isActive ? 'tool-button-active' : ''}`}
               >
-                <Icon className="w-[22px] h-[22px]" />
-                <span>{tool.label}</span>
+                <Icon />
+                <span className="tool-label">{tool.label}</span>
               </button>
             );
           })}
@@ -374,10 +370,10 @@ const EditorPage = () => {
           <button
             onClick={handleReset}
             disabled={!hasTransforms()}
-            className="tool-button opacity-70 hover:opacity-100 transition disabled:opacity-30 disabled:cursor-not-allowed"
+            className="tool-button disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            <RotateCcw className="w-[22px] h-[22px]" />
-            <span>{t('editor.reset', 'Reset')}</span>
+            <RotateCcw />
+            <span className="tool-label">{t('editor.reset', 'Reset')}</span>
           </button>
         </div>
 

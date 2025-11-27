@@ -98,13 +98,13 @@ const AdjustPanel = ({ viewportRef }) => {
   });
 
   return (
-    <div className="panel-inner">
+    <section className="panel-content-wrapper">
       <div className="adjust-panel">
         {/* Header */}
         <div className="adjust-panel-header">
-          <h3 className="text-base font-semibold text-white/90">
+          <h2 className="panel-title">
             {t('editor.adjust.title', 'Adjust')}
-          </h3>
+          </h2>
 
           {/* Reset All Button */}
           {hasChanges && (
@@ -156,7 +156,7 @@ const AdjustPanel = ({ viewportRef }) => {
           )}
         </p>
       </div>
-    </div>
+    </section>
   );
 };
 

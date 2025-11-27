@@ -51,72 +51,70 @@ const FiltersPanel = ({ viewportRef, photo }) => {
   };
 
   return (
-    <div className="panel-inner">
-      <div className="space-y-3 shadow-inner shadow-black/40 rounded-xl bg-black/40 backdrop-blur-xl p-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold text-white/90">
-            {t('editor.filters.title', 'Filters')}
-          </h3>
+    <section className="panel-content-wrapper">
+      <div className="flex items-center justify-between">
+        <h2 className="panel-title">
+          {t('editor.filters.title', 'Filters')}
+        </h2>
 
-          {/* Clear Filter Button */}
-          {filter !== 'original' && (
-            <button
-              onClick={handleClearFilter}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 rounded-full hover:bg-zinc-700 transition text-xs text-white font-medium"
-            >
-              <X className="w-4 h-4" />
-              {t('editor.filters.clear', 'Clear Filter')}
-            </button>
-          )}
-        </div>
-
-        {/* Horizontal Scrollable Filter Row */}
-        <div className="filters-row">
-          {FILTERS.map((filterItem) => (
-            <button
-              key={filterItem.id}
-              onClick={() => handleFilterSelect(filterItem.id)}
-              className={`filter-item filter-thumb ${filter === filterItem.id ? 'filter-item--selected active' : ''}`}
-              aria-label={t(`editor.filters.${filterItem.id}`, filterItem.name)}
-            >
-              {/* Filter Thumbnail Preview */}
-              <div className="filter-thumbnail">
-                {photo?.url ? (
-                  <img
-                    src={photo.url}
-                    alt={filterItem.name}
-                    className="w-full h-full object-cover"
-                    style={{
-                      // Phase 1A: Real filter preview
-                      opacity: 1,
-                      filter: getCssFilter(filterItem.id),
-                    }}
-                  />
-                ) : (
-                  // Fallback placeholder if no photo
-                  <div className="w-full h-full bg-white/5 flex items-center justify-center">
-                    <span className="text-white/40 text-xs">?</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Filter Name */}
-              <span className="filter-name">
-                {t(`editor.filters.${filterItem.id}`, filterItem.name)}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {/* Instructions */}
-        <p className="text-xs text-white/60 text-center mt-2">
-          {t(
-            'editor.filters.instructions',
-            'Tap a filter to preview. Use Clear Filter or Reset to remove.'
-          )}
-        </p>
+        {/* Clear Filter Button */}
+        {filter !== 'original' && (
+          <button
+            onClick={handleClearFilter}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 rounded-full hover:bg-zinc-700 transition text-xs text-white font-medium"
+          >
+            <X className="w-4 h-4" />
+            {t('editor.filters.clear', 'Clear Filter')}
+          </button>
+        )}
       </div>
-    </div>
+
+      {/* Horizontal Scrollable Filter Row */}
+      <div className="filters-grid">
+        {FILTERS.map((filterItem) => (
+          <button
+            key={filterItem.id}
+            onClick={() => handleFilterSelect(filterItem.id)}
+            className={`filter-item ${filter === filterItem.id ? 'filter-item-active' : ''}`}
+            aria-label={t(`editor.filters.${filterItem.id}`, filterItem.name)}
+          >
+            {/* Filter Thumbnail Preview */}
+            <div className="filter-thumbnail">
+              {photo?.url ? (
+                <img
+                  src={photo.url}
+                  alt={filterItem.name}
+                  className="w-full h-full object-cover"
+                  style={{
+                    // Phase 1A: Real filter preview
+                    opacity: 1,
+                    filter: getCssFilter(filterItem.id),
+                  }}
+                />
+              ) : (
+                // Fallback placeholder if no photo
+                <div className="w-full h-full bg-white/5 flex items-center justify-center">
+                  <span className="text-white/40 text-xs">?</span>
+                </div>
+              )}
+            </div>
+
+            {/* Filter Name */}
+            <span className="filter-name">
+              {t(`editor.filters.${filterItem.id}`, filterItem.name)}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {/* Instructions */}
+      <p className="text-xs text-white/60 text-center mt-2">
+        {t(
+          'editor.filters.instructions',
+          'Tap a filter to preview. Use Clear Filter or Reset to remove.'
+        )}
+      </p>
+    </section>
   );
 };
 
