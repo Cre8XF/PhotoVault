@@ -1490,3 +1490,97 @@
     touch-action: pan-x;
   }
 }
+
+/* ============================
+   PHASE 3A — SCROLL-SAFE CARD LAYOUT
+   ============================ */
+
+/* Adjust Panel Padding */
+.adjust-panel {
+  padding: 0.75rem 1rem 1rem;
+}
+
+/* Scroll Container */
+.adjust-scroll {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+  padding-bottom: 1.25rem;
+}
+
+/* Larger screens - more height */
+@media (min-width: 768px) {
+  .adjust-scroll {
+    max-height: 320px;
+  }
+}
+
+/* Thin scrollbar styling */
+.adjust-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.adjust-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.adjust-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+}
+
+/* Individual Adjust Card */
+.adjust-card {
+  background: radial-gradient(
+    circle at top left,
+    rgba(255, 255, 255, 0.06),
+    rgba(12, 12, 12, 0.96)
+  );
+  border-radius: 0.9rem;
+  padding: 0.7rem 0.9rem 0.85rem;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 8px 18px rgba(0, 0, 0, 0.65);
+}
+
+/* Card Header - Label and Value */
+.adjust-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.45rem;
+  font-size: 0.9rem;
+}
+
+/* Label Styling */
+.adjust-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+/* Value Display */
+.adjust-value {
+  color: rgba(255, 255, 255, 0.6);
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+  font-size: 0.8rem;
+}
+
+/* Slider Row - Touch-friendly spacing */
+.adjust-slider-row {
+  padding-top: 0.1rem;
+}
+
+/* Increase touch height for sliders in cards */
+.adjust-card input[type='range'],
+.adjust-card .range-input,
+.adjust-card .slider-input {
+  min-height: 24px;
+}
+
+/* Last card spacing */
+.adjust-card:last-child {
+  margin-bottom: 0.25rem;
+}
