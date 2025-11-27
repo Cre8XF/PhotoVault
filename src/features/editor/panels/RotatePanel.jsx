@@ -49,11 +49,11 @@ const RotatePanel = ({ viewportRef }) => {
   };
 
   return (
-    <div className="panel-inner">
+    <section className="panel-content-wrapper">
       <div className="space-y-3">
-        <h3 className="text-base font-semibold text-white/90 mb-2">
+        <h2 className="panel-title">
           {t('editor.rotate.title', 'Rotate & Flip')}
-        </h3>
+        </h2>
 
         {/* Rotate & Flip Grid - 2x2 */}
         <div className="rotate-panel-grid">
@@ -111,7 +111,7 @@ const RotatePanel = ({ viewportRef }) => {
           {t('editor.rotate.instructions', 'Tap buttons to rotate or flip the image. Use Reset to undo all changes.')}
         </p>
       </div>
-    </div>
+    </section>
   );
 };
 
