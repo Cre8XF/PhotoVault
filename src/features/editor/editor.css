@@ -1293,3 +1293,200 @@
   width: 100%;
   height: 100%;
 }
+
+/* ============================
+   ULTRA-PREMIUM PHASE 3 — CSS-ONLY PATCH
+   ============================ */
+
+/* ============================
+   DESKTOP LAYOUT PREMIUM MODE
+   ============================ */
+@media (min-width: 1024px) {
+  .editor-tools-bar {
+    max-width: 900px;
+    margin: 12px auto 0;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    padding-bottom: 12px;
+  }
+
+  .editor-tools-bar button {
+    transform: scale(0.85);
+    transition: 0.25s ease;
+  }
+
+  .editor-tools-bar button:hover {
+    transform: scale(0.93);
+  }
+
+  .editor-panel {
+    max-width: 800px;
+    margin: 24px auto 0;
+    border-radius: 16px;
+    padding: 24px 32px;
+  }
+
+  .editor-footer {
+    max-width: 800px;
+    margin: 24px auto;
+    padding: 0 32px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .editor-footer .btn-primary {
+    width: auto;
+    padding: 12px 28px;
+  }
+}
+
+/* ============================
+   ULTRA SLIDERS
+   ============================ */
+.adjust-sliders-list {
+  gap: 18px;
+}
+
+.adjust-slider {
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 999px;
+  outline: none;
+  transition: background 0.3s ease;
+}
+
+.adjust-slider:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+.adjust-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: #a855f7;
+  border-radius: 999px;
+  box-shadow: 0 0 6px #a855f7;
+  transition: 0.2s ease;
+}
+
+.adjust-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 10px #c084fc;
+}
+
+/* DESKTOP LIMIT */
+@media (min-width: 1024px) {
+  .adjust-sliders-list {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+}
+
+/* ============================
+   TOOL ACTIVE GLOW
+   ============================ */
+.tool-button-active {
+  background: rgba(147, 51, 234, 0.25);
+  box-shadow: 0 0 12px rgba(167, 139, 250, 0.55);
+  border-radius: 12px;
+}
+
+/* ============================
+   FILTER PREVIEWS
+   ============================ */
+.filter-item {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.filter-item:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 12px rgba(255,255,255,0.22);
+}
+
+.filter-item.active {
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.7);
+}
+
+/* ============================
+   CROP PANEL
+   ============================ */
+.crop-aspect-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.crop-aspect-btn {
+  padding: 12px 0;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.1);
+  transition: 0.2s ease;
+}
+
+.crop-aspect-btn:hover {
+  background: rgba(255,255,255,0.2);
+  transform: scale(1.05);
+}
+
+/* DESKTOP inline layout */
+@media (min-width: 1024px) {
+  .crop-aspect-grid {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+  }
+}
+
+/* ============================
+   ROTATE BUTTONS
+   ============================ */
+.rotate-btn {
+  padding: 12px 18px;
+  border-radius: 14px;
+  transition: 0.25s ease;
+}
+
+.rotate-btn:hover {
+  transform: scale(1.07);
+  background: rgba(255,255,255,0.15);
+}
+
+/* DESKTOP */
+@media (min-width: 1024px) {
+  .rotate-btn {
+    transform: scale(0.85);
+  }
+
+  .rotate-btn:hover {
+    transform: scale(0.92);
+  }
+}
+
+/* ============================
+   SMOOTH PANEL TRANSITIONS
+   ============================ */
+.editor-panel {
+  animation: fadeUp 0.32s ease forwards;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================
+   SCROLL-SAFE ADJUST
+   ============================ */
+@media (max-width: 768px) {
+  .adjust-slider-item {
+    padding: 8px 4px;
+  }
+
+  .adjust-slider {
+    pointer-events: auto;
+    touch-action: pan-x;
+  }
+}
