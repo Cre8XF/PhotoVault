@@ -395,16 +395,16 @@ const EditorPage = () => {
         <div className="action-buttons-row">
           <button
             onClick={handleBack}
-            className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg transition font-medium text-white text-sm"
+            className="btn-secondary flex-1 max-w-[120px]"
           >
             {t('common:cancel', 'Cancel')}
           </button>
           <button
             onClick={handleSave}
             disabled={!hasTransforms()}
-            className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition font-medium text-white text-sm"
+            className="btn-primary flex-1 max-w-[120px]"
           >
-            <Save className="w-4 h-4" />
+            <Save className="icon" />
             {t('editor.save', 'Save')}
           </button>
         </div>

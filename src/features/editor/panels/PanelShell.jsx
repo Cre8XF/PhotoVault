@@ -81,133 +81,112 @@ const PanelShell = ({ activeTool, viewportRef, photo, onCropApplied }) => {
     switch (activeTool) {
       case 'crop':
         return (
-          <div className="panel-inner">
-            <div className="space-y-3">
-              <h3 className="text-lg font-bold text-white mb-3">{t('editor.crop', 'Crop')}</h3>
+          <section className="panel-content-wrapper">
+            <h2 className="panel-title">{t('editor.crop', 'Crop')}</h2>
 
             {/* Aspect Ratio Presets */}
-            <div>
-              <label className="text-sm font-medium mb-2 block text-white">
-                {t('editor.crop.aspectRatio', 'Aspect Ratio')}
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {/* Free aspect ratio */}
-                <button
-                  onClick={() => {
-                    const crop = transform.crop;
-                    if (crop) {
-                      applyTransform('crop', { ...crop, aspectRatio: null });
-                    }
-                  }}
-                  className={`px-3 py-2 rounded-lg transition text-sm text-white ${
-                    transform.crop?.aspectRatio === null
-                      ? 'bg-purple-600 hover:bg-purple-700'
-                      : 'bg-white/10 hover:bg-white/20'
-                  }`}
-                >
-                  {t('editor.crop.free', 'Free')}
-                </button>
-
-                {/* Square 1:1 */}
-                <button
-                  onClick={() => {
-                    const crop = transform.crop;
-                    if (crop) {
-                      const newCrop = applyCropAspectRatio(crop, 1, 'center');
-                      const clampedCrop = clampCropRect(newCrop);
-                      applyTransform('crop', { ...clampedCrop, aspectRatio: 1 });
-                    }
-                  }}
-                  className={`px-3 py-2 rounded-lg transition text-sm text-white ${
-                    transform.crop?.aspectRatio === 1
-                      ? 'bg-purple-600 hover:bg-purple-700'
-                      : 'bg-white/10 hover:bg-white/20'
-                  }`}
-                >
-                  {t('editor.crop.square', '1:1')}
-                </button>
-
-                {/* Portrait 4:5 */}
-                <button
-                  onClick={() => {
-                    const crop = transform.crop;
-                    if (crop) {
-                      const newCrop = applyCropAspectRatio(crop, 4/5, 'center');
-                      const clampedCrop = clampCropRect(newCrop);
-                      applyTransform('crop', { ...clampedCrop, aspectRatio: 4/5 });
-                    }
-                  }}
-                  className={`px-3 py-2 rounded-lg transition text-sm text-white ${
-                    transform.crop?.aspectRatio === 4/5
-                      ? 'bg-purple-600 hover:bg-purple-700'
-                      : 'bg-white/10 hover:bg-white/20'
-                  }`}
-                >
-                  {t('editor.crop.portrait', '4:5')}
-                </button>
-
-                {/* Landscape 16:9 */}
-                <button
-                  onClick={() => {
-                    const crop = transform.crop;
-                    if (crop) {
-                      const newCrop = applyCropAspectRatio(crop, 16/9, 'center');
-                      const clampedCrop = clampCropRect(newCrop);
-                      applyTransform('crop', { ...clampedCrop, aspectRatio: 16/9 });
-                    }
-                  }}
-                  className={`px-3 py-2 rounded-lg transition text-sm text-white ${
-                    transform.crop?.aspectRatio === 16/9
-                      ? 'bg-purple-600 hover:bg-purple-700'
-                      : 'bg-white/10 hover:bg-white/20'
-                  }`}
-                >
-                  {t('editor.crop.landscape', '16:9')}
-                </button>
-              </div>
-            </div>
-
-            {/* Apply Crop Button */}
-            <button
-              onClick={() => {
-                const cropRect = transform.crop;
-                if (cropRect && viewportRef?.current) {
-                  viewportRef.current.applyCrop(cropRect);
-                  console.log('🔷 Crop applied to canvas');
-
-                  // Notify parent that crop is applied
-                  if (typeof onCropApplied === 'function') {
-                    onCropApplied();
-                  }
-                }
-              }}
-              disabled={!transform.crop}
-              className="w-full px-4 py-3 bg-green-600 rounded-lg hover:bg-green-700 active:bg-green-800 transition disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-base shadow-lg"
-            >
-              {t('editor.crop.apply', 'Apply Crop')}
-            </button>
-
-            {/* Clear Crop Button - shown only when crop is applied */}
-            {viewportRef?.current?.getAppliedCrop() && (
+            <div className="crop-aspect-grid">
+              {/* Free aspect ratio */}
               <button
                 onClick={() => {
-                  if (viewportRef?.current) {
-                    viewportRef.current.clearCrop();
-                    console.log('🔷 Crop cleared - back to full image');
+                  const crop = transform.crop;
+                  if (crop) {
+                    applyTransform('crop', { ...crop, aspectRatio: null });
                   }
                 }}
-                className="w-full px-4 py-2.5 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium text-sm"
+                className={`crop-aspect-btn ${transform.crop?.aspectRatio === null ? 'active' : ''}`}
               >
-                {t('editor.crop.clear', 'Clear Crop')}
+                {t('editor.crop.free', 'Free')}
               </button>
-            )}
+
+              {/* Square 1:1 */}
+              <button
+                onClick={() => {
+                  const crop = transform.crop;
+                  if (crop) {
+                    const newCrop = applyCropAspectRatio(crop, 1, 'center');
+                    const clampedCrop = clampCropRect(newCrop);
+                    applyTransform('crop', { ...clampedCrop, aspectRatio: 1 });
+                  }
+                }}
+                className={`crop-aspect-btn ${transform.crop?.aspectRatio === 1 ? 'active' : ''}`}
+              >
+                {t('editor.crop.square', '1:1')}
+              </button>
+
+              {/* Portrait 4:5 */}
+              <button
+                onClick={() => {
+                  const crop = transform.crop;
+                  if (crop) {
+                    const newCrop = applyCropAspectRatio(crop, 4/5, 'center');
+                    const clampedCrop = clampCropRect(newCrop);
+                    applyTransform('crop', { ...clampedCrop, aspectRatio: 4/5 });
+                  }
+                }}
+                className={`crop-aspect-btn ${transform.crop?.aspectRatio === 4/5 ? 'active' : ''}`}
+              >
+                {t('editor.crop.portrait', '4:5')}
+              </button>
+
+              {/* Landscape 16:9 */}
+              <button
+                onClick={() => {
+                  const crop = transform.crop;
+                  if (crop) {
+                    const newCrop = applyCropAspectRatio(crop, 16/9, 'center');
+                    const clampedCrop = clampCropRect(newCrop);
+                    applyTransform('crop', { ...clampedCrop, aspectRatio: 16/9 });
+                  }
+                }}
+                className={`crop-aspect-btn ${transform.crop?.aspectRatio === 16/9 ? 'active' : ''}`}
+              >
+                {t('editor.crop.landscape', '16:9')}
+              </button>
+            </div>
+
+            {/* Apply / Clear Crop actions */}
+            <div className="crop-actions">
+              <button
+                onClick={() => {
+                  const cropRect = transform.crop;
+                  if (cropRect && viewportRef?.current) {
+                    viewportRef.current.applyCrop(cropRect);
+                    console.log('🔷 Crop applied to canvas');
+
+                    // Notify parent that crop is applied
+                    if (typeof onCropApplied === 'function') {
+                      onCropApplied();
+                    }
+                  }
+                }}
+                disabled={!transform.crop}
+                className="btn-primary w-full"
+              >
+                {t('editor.crop.apply', 'Apply Crop')}
+              </button>
+
+              {/* Clear Crop Button - shown only when crop is applied */}
+              {viewportRef?.current?.getAppliedCrop() && (
+                <button
+                  onClick={() => {
+                    if (viewportRef?.current) {
+                      viewportRef.current.clearCrop();
+                      console.log('🔷 Crop cleared - back to full image');
+                    }
+                  }}
+                  className="btn-secondary w-full"
+                >
+                  {t('editor.crop.clear', 'Clear Crop')}
+                </button>
+              )}
+            </div>
 
             {/* Instructions */}
             <p className="text-xs text-white/60 text-center mt-2">
               {t('editor.crop.instructions', 'Drag handles to crop. Pinch to zoom. Tap Apply when ready.')}
             </p>
-            </div>
-          </div>
+          </section>
         );
 
       case 'adjust':
