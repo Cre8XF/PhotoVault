@@ -349,7 +349,7 @@ const EditorPage = () => {
       {/* Unified Footer - 3 rows: tools | panel | actions */}
       <div className="editor-unified-footer">
         {/* Row 1: Tool Selector */}
-        <div className="tool-selector-row">
+        <div className="tool-strip tool-selector-row">
           {tools.map((tool) => {
             const Icon = tool.icon;
             const isActive = activeTool === tool.id;
@@ -392,7 +392,7 @@ const EditorPage = () => {
         </div>
 
         {/* Row 3: Action Buttons */}
-        <div className="action-buttons-row">
+        <div className="editor-footer-bar action-buttons-row">
           <button
             onClick={handleBack}
             className="btn-secondary flex-1 max-w-[120px]"
