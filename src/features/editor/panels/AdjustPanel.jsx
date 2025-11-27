@@ -159,21 +159,20 @@ const AdjustPanel = ({ viewportRef }) => {
           )}
         </div>
 
-        {/* --- CONTENT AREA: sliders + scroll-safe zone --- */}
-        <div className="adjust-content">
-          {/* Sliders */}
-          <div className="adjust-sliders-list">
-            {ADJUST_SLIDERS.map((slider) => (
-              <div key={slider.key} className="adjust-slider-item">
-                {/* Label + Value */}
-                <div className="adjust-slider-label">
-                  <span>{t(`editor.adjust.${slider.key}`, slider.label)}</span>
-                  <span className="text-xs text-white/60">
-                    {sliderValues[slider.key]}
-                  </span>
-                </div>
+        {/* Scroll Container with Cards */}
+        <div className="adjust-scroll">
+          {ADJUST_SLIDERS.map((slider) => (
+            <section key={slider.key} className="adjust-card">
+              {/* Card Header: Label + Value */}
+              <div className="adjust-card-header">
+                <span className="adjust-label">
+                  {t(`editor.adjust.${slider.key}`, slider.label)}
+                </span>
+                <span className="adjust-value">{sliderValues[slider.key]}</span>
+              </div>
 
-                {/* Slider */}
+              {/* Slider Row */}
+              <div className="adjust-slider-row">
                 <input
                   type="range"
                   min={slider.min}
@@ -187,21 +186,9 @@ const AdjustPanel = ({ viewportRef }) => {
                   aria-label={slider.label}
                 />
               </div>
-            ))}
-          </div>
-
-          {/* Scroll-safe zone (so scrolling doesn't hit sliders) */}
-          <div className="adjust-scrollzone" />
+            </section>
+          ))}
         </div>
-        {/* --- END CONTENT AREA --- */}
-
-        {/* Instructions */}
-        <p className="text-xs text-white/50 text-center mt-2">
-          {t(
-            'editor.adjust.instructions',
-            'Drag sliders to adjust. Changes apply instantly. Use Reset All to undo.'
-          )}
-        </p>
       </div>
     </section>
   )
