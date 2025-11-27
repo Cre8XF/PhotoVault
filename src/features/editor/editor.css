@@ -68,7 +68,7 @@
   touch-action: none;
 }
 
-/* Canvas - fills entire viewport container */
+/* Canvas - fills entire viewport container with Google Photos style shadow */
 .editor-viewport-canvas {
   width: 100%;
   height: 100%;
@@ -76,6 +76,8 @@
   display: block;
   user-select: none;
   touch-action: none;
+  border-radius: 12px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
 }
 
 /* ============================================================================
@@ -101,6 +103,42 @@
   gap: 2px;
   padding: 4px 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Tool Button Styles - Google Photos minimal aesthetic */
+.tool-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tool-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.tool-button--active {
+  background: rgba(168, 85, 255, 0.14);
+  color: #a855ff;
+  font-weight: 500;
+}
+
+/* Tool Divider */
+.tool-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0 4px;
 }
 
 /* Row 2: Panel Content Wrapper - 176px ultra-compact */
@@ -138,16 +176,55 @@
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.action-buttons-row button {
+/* Primary Action Button (Save/Apply) - Google Photos style */
+.action-buttons-row button:last-child {
   flex: 1;
   max-width: 120px;
-  height: 36px;
-  border-radius: 6px;
+  height: 32px;
+  border-radius: 999px;
   font-size: 13px;
   font-weight: 600;
   transition: all 0.2s ease;
   cursor: pointer;
   border: none;
+  background: #a855ff;
+  color: white;
+  box-shadow: 0 2px 8px rgba(168, 85, 255, 0.3);
+}
+
+.action-buttons-row button:last-child:hover {
+  background: #9333ea;
+  box-shadow: 0 4px 12px rgba(168, 85, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.action-buttons-row button:last-child:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(168, 85, 255, 0.3);
+}
+
+/* Secondary Action Button (Cancel) - Google Photos style */
+.action-buttons-row button:first-child {
+  flex: 1;
+  max-width: 120px;
+  height: 32px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.action-buttons-row button:first-child:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.action-buttons-row button:first-child:active {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 /* ============================================================================
@@ -159,7 +236,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
 }
 
 .editor-panel-content {
@@ -188,23 +265,23 @@
 .rotate-panel-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 8px;
   margin-top: 8px;
 }
 
-/* Individual rotate/flip button */
+/* Individual rotate/flip button - Google Photos pill style */
 .rotate-panel-button {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 12px 8px;
+  gap: 4px;
+  padding: 10px 8px;
   min-height: 68px;
-  background: rgba(255, 255, 255, 0.1);
+  background: #18181b;
   border: none;
-  border-radius: 8px;
-  color: white;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.9);
   cursor: pointer;
   transition: all 0.2s ease;
   user-select: none;
@@ -212,13 +289,13 @@
 }
 
 .rotate-panel-button:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: translateY(-2px);
+  background: #27272a;
+  transform: scale(1.02);
 }
 
 .rotate-panel-button:active {
-  background: rgba(147, 51, 234, 0.3);
-  transform: translateY(0);
+  background: rgba(168, 85, 255, 0.2);
+  transform: scale(0.98);
 }
 
 /* Mobile optimization */
@@ -245,10 +322,10 @@
    FILTERS PANEL - Phase 8B-5
    ============================================================================ */
 
-/* Horizontal scrollable filter row */
+/* Horizontal scrollable filter row - Google Photos spacing */
 .filters-row {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   overflow-x: auto;
   overflow-y: hidden;
   padding-bottom: 8px;
@@ -278,16 +355,16 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* Individual filter item */
+/* Individual filter item - Google Photos style */
 .filter-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 6px;
+  gap: 6px;
+  padding: 4px;
   background: transparent;
-  border: 2px solid transparent;
-  border-radius: 10px;
+  border: none;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   user-select: none;
@@ -297,30 +374,34 @@
 }
 
 .filter-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .filter-item:active {
-  transform: scale(0.95);
+  transform: scale(0.96);
 }
 
-/* Selected filter state */
+/* Selected filter state - Google Photos purple outline */
 .filter-item--selected {
-  border-color: rgb(147, 51, 234);
-  background: rgba(147, 51, 234, 0.1);
-  box-shadow: 0 0 8px rgba(147, 51, 234, 0.4);
+  background: transparent;
 }
 
-/* Filter thumbnail preview */
+.filter-item--selected .filter-thumbnail {
+  outline: 3px solid #a855ff;
+  outline-offset: -3px;
+}
+
+/* Filter thumbnail preview - Google Photos style */
 .filter-thumbnail {
   width: 56px;
   height: 56px;
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
 }
 
 .filter-thumbnail img {
@@ -342,11 +423,10 @@
   white-space: nowrap;
 }
 
-/* Active filter styling (Phase 1A) */
-.filter-item.active {
-  outline: 3px solid #a855f7;
+/* Active filter styling (legacy support) */
+.filter-item.active .filter-thumbnail {
+  outline: 3px solid #a855ff;
   outline-offset: -3px;
-  border-radius: 14px;
 }
 
 /* Mobile optimization */
@@ -400,7 +480,7 @@
 .adjust-panel {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 7px;
 }
 
 /* Header with title and reset button */
@@ -411,16 +491,16 @@
   margin-bottom: 6px;
 }
 
-/* Reset All button */
+/* Reset All button - Google Photos style */
 .adjust-reset-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  background: rgba(255, 255, 255, 0.1);
+  gap: 4px;
+  padding: 6px 12px;
+  background: #18181b;
   border: none;
-  border-radius: 6px;
-  color: white;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 11px;
   font-weight: 500;
   cursor: pointer;
@@ -430,11 +510,12 @@
 }
 
 .adjust-reset-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: #27272a;
+  transform: scale(1.02);
 }
 
 .adjust-reset-btn:active {
-  background: rgba(147, 51, 234, 0.3);
+  background: rgba(168, 85, 255, 0.2);
   transform: scale(0.98);
 }
 
@@ -482,14 +563,14 @@
   align-items: center;
 }
 
-/* Range slider styling */
+/* Range slider styling - Google Photos modern aesthetic */
 .adjust-slider {
   width: 100%;
-  height: 4px;
+  height: 5px;
   -webkit-appearance: none;
   appearance: none;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
   outline: none;
   cursor: pointer;
 }
@@ -497,60 +578,62 @@
 /* Slider track */
 .adjust-slider::-webkit-slider-track {
   width: 100%;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
 }
 
 .adjust-slider::-moz-range-track {
   width: 100%;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
 }
 
-/* Slider thumb */
+/* Slider thumb - Google Photos purple aesthetic */
 .adjust-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
-  background: white;
-  border: 2px solid rgb(147, 51, 234);
+  width: 20px;
+  height: 20px;
+  background: #a855ff;
+  border: 3px solid rgba(0, 0, 0, 0.5);
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  transition: transform 0.1s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), 0 0 0 0 rgba(168, 85, 255, 0.3);
+  transition: all 0.2s ease;
 }
 
 .adjust-slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  background: white;
-  border: 2px solid rgb(147, 51, 234);
+  width: 20px;
+  height: 20px;
+  background: #a855ff;
+  border: 3px solid rgba(0, 0, 0, 0.5);
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  transition: transform 0.1s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), 0 0 0 0 rgba(168, 85, 255, 0.3);
+  transition: all 0.2s ease;
 }
 
-/* Active/hover states */
+/* Active/hover states - enhanced feedback */
 .adjust-slider:hover::-webkit-slider-thumb {
-  transform: scale(1.1);
+  transform: scale(1.15);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5), 0 0 0 4px rgba(168, 85, 255, 0.15);
 }
 
 .adjust-slider:hover::-moz-range-thumb {
-  transform: scale(1.1);
+  transform: scale(1.15);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5), 0 0 0 4px rgba(168, 85, 255, 0.15);
 }
 
 .adjust-slider:active::-webkit-slider-thumb {
-  transform: scale(1.2);
-  box-shadow: 0 0 8px rgba(147, 51, 234, 0.5);
+  transform: scale(1.25);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), 0 0 0 6px rgba(168, 85, 255, 0.25);
 }
 
 .adjust-slider:active::-moz-range-thumb {
-  transform: scale(1.2);
-  box-shadow: 0 0 8px rgba(147, 51, 234, 0.5);
+  transform: scale(1.25);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), 0 0 0 6px rgba(168, 85, 255, 0.25);
 }
 
 /* Mobile optimization */
