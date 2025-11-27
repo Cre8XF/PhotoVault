@@ -98,7 +98,7 @@ const AdjustPanel = ({ viewportRef }) => {
   });
 
   return (
-    <section className="panel-content-wrapper">
+    <section className="panel-content-wrapper editor-panel editor-panel--active">
       <div className="adjust-panel">
         {/* Header */}
         <div className="adjust-panel-header">

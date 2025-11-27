@@ -899,3 +899,181 @@
   width: 18px;
   height: 18px;
 }
+
+/* ============================================================================
+   PHASE 3 — ULTRA PREMIUM PATCH — PIXTR EDITOR
+   Ultra motion, glass-look & micro-polish
+   ============================================================================ */
+
+/* ============================================================================
+   3A — Panel Transitions
+   ============================================================================ */
+
+.editor-panel {
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 180ms ease-out,
+    transform 180ms ease-out;
+}
+
+.editor-panel--active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============================================================================
+   3B — Tool Buttons – Motion & Active Glow
+   ============================================================================ */
+
+.tool-button {
+  transition:
+    transform 120ms ease-out,
+    box-shadow 120ms ease-out,
+    background-color 120ms ease-out,
+    color 120ms ease-out;
+}
+
+.tool-button:active {
+  transform: translateY(1px) scale(0.97);
+}
+
+.tool-button-active {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08),
+              0 8px 18px rgba(0, 0, 0, 0.55);
+  background: radial-gradient(circle at 30% 0,
+    rgba(255, 255, 255, 0.12),
+    rgba(0, 0, 0, 0.9)
+  );
+}
+
+.tool-button-active .tool-label {
+  opacity: 1;
+}
+
+.tool-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ============================================================================
+   3C — Slider Ultra Polish
+   ============================================================================ */
+
+.editor-slider-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.24)
+  );
+}
+
+.editor-slider-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 0,
+    rgba(255, 255, 255, 0.9),
+    rgba(139, 92, 246, 1)
+  );
+  box-shadow:
+    0 0 0 2px rgba(15, 23, 42, 1),
+    0 8px 20px rgba(0, 0, 0, 0.75);
+  transition:
+    transform 120ms ease-out,
+    box-shadow 120ms ease-out;
+}
+
+.editor-slider-thumb:active {
+  transform: scale(1.04);
+  box-shadow:
+    0 0 0 2px rgba(15, 23, 42, 1),
+    0 10px 26px rgba(0, 0, 0, 0.9);
+}
+
+/* Wrapper for custom slider styling */
+.editor-slider {
+  position: relative;
+}
+
+/* ============================================================================
+   3D — Filters Thumbnails Micro-motion
+   ============================================================================ */
+
+.filter-thumbnail {
+  transition:
+    transform 120ms ease-out,
+    box-shadow 120ms ease-out,
+    outline-color 120ms ease-out;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.filter-thumbnail-inner {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.filter-thumbnail img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.filter-thumbnail:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.7);
+}
+
+.filter-thumbnail--active {
+  outline: 2px solid rgba(196, 181, 253, 1);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   3E — Header Glass & App-chrome Polish
+   ============================================================================ */
+
+.editor-header {
+  position: relative;
+  z-index: 10;
+  padding: 10px 16px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  background: linear-gradient(
+    to bottom,
+    rgba(15, 23, 42, 0.95),
+    rgba(15, 23, 42, 0.85)
+  );
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.95);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+/* ============================================================================
+   3F — Action Buttons Micro-polish
+   ============================================================================ */
+
+.btn-primary,
+.btn-secondary {
+  transition:
+    transform 120ms ease-out,
+    box-shadow 120ms ease-out,
+    background-color 120ms ease-out,
+    color 120ms ease-out;
+}
+
+.btn-primary:active,
+.btn-secondary:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.9);
+}
+
+.btn-secondary:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.7);
+}
