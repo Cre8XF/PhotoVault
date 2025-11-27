@@ -402,7 +402,7 @@ const EditorPage = () => {
           <button
             onClick={handleSave}
             disabled={!hasTransforms()}
-            className="btn-primary flex-1 max-w-[120px]"
+            className="btn-primary save-button flex-1 max-w-[120px]"
           >
             <Save className="icon" />
             {t('editor.save', 'Save')}

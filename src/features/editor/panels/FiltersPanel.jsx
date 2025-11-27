@@ -77,7 +77,7 @@ const FiltersPanel = ({ viewportRef, photo }) => {
             <button
               key={filterItem.id}
               onClick={() => handleFilterSelect(filterItem.id)}
-              className="filter-item"
+              className="filter-item filter-thumb"
               aria-label={t(`editor.filters.${filterItem.id}`, filterItem.name)}
             >
               {/* Filter Thumbnail Preview */}
