@@ -22,7 +22,7 @@
    EDITORWORLD V2 - MOBILE PANEL IMPORTS
    ============================================================================ */
 
-@import "./panels/crop-panel-mobile.css";
+@import './panels/crop-panel-mobile.css';
 
 /* ============================================================================
    EDITOR WORLD - Root Container (Phase 8C-5: Critical Overlay Isolation)
@@ -90,7 +90,7 @@
   flex: 0 0 250px; /* ULTRA-COMPACT: 38px + 176px + 36px */
   display: flex;
   flex-direction: column;
-  background: rgba(0, 0, 0, 0.92);
+  background: rgba(0, 0, 0, 0.88);
   backdrop-filter: blur(18px);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   z-index: 30;
@@ -145,12 +145,14 @@
 
 /* Row 2: Panel Content Wrapper - 176px ultra-compact */
 .panel-content-wrapper {
-  flex: 0 0 176px;
+  flex: 0 0 146px;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 10px 14px;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+  padding-top: 6px;
+  padding-bottom: 6px;
 }
 
 /* Hide scrollbar but keep functionality */
@@ -182,11 +184,11 @@
 .action-buttons-row button:last-child {
   flex: 1;
   max-width: 120px;
-  height: 32px;
+  height: 38px;
   border-radius: 10px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
   transition: all 0.2s ease;
   cursor: pointer;
   border: none;
@@ -256,10 +258,6 @@
 /* Touch-friendly controls */
 .editor-panel-content button {
   min-height: 44px;
-}
-
-.editor-panel-content input[type="range"] {
-  height: 44px;
 }
 
 /* ============================================================================
