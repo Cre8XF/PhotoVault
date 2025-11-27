@@ -1,5 +1,5 @@
 // ============================================================================
-// COMPONENT: AdjustPanel.jsx - Adjust Sliders (Phase 8C-1)
+// COMPONENT: AdjustPanel.jsx - Adjust Sliders (Phase 8C-2: Horizontal Slider Rows)
 // ============================================================================
 
 import React, { useState, useEffect } from 'react'
@@ -7,19 +7,12 @@ import { useTranslation } from 'react-i18next'
 import { RotateCcw } from 'lucide-react'
 
 /**
- * AdjustPanel - Google Photos-style adjust sliders (Phase 8C-1)
+ * AdjustPanel - Google Photos-style adjust sliders (Phase 8C-2)
  *
- * Provides real-time adjustment controls:
- * - Brightness, Contrast, Saturation, Warmth
- * - Highlights, Shadows, Clarity
- * - Blur, Vignette
- *
- * All changes apply instantly via viewportRef.current.setAdjustValue()
- *
- * @param {React.RefObject} viewportRef - Reference to EditorViewport
+ * Now updated with horizontal scroll containers for each slider row:
+ * - Prevents accidental vertical scroll grabbing a slider on mobile
  */
 
-// Slider configurations
 const ADJUST_SLIDERS = [
   {
     key: 'brightness',
@@ -77,66 +70,35 @@ const ADJUST_SLIDERS = [
 const AdjustPanel = ({ viewportRef }) => {
   const { t } = useTranslation()
 
-  // Local state for sliders (mirrors viewport state)
   const [sliderValues, setSliderValues] = useState(() => {
     const initial = {}
-    ADJUST_SLIDERS.forEach((slider) => {
-      initial[slider.key] = slider.default
-    })
+    ADJUST_SLIDERS.forEach((s) => (initial[s.key] = s.default))
     return initial
   })
 
-  // Sync with viewport on mount
   useEffect(() => {
     if (viewportRef?.current) {
       const adjustState = viewportRef.current.getAdjustState?.()
-      if (adjustState) {
-        setSliderValues(adjustState)
-      }
+      if (adjustState) setSliderValues(adjustState)
     }
   }, [viewportRef])
 
-  /**
-   * Handle slider change
-   */
   const handleSliderChange = (key, value) => {
-    const numValue = Number(value)
-
-    // Update local state
-    setSliderValues((prev) => ({ ...prev, [key]: numValue }))
-
-    // Update viewport (real-time)
-    if (viewportRef?.current) {
-      viewportRef.current.setAdjustValue(key, numValue)
-    }
-
-    console.log(`🎨 Adjust: ${key} = ${numValue}`)
+    const val = Number(value)
+    setSliderValues((prev) => ({ ...prev, [key]: val }))
+    viewportRef?.current?.setAdjustValue(key, val)
   }
 
-  /**
-   * Reset all sliders to defaults
-   */
   const handleResetAll = () => {
     const defaults = {}
-    ADJUST_SLIDERS.forEach((slider) => {
-      defaults[slider.key] = slider.default
-    })
-
+    ADJUST_SLIDERS.forEach((s) => (defaults[s.key] = s.default))
     setSliderValues(defaults)
-
-    if (viewportRef?.current) {
-      viewportRef.current.resetAdjustValues()
-    }
-
-    console.log('🎨 Reset all adjust values')
+    viewportRef?.current?.resetAdjustValues()
   }
 
-  /**
-   * Check if any slider has changed
-   */
   const hasChanges = Object.keys(sliderValues).some((key) => {
-    const slider = ADJUST_SLIDERS.find((s) => s.key === key)
-    return sliderValues[key] !== slider.default
+    const config = ADJUST_SLIDERS.find((s) => s.key === key)
+    return sliderValues[key] !== config.default
   })
 
   return (
@@ -146,7 +108,6 @@ const AdjustPanel = ({ viewportRef }) => {
         <div className="adjust-panel-header">
           <h2 className="panel-title">{t('editor.adjust.title', 'Adjust')}</h2>
 
-          {/* Reset All Button */}
           {hasChanges && (
             <button
               onClick={handleResetAll}
@@ -159,36 +120,45 @@ const AdjustPanel = ({ viewportRef }) => {
           )}
         </div>
 
-        {/* Scroll Container with Cards */}
-        <div className="adjust-scroll">
-          {ADJUST_SLIDERS.map((slider) => (
-            <section key={slider.key} className="adjust-card">
-              {/* Card Header: Label + Value */}
-              <div className="adjust-card-header">
-                <span className="adjust-label">
-                  {t(`editor.adjust.${slider.key}`, slider.label)}
-                </span>
-                <span className="adjust-value">{sliderValues[slider.key]}</span>
-              </div>
+        {/* Content */}
+        <div className="adjust-content">
+          <div className="adjust-sliders-list">
+            {ADJUST_SLIDERS.map((s) => (
+              <div key={s.key} className="adjust-slider-item">
+                {/* Label + value */}
+                <div className="adjust-slider-label">
+                  <span>{t(`editor.adjust.${s.key}`, s.label)}</span>
+                  <span className="text-xs text-white/60">
+                    {sliderValues[s.key]}
+                  </span>
+                </div>
 
-              {/* Slider Row */}
-              <div className="adjust-slider-row">
-                <input
-                  type="range"
-                  min={slider.min}
-                  max={slider.max}
-                  step={slider.step}
-                  value={sliderValues[slider.key]}
-                  onChange={(e) =>
-                    handleSliderChange(slider.key, e.target.value)
-                  }
-                  className="adjust-slider"
-                  aria-label={slider.label}
-                />
+                {/* Horizontal slider row */}
+                <div className="slider-row slider-scroll-x">
+                  <input
+                    type="range"
+                    min={s.min}
+                    max={s.max}
+                    step={s.step}
+                    value={sliderValues[s.key]}
+                    onChange={(e) => handleSliderChange(s.key, e.target.value)}
+                    className="adjust-slider"
+                  />
+                </div>
               </div>
-            </section>
-          ))}
+            ))}
+          </div>
+
+          {/* Scroll-safe zone */}
+          <div className="adjust-scrollzone" />
         </div>
+
+        <p className="text-xs text-white/50 text-center mt-2">
+          {t(
+            'editor.adjust.instructions',
+            'Drag sliders to adjust. Changes apply instantly. Use Reset All to undo.'
+          )}
+        </p>
       </div>
     </section>
   )

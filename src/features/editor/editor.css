@@ -1352,14 +1352,14 @@
   appearance: none;
   width: 100%;
   height: 4px;
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 999px;
   outline: none;
   transition: background 0.3s ease;
 }
 
 .adjust-slider:hover {
-  background: rgba(255,255,255,0.25);
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .adjust-slider::-webkit-slider-thumb {
@@ -1403,7 +1403,7 @@
 
 .filter-item:hover {
   transform: scale(1.08);
-  box-shadow: 0 0 12px rgba(255,255,255,0.22);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.22);
 }
 
 .filter-item.active {
@@ -1422,12 +1422,12 @@
 .crop-aspect-btn {
   padding: 12px 0;
   border-radius: 12px;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
   transition: 0.2s ease;
 }
 
 .crop-aspect-btn:hover {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   transform: scale(1.05);
 }
 
@@ -1451,7 +1451,7 @@
 
 .rotate-btn:hover {
   transform: scale(1.07);
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 /* DESKTOP */
@@ -1473,8 +1473,14 @@
 }
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ============================
@@ -1583,4 +1589,23 @@
 /* Last card spacing */
 .adjust-card:last-child {
   margin-bottom: 0.25rem;
+}
+.slider-row {
+  padding: 12px 0;
+}
+
+.slider-scroll-x {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 8px;
+}
+
+.slider-scroll-x::-webkit-scrollbar {
+  display: none;
+}
+
+/* Slider width so scrolling works */
+.slider-scroll-x > * {
+  min-width: 260px;
 }
