@@ -315,7 +315,7 @@ const EditorPage = () => {
   return (
     <div className="editor-world">
       {/* Minimal Header - Back button only */}
-      <header className="editor-minimal-header bg-[rgba(0,0,0,0.85)] backdrop-blur-xl border-b border-white/10 py-3">
+      <header className="editor-header editor-minimal-header">
         <button
           onClick={handleBack}
           className="flex items-center gap-2 px-3 py-2 hover:bg-white/10 rounded-lg transition text-white"

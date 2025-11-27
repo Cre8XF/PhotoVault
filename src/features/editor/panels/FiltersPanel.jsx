@@ -51,7 +51,7 @@ const FiltersPanel = ({ viewportRef, photo }) => {
   };
 
   return (
-    <section className="panel-content-wrapper">
+    <section className="panel-content-wrapper editor-panel editor-panel--active">
       <div className="flex items-center justify-between">
         <h2 className="panel-title">
           {t('editor.filters.title', 'Filters')}
@@ -71,40 +71,44 @@ const FiltersPanel = ({ viewportRef, photo }) => {
 
       {/* Horizontal Scrollable Filter Row */}
       <div className="filters-grid">
-        {FILTERS.map((filterItem) => (
-          <button
-            key={filterItem.id}
-            onClick={() => handleFilterSelect(filterItem.id)}
-            className={`filter-item ${filter === filterItem.id ? 'filter-item-active' : ''}`}
-            aria-label={t(`editor.filters.${filterItem.id}`, filterItem.name)}
-          >
-            {/* Filter Thumbnail Preview */}
-            <div className="filter-thumbnail">
-              {photo?.url ? (
-                <img
-                  src={photo.url}
-                  alt={filterItem.name}
-                  className="w-full h-full object-cover"
-                  style={{
-                    // Phase 1A: Real filter preview
-                    opacity: 1,
-                    filter: getCssFilter(filterItem.id),
-                  }}
-                />
-              ) : (
-                // Fallback placeholder if no photo
-                <div className="w-full h-full bg-white/5 flex items-center justify-center">
-                  <span className="text-white/40 text-xs">?</span>
+        {FILTERS.map((filterItem) => {
+          const isActive = filter === filterItem.id;
+          return (
+            <button
+              key={filterItem.id}
+              onClick={() => handleFilterSelect(filterItem.id)}
+              className="filter-item"
+              aria-label={t(`editor.filters.${filterItem.id}`, filterItem.name)}
+            >
+              {/* Filter Thumbnail Preview */}
+              <div className={`filter-thumbnail ${isActive ? 'filter-thumbnail--active' : ''}`}>
+                <div className="filter-thumbnail-inner">
+                  {photo?.url ? (
+                    <img
+                      src={photo.url}
+                      alt={filterItem.name}
+                      style={{
+                        // Phase 1A: Real filter preview
+                        opacity: 1,
+                        filter: getCssFilter(filterItem.id),
+                      }}
+                    />
+                  ) : (
+                    // Fallback placeholder if no photo
+                    <div className="w-full h-full bg-white/5 flex items-center justify-center">
+                      <span className="text-white/40 text-xs">?</span>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </div>
 
-            {/* Filter Name */}
-            <span className="filter-name">
-              {t(`editor.filters.${filterItem.id}`, filterItem.name)}
-            </span>
-          </button>
-        ))}
+              {/* Filter Name */}
+              <span className="filter-name">
+                {t(`editor.filters.${filterItem.id}`, filterItem.name)}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Instructions */}

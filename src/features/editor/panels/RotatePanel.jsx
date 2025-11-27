@@ -49,7 +49,7 @@ const RotatePanel = ({ viewportRef }) => {
   };
 
   return (
-    <section className="panel-content-wrapper">
+    <section className="panel-content-wrapper editor-panel editor-panel--active">
       <div className="space-y-3">
         <h2 className="panel-title">
           {t('editor.rotate.title', 'Rotate & Flip')}

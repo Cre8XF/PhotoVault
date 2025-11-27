@@ -81,7 +81,7 @@ const PanelShell = ({ activeTool, viewportRef, photo, onCropApplied }) => {
     switch (activeTool) {
       case 'crop':
         return (
-          <section className="panel-content-wrapper">
+          <section className="panel-content-wrapper editor-panel editor-panel--active">
             <h2 className="panel-title">{t('editor.crop', 'Crop')}</h2>
 
             {/* Aspect Ratio Presets */}
