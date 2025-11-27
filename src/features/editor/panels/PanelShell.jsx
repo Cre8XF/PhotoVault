@@ -204,7 +204,7 @@ const PanelShell = ({ activeTool, viewportRef, photo, onCropApplied }) => {
   };
 
   return (
-    <div className="editor-panel-content">
+    <div className="panel-shell panel-enter editor-panel-content">
       {renderContent()}
     </div>
   );
