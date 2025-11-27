@@ -55,53 +55,53 @@ const RotatePanel = ({ viewportRef }) => {
           {t('editor.rotate.title', 'Rotate & Flip')}
         </h2>
 
-        {/* Rotate & Flip Grid - 2x2 */}
-        <div className="rotate-panel-grid">
+        {/* Rotate & Flip Grid - Compact 1x4 */}
+        <div className="rotate-grid">
           {/* Rotate Left */}
           <button
             onClick={handleRotateLeft}
-            className="rotate-panel-button"
+            className="rotate-btn"
             aria-label={t('editor.rotate.rotateLeft', 'Rotate Left')}
           >
-            <RotateCcw className="w-5 h-5" />
+            <RotateCcw />
             <span>
-              {t('editor.rotate.rotateLeft', 'Rotate Left')}
+              {t('editor.rotate.rotateLeft', 'Left')}
             </span>
           </button>
 
           {/* Rotate Right */}
           <button
             onClick={handleRotateRight}
-            className="rotate-panel-button"
+            className="rotate-btn"
             aria-label={t('editor.rotate.rotateRight', 'Rotate Right')}
           >
-            <RotateCw className="w-5 h-5" />
+            <RotateCw />
             <span>
-              {t('editor.rotate.rotateRight', 'Rotate Right')}
+              {t('editor.rotate.rotateRight', 'Right')}
             </span>
           </button>
 
           {/* Flip Horizontal */}
           <button
             onClick={handleFlipHorizontal}
-            className="rotate-panel-button"
+            className="rotate-btn"
             aria-label={t('editor.rotate.flipHorizontal', 'Flip Horizontal')}
           >
-            <FlipHorizontal className="w-5 h-5" />
+            <FlipHorizontal />
             <span>
-              {t('editor.rotate.flipHorizontal', 'Flip Horizontal')}
+              {t('editor.rotate.flipHorizontal', 'H-Flip')}
             </span>
           </button>
 
           {/* Flip Vertical */}
           <button
             onClick={handleFlipVertical}
-            className="rotate-panel-button"
+            className="rotate-btn"
             aria-label={t('editor.rotate.flipVertical', 'Flip Vertical')}
           >
-            <FlipVertical className="w-5 h-5" />
+            <FlipVertical />
             <span>
-              {t('editor.rotate.flipVertical', 'Flip Vertical')}
+              {t('editor.rotate.flipVertical', 'V-Flip')}
             </span>
           </button>
         </div>

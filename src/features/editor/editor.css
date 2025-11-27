@@ -1077,3 +1077,104 @@
 .btn-secondary:hover {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.7);
 }
+
+/* ============================================================================
+   ULTRA PREMIUM PATCH - FINAL POLISH
+   ============================================================================ */
+
+/* PART 1 - Rotate Panel Compact Mode */
+.rotate-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.rotate-btn {
+  background: #111;
+  padding: 10px 0;
+  border-radius: 14px;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  border: none;
+  color: white;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rotate-btn:hover {
+  transform: translateY(-2px);
+  background: #1b1b1b;
+}
+
+.rotate-btn:active {
+  transform: scale(0.97);
+}
+
+.rotate-btn svg {
+  width: 22px;
+  height: 22px;
+  margin-bottom: 4px;
+}
+
+/* PART 2 - Toolbar Premium Micro-animation (enhanced) */
+.tool-button:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.tool-button-active {
+  transform: translateY(-2px);
+}
+
+/* PART 3 - Crop Glow Mode */
+.cropper-point,
+.cropper-line {
+  transition: all 0.15s ease;
+}
+
+.cropper-point:hover {
+  box-shadow: 0 0 8px #8ab4ff;
+}
+
+.cropper-line:hover {
+  box-shadow: 0 0 6px #8ab4ff;
+}
+
+/* PART 4 - Filter Thumb Hover Elevation (enhanced) */
+.filter-thumb {
+  transition: all 0.15s ease;
+}
+
+.filter-thumb:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+/* PART 5 - Save Button Premium Elevation */
+.save-button {
+  transition: all 0.2s ease;
+}
+
+.save-button:active {
+  transform: scale(0.95);
+}
+
+.save-button:hover {
+  transform: translateY(-2px);
+}
+
+/* PART 6 - Panel Polish */
+.panel-content-wrapper {
+  padding: 14px 18px 20px 18px;
+}
+
+.panel-title {
+  font-size: 17px;
+  font-weight: 600;
+}
