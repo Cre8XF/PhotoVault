@@ -52,7 +52,7 @@ const FiltersPanel = ({ viewportRef, photo }) => {
 
   return (
     <div className="panel-inner">
-      <div className="space-y-3">
+      <div className="space-y-3 shadow-inner shadow-black/40 rounded-xl bg-black/40 backdrop-blur-xl p-3">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-semibold text-white/90">
             {t('editor.filters.title', 'Filters')}
@@ -76,7 +76,7 @@ const FiltersPanel = ({ viewportRef, photo }) => {
             <button
               key={filterItem.id}
               onClick={() => handleFilterSelect(filterItem.id)}
-              className={`filter-item ${filter === filterItem.id ? 'filter-item--selected active' : ''}`}
+              className={`filter-item filter-thumb ${filter === filterItem.id ? 'filter-item--selected active' : ''}`}
               aria-label={t(`editor.filters.${filterItem.id}`, filterItem.name)}
             >
               {/* Filter Thumbnail Preview */}

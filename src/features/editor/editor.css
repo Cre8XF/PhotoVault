@@ -36,6 +36,8 @@
   flex-direction: column;
   overflow: hidden;
   z-index: 9999; /* Phase 8C-5: Above all app elements including bottom nav */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* ============================================================================
@@ -60,7 +62,7 @@
 .editor-viewport-shell {
   flex: 1 1 auto;
   overflow: hidden;
-  background: #000;
+  background: linear-gradient(180deg, #050506 0%, #0b0b0d 100%);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -88,8 +90,8 @@
   flex: 0 0 250px; /* ULTRA-COMPACT: 38px + 176px + 36px */
   display: flex;
   flex-direction: column;
-  background: rgba(0, 0, 0, 0.98);
-  backdrop-filter: blur(16px);
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(18px);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   z-index: 30;
 }
@@ -101,7 +103,7 @@
   justify-content: space-around;
   align-items: center;
   gap: 2px;
-  padding: 4px 12px;
+  padding: 10px 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -146,7 +148,7 @@
   flex: 0 0 176px;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 10px 12px;
+  padding: 10px 14px;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
 }
@@ -181,15 +183,16 @@
   flex: 1;
   max-width: 120px;
   height: 32px;
-  border-radius: 999px;
+  border-radius: 10px;
   font-size: 13px;
   font-weight: 600;
+  letter-spacing: 0.3px;
   transition: all 0.2s ease;
   cursor: pointer;
   border: none;
-  background: #a855ff;
+  background: #6d28d9;
   color: white;
-  box-shadow: 0 2px 8px rgba(168, 85, 255, 0.3);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
 }
 
 .action-buttons-row button:last-child:hover {
@@ -199,6 +202,7 @@
 }
 
 .action-buttons-row button:last-child:active {
+  scale: 0.96;
   transform: translateY(0);
   box-shadow: 0 1px 4px rgba(168, 85, 255, 0.3);
 }
@@ -208,7 +212,7 @@
   flex: 1;
   max-width: 120px;
   height: 32px;
-  border-radius: 999px;
+  border-radius: 10px;
   font-size: 13px;
   font-weight: 500;
   transition: all 0.2s ease;
@@ -224,6 +228,7 @@
 }
 
 .action-buttons-row button:first-child:active {
+  scale: 0.96;
   background: rgba(255, 255, 255, 0.15);
 }
 
@@ -427,6 +432,22 @@
 .filter-item.active .filter-thumbnail {
   outline: 3px solid #a855ff;
   outline-offset: -3px;
+}
+
+/* Filter Thumb Polish - Google Photos elevation */
+.filter-thumb {
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.filter-thumb:hover {
+  transform: translateY(-2px);
+  opacity: 0.95;
+}
+
+.filter-thumb.active {
+  outline: 2px solid #a855f7;
 }
 
 /* Mobile optimization */
