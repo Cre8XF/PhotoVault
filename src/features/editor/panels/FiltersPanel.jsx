@@ -54,7 +54,7 @@ const FiltersPanel = ({ viewportRef, photo }) => {
     <div className="panel-inner">
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold text-white">
+          <h3 className="text-base font-semibold text-white/90">
             {t('editor.filters.title', 'Filters')}
           </h3>
 
@@ -62,7 +62,7 @@ const FiltersPanel = ({ viewportRef, photo }) => {
           {filter !== 'original' && (
             <button
               onClick={handleClearFilter}
-              className="flex items-center gap-1 px-3 py-1.5 bg-white/10 rounded-lg hover:bg-white/20 transition text-xs text-white font-medium"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 rounded-full hover:bg-zinc-700 transition text-xs text-white font-medium"
             >
               <X className="w-4 h-4" />
               {t('editor.filters.clear', 'Clear Filter')}

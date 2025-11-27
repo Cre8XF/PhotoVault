@@ -102,7 +102,7 @@ const AdjustPanel = ({ viewportRef }) => {
       <div className="adjust-panel">
         {/* Header */}
         <div className="adjust-panel-header">
-          <h3 className="text-lg font-bold text-white">
+          <h3 className="text-base font-semibold text-white/90">
             {t('editor.adjust.title', 'Adjust')}
           </h3>
 
@@ -125,7 +125,7 @@ const AdjustPanel = ({ viewportRef }) => {
             <div key={slider.key} className="adjust-slider-item">
               {/* Label + Value */}
               <div className="adjust-slider-label">
-                <span className="text-sm font-medium text-white">
+                <span>
                   {t(`editor.adjust.${slider.key}`, slider.label)}
                 </span>
                 <span className="text-xs text-white/60">
@@ -149,7 +149,7 @@ const AdjustPanel = ({ viewportRef }) => {
         </div>
 
         {/* Instructions */}
-        <p className="text-xs text-white/60 text-center mt-3">
+        <p className="text-xs text-white/50 text-center mt-2">
           {t(
             'editor.adjust.instructions',
             'Drag sliders to adjust. Changes apply instantly. Use Reset All to undo.'
