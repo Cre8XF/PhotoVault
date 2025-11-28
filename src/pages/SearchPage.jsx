@@ -91,12 +91,19 @@ const SearchPage = ({
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [photoToDelete, setPhotoToDelete] = useState(null)
 
-  // Debug: Track isMoveOpen changes
+  // Handle URL filter params on mount
   useEffect(() => {
-    console.log('📊 isMoveOpen changed:', isMoveOpen)
-    console.log('📊 Selected photos:', selectedPhotos.length)
-    console.log('📊 Albums available:', safeAlbums.length)
-  }, [isMoveOpen, selectedPhotos.length, safeAlbums.length])
+    const params = new URLSearchParams(location.search)
+    const urlFilter = params.get('filter')
+
+    if (urlFilter === 'favorites') {
+      setActiveFilters((f) => ({ ...f, favorites: true }))
+    }
+
+    if (urlFilter === 'recent') {
+      setActiveFilters((f) => ({ ...f, dateRange: 'month' }))
+    }
+  }, [])
 
   // 🔒 SIKRET: Kategorier med array-guard
   const categories = useMemo(() => {
