@@ -88,35 +88,42 @@ export const calculatePhotoFit = (photoAspectRatio, slotAspectRatio) => {
 };
 
 /**
+ * Sanitize value to prevent undefined from being saved to Firestore
+ */
+const safe = (value) => {
+  return value === undefined ? null : value;
+};
+
+/**
  * Serialize collage data for Firestore
  */
 export const serializeCollage = (collageData) => {
   return {
-    id: collageData.id || null,
-    templateId: collageData.templateId,
-    title: collageData.title || '',
+    id: safe(collageData.id),
+    templateId: safe(collageData.templateId),
+    title: safe(collageData.title) || '',
     slots: collageData.slots.map((slot) => ({
-      id: slot.id,
-      slotIndex: slot.slotIndex,
+      id: safe(slot.id),
+      slotIndex: safe(slot.slotIndex),
       photo: slot.photo
         ? {
-            id: slot.photo.id,
-            url: slot.photo.url,
-            thumbnailUrl: slot.photo.thumbnailUrl,
-            name: slot.photo.name,
-            width: slot.photo.width,
-            height: slot.photo.height,
+            id: safe(slot.photo.id),
+            url: safe(slot.photo.url),
+            thumbnailUrl: safe(slot.photo.thumbnailUrl),
+            name: safe(slot.photo.name),
+            width: safe(slot.photo.width),
+            height: safe(slot.photo.height),
           }
         : null,
-      transform: slot.transform,
-      row: slot.row,
-      col: slot.col,
-      rowSpan: slot.rowSpan,
-      colSpan: slot.colSpan,
+      transform: safe(slot.transform),
+      row: safe(slot.row),
+      col: safe(slot.col),
+      rowSpan: safe(slot.rowSpan),
+      colSpan: safe(slot.colSpan),
     })),
-    version: collageData.version || 2,
-    createdAt: collageData.createdAt || new Date().toISOString(),
-    updatedAt: collageData.updatedAt || new Date().toISOString(),
+    version: safe(collageData.version) || 2,
+    createdAt: safe(collageData.createdAt) || new Date().toISOString(),
+    updatedAt: safe(collageData.updatedAt) || new Date().toISOString(),
   };
 };
 

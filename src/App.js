@@ -389,17 +389,10 @@ function AppContent() {
           />
         )}
 
-        {console.log('🔍 Current page state:', currentPage)}
-        {console.log('🔍 isAdmin value:', isAdmin)}
-
         {currentPage === 'admin' && isAdmin && (
           <>
-            {console.log('🔍 RENDERING ADMIN DASHBOARD')}
-            {console.log('🔍 currentPage:', currentPage)}
-            {console.log('🔍 isAdmin:', isAdmin)}
             <AdminDashboard
               onBack={() => {
-                console.log('🔍 BACK BUTTON CLICKED')
                 setCurrentPage('more')
               }}
             />

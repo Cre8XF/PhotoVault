@@ -2,6 +2,7 @@
 // PAGE: HomeDashboard.jsx – FREE USER OPTIMIZED v5.0
 // ============================================================================
 import React, { useMemo, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { addAlbum } from "../firebase";
 import { auth } from "../firebase";
 import UploadModal from "../components/UploadModal";
@@ -23,6 +24,7 @@ import logoLight from "../assets/logo_light.png";
 import logoDark from "../assets/logo_dark.png";
 
 const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, onUpload, onPhotoClick }) => {
+  const navigate = useNavigate();
   const { t } = useTranslation(["common", "home"]);
   const [isUploadOpen, setUploadOpen] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -189,7 +191,7 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
               {t("home:favoritesTitle")}
             </h2>
             <button
-              onClick={() => onNavigate("search")}
+              onClick={() => navigate("/search?filter=favorites")}
               className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition whitespace-nowrap flex items-center"
             >
               {t("common:seeAll", { count: stats.favorites })} →
@@ -233,7 +235,7 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
               {t("home:recentUploads")}
             </h2>
             <button
-              onClick={() => onNavigate("albums")}
+              onClick={() => navigate("/search?filter=recent")}
               className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition whitespace-nowrap flex items-center ml-2"
             >
               {t("common:seeAll", { count: recentPhotos.length })} →

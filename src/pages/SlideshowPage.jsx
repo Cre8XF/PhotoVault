@@ -9,8 +9,6 @@ import { usePhotoById } from '../hooks/usePhotoById';
 import { usePhotoContext } from '../hooks/usePhotoContext';
 import { usePrefetchAdjacentPhotos } from '../hooks/usePrefetchAdjacentPhotos';
 
-const SLIDE_INTERVAL = 3000; // 3 seconds per slide
-
 export default function SlideshowPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -20,6 +18,7 @@ export default function SlideshowPage() {
   const [uiVisible, setUiVisible] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true); // Auto-play on mount
+  const [intervalSec, setIntervalSec] = useState(5); // Configurable interval
   const uiTimerRef = useRef(null);
   const slideTimerRef = useRef(null);
   const touchStartX = useRef(0);
@@ -126,7 +125,7 @@ export default function SlideshowPage() {
     // Set up auto-advance interval
     slideTimerRef.current = setInterval(() => {
       handleNext();
-    }, SLIDE_INTERVAL);
+    }, intervalSec * 1000);
 
     return () => {
       if (slideTimerRef.current) {
@@ -134,7 +133,7 @@ export default function SlideshowPage() {
         slideTimerRef.current = null;
       }
     };
-  }, [isPlaying, handleNext]);
+  }, [isPlaying, intervalSec, handleNext]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -359,9 +358,17 @@ export default function SlideshowPage() {
             <ChevronRight className="w-6 h-6" />
           </button>
 
-          {/* Interval Indicator (optional) */}
-          <div className="text-xs text-white/60 px-2 border-l border-white/20">
-            {SLIDE_INTERVAL / 1000}s
+          {/* Interval Control */}
+          <div className="border-l border-white/20 pl-4">
+            <select
+              value={intervalSec}
+              onChange={(e) => setIntervalSec(Number(e.target.value))}
+              className="bg-black/40 text-white text-xs px-2 py-1 rounded border border-white/20 cursor-pointer"
+            >
+              <option value={2}>2s</option>
+              <option value={5}>5s</option>
+              <option value={10}>10s</option>
+            </select>
           </div>
         </div>
       </div>
