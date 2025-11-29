@@ -513,32 +513,15 @@ export async function uploadPhoto(
       updatedAt: new Date().toISOString(),
     }
 
-    // Import gjøres her for å unngå circular dependency
-        const { analyzeImage } = await import('./utils/googleVision')
-
-        const analysis = await analyzeImage(downloadURL, {
-          detectLabels: true,
-          detectFaces: true,
-          detectSafeSearch: true,
-          maxLabels: 10,
-        })
-
-        // Oppdater photoData med AI-resultater
-        photoData.aiTags = analysis.labels.map((l) => l.name)
-        photoData.faces = analysis.faces
-        photoData.category = analysis.category || null
-        photoData.aiAnalyzed = true
-        photoData.analyzedAt = new Date().toISOString()
-
-
-        console.log(
-          `✅ AI-analyse fullført: ${photoData.aiTags.length} tags, ${photoData.faces} ansikter`
-        )
-      } catch (aiError) {
-        console.warn('⚠️ AI-analyse feilet:', aiError.message)
-        // Fortsett med opplasting selv om AI feiler
-      }
-    }
+    // 3. AI-tagging – deaktivert i Pixtr MVP
+if (aiTagging) {
+  console.log("🤖 AI-tagging er deaktivert i denne versjonen (MVP).");
+  photoData.aiTags = [];
+  photoData.faces = 0;
+  photoData.category = null;
+  photoData.aiAnalyzed = false;
+  photoData.analyzedAt = null;
+}
 
     // 4. Lagre metadata i Firestore
     const photoId = await addPhoto(photoData)
