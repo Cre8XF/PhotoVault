@@ -513,12 +513,7 @@ export async function uploadPhoto(
       updatedAt: new Date().toISOString(),
     }
 
-    // 3. AI-tagging (hvis aktivert) - Fase 4.1
-    if (aiTagging) {
-      try {
-        console.log('🤖 Starter AI-analyse...')
-
-        // Import gjøres her for å unngå circular dependency
+    // Import gjøres her for å unngå circular dependency
         const { analyzeImage } = await import('./utils/googleVision')
 
         const analysis = await analyzeImage(downloadURL, {
@@ -534,6 +529,7 @@ export async function uploadPhoto(
         photoData.category = analysis.category || null
         photoData.aiAnalyzed = true
         photoData.analyzedAt = new Date().toISOString()
+
 
         console.log(
           `✅ AI-analyse fullført: ${photoData.aiTags.length} tags, ${photoData.faces} ansikter`
