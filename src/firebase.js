@@ -514,16 +514,6 @@ export async function uploadPhoto(
     }
 
     // 3. AI-tagging (deaktivert i Pixtr MVP)
-    if (aiTagging) {
-      console.log('🤖 AI-tagging er deaktivert i denne versjonen (MVP).')
-
-      // Sett standard-verdier
-      photoData.aiTags = []
-      photoData.faces = 0
-      photoData.category = null
-      photoData.aiAnalyzed = false
-      photoData.analyzedAt = null
-    }
 
     // 4. Lagre metadata i Firestore
     const photoId = await addPhoto(photoData)
