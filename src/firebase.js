@@ -2,6 +2,7 @@
 // firebase.js – komplett integrasjon (v3.1) med konsolidert cover-funksjon
 // ============================================================================
 import { initializeApp } from 'firebase/app'
+import { analyzeImage } from './utils/googleVision'
 import { getAuth } from 'firebase/auth'
 import { onSnapshot } from 'firebase/firestore'
 import {
