@@ -8,6 +8,7 @@
 // 4. Forbedret handleMovePhotos med bekreftelsesdialog og auto-refresh
 
 import React, { useState, useMemo, useEffect } from 'react'
+import { deletePhoto } from '../firebase'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -251,8 +252,6 @@ const AlbumPage = ({
       cancelLabel: t('common:cancel'),
       onConfirm: async () => {
         try {
-          // Slett alle direkte uten ekstra dialoger
-          const { deletePhoto } = await import('../firebase')
           for (const photo of selectedPhotos) {
             await deletePhoto(photo.id, photo.storagePath)
           }
@@ -424,11 +423,15 @@ const AlbumPage = ({
             disabled={albumPhotos.length < 2}
             className="ripple-effect px-3 py-2 md:px-4 md:py-2.5 rounded-lg bg-purple-600 hover:bg-purple-700 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             title={
-              albumPhotos.length < 2 ? t('albums:minTwoPhotos') : t('albums:createCollage')
+              albumPhotos.length < 2
+                ? t('albums:minTwoPhotos')
+                : t('albums:createCollage')
             }
           >
             <Layout className="w-5 h-5" />
-            <span className="hidden sm:inline text-sm md:text-base">{t('albums:createCollage')}</span>
+            <span className="hidden sm:inline text-sm md:text-base">
+              {t('albums:createCollage')}
+            </span>
           </button>
 
           {/* Start Slideshow - Phase 2B */}
@@ -443,12 +446,16 @@ const AlbumPage = ({
                 setPhotoOrder(photoIds)
                 setPhotoIndex(0)
                 setCurrentAlbumId(album?.id || null)
-                navigate(`/slideshow/${firstPhoto.id}`, { state: { from: location } })
+                navigate(`/slideshow/${firstPhoto.id}`, {
+                  state: { from: location },
+                })
               }}
               className="ripple-effect px-3 py-1.5 md:px-4 md:py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 flex items-center gap-1.5 md:gap-2 text-sm md:text-base"
             >
               <Presentation className="w-4 md:w-5 h-4 md:h-5" />
-              <span className="hidden sm:inline">{t('common:slideshow.start')}</span>
+              <span className="hidden sm:inline">
+                {t('common:slideshow.start')}
+              </span>
             </button>
           )}
 
@@ -458,7 +465,9 @@ const AlbumPage = ({
             className="ripple-effect px-3 py-2 md:px-4 md:py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 transition flex items-center gap-2"
           >
             <Share2 className="w-5 h-5" />
-            <span className="hidden sm:inline text-sm md:text-base">{t('albums:shareAlbum')}</span>
+            <span className="hidden sm:inline text-sm md:text-base">
+              {t('albums:shareAlbum')}
+            </span>
           </button>
 
           {/* Edit Album Button */}
@@ -475,20 +484,36 @@ const AlbumPage = ({
       {/* Stats Row - Compressed */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 md:gap-3 mb-2.5 md:mb-3">
         <div className="bg-white/5 rounded-lg p-2.5 md:p-3 border border-white/10">
-          <p className="text-[10px] md:text-xs text-gray-400 mb-0.5 md:mb-1">{t('albums:photos')}</p>
-          <p className="text-xl md:text-2xl font-bold leading-none">{stats.total}</p>
+          <p className="text-[10px] md:text-xs text-gray-400 mb-0.5 md:mb-1">
+            {t('albums:photos')}
+          </p>
+          <p className="text-xl md:text-2xl font-bold leading-none">
+            {stats.total}
+          </p>
         </div>
         <div className="bg-white/5 rounded-lg p-2.5 md:p-3 border border-white/10">
-          <p className="text-[10px] md:text-xs text-gray-400 mb-0.5 md:mb-1">{t('albums:size')}</p>
-          <p className="text-xl md:text-2xl font-bold leading-none">{stats.totalSize} MB</p>
+          <p className="text-[10px] md:text-xs text-gray-400 mb-0.5 md:mb-1">
+            {t('albums:size')}
+          </p>
+          <p className="text-xl md:text-2xl font-bold leading-none">
+            {stats.totalSize} MB
+          </p>
         </div>
         <div className="bg-white/5 rounded-lg p-2.5 md:p-3 border border-white/10">
-          <p className="text-[10px] md:text-xs text-gray-400 mb-0.5 md:mb-1">{t('albums:aiAnalyzed')}</p>
-          <p className="text-xl md:text-2xl font-bold leading-none">{stats.aiAnalyzed}</p>
+          <p className="text-[10px] md:text-xs text-gray-400 mb-0.5 md:mb-1">
+            {t('albums:aiAnalyzed')}
+          </p>
+          <p className="text-xl md:text-2xl font-bold leading-none">
+            {stats.aiAnalyzed}
+          </p>
         </div>
         <div className="bg-white/5 rounded-lg p-2.5 md:p-3 border border-white/10">
-          <p className="text-[10px] md:text-xs text-gray-400 mb-0.5 md:mb-1">{t('albums:categories')}</p>
-          <p className="text-xl md:text-2xl font-bold leading-none">{stats.categories}</p>
+          <p className="text-[10px] md:text-xs text-gray-400 mb-0.5 md:mb-1">
+            {t('albums:categories')}
+          </p>
+          <p className="text-xl md:text-2xl font-bold leading-none">
+            {stats.categories}
+          </p>
         </div>
       </div>
 
@@ -626,127 +651,145 @@ const AlbumPage = ({
       {/* Loading Skeleton */}
       {isInitialLoading && viewMode === 'grid' && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
-          {Array(12).fill(0).map((_, i) => (
-            <SkeletonPhoto key={i} />
-          ))}
+          {Array(12)
+            .fill(0)
+            .map((_, i) => (
+              <SkeletonPhoto key={i} />
+            ))}
         </div>
       )}
 
       {/* Photos Grid - Using PhotoGrid component for video thumbnail support */}
-      {!isInitialLoading && viewMode === 'grid' && filteredPhotos.length > 0 && (
-        <PhotoGrid
-          photos={filteredPhotos}
-          compact={gridSize === 2}
-          editMode={editMode}
-          currentAlbum={album}
-          refreshPhotos={async () => {
-            if (refreshData) {
-              await refreshData()
-            }
-          }}
-          onPhotoClick={
-            editMode
-              ? null // In edit mode, don't open modal (use PhotoGrid's built-in edit buttons)
-              : (url) => {
-                  const index = filteredPhotos.findIndex(
-                    (p) => p.url === url || p.thumbnailUrl === url
-                  )
-                  if (index !== -1) {
-                    const photo = filteredPhotos[index]
-                    handlePhotoClick(photo, index)
+      {!isInitialLoading &&
+        viewMode === 'grid' &&
+        filteredPhotos.length > 0 && (
+          <PhotoGrid
+            photos={filteredPhotos}
+            compact={gridSize === 2}
+            editMode={editMode}
+            currentAlbum={album}
+            refreshPhotos={async () => {
+              if (refreshData) {
+                await refreshData()
+              }
+            }}
+            onPhotoClick={
+              editMode
+                ? null // In edit mode, don't open modal (use PhotoGrid's built-in edit buttons)
+                : (url) => {
+                    const index = filteredPhotos.findIndex(
+                      (p) => p.url === url || p.thumbnailUrl === url
+                    )
+                    if (index !== -1) {
+                      const photo = filteredPhotos[index]
+                      handlePhotoClick(photo, index)
+                    }
                   }
-                }
-          }
-        />
-      )}
+            }
+          />
+        )}
 
       {/* Photos List View - Compact Redesign */}
-      {!isInitialLoading && viewMode === 'list' && filteredPhotos.length > 0 && (
-        <div className="space-y-1.5 md:space-y-2">
-          {filteredPhotos.map((photo, index) => (
-            <div
-              key={photo.id}
-              className={`album-list-row flex items-center gap-2 md:gap-3 p-2 md:p-2.5 bg-white/5 rounded-lg md:rounded-xl border border-white/10 hover:bg-white/10 transition cursor-pointer animate-fade-in-up stagger-${(index % 12) + 1} ${
-                isPhotoSelected(photo) ? 'ring-2 ring-purple-500' : ''
-              }`}
-              onClick={() => {
-                if (editMode) {
-                  togglePhotoSelection(photo)
-                } else {
-                  handlePhotoClick(photo, index)
-                }
-              }}
-            >
-              <img
-                src={photo.type === 'video' ? photo.thumbnailUrl || photo.url : photo.url}
-                alt={photo.name}
-                className="album-list-thumb w-14 md:w-16 lg:w-20 h-14 md:h-16 lg:h-20 object-cover rounded-lg md:rounded-xl flex-shrink-0"
-              />
+      {!isInitialLoading &&
+        viewMode === 'list' &&
+        filteredPhotos.length > 0 && (
+          <div className="space-y-1.5 md:space-y-2">
+            {filteredPhotos.map((photo, index) => (
+              <div
+                key={photo.id}
+                className={`album-list-row flex items-center gap-2 md:gap-3 p-2 md:p-2.5 bg-white/5 rounded-lg md:rounded-xl border border-white/10 hover:bg-white/10 transition cursor-pointer animate-fade-in-up stagger-${
+                  (index % 12) + 1
+                } ${isPhotoSelected(photo) ? 'ring-2 ring-purple-500' : ''}`}
+                onClick={() => {
+                  if (editMode) {
+                    togglePhotoSelection(photo)
+                  } else {
+                    handlePhotoClick(photo, index)
+                  }
+                }}
+              >
+                <img
+                  src={
+                    photo.type === 'video'
+                      ? photo.thumbnailUrl || photo.url
+                      : photo.url
+                  }
+                  alt={photo.name}
+                  className="album-list-thumb w-14 md:w-16 lg:w-20 h-14 md:h-16 lg:h-20 object-cover rounded-lg md:rounded-xl flex-shrink-0"
+                />
 
-              <div className="list-info flex-1 min-w-0">
-                <div className="font-medium truncate text-xs md:text-sm">
-                  {photo.name || t('common:noName')}
+                <div className="list-info flex-1 min-w-0">
+                  <div className="font-medium truncate text-xs md:text-sm">
+                    {photo.name || t('common:noName')}
+                  </div>
+                  <div className="album-meta text-xs text-gray-400 flex items-center gap-1 md:gap-1.5 mt-0.5">
+                    {photo.type === 'video' && (
+                      <>
+                        <span className="flex items-center gap-0.5 text-purple-400">
+                          <Video className="w-3 h-3" />
+                          {photo.metadata?.duration && (
+                            <span>
+                              {formatDuration(photo.metadata.duration)}
+                            </span>
+                          )}
+                        </span>
+                        <span>•</span>
+                      </>
+                    )}
+                    {photo.createdAt
+                      ? new Date(photo.createdAt).toLocaleDateString('no-NO')
+                      : t('albums:unknownDate')}
+                    {photo.category && (
+                      <>
+                        <span>•</span>
+                        <span>
+                          {getCategoryIcon(photo.category)} {photo.category}
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <div className="album-meta text-xs text-gray-400 flex items-center gap-1 md:gap-1.5 mt-0.5">
-                  {photo.type === 'video' && (
-                    <>
-                      <span className="flex items-center gap-0.5 text-purple-400">
-                        <Video className="w-3 h-3" />
-                        {photo.metadata?.duration && (
-                          <span>{formatDuration(photo.metadata.duration)}</span>
-                        )}
-                      </span>
-                      <span>•</span>
-                    </>
-                  )}
-                  {photo.createdAt
-                    ? new Date(photo.createdAt).toLocaleDateString('no-NO')
-                    : t('albums:unknownDate')}
-                  {photo.category && (
-                    <>
-                      <span>•</span>
-                      <span>
-                        {getCategoryIcon(photo.category)} {photo.category}
-                      </span>
-                    </>
-                  )}
-                </div>
+
+                {editMode && (
+                  <div className="flex gap-1 md:gap-1.5">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleSetCover(photo)
+                      }}
+                      className="ripple-effect p-1.5 bg-yellow-500 hover:bg-yellow-600 rounded-lg transition"
+                      title={t('albums:setCover')}
+                    >
+                      <ImageIcon
+                        className="w-3.5 h-3.5 md:w-4 md:h-4"
+                        style={{ transform: 'scale(0.85)' }}
+                      />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDelete(photo)
+                      }}
+                      className="ripple-effect p-1.5 bg-red-500 hover:bg-red-600 rounded-lg transition"
+                      title={t('common:delete')}
+                    >
+                      <Trash2
+                        className="w-3.5 h-3.5 md:w-4 md:h-4"
+                        style={{ transform: 'scale(0.85)' }}
+                      />
+                    </button>
+                  </div>
+                )}
+
+                {isPhotoSelected(photo) && (
+                  <div className="bg-purple-600 text-white rounded-full w-4 md:w-5 h-4 md:h-5 flex items-center justify-center">
+                    <Check className="w-3 md:w-3.5 h-3 md:h-3.5" />
+                  </div>
+                )}
               </div>
-
-              {editMode && (
-                <div className="flex gap-1 md:gap-1.5">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleSetCover(photo)
-                    }}
-                    className="ripple-effect p-1.5 bg-yellow-500 hover:bg-yellow-600 rounded-lg transition"
-                    title={t('albums:setCover')}
-                  >
-                    <ImageIcon className="w-3.5 h-3.5 md:w-4 md:h-4" style={{ transform: 'scale(0.85)' }} />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleDelete(photo)
-                    }}
-                    className="ripple-effect p-1.5 bg-red-500 hover:bg-red-600 rounded-lg transition"
-                    title={t('common:delete')}
-                  >
-                    <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" style={{ transform: 'scale(0.85)' }} />
-                  </button>
-                </div>
-              )}
-
-              {isPhotoSelected(photo) && (
-                <div className="bg-purple-600 text-white rounded-full w-4 md:w-5 h-4 md:h-5 flex items-center justify-center">
-                  <Check className="w-3 md:w-3.5 h-3 md:h-3.5" />
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
 
       {/* Empty State */}
       {!isInitialLoading && filteredPhotos.length === 0 && (
@@ -822,7 +865,6 @@ const AlbumPage = ({
         onClose={() => setShareModalOpen(false)}
         album={album}
       />
-
     </div>
   )
 }

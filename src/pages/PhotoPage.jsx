@@ -1,241 +1,261 @@
 // ============================================================================
 // PhotoPage - Phase 2A: Fullscreen Photo Viewer
 // ============================================================================
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Heart, Info, MoreVertical, Presentation, Edit2 } from 'lucide-react';
-import { format } from 'date-fns';
-import useStore from '../state/store';
-import { usePhotoById } from '../hooks/usePhotoById';
-import { usePhotoContext } from '../hooks/usePhotoContext';
-import { usePrefetchAdjacentPhotos } from '../hooks/usePrefetchAdjacentPhotos';
+import React, { useEffect, useState, useRef, useCallback } from 'react'
+import { updatePhoto } from '../firebase'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import {
+  ArrowLeft,
+  Heart,
+  Info,
+  MoreVertical,
+  Presentation,
+  Edit2,
+} from 'lucide-react'
+import { format } from 'date-fns'
+import useStore from '../state/store'
+import { usePhotoById } from '../hooks/usePhotoById'
+import { usePhotoContext } from '../hooks/usePhotoContext'
+import { usePrefetchAdjacentPhotos } from '../hooks/usePrefetchAdjacentPhotos'
 
 export default function PhotoPage() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const location = useLocation()
 
   // State
-  const [uiVisible, setUiVisible] = useState(true);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const uiTimerRef = useRef(null);
-  const touchStartX = useRef(0);
-  const touchEndX = useRef(0);
+  const [uiVisible, setUiVisible] = useState(true)
+  const [imageLoaded, setImageLoaded] = useState(false)
+  const uiTimerRef = useRef(null)
+  const touchStartX = useRef(0)
+  const touchEndX = useRef(0)
 
   // Store
-  const setIsWorldView = useStore((state) => state.setIsWorldView);
-  const photos = useStore((state) => state.photos);
-  const updatePhoto = useStore((state) => state.updatePhoto);
+  const setIsWorldView = useStore((state) => state.setIsWorldView)
+  const photos = useStore((state) => state.photos)
+  const updatePhoto = useStore((state) => state.updatePhoto)
 
   // Custom hooks
-  const { photo, loading, error } = usePhotoById(id);
+  const { photo, loading, error } = usePhotoById(id)
   const {
     photoContext,
     photoOrder,
     photoIndex,
     setPhotoIndex,
     setCurrentPhotoId,
-  } = usePhotoContext();
+  } = usePhotoContext()
 
   // Prefetch adjacent photos
-  usePrefetchAdjacentPhotos(photoOrder, photoIndex, photos);
+  usePrefetchAdjacentPhotos(photoOrder, photoIndex, photos)
 
   // Set world view on mount
   useEffect(() => {
-    setIsWorldView(true);
-    setCurrentPhotoId(id);
+    setIsWorldView(true)
+    setCurrentPhotoId(id)
     return () => {
-      setIsWorldView(false);
-      setCurrentPhotoId(null);
-    };
-  }, [setIsWorldView, setCurrentPhotoId, id]);
+      setIsWorldView(false)
+      setCurrentPhotoId(null)
+    }
+  }, [setIsWorldView, setCurrentPhotoId, id])
 
   // Reset UI timer on any interaction
   const resetUiTimer = useCallback(() => {
-    setUiVisible(true);
+    setUiVisible(true)
     if (uiTimerRef.current) {
-      clearTimeout(uiTimerRef.current);
+      clearTimeout(uiTimerRef.current)
     }
     uiTimerRef.current = setTimeout(() => {
-      setUiVisible(false);
-    }, 3000);
-  }, []);
+      setUiVisible(false)
+    }, 3000)
+  }, [])
 
   // Handle navigation
   const handleNext = useCallback(() => {
-    if (!Array.isArray(photoOrder) || photoOrder.length === 0) return;
-    if (photoIndex >= photoOrder.length - 1) return; // Hard boundary
+    if (!Array.isArray(photoOrder) || photoOrder.length === 0) return
+    if (photoIndex >= photoOrder.length - 1) return // Hard boundary
 
-    const nextIndex = photoIndex + 1;
-    const nextId = photoOrder[nextIndex];
+    const nextIndex = photoIndex + 1
+    const nextId = photoOrder[nextIndex]
 
-    setPhotoIndex(nextIndex);
-    setCurrentPhotoId(nextId);
-    setImageLoaded(false);
-    navigate(`/photo/${nextId}`, { replace: true });
-    resetUiTimer();
-  }, [photoOrder, photoIndex, setPhotoIndex, setCurrentPhotoId, navigate, resetUiTimer]);
+    setPhotoIndex(nextIndex)
+    setCurrentPhotoId(nextId)
+    setImageLoaded(false)
+    navigate(`/photo/${nextId}`, { replace: true })
+    resetUiTimer()
+  }, [
+    photoOrder,
+    photoIndex,
+    setPhotoIndex,
+    setCurrentPhotoId,
+    navigate,
+    resetUiTimer,
+  ])
 
   const handlePrev = useCallback(() => {
-    if (!Array.isArray(photoOrder) || photoOrder.length === 0) return;
-    if (photoIndex <= 0) return; // Hard boundary
+    if (!Array.isArray(photoOrder) || photoOrder.length === 0) return
+    if (photoIndex <= 0) return // Hard boundary
 
-    const prevIndex = photoIndex - 1;
-    const prevId = photoOrder[prevIndex];
+    const prevIndex = photoIndex - 1
+    const prevId = photoOrder[prevIndex]
 
-    setPhotoIndex(prevIndex);
-    setCurrentPhotoId(prevId);
-    setImageLoaded(false);
-    navigate(`/photo/${prevId}`, { replace: true });
-    resetUiTimer();
-  }, [photoOrder, photoIndex, setPhotoIndex, setCurrentPhotoId, navigate, resetUiTimer]);
+    setPhotoIndex(prevIndex)
+    setCurrentPhotoId(prevId)
+    setImageLoaded(false)
+    navigate(`/photo/${prevId}`, { replace: true })
+    resetUiTimer()
+  }, [
+    photoOrder,
+    photoIndex,
+    setPhotoIndex,
+    setCurrentPhotoId,
+    navigate,
+    resetUiTimer,
+  ])
 
   // Handle back navigation
   const handleBack = useCallback(() => {
     if (location.state?.from) {
-      navigate(-1);
+      navigate(-1)
     } else {
-      navigate('/');
+      navigate('/')
     }
-  }, [navigate, location]);
+  }, [navigate, location])
 
   // Toggle favorite
   const handleToggleFavorite = useCallback(async () => {
-    if (!photo) return;
+    if (!photo) return
 
-    const newFavoriteStatus = !photo.favorite;
+    const newFavoriteStatus = !photo.favorite
 
     // Optimistic update
-    updatePhoto(photo.id, { favorite: newFavoriteStatus });
+    updatePhoto(photo.id, { favorite: newFavoriteStatus })
 
-    // Update in Firestore
     try {
-      const { updatePhoto: updatePhotoFirestore } = await import('../firebase');
-      await updatePhotoFirestore(photo.id, { favorite: newFavoriteStatus });
+      await updatePhoto(photo.id, { favorite: newFavoriteStatus })
     } catch (err) {
-      console.error('Error updating favorite:', err);
-      // Revert on error
-      updatePhoto(photo.id, { favorite: !newFavoriteStatus });
+      console.error('Error updating favorite:', err)
+      // Revert UI state on error
+      updatePhoto(photo.id, { favorite: !newFavoriteStatus })
     }
 
-    resetUiTimer();
-  }, [photo, updatePhoto, resetUiTimer]);
+    resetUiTimer()
+  }, [photo, updatePhoto, resetUiTimer])
 
   // Start slideshow - Phase 2B
   const handleStartSlideshow = useCallback(() => {
-    if (!photo) return;
+    if (!photo) return
     // Navigate to slideshow page with current photo
-    navigate(`/slideshow/${photo.id}`, { state: { from: location } });
-  }, [photo, navigate, location]);
+    navigate(`/slideshow/${photo.id}`, { state: { from: location } })
+  }, [photo, navigate, location])
 
   // Open editor - Phase 4
   const handleEdit = useCallback(() => {
-    if (!photo) return;
+    if (!photo) return
     // Navigate to editor page
-    navigate(`/editor/${photo.id}`, { state: { from: location } });
-  }, [photo, navigate, location]);
+    navigate(`/editor/${photo.id}`, { state: { from: location } })
+  }, [photo, navigate, location])
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
       switch (e.key) {
         case 'ArrowRight':
-          handleNext();
-          break;
+          handleNext()
+          break
         case 'ArrowLeft':
-          handlePrev();
-          break;
+          handlePrev()
+          break
         case 'Escape':
-          handleBack();
-          break;
+          handleBack()
+          break
         default:
-          break;
+          break
       }
-    };
+    }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleNext, handlePrev, handleBack]);
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [handleNext, handlePrev, handleBack])
 
   // Touch/swipe navigation
   useEffect(() => {
     const handleTouchStart = (e) => {
-      touchStartX.current = e.changedTouches[0].screenX;
-    };
+      touchStartX.current = e.changedTouches[0].screenX
+    }
 
     const handleTouchEnd = (e) => {
-      touchEndX.current = e.changedTouches[0].screenX;
-      handleSwipe();
-    };
+      touchEndX.current = e.changedTouches[0].screenX
+      handleSwipe()
+    }
 
     const handleSwipe = () => {
-      const swipeThreshold = 50;
-      const diff = touchStartX.current - touchEndX.current;
+      const swipeThreshold = 50
+      const diff = touchStartX.current - touchEndX.current
 
       if (Math.abs(diff) > swipeThreshold) {
         if (diff > 0) {
           // Swipe left → next
-          handleNext();
+          handleNext()
         } else {
           // Swipe right → prev
-          handlePrev();
+          handlePrev()
         }
       }
-    };
+    }
 
-    window.addEventListener('touchstart', handleTouchStart);
-    window.addEventListener('touchend', handleTouchEnd);
+    window.addEventListener('touchstart', handleTouchStart)
+    window.addEventListener('touchend', handleTouchEnd)
 
     return () => {
-      window.removeEventListener('touchstart', handleTouchStart);
-      window.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [handleNext, handlePrev]);
+      window.removeEventListener('touchstart', handleTouchStart)
+      window.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [handleNext, handlePrev])
 
   // Reset timer on mouse move
   useEffect(() => {
     const handleMouseMove = () => {
-      resetUiTimer();
-    };
+      resetUiTimer()
+    }
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [resetUiTimer]);
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [resetUiTimer])
 
   // Cleanup timer on unmount
   useEffect(() => {
     return () => {
       if (uiTimerRef.current) {
-        clearTimeout(uiTimerRef.current);
+        clearTimeout(uiTimerRef.current)
       }
-    };
-  }, []);
+    }
+  }, [])
 
   // Toggle UI on image click
   const handleImageClick = () => {
     if (uiVisible) {
-      setUiVisible(false);
+      setUiVisible(false)
       if (uiTimerRef.current) {
-        clearTimeout(uiTimerRef.current);
+        clearTimeout(uiTimerRef.current)
       }
     } else {
-      resetUiTimer();
+      resetUiTimer()
     }
-  };
+  }
 
   // Format date for title
   const getPhotoTitle = () => {
-    if (!photo) return '';
-    if (photo.caption) return photo.caption;
+    if (!photo) return ''
+    if (photo.caption) return photo.caption
     if (photo.createdAt) {
       try {
-        return format(new Date(photo.createdAt), 'MMMM d, yyyy');
+        return format(new Date(photo.createdAt), 'MMMM d, yyyy')
       } catch {
-        return photo.name || 'Photo';
+        return photo.name || 'Photo'
       }
     }
-    return photo.name || 'Photo';
-  };
+    return photo.name || 'Photo'
+  }
 
   // Loading state
   if (loading) {
@@ -243,7 +263,7 @@ export default function PhotoPage() {
       <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center">
         <div className="spinner" />
       </div>
-    );
+    )
   }
 
   // Error state
@@ -261,7 +281,7 @@ export default function PhotoPage() {
           </button>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -272,7 +292,8 @@ export default function PhotoPage() {
           uiVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         style={{
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%)',
+          background:
+            'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%)',
         }}
       >
         <div className="flex items-center justify-between px-4 h-full">
@@ -341,8 +362,8 @@ export default function PhotoPage() {
             <button
               onClick={() => {
                 // TODO: Show info modal in future phase
-                console.log('Info clicked');
-                resetUiTimer();
+                console.log('Info clicked')
+                resetUiTimer()
               }}
               className="text-white hover:bg-white/10 p-2 rounded-full transition active:scale-95"
               aria-label="Photo info"
@@ -354,8 +375,8 @@ export default function PhotoPage() {
             <button
               onClick={() => {
                 // TODO: Show more menu in future phase
-                console.log('More clicked');
-                resetUiTimer();
+                console.log('More clicked')
+                resetUiTimer()
               }}
               className="text-white hover:bg-white/10 p-2 rounded-full transition active:scale-95"
               aria-label="More options"
@@ -421,5 +442,5 @@ export default function PhotoPage() {
         </div>
       )}
     </div>
-  );
+  )
 }
