@@ -452,7 +452,14 @@ export async function uploadPhoto(
         const thumbPath = `users/${userId}/thumbnails/${timestamp}_${thumbSafeName}`
         const thumbRef = ref(storage, thumbPath)
 
-        await uploadBytes(thumbRef, thumbnailBlob)
+        await uploadBytes(thumbRef, thumbnailBlob, {
+          contentType: 'image/jpeg',
+          customMetadata: {
+            userId: userId,
+            parentVideo: file.name,
+            generatedAt: new Date().toISOString()
+          }
+        })
         thumbnailUrl = await getDownloadURL(thumbRef)
         console.log('✅ [Upload] Thumbnail uploaded:', thumbnailUrl)
       } catch (thumbError) {
