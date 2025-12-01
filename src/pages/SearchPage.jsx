@@ -354,18 +354,11 @@ const SearchPage = ({
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  console.log('🔵 Move button clicked!', {
-                    selectedCount: selectedPhotos.length,
-                    albumsCount: safeAlbums.length,
-                  })
-                  // Temporary debug alert
-                  alert(`Move clicked! ${selectedPhotos.length} photos selected`)
                   setMoveOpen(true)
                 }}
                 onTouchEnd={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  console.log('📱 Move button touched!')
                   setMoveOpen(true)
                 }}
                 className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center gap-2 touch-target"
