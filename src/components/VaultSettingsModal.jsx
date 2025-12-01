@@ -1,142 +1,201 @@
 // ============================================================================
 // COMPONENT: VaultSettingsModal.jsx – Phase 3.1: Vault Settings
 // ============================================================================
-import React, { useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { X, Settings, Lock, Clock, Fingerprint, Trash2, AlertTriangle, Eye, EyeOff } from "lucide-react";
-import { useVault } from "../hooks/useVault";
-import { hashPassword, verifyPassword, validatePasswordStrength } from "../services/encryption";
-import useStore from "../state/store";
+import React, { useState, useEffect } from 'react'
+import { NativeBiometric } from 'capacitor-native-biometric'
+import { useTranslation } from 'react-i18next'
+import {
+  X,
+  Settings,
+  Lock,
+  Clock,
+  Fingerprint,
+  Trash2,
+  AlertTriangle,
+  Eye,
+  EyeOff,
+} from 'lucide-react'
+import { useVault } from '../hooks/useVault'
+import {
+  hashPassword,
+  verifyPassword,
+  validatePasswordStrength,
+} from '../services/encryption'
+import useStore from '../state/store'
 
 const VaultSettingsModal = ({ isOpen, onClose }) => {
-  const { t } = useTranslation(['vault', 'common']);
+  const { t } = useTranslation(['vault', 'common'])
   const {
     vaultSettings,
     updateVaultSettings,
     resetVault,
     checkBiometricAvailability,
     unlockWithPassword,
-  } = useVault();
+  } = useVault()
 
-  const vaultPasswordHash = useStore((state) => state.vaultPasswordHash);
-  const setupVault = useStore((state) => state.setupVault);
-  const setConfirmModal = useStore((state) => state.setConfirmModal);
-  const showNotification = useStore((state) => state.showNotification);
+  const vaultPasswordHash = useStore((state) => state.vaultPasswordHash)
+  const setupVault = useStore((state) => state.setupVault)
+  const setConfirmModal = useStore((state) => state.setConfirmModal)
+  const showNotification = useStore((state) => state.showNotification)
 
-  const [autoLockTimeout, setAutoLockTimeout] = useState(vaultSettings.autoLockTimeout);
-  const [biometricEnabled, setBiometricEnabled] = useState(vaultSettings.biometricEnabled);
-  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [autoLockTimeout, setAutoLockTimeout] = useState(
+    vaultSettings.autoLockTimeout
+  )
+  const [biometricEnabled, setBiometricEnabled] = useState(
+    vaultSettings.biometricEnabled
+  )
+  const [biometricAvailable, setBiometricAvailable] = useState(false)
 
   // Change password state
-  const [showChangePassword, setShowChangePassword] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmNewPassword, setConfirmNewPassword] = useState("");
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
-  const [passwordStrength, setPasswordStrength] = useState({ valid: false, errors: [] });
+  const [showChangePassword, setShowChangePassword] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmNewPassword, setConfirmNewPassword] = useState('')
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false)
+  const [passwordStrength, setPasswordStrength] = useState({
+    valid: false,
+    errors: [],
+  })
 
   useEffect(() => {
     if (isOpen) {
-      setAutoLockTimeout(vaultSettings.autoLockTimeout);
-      setBiometricEnabled(vaultSettings.biometricEnabled);
-      checkBiometricAvailability().then(setBiometricAvailable);
+      setAutoLockTimeout(vaultSettings.autoLockTimeout)
+      setBiometricEnabled(vaultSettings.biometricEnabled)
+      checkBiometricAvailability().then(setBiometricAvailable)
     }
-  }, [isOpen, vaultSettings, checkBiometricAvailability]);
+  }, [isOpen, vaultSettings, checkBiometricAvailability])
 
   useEffect(() => {
     if (newPassword) {
-      const validation = validatePasswordStrength(newPassword);
-      setPasswordStrength(validation);
+      const validation = validatePasswordStrength(newPassword)
+      setPasswordStrength(validation)
     } else {
-      setPasswordStrength({ valid: false, errors: [] });
+      setPasswordStrength({ valid: false, errors: [] })
     }
-  }, [newPassword]);
+  }, [newPassword])
 
   const handleSaveSettings = async () => {
     try {
       await updateVaultSettings({
         autoLockTimeout,
         biometricEnabled,
-      });
+      })
 
-      showNotification(t('vault:settings.saveSuccess', { defaultValue: 'Settings saved' }), 'success');
-      onClose();
+      showNotification(
+        t('vault:settings.saveSuccess', { defaultValue: 'Settings saved' }),
+        'success'
+      )
+      onClose()
     } catch (error) {
-      console.error('Failed to save settings:', error);
-      showNotification(t('vault:settings.saveFailed', { defaultValue: 'Failed to save settings' }), 'error');
+      console.error('Failed to save settings:', error)
+      showNotification(
+        t('vault:settings.saveFailed', {
+          defaultValue: 'Failed to save settings',
+        }),
+        'error'
+      )
     }
-  };
+  }
 
   const handleChangePassword = async () => {
     if (!passwordStrength.valid) {
-      showNotification(t('vault:settings.passwordWeak', { defaultValue: 'Password is too weak' }), 'error');
-      return;
+      showNotification(
+        t('vault:settings.passwordWeak', {
+          defaultValue: 'Password is too weak',
+        }),
+        'error'
+      )
+      return
     }
 
     if (newPassword !== confirmNewPassword) {
-      showNotification(t('vault:settings.passwordMismatch', { defaultValue: 'Passwords do not match' }), 'error');
-      return;
+      showNotification(
+        t('vault:settings.passwordMismatch', {
+          defaultValue: 'Passwords do not match',
+        }),
+        'error'
+      )
+      return
     }
 
     try {
       // Verify current password
-      const isValid = await verifyPassword(currentPassword, vaultPasswordHash);
+      const isValid = await verifyPassword(currentPassword, vaultPasswordHash)
       if (!isValid) {
-        showNotification(t('vault:settings.incorrectPassword', { defaultValue: 'Current password is incorrect' }), 'error');
-        return;
+        showNotification(
+          t('vault:settings.incorrectPassword', {
+            defaultValue: 'Current password is incorrect',
+          }),
+          'error'
+        )
+        return
       }
 
       // Update password
-      const newPasswordHash = await hashPassword(newPassword);
-      setupVault(newPasswordHash, vaultSettings);
+      const newPasswordHash = await hashPassword(newPassword)
+      setupVault(newPasswordHash, vaultSettings)
 
       // Update biometric credentials if enabled
       if (biometricEnabled) {
         try {
-          const { NativeBiometric } = require('capacitor-native-biometric');
           await NativeBiometric.setCredentials({
             username: 'vault',
             password: newPassword,
-            server: 'photovault.vault'
-          });
+            server: 'photovault.vault',
+          })
         } catch (error) {
-          console.error('Failed to update biometric credentials:', error);
+          console.error('Failed to update biometric credentials:', error)
         }
       }
 
-      showNotification(t('vault:settings.passwordChanged', { defaultValue: 'Password changed successfully' }), 'success');
-      setShowChangePassword(false);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmNewPassword("");
+      showNotification(
+        t('vault:settings.passwordChanged', {
+          defaultValue: 'Password changed successfully',
+        }),
+        'success'
+      )
+      setShowChangePassword(false)
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmNewPassword('')
     } catch (error) {
-      console.error('Failed to change password:', error);
-      showNotification(t('vault:settings.passwordChangeFailed', { defaultValue: 'Failed to change password' }), 'error');
+      console.error('Failed to change password:', error)
+      showNotification(
+        t('vault:settings.passwordChangeFailed', {
+          defaultValue: 'Failed to change password',
+        }),
+        'error'
+      )
     }
-  };
+  }
 
   const handleResetVault = () => {
     setConfirmModal({
-      title: t('vault:settings.resetConfirm.title', { defaultValue: 'Reset Vault' }),
-      message: t('vault:settings.resetConfirm.message', {
-        defaultValue: 'This will permanently delete all vault photos and settings. This action cannot be undone.'
+      title: t('vault:settings.resetConfirm.title', {
+        defaultValue: 'Reset Vault',
       }),
-      confirmText: t('vault:settings.resetConfirm.confirm', { defaultValue: 'Delete Everything' }),
+      message: t('vault:settings.resetConfirm.message', {
+        defaultValue:
+          'This will permanently delete all vault photos and settings. This action cannot be undone.',
+      }),
+      confirmText: t('vault:settings.resetConfirm.confirm', {
+        defaultValue: 'Delete Everything',
+      }),
       confirmStyle: 'danger',
       onConfirm: async () => {
-        await resetVault();
-        setConfirmModal(null);
-        onClose();
+        await resetVault()
+        setConfirmModal(null)
+        onClose()
       },
       onCancel: () => setConfirmModal(null),
-    });
-  };
+    })
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
-  const isPasswordMatch = newPassword === confirmNewPassword;
+  const isPasswordMatch = newPassword === confirmNewPassword
 
   return (
     <div
@@ -167,7 +226,9 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
         <div className="mb-6">
           <label className="flex items-center gap-2 text-sm text-gray-300 mb-2">
             <Clock className="w-4 h-4 text-purple-400" />
-            {t('vault:settings.autoLock.label', { defaultValue: 'Auto-Lock Timeout' })}
+            {t('vault:settings.autoLock.label', {
+              defaultValue: 'Auto-Lock Timeout',
+            })}
           </label>
           <select
             value={autoLockTimeout}
@@ -175,15 +236,36 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
             className="w-full p-3 rounded-xl bg-gray-800/60 border border-gray-600/50
                        text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
-            <option value={60000}>1 {t('vault:settings.autoLock.minute', { defaultValue: 'minute' })}</option>
-            <option value={300000}>5 {t('vault:settings.autoLock.minutes', { defaultValue: 'minutes' })}</option>
-            <option value={900000}>15 {t('vault:settings.autoLock.minutes', { defaultValue: 'minutes' })}</option>
-            <option value={1800000}>30 {t('vault:settings.autoLock.minutes', { defaultValue: 'minutes' })}</option>
-            <option value={0}>{t('vault:settings.autoLock.never', { defaultValue: 'Never' })}</option>
+            <option value={60000}>
+              1{' '}
+              {t('vault:settings.autoLock.minute', { defaultValue: 'minute' })}
+            </option>
+            <option value={300000}>
+              5{' '}
+              {t('vault:settings.autoLock.minutes', {
+                defaultValue: 'minutes',
+              })}
+            </option>
+            <option value={900000}>
+              15{' '}
+              {t('vault:settings.autoLock.minutes', {
+                defaultValue: 'minutes',
+              })}
+            </option>
+            <option value={1800000}>
+              30{' '}
+              {t('vault:settings.autoLock.minutes', {
+                defaultValue: 'minutes',
+              })}
+            </option>
+            <option value={0}>
+              {t('vault:settings.autoLock.never', { defaultValue: 'Never' })}
+            </option>
           </select>
           <p className="text-xs text-gray-400 mt-1">
             {t('vault:settings.autoLock.description', {
-              defaultValue: 'Vault will automatically lock after this period of inactivity'
+              defaultValue:
+                'Vault will automatically lock after this period of inactivity',
             })}
           </p>
         </div>
@@ -196,10 +278,14 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
                 <Fingerprint className="w-5 h-5 text-purple-400" />
                 <div>
                   <p className="text-white font-semibold">
-                    {t('vault:settings.biometric.label', { defaultValue: 'Biometric Unlock' })}
+                    {t('vault:settings.biometric.label', {
+                      defaultValue: 'Biometric Unlock',
+                    })}
                   </p>
                   <p className="text-xs text-gray-400">
-                    {t('vault:settings.biometric.description', { defaultValue: 'Use FaceID/TouchID' })}
+                    {t('vault:settings.biometric.description', {
+                      defaultValue: 'Use FaceID/TouchID',
+                    })}
                   </p>
                 </div>
               </div>
@@ -226,18 +312,22 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
             className="flex items-center gap-2 text-purple-400 hover:text-purple-300 transition mb-3"
           >
             <Lock className="w-4 h-4" />
-            {t('vault:settings.changePassword.button', { defaultValue: 'Change Vault Password' })}
+            {t('vault:settings.changePassword.button', {
+              defaultValue: 'Change Vault Password',
+            })}
           </button>
 
           {showChangePassword && (
             <div className="space-y-3 p-4 bg-gray-800/40 border border-gray-700/50 rounded-xl">
               <div>
                 <label className="block text-sm text-gray-300 mb-1">
-                  {t('vault:settings.changePassword.currentLabel', { defaultValue: 'Current Password' })}
+                  {t('vault:settings.changePassword.currentLabel', {
+                    defaultValue: 'Current Password',
+                  })}
                 </label>
                 <div className="relative">
                   <input
-                    type={showCurrentPassword ? "text" : "password"}
+                    type={showCurrentPassword ? 'text' : 'password'}
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     className="w-full p-3 pr-10 rounded-xl bg-gray-800/60 border border-gray-600/50
@@ -248,18 +338,24 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
                   >
-                    {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showCurrentPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm text-gray-300 mb-1">
-                  {t('vault:settings.changePassword.newLabel', { defaultValue: 'New Password' })}
+                  {t('vault:settings.changePassword.newLabel', {
+                    defaultValue: 'New Password',
+                  })}
                 </label>
                 <div className="relative">
                   <input
-                    type={showNewPassword ? "text" : "password"}
+                    type={showNewPassword ? 'text' : 'password'}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     className="w-full p-3 pr-10 rounded-xl bg-gray-800/60 border border-gray-600/50
@@ -270,13 +366,19 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
                     onClick={() => setShowNewPassword(!showNewPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
                   >
-                    {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showNewPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
                 {newPassword && !passwordStrength.valid && (
                   <div className="mt-1 space-y-0.5">
                     {passwordStrength.errors.map((error, index) => (
-                      <p key={index} className="text-xs text-red-400">• {error}</p>
+                      <p key={index} className="text-xs text-red-400">
+                        • {error}
+                      </p>
                     ))}
                   </div>
                 )}
@@ -284,11 +386,13 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
 
               <div>
                 <label className="block text-sm text-gray-300 mb-1">
-                  {t('vault:settings.changePassword.confirmLabel', { defaultValue: 'Confirm New Password' })}
+                  {t('vault:settings.changePassword.confirmLabel', {
+                    defaultValue: 'Confirm New Password',
+                  })}
                 </label>
                 <div className="relative">
                   <input
-                    type={showConfirmNewPassword ? "text" : "password"}
+                    type={showConfirmNewPassword ? 'text' : 'password'}
                     value={confirmNewPassword}
                     onChange={(e) => setConfirmNewPassword(e.target.value)}
                     className="w-full p-3 pr-10 rounded-xl bg-gray-800/60 border border-gray-600/50
@@ -296,26 +400,40 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
                   />
                   <button
                     type="button"
-                    onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
+                    onClick={() =>
+                      setShowConfirmNewPassword(!showConfirmNewPassword)
+                    }
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
                   >
-                    {showConfirmNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showConfirmNewPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
                 {confirmNewPassword && !isPasswordMatch && (
                   <p className="mt-1 text-xs text-red-400">
-                    {t('vault:settings.changePassword.mismatch', { defaultValue: 'Passwords do not match' })}
+                    {t('vault:settings.changePassword.mismatch', {
+                      defaultValue: 'Passwords do not match',
+                    })}
                   </p>
                 )}
               </div>
 
               <button
                 onClick={handleChangePassword}
-                disabled={!currentPassword || !passwordStrength.valid || !isPasswordMatch}
+                disabled={
+                  !currentPassword ||
+                  !passwordStrength.valid ||
+                  !isPasswordMatch
+                }
                 className="w-full py-2 rounded-xl bg-purple-600 text-white font-semibold
                            hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {t('vault:settings.changePassword.submit', { defaultValue: 'Update Password' })}
+                {t('vault:settings.changePassword.submit', {
+                  defaultValue: 'Update Password',
+                })}
               </button>
             </div>
           )}
@@ -326,12 +444,15 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="w-5 h-5 text-red-400" />
             <h3 className="text-white font-semibold">
-              {t('vault:settings.dangerZone.title', { defaultValue: 'Danger Zone' })}
+              {t('vault:settings.dangerZone.title', {
+                defaultValue: 'Danger Zone',
+              })}
             </h3>
           </div>
           <p className="text-sm text-gray-300 mb-3">
             {t('vault:settings.dangerZone.description', {
-              defaultValue: 'Permanently delete all vault photos and reset vault settings.'
+              defaultValue:
+                'Permanently delete all vault photos and reset vault settings.',
             })}
           </p>
           <button
@@ -340,7 +461,9 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
                        text-white font-semibold hover:bg-red-600 transition"
           >
             <Trash2 className="w-4 h-4 inline mr-2" />
-            {t('vault:settings.dangerZone.button', { defaultValue: 'Reset Vault' })}
+            {t('vault:settings.dangerZone.button', {
+              defaultValue: 'Reset Vault',
+            })}
           </button>
         </div>
 
@@ -363,7 +486,7 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default VaultSettingsModal;
+export default VaultSettingsModal
