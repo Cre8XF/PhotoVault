@@ -8,9 +8,12 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Save, AlertCircle, Loader, Sliders, Crop as CropIcon, RotateCw, Sparkles, RotateCcw } from 'lucide-react';
 import useStore from '../state/store';
 import useEditorStore from '../features/editor/editorStore';
+import { exportFinalCanvas } from '../features/editor/utils/canvasUtils';
+import { uploadEditedPhoto, auth } from '../firebase';
 import { EditorViewport } from '../features/editor/components/EditorViewport';
 import CropOverlay from '../features/editor/components/CropOverlay';
 import PanelShell from '../features/editor/panels/PanelShell';
+import { showToast } from '../utils/nativeUtils';
 import '../features/editor/editor.css';
 
 /**
@@ -48,7 +51,7 @@ const EditorPage = () => {
   const { t } = useTranslation();
 
   // Global store - World pattern
-  const { setIsWorldView, setCurrentPhotoId, photos } = useStore();
+  const { setIsWorldView, setCurrentPhotoId, photos, updatePhoto } = useStore();
 
   // Photo context for smart back navigation (A7)
   const photoContext = useStore((state) => state.photoContext);
@@ -57,6 +60,7 @@ const EditorPage = () => {
   // Editor store
   const {
     originalPhoto,
+    filter,
     transform,
     isDirty,
     initializeEditor,
@@ -67,6 +71,7 @@ const EditorPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [activeTool, setActiveTool] = useState('none');
+  const [isSaving, setIsSaving] = useState(false);
   const [isCropApplied, setIsCropApplied] = useState(false);
   const [viewportDimensions, setViewportDimensions] = useState(null);
   const [viewportTransform, setViewportTransform] = useState({ zoom: 1, panX: 0, panY: 0 });
@@ -185,9 +190,70 @@ const EditorPage = () => {
   }, []);
 
   const handleSave = useCallback(() => {
-    // Phase 8A: Save functionality will be implemented in 8B/8C
-    console.log('💾 Phase 8A: Save will be implemented in Phase 8B/8C');
-  }, []);
+    const performSave = async () => {
+      try {
+        setIsSaving(true);
+        console.log('💾 [EditorPage] Starting save process...');
+
+        // 1. Get current user
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+          throw new Error('No authenticated user');
+        }
+
+        // 2. Export final image via exportFinalCanvas
+        console.log('📸 [EditorPage] Exporting final canvas...');
+        const { blob, width, height } = await exportFinalCanvas({
+          imageUrl: originalPhoto.url,
+          transform,
+          filter,
+          targetMaxSize: 4096,
+          quality: 0.92,
+        });
+
+        console.log(`✅ [EditorPage] Canvas exported: ${width}x${height}, ${(blob.size / 1024).toFixed(1)}KB`);
+
+        // 3. Upload edited photo to R2 and update Firestore
+        console.log('☁️ [EditorPage] Uploading to R2...');
+        const { editedUrl } = await uploadEditedPhoto(
+          currentUser.uid,
+          photoId,
+          blob,
+          transform,
+          filter
+        );
+
+        console.log('✅ [EditorPage] Upload complete:', editedUrl);
+
+        // 4. Update local photo state/store with new editedUrl
+        updatePhoto(photoId, {
+          editedUrl,
+          editedAt: new Date().toISOString(),
+          transforms: transform,
+          filter,
+        });
+
+        // 5. Show success toast
+        showToast(t('editor.saveSuccess', 'Photo saved successfully!'));
+
+        // 6. Navigate back using existing photoContext logic (from A7)
+        console.log('🔙 [EditorPage] Navigating back...');
+        handleBack();
+
+      } catch (error) {
+        console.error('🔥 [EditorPage] Save error:', error);
+        showToast(
+          t('editor.saveError', 'Could not save edited image. Please try again.'),
+          'long'
+        );
+        // Do NOT navigate away on error
+      } finally {
+        setIsSaving(false);
+      }
+    };
+
+    performSave();
+  }, [originalPhoto, transform, filter, photoId, updatePhoto, t, handleBack]);
 
   const handleCropChange = useCallback((newCropRect) => {
     const { applyTransform } = useEditorStore.getState();
@@ -421,11 +487,20 @@ const EditorPage = () => {
           </button>
           <button
             onClick={handleSave}
-            disabled={!hasTransforms()}
+            disabled={!hasTransforms() || isSaving}
             className="btn-primary save-button flex-1 max-w-[120px]"
           >
-            <Save className="icon" />
-            {t('editor.save', 'Save')}
+            {isSaving ? (
+              <>
+                <Loader className="icon animate-spin" />
+                {t('editor.saving', 'Saving...')}
+              </>
+            ) : (
+              <>
+                <Save className="icon" />
+                {t('editor.save', 'Save')}
+              </>
+            )}
           </button>
         </div>
       </div>
