@@ -72,7 +72,6 @@ const EditorPage = () => {
   const [loadError, setLoadError] = useState(null);
   const [activeTool, setActiveTool] = useState('none');
   const [isSaving, setIsSaving] = useState(false);
-  const [isCropApplied, setIsCropApplied] = useState(false);
   const [viewportDimensions, setViewportDimensions] = useState(null);
   const [viewportTransform, setViewportTransform] = useState({ zoom: 1, panX: 0, panY: 0 });
 
@@ -471,7 +470,6 @@ const EditorPage = () => {
             viewportRef={viewportRef}
             photo={originalPhoto}
             onCropApplied={() => {
-              setIsCropApplied(true);
               setActiveTool('none');
               console.log('✅ Crop applied - closing crop tool');
             }}

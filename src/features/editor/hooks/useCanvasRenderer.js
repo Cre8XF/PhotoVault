@@ -51,9 +51,6 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
   // Transform state
   const [transform, setTransform] = useState(createInitialTransform())
 
-  // Crop state (Phase 8C-3)
-  const [appliedCropBox, setAppliedCropBox] = useState(null)
-
   // Gesture state
   const isDraggingRef = useRef(false)
   const dragStartRef = useRef({ x: 0, y: 0, panX: 0, panY: 0 })
@@ -374,10 +371,7 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
       return
     }
 
-    console.log('Applying crop')
-
-    // Set crop box
-    setAppliedCropBox(cropBox)
+    console.log('✅ Crop applied (persisted in editorStore)')
 
     // Reset transform to clean state (zoom=1, pan=0)
     setTransform((prev) => ({
@@ -389,21 +383,24 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
   }, [])
 
   /**
-   * Clear crop (Phase 8C-3)
-   * Returns to normal transform mode
+   * Clear crop (Phase 3.5 Cleanup)
+   * Clears crop from editorStore (single source of truth)
    */
   const clearCrop = useCallback(() => {
-    console.log('Clearing crop')
-    setAppliedCropBox(null)
-  }, [])
+    const { resetCrop } = useEditorStore.getState()
+    resetCrop()
+    console.log('🔷 Crop cleared from editorStore')
+    render()
+  }, [render])
 
   /**
-   * Get current applied crop box (Phase 8C-3)
-   * @returns {Object|null} Crop box in pixels or null
+   * Get current applied crop box (Phase 3.5 Cleanup)
+   * @returns {Object|null} Crop box from editorStore or null
    */
   const getAppliedCrop = useCallback(() => {
-    return appliedCropBox
-  }, [appliedCropBox])
+    const { transform } = useEditorStore.getState()
+    return transform.crop
+  }, [])
 
   /**
    * Get image size (Phase 8C-3)
