@@ -553,7 +553,15 @@ export async function uploadThumbnail(blob, userId, photoId, size = 'small') {
   try {
     const storagePath = `users/${userId}/thumbnails/${photoId}_${size}.jpg`
     const storageRef = ref(storage, storagePath)
-    await uploadBytes(storageRef, blob)
+    await uploadBytes(storageRef, blob, {
+      contentType: 'image/jpeg',
+      customMetadata: {
+        userId: userId,
+        photoId: photoId,
+        size: size,
+        generatedAt: new Date().toISOString()
+      }
+    })
     const downloadURL = await getDownloadURL(storageRef)
     return { downloadURL, storagePath }
   } catch (error) {
