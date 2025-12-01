@@ -25,12 +25,18 @@ const useEditorStore = create((set, get) => ({
 
   // Transform state
   transform: {
-    brightness: 0,      // -100 to 100
-    contrast: 0,        // -100 to 100
-    saturation: 0,      // -100 to 100
-    temperature: 0,     // -100 to 100 (warm/cool)
-    blur: 0,            // 0 to 10
-    vignette: 0,        // 0 to 100
+    // Adjust values (Phase 8C-1)
+    adjust: {
+      brightness: 0,    // -100 to 100
+      contrast: 0,      // -100 to 100
+      saturation: 0,    // -100 to 100
+      warmth: 0,        // -100 to 100
+      highlights: 0,    // -100 to 100
+      shadows: 0,       // -100 to 100
+      clarity: 0,       // -100 to 100
+      blur: 0,          // 0 to 20
+      vignette: 0,      // 0 to 100
+    },
     rotate: 0,          // 0, 90, 180, 270
     flipH: false,       // horizontal flip
     flipV: false,       // vertical flip
@@ -65,12 +71,17 @@ const useEditorStore = create((set, get) => ({
       originalPhoto: photo,
       workingPhoto: { ...photo },
       transform: {
-        brightness: 0,
-        contrast: 0,
-        saturation: 0,
-        temperature: 0,
-        blur: 0,
-        vignette: 0,
+        adjust: {
+          brightness: 0,
+          contrast: 0,
+          saturation: 0,
+          warmth: 0,
+          highlights: 0,
+          shadows: 0,
+          clarity: 0,
+          blur: 0,
+          vignette: 0,
+        },
         rotate: 0,
         flipH: false,
         flipV: false,
@@ -133,12 +144,17 @@ const useEditorStore = create((set, get) => ({
   resetToOriginal: () => {
     set({
       transform: {
-        brightness: 0,
-        contrast: 0,
-        saturation: 0,
-        temperature: 0,
-        blur: 0,
-        vignette: 0,
+        adjust: {
+          brightness: 0,
+          contrast: 0,
+          saturation: 0,
+          warmth: 0,
+          highlights: 0,
+          shadows: 0,
+          clarity: 0,
+          blur: 0,
+          vignette: 0,
+        },
         rotate: 0,
         flipH: false,
         flipV: false,
@@ -259,12 +275,17 @@ const useEditorStore = create((set, get) => ({
       originalPhoto: null,
       workingPhoto: null,
       transform: {
-        brightness: 0,
-        contrast: 0,
-        saturation: 0,
-        temperature: 0,
-        blur: 0,
-        vignette: 0,
+        adjust: {
+          brightness: 0,
+          contrast: 0,
+          saturation: 0,
+          warmth: 0,
+          highlights: 0,
+          shadows: 0,
+          clarity: 0,
+          blur: 0,
+          vignette: 0,
+        },
         rotate: 0,
         flipH: false,
         flipV: false,
@@ -296,13 +317,9 @@ const useEditorStore = create((set, get) => ({
   hasTransforms: () => {
     const t = get().transform;
     const f = get().filter;
+    const hasAdjust = Object.values(t.adjust).some(v => v !== 0);
     return (
-      t.brightness !== 0 ||
-      t.contrast !== 0 ||
-      t.saturation !== 0 ||
-      t.temperature !== 0 ||
-      t.blur !== 0 ||
-      t.vignette !== 0 ||
+      hasAdjust ||
       t.rotate !== 0 ||
       t.flipH !== false ||
       t.flipV !== false ||
