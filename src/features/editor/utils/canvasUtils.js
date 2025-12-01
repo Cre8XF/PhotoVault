@@ -409,3 +409,159 @@ export const drawCroppedImageToCanvas = (ctx, image, canvasWidth, canvasHeight, 
     drawVignetteOverlay(ctx, canvasWidth, canvasHeight, adjust.vignette);
   }
 };
+
+/**
+ * Export final edited image as JPEG blob (Phase 3)
+ * Applies ALL transforms in correct order: rotation → flip → crop → adjust
+ *
+ * @param {Object} params - Export parameters
+ * @param {string} params.imageUrl - Source image URL
+ * @param {Object} params.transform - Transform state from editorStore
+ * @param {Object} params.transform.adjust - Adjust values (brightness, contrast, etc.)
+ * @param {number} params.transform.rotate - Rotation in degrees (0, 90, 180, 270)
+ * @param {boolean} params.transform.flipH - Horizontal flip
+ * @param {boolean} params.transform.flipV - Vertical flip
+ * @param {Object} params.transform.crop - Crop rect { x1, y1, x2, y2 } in 0-1 normalized space
+ * @param {string} params.filter - Named filter ('original', 'bright', 'warm', etc.)
+ * @param {number} params.targetMaxSize - Maximum width/height (default 4096)
+ * @param {number} params.quality - JPEG quality 0-1 (default 0.92)
+ * @returns {Promise<Object>} { blob, width, height }
+ */
+export async function exportFinalCanvas({
+  imageUrl,
+  transform,
+  filter = 'original',
+  targetMaxSize = 4096,
+  quality = 0.92,
+}) {
+  // Load source image
+  const image = await loadImage(imageUrl);
+
+  // Step 1: Determine if we need to extract a crop region first
+  let sourceImage = image;
+  let sourceWidth = image.naturalWidth;
+  let sourceHeight = image.naturalHeight;
+
+  if (transform.crop) {
+    // Extract cropped region to a temporary canvas
+    const cropX = Math.round(transform.crop.x1 * image.naturalWidth);
+    const cropY = Math.round(transform.crop.y1 * image.naturalHeight);
+    const cropWidth = Math.round((transform.crop.x2 - transform.crop.x1) * image.naturalWidth);
+    const cropHeight = Math.round((transform.crop.y2 - transform.crop.y1) * image.naturalHeight);
+
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = cropWidth;
+    tempCanvas.height = cropHeight;
+    const tempCtx = tempCanvas.getContext('2d');
+
+    // Draw cropped portion
+    tempCtx.drawImage(
+      image,
+      cropX, cropY, cropWidth, cropHeight,  // Source crop region
+      0, 0, cropWidth, cropHeight            // Destination (fill canvas)
+    );
+
+    // Create image from cropped canvas to use as source
+    const croppedDataUrl = tempCanvas.toDataURL('image/png');
+    sourceImage = await loadImage(croppedDataUrl);
+    sourceWidth = cropWidth;
+    sourceHeight = cropHeight;
+  }
+
+  // Step 2: Calculate final dimensions considering rotation
+  let finalWidth = sourceWidth;
+  let finalHeight = sourceHeight;
+
+  // If rotated 90 or 270 degrees, swap width/height
+  if (transform.rotate === 90 || transform.rotate === 270) {
+    [finalWidth, finalHeight] = [finalHeight, finalWidth];
+  }
+
+  // Step 3: Apply max size limit while maintaining aspect ratio
+  if (finalWidth > targetMaxSize || finalHeight > targetMaxSize) {
+    const scale = Math.min(targetMaxSize / finalWidth, targetMaxSize / finalHeight);
+    finalWidth = Math.round(finalWidth * scale);
+    finalHeight = Math.round(finalHeight * scale);
+  }
+
+  // Step 4: Create final export canvas
+  const exportCanvas = document.createElement('canvas');
+  exportCanvas.width = finalWidth;
+  exportCanvas.height = finalHeight;
+  const ctx = exportCanvas.getContext('2d');
+
+  // Enable high-quality rendering
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
+  // Step 5: Apply named filter + adjust filters
+  const namedFilterCss = (filter && filter !== 'original') ? getCssFilter(filter) : '';
+
+  if (transform.adjust) {
+    const adjustString = buildCanvasAdjustString(transform.adjust);
+
+    if (adjustString === 'none') {
+      ctx.filter = namedFilterCss || 'none';
+    } else if (namedFilterCss) {
+      ctx.filter = `${namedFilterCss} ${adjustString}`;
+    } else {
+      ctx.filter = adjustString;
+    }
+  } else if (namedFilterCss) {
+    ctx.filter = namedFilterCss;
+  }
+
+  // Step 6: Apply rotation and flip transforms
+  ctx.save();
+
+  // Translate to center
+  ctx.translate(finalWidth / 2, finalHeight / 2);
+
+  // Apply rotation
+  if (transform.rotate !== 0) {
+    const rotationRadians = (transform.rotate * Math.PI) / 180;
+    ctx.rotate(rotationRadians);
+  }
+
+  // Apply flips
+  const scaleX = transform.flipH ? -1 : 1;
+  const scaleY = transform.flipV ? -1 : 1;
+  if (transform.flipH || transform.flipV) {
+    ctx.scale(scaleX, scaleY);
+  }
+
+  // Step 7: Draw image centered at origin
+  // Calculate draw dimensions (accounting for max size scaling)
+  const drawWidth = sourceWidth * (finalWidth / sourceWidth);
+  const drawHeight = sourceHeight * (finalHeight / sourceHeight);
+
+  ctx.drawImage(
+    sourceImage,
+    -drawWidth / 2, -drawHeight / 2,  // Centered position
+    drawWidth, drawHeight              // Scaled size
+  );
+
+  ctx.restore();
+
+  // Reset filter
+  ctx.filter = 'none';
+
+  // Step 8: Apply vignette overlay (if any)
+  if (transform.adjust && transform.adjust.vignette > 0) {
+    drawVignetteOverlay(ctx, finalWidth, finalHeight, transform.adjust.vignette);
+  }
+
+  // Step 9: Export to JPEG blob
+  const blob = await new Promise((resolve, reject) => {
+    exportCanvas.toBlob(
+      (blob) => {
+        if (blob) resolve(blob);
+        else reject(new Error('Canvas toBlob failed'));
+      },
+      'image/jpeg',
+      quality
+    );
+  });
+
+  return { blob, width: finalWidth, height: finalHeight };
+}
