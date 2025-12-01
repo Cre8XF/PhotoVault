@@ -50,6 +50,10 @@ const EditorPage = () => {
   // Global store - World pattern
   const { setIsWorldView, setCurrentPhotoId, photos } = useStore();
 
+  // Photo context for smart back navigation (A7)
+  const photoContext = useStore((state) => state.photoContext);
+  const currentAlbumId = useStore((state) => state.currentAlbumId);
+
   // Editor store
   const {
     originalPhoto,
@@ -124,9 +128,25 @@ const EditorPage = () => {
   // ============================================================================
 
   const handleBack = useCallback(() => {
-    // Simple back navigation (masterplan requirement)
-    navigate(-1);
-  }, [navigate]);
+    // Smart back navigation based on photo context (A7)
+    if (photoContext === 'album' && currentAlbumId) {
+      // Return to album page
+      navigate(`/album/${currentAlbumId}`);
+      console.log('🔙 Returning to album:', currentAlbumId);
+    } else if (photoContext === 'search') {
+      // Return to search page
+      navigate('/search');
+      console.log('🔙 Returning to search');
+    } else if (photoContext === 'favorites') {
+      // Return to favorites (home dashboard)
+      navigate('/');
+      console.log('🔙 Returning to favorites');
+    } else {
+      // Fallback to generic back navigation
+      navigate(-1);
+      console.log('🔙 Generic back navigation');
+    }
+  }, [navigate, photoContext, currentAlbumId]);
 
   const handleToolChange = useCallback(
     (tool) => {
