@@ -113,7 +113,12 @@ const EditorPage = () => {
     const photo = photos?.find((p) => p.id === photoId);
 
     if (photo) {
-      initializeEditor(photo);
+      // Phase 3.5 FIX: Load edited version if it exists
+      const photoToEdit = {
+        ...photo,
+        url: photo.editedUrl || photo.url,
+      };
+      initializeEditor(photoToEdit);
       setIsLoading(false);
     } else {
       setLoadError('Photo not found');
@@ -155,12 +160,8 @@ const EditorPage = () => {
 
   const handleToolChange = useCallback(
     (tool) => {
-      // Clear applied crop when switching tools
-      if (isCropApplied && viewportRef.current) {
-        viewportRef.current.clearCrop();
-        setIsCropApplied(false);
-        console.log('🔷 Cleared applied crop when switching tools');
-      }
+      // Phase 3.5 FIX: DO NOT clear crop when switching tools
+      // Crop must persist across Rotate/Filters/Adjust tools
 
       // Toggle tool: clicking same tool closes it
       const newTool = activeTool === tool ? 'none' : tool;
@@ -174,7 +175,7 @@ const EditorPage = () => {
         console.log('🎯 Initialized centered crop:', centeredCrop);
       }
     },
-    [activeTool, transform.crop, isCropApplied]
+    [activeTool, transform.crop]
   );
 
   const handleReset = useCallback(() => {

@@ -390,7 +390,7 @@ export default function PhotoPage() {
       {/* Image Canvas */}
       <main className="flex-1 flex items-center justify-center p-0">
         <img
-          src={photo.url}
+          src={photo.displayUrl || photo.url}
           alt={photo.caption || photo.name || 'Photo'}
           className={`max-w-full max-h-[100vh] object-contain transition-opacity duration-300 cursor-pointer ${
             imageLoaded ? 'opacity-100' : 'opacity-0'

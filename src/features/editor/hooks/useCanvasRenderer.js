@@ -88,8 +88,8 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
   }, [])
 
   /**
-   * Render current image to canvas with transforms (Phase 8C-3)
-   * Uses crop mode if appliedCropBox is set OR if external crop preview exists
+   * Render current image to canvas with transforms (Phase 3.5 FIX)
+   * ALWAYS use crop from externalTransform if it exists (persists across tool changes)
    */
   const render = useCallback(() => {
     const canvas = canvasRef.current
@@ -110,38 +110,30 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
     // Use external transform if provided, otherwise use internal
     const activeTransform = externalTransform || transform
 
-    // Crop mode (Phase 8C-3): render only cropped portion
-    if (appliedCropBox) {
-      // Final applied crop - locked and permanent
-      drawCroppedImageToCanvas(
-        ctx,
-        image,
-        width,
-        height,
-        appliedCropBox,
-        activeTransform.adjust
-      )
-    } else if (externalTransform?.crop && !appliedCropBox) {
-      // Real-time crop preview (Phase 8C-5 FIX #3) - while adjusting crop handles
-      const previewCropBox = getEffectiveCropBox(externalTransform.crop, {
+    // Phase 3.5 FIX: ALWAYS check externalTransform.crop from editorStore
+    // This ensures crop persists when switching tools (Rotate/Filters/Adjust)
+    if (externalTransform?.crop) {
+      const cropBox = getEffectiveCropBox(externalTransform.crop, {
         width: image.naturalWidth,
         height: image.naturalHeight,
       })
-      if (previewCropBox) {
+
+      if (cropBox) {
         drawCroppedImageToCanvas(
           ctx,
           image,
           width,
           height,
-          previewCropBox,
+          cropBox,
           activeTransform.adjust
         )
+        return
       }
-    } else {
-      // Normal mode: draw image with full transforms (zoom, pan, rotation, flip)
-      drawImageWithFullTransform(ctx, image, width, height, activeTransform)
     }
-  }, [transform, externalTransform, appliedCropBox, filter])
+
+    // Normal mode: draw image with full transforms (zoom, pan, rotation, flip)
+    drawImageWithFullTransform(ctx, image, width, height, activeTransform)
+  }, [transform, externalTransform, filter])
 
   /**
    * Set zoom level with pan clamping (Phase 8B-3: rotation-aware)
