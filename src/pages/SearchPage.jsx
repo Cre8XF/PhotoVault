@@ -259,12 +259,40 @@ const SearchPage = ({
       const db = getFirestore()
       const safeSelected = Array.isArray(selectedPhotos) ? selectedPhotos : []
 
+      console.log('🔵 Moving photos:', {
+        count: safeSelected.length,
+        targetAlbumId,
+        selectedIds: safeSelected
+      })
+
+      // Track source albums to update their counts
+      const sourceAlbums = new Set()
+
       for (const id of safeSelected) {
+        const photo = safePhotos.find(p => p.id === id)
+
+        // Track source album (if photo has one)
+        if (photo?.albumId) {
+          sourceAlbums.add(photo.albumId)
+          console.log(`📦 Photo ${id} moving from album ${photo.albumId} to ${targetAlbumId}`)
+        } else {
+          console.log(`📦 Photo ${id} moving from "Uten album" to ${targetAlbumId}`)
+        }
+
         const docRef = doc(db, 'photos', id)
         await updateDoc(docRef, { albumId: targetAlbumId })
       }
 
+      // Update target album count
+      console.log(`✅ Updating target album ${targetAlbumId} count`)
       await updateAlbumPhotoCount(targetAlbumId)
+
+      // Update source album counts (decrement)
+      for (const sourceAlbumId of sourceAlbums) {
+        console.log(`✅ Updating source album ${sourceAlbumId} count`)
+        await updateAlbumPhotoCount(sourceAlbumId)
+      }
+
       setSelectedPhotos([])
       setMoveOpen(false)
       setEditMode(false)
