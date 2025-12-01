@@ -91,19 +91,18 @@ const SearchPage = ({
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [photoToDelete, setPhotoToDelete] = useState(null)
 
-  // Handle URL filter params on mount
+  // Handle filter from location.state (from "See All" buttons)
   useEffect(() => {
-    const params = new URLSearchParams(location.search)
-    const urlFilter = params.get('filter')
+    const filterFromState = location.state?.filter
 
-    if (urlFilter === 'favorites') {
+    if (filterFromState === 'favorites') {
       setActiveFilters((f) => ({ ...f, favorites: true }))
     }
 
-    if (urlFilter === 'recent') {
+    if (filterFromState === 'recent') {
       setActiveFilters((f) => ({ ...f, dateRange: 'month' }))
     }
-  }, [])
+  }, [location.state])
 
   // 🔒 SIKRET: Kategorier med array-guard
   const categories = useMemo(() => {
