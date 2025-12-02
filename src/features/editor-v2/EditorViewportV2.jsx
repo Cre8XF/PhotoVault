@@ -1,6 +1,7 @@
 // src/features/editor-v2/EditorViewportV2.jsx
 import React, { useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
 import useEditorModeStore from './modeStore';
+import { drawTransformedImage } from './utils/transformUtils';
 
 /**
  * EditorViewportV2 - Simple viewport for displaying the photo
@@ -14,7 +15,7 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
   const containerRef = useRef(null);
   const imageCache = useRef(null);
 
-  const { crop, workingImageUrl } = useEditorModeStore();
+  const { crop, workingImageUrl, transform } = useEditorModeStore();
 
   // Use workingImageUrl if available, otherwise use original photo.url
   const imageUrl = workingImageUrl || photo?.url;
@@ -64,51 +65,59 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
     // Clear canvas
     ctx.clearRect(0, 0, containerWidth, containerHeight);
 
-    // Calculate image dimensions to fit container (object-contain)
-    const imgAspect = img.width / img.height;
-    const containerAspect = containerWidth / containerHeight;
+    // PIPELINE ORDER:
+    // 1. Apply transforms (rotate + flip)
+    // 2. Apply crop clipping (if active)
+    // 3. Draw final result
 
-    let renderWidth, renderHeight, offsetX, offsetY;
+    // Check if any transforms are active
+    const hasTransforms = transform.rotate !== 0 || transform.flipH || transform.flipV;
 
-    if (imgAspect > containerAspect) {
-      // Image wider than container
-      renderWidth = containerWidth;
-      renderHeight = containerWidth / imgAspect;
-      offsetX = 0;
-      offsetY = (containerHeight - renderHeight) / 2;
+    if (hasTransforms) {
+      // Use transform pipeline
+      drawTransformedImage(ctx, img, transform, containerWidth, containerHeight);
     } else {
-      // Image taller than container
-      renderWidth = containerHeight * imgAspect;
-      renderHeight = containerHeight;
-      offsetX = (containerWidth - renderWidth) / 2;
-      offsetY = 0;
-    }
+      // Original rendering logic (no transforms)
+      // Calculate image dimensions to fit container (object-contain)
+      const imgAspect = img.width / img.height;
+      const containerAspect = containerWidth / containerHeight;
 
-    // Apply crop clipping if crop is active and rect is defined
-    if (crop.isActive && crop.rect) {
-      const { x1, y1, x2, y2 } = crop.rect;
+      let renderWidth, renderHeight, offsetX, offsetY;
 
-      // Convert normalized coordinates to pixel coordinates
-      const cropX = offsetX + x1 * renderWidth;
-      const cropY = offsetY + y1 * renderHeight;
-      const cropW = (x2 - x1) * renderWidth;
-      const cropH = (y2 - y1) * renderHeight;
+      if (imgAspect > containerAspect) {
+        renderWidth = containerWidth;
+        renderHeight = containerWidth / imgAspect;
+        offsetX = 0;
+        offsetY = (containerHeight - renderHeight) / 2;
+      } else {
+        renderWidth = containerHeight * imgAspect;
+        renderHeight = containerHeight;
+        offsetX = (containerWidth - renderWidth) / 2;
+        offsetY = 0;
+      }
 
-      console.log('Rendering crop preview:', { x1, y1, x2, y2 }, '→', { cropX, cropY, cropW, cropH });
+      // Apply crop clipping if crop is active
+      if (crop.isActive && crop.rect) {
+        const { x1, y1, x2, y2 } = crop.rect;
 
-      // Apply clipping path
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(cropX, cropY, cropW, cropH);
-      ctx.clip();
-    }
+        const cropX = offsetX + x1 * renderWidth;
+        const cropY = offsetY + y1 * renderHeight;
+        const cropW = (x2 - x1) * renderWidth;
+        const cropH = (y2 - y1) * renderHeight;
 
-    // Draw image
-    ctx.drawImage(img, offsetX, offsetY, renderWidth, renderHeight);
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(cropX, cropY, cropW, cropH);
+        ctx.clip();
+      }
 
-    // Restore context if clipping was applied
-    if (crop.isActive && crop.rect) {
-      ctx.restore();
+      // Draw image
+      ctx.drawImage(img, offsetX, offsetY, renderWidth, renderHeight);
+
+      // Restore context if clipping was applied
+      if (crop.isActive && crop.rect) {
+        ctx.restore();
+      }
     }
   };
 
@@ -117,10 +126,10 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
     renderCropPreview,
   }));
 
-  // Re-render when crop changes
+  // Re-render when crop or transform changes
   useEffect(() => {
     renderCropPreview();
-  }, [crop.rect, crop.isActive, imageUrl]);
+  }, [crop.rect, crop.isActive, imageUrl, transform.rotate, transform.flipH, transform.flipV]);
 
   // Re-render on window resize
   useEffect(() => {

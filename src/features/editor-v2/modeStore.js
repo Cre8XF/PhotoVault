@@ -12,6 +12,13 @@ const useEditorModeStore = create((set, get) => ({
   // Working image URL (committed edits)
   workingImageUrl: null,
 
+  // Transform state
+  transform: {
+    rotate: 0,      // 0 | 90 | 180 | 270
+    flipH: false,
+    flipV: false,
+  },
+
   // Crop state
   crop: {
     isActive: false,
@@ -32,6 +39,47 @@ const useEditorModeStore = create((set, get) => ({
 
   // Working image actions
   setWorkingImageUrl: (url) => set({ workingImageUrl: url }),
+
+  // Transform actions
+  setRotate: (deg) => {
+    // Normalize to [0, 90, 180, 270]
+    const normalized = Math.round(deg / 90) * 90 % 360;
+    const final = normalized < 0 ? normalized + 360 : normalized;
+    set((state) => ({
+      transform: {
+        ...state.transform,
+        rotate: final,
+      },
+    }));
+  },
+
+  setFlipH: (val) => {
+    set((state) => ({
+      transform: {
+        ...state.transform,
+        flipH: typeof val === 'boolean' ? val : !state.transform.flipH,
+      },
+    }));
+  },
+
+  setFlipV: (val) => {
+    set((state) => ({
+      transform: {
+        ...state.transform,
+        flipV: typeof val === 'boolean' ? val : !state.transform.flipV,
+      },
+    }));
+  },
+
+  resetTransforms: () => {
+    set({
+      transform: {
+        rotate: 0,
+        flipH: false,
+        flipV: false,
+      },
+    });
+  },
 
   // Crop actions
   setCropRect: (rect) => {
