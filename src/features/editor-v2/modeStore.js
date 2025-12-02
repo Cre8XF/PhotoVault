@@ -19,6 +19,14 @@ const useEditorModeStore = create((set, get) => ({
     flipV: false,
   },
 
+  // Adjust state
+  adjust: {
+    brightness: 0,   // -100 to +100
+    contrast: 0,     // -100 to +100
+    saturation: 0,   // -100 to +100
+    warmth: 0,       // -100 to +100
+  },
+
   // Crop state
   crop: {
     isActive: false,
@@ -77,6 +85,29 @@ const useEditorModeStore = create((set, get) => ({
         rotate: 0,
         flipH: false,
         flipV: false,
+      },
+    });
+  },
+
+  // Adjust actions
+  setAdjustValue: (key, value) => {
+    // Clamp value between -100 and +100
+    const clampedValue = Math.max(-100, Math.min(100, value));
+    set((state) => ({
+      adjust: {
+        ...state.adjust,
+        [key]: clampedValue,
+      },
+    }));
+  },
+
+  resetAdjust: () => {
+    set({
+      adjust: {
+        brightness: 0,
+        contrast: 0,
+        saturation: 0,
+        warmth: 0,
       },
     });
   },
