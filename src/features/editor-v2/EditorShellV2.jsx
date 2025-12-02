@@ -1,5 +1,5 @@
 // src/features/editor-v2/EditorShellV2.jsx
-import React from 'react';
+import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Check } from 'lucide-react';
 import EditorViewportV2 from './EditorViewportV2';
@@ -25,6 +25,7 @@ import MarkupMode from './modes/MarkupMode';
 const EditorShellV2 = ({ photo }) => {
   const navigate = useNavigate();
   const { mode, setMode } = useEditorModeStore();
+  const viewportRef = useRef(null);
 
   // Mode configuration
   const modes = [
@@ -59,7 +60,7 @@ const EditorShellV2 = ({ photo }) => {
   // Render mode overlay
   const renderModeOverlay = () => {
     switch (mode) {
-      case 'crop': return <CropMode photo={photo} />;
+      case 'crop': return <CropMode photo={photo} viewportRef={viewportRef} />;
       case 'adjust': return <AdjustMode photo={photo} />;
       case 'rotate': return <RotateMode photo={photo} />;
       case 'filters': return <FiltersMode photo={photo} />;
@@ -100,7 +101,7 @@ const EditorShellV2 = ({ photo }) => {
       {/* VIEWPORT - Hidden in fullscreen modes */}
       {!isFullscreenMode && (
         <div className="editor-v2-viewport-container">
-        <EditorViewportV2 photo={photo} />
+        <EditorViewportV2 ref={viewportRef} photo={photo} />
 
         {/* Mode overlay */}
         <div className="editor-v2-mode-overlay">

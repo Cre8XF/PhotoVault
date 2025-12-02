@@ -10,8 +10,9 @@ import useEditorModeStore from '../modeStore';
  * - Resizable handles (8 handles: 4 corners + 4 edges)
  * - Normalized coordinates (0-1)
  * - Aspect ratio constraints (Phase 2)
+ * - Canvas crop preview (Phase 3A)
  */
-const CropMode = ({ photo }) => {
+const CropMode = ({ photo, viewportRef }) => {
   const {
     setMode,
     crop,
@@ -216,6 +217,11 @@ const CropMode = ({ photo }) => {
     }
 
     setCropRect(newRect);
+
+    // Trigger canvas re-render
+    if (viewportRef?.current?.renderCropPreview) {
+      viewportRef.current.renderCropPreview();
+    }
   };
 
   const handlePointerUp = () => {
