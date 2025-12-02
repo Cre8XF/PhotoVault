@@ -1,9 +1,23 @@
 // src/features/editor-v2/EditorPageV2.jsx
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import useStore from '../../state/store';
-import EditorShellV2 from './EditorShellV2';
-import './editor-v2.css';
+import React, { useEffect, useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import useStore from '../../state/store'
+import EditorShellV2 from './EditorShellV2'
+import './editor-v2.css'
+
+const usePhotoData = (photoId) => {
+  const store = useStore()
+  const [photo, setPhoto] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const foundPhoto = store.photos?.find((p) => p.id === photoId)
+    setPhoto(foundPhoto || null)
+    setLoading(false)
+  }, [photoId, store.photos])
+
+  return { photo, loading }
+}
 
 /**
  * EditorPageV2 - Wrapper page component for Editor V2
@@ -13,47 +27,24 @@ import './editor-v2.css';
  * - Render EditorShellV2 with photo data
  */
 const EditorPageV2 = () => {
-  const { id: photoId } = useParams();
-  const navigate = useNavigate();
-  const photos = useStore((state) => state.photos);
-  const [photo, setPhoto] = useState(null);
+  const { id: photoId } = useParams()
+  const { photo, loading } = usePhotoData(photoId)
+  const navigate = useNavigate()
 
-  useEffect(() => {
-    if (!photoId) {
-      console.error('No photo ID provided');
-      navigate('/');
-      return;
-    }
-
-    // Find photo in global store
-    const foundPhoto = photos.find((p) => p.id === photoId);
-
-    if (!foundPhoto) {
-      console.error('Photo not found:', photoId);
-      // Photo might still be loading, so wait a moment
-      const timer = setTimeout(() => {
-        const retryPhoto = photos.find((p) => p.id === photoId);
-        if (!retryPhoto) {
-          navigate('/');
-        } else {
-          setPhoto(retryPhoto);
-        }
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-
-    setPhoto(foundPhoto);
-  }, [photoId, photos, navigate]);
-
-  if (!photo) {
+  if (loading) {
     return (
       <div className="editor-v2-loading">
         <p>Loading photo...</p>
       </div>
-    );
+    )
   }
 
-  return <EditorShellV2 photo={photo} />;
-};
+  if (!photo) {
+    console.warn('Photo not found:', photoId)
+    return <div style={{ color: 'white', padding: 20 }}>Photo not found.</div>
+  }
 
-export default EditorPageV2;
+  return <EditorShellV2 photo={photo} />
+}
+
+export default EditorPageV2
