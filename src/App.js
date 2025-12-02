@@ -35,6 +35,7 @@ import CollageEditPage from './pages/CollageEditPage'
 import PhotoPage from './pages/PhotoPage'
 import SlideshowPage from './pages/SlideshowPage'
 import EditorPage from './pages/EditorPage'
+import EditorPageV2 from './features/editor-v2/EditorPageV2'
 
 // AI Tools - Phase 5
 import AIToolsPage from './pages/ai/AIToolsPage'
@@ -89,6 +90,7 @@ function App() {
               <Route path={ROUTES.PHOTO} element={<PhotoPage />} />
               <Route path={ROUTES.SLIDESHOW} element={<SlideshowPage />} />
               <Route path={ROUTES.EDITOR} element={<EditorPage />} />
+              <Route path={ROUTES.EDITOR_V2} element={<EditorPageV2 />} />
 
               {/* AI Tools - Phase 5 */}
               <Route path={ROUTES.AI_TOOLS} element={<AIToolsPage />} />

@@ -11,6 +11,7 @@ export const ROUTES = {
   PHOTO: '/photo/:id',
   SLIDESHOW: '/slideshow/:id',
   EDITOR: '/editor/:id',
+  EDITOR_V2: '/editor-v2/:id',
   // Phase 5: AI Tools World
   AI_TOOLS: '/tools/ai',
   AI_ENHANCE: '/tools/ai/enhance',
