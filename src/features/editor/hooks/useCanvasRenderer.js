@@ -110,12 +110,14 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
     // Phase 3.5 FIX: ALWAYS check externalTransform.crop from editorStore
     // This ensures crop persists when switching tools (Rotate/Filters/Adjust)
     if (externalTransform?.crop) {
+      console.log('🎨 [RENDER] Starting render with crop:', externalTransform.crop)
       const cropBox = getEffectiveCropBox(externalTransform.crop, {
         width: image.naturalWidth,
         height: image.naturalHeight,
       })
 
       if (cropBox) {
+        console.log('🔷 [RENDER] Drawing CROPPED image with cropBox:', cropBox)
         drawCroppedImageToCanvas(
           ctx,
           image,
@@ -124,11 +126,13 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
           cropBox,
           activeTransform.adjust
         )
+        console.log('✅ [RENDER] Render complete - cropped image drawn')
         return
       }
     }
 
     // Normal mode: draw image with full transforms (zoom, pan, rotation, flip)
+    console.log('🖼️ [RENDER] Drawing FULL image (no crop)')
     drawImageWithFullTransform(ctx, image, width, height, activeTransform)
   }, [transform, externalTransform, filter])
 
