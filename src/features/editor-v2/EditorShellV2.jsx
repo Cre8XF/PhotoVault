@@ -69,10 +69,14 @@ const EditorShellV2 = ({ photo }) => {
     }
   };
 
+  // Check if we're in a fullscreen mode (crop takes over entire UI)
+  const isFullscreenMode = mode === 'crop';
+
   return (
     <div className="editor-v2-shell">
-      {/* HEADER */}
-      <div className="editor-v2-header">
+      {/* HEADER - Hidden in fullscreen modes */}
+      {!isFullscreenMode && (
+        <div className="editor-v2-header">
         <button
           className="editor-v2-header-btn"
           onClick={handleClose}
@@ -91,9 +95,11 @@ const EditorShellV2 = ({ photo }) => {
           <Check size={24} />
         </button>
       </div>
+      )}
 
-      {/* VIEWPORT */}
-      <div className="editor-v2-viewport-container">
+      {/* VIEWPORT - Hidden in fullscreen modes */}
+      {!isFullscreenMode && (
+        <div className="editor-v2-viewport-container">
         <EditorViewportV2 photo={photo} />
 
         {/* Mode overlay */}
@@ -101,9 +107,14 @@ const EditorShellV2 = ({ photo }) => {
           {renderModeOverlay()}
         </div>
       </div>
+      )}
 
-      {/* FOOTER - Mode Selector */}
-      <div className="editor-v2-footer">
+      {/* FULLSCREEN MODE OVERLAYS */}
+      {isFullscreenMode && renderModeOverlay()}
+
+      {/* FOOTER - Mode Selector - Hidden in fullscreen modes */}
+      {!isFullscreenMode && (
+        <div className="editor-v2-footer">
         <div className="editor-v2-mode-buttons">
           {modes.map((m) => (
             <button
@@ -117,6 +128,7 @@ const EditorShellV2 = ({ photo }) => {
           ))}
         </div>
       </div>
+      )}
     </div>
   );
 };
