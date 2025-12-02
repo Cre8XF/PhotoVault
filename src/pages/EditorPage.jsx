@@ -415,7 +415,6 @@ const EditorPage = () => {
       <EditorViewport
         ref={viewportRef}
         photo={originalPhoto}
-        externalTransform={transform}
         hasActivePanel={activeTool !== 'none'}
       >
         {/* CropOverlay - Phase 8C-4: synced with viewport transform */}
