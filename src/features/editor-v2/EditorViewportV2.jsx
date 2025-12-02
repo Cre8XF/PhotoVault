@@ -14,7 +14,10 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
   const containerRef = useRef(null);
   const imageCache = useRef(null);
 
-  const { crop } = useEditorModeStore();
+  const { crop, workingImageUrl } = useEditorModeStore();
+
+  // Use workingImageUrl if available, otherwise use original photo.url
+  const imageUrl = workingImageUrl || photo?.url;
 
   /**
    * Render crop preview on canvas
@@ -26,7 +29,7 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
 
-    if (!canvas || !container || !photo || !photo.url) return;
+    if (!canvas || !container || !imageUrl) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -43,10 +46,10 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
     ctx.scale(dpr, dpr);
 
     // Load image (use cache)
-    if (!imageCache.current || imageCache.current.src !== photo.url) {
+    if (!imageCache.current || imageCache.current.src !== imageUrl) {
       imageCache.current = new Image();
       imageCache.current.crossOrigin = 'anonymous';
-      imageCache.current.src = photo.url;
+      imageCache.current.src = imageUrl;
 
       imageCache.current.onload = () => {
         renderCropPreview(); // Re-render when image loads
@@ -117,7 +120,7 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
   // Re-render when crop changes
   useEffect(() => {
     renderCropPreview();
-  }, [crop.rect, crop.isActive, photo]);
+  }, [crop.rect, crop.isActive, imageUrl]);
 
   // Re-render on window resize
   useEffect(() => {

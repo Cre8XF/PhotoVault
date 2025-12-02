@@ -9,6 +9,9 @@ const useEditorModeStore = create((set, get) => ({
   // Current mode
   mode: 'view', // 'view' | 'crop' | 'adjust' | 'rotate' | 'filters' | 'text' | 'markup'
 
+  // Working image URL (committed edits)
+  workingImageUrl: null,
+
   // Crop state
   crop: {
     isActive: false,
@@ -26,6 +29,9 @@ const useEditorModeStore = create((set, get) => ({
   // Mode actions
   setMode: (newMode) => set({ mode: newMode }),
   resetMode: () => set({ mode: 'view' }),
+
+  // Working image actions
+  setWorkingImageUrl: (url) => set({ workingImageUrl: url }),
 
   // Crop actions
   setCropRect: (rect) => {
