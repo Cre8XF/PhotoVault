@@ -86,6 +86,16 @@ const useEditorModeStore = create((set, get) => ({
     }));
   },
 
+  setAspectRatio: (ratio) => {
+    console.log('Aspect ratio changed:', ratio);
+    set((state) => ({
+      crop: {
+        ...state.crop,
+        aspectRatio: ratio,
+      },
+    }));
+  },
+
   resetCrop: () => {
     set({
       crop: {

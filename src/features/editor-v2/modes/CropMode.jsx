@@ -1,5 +1,5 @@
 // src/features/editor-v2/modes/CropMode.jsx
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { X, Check, RotateCw, FlipHorizontal2, FlipVertical2 } from 'lucide-react';
 import useEditorModeStore from '../modeStore';
 
@@ -18,10 +18,9 @@ const CropMode = ({ photo }) => {
     setCropRect,
     setActiveHandle,
     setCropActive,
-    resetCrop
+    resetCrop,
+    setAspectRatio
   } = useEditorModeStore();
-
-  const [selectedAspect, setSelectedAspect] = useState('free');
 
   // Refs
   const cropAreaRef = useRef(null);
@@ -164,6 +163,58 @@ const CropMode = ({ photo }) => {
         return;
     }
 
+    // Apply aspect ratio constraint (if active and not moving)
+    if (crop.aspectRatio !== null && crop.activeHandle !== 'move') {
+      console.log('Applying aspect ratio constraint:', crop.aspectRatio);
+
+      let width = newRect.x2 - newRect.x1;
+      let height = newRect.y2 - newRect.y1;
+
+      switch (crop.activeHandle) {
+        case 'l':
+        case 'r':
+          // Width changed, adjust height to maintain aspect ratio
+          const targetHeight = width / crop.aspectRatio;
+          const centerY = (newRect.y1 + newRect.y2) / 2;
+          newRect.y1 = centerY - targetHeight / 2;
+          newRect.y2 = centerY + targetHeight / 2;
+          console.log('Edge L/R: width =', width, '→ height =', targetHeight);
+          break;
+
+        case 't':
+        case 'b':
+          // Height changed, adjust width to maintain aspect ratio
+          const targetWidth = height * crop.aspectRatio;
+          const centerX = (newRect.x1 + newRect.x2) / 2;
+          newRect.x1 = centerX - targetWidth / 2;
+          newRect.x2 = centerX + targetWidth / 2;
+          console.log('Edge T/B: height =', height, '→ width =', targetWidth);
+          break;
+
+        case 'tl':
+        case 'tr':
+        case 'bl':
+        case 'br':
+          // Corner handles - use width as driver, adjust height
+          const constrainedHeight = width / crop.aspectRatio;
+
+          // Adjust y based on which corner
+          if (crop.activeHandle === 'tl' || crop.activeHandle === 'tr') {
+            // Top corners - adjust y1 (keep bottom fixed)
+            newRect.y1 = newRect.y2 - constrainedHeight;
+            console.log('Corner top: width =', width, '→ height =', constrainedHeight);
+          } else {
+            // Bottom corners - adjust y2 (keep top fixed)
+            newRect.y2 = newRect.y1 + constrainedHeight;
+            console.log('Corner bottom: width =', width, '→ height =', constrainedHeight);
+          }
+          break;
+
+        default:
+          break;
+      }
+    }
+
     setCropRect(newRect);
   };
 
@@ -217,8 +268,8 @@ const CropMode = ({ photo }) => {
           {aspectRatios.map((aspect) => (
             <button
               key={aspect.id}
-              className={`aspect-chip ${selectedAspect === aspect.id ? 'active' : ''}`}
-              onClick={() => setSelectedAspect(aspect.id)}
+              className={`aspect-chip ${crop.aspectRatio === aspect.ratio ? 'active' : ''}`}
+              onClick={() => setAspectRatio(aspect.ratio)}
             >
               {aspect.label}
             </button>
