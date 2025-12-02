@@ -470,7 +470,26 @@ const EditorPage = () => {
             viewportRef={viewportRef}
             photo={originalPhoto}
             onCropApplied={() => {
+              console.log('🎯 [EDITOR] handleCropApplied called');
+
               setActiveTool('none');
+
+              // Diagnostic: Check crop state after apply
+              setTimeout(() => {
+                const { transform } = useEditorStore.getState();
+                console.log('🔍 [EDITOR] Crop after apply:', transform.crop);
+              }, 20);
+
+              // Force viewport re-render AFTER crop is saved to store
+              setTimeout(() => {
+                if (viewportRef.current) {
+                  console.log('🔄 [EDITOR] Forcing viewport render after crop');
+                  viewportRef.current.render();
+                } else {
+                  console.log('⚠️ [EDITOR] Viewport ref missing during crop render');
+                }
+              }, 50);
+
               console.log('✅ Crop applied - closing crop tool');
             }}
           />
