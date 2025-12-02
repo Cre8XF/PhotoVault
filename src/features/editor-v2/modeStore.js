@@ -5,13 +5,102 @@ import { create } from 'zustand';
  * Editor V2 Mode Store
  * Manages the current editing mode (view, crop, adjust, rotate, filters, text, markup)
  */
-const useEditorModeStore = create((set) => ({
+const useEditorModeStore = create((set, get) => ({
   // Current mode
   mode: 'view', // 'view' | 'crop' | 'adjust' | 'rotate' | 'filters' | 'text' | 'markup'
 
-  // Actions
+  // Crop state
+  crop: {
+    isActive: false,
+    // Normalized coordinates [0..1] relative to the viewport/image
+    rect: {
+      x1: 0.1,
+      y1: 0.1,
+      x2: 0.9,
+      y2: 0.9,
+    },
+    aspectRatio: null, // null = free; number = width/height ratio
+    activeHandle: null, // 'move' | 'tl' | 'tr' | 'bl' | 'br' | 't' | 'b' | 'l' | 'r' | null
+  },
+
+  // Mode actions
   setMode: (newMode) => set({ mode: newMode }),
   resetMode: () => set({ mode: 'view' }),
+
+  // Crop actions
+  setCropRect: (rect) => {
+    const MIN_SIZE = 0.05; // Minimum 5% of viewport
+
+    // Clamp and validate
+    let { x1, y1, x2, y2 } = rect;
+
+    // Ensure values are between 0 and 1
+    x1 = Math.max(0, Math.min(1, x1));
+    y1 = Math.max(0, Math.min(1, y1));
+    x2 = Math.max(0, Math.min(1, x2));
+    y2 = Math.max(0, Math.min(1, y2));
+
+    // Ensure x1 < x2 and y1 < y2
+    if (x1 > x2) [x1, x2] = [x2, x1];
+    if (y1 > y2) [y1, y2] = [y2, y1];
+
+    // Ensure minimum size
+    const width = x2 - x1;
+    const height = y2 - y1;
+
+    if (width < MIN_SIZE) {
+      const center = (x1 + x2) / 2;
+      x1 = Math.max(0, center - MIN_SIZE / 2);
+      x2 = Math.min(1, center + MIN_SIZE / 2);
+    }
+
+    if (height < MIN_SIZE) {
+      const center = (y1 + y2) / 2;
+      y1 = Math.max(0, center - MIN_SIZE / 2);
+      y2 = Math.min(1, center + MIN_SIZE / 2);
+    }
+
+    set((state) => ({
+      crop: {
+        ...state.crop,
+        rect: { x1, y1, x2, y2 },
+      },
+    }));
+  },
+
+  setActiveHandle: (handle) => {
+    set((state) => ({
+      crop: {
+        ...state.crop,
+        activeHandle: handle,
+      },
+    }));
+  },
+
+  setCropActive: (isActive) => {
+    set((state) => ({
+      crop: {
+        ...state.crop,
+        isActive,
+      },
+    }));
+  },
+
+  resetCrop: () => {
+    set({
+      crop: {
+        isActive: false,
+        rect: {
+          x1: 0.1,
+          y1: 0.1,
+          x2: 0.9,
+          y2: 0.9,
+        },
+        aspectRatio: null,
+        activeHandle: null,
+      },
+    });
+  },
 }));
 
 export default useEditorModeStore;

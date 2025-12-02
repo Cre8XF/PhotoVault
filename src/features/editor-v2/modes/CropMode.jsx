@@ -1,21 +1,35 @@
 // src/features/editor-v2/modes/CropMode.jsx
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X, Check, RotateCw, FlipHorizontal2, FlipVertical2 } from 'lucide-react';
 import useEditorModeStore from '../modeStore';
 
 /**
- * CropMode - Crop mode UI skeleton
+ * CropMode - Interactive crop mode
  * Google Photos-inspired crop interface with:
- * - Fullscreen overlay
- * - Centered crop window
- * - 3×3 grid overlay
- * - 8 static handles (not interactive yet)
- * - Aspect ratio selector bar
- * - Quick action buttons (rotate, flip)
+ * - Draggable crop window
+ * - Resizable handles (8 handles: 4 corners + 4 edges)
+ * - Normalized coordinates (0-1)
+ * - Aspect ratio constraints (Phase 2)
  */
 const CropMode = ({ photo }) => {
-  const { setMode } = useEditorModeStore();
+  const {
+    setMode,
+    crop,
+    setCropRect,
+    setActiveHandle,
+    setCropActive,
+    resetCrop
+  } = useEditorModeStore();
+
   const [selectedAspect, setSelectedAspect] = useState('free');
+
+  // Refs
+  const cropAreaRef = useRef(null);
+  const dragContextRef = useRef({
+    startPointer: null,
+    startRect: null,
+    container: null,
+  });
 
   // Aspect ratio presets
   const aspectRatios = [
@@ -29,14 +43,23 @@ const CropMode = ({ photo }) => {
     { id: '2:3', label: '2:3', ratio: 2/3 },
   ];
 
+  // Activate crop when component mounts
+  useEffect(() => {
+    setCropActive(true);
+    return () => {
+      setCropActive(false);
+    };
+  }, [setCropActive]);
+
   // Handle cancel
   const handleCancel = () => {
+    resetCrop();
     setMode('view');
   };
 
-  // Handle done (TODO: Apply crop)
+  // Handle done (TODO: Apply crop to image)
   const handleDone = () => {
-    console.log('Apply crop');
+    console.log('Apply crop:', crop.rect);
     setMode('view');
   };
 
@@ -53,9 +76,116 @@ const CropMode = ({ photo }) => {
     console.log('Flip vertical');
   };
 
+  // Pointer event handlers
+  const handlePointerDown = (handle, event) => {
+    event.preventDefault();
+
+    if (!cropAreaRef.current) return;
+
+    const rect = cropAreaRef.current.getBoundingClientRect();
+
+    dragContextRef.current = {
+      startPointer: { x: event.clientX, y: event.clientY },
+      startRect: { ...crop.rect },
+      container: { width: rect.width, height: rect.height },
+    };
+
+    setActiveHandle(handle);
+
+    console.log('Drag start:', handle, crop.rect);
+  };
+
+  const handlePointerMove = (event) => {
+    if (!crop.activeHandle || !dragContextRef.current.startPointer) return;
+
+    const { startPointer, startRect, container } = dragContextRef.current;
+
+    // Calculate normalized delta
+    const dx = (event.clientX - startPointer.x) / container.width;
+    const dy = (event.clientY - startPointer.y) / container.height;
+
+    let newRect = { ...startRect };
+
+    // Apply delta based on active handle
+    switch (crop.activeHandle) {
+      case 'move':
+        // Move entire crop window
+        newRect.x1 = startRect.x1 + dx;
+        newRect.y1 = startRect.y1 + dy;
+        newRect.x2 = startRect.x2 + dx;
+        newRect.y2 = startRect.y2 + dy;
+        break;
+
+      case 'tl':
+        // Top-left corner
+        newRect.x1 = startRect.x1 + dx;
+        newRect.y1 = startRect.y1 + dy;
+        break;
+
+      case 'tr':
+        // Top-right corner
+        newRect.x2 = startRect.x2 + dx;
+        newRect.y1 = startRect.y1 + dy;
+        break;
+
+      case 'bl':
+        // Bottom-left corner
+        newRect.x1 = startRect.x1 + dx;
+        newRect.y2 = startRect.y2 + dy;
+        break;
+
+      case 'br':
+        // Bottom-right corner
+        newRect.x2 = startRect.x2 + dx;
+        newRect.y2 = startRect.y2 + dy;
+        break;
+
+      case 't':
+        // Top edge
+        newRect.y1 = startRect.y1 + dy;
+        break;
+
+      case 'b':
+        // Bottom edge
+        newRect.y2 = startRect.y2 + dy;
+        break;
+
+      case 'l':
+        // Left edge
+        newRect.x1 = startRect.x1 + dx;
+        break;
+
+      case 'r':
+        // Right edge
+        newRect.x2 = startRect.x2 + dx;
+        break;
+
+      default:
+        return;
+    }
+
+    setCropRect(newRect);
+  };
+
+  const handlePointerUp = () => {
+    if (crop.activeHandle) {
+      console.log('Drag end:', crop.rect);
+      setActiveHandle(null);
+    }
+  };
+
   if (!photo || !photo.url) {
     return null;
   }
+
+  // Calculate crop window style based on normalized rect
+  const cropWindowStyle = {
+    position: 'absolute',
+    left: `${crop.rect.x1 * 100}%`,
+    top: `${crop.rect.y1 * 100}%`,
+    width: `${(crop.rect.x2 - crop.rect.x1) * 100}%`,
+    height: `${(crop.rect.y2 - crop.rect.y1) * 100}%`,
+  };
 
   return (
     <div className="crop-mode-overlay">
@@ -96,14 +226,25 @@ const CropMode = ({ photo }) => {
         </div>
 
         {/* Crop Window Area */}
-        <div className="crop-area">
-          {/* Crop Window (centered) */}
-          <div className="crop-window">
+        <div
+          className="crop-area"
+          ref={cropAreaRef}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerUp}
+        >
+          {/* Crop Window (positioned absolutely based on crop.rect) */}
+          <div
+            className="crop-window"
+            style={cropWindowStyle}
+            onPointerDown={(e) => handlePointerDown('move', e)}
+          >
             {/* Image */}
             <img
               src={photo.url}
               alt={photo.caption || 'Photo'}
               className="crop-image"
+              draggable={false}
             />
 
             {/* 3×3 Grid Overlay */}
@@ -116,15 +257,63 @@ const CropMode = ({ photo }) => {
               <div className="crop-grid-line crop-grid-v" style={{ left: '66.666%' }} />
             </div>
 
-            {/* 8 Handles (static, not interactive yet) */}
-            <div className="crop-handle crop-handle-tl" data-position="top-left" />
-            <div className="crop-handle crop-handle-t" data-position="top" />
-            <div className="crop-handle crop-handle-tr" data-position="top-right" />
-            <div className="crop-handle crop-handle-r" data-position="right" />
-            <div className="crop-handle crop-handle-br" data-position="bottom-right" />
-            <div className="crop-handle crop-handle-b" data-position="bottom" />
-            <div className="crop-handle crop-handle-bl" data-position="bottom-left" />
-            <div className="crop-handle crop-handle-l" data-position="left" />
+            {/* 8 Handles (interactive) */}
+            <div
+              className="crop-handle crop-handle-tl"
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                handlePointerDown('tl', e);
+              }}
+            />
+            <div
+              className="crop-handle crop-handle-t"
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                handlePointerDown('t', e);
+              }}
+            />
+            <div
+              className="crop-handle crop-handle-tr"
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                handlePointerDown('tr', e);
+              }}
+            />
+            <div
+              className="crop-handle crop-handle-r"
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                handlePointerDown('r', e);
+              }}
+            />
+            <div
+              className="crop-handle crop-handle-br"
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                handlePointerDown('br', e);
+              }}
+            />
+            <div
+              className="crop-handle crop-handle-b"
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                handlePointerDown('b', e);
+              }}
+            />
+            <div
+              className="crop-handle crop-handle-bl"
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                handlePointerDown('bl', e);
+              }}
+            />
+            <div
+              className="crop-handle crop-handle-l"
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                handlePointerDown('l', e);
+              }}
+            />
           </div>
         </div>
       </div>
