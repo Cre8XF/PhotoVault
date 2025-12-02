@@ -78,12 +78,12 @@ const AdjustPanel = ({ viewportRef }) => {
     return initial
   })
 
+  // Sync slider values from editorStore on mount
   useEffect(() => {
-    if (viewportRef?.current) {
-      const adjustState = viewportRef.current.getAdjustState?.()
-      if (adjustState) setSliderValues(adjustState)
+    if (transform.adjust) {
+      setSliderValues(transform.adjust)
     }
-  }, [viewportRef])
+  }, []) // Run only on mount
 
   const handleSliderChange = (key, value) => {
     const val = Number(value)
@@ -91,10 +91,7 @@ const AdjustPanel = ({ viewportRef }) => {
     // Update local state for immediate UI feedback
     setSliderValues((prev) => ({ ...prev, [key]: val }))
 
-    // Update viewport for canvas rendering
-    viewportRef?.current?.setAdjustValue(key, val)
-
-    // Update editorStore for persistence/save
+    // Update editorStore (viewport auto-renders from store)
     applyTransform('adjust', { ...transform.adjust, [key]: val })
   }
 
@@ -102,10 +99,10 @@ const AdjustPanel = ({ viewportRef }) => {
     const defaults = {}
     ADJUST_SLIDERS.forEach((s) => (defaults[s.key] = s.default))
     setSliderValues(defaults)
-    viewportRef?.current?.resetAdjustValues()
 
-    // Reset editorStore
+    // Reset editorStore (viewport auto-renders from store)
     applyTransform('adjust', defaults)
+    console.log('🔄 Reset all adjust values to defaults')
   }
 
   const hasChanges = Object.keys(sliderValues).some((key) => {

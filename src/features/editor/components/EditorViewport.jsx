@@ -24,12 +24,13 @@ import { useCanvasRenderer } from '../hooks/useCanvasRenderer'
  * EditorViewport Component
  *
  * @param {Object} photo - Photo object with url, name, etc.
+ * @param {Object} externalTransform - Transform state from editorStore (single source of truth)
  * @param {boolean} hasActivePanel - Whether a panel (Adjust/Crop/Rotate/Filters) is open
  * @param {React.ReactNode} children - Child components (e.g., CropOverlay in future phases)
  * @param {React.Ref} ref - Forward ref for imperative API
  */
 export const EditorViewport = forwardRef(
-  ({ photo, hasActivePanel, children }, ref) => {
+  ({ photo, externalTransform, hasActivePanel, children }, ref) => {
     const {
       canvasRef,
       containerRef,
@@ -37,41 +38,21 @@ export const EditorViewport = forwardRef(
       setZoom,
       setPan,
       resetTransform,
-      rotateClockwise,
-      rotateCounterClockwise,
-      flipHorizontal,
-      flipVertical,
-      setAdjustValue,
-      resetAdjustValues,
-      getAdjustState,
       applyCrop,
       clearCrop,
       getAppliedCrop,
       getImageSize,
       render,
-    } = useCanvasRenderer(photo, null)
+    } = useCanvasRenderer(photo, externalTransform)
 
     // Expose imperative API to parent (Phase 8C-3)
     useImperativeHandle(
       ref,
       () => ({
-        // Transform controls
+        // Transform controls (zoom/pan for UI interactions)
         setZoom: (zoom) => setZoom(zoom),
         setPan: (panX, panY) => setPan(panX, panY),
         resetTransform,
-
-        // Rotation controls (Phase 8B-3)
-        rotateClockwise,
-        rotateCounterClockwise,
-
-        // Flip controls (Phase 8B-3)
-        flipHorizontal,
-        flipVertical,
-
-        // Adjust controls (Phase 8C-1)
-        setAdjustValue,
-        resetAdjustValues,
-        getAdjustState,
 
         // Crop controls (Phase 8C-3)
         applyCrop,
@@ -83,9 +64,6 @@ export const EditorViewport = forwardRef(
         getTransform: () => transform,
         getZoom: () => transform.zoom,
         getPan: () => ({ panX: transform.panX, panY: transform.panY }),
-        getRotation: () => transform.rotation,
-        getFlip: () => ({ flipX: transform.flipX, flipY: transform.flipY }),
-        getAdjust: () => transform.adjust,
 
         // Refs (Phase 8C-2: for CropOverlay)
         canvasRef,
@@ -99,13 +77,6 @@ export const EditorViewport = forwardRef(
         setZoom,
         setPan,
         resetTransform,
-        rotateClockwise,
-        rotateCounterClockwise,
-        flipHorizontal,
-        flipVertical,
-        setAdjustValue,
-        resetAdjustValues,
-        getAdjustState,
         applyCrop,
         clearCrop,
         getAppliedCrop,

@@ -23,53 +23,25 @@ const RotatePanel = ({ viewportRef }) => {
   const { transform, applyTransform } = useEditorStore();
 
   const handleRotateLeft = () => {
-    if (viewportRef?.current) {
-      // Update viewport for visual rendering
-      viewportRef.current.rotateCounterClockwise();
-
-      // Update editorStore for persistence
-      const newRotation = (transform.rotate - 90 + 360) % 360;
-      applyTransform('rotate', newRotation);
-
-      console.log('🔄 Rotated 90° counter-clockwise');
-    }
+    const newRotation = (transform.rotate - 90 + 360) % 360;
+    applyTransform('rotate', newRotation);
+    console.log('🔄 Rotated left to:', newRotation);
   };
 
   const handleRotateRight = () => {
-    if (viewportRef?.current) {
-      // Update viewport for visual rendering
-      viewportRef.current.rotateClockwise();
-
-      // Update editorStore for persistence
-      const newRotation = (transform.rotate + 90) % 360;
-      applyTransform('rotate', newRotation);
-
-      console.log('🔄 Rotated 90° clockwise');
-    }
+    const newRotation = (transform.rotate + 90) % 360;
+    applyTransform('rotate', newRotation);
+    console.log('🔄 Rotated right to:', newRotation);
   };
 
   const handleFlipHorizontal = () => {
-    if (viewportRef?.current) {
-      // Update viewport for visual rendering
-      viewportRef.current.flipHorizontal();
-
-      // Update editorStore for persistence
-      applyTransform('flipH', !transform.flipH);
-
-      console.log('↔️ Flipped horizontal');
-    }
+    applyTransform('flipH', !transform.flipH);
+    console.log('↔️ Flipped horizontal:', !transform.flipH);
   };
 
   const handleFlipVertical = () => {
-    if (viewportRef?.current) {
-      // Update viewport for visual rendering
-      viewportRef.current.flipVertical();
-
-      // Update editorStore for persistence
-      applyTransform('flipV', !transform.flipV);
-
-      console.log('↕️ Flipped vertical');
-    }
+    applyTransform('flipV', !transform.flipV);
+    console.log('↕️ Flipped vertical:', !transform.flipV);
   };
 
   return (
