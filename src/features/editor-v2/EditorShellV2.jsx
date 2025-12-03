@@ -1,5 +1,5 @@
 // src/features/editor-v2/EditorShellV2.jsx
-import React from 'react';
+import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Check } from 'lucide-react';
 import EditorViewportV2 from './EditorViewportV2';
@@ -25,6 +25,7 @@ import MarkupMode from './modes/MarkupMode';
 const EditorShellV2 = ({ photo }) => {
   const navigate = useNavigate();
   const { mode, setMode } = useEditorModeStore();
+  const viewportRef = useRef(null);
 
   // Mode configuration
   const modes = [
@@ -59,7 +60,7 @@ const EditorShellV2 = ({ photo }) => {
   // Render mode overlay
   const renderModeOverlay = () => {
     switch (mode) {
-      case 'crop': return <CropMode photo={photo} />;
+      case 'crop': return <CropMode photo={photo} viewportRef={viewportRef} />;
       case 'adjust': return <AdjustMode photo={photo} />;
       case 'rotate': return <RotateMode photo={photo} />;
       case 'filters': return <FiltersMode photo={photo} />;
@@ -69,10 +70,14 @@ const EditorShellV2 = ({ photo }) => {
     }
   };
 
+  // Check if we're in a fullscreen mode (crop takes over entire UI)
+  const isFullscreenMode = mode === 'crop';
+
   return (
     <div className="editor-v2-shell">
-      {/* HEADER */}
-      <div className="editor-v2-header">
+      {/* HEADER - Hidden in fullscreen modes */}
+      {!isFullscreenMode && (
+        <div className="editor-v2-header">
         <button
           className="editor-v2-header-btn"
           onClick={handleClose}
@@ -91,19 +96,26 @@ const EditorShellV2 = ({ photo }) => {
           <Check size={24} />
         </button>
       </div>
+      )}
 
-      {/* VIEWPORT */}
-      <div className="editor-v2-viewport-container">
-        <EditorViewportV2 photo={photo} />
+      {/* VIEWPORT - Hidden in fullscreen modes */}
+      {!isFullscreenMode && (
+        <div className="editor-v2-viewport-container">
+        <EditorViewportV2 ref={viewportRef} photo={photo} />
 
         {/* Mode overlay */}
         <div className="editor-v2-mode-overlay">
           {renderModeOverlay()}
         </div>
       </div>
+      )}
 
-      {/* FOOTER - Mode Selector */}
-      <div className="editor-v2-footer">
+      {/* FULLSCREEN MODE OVERLAYS */}
+      {isFullscreenMode && renderModeOverlay()}
+
+      {/* FOOTER - Mode Selector - Hidden in fullscreen modes */}
+      {!isFullscreenMode && (
+        <div className="editor-v2-footer">
         <div className="editor-v2-mode-buttons">
           {modes.map((m) => (
             <button
@@ -117,6 +129,7 @@ const EditorShellV2 = ({ photo }) => {
           ))}
         </div>
       </div>
+      )}
     </div>
   );
 };
