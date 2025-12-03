@@ -17,6 +17,9 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
 
   const { crop, workingImageUrl, transform, adjust } = useEditorModeStore();
 
+  // VERIFICATION: Confirm transform is received from store
+  console.log('[VIEWPORT VERIFY] Transform received from store:', transform);
+
   // Use workingImageUrl if available, otherwise use original photo.url
   const imageUrl = workingImageUrl || photo?.url;
 
