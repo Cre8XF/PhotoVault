@@ -86,16 +86,25 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
     // Check if any transforms are active
     const hasTransforms = transform.rotate !== 0 || transform.flipH || transform.flipV;
 
-    // DEBUG: Verify rotate is numeric
-    console.log('[VIEWPORT] Using rotate:', transform.rotate, typeof transform.rotate);
+    // DIAGNOSTIC: Comprehensive transform debugging
+    console.log('[VIEWPORT] Transform state:', {
+      rotate: transform.rotate,
+      rotateType: typeof transform.rotate,
+      flipH: transform.flipH,
+      flipV: transform.flipV,
+      hasTransforms: hasTransforms,
+      willUseTransformPipeline: hasTransforms
+    });
 
     // Save context for all rendering operations
     ctx.save();
 
     if (hasTransforms) {
+      console.log('[VIEWPORT] ✅ Using TRANSFORM pipeline');
       // Use transform pipeline
       drawTransformedImage(ctx, img, transform, containerWidth, containerHeight);
     } else {
+      console.log('[VIEWPORT] ⚠️ Using NO-TRANSFORM pipeline');
       // Original rendering logic (no transforms)
       // Calculate image dimensions to fit container (object-contain)
       const imgAspect = img.width / img.height;
