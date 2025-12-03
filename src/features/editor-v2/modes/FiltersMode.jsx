@@ -14,6 +14,16 @@ const FILTERS = [
   { name: 'punch', label: 'Punch' },
 ];
 
+// CSS filter strings for preview thumbnails
+const FILTER_CSS = {
+  warm: 'sepia(20%) saturate(120%)',
+  cool: 'hue-rotate(180deg) saturate(110%)',
+  film: 'contrast(90%) brightness(110%)',
+  noir: 'grayscale(100%) contrast(120%)',
+  fade: 'opacity(80%) brightness(110%)',
+  punch: 'contrast(135%) saturate(130%)',
+};
+
 /**
  * FiltersMode - Filter selection mode
  * Features:
@@ -90,22 +100,36 @@ const FiltersMode = ({ photo }) => {
 
       {/* Filter Selection */}
       <div className="mode-filters-controls">
-        <div className="filter-row">
-          <button
-            className={`filter-btn ${filter.name === null ? 'active' : ''}`}
-            onClick={() => setFilter(null)}
+        <div className="filter-grid">
+          {/* No Filter tile */}
+          <div
+            className={`filter-tile ${filter.name === null ? 'active' : ''}`}
+            onClick={() => resetFilter()}
           >
-            Original
-          </button>
+            <div className="filter-preview">
+              <div className="filter-preview-img" style={{ backgroundImage: `url(${workingImageUrl || photo.url})` }} />
+            </div>
+            <span className="filter-label">No Filter</span>
+          </div>
 
+          {/* Filter preset tiles */}
           {FILTERS.map(f => (
-            <button
+            <div
               key={f.name}
-              className={`filter-btn ${filter.name === f.name ? 'active' : ''}`}
+              className={`filter-tile ${filter.name === f.name ? 'active' : ''}`}
               onClick={() => setFilter(f.name)}
             >
-              {f.label}
-            </button>
+              <div className="filter-preview">
+                <div
+                  className="filter-preview-img"
+                  style={{
+                    backgroundImage: `url(${workingImageUrl || photo.url})`,
+                    filter: FILTER_CSS[f.name]
+                  }}
+                />
+              </div>
+              <span className="filter-label">{f.label}</span>
+            </div>
           ))}
         </div>
       </div>
