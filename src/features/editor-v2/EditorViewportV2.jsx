@@ -16,6 +16,7 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
   const imageCache = useRef(null);
 
   const { crop, workingImageUrl, transform, adjust } = useEditorModeStore();
+  const filter = useEditorModeStore((state) => state.filter);
 
   // VERIFICATION: Confirm transform is received from store
   console.log('[VIEWPORT VERIFY] Transform received from store:', transform);
@@ -80,11 +81,38 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
     // Apply CSS filters to canvas context
     ctx.filter = filterString;
 
+    // Apply FILTER preview (NOT permanent)
+    if (filter?.name) {
+      switch (filter.name) {
+        case 'warm':
+          ctx.filter += ' sepia(20%) saturate(120%)';
+          break;
+        case 'cool':
+          ctx.filter += ' hue-rotate(180deg) saturate(110%)';
+          break;
+        case 'film':
+          ctx.filter += ' contrast(90%) brightness(110%)';
+          break;
+        case 'noir':
+          ctx.filter += ' grayscale(100%) contrast(120%)';
+          break;
+        case 'fade':
+          ctx.filter += ' opacity(80%) brightness(110%)';
+          break;
+        case 'punch':
+          ctx.filter += ' contrast(135%) saturate(130%)';
+          break;
+        default:
+          break;
+      }
+    }
+
     // PIPELINE ORDER:
     // 1. Apply transforms (rotate + flip)
     // 2. Apply adjust filters (brightness, contrast, saturation, warmth)
-    // 3. Apply crop clipping (if active)
-    // 4. Draw final result
+    // 3. Apply filter preset (warm, cool, film, noir, fade, punch)
+    // 4. Apply crop clipping (if active)
+    // 5. Draw final result
 
     // Check if any transforms are active
     const hasTransforms = transform.rotate !== 0 || transform.flipH || transform.flipV;
@@ -157,10 +185,10 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
     renderCropPreview,
   }));
 
-  // Re-render when crop, transform, or adjust changes
+  // Re-render when crop, transform, adjust, or filter changes
   useEffect(() => {
     renderCropPreview();
-  }, [crop.rect, crop.isActive, imageUrl, transform.rotate, transform.flipH, transform.flipV, adjust.brightness, adjust.contrast, adjust.saturation, adjust.warmth]);
+  }, [crop.rect, crop.isActive, imageUrl, transform.rotate, transform.flipH, transform.flipV, adjust.brightness, adjust.contrast, adjust.saturation, adjust.warmth, filter?.name]);
 
   // Re-render on window resize
   useEffect(() => {

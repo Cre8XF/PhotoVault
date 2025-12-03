@@ -27,6 +27,12 @@ const useEditorModeStore = create((set, get) => ({
     warmth: 0,       // -100 to +100
   },
 
+  // Filter state
+  filter: {
+    name: null,      // e.g. "warm", "cool", "film", "noir", "fade", "punch"
+    intensity: 1,    // reserved for later
+  },
+
   // Crop state
   crop: {
     isActive: false,
@@ -112,6 +118,19 @@ const useEditorModeStore = create((set, get) => ({
         warmth: 0,
       },
     });
+  },
+
+  // Filter actions
+  setFilter: (name) => {
+    set((state) => ({
+      filter: { ...state.filter, name }
+    }));
+  },
+
+  resetFilter: () => {
+    set((state) => ({
+      filter: { name: null, intensity: 1 }
+    }));
   },
 
   // Crop actions
