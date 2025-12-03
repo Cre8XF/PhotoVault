@@ -3,6 +3,7 @@ import React from 'react';
 import { X, Check } from 'lucide-react';
 import useEditorModeStore from '../modeStore';
 import EditorViewportV2 from '../EditorViewportV2';
+import { renderFullPipelineToDataUrl } from '../utils/imagePipeline';
 
 /**
  * AdjustMode - Image adjustment mode
@@ -20,6 +21,10 @@ const AdjustMode = ({ photo }) => {
     adjust,
     setAdjustValue,
     resetAdjust,
+    crop,
+    transform,
+    workingImageUrl,
+    setWorkingImageUrl,
   } = useEditorModeStore();
 
   // Handle cancel
@@ -28,11 +33,33 @@ const AdjustMode = ({ photo }) => {
     setMode('view');
   };
 
-  // Handle done (TODO: Apply adjustments in Phase 5C)
-  const handleDone = () => {
-    console.log('Apply adjustments:', adjust);
-    // TODO Phase 5C: Commit adjustments to workingImageUrl
-    setMode('view');
+  // Handle done - Apply adjustments permanently (Phase 5C)
+  const handleDone = async () => {
+    try {
+      const imageUrl = workingImageUrl || photo.url;
+
+      console.log('Applying adjustments:', adjust);
+
+      // Render full pipeline with adjustments
+      const dataUrl = await renderFullPipelineToDataUrl({
+        imageUrl,
+        crop,
+        transform,
+        adjust,
+      });
+
+      // Commit to working image
+      setWorkingImageUrl(dataUrl);
+
+      // Reset adjust state
+      resetAdjust();
+
+      // Return to view mode
+      setMode('view');
+    } catch (error) {
+      console.error('Failed to apply adjustments:', error);
+      alert('Failed to apply adjustments. Please try again.');
+    }
   };
 
   // Slider change handler
