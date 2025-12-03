@@ -86,6 +86,9 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
     // Check if any transforms are active
     const hasTransforms = transform.rotate !== 0 || transform.flipH || transform.flipV;
 
+    // Save context for all rendering operations
+    ctx.save();
+
     if (hasTransforms) {
       // Use transform pipeline
       drawTransformedImage(ctx, img, transform, containerWidth, containerHeight);
@@ -118,7 +121,6 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
         const cropW = (x2 - x1) * renderWidth;
         const cropH = (y2 - y1) * renderHeight;
 
-        ctx.save();
         ctx.beginPath();
         ctx.rect(cropX, cropY, cropW, cropH);
         ctx.clip();
@@ -126,12 +128,10 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
 
       // Draw image
       ctx.drawImage(img, offsetX, offsetY, renderWidth, renderHeight);
-
-      // Restore context if clipping was applied
-      if (crop.isActive && crop.rect) {
-        ctx.restore();
-      }
     }
+
+    // Restore context
+    ctx.restore();
 
     // Reset filter to prevent bleeding to other draws
     ctx.filter = 'none';

@@ -2,7 +2,7 @@
 import React from 'react';
 import { X, Check, RotateCw, RotateCcw, FlipHorizontal2, FlipVertical2 } from 'lucide-react';
 import useEditorModeStore from '../modeStore';
-import { commitTransformPipelineToImage } from '../utils/transformUtils';
+import { renderFullPipelineToDataUrl } from '../utils/imagePipeline';
 import EditorViewportV2 from '../EditorViewportV2';
 
 /**
@@ -21,6 +21,8 @@ const RotateMode = ({ photo }) => {
     setFlipH,
     setFlipV,
     resetTransforms,
+    crop,
+    adjust,
     workingImageUrl,
     setWorkingImageUrl,
   } = useEditorModeStore();
@@ -54,19 +56,20 @@ const RotateMode = ({ photo }) => {
   // Handle done - Apply transforms permanently
   const handleDone = async () => {
     try {
-      // Get current image URL
-      const currentImageUrl = workingImageUrl || photo.url;
+      const imageUrl = workingImageUrl || photo.url;
 
       console.log('Applying transforms:', transform);
 
-      // Apply transforms to image
-      const transformedImageUrl = await commitTransformPipelineToImage(
-        currentImageUrl,
-        transform
-      );
+      // Render full pipeline with transforms
+      const dataUrl = await renderFullPipelineToDataUrl({
+        imageUrl,
+        crop,
+        transform,
+        adjust,
+      });
 
-      // Update working image URL with transformed result
-      setWorkingImageUrl(transformedImageUrl);
+      // Commit to working image
+      setWorkingImageUrl(dataUrl);
 
       // Reset transform state
       resetTransforms();
