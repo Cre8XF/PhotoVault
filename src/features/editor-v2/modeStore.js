@@ -50,8 +50,10 @@ const useEditorModeStore = create((set, get) => ({
 
   // Transform actions
   setRotate: (deg) => {
+    // CRITICAL FIX: Ensure rotate is always numeric
+    const numericDeg = Number(deg);
     // Normalize to [0, 90, 180, 270]
-    const normalized = Math.round(deg / 90) * 90 % 360;
+    const normalized = Math.round(numericDeg / 90) * 90 % 360;
     const final = normalized < 0 ? normalized + 360 : normalized;
     set((state) => ({
       transform: {

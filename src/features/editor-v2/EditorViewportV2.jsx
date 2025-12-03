@@ -86,6 +86,9 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
     // Check if any transforms are active
     const hasTransforms = transform.rotate !== 0 || transform.flipH || transform.flipV;
 
+    // DEBUG: Verify rotate is numeric
+    console.log('[VIEWPORT] Using rotate:', transform.rotate, typeof transform.rotate);
+
     // Save context for all rendering operations
     ctx.save();
 
