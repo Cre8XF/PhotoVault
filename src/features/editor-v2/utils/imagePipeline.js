@@ -12,6 +12,7 @@
  * @param {object} options.crop - Crop state {isActive, rect: {x1, y1, x2, y2}}
  * @param {object} options.transform - Transform state {rotate, flipH, flipV}
  * @param {object} options.adjust - Adjust state {brightness, contrast, saturation, warmth}
+ * @param {object} options.filter - Filter state {name, intensity}
  * @param {string} options.mimeType - Output MIME type (default: 'image/jpeg')
  * @param {number} options.quality - JPEG quality 0-1 (default: 0.92)
  * @returns {Promise<string>} - DataURL of rendered image
@@ -21,6 +22,7 @@ export async function renderFullPipelineToDataUrl({
   crop = { isActive: false, rect: null },
   transform = { rotate: 0, flipH: false, flipV: false },
   adjust = { brightness: 0, contrast: 0, saturation: 0, warmth: 0 },
+  filter = { name: null, intensity: 1 },
   mimeType = 'image/jpeg',
   quality = 0.92,
 }) {
@@ -67,7 +69,33 @@ export async function renderFullPipelineToDataUrl({
         const saturatePct = 100 + saturation;
         const sepiaPct = warmth > 0 ? warmth : 0;
 
-        const filterString = `brightness(${brightnessPct}%) contrast(${contrastPct}%) saturate(${saturatePct}%) sepia(${sepiaPct}%)`;
+        let filterString = `brightness(${brightnessPct}%) contrast(${contrastPct}%) saturate(${saturatePct}%) sepia(${sepiaPct}%)`;
+
+        // Add filter preset if active
+        if (filter?.name) {
+          switch (filter.name) {
+            case 'warm':
+              filterString += ' sepia(20%) saturate(120%)';
+              break;
+            case 'cool':
+              filterString += ' hue-rotate(180deg) saturate(110%)';
+              break;
+            case 'film':
+              filterString += ' contrast(90%) brightness(110%)';
+              break;
+            case 'noir':
+              filterString += ' grayscale(100%) contrast(120%)';
+              break;
+            case 'fade':
+              filterString += ' opacity(80%) brightness(110%)';
+              break;
+            case 'punch':
+              filterString += ' contrast(135%) saturate(130%)';
+              break;
+            default:
+              break;
+          }
+        }
 
         // Apply filter
         ctx.filter = filterString;
