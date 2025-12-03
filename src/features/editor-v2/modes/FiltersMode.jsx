@@ -3,6 +3,7 @@ import React from 'react';
 import { X, Check } from 'lucide-react';
 import useEditorModeStore from '../modeStore';
 import EditorViewportV2 from '../EditorViewportV2';
+import { renderFullPipelineToDataUrl } from '../utils/imagePipeline';
 
 const FILTERS = [
   { name: 'warm', label: 'Warm' },
@@ -18,7 +19,7 @@ const FILTERS = [
  * Features:
  * - Preset filters (warm, cool, film, noir, fade, punch)
  * - Live preview
- * - Cancel/Done buttons
+ * - Permanent filter commit (Phase 6B)
  */
 const FiltersMode = ({ photo }) => {
   const {
@@ -26,6 +27,11 @@ const FiltersMode = ({ photo }) => {
     filter,
     setFilter,
     resetFilter,
+    crop,
+    transform,
+    adjust,
+    workingImageUrl,
+    setWorkingImageUrl,
   } = useEditorModeStore();
 
   // Handle cancel
@@ -34,11 +40,34 @@ const FiltersMode = ({ photo }) => {
     setMode('view');
   };
 
-  // Handle done (TODO: Phase 6B will commit to workingImageUrl)
-  const handleDone = () => {
-    console.log('Apply filter:', filter.name);
-    // TODO Phase 6B: Commit filter to workingImageUrl
-    setMode('view');
+  // Handle done - Apply filter permanently (Phase 6B)
+  const handleDone = async () => {
+    try {
+      const imageUrl = workingImageUrl || photo.url;
+
+      console.log('Applying filter:', filter.name);
+
+      // Render full pipeline with filter
+      const dataUrl = await renderFullPipelineToDataUrl({
+        imageUrl,
+        crop,
+        transform,
+        adjust,
+        filter,
+      });
+
+      // Commit to working image
+      setWorkingImageUrl(dataUrl);
+
+      // Reset filter state
+      resetFilter();
+
+      // Return to view mode
+      setMode('view');
+    } catch (error) {
+      console.error('Failed to apply filter:', error);
+      alert('Failed to apply filter. Please try again.');
+    }
   };
 
   return (
