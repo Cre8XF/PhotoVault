@@ -15,7 +15,7 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
   const containerRef = useRef(null);
   const imageCache = useRef(null);
 
-  const { crop, workingImageUrl, transform } = useEditorModeStore();
+  const { crop, workingImageUrl, transform, adjust } = useEditorModeStore();
 
   // Use workingImageUrl if available, otherwise use original photo.url
   const imageUrl = workingImageUrl || photo?.url;
@@ -65,10 +65,23 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
     // Clear canvas
     ctx.clearRect(0, 0, containerWidth, containerHeight);
 
+    // Build CSS filter string from adjust values
+    const { brightness = 0, contrast = 0, saturation = 0, warmth = 0 } = adjust || {};
+    const brightnessPct = 100 + brightness;  // -100 → 0%, 0 → 100%, +100 → 200%
+    const contrastPct = 100 + contrast;
+    const saturatePct = 100 + saturation;
+    const sepiaPct = warmth > 0 ? warmth : 0;  // Warmth approximated via sepia (positive values only)
+
+    const filterString = `brightness(${brightnessPct}%) contrast(${contrastPct}%) saturate(${saturatePct}%) sepia(${sepiaPct}%)`;
+
+    // Apply CSS filters to canvas context
+    ctx.filter = filterString;
+
     // PIPELINE ORDER:
     // 1. Apply transforms (rotate + flip)
-    // 2. Apply crop clipping (if active)
-    // 3. Draw final result
+    // 2. Apply adjust filters (brightness, contrast, saturation, warmth)
+    // 3. Apply crop clipping (if active)
+    // 4. Draw final result
 
     // Check if any transforms are active
     const hasTransforms = transform.rotate !== 0 || transform.flipH || transform.flipV;
@@ -119,6 +132,9 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
         ctx.restore();
       }
     }
+
+    // Reset filter to prevent bleeding to other draws
+    ctx.filter = 'none';
   };
 
   // Expose renderCropPreview via ref
@@ -126,10 +142,10 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
     renderCropPreview,
   }));
 
-  // Re-render when crop or transform changes
+  // Re-render when crop, transform, or adjust changes
   useEffect(() => {
     renderCropPreview();
-  }, [crop.rect, crop.isActive, imageUrl, transform.rotate, transform.flipH, transform.flipV]);
+  }, [crop.rect, crop.isActive, imageUrl, transform.rotate, transform.flipH, transform.flipV, adjust.brightness, adjust.contrast, adjust.saturation, adjust.warmth]);
 
   // Re-render on window resize
   useEffect(() => {
