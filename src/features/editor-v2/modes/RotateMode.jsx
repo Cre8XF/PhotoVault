@@ -29,12 +29,12 @@ const RotateMode = ({ photo }) => {
 
   // Handle rotate clockwise
   const handleRotateCW = () => {
-    setRotate((transform.rotate + 90) % 360);
+    setRotate((Number(transform.rotate) + 90) % 360);
   };
 
   // Handle rotate counter-clockwise
   const handleRotateCCW = () => {
-    setRotate((transform.rotate + 270) % 360);
+    setRotate((Number(transform.rotate) + 270) % 360);
   };
 
   // Handle flip horizontal
