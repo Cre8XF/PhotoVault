@@ -139,9 +139,25 @@ export const usePhotoData = () => {
     const unsubAlbums = listenToAlbumsByUser(user.uid, (data) =>
       setAlbums(data)
     )
-    const unsubPhotos = listenToPhotosByUser(user.uid, (data) =>
-      setPhotos(data)
-    )
+
+    // Phase 3.5 FIX: Add displayUrl to show edited version
+    const unsubPhotos = listenToPhotosByUser(user.uid, (data) => {
+      const photosWithDisplayUrl = Array.isArray(data)
+        ? data.map((photo) => ({
+            ...photo,
+            // displayUrl = editedUrl if exists, otherwise original url
+            displayUrl: photo.editedUrl || photo.url,
+          }))
+        : []
+
+      console.log(
+        '✅ Photos mapped with displayUrl:',
+        photosWithDisplayUrl.filter((p) => p.editedUrl).length,
+        'edited photos'
+      )
+
+      setPhotos(photosWithDisplayUrl)
+    })
 
     // Initial engangs-refresh (for sikkerhet)
     refreshAllData(user.uid)

@@ -24,12 +24,13 @@ import { useCanvasRenderer } from '../hooks/useCanvasRenderer'
  * EditorViewport Component
  *
  * @param {Object} photo - Photo object with url, name, etc.
+ * @param {Object} externalTransform - Transform state from editorStore (for crop persistence)
  * @param {boolean} hasActivePanel - Whether a panel (Adjust/Crop/Rotate/Filters) is open
  * @param {React.ReactNode} children - Child components (e.g., CropOverlay in future phases)
  * @param {React.Ref} ref - Forward ref for imperative API
  */
 export const EditorViewport = forwardRef(
-  ({ photo, hasActivePanel, children }, ref) => {
+  ({ photo, externalTransform = null, hasActivePanel, children }, ref) => {
     const {
       canvasRef,
       containerRef,
@@ -49,7 +50,7 @@ export const EditorViewport = forwardRef(
       getAppliedCrop,
       getImageSize,
       render,
-    } = useCanvasRenderer(photo, null)
+    } = useCanvasRenderer(photo, externalTransform)
 
     // Expose imperative API to parent (Phase 8C-3)
     useImperativeHandle(

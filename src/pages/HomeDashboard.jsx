@@ -191,7 +191,7 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
               {t("home:favoritesTitle")}
             </h2>
             <button
-              onClick={() => navigate("/search?filter=favorites")}
+              onClick={() => navigate("/search", { state: { filter: "favorites" } })}
               className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition whitespace-nowrap flex items-center"
             >
               {t("common:seeAll", { count: stats.favorites })} →
@@ -235,7 +235,7 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
               {t("home:recentUploads")}
             </h2>
             <button
-              onClick={() => navigate("/search?filter=recent")}
+              onClick={() => navigate("/search", { state: { filter: "recent" } })}
               className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition whitespace-nowrap flex items-center ml-2"
             >
               {t("common:seeAll", { count: recentPhotos.length })} →

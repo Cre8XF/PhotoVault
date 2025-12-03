@@ -5,6 +5,7 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RotateCcw } from 'lucide-react'
+import useEditorStore from '../editorStore'
 
 /**
  * AdjustPanel - Google Photos-style adjust sliders (Phase 8C-2)
@@ -69,6 +70,7 @@ const ADJUST_SLIDERS = [
 
 const AdjustPanel = ({ viewportRef }) => {
   const { t } = useTranslation()
+  const { transform, applyTransform } = useEditorStore()
 
   const [sliderValues, setSliderValues] = useState(() => {
     const initial = {}
@@ -85,8 +87,15 @@ const AdjustPanel = ({ viewportRef }) => {
 
   const handleSliderChange = (key, value) => {
     const val = Number(value)
+
+    // Update local state for immediate UI feedback
     setSliderValues((prev) => ({ ...prev, [key]: val }))
+
+    // Update viewport for canvas rendering
     viewportRef?.current?.setAdjustValue(key, val)
+
+    // Update editorStore for persistence/save
+    applyTransform('adjust', { ...transform.adjust, [key]: val })
   }
 
   const handleResetAll = () => {
@@ -94,6 +103,9 @@ const AdjustPanel = ({ viewportRef }) => {
     ADJUST_SLIDERS.forEach((s) => (defaults[s.key] = s.default))
     setSliderValues(defaults)
     viewportRef?.current?.resetAdjustValues()
+
+    // Reset editorStore
+    applyTransform('adjust', defaults)
   }
 
   const hasChanges = Object.keys(sliderValues).some((key) => {

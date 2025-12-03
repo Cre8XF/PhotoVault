@@ -452,7 +452,14 @@ export async function uploadPhoto(
         const thumbPath = `users/${userId}/thumbnails/${timestamp}_${thumbSafeName}`
         const thumbRef = ref(storage, thumbPath)
 
-        await uploadBytes(thumbRef, thumbnailBlob)
+        await uploadBytes(thumbRef, thumbnailBlob, {
+          contentType: 'image/jpeg',
+          customMetadata: {
+            userId: userId,
+            parentVideo: file.name,
+            generatedAt: new Date().toISOString()
+          }
+        })
         thumbnailUrl = await getDownloadURL(thumbRef)
         console.log('✅ [Upload] Thumbnail uploaded:', thumbnailUrl)
       } catch (thumbError) {
@@ -546,12 +553,115 @@ export async function uploadThumbnail(blob, userId, photoId, size = 'small') {
   try {
     const storagePath = `users/${userId}/thumbnails/${photoId}_${size}.jpg`
     const storageRef = ref(storage, storagePath)
-    await uploadBytes(storageRef, blob)
+    await uploadBytes(storageRef, blob, {
+      contentType: 'image/jpeg',
+      customMetadata: {
+        userId: userId,
+        photoId: photoId,
+        size: size,
+        generatedAt: new Date().toISOString()
+      }
+    })
     const downloadURL = await getDownloadURL(storageRef)
     return { downloadURL, storagePath }
   } catch (error) {
     console.error('🔥 uploadThumbnail:', error)
     throw new Error(error.message)
+  }
+}
+
+/**
+ * Upload edited photo to R2 enhanced bucket and update Firestore (Phase 3)
+ * @param {string} userId - User ID
+ * @param {string} photoId - Original photo ID
+ * @param {Blob} blob - Edited image blob (JPEG)
+ * @param {Object} transform - Transform state from editorStore
+ * @param {string} filter - Named filter applied
+ * @param {Blob} thumbnailBlob - Optional thumbnail blob
+ * @returns {Promise<Object>} { editedUrl, thumbnailUrl, storagePath }
+ */
+export async function uploadEditedPhoto(
+  userId,
+  photoId,
+  blob,
+  transform,
+  filter = 'original',
+  thumbnailBlob = null
+) {
+  try {
+    if (!userId) {
+      throw new Error('No user ID provided to uploadEditedPhoto')
+    }
+
+    if (!photoId) {
+      throw new Error('No photo ID provided to uploadEditedPhoto')
+    }
+
+    if (!blob) {
+      throw new Error('No blob provided to uploadEditedPhoto')
+    }
+
+    const timestamp = Date.now()
+
+    // 1. Upload edited image to enhanced bucket
+    const fileName = `edited_${photoId}_${timestamp}.jpg`
+    const storagePath = `users/${userId}/enhanced/${fileName}`
+    const storageRef = ref(storage, storagePath)
+
+    await uploadBytes(storageRef, blob, {
+      contentType: 'image/jpeg',
+      customMetadata: {
+        userId: userId,
+        sourcePhotoId: photoId,
+        editedAt: new Date().toISOString(),
+        hasTransforms: 'true',
+      },
+    })
+
+    const editedUrl = await getDownloadURL(storageRef)
+    console.log('✅ [EditedPhoto] Uploaded to R2:', editedUrl)
+
+    // 2. Upload thumbnail if provided
+    let thumbnailUrl = null
+    if (thumbnailBlob) {
+      try {
+        const thumbFileName = `edited_${photoId}_${timestamp}_thumb.jpg`
+        const thumbPath = `users/${userId}/thumbnails/${thumbFileName}`
+        const thumbRef = ref(storage, thumbPath)
+
+        await uploadBytes(thumbRef, thumbnailBlob, {
+          contentType: 'image/jpeg',
+          customMetadata: {
+            userId: userId,
+            sourcePhotoId: photoId,
+            editedThumbnail: 'true',
+            generatedAt: new Date().toISOString(),
+          },
+        })
+
+        thumbnailUrl = await getDownloadURL(thumbRef)
+        console.log('✅ [EditedPhoto] Thumbnail uploaded:', thumbnailUrl)
+      } catch (thumbError) {
+        console.error('⚠️ [EditedPhoto] Thumbnail upload failed:', thumbError)
+        // Continue without thumbnail
+      }
+    }
+
+    // 3. Update Firestore document
+    await updateDoc(doc(db, 'photos', photoId), {
+      editedUrl: editedUrl,
+      editedAt: new Date().toISOString(),
+      transforms: transform,
+      filter: filter,
+      updatedAt: new Date().toISOString(),
+    })
+
+    console.log(`✅ [EditedPhoto] Firestore updated for ${photoId}`)
+
+    return { editedUrl, thumbnailUrl, storagePath }
+  } catch (error) {
+    console.error('🔥 uploadEditedPhoto error:', error)
+    throw new Error(`Edited photo upload failed: ${error.message}`)
   }
 }
 

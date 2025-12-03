@@ -91,19 +91,18 @@ const SearchPage = ({
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [photoToDelete, setPhotoToDelete] = useState(null)
 
-  // Handle URL filter params on mount
+  // Handle filter from location.state (from "See All" buttons)
   useEffect(() => {
-    const params = new URLSearchParams(location.search)
-    const urlFilter = params.get('filter')
+    const filterFromState = location.state?.filter
 
-    if (urlFilter === 'favorites') {
+    if (filterFromState === 'favorites') {
       setActiveFilters((f) => ({ ...f, favorites: true }))
     }
 
-    if (urlFilter === 'recent') {
+    if (filterFromState === 'recent') {
       setActiveFilters((f) => ({ ...f, dateRange: 'month' }))
     }
-  }, [])
+  }, [location.state])
 
   // 🔒 SIKRET: Kategorier med array-guard
   const categories = useMemo(() => {
@@ -260,12 +259,40 @@ const SearchPage = ({
       const db = getFirestore()
       const safeSelected = Array.isArray(selectedPhotos) ? selectedPhotos : []
 
+      console.log('🔵 Moving photos:', {
+        count: safeSelected.length,
+        targetAlbumId,
+        selectedIds: safeSelected
+      })
+
+      // Track source albums to update their counts
+      const sourceAlbums = new Set()
+
       for (const id of safeSelected) {
+        const photo = safePhotos.find(p => p.id === id)
+
+        // Track source album (if photo has one)
+        if (photo?.albumId) {
+          sourceAlbums.add(photo.albumId)
+          console.log(`📦 Photo ${id} moving from album ${photo.albumId} to ${targetAlbumId}`)
+        } else {
+          console.log(`📦 Photo ${id} moving from "Uten album" to ${targetAlbumId}`)
+        }
+
         const docRef = doc(db, 'photos', id)
         await updateDoc(docRef, { albumId: targetAlbumId })
       }
 
+      // Update target album count
+      console.log(`✅ Updating target album ${targetAlbumId} count`)
       await updateAlbumPhotoCount(targetAlbumId)
+
+      // Update source album counts (decrement)
+      for (const sourceAlbumId of sourceAlbums) {
+        console.log(`✅ Updating source album ${sourceAlbumId} count`)
+        await updateAlbumPhotoCount(sourceAlbumId)
+      }
+
       setSelectedPhotos([])
       setMoveOpen(false)
       setEditMode(false)
@@ -355,18 +382,11 @@ const SearchPage = ({
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  console.log('🔵 Move button clicked!', {
-                    selectedCount: selectedPhotos.length,
-                    albumsCount: safeAlbums.length,
-                  })
-                  // Temporary debug alert
-                  alert(`Move clicked! ${selectedPhotos.length} photos selected`)
                   setMoveOpen(true)
                 }}
                 onTouchEnd={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  console.log('📱 Move button touched!')
                   setMoveOpen(true)
                 }}
                 className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center gap-2 touch-target"
