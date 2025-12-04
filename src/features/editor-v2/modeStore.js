@@ -30,14 +30,6 @@ const useEditorModeStore = create((set, get) => ({
     warmth: 0,       // -100 to +100
   },
 
-  // ✅ Saved adjust state (for cancel/restore behavior)
-  savedAdjust: {
-    brightness: 0,
-    contrast: 0,
-    saturation: 0,
-    warmth: 0,
-  },
-
   // Filter state
   filter: {
     name: null,      // e.g. "warm", "cool", "film", "noir", "fade", "punch"
@@ -120,20 +112,6 @@ const useEditorModeStore = create((set, get) => ({
         ...state.adjust,
         [key]: clampedValue,
       },
-    }));
-  },
-
-  // ✅ Save current adjust values (for cancel behavior)
-  saveAdjust: () => {
-    set((state) => ({
-      savedAdjust: { ...state.adjust },
-    }));
-  },
-
-  // ✅ Restore saved adjust values (for cancel)
-  restoreAdjust: () => {
-    set((state) => ({
-      adjust: { ...state.savedAdjust },
     }));
   },
 
@@ -246,7 +224,39 @@ const useEditorModeStore = create((set, get) => ({
     });
   },
 
-  // Reset all edits - Revert to original
+  // Reset all edits (state only, without changing workingImageUrl)
+  resetAllEdits: () => {
+    set({
+      crop: {
+        isActive: false,
+        rect: {
+          x1: 0.1,
+          y1: 0.1,
+          x2: 0.9,
+          y2: 0.9,
+        },
+        aspectRatio: null,
+        activeHandle: null,
+      },
+      transform: {
+        rotate: 0,
+        flipH: false,
+        flipV: false,
+      },
+      adjust: {
+        brightness: 0,
+        contrast: 0,
+        saturation: 0,
+        warmth: 0,
+      },
+      filter: {
+        name: null,
+        intensity: 1,
+      },
+    });
+  },
+
+  // Reset all - Revert to original (includes workingImageUrl)
   resetAll: () => {
     set((state) => ({
       workingImageUrl: state.originalUrl,
@@ -276,6 +286,7 @@ const useEditorModeStore = create((set, get) => ({
         name: null,
         intensity: 1,
       },
+      mode: 'view',
     }));
   },
 }));

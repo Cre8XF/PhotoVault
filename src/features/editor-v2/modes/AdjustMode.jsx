@@ -1,9 +1,8 @@
 // src/features/editor-v2/modes/AdjustMode.jsx
-import React, { useEffect } from 'react';
+import React from 'react';
 import { X, Check } from 'lucide-react';
 import useEditorModeStore from '../modeStore';
 import EditorViewportV2 from '../EditorViewportV2';
-import { renderFullPipelineToDataUrl } from '../utils/imagePipeline';
 
 /**
  * AdjustMode - Image adjustment mode
@@ -15,57 +14,24 @@ import { renderFullPipelineToDataUrl } from '../utils/imagePipeline';
  * - Real-time preview
  * - Apply adjustments permanently
  */
-const AdjustMode = ({ photo }) => {
+const AdjustMode = ({ photo, onDone }) => {
   const {
     setMode,
     adjust,
     setAdjustValue,
     resetAdjust,
-    saveAdjust,
-    restoreAdjust,
-    crop,
-    transform,
-    workingImageUrl,
-    setWorkingImageUrl,
   } = useEditorModeStore();
 
-  // ✅ Save current adjust values when entering Adjust mode
-  useEffect(() => {
-    saveAdjust();
-  }, [saveAdjust]);
-
-  // Handle cancel
+  // Handle cancel - Model A: just reset adjust state
   const handleCancel = () => {
-    restoreAdjust();  // ✅ Restore previous values, not reset to 0
+    resetAdjust();
     setMode('view');
   };
 
-  // Handle done - Apply adjustments permanently (Phase 5C)
-  const handleDone = async () => {
-    try {
-      const imageUrl = workingImageUrl || photo.url;
-
-      console.log('Applying adjustments:', adjust);
-
-      // Render full pipeline with adjustments
-      const dataUrl = await renderFullPipelineToDataUrl({
-        imageUrl,
-        crop,
-        transform,
-        adjust,
-      });
-
-      // Commit to working image
-      setWorkingImageUrl(dataUrl);
-
-      // Reset adjust state
-      resetAdjust();
-
-      // Return to view mode
-      setMode('view');
-    } catch (error) {
-      console.error('Failed to apply adjustments:', error);
-      alert('Failed to apply adjustments. Please try again.');
+  // Handle done - Model A commit pattern
+  const handleDone = () => {
+    if (onDone) {
+      onDone();
     }
   };
 

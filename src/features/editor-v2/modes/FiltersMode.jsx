@@ -3,7 +3,6 @@ import React from 'react';
 import { X, Check } from 'lucide-react';
 import useEditorModeStore from '../modeStore';
 import EditorViewportV2 from '../EditorViewportV2';
-import { renderFullPipelineToDataUrl } from '../utils/imagePipeline';
 
 const FILTERS = [
   { name: 'warm', label: 'Warm' },
@@ -31,52 +30,25 @@ const FILTER_CSS = {
  * - Live preview
  * - Permanent filter commit (Phase 6B)
  */
-const FiltersMode = ({ photo }) => {
+const FiltersMode = ({ photo, onDone }) => {
   const {
     setMode,
     filter,
     setFilter,
     resetFilter,
-    crop,
-    transform,
-    adjust,
     workingImageUrl,
-    setWorkingImageUrl,
   } = useEditorModeStore();
 
-  // Handle cancel
+  // Handle cancel - Model A: just reset filter state
   const handleCancel = () => {
     resetFilter();
     setMode('view');
   };
 
-  // Handle done - Apply filter permanently (Phase 6B)
-  const handleDone = async () => {
-    try {
-      const imageUrl = workingImageUrl || photo.url;
-
-      console.log('Applying filter:', filter.name);
-
-      // Render full pipeline with filter
-      const dataUrl = await renderFullPipelineToDataUrl({
-        imageUrl,
-        crop,
-        transform,
-        adjust,
-        filter,
-      });
-
-      // Commit to working image
-      setWorkingImageUrl(dataUrl);
-
-      // Reset filter state
-      resetFilter();
-
-      // Return to view mode
-      setMode('view');
-    } catch (error) {
-      console.error('Failed to apply filter:', error);
-      alert('Failed to apply filter. Please try again.');
+  // Handle done - Model A commit pattern
+  const handleDone = () => {
+    if (onDone) {
+      onDone();
     }
   };
 
