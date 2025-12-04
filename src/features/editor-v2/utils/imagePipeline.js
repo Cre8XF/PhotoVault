@@ -97,9 +97,6 @@ export async function renderFullPipelineToDataUrl({
           }
         }
 
-        // Apply filter
-        ctx.filter = filterString;
-
         // Apply transforms and draw
         ctx.save();
 
@@ -119,7 +116,8 @@ export async function renderFullPipelineToDataUrl({
             return;
           }
 
-          // Apply filter to temp canvas
+          // ✅ FIX: Apply filter ONLY to temp canvas (not to final canvas)
+          // This prevents double filtering when drawing from temp to final
           tempCtx.filter = filterString;
           tempCtx.save();
           tempCtx.translate(canvasWidth / 2, canvasHeight / 2);
@@ -133,13 +131,16 @@ export async function renderFullPipelineToDataUrl({
           const cropX = Math.round(x1 * canvasWidth);
           const cropY = Math.round(y1 * canvasHeight);
 
+          // ✅ FIX: Draw from temp canvas to final canvas WITHOUT filters
+          // (filters already applied in temp canvas)
           ctx.drawImage(
             tempCanvas,
             cropX, cropY, finalWidth, finalHeight,
             0, 0, finalWidth, finalHeight
           );
         } else {
-          // No crop, just apply transforms
+          // ✅ FIX: No crop path - apply filters to final canvas before drawing
+          ctx.filter = filterString;
           ctx.translate(finalWidth / 2, finalHeight / 2);
           ctx.rotate((transform.rotate * Math.PI) / 180);
           ctx.scale(transform.flipH ? -1 : 1, transform.flipV ? -1 : 1);

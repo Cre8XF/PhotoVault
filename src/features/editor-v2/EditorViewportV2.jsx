@@ -1,6 +1,7 @@
 // src/features/editor-v2/EditorViewportV2.jsx
 import React, {
   useRef,
+  useState,
   useEffect,
   useImperativeHandle,
   forwardRef,
@@ -19,6 +20,7 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
   const canvasRef = useRef(null)
   const containerRef = useRef(null)
   const imageCache = useRef(null)
+  const [imageLoadCounter, setImageLoadCounter] = useState(0)
 
   const { crop, workingImageUrl, transform, adjust, mode } = useEditorModeStore()
   const filter = useEditorModeStore((state) => state.filter)
@@ -53,14 +55,16 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
     canvas.style.height = `${containerHeight}px`
     ctx.scale(dpr, dpr)
 
-    // Load image (use cache)
+    // Load image (simple caching - create new Image if URL changed)
     if (!imageCache.current || imageCache.current.src !== imageUrl) {
       imageCache.current = new Image()
       imageCache.current.crossOrigin = 'anonymous'
       imageCache.current.src = imageUrl
 
+      // ✅ CRITICAL FIX: Instead of calling renderCropPreview() recursively,
+      // increment a counter to trigger useEffect when image loads
       imageCache.current.onload = () => {
-        renderCropPreview() // Re-render when image loads
+        setImageLoadCounter(c => c + 1)
       }
 
       if (!imageCache.current.complete) return // Wait for load
@@ -173,6 +177,7 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
     crop.rect,
     crop.isActive,
     imageUrl,
+    imageLoadCounter, // ✅ Added to trigger re-render when image loads
     transform.rotate,
     transform.flipH,
     transform.flipV,
