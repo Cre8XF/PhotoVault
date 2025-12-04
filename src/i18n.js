@@ -39,9 +39,6 @@ import uploadEN from './locales/en/upload.json'
 import navNO from './locales/no/nav.json'
 import navEN from './locales/en/nav.json'
 
-import editorNO from './locales/no/editor.json'
-import editorEN from './locales/en/editor.json'
-
 import collageNO from './locales/no/collage.json'
 import collageEN from './locales/en/collage.json'
 
@@ -68,7 +65,6 @@ const resources = {
     home: homeNO,
     upload: uploadNO,
     nav: navNO,
-    editor: editorNO,
     collage: collageNO,
     timeline: timelineNO,
     profile: profileNO,
@@ -87,7 +83,6 @@ const resources = {
     home: homeEN,
     upload: uploadEN,
     nav: navEN,
-    editor: editorEN,
     collage: collageEN,
     timeline: timelineEN,
     profile: profileEN,
@@ -115,7 +110,6 @@ i18n
       'home',
       'upload',
       'nav',
-      'editor',
       'collage',
       'timeline',
       'profile',
