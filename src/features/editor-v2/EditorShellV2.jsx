@@ -24,15 +24,16 @@ import MarkupMode from './modes/MarkupMode';
  */
 const EditorShellV2 = ({ photo }) => {
   const navigate = useNavigate();
-  const { mode, setMode, setOriginalUrl, resetAll } = useEditorModeStore();
+  const { mode, setMode, setOriginalUrl, setWorkingImageUrl, resetAll } = useEditorModeStore();
   const viewportRef = useRef(null);
 
-  // Store original URL once when photo loads
+  // Store original URL + working URL once when photo loads
   useEffect(() => {
     if (photo?.url) {
       setOriginalUrl(photo.url);
+      setWorkingImageUrl(photo.url);  // ✅ CRITICAL: Initialize working image
     }
-  }, [photo?.url, setOriginalUrl]);
+  }, [photo?.url, setOriginalUrl, setWorkingImageUrl]);
 
   // Mode configuration
   const modes = [

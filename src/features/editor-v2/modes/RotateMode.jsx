@@ -29,12 +29,16 @@ const RotateMode = ({ photo }) => {
 
   // Handle rotate clockwise
   const handleRotateCW = () => {
-    setRotate((Number(transform.rotate) + 90) % 360);
+    // ✅ Ensure numeric, modeStore will normalize to [0, 90, 180, 270]
+    const current = Number(transform.rotate) || 0;
+    setRotate(current + 90);
   };
 
   // Handle rotate counter-clockwise
   const handleRotateCCW = () => {
-    setRotate((Number(transform.rotate) + 270) % 360);
+    // ✅ Ensure numeric, modeStore will normalize to [0, 90, 180, 270]
+    const current = Number(transform.rotate) || 0;
+    setRotate(current + 270);
   };
 
   // Handle flip horizontal
