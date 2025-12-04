@@ -48,12 +48,19 @@ const CropMode = ({ photo, viewportRef }) => {
 
   // Activate crop when component mounts, reset when leaving
   useEffect(() => {
+    // ✅ Activate immediately
     setCropActive(true);
+
+    // ✅ Force viewport re-render to show crop overlay
+    if (viewportRef?.current?.renderCropPreview) {
+      viewportRef.current.renderCropPreview();
+    }
+
     return () => {
       // Leaving crop mode → disable and reset crop globally
       resetCrop();
     };
-  }, [setCropActive, resetCrop]);
+  }, [setCropActive, resetCrop, viewportRef]);
 
   // Handle cancel
   const handleCancel = () => {

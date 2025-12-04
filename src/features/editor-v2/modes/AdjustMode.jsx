@@ -1,5 +1,5 @@
 // src/features/editor-v2/modes/AdjustMode.jsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Check } from 'lucide-react';
 import useEditorModeStore from '../modeStore';
 import EditorViewportV2 from '../EditorViewportV2';
@@ -21,15 +21,22 @@ const AdjustMode = ({ photo }) => {
     adjust,
     setAdjustValue,
     resetAdjust,
+    saveAdjust,
+    restoreAdjust,
     crop,
     transform,
     workingImageUrl,
     setWorkingImageUrl,
   } = useEditorModeStore();
 
+  // ✅ Save current adjust values when entering Adjust mode
+  useEffect(() => {
+    saveAdjust();
+  }, [saveAdjust]);
+
   // Handle cancel
   const handleCancel = () => {
-    resetAdjust();
+    restoreAdjust();  // ✅ Restore previous values, not reset to 0
     setMode('view');
   };
 

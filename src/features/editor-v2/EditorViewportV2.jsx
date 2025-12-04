@@ -20,11 +20,8 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
   const containerRef = useRef(null)
   const imageCache = useRef(null)
 
-  const { crop, workingImageUrl, transform, adjust } = useEditorModeStore()
+  const { crop, workingImageUrl, transform, adjust, mode } = useEditorModeStore()
   const filter = useEditorModeStore((state) => state.filter)
-
-  // VERIFICATION: Confirm transform is received from store
-  console.log('[VIEWPORT VERIFY] Transform received from store:', transform)
 
   // Use workingImageUrl if available, otherwise use original photo.url
   const imageUrl = workingImageUrl || photo?.url
@@ -72,8 +69,8 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
     const img = imageCache.current
     if (!img.complete) return
 
-    // Clear canvas
-    ctx.clearRect(0, 0, containerWidth, containerHeight)
+    // Clear canvas (at device pixel ratio scale)
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     // Build CSS filter string from adjust values
     const {
@@ -118,72 +115,44 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
       }
     }
 
-    // PIPELINE ORDER:
-    // 1. Apply transforms (rotate + flip)
-    // 2. Apply adjust filters (brightness, contrast, saturation, warmth)
-    // 3. Apply filter preset (warm, cool, film, noir, fade, punch)
-    // 4. Apply crop clipping (if active)
-    // 5. Draw final result
-
-    // Check if any transforms are active
-    const hasTransforms =
-      transform.rotate !== 0 || transform.flipH || transform.flipV
-
-    // DIAGNOSTIC: Comprehensive transform debugging
-    console.log('[VIEWPORT] Transform state:', {
-      rotate: transform.rotate,
-      rotateType: typeof transform.rotate,
-      flipH: transform.flipH,
-      flipV: transform.flipV,
-      hasTransforms: hasTransforms,
-      willUseTransformPipeline: hasTransforms,
-    })
-
+    // ✅ UNIFIED PIPELINE - removes dual-pipeline completely
     // Save context for all rendering operations
     ctx.save()
 
-    if (hasTransforms) {
-      console.log('[VIEWPORT] ✅ Using TRANSFORM pipeline')
-      // Use transform pipeline
-      drawTransformedImage(ctx, img, transform, containerWidth, containerHeight)
+    // Calculate image dimensions to fit container (object-contain)
+    const imgAspect = img.width / img.height
+    const containerAspect = containerWidth / containerHeight
+
+    let renderWidth, renderHeight, offsetX, offsetY
+
+    if (imgAspect > containerAspect) {
+      renderWidth = containerWidth
+      renderHeight = containerWidth / imgAspect
+      offsetX = 0
+      offsetY = (containerHeight - renderHeight) / 2
     } else {
-      console.log('[VIEWPORT] ⚠️ Using NO-TRANSFORM pipeline')
-      // Original rendering logic (no transforms)
-      // Calculate image dimensions to fit container (object-contain)
-      const imgAspect = img.width / img.height
-      const containerAspect = containerWidth / containerHeight
-
-      let renderWidth, renderHeight, offsetX, offsetY
-
-      if (imgAspect > containerAspect) {
-        renderWidth = containerWidth
-        renderHeight = containerWidth / imgAspect
-        offsetX = 0
-        offsetY = (containerHeight - renderHeight) / 2
-      } else {
-        renderWidth = containerHeight * imgAspect
-        renderHeight = containerHeight
-        offsetX = (containerWidth - renderWidth) / 2
-        offsetY = 0
-      }
-
-      // Apply crop clipping if crop is active
-      if (crop.isActive && crop.rect) {
-        const { x1, y1, x2, y2 } = crop.rect
-
-        const cropX = offsetX + x1 * renderWidth
-        const cropY = offsetY + y1 * renderHeight
-        const cropW = (x2 - x1) * renderWidth
-        const cropH = (y2 - y1) * renderHeight
-
-        ctx.beginPath()
-        ctx.rect(cropX, cropY, cropW, cropH)
-        ctx.clip()
-      }
-
-      // Draw image
-      ctx.drawImage(img, offsetX, offsetY, renderWidth, renderHeight)
+      renderWidth = containerHeight * imgAspect
+      renderHeight = containerHeight
+      offsetX = (containerWidth - renderWidth) / 2
+      offsetY = 0
     }
+
+    // ✅ FIX: Apply crop clipping - Check mode === 'crop' OR crop.isActive
+    if ((mode === 'crop' || crop.isActive) && crop.rect) {
+      const { x1, y1, x2, y2 } = crop.rect
+
+      const cropX = offsetX + x1 * renderWidth
+      const cropY = offsetY + y1 * renderHeight
+      const cropW = (x2 - x1) * renderWidth
+      const cropH = (y2 - y1) * renderHeight
+
+      ctx.beginPath()
+      ctx.rect(cropX, cropY, cropW, cropH)
+      ctx.clip()
+    }
+
+    // ✅ UNIFIED: Always use transform pipeline (handles rotate, flip, and no-transform)
+    drawTransformedImage(ctx, img, transform, containerWidth, containerHeight)
 
     // Restore context
     ctx.restore()

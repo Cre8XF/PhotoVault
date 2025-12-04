@@ -9,19 +9,32 @@
  * @param {number} canvasH - Canvas height
  */
 export function drawTransformedImage(ctx, img, transforms, canvasW, canvasH) {
-  const { rotate, flipH, flipV } = transforms;
+  const { rotate = 0, flipH = false, flipV = false } = transforms;
 
-  console.log('[TRANSFORM] drawTransformedImage called with:', {
-    rotate,
-    rotateType: typeof rotate,
-    flipH,
-    flipV,
-    canvasW,
-    canvasH,
-    imgW: img.width,
-    imgH: img.height
-  });
+  // ✅ FIX: Handle no-transform case explicitly (early return)
+  if (rotate === 0 && !flipH && !flipV) {
+    // No transforms - draw centered without any rotation/flip
+    const imgAspect = img.width / img.height;
+    const canvasAspect = canvasW / canvasH;
 
+    let drawW, drawH;
+
+    if (imgAspect > canvasAspect) {
+      drawW = canvasW;
+      drawH = canvasW / imgAspect;
+    } else {
+      drawW = canvasH * imgAspect;
+      drawH = canvasH;
+    }
+
+    const offsetX = (canvasW - drawW) / 2;
+    const offsetY = (canvasH - drawH) / 2;
+
+    ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
+    return;  // ✅ Early return - skip transform logic
+  }
+
+  // ✅ Continue with transform logic for rotate/flip cases
   ctx.save();
 
   // Move origin to center for rotation
@@ -29,12 +42,10 @@ export function drawTransformedImage(ctx, img, transforms, canvasW, canvasH) {
 
   // Apply rotation
   const rad = (rotate * Math.PI) / 180;
-  console.log('[TRANSFORM] Applying rotation:', { rotate, rad, radiansCalc: `${rotate} * PI / 180 = ${rad}` });
   ctx.rotate(rad);
 
   // Apply flips
   ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
-  console.log('[TRANSFORM] Applied scale for flips:', { flipH, flipV, scaleX: flipH ? -1 : 1, scaleY: flipV ? -1 : 1 });
 
   // Calculate dimensions based on rotation
   let drawW = img.width;
@@ -43,19 +54,16 @@ export function drawTransformedImage(ctx, img, transforms, canvasW, canvasH) {
   // Swap dimensions for 90° and 270° rotations
   if (rotate === 90 || rotate === 270) {
     [drawW, drawH] = [drawH, drawW];
-    console.log('[TRANSFORM] Swapped dimensions for 90°/270°:', { drawW, drawH });
   }
 
   // Calculate scale to fit canvas (object-contain)
   const scale = Math.min(canvasW / drawW, canvasH / drawH);
-  console.log('[TRANSFORM] Calculated scale:', { scale, drawW, drawH, canvasW, canvasH });
 
   // Draw image centered
   const drawX = -(img.width * scale) / 2;
   const drawY = -(img.height * scale) / 2;
   const drawWidth = img.width * scale;
   const drawHeight = img.height * scale;
-  console.log('[TRANSFORM] Drawing at:', { drawX, drawY, drawWidth, drawHeight });
   ctx.drawImage(
     img,
     drawX,
@@ -64,7 +72,6 @@ export function drawTransformedImage(ctx, img, transforms, canvasW, canvasH) {
     drawHeight
   );
 
-  console.log('[TRANSFORM] ✅ Image drawn, restoring context');
   ctx.restore();
 }
 

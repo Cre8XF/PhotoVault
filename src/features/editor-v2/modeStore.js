@@ -30,6 +30,14 @@ const useEditorModeStore = create((set, get) => ({
     warmth: 0,       // -100 to +100
   },
 
+  // ✅ Saved adjust state (for cancel/restore behavior)
+  savedAdjust: {
+    brightness: 0,
+    contrast: 0,
+    saturation: 0,
+    warmth: 0,
+  },
+
   // Filter state
   filter: {
     name: null,      // e.g. "warm", "cool", "film", "noir", "fade", "punch"
@@ -112,6 +120,20 @@ const useEditorModeStore = create((set, get) => ({
         ...state.adjust,
         [key]: clampedValue,
       },
+    }));
+  },
+
+  // ✅ Save current adjust values (for cancel behavior)
+  saveAdjust: () => {
+    set((state) => ({
+      savedAdjust: { ...state.adjust },
+    }));
+  },
+
+  // ✅ Restore saved adjust values (for cancel)
+  restoreAdjust: () => {
+    set((state) => ({
+      adjust: { ...state.savedAdjust },
     }));
   },
 
