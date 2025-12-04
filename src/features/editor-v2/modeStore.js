@@ -9,6 +9,9 @@ const useEditorModeStore = create((set, get) => ({
   // Current mode
   mode: 'view', // 'view' | 'crop' | 'adjust' | 'rotate' | 'filters' | 'text' | 'markup'
 
+  // Original image URL (stored once at editor load)
+  originalUrl: null,
+
   // Working image URL (committed edits)
   workingImageUrl: null,
 
@@ -50,6 +53,9 @@ const useEditorModeStore = create((set, get) => ({
   // Mode actions
   setMode: (newMode) => set({ mode: newMode }),
   resetMode: () => set({ mode: 'view' }),
+
+  // Original image actions
+  setOriginalUrl: (url) => set({ originalUrl: url }),
 
   // Working image actions
   setWorkingImageUrl: (url) => set({ workingImageUrl: url }),
@@ -216,6 +222,39 @@ const useEditorModeStore = create((set, get) => ({
         activeHandle: null,
       },
     });
+  },
+
+  // Reset all edits - Revert to original
+  resetAll: () => {
+    set((state) => ({
+      workingImageUrl: state.originalUrl,
+      crop: {
+        isActive: false,
+        rect: {
+          x1: 0.1,
+          y1: 0.1,
+          x2: 0.9,
+          y2: 0.9,
+        },
+        aspectRatio: null,
+        activeHandle: null,
+      },
+      transform: {
+        rotate: 0,
+        flipH: false,
+        flipV: false,
+      },
+      adjust: {
+        brightness: 0,
+        contrast: 0,
+        saturation: 0,
+        warmth: 0,
+      },
+      filter: {
+        name: null,
+        intensity: 1,
+      },
+    }));
   },
 }));
 
