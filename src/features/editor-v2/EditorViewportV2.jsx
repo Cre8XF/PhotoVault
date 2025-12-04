@@ -165,9 +165,17 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
     ctx.filter = 'none'
   }
 
-  // Expose renderCropPreview via ref
+  // Expose renderCropPreview and exportCurrentFrame via ref
   useImperativeHandle(ref, () => ({
     renderCropPreview,
+    exportCurrentFrame: async () => {
+      // Ensure latest state is rendered
+      renderCropPreview();
+
+      // Return canvas as dataURL
+      if (!canvasRef.current) return null;
+      return canvasRef.current.toDataURL('image/jpeg', 0.95);
+    },
   }))
 
   // Re-render when crop, transform, adjust, or filter changes

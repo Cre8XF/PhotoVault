@@ -2,7 +2,6 @@
 import React, { useRef, useEffect } from 'react';
 import { X, Check, RotateCw, FlipHorizontal2, FlipVertical2 } from 'lucide-react';
 import useEditorModeStore from '../modeStore';
-import { applyNormalizedCropToImage } from '../utils/cropUtils';
 
 /**
  * CropMode - Interactive crop mode
@@ -13,7 +12,7 @@ import { applyNormalizedCropToImage } from '../utils/cropUtils';
  * - Aspect ratio constraints (Phase 2)
  * - Canvas crop preview (Phase 3A)
  */
-const CropMode = ({ photo, viewportRef }) => {
+const CropMode = ({ photo, viewportRef, onDone }) => {
   const {
     setMode,
     crop,
@@ -22,8 +21,6 @@ const CropMode = ({ photo, viewportRef }) => {
     setCropActive,
     resetCrop,
     setAspectRatio,
-    workingImageUrl,
-    setWorkingImageUrl
   } = useEditorModeStore();
 
   // Refs
@@ -68,28 +65,10 @@ const CropMode = ({ photo, viewportRef }) => {
     setMode('view');
   };
 
-  // Handle done - Apply crop to image
-  const handleDone = async () => {
-    try {
-      // Get current image URL (use workingImageUrl if available)
-      const currentImageUrl = workingImageUrl || photo.url;
-
-      console.log('Applying crop:', crop.rect);
-
-      // Apply crop to current image
-      const croppedImageUrl = await applyNormalizedCropToImage(currentImageUrl, crop.rect);
-
-      // Update working image URL with cropped result
-      setWorkingImageUrl(croppedImageUrl);
-
-      // Reset crop state
-      resetCrop();
-
-      // Return to view mode
-      setMode('view');
-    } catch (error) {
-      console.error('Failed to apply crop:', error);
-      alert('Failed to apply crop. Please try again.');
+  // Handle done - Model A commit pattern
+  const handleDone = () => {
+    if (onDone) {
+      onDone();
     }
   };
 

@@ -2,7 +2,6 @@
 import React from 'react';
 import { X, Check, RotateCw, RotateCcw, FlipHorizontal2, FlipVertical2 } from 'lucide-react';
 import useEditorModeStore from '../modeStore';
-import { renderFullPipelineToDataUrl } from '../utils/imagePipeline';
 import EditorViewportV2 from '../EditorViewportV2';
 
 /**
@@ -13,7 +12,7 @@ import EditorViewportV2 from '../EditorViewportV2';
  * - Real-time preview
  * - Apply transforms permanently
  */
-const RotateMode = ({ photo }) => {
+const RotateMode = ({ photo, onDone }) => {
   const {
     setMode,
     transform,
@@ -21,10 +20,6 @@ const RotateMode = ({ photo }) => {
     setFlipH,
     setFlipV,
     resetTransforms,
-    crop,
-    adjust,
-    workingImageUrl,
-    setWorkingImageUrl,
   } = useEditorModeStore();
 
   // Handle rotate clockwise
@@ -51,38 +46,16 @@ const RotateMode = ({ photo }) => {
     setFlipV(!transform.flipV);
   };
 
-  // Handle cancel
+  // Handle cancel - Model A: just reset transform state
   const handleCancel = () => {
     resetTransforms();
     setMode('view');
   };
 
-  // Handle done - Apply transforms permanently
-  const handleDone = async () => {
-    try {
-      const imageUrl = workingImageUrl || photo.url;
-
-      console.log('Applying transforms:', transform);
-
-      // Render full pipeline with transforms
-      const dataUrl = await renderFullPipelineToDataUrl({
-        imageUrl,
-        crop,
-        transform,
-        adjust,
-      });
-
-      // Commit to working image
-      setWorkingImageUrl(dataUrl);
-
-      // Reset transform state
-      resetTransforms();
-
-      // Return to view mode
-      setMode('view');
-    } catch (error) {
-      console.error('Failed to apply transforms:', error);
-      alert('Failed to apply transforms. Please try again.');
+  // Handle done - Model A commit pattern
+  const handleDone = () => {
+    if (onDone) {
+      onDone();
     }
   };
 

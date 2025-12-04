@@ -24,7 +24,7 @@ import MarkupMode from './modes/MarkupMode';
  */
 const EditorShellV2 = ({ photo }) => {
   const navigate = useNavigate();
-  const { mode, setMode, setOriginalUrl, setWorkingImageUrl, resetAll } = useEditorModeStore();
+  const { mode, setMode, setOriginalUrl, setWorkingImageUrl, resetAll, resetAllEdits } = useEditorModeStore();
   const viewportRef = useRef(null);
 
   // Store original URL + working URL once when photo loads
@@ -58,7 +58,34 @@ const EditorShellV2 = ({ photo }) => {
     navigate(-1);
   };
 
-  // Handle done
+  // Handle done for each mode (Model A commit pattern)
+  const handleDoneForMode = async () => {
+    if (!viewportRef.current?.exportCurrentFrame) {
+      console.error('exportCurrentFrame not available');
+      return;
+    }
+
+    try {
+      // Export current frame with all active edits
+      const dataUrl = await viewportRef.current.exportCurrentFrame();
+
+      if (dataUrl) {
+        // Update workingImageUrl with the new committed version
+        setWorkingImageUrl(dataUrl);
+      }
+
+      // Reset all edit states (crop, adjust, transform, filter)
+      resetAllEdits();
+
+      // Return to view mode
+      setMode('view');
+    } catch (error) {
+      console.error('Failed to commit edits:', error);
+      alert('Failed to save edits. Please try again.');
+    }
+  };
+
+  // Handle global done (save to Firebase)
   const handleDone = () => {
     // TODO: Save changes logic
     console.log('Save changes');
@@ -68,10 +95,10 @@ const EditorShellV2 = ({ photo }) => {
   // Render mode overlay
   const renderModeOverlay = () => {
     switch (mode) {
-      case 'crop': return <CropMode photo={photo} viewportRef={viewportRef} />;
-      case 'adjust': return <AdjustMode photo={photo} />;
-      case 'rotate': return <RotateMode photo={photo} />;
-      case 'filters': return <FiltersMode photo={photo} />;
+      case 'crop': return <CropMode photo={photo} viewportRef={viewportRef} onDone={handleDoneForMode} />;
+      case 'adjust': return <AdjustMode photo={photo} onDone={handleDoneForMode} />;
+      case 'rotate': return <RotateMode photo={photo} onDone={handleDoneForMode} />;
+      case 'filters': return <FiltersMode photo={photo} onDone={handleDoneForMode} />;
       case 'text': return <TextMode photo={photo} />;
       case 'markup': return <MarkupMode photo={photo} />;
       default: return <ViewMode photo={photo} />;
