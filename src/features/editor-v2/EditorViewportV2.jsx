@@ -15,7 +15,7 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
   const containerRef = useRef(null);
   const imageCache = useRef(null);
 
-  const { crop, workingImageUrl, transform, adjust } = useEditorModeStore();
+  const { crop, workingImageUrl, transform, adjust, mode } = useEditorModeStore();
   const filter = useEditorModeStore((state) => state.filter);
 
   // VERIFICATION: Confirm transform is received from store
@@ -155,8 +155,10 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
         offsetY = 0;
       }
 
-      // Apply crop clipping if crop is active
-      if (crop.isActive && crop.rect) {
+      // Apply crop clipping ONLY when in crop mode
+      const shouldCrop = mode === 'crop' && crop.isActive && crop.rect && crop.rect.x1 != null;
+
+      if (shouldCrop) {
         const { x1, y1, x2, y2 } = crop.rect;
 
         const cropX = offsetX + x1 * renderWidth;
