@@ -46,13 +46,14 @@ const CropMode = ({ photo, viewportRef }) => {
     { id: '2:3', label: '2:3', ratio: 2/3 },
   ];
 
-  // Activate crop when component mounts
+  // Activate crop when component mounts, reset when leaving
   useEffect(() => {
     setCropActive(true);
     return () => {
-      setCropActive(false);
+      // Leaving crop mode → disable and reset crop globally
+      resetCrop();
     };
-  }, [setCropActive]);
+  }, [setCropActive, resetCrop]);
 
   // Handle cancel
   const handleCancel = () => {

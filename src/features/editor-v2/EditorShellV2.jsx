@@ -1,7 +1,7 @@
 // src/features/editor-v2/EditorShellV2.jsx
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Check } from 'lucide-react';
+import { X, Check, RotateCcw } from 'lucide-react';
 import EditorViewportV2 from './EditorViewportV2';
 import useEditorModeStore from './modeStore';
 
@@ -24,8 +24,15 @@ import MarkupMode from './modes/MarkupMode';
  */
 const EditorShellV2 = ({ photo }) => {
   const navigate = useNavigate();
-  const { mode, setMode } = useEditorModeStore();
+  const { mode, setMode, setOriginalUrl, resetAll } = useEditorModeStore();
   const viewportRef = useRef(null);
+
+  // Store original URL once when photo loads
+  useEffect(() => {
+    if (photo?.url) {
+      setOriginalUrl(photo.url);
+    }
+  }, [photo?.url, setOriginalUrl]);
 
   // Mode configuration
   const modes = [
@@ -88,13 +95,24 @@ const EditorShellV2 = ({ photo }) => {
 
         <h1 className="editor-v2-header-title">{getModeTitle()}</h1>
 
-        <button
-          className="editor-v2-header-btn editor-v2-header-btn-done"
-          onClick={handleDone}
-          aria-label="Save changes"
-        >
-          <Check size={24} />
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            className="editor-v2-header-btn"
+            onClick={resetAll}
+            aria-label="Reset to original"
+            title="Reset to original"
+          >
+            <RotateCcw size={20} />
+          </button>
+
+          <button
+            className="editor-v2-header-btn editor-v2-header-btn-done"
+            onClick={handleDone}
+            aria-label="Save changes"
+          >
+            <Check size={24} />
+          </button>
+        </div>
       </div>
       )}
 
