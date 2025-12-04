@@ -4,9 +4,6 @@
       "http://localhost:3000",
       "http://localhost:5173",
       "http://localhost:5174",
-      "https://cre8web-photovault.netlify.app",
-      "https://photovault-app-a0946.web.app",
-      "https://photovault-app-a0946.firebaseapp.com",
       "https://pixtr.cloud",
       "https://www.pixtr.cloud"
     ],
@@ -14,15 +11,17 @@
     "responseHeader": [
       "Authorization",
       "Content-Type",
-      "x-goog-meta-*",
-      "x-goog-acl",
-      "x-goog-resumable",
-      "x-goog-upload-protocol",
-      "x-goog-upload-command",
-      "x-goog-upload-offset",
-      "x-goog-upload-content-type",
-      "x-goog-upload-content-length",
-      "Access-Control-Allow-Origin"
+      "Content-Length",
+      "Content-Range",
+      "Accept-Ranges",
+      "Range",
+      "ETag",
+      "Last-Modified",
+      "Cache-Control",
+      "Access-Control-Allow-Origin",
+      "Access-Control-Expose-Headers",
+      "Access-Control-Allow-Headers",
+      "Access-Control-Allow-Methods"
     ],
     "maxAgeSeconds": 3600
   }

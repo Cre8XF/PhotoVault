@@ -62,7 +62,8 @@ const PhotoGrid = ({
     }
 
     try {
-      await setAlbumCover(photo.albumId, photo.url);
+      // Phase 3.5 FIX: Use displayUrl for edited versions
+      await setAlbumCover(photo.albumId, photo.displayUrl || photo.url);
       console.log(`🖼️ Forsidebilde satt for album ${photo.albumId}`);
       if (refreshPhotos) await refreshPhotos();
     } catch (err) {
@@ -101,7 +102,7 @@ const PhotoGrid = ({
             className="relative group overflow-hidden rounded-xl cursor-pointer ripple-effect card-press"
             onClick={() =>
               onPhotoClick
-                ? onPhotoClick(photo.url)
+                ? onPhotoClick(photo.displayUrl || photo.url)
                 : setPhotoModal({ open: true, index: i })
             }
           >
@@ -146,7 +147,7 @@ const PhotoGrid = ({
             ) : (
               /* Regular Photo */
               <img
-                src={photo.url}
+                src={photo.displayUrl || photo.url}
                 alt={photo.title || photo.name || ""}
                 className={`w-full ${
                   compact ? "h-40" : "h-56"
@@ -156,7 +157,7 @@ const PhotoGrid = ({
             )}
 
             {/* Cover-indikator (vises hvis bildet er albumforside) */}
-            {currentAlbum && currentAlbum.cover === photo.url && photo.type !== 'video' && (
+            {currentAlbum && currentAlbum.cover === (photo.displayUrl || photo.url) && photo.type !== 'video' && (
               <div className="absolute top-2 left-2 bg-yellow-500 text-black px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
                 <ImageIcon className="w-3 h-3" />
                 {t('common:grid.coverBadge')}
@@ -164,7 +165,7 @@ const PhotoGrid = ({
             )}
 
             {/* Cover indicator for videos (adjusted position to not overlap video badge) */}
-            {currentAlbum && currentAlbum.cover === photo.url && photo.type === 'video' && (
+            {currentAlbum && currentAlbum.cover === (photo.displayUrl || photo.url) && photo.type === 'video' && (
               <div className="absolute top-2 left-20 bg-yellow-500 text-black px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
                 <ImageIcon className="w-3 h-3" />
                 {t('common:grid.coverBadge')}

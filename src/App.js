@@ -2,7 +2,13 @@
 // APP.js – v6.0 Phase 2: Modern Architecture with Zustand & Hooks
 // ============================================================================
 import React from 'react'
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+} from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import i18n from './i18n'
 
@@ -84,12 +90,15 @@ function App() {
 
               {/* Function Worlds - Phase 1 */}
               <Route path={ROUTES.TOOLS} element={<ToolsPage />} />
-              <Route path={ROUTES.COLLAGE_TEMPLATES} element={<CollageTemplatesPage />} />
+              <Route
+                path={ROUTES.COLLAGE_TEMPLATES}
+                element={<CollageTemplatesPage />}
+              />
               <Route path={ROUTES.COLLAGE_NEW} element={<CollageNewPage />} />
               <Route path={ROUTES.COLLAGE_EDIT} element={<CollageEditPage />} />
               <Route path={ROUTES.PHOTO} element={<PhotoPage />} />
               <Route path={ROUTES.SLIDESHOW} element={<SlideshowPage />} />
-              <Route path={ROUTES.EDITOR} element={<EditorPage />} />
+              <Route path={ROUTES.EDITOR} element={<EditorPageV2 />} />
               <Route path={ROUTES.EDITOR_V2} element={<EditorPageV2 />} />
 
               {/* AI Tools - Phase 5 */}

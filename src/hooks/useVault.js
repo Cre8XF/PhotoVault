@@ -249,7 +249,15 @@ export const useVault = () => {
 
           // Upload encrypted blob to Firebase Storage
           const storageRef = ref(storage, `vault/${user.uid}/${photoId}.enc`)
-          await uploadBytes(storageRef, encryptedBlob)
+          await uploadBytes(storageRef, encryptedBlob, {
+            contentType: 'application/octet-stream',
+            customMetadata: {
+              userId: user.uid,
+              photoId: photoId,
+              encrypted: 'true',
+              encryptedAt: new Date().toISOString()
+            }
+          })
 
           // Save metadata to Firestore
           const photoDoc = {

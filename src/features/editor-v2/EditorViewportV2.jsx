@@ -1,7 +1,12 @@
 // src/features/editor-v2/EditorViewportV2.jsx
-import React, { useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
-import useEditorModeStore from './modeStore';
-import { drawTransformedImage } from './utils/transformUtils';
+import React, {
+  useRef,
+  useEffect,
+  useImperativeHandle,
+  forwardRef,
+} from 'react'
+import useEditorModeStore from './modeStore'
+import { drawTransformedImage } from './utils/transformUtils'
 
 /**
  * EditorViewportV2 - Simple viewport for displaying the photo
@@ -11,18 +16,18 @@ import { drawTransformedImage } from './utils/transformUtils';
  * - Exposes renderCropPreview() method via ref
  */
 const EditorViewportV2 = forwardRef(({ photo }, ref) => {
-  const canvasRef = useRef(null);
-  const containerRef = useRef(null);
-  const imageCache = useRef(null);
+  const canvasRef = useRef(null)
+  const containerRef = useRef(null)
+  const imageCache = useRef(null)
 
-  const { crop, workingImageUrl, transform, adjust, mode } = useEditorModeStore();
-  const filter = useEditorModeStore((state) => state.filter);
+  const { crop, workingImageUrl, transform, adjust } = useEditorModeStore()
+  const filter = useEditorModeStore((state) => state.filter)
 
   // VERIFICATION: Confirm transform is received from store
-  console.log('[VIEWPORT VERIFY] Transform received from store:', transform);
+  console.log('[VIEWPORT VERIFY] Transform received from store:', transform)
 
   // Use workingImageUrl if available, otherwise use original photo.url
-  const imageUrl = workingImageUrl || photo?.url;
+  const imageUrl = workingImageUrl || photo?.url
 
   /**
    * Render crop preview on canvas
@@ -31,79 +36,85 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
    * - Draws full image if crop inactive
    */
   const renderCropPreview = () => {
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
+    const canvas = canvasRef.current
+    const container = containerRef.current
 
-    if (!canvas || !container || !imageUrl) return;
+    if (!canvas || !container || !imageUrl) return
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
 
     // Get container dimensions
-    const { width: containerWidth, height: containerHeight } = container.getBoundingClientRect();
+    const { width: containerWidth, height: containerHeight } =
+      container.getBoundingClientRect()
 
     // Set canvas size (HiDPI support)
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = containerWidth * dpr;
-    canvas.height = containerHeight * dpr;
-    canvas.style.width = `${containerWidth}px`;
-    canvas.style.height = `${containerHeight}px`;
-    ctx.scale(dpr, dpr);
+    const dpr = window.devicePixelRatio || 1
+    canvas.width = containerWidth * dpr
+    canvas.height = containerHeight * dpr
+    canvas.style.width = `${containerWidth}px`
+    canvas.style.height = `${containerHeight}px`
+    ctx.scale(dpr, dpr)
 
     // Load image (use cache)
     if (!imageCache.current || imageCache.current.src !== imageUrl) {
-      imageCache.current = new Image();
-      imageCache.current.crossOrigin = 'anonymous';
-      imageCache.current.src = imageUrl;
+      imageCache.current = new Image()
+      imageCache.current.crossOrigin = 'anonymous'
+      imageCache.current.src = imageUrl
 
       imageCache.current.onload = () => {
-        renderCropPreview(); // Re-render when image loads
-      };
+        renderCropPreview() // Re-render when image loads
+      }
 
-      if (!imageCache.current.complete) return; // Wait for load
+      if (!imageCache.current.complete) return // Wait for load
     }
 
-    const img = imageCache.current;
-    if (!img.complete) return;
+    const img = imageCache.current
+    if (!img.complete) return
 
     // Clear canvas
-    ctx.clearRect(0, 0, containerWidth, containerHeight);
+    ctx.clearRect(0, 0, containerWidth, containerHeight)
 
     // Build CSS filter string from adjust values
-    const { brightness = 0, contrast = 0, saturation = 0, warmth = 0 } = adjust || {};
-    const brightnessPct = 100 + brightness;  // -100 → 0%, 0 → 100%, +100 → 200%
-    const contrastPct = 100 + contrast;
-    const saturatePct = 100 + saturation;
-    const sepiaPct = warmth > 0 ? warmth : 0;  // Warmth approximated via sepia (positive values only)
+    const {
+      brightness = 0,
+      contrast = 0,
+      saturation = 0,
+      warmth = 0,
+    } = adjust || {}
+    const brightnessPct = 100 + brightness // -100 → 0%, 0 → 100%, +100 → 200%
+    const contrastPct = 100 + contrast
+    const saturatePct = 100 + saturation
+    const sepiaPct = warmth > 0 ? warmth : 0 // Warmth approximated via sepia (positive values only)
 
-    const filterString = `brightness(${brightnessPct}%) contrast(${contrastPct}%) saturate(${saturatePct}%) sepia(${sepiaPct}%)`;
+    const filterString = `brightness(${brightnessPct}%) contrast(${contrastPct}%) saturate(${saturatePct}%) sepia(${sepiaPct}%)`
 
     // Apply CSS filters to canvas context
-    ctx.filter = filterString;
+    ctx.filter = filterString
 
     // Apply FILTER preview (NOT permanent)
     if (filter?.name) {
       switch (filter.name) {
         case 'warm':
-          ctx.filter += ' sepia(20%) saturate(120%)';
-          break;
+          ctx.filter += ' sepia(20%) saturate(120%)'
+          break
         case 'cool':
-          ctx.filter += ' hue-rotate(180deg) saturate(110%)';
-          break;
+          ctx.filter += ' hue-rotate(180deg) saturate(110%)'
+          break
         case 'film':
-          ctx.filter += ' contrast(90%) brightness(110%)';
-          break;
+          ctx.filter += ' contrast(90%) brightness(110%)'
+          break
         case 'noir':
-          ctx.filter += ' grayscale(100%) contrast(120%)';
-          break;
+          ctx.filter += ' grayscale(100%) contrast(120%)'
+          break
         case 'fade':
-          ctx.filter += ' opacity(80%) brightness(110%)';
-          break;
+          ctx.filter += ' opacity(80%) brightness(110%)'
+          break
         case 'punch':
-          ctx.filter += ' contrast(135%) saturate(130%)';
-          break;
+          ctx.filter += ' contrast(135%) saturate(130%)'
+          break
         default:
-          break;
+          break
       }
     }
 
@@ -115,7 +126,8 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
     // 5. Draw final result
 
     // Check if any transforms are active
-    const hasTransforms = transform.rotate !== 0 || transform.flipH || transform.flipV;
+    const hasTransforms =
+      transform.rotate !== 0 || transform.flipH || transform.flipV
 
     // DIAGNOSTIC: Comprehensive transform debugging
     console.log('[VIEWPORT] Transform state:', {
@@ -124,88 +136,98 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
       flipH: transform.flipH,
       flipV: transform.flipV,
       hasTransforms: hasTransforms,
-      willUseTransformPipeline: hasTransforms
-    });
+      willUseTransformPipeline: hasTransforms,
+    })
 
     // Save context for all rendering operations
-    ctx.save();
+    ctx.save()
 
     if (hasTransforms) {
-      console.log('[VIEWPORT] ✅ Using TRANSFORM pipeline');
+      console.log('[VIEWPORT] ✅ Using TRANSFORM pipeline')
       // Use transform pipeline
-      drawTransformedImage(ctx, img, transform, containerWidth, containerHeight);
+      drawTransformedImage(ctx, img, transform, containerWidth, containerHeight)
     } else {
-      console.log('[VIEWPORT] ⚠️ Using NO-TRANSFORM pipeline');
+      console.log('[VIEWPORT] ⚠️ Using NO-TRANSFORM pipeline')
       // Original rendering logic (no transforms)
       // Calculate image dimensions to fit container (object-contain)
-      const imgAspect = img.width / img.height;
-      const containerAspect = containerWidth / containerHeight;
+      const imgAspect = img.width / img.height
+      const containerAspect = containerWidth / containerHeight
 
-      let renderWidth, renderHeight, offsetX, offsetY;
+      let renderWidth, renderHeight, offsetX, offsetY
 
       if (imgAspect > containerAspect) {
-        renderWidth = containerWidth;
-        renderHeight = containerWidth / imgAspect;
-        offsetX = 0;
-        offsetY = (containerHeight - renderHeight) / 2;
+        renderWidth = containerWidth
+        renderHeight = containerWidth / imgAspect
+        offsetX = 0
+        offsetY = (containerHeight - renderHeight) / 2
       } else {
-        renderWidth = containerHeight * imgAspect;
-        renderHeight = containerHeight;
-        offsetX = (containerWidth - renderWidth) / 2;
-        offsetY = 0;
+        renderWidth = containerHeight * imgAspect
+        renderHeight = containerHeight
+        offsetX = (containerWidth - renderWidth) / 2
+        offsetY = 0
       }
 
-      // Apply crop clipping ONLY when in crop mode
-      const shouldCrop = mode === 'crop' && crop.isActive && crop.rect && crop.rect.x1 != null;
+      // Apply crop clipping if crop is active
+      if (crop.isActive && crop.rect) {
+        const { x1, y1, x2, y2 } = crop.rect
 
-      if (shouldCrop) {
-        const { x1, y1, x2, y2 } = crop.rect;
+        const cropX = offsetX + x1 * renderWidth
+        const cropY = offsetY + y1 * renderHeight
+        const cropW = (x2 - x1) * renderWidth
+        const cropH = (y2 - y1) * renderHeight
 
-        const cropX = offsetX + x1 * renderWidth;
-        const cropY = offsetY + y1 * renderHeight;
-        const cropW = (x2 - x1) * renderWidth;
-        const cropH = (y2 - y1) * renderHeight;
-
-        ctx.beginPath();
-        ctx.rect(cropX, cropY, cropW, cropH);
-        ctx.clip();
+        ctx.beginPath()
+        ctx.rect(cropX, cropY, cropW, cropH)
+        ctx.clip()
       }
 
       // Draw image
-      ctx.drawImage(img, offsetX, offsetY, renderWidth, renderHeight);
+      ctx.drawImage(img, offsetX, offsetY, renderWidth, renderHeight)
     }
 
     // Restore context
-    ctx.restore();
+    ctx.restore()
 
     // Reset filter to prevent bleeding to other draws
-    ctx.filter = 'none';
-  };
+    ctx.filter = 'none'
+  }
 
   // Expose renderCropPreview via ref
   useImperativeHandle(ref, () => ({
     renderCropPreview,
-  }));
+  }))
 
   // Re-render when crop, transform, adjust, or filter changes
   useEffect(() => {
-    renderCropPreview();
-  }, [crop.rect, crop.isActive, imageUrl, transform.rotate, transform.flipH, transform.flipV, adjust.brightness, adjust.contrast, adjust.saturation, adjust.warmth, filter?.name]);
+    renderCropPreview()
+  }, [
+    crop.rect,
+    crop.isActive,
+    imageUrl,
+    transform.rotate,
+    transform.flipH,
+    transform.flipV,
+    adjust.brightness,
+    adjust.contrast,
+    adjust.saturation,
+    adjust.warmth,
+    filter?.name,
+  ])
 
   // Re-render on window resize
   useEffect(() => {
     const handleResize = () => {
-      renderCropPreview();
-    };
+      renderCropPreview()
+    }
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // Initial render
   useEffect(() => {
-    renderCropPreview();
-  }, []);
+    renderCropPreview()
+  }, [])
 
   if (!photo || !photo.url) {
     return (
@@ -214,18 +236,24 @@ const EditorViewportV2 = forwardRef(({ photo }, ref) => {
           <p>No photo loaded</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
     <div className="editor-v2-viewport" ref={containerRef}>
-      <div className="editor-v2-viewport-content" style={{ width: '100%', height: '100%' }}>
-        <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: '100%' }} />
+      <div
+        className="editor-v2-viewport-content"
+        style={{ width: '100%', height: '100%' }}
+      >
+        <canvas
+          ref={canvasRef}
+          style={{ display: 'block', width: '100%', height: '100%' }}
+        />
       </div>
     </div>
-  );
-});
+  )
+})
 
-EditorViewportV2.displayName = 'EditorViewportV2';
+EditorViewportV2.displayName = 'EditorViewportV2'
 
-export default EditorViewportV2;
+export default EditorViewportV2

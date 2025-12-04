@@ -51,9 +51,6 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
   // Transform state
   const [transform, setTransform] = useState(createInitialTransform())
 
-  // Crop state (Phase 8C-3)
-  const [appliedCropBox, setAppliedCropBox] = useState(null)
-
   // Gesture state
   const isDraggingRef = useRef(false)
   const dragStartRef = useRef({ x: 0, y: 0, panX: 0, panY: 0 })
@@ -88,8 +85,8 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
   }, [])
 
   /**
-   * Render current image to canvas with transforms (Phase 8C-3)
-   * Uses crop mode if appliedCropBox is set OR if external crop preview exists
+   * Render current image to canvas with transforms (Phase 3.5 FIX)
+   * ALWAYS use crop from externalTransform if it exists (persists across tool changes)
    */
   const render = useCallback(() => {
     const canvas = canvasRef.current
@@ -110,38 +107,34 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
     // Use external transform if provided, otherwise use internal
     const activeTransform = externalTransform || transform
 
-    // Crop mode (Phase 8C-3): render only cropped portion
-    if (appliedCropBox) {
-      // Final applied crop - locked and permanent
-      drawCroppedImageToCanvas(
-        ctx,
-        image,
-        width,
-        height,
-        appliedCropBox,
-        activeTransform.adjust
-      )
-    } else if (externalTransform?.crop && !appliedCropBox) {
-      // Real-time crop preview (Phase 8C-5 FIX #3) - while adjusting crop handles
-      const previewCropBox = getEffectiveCropBox(externalTransform.crop, {
+    // Phase 3.5 FIX: ALWAYS check externalTransform.crop from editorStore
+    // This ensures crop persists when switching tools (Rotate/Filters/Adjust)
+    if (externalTransform?.crop) {
+      console.log('🎨 [RENDER] Starting render with crop:', externalTransform.crop)
+      const cropBox = getEffectiveCropBox(externalTransform.crop, {
         width: image.naturalWidth,
         height: image.naturalHeight,
       })
-      if (previewCropBox) {
+
+      if (cropBox) {
+        console.log('🔷 [RENDER] Drawing CROPPED image with cropBox:', cropBox)
         drawCroppedImageToCanvas(
           ctx,
           image,
           width,
           height,
-          previewCropBox,
+          cropBox,
           activeTransform.adjust
         )
+        console.log('✅ [RENDER] Render complete - cropped image drawn')
+        return
       }
-    } else {
-      // Normal mode: draw image with full transforms (zoom, pan, rotation, flip)
-      drawImageWithFullTransform(ctx, image, width, height, activeTransform)
     }
-  }, [transform, externalTransform, appliedCropBox, filter])
+
+    // Normal mode: draw image with full transforms (zoom, pan, rotation, flip)
+    console.log('🖼️ [RENDER] Drawing FULL image (no crop)')
+    drawImageWithFullTransform(ctx, image, width, height, activeTransform)
+  }, [transform, externalTransform, filter])
 
   /**
    * Set zoom level with pan clamping (Phase 8B-3: rotation-aware)
@@ -382,10 +375,7 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
       return
     }
 
-    console.log('Applying crop')
-
-    // Set crop box
-    setAppliedCropBox(cropBox)
+    console.log('✅ Crop applied (persisted in editorStore)')
 
     // Reset transform to clean state (zoom=1, pan=0)
     setTransform((prev) => ({
@@ -397,21 +387,24 @@ export const useCanvasRenderer = (photo, externalTransform = null) => {
   }, [])
 
   /**
-   * Clear crop (Phase 8C-3)
-   * Returns to normal transform mode
+   * Clear crop (Phase 3.5 Cleanup)
+   * Clears crop from editorStore (single source of truth)
    */
   const clearCrop = useCallback(() => {
-    console.log('Clearing crop')
-    setAppliedCropBox(null)
-  }, [])
+    const { resetCrop } = useEditorStore.getState()
+    resetCrop()
+    console.log('🔷 Crop cleared from editorStore')
+    render()
+  }, [render])
 
   /**
-   * Get current applied crop box (Phase 8C-3)
-   * @returns {Object|null} Crop box in pixels or null
+   * Get current applied crop box (Phase 3.5 Cleanup)
+   * @returns {Object|null} Crop box from editorStore or null
    */
   const getAppliedCrop = useCallback(() => {
-    return appliedCropBox
-  }, [appliedCropBox])
+    const { transform } = useEditorStore.getState()
+    return transform.crop
+  }, [])
 
   /**
    * Get image size (Phase 8C-3)

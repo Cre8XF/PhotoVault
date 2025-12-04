@@ -89,10 +89,17 @@ const PanelShell = ({ activeTool, viewportRef, photo, onCropApplied }) => {
               {/* Free aspect ratio */}
               <button
                 onClick={() => {
-                  const crop = transform.crop;
-                  if (crop) {
-                    applyTransform('crop', { ...crop, aspectRatio: null });
+                  let crop = transform.crop;
+
+                  // Fallback: Initialize default crop if doesn't exist
+                  if (!crop) {
+                    crop = {
+                      x1: 0.1, y1: 0.1, x2: 0.9, y2: 0.9,
+                      aspectRatio: null
+                    };
                   }
+
+                  applyTransform('crop', { ...crop, aspectRatio: null });
                 }}
                 className={`crop-aspect-btn ${transform.crop?.aspectRatio === null ? 'active' : ''}`}
               >
@@ -102,12 +109,19 @@ const PanelShell = ({ activeTool, viewportRef, photo, onCropApplied }) => {
               {/* Square 1:1 */}
               <button
                 onClick={() => {
-                  const crop = transform.crop;
-                  if (crop) {
-                    const newCrop = applyCropAspectRatio(crop, 1, 'center');
-                    const clampedCrop = clampCropRect(newCrop);
-                    applyTransform('crop', { ...clampedCrop, aspectRatio: 1 });
+                  let crop = transform.crop;
+
+                  // Fallback: Initialize default crop if doesn't exist
+                  if (!crop) {
+                    crop = {
+                      x1: 0.1, y1: 0.1, x2: 0.9, y2: 0.9,
+                      aspectRatio: null
+                    };
                   }
+
+                  const newCrop = applyCropAspectRatio(crop, 1, 'center');
+                  const clampedCrop = clampCropRect(newCrop);
+                  applyTransform('crop', { ...clampedCrop, aspectRatio: 1 });
                 }}
                 className={`crop-aspect-btn ${transform.crop?.aspectRatio === 1 ? 'active' : ''}`}
               >
@@ -117,12 +131,19 @@ const PanelShell = ({ activeTool, viewportRef, photo, onCropApplied }) => {
               {/* Portrait 4:5 */}
               <button
                 onClick={() => {
-                  const crop = transform.crop;
-                  if (crop) {
-                    const newCrop = applyCropAspectRatio(crop, 4/5, 'center');
-                    const clampedCrop = clampCropRect(newCrop);
-                    applyTransform('crop', { ...clampedCrop, aspectRatio: 4/5 });
+                  let crop = transform.crop;
+
+                  // Fallback: Initialize default crop if doesn't exist
+                  if (!crop) {
+                    crop = {
+                      x1: 0.1, y1: 0.1, x2: 0.9, y2: 0.9,
+                      aspectRatio: null
+                    };
                   }
+
+                  const newCrop = applyCropAspectRatio(crop, 4/5, 'center');
+                  const clampedCrop = clampCropRect(newCrop);
+                  applyTransform('crop', { ...clampedCrop, aspectRatio: 4/5 });
                 }}
                 className={`crop-aspect-btn ${transform.crop?.aspectRatio === 4/5 ? 'active' : ''}`}
               >
@@ -132,12 +153,19 @@ const PanelShell = ({ activeTool, viewportRef, photo, onCropApplied }) => {
               {/* Landscape 16:9 */}
               <button
                 onClick={() => {
-                  const crop = transform.crop;
-                  if (crop) {
-                    const newCrop = applyCropAspectRatio(crop, 16/9, 'center');
-                    const clampedCrop = clampCropRect(newCrop);
-                    applyTransform('crop', { ...clampedCrop, aspectRatio: 16/9 });
+                  let crop = transform.crop;
+
+                  // Fallback: Initialize default crop if doesn't exist
+                  if (!crop) {
+                    crop = {
+                      x1: 0.1, y1: 0.1, x2: 0.9, y2: 0.9,
+                      aspectRatio: null
+                    };
                   }
+
+                  const newCrop = applyCropAspectRatio(crop, 16/9, 'center');
+                  const clampedCrop = clampCropRect(newCrop);
+                  applyTransform('crop', { ...clampedCrop, aspectRatio: 16/9 });
                 }}
                 className={`crop-aspect-btn ${transform.crop?.aspectRatio === 16/9 ? 'active' : ''}`}
               >
