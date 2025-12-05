@@ -156,7 +156,6 @@ function AppContent() {
   const editingAlbum = useStore((state) => state.editingAlbum)
   const selectedPhotoIndex = useStore((state) => state.selectedPhotoIndex)
   const isDarkMode = useStore((state) => state.isDarkMode)
-  const currentPage = useStore((state) => state.currentPage)
   const selectedAlbum = useStore((state) => state.selectedAlbum)
   const storageUsed = useStore((state) => state.storageUsed)
   const storageLimit = useStore((state) => state.storageLimit)
@@ -168,7 +167,6 @@ function AppContent() {
   const setEditingAlbum = useStore((state) => state.setEditingAlbum)
   const setConfirmModal = useStore((state) => state.setConfirmModal)
   const clearNotification = useStore((state) => state.clearNotification)
-  const setCurrentPage = useStore((state) => state.setCurrentPage)
   const setSelectedAlbum = useStore((state) => state.setSelectedAlbum)
   const setTheme = useStore((state) => state.setTheme)
 
@@ -190,12 +188,13 @@ function AppContent() {
     const photoIds = list.map((p) => p.id)
 
     // Determine context based on current page
+    const currentPath = location.pathname
     let context = 'all'
-    if (currentPage === 'albums' || selectedAlbum) {
+    if (currentPath.startsWith('/albums') || currentPath.startsWith('/album/') || selectedAlbum) {
       context = 'album'
-    } else if (currentPage === 'search') {
+    } else if (currentPath === '/search') {
       context = 'search'
-    } else if (currentPage === 'home') {
+    } else if (currentPath === '/') {
       // Check if it's favorites by seeing if sourceList is favoritePhotos
       const isFavorites = list.every((p) => p.favorite)
       context = isFavorites ? 'favorites' : 'all'
@@ -218,7 +217,7 @@ function AppContent() {
   // Handle album click
   const handleAlbumClick = (album) => {
     setSelectedAlbum(album)
-    setCurrentPage('album')
+    navigate(`/album/${album.id}`)
   }
 
   // Handle navigate to photo from notification
@@ -296,115 +295,138 @@ function AppContent() {
 
   // Determine if we should show bottom navigation
   // Phase 1: Hide bottom nav when in any "world view"
+  const currentPath = location.pathname
   const showBottomNav =
     !isWorldView &&
     !isFullscreen &&
-    currentPage !== 'album' &&
-    currentPage !== 'admin' &&
-    currentPage !== 'security' &&
-    currentPage !== 'vault' &&
-    currentPage !== 'profile' &&
-    currentPage !== 'subscription' &&
-    currentPage !== 'collage'
+    !currentPath.startsWith('/album/') &&
+    currentPath !== '/admin' &&
+    currentPath !== '/security' &&
+    currentPath !== '/vault' &&
+    currentPath !== '/profile' &&
+    currentPath !== '/subscription' &&
+    !currentPath.startsWith('/collage/')
 
   return (
     <div className="min-h-screen relative">
       <Particles />
 
-      {/* Main content - state-based rendering */}
+      {/* Main content - React Router based rendering */}
       <main className="relative z-10">
-        {currentPage === 'home' && (
-          <HomeDashboard
-            albums={albums}
-            photos={photos}
-            user={userProfile || user}
-            onNavigate={setCurrentPage}
-            refreshData={refreshData}
-            onPhotoClick={handlePhotoClick}
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <HomeDashboard
+                albums={albums}
+                photos={photos}
+                user={userProfile || user}
+                refreshData={refreshData}
+                onPhotoClick={handlePhotoClick}
+                onUpload={handleUpload}
+              />
+            }
           />
-        )}
 
-        {currentPage === 'albums' && (
-          <AlbumsPage
-            user={userProfile || user}
-            albums={albums}
-            photos={photos}
-            onNavigate={setCurrentPage}
-            onAlbumClick={handleAlbumClick}
-            onPhotoClick={handlePhotoClick}
-            toggleFavorite={toggleFavorite}
-            refreshData={refreshData}
+          <Route
+            path="/albums"
+            element={
+              <AlbumsPage
+                user={userProfile || user}
+                albums={albums}
+                photos={photos}
+                onAlbumClick={handleAlbumClick}
+                onPhotoClick={handlePhotoClick}
+                toggleFavorite={toggleFavorite}
+                refreshData={refreshData}
+              />
+            }
           />
-        )}
 
-        {currentPage === 'search' && (
-          <SearchPage
-            photos={photos}
-            albums={albums}
-            onPhotoClick={handlePhotoClick}
-            toggleFavorite={toggleFavorite}
-            refreshData={refreshData}
+          <Route
+            path="/search"
+            element={
+              <SearchPage
+                photos={photos}
+                albums={albums}
+                onPhotoClick={handlePhotoClick}
+                toggleFavorite={toggleFavorite}
+                refreshData={refreshData}
+              />
+            }
           />
-        )}
 
-        {currentPage === 'more' && (
-          <MorePage
-            user={userProfile || user}
-            storageUsed={storageUsed}
-            storageLimit={storageLimit}
-            photos={photos}
-            albums={albums}
-            isDarkMode={isDarkMode}
-            setIsDarkMode={setTheme}
-            onLogout={handleLogout}
-            onNavigate={setCurrentPage}
+          <Route
+            path="/more"
+            element={
+              <MorePage
+                user={userProfile || user}
+                storageUsed={storageUsed}
+                storageLimit={storageLimit}
+                photos={photos}
+                albums={albums}
+                isDarkMode={isDarkMode}
+                setIsDarkMode={setTheme}
+                onLogout={handleLogout}
+                onNavigate={(page) => navigate(`/${page}`)}
+              />
+            }
           />
-        )}
 
-        {currentPage === 'security' && (
-          <SecuritySettings onBack={() => setCurrentPage('more')} />
-        )}
-
-        {currentPage === 'vault' && <VaultPage />}
-
-        {currentPage === 'profile' && (
-          <ProfilePage onBack={() => setCurrentPage('more')} />
-        )}
-
-        {currentPage === 'subscription' && (
-          <SubscriptionPage onBack={() => setCurrentPage('more')} />
-        )}
-
-        {currentPage === 'album' && selectedAlbum && (
-          <AlbumPage
-            album={selectedAlbum}
-            albums={albums}
-            user={userProfile || user}
-            photos={photos}
-            onBack={() => {
-              setCurrentPage('albums')
-              setSelectedAlbum(null)
-            }}
-            refreshData={refreshData}
-            onDeletePhoto={handleDeletePhoto}
-            onSetAlbumCover={handleSetAlbumCover}
-            onUpload={handleUpload}
-            onSaveAlbum={handleAlbumSave}
-            onUpdatePhotoCount={handleUpdatePhotoCount}
-            onToggleFavorite={toggleFavorite}
-            colors={{}}
+          <Route
+            path="/security"
+            element={<SecuritySettings onBack={() => navigate('/more')} />}
           />
-        )}
 
-        {currentPage === 'admin' && isAdmin && (
-          <>
-            <AdminDashboard
-              onBack={() => {
-                setCurrentPage('more')
-              }}
+          <Route
+            path="/vault"
+            element={<VaultPage />}
+          />
+
+          <Route
+            path="/profile"
+            element={<ProfilePage onBack={() => navigate('/more')} />}
+          />
+
+          <Route
+            path="/subscription"
+            element={<SubscriptionPage user={userProfile || user} onBack={() => navigate('/more')} />}
+          />
+
+          <Route
+            path="/album/:albumId"
+            element={
+              <AlbumPage
+                album={selectedAlbum}
+                albums={albums}
+                user={userProfile || user}
+                photos={photos}
+                onBack={() => {
+                  navigate('/albums')
+                  setSelectedAlbum(null)
+                }}
+                refreshData={refreshData}
+                onDeletePhoto={handleDeletePhoto}
+                onSetAlbumCover={handleSetAlbumCover}
+                onUpload={handleUpload}
+                onSaveAlbum={handleAlbumSave}
+                onUpdatePhotoCount={handleUpdatePhotoCount}
+                onToggleFavorite={toggleFavorite}
+              />
+            }
+          />
+
+          {isAdmin && (
+            <Route
+              path="/admin"
+              element={
+                <AdminDashboard
+                  onBack={() => navigate('/more')}
+                />
+              }
             />
-          </>
-        )}
+          )}
+        </Routes>
       </main>
 
       {/* Floating Notification Bell - Bottom left */}
@@ -420,9 +442,9 @@ function AppContent() {
           <div className="flex justify-around items-center gap-2">
             {/* Home */}
             <button
-              onClick={() => setCurrentPage('home')}
+              onClick={() => navigate('/')}
               className={`ripple-effect nav-item-premium ${
-                currentPage === 'home' ? 'active' : ''
+                location.pathname === '/' ? 'active' : ''
               }`}
             >
               <Home className="w-6 h-6" />
@@ -431,9 +453,9 @@ function AppContent() {
 
             {/* Albums */}
             <button
-              onClick={() => setCurrentPage('albums')}
+              onClick={() => navigate('/albums')}
               className={`ripple-effect nav-item-premium ${
-                currentPage === 'albums' ? 'active' : ''
+                location.pathname === '/albums' ? 'active' : ''
               }`}
             >
               <FolderOpen className="w-6 h-6" />
@@ -451,9 +473,9 @@ function AppContent() {
 
             {/* Search */}
             <button
-              onClick={() => setCurrentPage('search')}
+              onClick={() => navigate('/search')}
               className={`ripple-effect nav-item-premium ${
-                currentPage === 'search' ? 'active' : ''
+                location.pathname === '/search' ? 'active' : ''
               }`}
             >
               <Search className="w-6 h-6" />
@@ -462,9 +484,9 @@ function AppContent() {
 
             {/* More */}
             <button
-              onClick={() => setCurrentPage('more')}
+              onClick={() => navigate('/more')}
               className={`ripple-effect nav-item-premium ${
-                currentPage === 'more' ? 'active' : ''
+                location.pathname === '/more' ? 'active' : ''
               }`}
             >
               <Menu className="w-6 h-6" />
