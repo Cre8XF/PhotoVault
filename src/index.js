@@ -2,6 +2,7 @@
 // index.js - Entry point with i18n support
 // FASE 3.5: Flerspråklig støtte
 // ============================================================================
+
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
@@ -15,3 +16,4 @@ root.render(
     <App />
   </React.StrictMode>
 )
+console.log('ENV:', import.meta.env)
