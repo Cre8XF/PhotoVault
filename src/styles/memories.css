@@ -1,0 +1,238 @@
+/* Memories Widget - "On This Day" */
+.memories-widget {
+  margin-bottom: 2rem;
+  padding: 24px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  border: 2px solid transparent;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.03)),
+    linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(59, 130, 246, 0.5));
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+body.light-mode .memories-widget {
+  background: rgba(139, 92, 246, 0.05);
+  background-image:
+    linear-gradient(rgba(139, 92, 246, 0.05), rgba(139, 92, 246, 0.05)),
+    linear-gradient(135deg, rgba(139, 92, 246, 0.6), rgba(59, 130, 246, 0.6));
+}
+
+/* Glowing animation */
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.5);
+  }
+}
+
+.animate-glow {
+  animation: glow 3s ease-in-out infinite;
+}
+
+/* Header */
+.memories-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.memories-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(59, 130, 246, 0.3));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+body.light-mode .memories-icon-wrapper {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.2));
+}
+
+.memories-icon {
+  width: 28px;
+  height: 28px;
+  color: rgba(251, 191, 36, 1);
+}
+
+body.light-mode .memories-icon {
+  color: rgba(139, 92, 246, 1);
+}
+
+.memories-title-group {
+  flex: 1;
+}
+
+.memories-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+body.light-mode .memories-title {
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.memories-subtitle {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.4;
+}
+
+body.light-mode .memories-subtitle {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* Grid */
+.memories-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+@media (min-width: 768px) {
+  .memories-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+}
+
+.memory-photo-wrapper {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fade-slide-up 0.5s ease-out backwards;
+}
+
+.memory-photo-wrapper:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+}
+
+.memory-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.memory-photo-wrapper:hover .memory-photo {
+  transform: scale(1.1);
+}
+
+/* Year Badge */
+.memory-year-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(251, 191, 36, 1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  line-height: 1;
+}
+
+body.light-mode .memory-year-badge {
+  background: rgba(255, 255, 255, 0.95);
+  color: rgba(139, 92, 246, 1);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+/* View All Button */
+.memories-view-all {
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.light-mode .memories-view-all {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.3);
+  color: rgba(139, 92, 246, 1);
+}
+
+.memories-view-all:hover {
+  background: rgba(139, 92, 246, 0.25);
+  border-color: rgba(139, 92, 246, 0.5);
+  transform: translateY(-2px);
+}
+
+body.light-mode .memories-view-all:hover {
+  background: rgba(139, 92, 246, 0.2);
+}
+
+.memories-view-all:active {
+  transform: translateY(0);
+}
+
+/* Mobile optimizations */
+@media (max-width: 480px) {
+  .memories-widget {
+    padding: 20px;
+  }
+
+  .memories-icon-wrapper {
+    width: 48px;
+    height: 48px;
+  }
+
+  .memories-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .memories-title {
+    font-size: 1.125rem;
+  }
+
+  .memories-subtitle {
+    font-size: 0.8125rem;
+  }
+
+  .memory-year-badge {
+    padding: 4px 8px;
+    font-size: 0.6875rem;
+  }
+}
+
+/* Animation */
+@keyframes fade-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
