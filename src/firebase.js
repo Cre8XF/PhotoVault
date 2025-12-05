@@ -30,12 +30,12 @@ import {
 
 // 🔗 Firebase-konfig (from environment variables)
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
 // Validate required environment variables
@@ -457,8 +457,8 @@ export async function uploadPhoto(
           customMetadata: {
             userId: userId,
             parentVideo: file.name,
-            generatedAt: new Date().toISOString()
-          }
+            generatedAt: new Date().toISOString(),
+          },
         })
         thumbnailUrl = await getDownloadURL(thumbRef)
         console.log('✅ [Upload] Thumbnail uploaded:', thumbnailUrl)
@@ -559,8 +559,8 @@ export async function uploadThumbnail(blob, userId, photoId, size = 'small') {
         userId: userId,
         photoId: photoId,
         size: size,
-        generatedAt: new Date().toISOString()
-      }
+        generatedAt: new Date().toISOString(),
+      },
     })
     const downloadURL = await getDownloadURL(storageRef)
     return { downloadURL, storagePath }
