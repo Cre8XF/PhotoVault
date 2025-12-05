@@ -164,8 +164,8 @@ const MorePage = ({
   // === STRIPE INTEGRATION ===
   // ============================================================================
   const handleUpgradeToPro = async () => {
-    const stripePublicKey = process.env.REACT_APP_STRIPE_PUBLIC_KEY
-    const stripeCheckoutUrl = process.env.REACT_APP_STRIPE_CHECKOUT_URL
+    const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY
+    const stripeCheckoutUrl = import.meta.env.VITE_STRIPE_CHECKOUT_URL
 
     if (!stripePublicKey || !stripeCheckoutUrl) {
       console.warn('Stripe keys not configured')
@@ -201,7 +201,7 @@ const MorePage = ({
   // === EXPORT FUNCTION ===
   // ============================================================================
   const exportUserData = async () => {
-    const exportUrl = process.env.REACT_APP_EXPORT_URL
+    const exportUrl = import.meta.env.VITE_EXPORT_URL
 
     if (!exportUrl) {
       console.warn('Export URL not configured')
@@ -251,7 +251,7 @@ const MorePage = ({
   // === IMPORT FUNCTION ===
   // ============================================================================
   const handleImportData = async (event) => {
-    const importUrl = process.env.REACT_APP_IMPORT_URL
+    const importUrl = import.meta.env.VITE_IMPORT_URL
     const file = event.target.files?.[0]
 
     if (!file) return
@@ -299,7 +299,7 @@ const MorePage = ({
   // ============================================================================
   const handleShareProfile = async () => {
     const shareBaseUrl =
-      process.env.REACT_APP_SHARE_BASE_URL || 'https://photovault.app/u/'
+      import.meta.env.VITE_SHARE_BASE_URL || 'https://photovault.app/u/'
     const shareLink = `${shareBaseUrl}${user.uid}`
 
     try {
@@ -994,7 +994,7 @@ const MorePage = ({
                   <p className="font-medium text-sm">{t('info.about')}</p>
                 </div>
                 <span className="text-xs opacity-70 font-mono">
-                  {t('info.version')} {process.env.REACT_APP_VERSION || '7.1'}
+                  {t('info.version')} {import.meta.env.VITE_VERSION || '7.1'}
                 </span>
               </div>
             </div>
