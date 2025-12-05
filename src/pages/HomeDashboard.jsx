@@ -23,7 +23,7 @@ import { useTranslation } from "react-i18next";
 import logoLight from "../assets/logo_light.png";
 import logoDark from "../assets/logo_dark.png";
 
-const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, onUpload, onPhotoClick }) => {
+const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, onPhotoClick }) => {
   const navigate = useNavigate();
   const { t } = useTranslation(["common", "home"]);
   const [isUploadOpen, setUploadOpen] = useState(false);
@@ -360,7 +360,6 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
             </button>
 
             <button
-              onClick={() => onNavigate("more")}
               className="ripple-effect glass p-4 rounded-xl hover:bg-white/15 transition flex items-center gap-3"
             >
               <div className="p-2 bg-pink-600/30 rounded-lg">
