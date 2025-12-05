@@ -9,7 +9,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react'
 import { deletePhoto } from '../firebase'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
   Trash2,
@@ -61,11 +61,9 @@ function getCategoryIcon(category) {
 }
 
 const AlbumPage = ({
-  album,
   albums = [],
   user,
   photos,
-  onBack,
   refreshData,
   onDeletePhoto,
   onSetAlbumCover,
@@ -77,6 +75,10 @@ const AlbumPage = ({
   const { t } = useTranslation(['common', 'albums'])
   const navigate = useNavigate()
   const location = useLocation()
+  const { albumId } = useParams()
+
+  // Get album from route params
+  const album = albums.find(a => a.id === albumId)
 
   const [editMode, setEditMode] = useState(false)
   const [selectedPhotos, setSelectedPhotos] = useState([])
@@ -367,10 +369,19 @@ const AlbumPage = ({
     return selectedPhotos.some((p) => p.id === photo.id)
   }
 
+  // Handle album not found
   if (!album) {
     return (
-      <div className="p-6">
-        <p>{t('albums:errors.albumNotFound')}</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Album ikke funnet</h2>
+          <button
+            onClick={() => navigate('/albums')}
+            className="px-4 py-2 bg-purple-600 rounded-lg"
+          >
+            Tilbake til album
+          </button>
+        </div>
       </div>
     )
   }
@@ -381,7 +392,7 @@ const AlbumPage = ({
       <div className="flex items-center justify-between mb-2.5 md:mb-3">
         <div className="flex items-center gap-4">
           <button
-            onClick={onBack}
+            onClick={() => navigate('/albums')}
             className="ripple-effect p-2 hover:bg-white/10 rounded-lg transition"
           >
             <ArrowLeft className="w-6 h-6" />

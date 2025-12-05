@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Users, Image, Video, HardDrive } from 'lucide-react'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
 
-export default function AdminDashboard({ onBack }) {
+export default function AdminDashboard() {
+  const navigate = useNavigate()
   const { t } = useTranslation(['admin', 'common'])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
@@ -107,7 +109,7 @@ export default function AdminDashboard({ onBack }) {
       {/* Header */}
       <div className="max-w-4xl mx-auto mb-6">
         <button
-          onClick={onBack}
+          onClick={() => navigate('/more')}
           className="flex items-center gap-2 text-purple-600 hover:text-purple-700 mb-4"
         >
           <ArrowLeft className="w-5 h-5" />

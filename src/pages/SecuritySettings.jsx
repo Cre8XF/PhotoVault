@@ -2,6 +2,7 @@
 // SecuritySettings.jsx - MED FULL I18N
 // ============================================================================
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Shield,
@@ -21,7 +22,8 @@ import { useSecurityContext } from '../contexts/SecurityContext';
 import { validatePIN, checkPINStrength } from '../utils/security';
 import { getBiometricIcon, getBiometricDisplayName } from '../utils/biometric';
 
-const SecuritySettings = ({ onBack }) => {
+const SecuritySettings = () => {
+  const navigate = useNavigate();
   const { t } = useTranslation(['security', 'common']);
   const {
     pinEnabled,
@@ -459,7 +461,7 @@ const SecuritySettings = ({ onBack }) => {
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-4 mb-8">
           <button
-            onClick={onBack}
+            onClick={() => navigate('/more')}
             className="p-2 hover:bg-white/10 rounded-xl transition"
           >
             <ChevronLeft className="w-6 h-6" />
