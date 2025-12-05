@@ -1,9 +1,8 @@
 // ============================================================================
-// firebase.js – komplett integrasjon (v3.1) med konsolidert cover-funksjon
+// firebase.js – komplett integrasjon (v3.2) – Vite + Firebase modular
 // ============================================================================
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
-import { onSnapshot } from 'firebase/firestore'
 import {
   getFirestore,
   collection,
@@ -19,6 +18,7 @@ import {
   getDoc,
   limit,
   startAfter,
+  onSnapshot,
 } from 'firebase/firestore'
 import {
   getStorage,
@@ -28,7 +28,7 @@ import {
   deleteObject,
 } from 'firebase/storage'
 
-// 🔗 Firebase-konfig (from environment variables)
+// 🔗 Firebase-konfig (Vite environment variables)
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -38,30 +38,30 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
-// Validate required environment variables
+// Validate Vite environment variables
 const requiredEnvVars = [
-  'REACT_APP_FIREBASE_API_KEY',
-  'REACT_APP_FIREBASE_AUTH_DOMAIN',
-  'REACT_APP_FIREBASE_PROJECT_ID',
-  'REACT_APP_FIREBASE_STORAGE_BUCKET',
+  'VITE_FIREBASE_API_KEY',
+  'VITE_FIREBASE_AUTH_DOMAIN',
+  'VITE_FIREBASE_PROJECT_ID',
+  'VITE_FIREBASE_STORAGE_BUCKET',
+  'VITE_FIREBASE_MESSAGING_SENDER_ID',
+  'VITE_FIREBASE_APP_ID',
 ]
 
-const missingVars = requiredEnvVars.filter((varName) => !process.env[varName])
+const missingVars = requiredEnvVars.filter(
+  (varName) => !import.meta.env[varName]
+)
+
 if (missingVars.length > 0) {
-  console.error(
-    '❌ Missing required environment variables:',
-    missingVars.join(', ')
-  )
-  console.error(
-    'Please check your .env file and ensure all Firebase config variables are set.'
-  )
+  console.error('❌ Missing Firebase environment variables:', missingVars)
 }
 
 // 🚀 Initialiser Firebase
 const app = initializeApp(firebaseConfig)
-const db = getFirestore(app)
-const storage = getStorage(app)
-const auth = getAuth(app)
+export const db = getFirestore(app)
+export const storage = getStorage(app)
+export const auth = getAuth(app)
+export default app
 
 // ============================================================================
 // 📁 Firestore-funksjoner
