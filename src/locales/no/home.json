@@ -22,5 +22,23 @@
   "userNotLoggedIn": "Bruker ikke innlogget",
   "albumCreated": "✅ Album opprettet:",
   "albumCreationError": "Feil ved oppretting av album:",
-  "couldNotCreateAlbum": "Kunne ikke opprette album. Prøv igjen."
+  "couldNotCreateAlbum": "Kunne ikke opprette album. Prøv igjen.",
+  "emptyStates": {
+    "noFavorites": {
+      "title": "Ingen favoritter ennå",
+      "description": "Trykk ❤️ på bilder du vil lagre her",
+      "action": "Utforsk bilder"
+    },
+    "noRecent": {
+      "title": "Ingen nylige opplastninger",
+      "description": "Last opp første bilder",
+      "action": "Last opp"
+    },
+    "noAlbums": {
+      "title": "Ingen album ennå",
+      "description": "Opprett album for å organisere bilder",
+      "action": "Opprett album"
+    }
+  },
+  "pullToRefresh": "Dra for å oppdatere"
 }
