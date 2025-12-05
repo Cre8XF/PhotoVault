@@ -2,6 +2,7 @@
 // SubscriptionPage - Phase 2: Subscription & Storage Management
 // ============================================================================
 import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import useAuth from '../hooks/useAuth';
 import usePhotoData from '../hooks/usePhotoData';
@@ -22,7 +23,8 @@ import {
  * Subscription Page
  * Shows current plan, storage usage, and AI quota
  */
-const SubscriptionPage = ({ onBack }) => {
+const SubscriptionPage = ({ user }) => {
+  const navigate = useNavigate();
   const { t } = useTranslation(['common', 'subscription']);
   const { userProfile, tier, isAdmin } = useAuth(); // ✅ Use tier
   const { photos } = usePhotoData();
@@ -166,7 +168,7 @@ const SubscriptionPage = ({ onBack }) => {
       <div className="sticky top-0 z-10 glass-card border-b border-white/20 px-4 py-4">
         <div className="flex items-center gap-3">
           <button
-            onClick={onBack}
+            onClick={() => navigate('/more')}
             className="p-2 hover:bg-white/10 rounded-lg transition"
           >
             <ArrowLeft className="w-6 h-6" />

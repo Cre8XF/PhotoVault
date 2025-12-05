@@ -368,14 +368,13 @@ function AppContent() {
                 isDarkMode={isDarkMode}
                 setIsDarkMode={setTheme}
                 onLogout={handleLogout}
-                onNavigate={(page) => navigate(`/${page}`)}
               />
             }
           />
 
           <Route
             path="/security"
-            element={<SecuritySettings onBack={() => navigate('/more')} />}
+            element={<SecuritySettings />}
           />
 
           <Route
@@ -385,26 +384,21 @@ function AppContent() {
 
           <Route
             path="/profile"
-            element={<ProfilePage onBack={() => navigate('/more')} />}
+            element={<ProfilePage />}
           />
 
           <Route
             path="/subscription"
-            element={<SubscriptionPage user={userProfile || user} onBack={() => navigate('/more')} />}
+            element={<SubscriptionPage user={userProfile || user} />}
           />
 
           <Route
             path="/album/:albumId"
             element={
               <AlbumPage
-                album={selectedAlbum}
                 albums={albums}
                 user={userProfile || user}
                 photos={photos}
-                onBack={() => {
-                  navigate('/albums')
-                  setSelectedAlbum(null)
-                }}
                 refreshData={refreshData}
                 onDeletePhoto={handleDeletePhoto}
                 onSetAlbumCover={handleSetAlbumCover}
@@ -419,11 +413,7 @@ function AppContent() {
           {isAdmin && (
             <Route
               path="/admin"
-              element={
-                <AdminDashboard
-                  onBack={() => navigate('/more')}
-                />
-              }
+              element={<AdminDashboard />}
             />
           )}
         </Routes>
