@@ -124,6 +124,23 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
     );
   }, [safePhotosForSmartAlbums, stats, t, plan]);
 
+  // Handler for smart album navigation
+  const handleSmartAlbumClick = (albumId) => {
+    switch (albumId) {
+      case "last30days":
+        navigate("/search?range=30days");
+        break;
+      case "withFaces":
+        navigate("/search?faces=true");
+        break;
+      case "unassigned":
+        navigate("/search?unassigned=true");
+        break;
+      default:
+        navigate("/search");
+    }
+  };
+
   const handleCreateAlbum = async (albumData) => {
     try {
       // Album already created by UploadModal - just refresh UI
@@ -191,7 +208,7 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
               {t("home:favoritesTitle")}
             </h2>
             <button
-              onClick={() => navigate("/search", { state: { filter: "favorites" } })}
+              onClick={() => navigate("/search?favorites=true")}
               className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition whitespace-nowrap flex items-center"
             >
               {t("common:seeAll", { count: stats.favorites })} →
@@ -235,7 +252,7 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
               {t("home:recentUploads")}
             </h2>
             <button
-              onClick={() => navigate("/search", { state: { filter: "recent" } })}
+              onClick={() => navigate("/search?recent=true")}
               className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition whitespace-nowrap flex items-center ml-2"
             >
               {t("common:seeAll", { count: recentPhotos.length })} →
@@ -294,7 +311,7 @@ const HomeDashboard = ({ albums, photos, colors, user, onNavigate, refreshData, 
             return (
               <button
                 key={album.id}
-                onClick={() => onNavigate("search")}
+                onClick={() => handleSmartAlbumClick(album.id)}
                 className={`ripple-effect glass p-4 md:p-6 rounded-2xl text-left hover:scale-105 transition-transform group animate-fade-in-up ${staggerClass} free-shadow free-smart-card`}
               >
                 <div
