@@ -91,18 +91,64 @@ const SearchPage = ({
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [photoToDelete, setPhotoToDelete] = useState(null)
 
-  // Handle filter from location.state (from "See All" buttons)
+  // Read filters from URL query params
   useEffect(() => {
-    const filterFromState = location.state?.filter
+    const params = new URLSearchParams(location.search)
 
-    if (filterFromState === 'favorites') {
-      setActiveFilters((f) => ({ ...f, favorites: true }))
+    const newFilters = { ...activeFilters }
+    let hasChanges = false
+
+    // Check for range filter (30days, week, month, year)
+    if (params.has('range')) {
+      const range = params.get('range')
+      if (range === '30days') {
+        newFilters.dateRange = 'month'
+        hasChanges = true
+      } else if (range === 'week') {
+        newFilters.dateRange = 'week'
+        hasChanges = true
+      } else if (range === 'year') {
+        newFilters.dateRange = 'year'
+        hasChanges = true
+      }
     }
 
-    if (filterFromState === 'recent') {
-      setActiveFilters((f) => ({ ...f, dateRange: 'month' }))
+    // Check for favorites filter
+    if (params.has('favorites') && params.get('favorites') === 'true') {
+      newFilters.favorites = true
+      hasChanges = true
     }
-  }, [location.state])
+
+    // Check for recent filter
+    if (params.has('recent') && params.get('recent') === 'true') {
+      newFilters.dateRange = 'month'
+      hasChanges = true
+    }
+
+    // Check for faces filter
+    if (params.has('faces') && params.get('faces') === 'true') {
+      newFilters.withFaces = true
+      hasChanges = true
+    }
+
+    // Check for unassigned filter
+    if (params.has('unassigned') && params.get('unassigned') === 'true') {
+      newFilters.albumId = 'noAlbum'
+      hasChanges = true
+    }
+
+    // Check for AI analyzed filter
+    if (params.has('aiAnalyzed') && params.get('aiAnalyzed') === 'true') {
+      newFilters.aiAnalyzed = true
+      hasChanges = true
+    }
+
+    // Apply filters if any were found in URL
+    if (hasChanges) {
+      setActiveFilters(newFilters)
+      console.log('✅ Applied filters from URL params:', newFilters)
+    }
+  }, [location.search]) // Re-run when URL query params change
 
   // 🔒 SIKRET: Kategorier med array-guard
   const categories = useMemo(() => {
