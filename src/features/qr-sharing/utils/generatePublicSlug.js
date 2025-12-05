@@ -25,6 +25,6 @@ export const generatePublicSlug = (albumName) => {
  * @returns {string} - Full URL
  */
 export const getPublicAlbumUrl = (slug) => {
-  const baseUrl = process.env.REACT_APP_PUBLIC_URL || window.location.origin
+  const baseUrl = import.meta.env.VITE_PUBLIC_URL || window.location.origin
   return `${baseUrl}/share/${slug}`
 }
