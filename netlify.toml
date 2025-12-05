@@ -1,4 +1,5 @@
 [build]
+  node_version = "18.20.3"
   command = "bash build-production.sh"
   publish = "build"
 
