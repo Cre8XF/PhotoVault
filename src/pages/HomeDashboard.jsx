@@ -31,10 +31,13 @@ import EmptyState from "../components/EmptyState";
 import ScrollToTop from "../components/ScrollToTop";
 import QuickActionsBar from "../components/QuickActionsBar";
 import HomeMemoriesWidget from "../components/HomeMemoriesWidget";
+import TimeGroupSection from "../components/TimeGroupSection";
+import { groupPhotosByTime } from "../utils/groupPhotosByTime";
 import "../styles/emptyState.css";
 import "../styles/scrollToTop.css";
 import "../styles/quickActions.css";
 import "../styles/memories.css";
+import "../styles/timeGroups.css";
 
 const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, onPhotoClick }) => {
   const navigate = useNavigate();
@@ -94,17 +97,24 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
     [photos, isFreeUser]
   );
 
-  const recentPhotos = useMemo(
-    () => {
-      const safePhotos = Array.isArray(photos) ? photos : [];
-      return [...safePhotos]
-        .sort(
-          (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-        )
-        .slice(0, 12);
-    },
-    [photos]
-  );
+  // Group recent photos by time periods
+  const timeGroups = useMemo(() => {
+    if (!photos || photos.length === 0) {
+      return []
+    }
+
+    // Get recent photos (last 50, sorted by date)
+    const recent = photos
+      .filter(p => p.createdAt || p.dateTaken)
+      .sort((a, b) => {
+        const dateA = a.dateTaken?.toMillis?.() || a.createdAt?.toMillis?.() || new Date(a.createdAt || 0).getTime()
+        const dateB = b.dateTaken?.toMillis?.() || b.createdAt?.toMillis?.() || new Date(b.createdAt || 0).getTime()
+        return dateB - dateA
+      })
+      .slice(0, 50) // Max 50 recent photos
+
+    return groupPhotosByTime(recent)
+  }, [photos]);
 
   const safePhotosForSmartAlbums = Array.isArray(photos) ? photos : [];
 
@@ -319,53 +329,24 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
             </section>
           )}
 
-      {/* Siste opplastninger */}
+      {/* Recent Uploads with Time Grouping */}
       <section className="mb-6 md:mb-10">
         <div className="flex justify-between items-center mb-3 md:mb-4">
-          <h2 className="text-2xl font-bold flex items-center gap-2 whitespace-nowrap">
-            <Clock className="w-6 h-6 text-purple-400" />
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <Clock className="w-6 h-6 text-blue-400" />
             {t("home:recentUploads")}
           </h2>
-          {recentPhotos.length > 0 && (
+          {timeGroups.length > 0 && (
             <button
-              onClick={() => navigate("/search?recent=true")}
-              className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition whitespace-nowrap flex items-center ml-2"
+              onClick={() => navigate('/search', { state: { view: 'recent' } })}
+              className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition whitespace-nowrap flex items-center"
             >
-              {t("common:seeAll", { count: recentPhotos.length })} →
+              {t("common:seeAll")} →
             </button>
           )}
         </div>
 
-        {recentPhotos.length > 0 ? (
-          <div className="overflow-x-auto">
-            <div className="flex gap-4 pb-4">
-              {recentPhotos.map((photo, index) => {
-                // Limit stagger animation to 3 for free users
-                const staggerClass = isFreeUser && index >= 3 ? 'stagger-3' : `stagger-${(index % 12) + 1}`;
-                return (
-                  <div
-                    key={photo.id}
-                    className={`flex-shrink-0 w-32 md:w-48 cursor-pointer group animate-fade-in-up ${staggerClass} free-thumbnail free-recent-thumb`}
-                    onClick={() => onPhotoClick(photo, recentPhotos)}
-                  >
-                    <LazyImage
-                      src={photo.type === 'video' ? (photo.thumbnailUrl || photo.url) : photo.url}
-                      thumbnail={photo.thumbnailSmall}
-                      photoId={photo.id}
-                      alt={photo.name || t("common:photo")}
-                      className="w-full h-32 md:h-48 object-contain bg-gray-900 rounded-xl transition-transform duration-300 group-hover:scale-105 border border-white/10"
-                    />
-                    {photo.name && (
-                      <p className="mt-2 text-sm truncate opacity-70">
-                        {photo.name}
-                      </p>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ) : (
+        {timeGroups.length === 0 ? (
           <EmptyState
             icon={<Upload className="w-10 h-10" />}
             title={t("home:emptyStates.noRecent.title")}
@@ -373,6 +354,25 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
             actionLabel={t("home:emptyStates.noRecent.action")}
             onAction={() => setUploadOpen(true)}
           />
+        ) : (
+          <div className="time-groups-container">
+            {timeGroups.map((group) => (
+              <TimeGroupSection
+                key={group.key}
+                group={group}
+                onPhotoClick={onPhotoClick}
+                onHeaderClick={(group) => {
+                  // Navigate to SearchPage filtered by time period
+                  navigate('/search', {
+                    state: {
+                      timeFilter: group.key,
+                      timeLabel: group.label
+                    }
+                  })
+                }}
+              />
+            ))}
+          </div>
         )}
       </section>
 

@@ -54,5 +54,10 @@
     "viewAllWithCount": "See all {{count}} memories",
     "yearsAgo": "{{count}} year ago",
     "yearsAgo_plural": "{{count}} years ago"
+  },
+  "recentGroups": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "thisWeek": "This week"
   }
 }

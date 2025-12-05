@@ -54,5 +54,10 @@
     "viewAllWithCount": "Se alle {{count}} minner",
     "yearsAgo": "{{count}} år siden",
     "yearsAgo_plural": "{{count}} år siden"
+  },
+  "recentGroups": {
+    "today": "I dag",
+    "yesterday": "I går",
+    "thisWeek": "Denne uken"
   }
 }
