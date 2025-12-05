@@ -1,6 +1,7 @@
 // ============================================================================
-// firebase.js – komplett integrasjon (v3.2) – Vite + Firebase modular
+// firebase.js – komplett integrasjon (v3.3) – Vite + Firebase modular
 // ============================================================================
+
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import {
@@ -28,7 +29,7 @@ import {
   deleteObject,
 } from 'firebase/storage'
 
-// 🔗 Firebase-konfig (Vite environment variables)
+// 🔗 Firebase-konfig (fra Vite environment variabler)
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -38,26 +39,22 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
-// Validate Vite environment variables
-const requiredEnvVars = [
-  'VITE_FIREBASE_API_KEY',
-  'VITE_FIREBASE_AUTH_DOMAIN',
-  'VITE_FIREBASE_PROJECT_ID',
-  'VITE_FIREBASE_STORAGE_BUCKET',
-  'VITE_FIREBASE_MESSAGING_SENDER_ID',
-  'VITE_FIREBASE_APP_ID',
-]
+// 🔍 Enkel validering (Uten process.env – helt Vite-kompatibelt)
+const missing = Object.entries(firebaseConfig)
+  .filter(([key, value]) => !value)
+  .map(([key]) => key)
 
-const missingVars = requiredEnvVars.filter(
-  (varName) => !import.meta.env[varName]
-)
-
-if (missingVars.length > 0) {
-  console.error('❌ Missing Firebase environment variables:', missingVars)
+if (missing.length > 0) {
+  console.error(
+    '❌ Missing Firebase environment variables in firebaseConfig:',
+    missing
+  )
 }
 
 // 🚀 Initialiser Firebase
 const app = initializeApp(firebaseConfig)
+
+// Eksporter Firebase-tjenestene
 export const db = getFirestore(app)
 export const storage = getStorage(app)
 export const auth = getAuth(app)
