@@ -40,5 +40,11 @@
       "action": "Create album"
     }
   },
-  "pullToRefresh": "Pull to refresh"
+  "pullToRefresh": "Pull to refresh",
+  "quickActions": {
+    "upload": "Upload",
+    "newAlbum": "New Album",
+    "createCollage": "Create Collage",
+    "searchFaces": "Search Faces"
+  }
 }

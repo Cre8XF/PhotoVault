@@ -29,8 +29,10 @@ import logoDark from "../assets/logo_dark.png";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import EmptyState from "../components/EmptyState";
 import ScrollToTop from "../components/ScrollToTop";
+import QuickActionsBar from "../components/QuickActionsBar";
 import "../styles/emptyState.css";
 import "../styles/scrollToTop.css";
+import "../styles/quickActions.css";
 
 const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, onPhotoClick }) => {
   const navigate = useNavigate();
@@ -210,6 +212,19 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
           </p>
         )}
       </section>
+
+      {/* Quick Actions Bar */}
+      {!isInitialLoading && (
+        <QuickActionsBar
+          onUpload={() => setUploadOpen(true)}
+          onNewAlbum={() => {
+            setUploadOpen(true)
+            // The UploadModal will handle album creation through its AlbumModal
+          }}
+          onCreateCollage={() => navigate('/collage/templates')}
+          onSearchFaces={() => navigate('/search', { state: { filter: 'faces' } })}
+        />
+      )}
 
       {/* Loading Skeletons */}
       {isInitialLoading ? (
