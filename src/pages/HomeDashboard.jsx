@@ -16,12 +16,21 @@ import {
   FolderOpen,
   Wand2,
   ImagePlus,
-  Scan
+  Scan,
+  Heart,
+  Upload,
+  FolderPlus,
+  Image
 } from "lucide-react";
 import LazyImage from "../components/LazyImage";
 import { useTranslation } from "react-i18next";
 import logoLight from "../assets/logo_light.png";
 import logoDark from "../assets/logo_dark.png";
+import { usePullToRefresh } from "../hooks/usePullToRefresh";
+import EmptyState from "../components/EmptyState";
+import ScrollToTop from "../components/ScrollToTop";
+import "../styles/emptyState.css";
+import "../styles/scrollToTop.css";
 
 const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, onPhotoClick }) => {
   const navigate = useNavigate();
@@ -32,6 +41,14 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
   // Determine user plan (default to "free" if not set)
   const plan = user?.plan || "free";
   const isFreeUser = plan === "free";
+
+  // Pull-to-refresh functionality
+  const { isPulling, pullDistance, handlers } = usePullToRefresh(
+    async () => {
+      await refreshData();
+    },
+    80
+  );
 
   // Track initial data loading
   useEffect(() => {
@@ -152,7 +169,24 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
   };
 
   return (
-    <div className="min-h-screen p-6 md:p-10 animate-fade-in pb-20 md:pb-10">
+    <div
+      className="min-h-screen p-6 md:p-10 animate-fade-in pb-20 md:pb-10"
+      {...handlers}
+    >
+      {/* Pull indicator */}
+      {isPulling && (
+        <div
+          className="pull-indicator"
+          style={{
+            transform: `translateY(${Math.min(pullDistance, 80)}px)`,
+            opacity: Math.min(pullDistance / 80, 1)
+          }}
+        >
+          <div className="spinner-small" />
+          <span>{t('home:pullToRefresh')}</span>
+        </div>
+      )}
+
       {/* Hero-velkomst with PIXTR Logo */}
       <section className="mb-5 md:mb-8 free-hero">
         <div className="flex items-center gap-3 mb-2">
@@ -200,64 +234,83 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
       ) : (
         <>
           {/* Favoritter */}
-          {favoritePhotos.length > 0 && (
-        <section className="mb-6 md:mb-10 animate-scale-in free-section">
-          <div className="flex justify-between items-center mb-3 md:mb-4">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              <Star className="w-6 h-6 text-yellow-400" fill="currentColor" />
-              {t("home:favoritesTitle")}
-            </h2>
-            <button
-              onClick={() => navigate("/search?favorites=true")}
-              className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition whitespace-nowrap flex items-center"
-            >
-              {t("common:seeAll", { count: stats.favorites })} →
-            </button>
-          </div>
-          <div className={`grid grid-cols-2 md:grid-cols-${isFreeUser ? '3' : '4'} gap-3 md:gap-4`}>
-            {favoritePhotos.map((photo, i) => {
-              // Limit stagger animation to 3 for free users
-              const staggerClass = isFreeUser && i >= 3 ? 'stagger-3' : `stagger-${(i % 4) + 1}`;
-              return (
-                <div
-                  key={photo.id}
-                  className={`relative group cursor-pointer animate-scale-in ${staggerClass} free-thumbnail`}
-                  onClick={() => onPhotoClick(photo, favoritePhotos)}
+          {favoritePhotos.length > 0 ? (
+            <section className="mb-6 md:mb-10 animate-scale-in free-section">
+              <div className="flex justify-between items-center mb-3 md:mb-4">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Star className="w-6 h-6 text-yellow-400" fill="currentColor" />
+                  {t("home:favoritesTitle")}
+                </h2>
+                <button
+                  onClick={() => navigate("/search?favorites=true")}
+                  className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition whitespace-nowrap flex items-center"
                 >
-                  <LazyImage
-                    src={photo.type === 'video' ? (photo.thumbnailUrl || photo.url) : photo.url}
-                    thumbnail={photo.thumbnailSmall}
-                    photoId={photo.id}
-                    alt={photo.name || t("common:photo")}
-                    className="w-full h-36 md:h-40 object-contain bg-gray-900 rounded-xl transition-transform duration-300 group-hover:scale-105 border border-white/10 free-fav-thumb"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
-                  <Star
-                    className="absolute top-2 right-2 w-5 h-5 text-yellow-400"
-                    fill="currentColor"
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
+                  {t("common:seeAll", { count: stats.favorites })} →
+                </button>
+              </div>
+              <div className={`grid grid-cols-2 md:grid-cols-${isFreeUser ? '3' : '4'} gap-3 md:gap-4`}>
+                {favoritePhotos.map((photo, i) => {
+                  // Limit stagger animation to 3 for free users
+                  const staggerClass = isFreeUser && i >= 3 ? 'stagger-3' : `stagger-${(i % 4) + 1}`;
+                  return (
+                    <div
+                      key={photo.id}
+                      className={`relative group cursor-pointer animate-scale-in ${staggerClass} free-thumbnail`}
+                      onClick={() => onPhotoClick(photo, favoritePhotos)}
+                    >
+                      <LazyImage
+                        src={photo.type === 'video' ? (photo.thumbnailUrl || photo.url) : photo.url}
+                        thumbnail={photo.thumbnailSmall}
+                        photoId={photo.id}
+                        alt={photo.name || t("common:photo")}
+                        className="w-full h-36 md:h-40 object-contain bg-gray-900 rounded-xl transition-transform duration-300 group-hover:scale-105 border border-white/10 free-fav-thumb"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
+                      <Star
+                        className="absolute top-2 right-2 w-5 h-5 text-yellow-400"
+                        fill="currentColor"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          ) : (
+            <section className="mb-6 md:mb-10">
+              <div className="flex justify-between items-center mb-3 md:mb-4">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Star className="w-6 h-6 text-yellow-400" fill="currentColor" />
+                  {t("home:favoritesTitle")}
+                </h2>
+              </div>
+              <EmptyState
+                icon={<Heart className="w-10 h-10" />}
+                title={t("home:emptyStates.noFavorites.title")}
+                description={t("home:emptyStates.noFavorites.description")}
+                actionLabel={t("home:emptyStates.noFavorites.action")}
+                onAction={() => navigate('/search')}
+              />
+            </section>
+          )}
 
       {/* Siste opplastninger */}
-      {recentPhotos.length > 0 && (
-        <section className="mb-6 md:mb-10 free-section">
-          <div className="flex justify-between items-center mb-3 md:mb-4">
-            <h2 className="text-2xl font-bold flex items-center gap-2 whitespace-nowrap">
-              <Clock className="w-6 h-6 text-purple-400" />
-              {t("home:recentUploads")}
-            </h2>
+      <section className="mb-6 md:mb-10">
+        <div className="flex justify-between items-center mb-3 md:mb-4">
+          <h2 className="text-2xl font-bold flex items-center gap-2 whitespace-nowrap">
+            <Clock className="w-6 h-6 text-purple-400" />
+            {t("home:recentUploads")}
+          </h2>
+          {recentPhotos.length > 0 && (
             <button
               onClick={() => navigate("/search?recent=true")}
               className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition whitespace-nowrap flex items-center ml-2"
             >
               {t("common:seeAll", { count: recentPhotos.length })} →
             </button>
-          </div>
+          )}
+        </div>
+
+        {recentPhotos.length > 0 ? (
           <div className="overflow-x-auto">
             <div className="flex gap-4 pb-4">
               {recentPhotos.map((photo, index) => {
@@ -286,8 +339,16 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
               })}
             </div>
           </div>
-        </section>
-      )}
+        ) : (
+          <EmptyState
+            icon={<Upload className="w-10 h-10" />}
+            title={t("home:emptyStates.noRecent.title")}
+            description={t("home:emptyStates.noRecent.description")}
+            actionLabel={t("home:emptyStates.noRecent.action")}
+            onAction={() => setUploadOpen(true)}
+          />
+        )}
+      </section>
 
       {/* Upload Button - Moved here for FREE users (primary action) */}
       <button
@@ -396,6 +457,9 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
           </div>
         </div>
       </section>
+
+      {/* Scroll to Top Button */}
+      <ScrollToTop />
 
       {/* Upload Modal */}
       <UploadModal
