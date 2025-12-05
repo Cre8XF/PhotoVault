@@ -30,9 +30,11 @@ import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import EmptyState from "../components/EmptyState";
 import ScrollToTop from "../components/ScrollToTop";
 import QuickActionsBar from "../components/QuickActionsBar";
+import HomeMemoriesWidget from "../components/HomeMemoriesWidget";
 import "../styles/emptyState.css";
 import "../styles/scrollToTop.css";
 import "../styles/quickActions.css";
+import "../styles/memories.css";
 
 const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, onPhotoClick }) => {
   const navigate = useNavigate();
@@ -212,6 +214,15 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
           </p>
         )}
       </section>
+
+      {/* Memories Widget - "On This Day" */}
+      {!isInitialLoading && (
+        <HomeMemoriesWidget
+          photos={photos}
+          onPhotoClick={onPhotoClick}
+          onViewAll={() => navigate('/timeline')}
+        />
+      )}
 
       {/* Quick Actions Bar */}
       {!isInitialLoading && (

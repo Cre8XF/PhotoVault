@@ -46,5 +46,13 @@
     "newAlbum": "Nytt album",
     "createCollage": "Lag kollasj",
     "searchFaces": "Søk ansikter"
+  },
+  "memories": {
+    "title": "På denne dagen",
+    "description": "Minner fra {{date}} i tidligere år",
+    "viewAll": "Se alle minner",
+    "viewAllWithCount": "Se alle {{count}} minner",
+    "yearsAgo": "{{count}} år siden",
+    "yearsAgo_plural": "{{count}} år siden"
   }
 }

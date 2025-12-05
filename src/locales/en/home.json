@@ -46,5 +46,13 @@
     "newAlbum": "New Album",
     "createCollage": "Create Collage",
     "searchFaces": "Search Faces"
+  },
+  "memories": {
+    "title": "On This Day",
+    "description": "Memories from {{date}} in previous years",
+    "viewAll": "See all memories",
+    "viewAllWithCount": "See all {{count}} memories",
+    "yearsAgo": "{{count}} year ago",
+    "yearsAgo_plural": "{{count}} years ago"
   }
 }
