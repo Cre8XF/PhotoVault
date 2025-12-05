@@ -40,5 +40,11 @@
       "action": "Opprett album"
     }
   },
-  "pullToRefresh": "Dra for å oppdatere"
+  "pullToRefresh": "Dra for å oppdatere",
+  "quickActions": {
+    "upload": "Last opp",
+    "newAlbum": "Nytt album",
+    "createCollage": "Lag kollasj",
+    "searchFaces": "Søk ansikter"
+  }
 }
