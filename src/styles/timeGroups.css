@@ -1,0 +1,217 @@
+/* Time Group Sections */
+.time-group-section {
+  margin-bottom: 2rem;
+  animation: fade-slide-up 0.5s ease-out;
+}
+
+/* Header */
+.time-group-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+  padding: 8px 0;
+}
+
+.time-group-header:hover {
+  opacity: 0.8;
+}
+
+.time-group-header:hover .time-group-arrow {
+  transform: translateX(4px);
+}
+
+/* Timeline dot */
+.timeline-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(59, 130, 246, 0.8));
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.5);
+  flex-shrink: 0;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+body.light-mode .timeline-dot {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 1), rgba(59, 130, 246, 1));
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.8);
+  }
+}
+
+/* Title */
+.time-group-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0;
+}
+
+body.light-mode .time-group-title {
+  color: rgba(0, 0, 0, 0.9);
+}
+
+/* Count */
+.time-group-count {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 400;
+}
+
+body.light-mode .time-group-count {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* Arrow */
+.time-group-arrow {
+  width: 18px;
+  height: 18px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-left: auto;
+  transition: all 0.3s;
+}
+
+body.light-mode .time-group-arrow {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/* Photo Grid - Horizontal Scroll */
+.time-group-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(140px, 180px);
+  gap: 12px;
+  overflow-x: auto;
+  padding: 8px 0 16px;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+}
+
+@media (min-width: 768px) {
+  .time-group-grid {
+    grid-auto-columns: minmax(160px, 200px);
+    gap: 16px;
+  }
+}
+
+/* Custom scrollbar */
+.time-group-grid::-webkit-scrollbar {
+  height: 6px;
+}
+
+.time-group-grid::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+body.light-mode .time-group-grid::-webkit-scrollbar-track {
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.time-group-grid::-webkit-scrollbar-thumb {
+  background: rgba(167, 139, 250, 0.5);
+  border-radius: 10px;
+}
+
+body.light-mode .time-group-grid::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.4);
+}
+
+/* Photo Item */
+.time-group-photo {
+  scroll-snap-align: start;
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fade-scale-in 0.4s ease-out backwards;
+}
+
+.time-group-photo:hover {
+  transform: scale(1.05) translateY(-4px);
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+}
+
+.time-group-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.time-group-photo:hover .time-group-photo-img {
+  transform: scale(1.1);
+}
+
+/* Video indicator */
+.video-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.time-group-photo:hover .video-indicator {
+  opacity: 1;
+}
+
+/* Animation */
+@keyframes fade-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fade-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 480px) {
+  .time-group-grid {
+    grid-auto-columns: minmax(120px, 150px);
+    gap: 10px;
+  }
+
+  .time-group-title {
+    font-size: 1rem;
+  }
+
+  .time-group-count {
+    font-size: 0.8125rem;
+  }
+}
