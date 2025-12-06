@@ -94,7 +94,7 @@ const CollageTeaser = () => {
 
           {/* CTA Button */}
           <button
-            onClick={() => navigate('/collage/templates')}
+            onClick={() => navigate('/tools/collage/templates')}
             className="collage-cta-button"
           >
             <span>{t('home:collageTeaser.cta', 'Start Creating')}</span>

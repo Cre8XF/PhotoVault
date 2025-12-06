@@ -2,16 +2,21 @@
 .quick-actions-container {
   margin-bottom: 2rem;
   animation: fade-slide-up 0.4s ease-out;
+  width: 100%;
+  overflow: hidden;
 }
 
 .quick-actions {
   display: flex;
   gap: 12px;
   overflow-x: auto;
+  overflow-y: hidden;
   scroll-snap-type: x mandatory;
   padding: 8px 0 16px;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  width: 100%;
 }
 
 .quick-actions::-webkit-scrollbar {
