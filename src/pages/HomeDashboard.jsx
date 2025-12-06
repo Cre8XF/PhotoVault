@@ -92,11 +92,11 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
   const favoritePhotos = useMemo(
     () => {
       const safePhotos = Array.isArray(photos) ? photos : [];
-      // Limit favorites to 6 for free users, 8 for others
-      const limit = isFreeUser ? 6 : 8;
+      // Limit favorites to 4 on mobile for compact view
+      const limit = 6;
       return safePhotos.filter((p) => p.favorite).slice(0, limit);
     },
-    [photos, isFreeUser]
+    [photos]
   );
 
   // Group recent photos by time periods
@@ -244,7 +244,7 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
             setUploadOpen(true)
             // The UploadModal will handle album creation through its AlbumModal
           }}
-          onCreateCollage={() => navigate('/collage/templates')}
+          onCreateCollage={() => navigate('/tools/collage/templates')}
           onSearchFaces={() => navigate('/search', { state: { filter: 'faces' } })}
         />
       )}
@@ -271,12 +271,12 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
         </>
       ) : (
         <>
-          {/* Favoritter - Enhanced (Phase 5) */}
+          {/* Favoritter - Compact (Phase 5 Bugfix) */}
           {favoritePhotos.length > 0 ? (
-            <section className="mb-6 md:mb-10 animate-scale-in">
-              <div className="flex justify-between items-center mb-4 md:mb-5">
-                <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
-                  <Star className="w-7 h-7 text-yellow-400" fill="currentColor" />
+            <section className="mb-5 md:mb-8 animate-scale-in">
+              <div className="flex justify-between items-center mb-3 md:mb-4">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Star className="w-6 h-6 text-yellow-400" fill="currentColor" />
                   {t("home:favoritesTitle")}
                 </h2>
                 <button
@@ -286,23 +286,24 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
                   {t("common:seeAll", { count: stats.favorites })} →
                 </button>
               </div>
-              <div className="enhanced-favorites-grid">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                 {favoritePhotos.map((photo, i) => (
                   <div
                     key={photo.id}
-                    className="enhanced-fav-card group"
+                    className="relative group cursor-pointer aspect-square rounded-xl overflow-hidden"
                     onClick={() => onPhotoClick(photo, favoritePhotos)}
-                    style={{ animationDelay: `${Math.min(i * 0.05, 0.3)}s` }}
+                    style={{ animationDelay: `${Math.min(i * 0.05, 0.2)}s` }}
                   >
                     <LazyImage
                       src={photo.type === 'video' ? (photo.thumbnailUrl || photo.url) : photo.url}
                       thumbnail={photo.thumbnailSmall}
                       photoId={photo.id}
                       alt={photo.name || t("common:photo")}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     <Star
-                      className="absolute top-3 right-3 w-6 h-6 text-yellow-400 drop-shadow-lg"
+                      className="absolute top-2 right-2 w-5 h-5 text-yellow-400 drop-shadow-lg"
                       fill="currentColor"
                     />
                   </div>
@@ -310,10 +311,10 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
               </div>
             </section>
           ) : (
-            <section className="mb-6 md:mb-10">
+            <section className="mb-5 md:mb-8">
               <div className="flex justify-between items-center mb-3 md:mb-4">
-                <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
-                  <Star className="w-7 h-7 text-yellow-400" fill="currentColor" />
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Star className="w-6 h-6 text-yellow-400" fill="currentColor" />
                   {t("home:favoritesTitle")}
                 </h2>
               </div>
