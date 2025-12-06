@@ -558,6 +558,42 @@ const MorePage = ({
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 border border-white/20">
               <div className="flex items-center gap-2 text-white/70 text-xs mb-1">
+                <Folder className="w-3 h-3" />
+                {t('common:albums')}
+              </div>
+              <p className="text-2xl font-bold text-white">
+                {stats.totalAlbums}
+              </p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 border border-white/20">
+              <div className="flex items-center gap-2 text-white/70 text-xs mb-1">
+                <Image className="w-3 h-3" />
+                {t('common:photos')}
+              </div>
+              <p className="text-2xl font-bold text-white">
+                {stats.totalPhotos}
+              </p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 border border-white/20">
+              <div className="flex items-center gap-2 text-white/70 text-xs mb-1">
+                <Heart className="w-3 h-3" />
+                {t('common:favorites')}
+              </div>
+              <p className="text-2xl font-bold text-white">
+                {stats.favorites}
+              </p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 border border-white/20">
+              <div className="flex items-center gap-2 text-white/70 text-xs mb-1">
+                <Folder className="w-3 h-3" />
+                {t('common:unassigned')}
+              </div>
+              <p className="text-2xl font-bold text-white">
+                {stats.totalPhotos - stats.favorites}
+              </p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 border border-white/20">
+              <div className="flex items-center gap-2 text-white/70 text-xs mb-1">
                 <Clock className="w-3 h-3" />
                 {t('more.stats.recentUploads')}
               </div>

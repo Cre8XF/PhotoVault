@@ -32,12 +32,14 @@ import ScrollToTop from "../components/ScrollToTop";
 import QuickActionsBar from "../components/QuickActionsBar";
 import HomeMemoriesWidget from "../components/HomeMemoriesWidget";
 import TimeGroupSection from "../components/TimeGroupSection";
+import CollageTeaser from "../components/CollageTeaser";
 import { groupPhotosByTime } from "../utils/groupPhotosByTime";
 import "../styles/emptyState.css";
 import "../styles/scrollToTop.css";
 import "../styles/quickActions.css";
 import "../styles/memories.css";
 import "../styles/timeGroups.css";
+import "../styles/collageTeaser.css";
 
 const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, onPhotoClick }) => {
   const navigate = useNavigate();
@@ -269,12 +271,12 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
         </>
       ) : (
         <>
-          {/* Favoritter */}
+          {/* Favoritter - Enhanced (Phase 5) */}
           {favoritePhotos.length > 0 ? (
-            <section className="mb-6 md:mb-10 animate-scale-in free-section">
-              <div className="flex justify-between items-center mb-3 md:mb-4">
-                <h2 className="text-2xl font-bold flex items-center gap-2">
-                  <Star className="w-6 h-6 text-yellow-400" fill="currentColor" />
+            <section className="mb-6 md:mb-10 animate-scale-in">
+              <div className="flex justify-between items-center mb-4 md:mb-5">
+                <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+                  <Star className="w-7 h-7 text-yellow-400" fill="currentColor" />
                   {t("home:favoritesTitle")}
                 </h2>
                 <button
@@ -284,38 +286,34 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
                   {t("common:seeAll", { count: stats.favorites })} →
                 </button>
               </div>
-              <div className={`grid grid-cols-2 md:grid-cols-${isFreeUser ? '3' : '4'} gap-3 md:gap-4`}>
-                {favoritePhotos.map((photo, i) => {
-                  // Limit stagger animation to 3 for free users
-                  const staggerClass = isFreeUser && i >= 3 ? 'stagger-3' : `stagger-${(i % 4) + 1}`;
-                  return (
-                    <div
-                      key={photo.id}
-                      className={`relative group cursor-pointer animate-scale-in ${staggerClass} free-thumbnail`}
-                      onClick={() => onPhotoClick(photo, favoritePhotos)}
-                    >
-                      <LazyImage
-                        src={photo.type === 'video' ? (photo.thumbnailUrl || photo.url) : photo.url}
-                        thumbnail={photo.thumbnailSmall}
-                        photoId={photo.id}
-                        alt={photo.name || t("common:photo")}
-                        className="w-full h-36 md:h-40 object-contain bg-gray-900 rounded-xl transition-transform duration-300 group-hover:scale-105 border border-white/10 free-fav-thumb"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
-                      <Star
-                        className="absolute top-2 right-2 w-5 h-5 text-yellow-400"
-                        fill="currentColor"
-                      />
-                    </div>
-                  );
-                })}
+              <div className="enhanced-favorites-grid">
+                {favoritePhotos.map((photo, i) => (
+                  <div
+                    key={photo.id}
+                    className="enhanced-fav-card group"
+                    onClick={() => onPhotoClick(photo, favoritePhotos)}
+                    style={{ animationDelay: `${Math.min(i * 0.05, 0.3)}s` }}
+                  >
+                    <LazyImage
+                      src={photo.type === 'video' ? (photo.thumbnailUrl || photo.url) : photo.url}
+                      thumbnail={photo.thumbnailSmall}
+                      photoId={photo.id}
+                      alt={photo.name || t("common:photo")}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <Star
+                      className="absolute top-3 right-3 w-6 h-6 text-yellow-400 drop-shadow-lg"
+                      fill="currentColor"
+                    />
+                  </div>
+                ))}
               </div>
             </section>
           ) : (
             <section className="mb-6 md:mb-10">
               <div className="flex justify-between items-center mb-3 md:mb-4">
-                <h2 className="text-2xl font-bold flex items-center gap-2">
-                  <Star className="w-6 h-6 text-yellow-400" fill="currentColor" />
+                <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+                  <Star className="w-7 h-7 text-yellow-400" fill="currentColor" />
                   {t("home:favoritesTitle")}
                 </h2>
               </div>
@@ -328,6 +326,9 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
               />
             </section>
           )}
+
+          {/* Collage Teaser - NEW (Phase 5) */}
+          {!isInitialLoading && <CollageTeaser />}
 
       {/* Recent Uploads with Time Grouping */}
       <section className="mb-6 md:mb-10">
@@ -385,34 +386,29 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
         <span className="font-semibold text-base md:text-lg">{t("home:uploadOrCreateAlbum")}</span>
       </button>
 
-      {/* Smarte album */}
-      <section className="mb-6 md:mb-10 free-section">
-        <h2 className="text-2xl font-bold mb-3 md:mb-4 flex items-center gap-2">
-          <Sparkles className="w-6 h-6 text-purple-400" />
+      {/* Smart Albums - Minimized (Phase 5) */}
+      <section className="mb-6 md:mb-10">
+        <h2 className="text-xl md:text-2xl font-bold mb-3 flex items-center gap-2">
+          <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-purple-400" />
           {t("home:smartAlbums")}
         </h2>
-        <div className={`grid grid-cols-1 md:grid-cols-${isFreeUser ? '2' : '3'} gap-3 md:gap-4`}>
-          {smartAlbums.map((album, index) => {
-            // Limit stagger to 3 for free users
-            const staggerClass = isFreeUser && index >= 3 ? 'stagger-3' : `stagger-${index + 1}`;
-            return (
-              <button
-                key={album.id}
-                onClick={() => handleSmartAlbumClick(album.id)}
-                className={`ripple-effect glass p-4 md:p-6 rounded-2xl text-left hover:scale-105 transition-transform group animate-fade-in-up ${staggerClass} free-shadow free-smart-card`}
-              >
-                <div
-                  className={`inline-flex p-2 md:p-3 rounded-xl bg-gradient-to-br ${album.color} mb-2 md:mb-3`}
-                >
-                  <album.icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
-                </div>
-                <h3 className="font-semibold text-lg mb-1">{album.name}</h3>
-                <p className="text-sm opacity-70">
-                  {album.count} {album.count === 1 ? t("common:photo") : t("common:photos")}
-                </p>
-              </button>
-            );
-          })}
+        <div className="minimized-smart-grid">
+          {smartAlbums.map((album, index) => (
+            <button
+              key={album.id}
+              onClick={() => handleSmartAlbumClick(album.id)}
+              className="minimized-smart-card"
+              style={{ animationDelay: `${index * 0.05}s` }}
+            >
+              <div className={`minimized-smart-icon bg-gradient-to-br ${album.color}`}>
+                <album.icon className="w-5 h-5 text-white" />
+              </div>
+              <span className="minimized-smart-name">{album.name}</span>
+              <span className="minimized-smart-count">
+                {album.count}
+              </span>
+            </button>
+          ))}
         </div>
       </section>
         </>
@@ -460,29 +456,6 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
           </div>
         </section>
       )}
-
-      {/* Quick stats - Reduced padding for FREE users */}
-      <section className={`glass ${isFreeUser ? 'p-4' : 'p-6'} rounded-2xl free-overview`}>
-        <h3 className="font-semibold mb-4 opacity-70">{t("home:quickOverview")}</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div>
-            <p className="text-2xl font-bold">{albums.length}</p>
-            <p className="text-sm opacity-70">{t("common:albums")}</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold">{stats.total}</p>
-            <p className="text-sm opacity-70">{t("common:photos")}</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold">{stats.favorites}</p>
-            <p className="text-sm opacity-70">{t("common:favorites")}</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold">{stats.unassigned}</p>
-            <p className="text-sm opacity-70">{t("common:unassigned")}</p>
-          </div>
-        </div>
-      </section>
 
       {/* Scroll to Top Button */}
       <ScrollToTop />

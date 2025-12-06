@@ -59,5 +59,13 @@
     "today": "I dag",
     "yesterday": "I går",
     "thisWeek": "Denne uken"
+  },
+  "collageTeaser": {
+    "title": "Lag vakre kollasjer",
+    "description": "Gjør bildene dine om til flotte layouts på sekunder",
+    "cta": "Start å lage",
+    "gridTemplate": "Rutenett",
+    "storyTemplate": "Historie",
+    "polaroidTemplate": "Polaroid"
   }
 }

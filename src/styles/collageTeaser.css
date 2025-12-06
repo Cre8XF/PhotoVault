@@ -1,0 +1,385 @@
+/* ============================================================================
+   CollageTeaser Component Styles
+   Showcases Pixtr's USP: Beautiful collage creation
+   ============================================================================ */
+
+/* Main Section */
+.collage-teaser-section {
+  margin-bottom: 2rem;
+  animation: fade-slide-up 0.6s ease-out;
+}
+
+@media (min-width: 768px) {
+  .collage-teaser-section {
+    margin-bottom: 2.5rem;
+  }
+}
+
+/* Container with Shimmer Background */
+.collage-teaser-container {
+  position: relative;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.15));
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  border-radius: 24px;
+  padding: 2rem 1.5rem;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.2);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.light-mode .collage-teaser-container {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(236, 72, 153, 0.08));
+  border-color: rgba(139, 92, 246, 0.25);
+  box-shadow: 0 4px 24px rgba(139, 92, 246, 0.12);
+}
+
+.collage-teaser-container:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(139, 92, 246, 0.3);
+  border-color: rgba(139, 92, 246, 0.5);
+}
+
+body.light-mode .collage-teaser-container:hover {
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.2);
+}
+
+/* Shimmer Animation */
+.collage-shimmer {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  animation: shimmer 3s infinite;
+  pointer-events: none;
+}
+
+body.light-mode .collage-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(139, 92, 246, 0.15),
+    transparent
+  );
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
+}
+
+/* Content Layout */
+.collage-teaser-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+}
+
+/* Sparkle Icon */
+.collage-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(236, 72, 153, 0.3));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse-glow 2s ease-in-out infinite;
+  box-shadow: 0 0 24px rgba(139, 92, 246, 0.4);
+}
+
+body.light-mode .collage-icon-wrapper {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
+  box-shadow: 0 0 16px rgba(139, 92, 246, 0.3);
+}
+
+.collage-sparkle-icon {
+  width: 28px;
+  height: 28px;
+  color: rgba(255, 255, 255, 0.95);
+  animation: sparkle-spin 4s linear infinite;
+}
+
+body.light-mode .collage-sparkle-icon {
+  color: rgba(139, 92, 246, 1);
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 24px rgba(139, 92, 246, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 36px rgba(139, 92, 246, 0.6);
+    transform: scale(1.05);
+  }
+}
+
+@keyframes sparkle-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-15deg) scale(1.1);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+  75% {
+    transform: rotate(15deg) scale(1.1);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+/* Text Content */
+.collage-text {
+  max-width: 480px;
+}
+
+.collage-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(196, 181, 253, 0.95));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+body.light-mode .collage-title {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 1), rgba(236, 72, 153, 1));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.collage-description {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.5;
+}
+
+body.light-mode .collage-description {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+/* Template Previews */
+.collage-templates-preview {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.template-preview-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.template-preview-card:hover {
+  transform: translateY(-4px);
+}
+
+.template-preview-grid {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 4px;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+body.light-mode .template-preview-grid {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
+.template-preview-card:hover .template-preview-grid {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+body.light-mode .template-preview-card:hover .template-preview-grid {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.template-slot {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.6), rgba(236, 72, 153, 0.6));
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+body.light-mode .template-slot {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.7), rgba(236, 72, 153, 0.7));
+}
+
+.template-preview-card:hover .template-slot {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(236, 72, 153, 0.8));
+}
+
+.template-name {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+body.light-mode .template-name {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+/* CTA Button */
+.collage-cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2rem;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(236, 72, 153, 0.9));
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+body.light-mode .collage-cta-button {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 1), rgba(236, 72, 153, 1));
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
+}
+
+.collage-cta-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.collage-cta-button:hover::before {
+  left: 100%;
+}
+
+.collage-cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.5);
+}
+
+body.light-mode .collage-cta-button:hover {
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+}
+
+.collage-cta-button:active {
+  transform: translateY(0);
+}
+
+/* Animation */
+@keyframes fade-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .collage-teaser-container {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .collage-title {
+    font-size: 1.25rem;
+  }
+
+  .collage-description {
+    font-size: 0.875rem;
+  }
+
+  .collage-templates-preview {
+    gap: 0.75rem;
+  }
+
+  .template-preview-grid {
+    width: 56px;
+    height: 56px;
+  }
+}
+
+@media (max-width: 480px) {
+  .collage-teaser-container {
+    padding: 1.25rem 1rem;
+  }
+
+  .collage-icon-wrapper {
+    width: 48px;
+    height: 48px;
+  }
+
+  .collage-sparkle-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .collage-title {
+    font-size: 1.125rem;
+  }
+
+  .collage-description {
+    font-size: 0.8125rem;
+  }
+
+  .collage-cta-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9375rem;
+  }
+
+  .template-preview-grid {
+    width: 48px;
+    height: 48px;
+    gap: 3px;
+    padding: 4px;
+  }
+
+  .template-name {
+    font-size: 0.6875rem;
+  }
+}

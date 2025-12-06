@@ -59,5 +59,13 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "thisWeek": "This week"
+  },
+  "collageTeaser": {
+    "title": "Create Beautiful Collages",
+    "description": "Turn your photos into stunning layouts in seconds",
+    "cta": "Start Creating",
+    "gridTemplate": "Grid",
+    "storyTemplate": "Story",
+    "polaroidTemplate": "Polaroid"
   }
 }
