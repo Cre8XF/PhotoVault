@@ -21,8 +21,20 @@ export default {
     const path = url.pathname
 
     // CORS headers
+    const origin = request.headers.get('Origin')
+
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'https://pixtr.cloud',
+      'https://www.pixtr.cloud',
+      'https://photovault-app-a0946.web.app',
+      'https://photovault-app-a0946.firebaseapp.com',
+    ]
+
     const corsHeaders = {
-      'Access-Control-Allow-Origin': '*', // TODO: Restrict to your domain
+      'Access-Control-Allow-Origin': allowedOrigins.includes(origin)
+        ? origin
+        : 'null',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400',
@@ -199,20 +211,16 @@ async function handlePostMetadata(request, env, corsHeaders) {
     const objectKey = `${metadata.userId}/metadata.json`
     console.log(`[POST] Writing metadata: ${objectKey}`)
 
-    await env.PIXTR_METADATA.put(
-      objectKey,
-      JSON.stringify(metadata, null, 2),
-      {
-        httpMetadata: {
-          contentType: 'application/json',
-        },
-        customMetadata: {
-          userId: metadata.userId,
-          version: metadata.version,
-          lastUpdated: metadata.lastUpdated,
-        },
-      }
-    )
+    await env.PIXTR_METADATA.put(objectKey, JSON.stringify(metadata, null, 2), {
+      httpMetadata: {
+        contentType: 'application/json',
+      },
+      customMetadata: {
+        userId: metadata.userId,
+        version: metadata.version,
+        lastUpdated: metadata.lastUpdated,
+      },
+    })
 
     console.log(`[POST] Metadata saved successfully: ${objectKey}`)
 
@@ -260,7 +268,9 @@ async function verifyFirebaseToken(token) {
     }
 
     // Decode payload (base64url)
-    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
+    const payload = JSON.parse(
+      atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
+    )
 
     // Basic validation
     if (!payload.user_id && !payload.sub) {
