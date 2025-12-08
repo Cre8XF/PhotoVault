@@ -316,6 +316,34 @@ const useStore = create(
         setStorageLimit: (limit) => set({ storageLimit: limit }),
 
         // =====================================================================
+        // INTEGRITY SCAN STATE - PIXTR STORAGE AUTO-REPAIR
+        // =====================================================================
+        integrityScan: {
+          lastRun: null,
+          missingFiles: [],
+          orphanFiles: [],
+          repaired: [],
+        },
+
+        setIntegrityResults: (results) => set({ integrityScan: results }),
+
+        appendRepairLog: (logEntry) =>
+          set((state) => ({
+            integrityScan: {
+              ...state.integrityScan,
+              repaired: [...state.integrityScan.repaired, logEntry],
+            },
+          })),
+
+        // =====================================================================
+        // CLOUDFLARE METADATA ENGINE - FEATURE FLAG
+        // =====================================================================
+        useCloudflareBackend: false, // Default: use Firestore
+
+        setUseCloudflareBackend: (enabled) =>
+          set({ useCloudflareBackend: enabled }),
+
+        // =====================================================================
         // COMPUTED GETTERS
         // =====================================================================
         getAlbumById: (albumId) => {

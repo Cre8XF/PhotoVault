@@ -28,6 +28,7 @@ import {
   getDownloadURL,
   deleteObject,
 } from 'firebase/storage'
+import exifr from 'exifr'
 
 // 🔗 Firebase-konfig (fra Vite environment variabler)
 const firebaseConfig = {
@@ -480,7 +481,38 @@ export async function uploadPhoto(
       }
     }
 
-    // 2. Upload main file to Storage
+    // 2. Extract EXIF data (for photos only)
+    let takenAt = null
+    if (!isVideo) {
+      try {
+        const exifData = await exifr.parse(file, {
+          pick: ['DateTimeOriginal', 'CreateDate', 'ModifyDate']
+        })
+
+        if (exifData) {
+          // Try DateTimeOriginal first (most accurate)
+          takenAt = exifData.DateTimeOriginal || exifData.CreateDate || exifData.ModifyDate
+
+          if (takenAt) {
+            // Convert to ISO string if it's a Date object
+            if (takenAt instanceof Date) {
+              takenAt = takenAt.toISOString()
+            }
+            console.log(`📅 EXIF date found: ${takenAt}`)
+          }
+        }
+      } catch (exifError) {
+        console.warn('Could not read EXIF data:', exifError)
+      }
+    }
+
+    // Fallback to current date if no EXIF date
+    if (!takenAt) {
+      takenAt = new Date().toISOString()
+      console.log(`📅 Using current date as fallback: ${takenAt}`)
+    }
+
+    // 3. Upload main file to Storage
     const timestamp = Date.now()
     const safeName = file.name.replace(/\s+/g, '_')
     const folderPath = albumId || 'unassigned'
@@ -494,7 +526,7 @@ export async function uploadPhoto(
       `📸 ${isVideo ? 'Video' : 'Bilde'} lastet opp til Storage: ${safeName}`
     )
 
-    // 3. Prepare metadata
+    // 4. Prepare metadata
     const photoData = {
       name: file.name,
       url: downloadURL,
@@ -504,6 +536,7 @@ export async function uploadPhoto(
       size: file.size,
       type: isVideo ? 'video' : fileType,
       favorite: false,
+      takenAt: takenAt, // ✅ EXIF date or current date
 
       // Video-specific fields
       ...(isVideo && {
