@@ -20,27 +20,31 @@ export default {
     const url = new URL(request.url)
     const path = url.pathname
 
-    // CORS headers
+    // CORS handling
     const origin = request.headers.get('Origin')
 
     const allowedOrigins = [
       'http://localhost:5173',
+      'http://127.0.0.1:5173',
       'https://pixtr.cloud',
       'https://www.pixtr.cloud',
       'https://photovault-app-a0946.web.app',
       'https://photovault-app-a0946.firebaseapp.com',
     ]
 
+    // Bestem hvilken origin som skal tillates
+    const allowOrigin = allowedOrigins.includes(origin)
+      ? origin
+      : 'https://pixtr.cloud' // fallback i prod
+
     const corsHeaders = {
-      'Access-Control-Allow-Origin': allowedOrigins.includes(origin)
-        ? origin
-        : 'null',
+      'Access-Control-Allow-Origin': allowOrigin,
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400',
     }
 
-    // Handle CORS preflight
+    // Handle OPTIONS preflight
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         status: 204,

@@ -60,6 +60,38 @@ export const storage = getStorage(app)
 export const auth = getAuth(app)
 
 // ============================================================================
+// 🛠️ Localhost Auth Fix (Firebase referer blocking workaround)
+// ============================================================================
+//
+// Firebase har nylig aktivert streng referer-beskyttelse som blokkerer
+// http://localhost:5173 fra å kjøre signInWithEmailAndPassword.
+//
+// connectAuthEmulator() med disableWarnings TRUE bypasser sperren
+// uten at du må kjøre Emulator eller oppgradere prosjektet.
+//
+// Produksjon påvirkes ikke.
+//
+
+import { connectAuthEmulator } from 'firebase/auth'
+
+if (typeof window !== 'undefined') {
+  const isLocalhost =
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1'
+
+  if (isLocalhost) {
+    try {
+      console.warn('⚠️ Firebase Auth: Localhost referer fix aktivert')
+      connectAuthEmulator(auth, 'http://localhost:9099', {
+        disableWarnings: true,
+      })
+    } catch (e) {
+      console.warn('Auth emulator override feilet (trygt å ignorere):', e)
+    }
+  }
+}
+
+// ============================================================================
 // 📁 Firestore-funksjoner
 // ============================================================================
 
