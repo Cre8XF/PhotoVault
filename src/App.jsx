@@ -268,6 +268,25 @@ function AppContent() {
     }
   }, [user, uploadModalOpen, setUploadModalOpen])
 
+  // Save metadata on window unload (Phase 1)
+  React.useEffect(() => {
+    if (!user) return
+
+    const saveMetadata = useStore.getState().saveMetadata
+
+    const handleBeforeUnload = (e) => {
+      // Force immediate save before page closes
+      console.log('🔄 [App] Saving metadata before page unload...')
+      saveMetadata(true) // immediate save
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [user])
+
   // Set initial language on mount
   React.useEffect(() => {
     const savedLang = localStorage.getItem('photoVaultLanguage') || 'no'

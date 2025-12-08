@@ -26,6 +26,8 @@ export const useAuth = () => {
   const logout = useStore((state) => state.logout)
   const setNotification = useStore((state) => state.setNotification)
   const setConfirmModal = useStore((state) => state.setConfirmModal)
+  const loadMetadata = useStore((state) => state.loadMetadata) // R2 metadata
+  const saveMetadata = useStore((state) => state.saveMetadata) // R2 metadata
 
   /**
    * Fetch user profile from Firestore
@@ -83,6 +85,10 @@ export const useAuth = () => {
       message: t('common:notifications.confirmLogoutMessage'),
       onConfirm: async () => {
         try {
+          // Force save metadata before logout
+          console.log('🔄 [useAuth] Force saving metadata before logout...')
+          await saveMetadata(true) // immediate save
+
           await signOut(auth)
           logout()
           setNotification({
@@ -98,7 +104,7 @@ export const useAuth = () => {
         }
       },
     })
-  }, [auth, logout, setConfirmModal, setNotification, t])
+  }, [auth, logout, saveMetadata, setConfirmModal, setNotification, t])
 
   /**
    * Initialize auth listener
@@ -110,13 +116,25 @@ export const useAuth = () => {
 
       if (currentUser) {
         await fetchUserProfile(currentUser.uid)
+
+        // Load metadata from R2 after login
+        try {
+          console.log('🔑 [useAuth] Getting Firebase ID token...')
+          const idToken = await currentUser.getIdToken()
+          console.log('📥 [useAuth] Loading metadata from R2...')
+          await loadMetadata(currentUser.uid, idToken)
+          console.log('✅ [useAuth] Metadata loaded successfully')
+        } catch (error) {
+          console.error('❌ [useAuth] Failed to load metadata:', error)
+          // Don't block login on metadata load failure
+        }
       } else {
         setUserProfile(null)
       }
     })
 
     return () => unsubscribe()
-  }, [auth, setUser, setLoading, setUserProfile, fetchUserProfile])
+  }, [auth, setUser, setLoading, setUserProfile, fetchUserProfile, loadMetadata])
 
   // ==========================================
   // ✅ TIER-BASED HELPERS

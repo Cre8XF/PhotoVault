@@ -1,0 +1,25 @@
+# ============================================================================
+# Cloudflare Worker Configuration - Pixtr Metadata API (Phase 1)
+# ============================================================================
+
+name = "pixtr-metadata-api"
+main = "worker/index.js"
+compatibility_date = "2024-12-01"
+
+# Worker settings
+workers_dev = true
+
+# R2 bucket binding
+[[r2_buckets]]
+binding = "PIXTR_METADATA"
+bucket_name = "pixtr-metadata"
+preview_bucket_name = "pixtr-metadata-preview"
+
+# Environment variables (optional)
+[vars]
+ENVIRONMENT = "production"
+
+# Routes (configure after deploying)
+# [[routes]]
+# pattern = "metadata.your-domain.com/*"
+# zone_name = "your-domain.com"
