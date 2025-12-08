@@ -72,24 +72,8 @@ export const auth = getAuth(app)
 // Produksjon påvirkes ikke.
 //
 
-import { connectAuthEmulator } from 'firebase/auth'
-
-if (typeof window !== 'undefined') {
-  const isLocalhost =
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1'
-
-  if (isLocalhost) {
-    try {
-      console.warn('⚠️ Firebase Auth: Localhost referer fix aktivert')
-      connectAuthEmulator(auth, 'http://localhost:9099', {
-        disableWarnings: true,
-      })
-    } catch (e) {
-      console.warn('Auth emulator override feilet (trygt å ignorere):', e)
-    }
-  }
-}
+// Emulator disabled – use real Firebase Auth everywhere
+console.log('ENV AUTH DOMAIN:', import.meta.env.VITE_FIREBASE_AUTH_DOMAIN)
 
 // ============================================================================
 // 📁 Firestore-funksjoner
