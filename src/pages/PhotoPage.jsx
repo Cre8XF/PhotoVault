@@ -33,6 +33,7 @@ export default function PhotoPage() {
   const setIsWorldView = useStore((state) => state.setIsWorldView)
   const photos = useStore((state) => state.photos)
   const updatePhoto = useStore((state) => state.updatePhoto)
+  const saveMetadata = useStore((state) => state.saveMetadata) // R2 persistence
 
   // Custom hooks
   const { photo, loading, error } = usePhotoById(id)
@@ -129,6 +130,9 @@ export default function PhotoPage() {
     // Optimistic update
     updatePhoto(photo.id, { favorite: newFavoriteStatus })
 
+    // Persist to R2
+    saveMetadata() // Debounced
+
     try {
       await updatePhoto(photo.id, { favorite: newFavoriteStatus })
     } catch (err) {
@@ -138,7 +142,7 @@ export default function PhotoPage() {
     }
 
     resetUiTimer()
-  }, [photo, updatePhoto, resetUiTimer])
+  }, [photo, updatePhoto, saveMetadata, resetUiTimer])
 
   // Start slideshow - Phase 2B
   const handleStartSlideshow = useCallback(() => {

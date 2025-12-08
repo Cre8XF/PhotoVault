@@ -21,15 +21,18 @@ const useStore = create(
         user: null,
         userProfile: null,
         loading: true,
+        idToken: null, // Firebase ID token for R2 API authentication
 
         setUser: (user) => set({ user }),
         setUserProfile: (profile) => set({ userProfile: profile }),
         setLoading: (loading) => set({ loading }),
+        setIdToken: (token) => set({ idToken: token }),
 
         logout: () =>
           set({
             user: null,
             userProfile: null,
+            idToken: null,
             albums: [],
             photos: [],
             currentPage: 'home',
@@ -361,6 +364,7 @@ const useStore = create(
           set({
             user: null,
             userProfile: null,
+            idToken: null,
             albums: [],
             photos: [],
             currentPage: 'home',
@@ -372,6 +376,104 @@ const useStore = create(
             aiQueue: [],
             processingAI: false,
           }),
+
+        // =====================================================================
+        // R2 METADATA PERSISTENCE - PHASE 1
+        // =====================================================================
+
+        /**
+         * Load metadata from R2 and populate Zustand store
+         * @param {string} userId - User ID
+         * @param {string} idToken - Firebase ID token
+         */
+        loadMetadata: async (userId, idToken) => {
+          console.log('📥 [Store] Loading metadata from R2...')
+
+          try {
+            // Import metadataService dynamically to avoid circular dependencies
+            const { loadMetadata: loadFromR2, objectToArray } = await import('../services/metadataService')
+
+            // Load metadata from R2
+            const metadata = await loadFromR2(userId, idToken)
+
+            // Convert objects to arrays for Zustand
+            const photosArray = objectToArray(metadata.photos)
+            const albumsArray = objectToArray(metadata.albums)
+
+            console.log('✅ [Store] Metadata loaded, populating store:', {
+              photos: photosArray.length,
+              albums: albumsArray.length,
+            })
+
+            // Update store
+            set({
+              photos: photosArray,
+              albums: albumsArray,
+              settings: metadata.settings || {},
+              idToken: idToken,
+            })
+
+            // Update storage used
+            get().updateStorageUsed()
+
+            return { success: true, metadata }
+          } catch (error) {
+            console.error('❌ [Store] loadMetadata error:', error)
+            return { success: false, error }
+          }
+        },
+
+        /**
+         * Save metadata to R2 (debounced or immediate)
+         * @param {boolean} immediate - If true, save immediately; otherwise debounce
+         */
+        saveMetadata: async (immediate = false) => {
+          const state = get()
+          const userId = state.user?.uid
+          const idToken = state.idToken
+
+          if (!userId || !idToken) {
+            console.warn('⚠️ [Store] Cannot save metadata: missing userId or idToken')
+            return { success: false, error: 'Missing userId or idToken' }
+          }
+
+          try {
+            // Import metadataService dynamically
+            const { debouncedSave, forceSave, arrayToObject } = await import('../services/metadataService')
+
+            // Convert arrays back to objects
+            const photosObject = arrayToObject(state.photos)
+            const albumsObject = arrayToObject(state.albums)
+
+            // Prepare metadata
+            const metadata = {
+              version: '1.0',
+              userId: userId,
+              lastUpdated: new Date().toISOString(),
+              photos: photosObject,
+              albums: albumsObject,
+              settings: state.settings || {},
+            }
+
+            console.log('💾 [Store] Saving metadata to R2:', {
+              immediate,
+              photos: Object.keys(photosObject).length,
+              albums: Object.keys(albumsObject).length,
+            })
+
+            // Save (debounced or immediate)
+            if (immediate) {
+              await forceSave(userId, idToken, metadata)
+            } else {
+              debouncedSave(userId, idToken, metadata)
+            }
+
+            return { success: true }
+          } catch (error) {
+            console.error('❌ [Store] saveMetadata error:', error)
+            return { success: false, error }
+          }
+        },
 
         // =====================================================================
         // VAULT SLICE

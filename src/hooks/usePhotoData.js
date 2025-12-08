@@ -1,5 +1,5 @@
 // ============================================================================
-// usePhotoData Hook - Phase 4.1: FIXED DEPENDENCIES & ARRAY GUARDS
+// usePhotoData Hook - Phase 1: R2 METADATA PERSISTENCE
 // ============================================================================
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -18,7 +18,8 @@ import {
 } from '../firebase'
 import { db } from '../firebase'
 import useStore from '../state/store'
-import { listenToAlbumsByUser, listenToPhotosByUser } from '../firebase'
+
+// PHASE 1: Firestore listeners removed - using R2 metadata instead
 
 /**
  * Custom hook for photo and album data management
@@ -49,6 +50,7 @@ export const usePhotoData = () => {
   const setCurrentPage = useStore((state) => state.setCurrentPage)
   const setSelectedAlbum = useStore((state) => state.setSelectedAlbum)
   const closePhotoModal = useStore((state) => state.closePhotoModal)
+  const saveMetadata = useStore((state) => state.saveMetadata) // R2 metadata persistence
 
   /**
    * Refresh all data (albums + photos) for current user
@@ -122,53 +124,22 @@ export const usePhotoData = () => {
   const refreshData = refreshAllData
 
   /**
-   * Auto-refresh data when user changes
-   * 🔒 FIXED: Proper dependency array to avoid infinite loops
+   * PHASE 1: R2 Metadata Persistence
+   * Metadata is now loaded from R2 on login via useAuth hook
+   * No Firestore listeners needed - metadata comes from Zustand store
+   *
+   * This effect is kept for clearing data on logout only
    */
   useEffect(() => {
     if (!user?.uid) {
-      console.warn('⏸ Ingen bruker – nullstiller data.')
+      console.warn('⏸ [usePhotoData] No user - clearing data')
       setAlbums([])
       setPhotos([])
       return
     }
 
-    console.log('🔗 Starter Firestore live listeners for bruker:', user.uid)
-
-    // Start Firestore listeners
-    const unsubAlbums = listenToAlbumsByUser(user.uid, (data) =>
-      setAlbums(data)
-    )
-
-    // Phase 3.5 FIX: Add displayUrl to show edited version
-    const unsubPhotos = listenToPhotosByUser(user.uid, (data) => {
-      const photosWithDisplayUrl = Array.isArray(data)
-        ? data.map((photo) => ({
-            ...photo,
-            // displayUrl = editedUrl if exists, otherwise original url
-            displayUrl: photo.editedUrl || photo.url,
-          }))
-        : []
-
-      console.log(
-        '✅ Photos mapped with displayUrl:',
-        photosWithDisplayUrl.filter((p) => p.editedUrl).length,
-        'edited photos'
-      )
-
-      setPhotos(photosWithDisplayUrl)
-    })
-
-    // Initial engangs-refresh (for sikkerhet)
-    refreshAllData(user.uid)
-
-    // Rydd opp ved logout
-    return () => {
-      console.log('🧹 Stopper Firestore listeners')
-      unsubAlbums()
-      unsubPhotos()
-    }
-  }, [user?.uid])
+    console.log('✅ [usePhotoData] User logged in, metadata loaded from R2 via useAuth')
+  }, [user?.uid, setAlbums, setPhotos])
 
   /**
    * Handle photo upload
@@ -263,6 +234,9 @@ export const usePhotoData = () => {
             album.id === editingAlbum.id ? { ...album, ...albumData } : album
           )
         })
+
+        // Persist to R2
+        saveMetadata() // Debounced
 
         // Sync to backend in background
         await updateAlbum(editingAlbum.id, albumData)
@@ -360,6 +334,9 @@ export const usePhotoData = () => {
               )
             })
 
+            // Persist to R2
+            saveMetadata() // Debounced
+
             // Navigate away if viewing this album
             if (currentPage === 'album' && selectedAlbum?.id === album.id) {
               setCurrentPage('albums')
@@ -437,6 +414,10 @@ export const usePhotoData = () => {
               const safePrev = Array.isArray(prev) ? prev : []
               return safePrev.filter((p) => p.id !== photo.id)
             })
+
+            // Persist to R2
+            saveMetadata() // Debounced
+
             closePhotoModal()
 
             // Sync to backend
@@ -503,6 +484,9 @@ export const usePhotoData = () => {
           )
         })
 
+        // Persist to R2
+        saveMetadata() // Debounced
+
         // Sync to backend
         await updatePhoto(photo.id, { favorite: newFavoriteState })
 
@@ -556,6 +540,9 @@ export const usePhotoData = () => {
               : p
           )
         })
+
+        // Persist to R2
+        saveMetadata() // Debounced
 
         setNotification({
           message: t('common:captionSaved'),
@@ -623,6 +610,9 @@ export const usePhotoData = () => {
           )
         })
 
+        // Persist to R2
+        saveMetadata() // Debounced
+
         // Sync to backend
         await setAlbumCover(albumId, coverUrl)
 
@@ -673,6 +663,9 @@ export const usePhotoData = () => {
             album.id === albumId ? { ...album, photoCount: count } : album
           )
         })
+
+        // Persist to R2
+        saveMetadata() // Debounced
 
         // Sync to backend
         await updateAlbumPhotoCount(albumId, count)
