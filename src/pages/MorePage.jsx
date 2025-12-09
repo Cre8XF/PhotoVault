@@ -57,7 +57,8 @@ import {
 
 import { getAuth, deleteUser as deleteAuthUser } from 'firebase/auth'
 
-import { getStorage, ref as storageRef, listAll } from 'firebase/storage'
+// Firebase Storage imports removed - scanning causes 403 errors
+// Storage operations handled by firebase.js CRUD functions
 
 import { db, migrateAlbumsAddUserId, migratePhotosAddUserId } from '../firebase'
 import ComingSoonModal from '../components/ComingSoonModal'
@@ -324,7 +325,6 @@ const MorePage = ({
 
       const auth = getAuth()
       const db = getFirestore()
-      const storage = getStorage()
 
       const collections = ['photos', 'albums', 'shared', 'favorites']
 
@@ -337,14 +337,9 @@ const MorePage = ({
 
       await deleteDoc(doc(db, 'users', user.uid))
 
-      try {
-        const userStorageRef = storageRef(storage, `users/${user.uid}`)
-        const listResult = await listAll(userStorageRef)
-
-        await Promise.all(listResult.items.map((item) => item.delete()))
-      } catch (storageError) {
-        console.warn('Storage deletion error:', storageError)
-      }
+      // Storage deletion removed - Firebase Storage scanning causes 403 errors
+      // Individual photo deletions already handled by CRUD operations
+      console.log('✅ User Firestore data deleted')
 
       const currentUser = auth.currentUser
       if (currentUser) {
