@@ -26,27 +26,29 @@ service cloud.firestore {
     }
 
     // ===== ALBUMS =====
-    match /albums/{albumId} {
-      // Alle kan lese hvis albumet er offentlig
-      allow read: if resource.data.isPublic == true;
+   match /albums/{albumId} {
+  // Owner or admin can read/write
+  allow read, write, update, delete:
+    if isOwner(resource.data.userId) || isAdmin();
 
-      // Eier eller admin kan lese/skrive alt
-      allow read, write, update, delete:
-        if isOwner(resource.data.userId) || isAdmin();
-    }
+  // Public override
+  allow read: if resource.data.isPublic == true;
+}
+
 
     // ===== PHOTOS (TOPP NIVÅ) =====
-    match /photos/{photoId} {
-      // Tillat lesing av bilder som tilhører offentlig album
-      allow read: if
-        resource.data.albumId != null &&
-        exists(/databases/$(database)/documents/albums/$(resource.data.albumId)) &&
-        get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.isPublic == true;
+  match /photos/{photoId} {
+  // Owner or admin first
+  allow read, write, update, delete:
+    if isOwner(resource.data.userId) || isAdmin();
 
-      // Eier eller admin kan endre egne bilder
-      allow read, write, update, delete:
-        if isOwner(resource.data.userId) || isAdmin();
-    }
+  // Public fallback
+  allow read: if
+    resource.data.albumId != null &&
+    exists(/databases/$(database)/documents/albums/$(resource.data.albumId)) &&
+    get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.isPublic == true;
+}
+
 
     // ===== BRUKER-BASERT STRUKTUR =====
     match /users/{userId} {
