@@ -26,10 +26,18 @@ export default {
     const allowedOrigins = [
       'http://localhost:5173',
       'http://127.0.0.1:5173',
+
+      // Pixtr PROD
       'https://pixtr.cloud',
       'https://www.pixtr.cloud',
+
+      // Firebase legacy apps
       'https://photovault-app-a0946.web.app',
       'https://photovault-app-a0946.firebaseapp.com',
+
+      // Cloudflare Worker URLS (kritiskt!)
+      'https://pixtr-metadata-api.rogsor80.workers.dev',
+      'https://*.pixtr-metadata-api.rogsor80.workers.dev',
     ]
 
     // Bestem hvilken origin som skal tillates
