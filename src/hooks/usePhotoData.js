@@ -53,8 +53,8 @@ export const usePhotoData = () => {
   const saveMetadata = useStore((state) => state.saveMetadata) // R2 metadata persistence
 
   /**
-   * Refresh all data (albums + photos) for current user
-   * PHASE 4.1: Added comprehensive array validation
+   * Refresh all data (albums + photos) for current user from R2
+   * R2 METADATA ARCHITECTURE: Load from R2, NOT from Firestore
    */
   const refreshAllData = useCallback(
     async (uid) => {
@@ -64,82 +64,73 @@ export const usePhotoData = () => {
       }
 
       try {
-        const [fetchedAlbums, fetchedPhotos] = await Promise.all([
-          getAlbumsByUser(uid),
-          getPhotosByUser(uid),
-        ])
+        console.log('🔄 [usePhotoData] Refreshing metadata from R2...')
 
-        // 🔒 CRITICAL VALIDATION
-        const isAlbumsArray = Array.isArray(fetchedAlbums)
-        const isPhotosArray = Array.isArray(fetchedPhotos)
-
-        if (!isAlbumsArray) {
-          console.error('❌ getAlbumsByUser returned non-array:', {
-            type: typeof fetchedAlbums,
-            value: fetchedAlbums,
-            isArray: isAlbumsArray,
-          })
+        // Get ID token
+        const idToken = user?.uid ? await user.getIdToken() : null
+        if (!idToken) {
+          console.error('❌ [usePhotoData] No ID token available')
+          throw new Error('No authentication token')
         }
 
-        if (!isPhotosArray) {
-          console.error('❌ getPhotosByUser returned non-array:', {
-            type: typeof fetchedPhotos,
-            value: fetchedPhotos,
-            isArray: isPhotosArray,
-          })
+        // Load metadata from R2 via store's loadMetadata
+        const loadMetadataFn = useStore.getState().loadMetadata
+        const result = await loadMetadataFn(uid, idToken)
+
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to load metadata')
         }
 
-        // FORCE ARRAYS - Store's setAlbums/setPhotos now also validate, but double-check here
-        const safeAlbums = isAlbumsArray ? fetchedAlbums : []
-        const safePhotos = isPhotosArray ? fetchedPhotos : []
+        // Metadata is already loaded into the store by loadMetadata
+        // Just get the current state
+        const currentState = useStore.getState()
+        const safeAlbums = Array.isArray(currentState.albums) ? currentState.albums : []
+        const safePhotos = Array.isArray(currentState.photos) ? currentState.photos : []
 
-        console.log('✅ Refresh complete:', {
+        console.log('✅ Refresh complete from R2:', {
           albums: safeAlbums.length,
           photos: safePhotos.length,
         })
 
-        // Store validates again, but we're passing safe arrays
-        setAlbums(safeAlbums)
-        setPhotos(safePhotos)
         updateStorageUsed()
 
         return { albums: safeAlbums, photos: safePhotos }
       } catch (err) {
-        console.error('❌ Error refreshing data:', err)
+        console.error('❌ Error refreshing data from R2:', err)
         setNotification({
           message: t('common:notifications.errorLoadingData'),
           type: 'error',
         })
 
-        // On error, reset to empty arrays (safe state)
-        setAlbums([])
-        setPhotos([])
-        return { albums: [], photos: [] }
+        // On error, DON'T reset to empty - keep existing data
+        const currentState = useStore.getState()
+        return {
+          albums: Array.isArray(currentState.albums) ? currentState.albums : [],
+          photos: Array.isArray(currentState.photos) ? currentState.photos : [],
+        }
       }
     },
-    [setAlbums, setPhotos, updateStorageUsed, setNotification, t]
+    [user, updateStorageUsed, setNotification, t]
   )
 
   // Alias for backwards compatibility
   const refreshData = refreshAllData
 
   /**
-   * PHASE 1: R2 Metadata Persistence
-   * Metadata is now loaded from R2 on login via useAuth hook
-   * No Firestore listeners needed - metadata comes from Zustand store
-   *
-   * This effect is kept for clearing data on logout only
+   * R2 METADATA ARCHITECTURE:
+   * Metadata is loaded from R2 on login via useAuth hook
+   * This effect only runs once to confirm the user is logged in
+   * DO NOT clear data here as it races with metadata loading
    */
   useEffect(() => {
-    if (!user?.uid) {
-      console.warn('⏸ [usePhotoData] No user - clearing data')
-      setAlbums([])
-      setPhotos([])
-      return
+    if (user?.uid) {
+      console.log('✅ [usePhotoData] User authenticated, metadata should be loaded from R2 via useAuth')
+    } else {
+      console.log('⏸ [usePhotoData] No user authenticated yet')
     }
-
-    console.log('✅ [usePhotoData] User logged in, metadata loaded from R2 via useAuth')
-  }, [user?.uid, setAlbums, setPhotos])
+    // DO NOT clear albums/photos here - it races with metadata loading
+    // Clearing happens in store.logout() instead
+  }, [user?.uid])
 
   /**
    * Handle photo upload
