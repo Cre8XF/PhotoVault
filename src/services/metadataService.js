@@ -1,200 +1,150 @@
 // ============================================================================
-// Metadata Service - R2 JSON Persistence (Phase 1)
+// METADATA SERVICE – DEV FALLBACK + PROD WORKER
 // ============================================================================
 
-/**
- * MetadataService handles all metadata persistence to Cloudflare R2
- * Replaces Firestore for metadata storage
- *
- * Architecture:
- * - Metadata stored as JSON in R2: {userId}/metadata.json
- * - Debounced saves (1 second)
- * - Full metadata object stored/retrieved
- * - Firebase Auth token for authentication
- */
+const IS_DEV = import.meta.env.DEV
+const METADATA_API_URL = import.meta.env.VITE_METADATA_API_URL
 
-const API_BASE_URL = import.meta.env.VITE_METADATA_API_URL || 'https://pixtr-metadata-api.your-subdomain.workers.dev'
+console.warn(
+  IS_DEV
+    ? '🟣 [MetadataService] DEV MODE: Cloudflare metadata backend DISABLED (fallback JSON).'
+    : '🟢 [MetadataService] PROD MODE: Cloudflare metadata backend ENABLED.'
+)
 
-// Debounce timeout reference
-let saveTimeout = null
+// ---------------------------------------------------------------------------
+// Shared empty metadata structure
+// ---------------------------------------------------------------------------
 
-/**
- * Load metadata from R2
- * @param {string} userId - User ID
- * @param {string} idToken - Firebase ID token
- * @returns {Promise<Object>} Metadata object
- */
-export async function loadMetadata(userId, idToken) {
-  console.log('📥 [MetadataService] Loading metadata for user:', userId)
-
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/metadata?userId=${userId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${idToken}`,
-        'Content-Type': 'application/json',
-      },
-    })
-
-    // If 404, return empty metadata (first time user)
-    if (response.status === 404) {
-      console.log('📭 [MetadataService] No metadata found (new user), returning empty metadata')
-      return createEmptyMetadata(userId)
-    }
-
-    if (!response.ok) {
-      console.error('❌ [MetadataService] Load failed:', response.status, response.statusText)
-      return createEmptyMetadata(userId)
-    }
-
-    const metadata = await response.json()
-    console.log('✅ [MetadataService] Metadata loaded successfully:', {
-      version: metadata.version,
-      userId: metadata.userId,
-      photosCount: Object.keys(metadata.photos || {}).length,
-      albumsCount: Object.keys(metadata.albums || {}).length,
-      lastUpdated: metadata.lastUpdated,
-    })
-
-    return metadata
-  } catch (error) {
-    console.error('❌ [MetadataService] Load error:', error)
-    return createEmptyMetadata(userId)
+function getEmptyMetadata(userId) {
+  return {
+    version: '1.0',
+    userId,
+    lastUpdated: new Date().toISOString(),
+    photos: {},
+    albums: {},
+    settings: {
+      language: 'no',
+      theme: 'dark',
+      autoCompress: false,
+    },
   }
 }
 
-/**
- * Save metadata to R2
- * @param {string} userId - User ID
- * @param {string} idToken - Firebase ID token
- * @param {Object} metadata - Full metadata object
- * @returns {Promise<boolean>} Success status
- */
-export async function saveMetadata(userId, idToken, metadata) {
-  console.log('💾 [MetadataService] Saving metadata for user:', userId)
+// ---------------------------------------------------------------------------
+// Load metadata
+// ---------------------------------------------------------------------------
+
+export async function loadMetadata(userId) {
+  if (!userId) {
+    console.error('[MetadataService] Missing userId!')
+    return getEmptyMetadata('unknown')
+  }
+
+  // DEV MODE – return local empty structure
+  if (IS_DEV || !METADATA_API_URL) {
+    console.log('🟣 [MetadataService] DEV fallback metadata used.')
+    return getEmptyMetadata(userId)
+  }
 
   try {
-    // Ensure metadata has required structure
-    const validMetadata = {
-      version: '1.0',
-      userId: userId,
-      lastUpdated: new Date().toISOString(),
-      photos: metadata.photos || {},
-      albums: metadata.albums || {},
-      settings: metadata.settings || {},
+    console.log(
+      `📡 [MetadataService] Fetching metadata from worker for: ${userId}`
+    )
+
+    const idToken = await getFirebaseToken()
+
+    const response = await fetch(
+      `${METADATA_API_URL}/api/metadata?userId=${userId}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+
+    if (!response.ok) {
+      console.error(
+        '[MetadataService] Failed to load metadata:',
+        response.status
+      )
+      return getEmptyMetadata(userId)
     }
 
-    console.log('📤 [MetadataService] Metadata structure:', {
-      version: validMetadata.version,
-      photosCount: Object.keys(validMetadata.photos).length,
-      albumsCount: Object.keys(validMetadata.albums).length,
-    })
+    const data = await response.json()
+    console.log('📥 [MetadataService] Loaded metadata:', data)
 
-    const response = await fetch(`${API_BASE_URL}/api/metadata`, {
+    return data
+  } catch (err) {
+    console.error('❌ [MetadataService] Error loading metadata:', err)
+    return getEmptyMetadata(userId)
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Save metadata
+// ---------------------------------------------------------------------------
+
+export async function saveMetadata(metadata) {
+  if (!metadata || !metadata.userId) {
+    console.error('[MetadataService] Invalid metadata object:', metadata)
+    return false
+  }
+
+  // DEV MODE – skip saving
+  if (IS_DEV || !METADATA_API_URL) {
+    console.log('🟣 [MetadataService] DEV mode: metadata NOT saved to backend.')
+    return true
+  }
+
+  try {
+    console.log(`📡 [MetadataService] Saving metadata for ${metadata.userId}`)
+
+    const idToken = await getFirebaseToken()
+
+    metadata.lastUpdated = new Date().toISOString()
+
+    const response = await fetch(`${METADATA_API_URL}/api/metadata`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${idToken}`,
+        Authorization: `Bearer ${idToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(validMetadata),
+      body: JSON.stringify(metadata),
     })
 
     if (!response.ok) {
-      console.error('❌ [MetadataService] Save failed:', response.status, response.statusText)
+      console.error(
+        '[MetadataService] Failed to save metadata:',
+        response.status
+      )
       return false
     }
 
-    console.log('✅ [MetadataService] Metadata saved successfully')
+    console.log('💾 [MetadataService] Metadata saved successfully!')
     return true
-  } catch (error) {
-    console.error('❌ [MetadataService] Save error:', error)
+  } catch (err) {
+    console.error('❌ [MetadataService] Error saving metadata:', err)
     return false
   }
 }
 
-/**
- * Debounced save - waits 1 second before saving
- * @param {string} userId - User ID
- * @param {string} idToken - Firebase ID token
- * @param {Object} metadata - Full metadata object
- */
-export function debouncedSave(userId, idToken, metadata) {
-  // Clear previous timeout
-  if (saveTimeout) {
-    clearTimeout(saveTimeout)
-  }
+// ---------------------------------------------------------------------------
+// Firebase token helper
+// ---------------------------------------------------------------------------
 
-  console.log('⏱️ [MetadataService] Debounced save scheduled (1s)')
-
-  // Schedule new save
-  saveTimeout = setTimeout(async () => {
-    await saveMetadata(userId, idToken, metadata)
-  }, 1000)
-}
-
-/**
- * Force immediate save (no debounce)
- * @param {string} userId - User ID
- * @param {string} idToken - Firebase ID token
- * @param {Object} metadata - Full metadata object
- * @returns {Promise<boolean>} Success status
- */
-export async function forceSave(userId, idToken, metadata) {
-  // Clear any pending debounced save
-  if (saveTimeout) {
-    clearTimeout(saveTimeout)
-    saveTimeout = null
-  }
-
-  console.log('⚡ [MetadataService] Force save (immediate)')
-  return await saveMetadata(userId, idToken, metadata)
-}
-
-/**
- * Create empty metadata structure
- * @param {string} userId - User ID
- * @returns {Object} Empty metadata object
- */
-function createEmptyMetadata(userId) {
-  return {
-    version: '1.0',
-    userId: userId,
-    lastUpdated: new Date().toISOString(),
-    photos: {},
-    albums: {},
-    settings: {},
-  }
-}
-
-/**
- * Convert array to object (keyed by id)
- * @param {Array} array - Array of items with id property
- * @returns {Object} Object keyed by id
- */
-export function arrayToObject(array) {
-  if (!Array.isArray(array)) {
-    console.warn('⚠️ [MetadataService] arrayToObject received non-array:', typeof array)
-    return {}
-  }
-
-  return array.reduce((acc, item) => {
-    if (item && item.id) {
-      acc[item.id] = item
+async function getFirebaseToken() {
+  try {
+    const { getAuth } = await import('firebase/auth')
+    const auth = getAuth()
+    const user = auth.currentUser
+    if (!user) {
+      throw new Error('No authenticated user')
     }
-    return acc
-  }, {})
-}
-
-/**
- * Convert object to array
- * @param {Object} obj - Object keyed by id
- * @returns {Array} Array of items
- */
-export function objectToArray(obj) {
-  if (!obj || typeof obj !== 'object') {
-    console.warn('⚠️ [MetadataService] objectToArray received invalid input:', typeof obj)
-    return []
+    return await user.getIdToken()
+  } catch (err) {
+    console.error('❌ [MetadataService] Failed to get Firebase token:', err)
+    throw err
   }
-
-  return Object.values(obj)
 }
