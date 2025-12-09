@@ -37,7 +37,6 @@ export default {
 
       // Cloudflare Worker URLS (kritiskt!)
       'https://pixtr-metadata-api.rogsor80.workers.dev',
-      'https://*.pixtr-metadata-api.rogsor80.workers.dev',
     ]
 
     // Bestem hvilken origin som skal tillates
@@ -115,8 +114,10 @@ async function handleGetMetadata(request, env, corsHeaders) {
     // Extract userId from query params
     const url = new URL(request.url)
     const userId = url.searchParams.get('userId')
+    console.log(`[GET] userId = ${userId}`)
 
     if (!userId) {
+      console.error('[GET] Missing userId parameter')
       return new Response(JSON.stringify({ error: 'userId is required' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -125,7 +126,10 @@ async function handleGetMetadata(request, env, corsHeaders) {
 
     // Verify Firebase token
     const authHeader = request.headers.get('Authorization')
+    console.log(`[AUTH] Authorization header: ${authHeader ? authHeader.substring(0, 20) + '...' : 'MISSING'}`)
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.error('[AUTH] Invalid or missing Authorization header')
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -134,9 +138,11 @@ async function handleGetMetadata(request, env, corsHeaders) {
 
     const token = authHeader.substring(7)
     const tokenUserId = await verifyFirebaseToken(token)
+    console.log(`[AUTH] Decoded user: ${tokenUserId}`)
 
     // Ensure user can only access their own metadata
     if (tokenUserId !== userId) {
+      console.error(`[AUTH] Token userId (${tokenUserId}) does not match requested userId (${userId})`)
       return new Response(JSON.stringify({ error: 'Forbidden' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -145,20 +151,33 @@ async function handleGetMetadata(request, env, corsHeaders) {
 
     // Read from R2
     const objectKey = `${userId}/metadata.json`
-    console.log(`[GET] Reading metadata: ${objectKey}`)
+    console.log(`[GET] Reading metadata from R2: ${objectKey}`)
 
     const object = await env.PIXTR_METADATA.get(objectKey)
 
     if (object === null) {
-      console.log(`[GET] Metadata not found: ${objectKey}`)
-      return new Response(JSON.stringify({ error: 'Not found' }), {
-        status: 404,
+      console.log(`[GET] Metadata not found in R2, returning empty structure: ${objectKey}`)
+      // Return empty metadata structure instead of 404
+      const emptyMetadata = {
+        version: '1.0',
+        userId,
+        lastUpdated: new Date().toISOString(),
+        photos: {},
+        albums: {},
+        settings: {
+          language: 'no',
+          theme: 'dark',
+          autoCompress: false,
+        },
+      }
+      return new Response(JSON.stringify(emptyMetadata), {
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
     const metadata = await object.json()
-    console.log(`[GET] Metadata retrieved successfully: ${objectKey}`)
+    console.log(`[GET] Metadata retrieved successfully: ${objectKey} (${JSON.stringify(metadata).length} bytes)`)
 
     return new Response(JSON.stringify(metadata), {
       status: 200,
@@ -187,7 +206,10 @@ async function handlePostMetadata(request, env, corsHeaders) {
   try {
     // Verify Firebase token
     const authHeader = request.headers.get('Authorization')
+    console.log(`[AUTH] Authorization header: ${authHeader ? authHeader.substring(0, 20) + '...' : 'MISSING'}`)
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.error('[AUTH] Invalid or missing Authorization header')
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -196,12 +218,15 @@ async function handlePostMetadata(request, env, corsHeaders) {
 
     const token = authHeader.substring(7)
     const tokenUserId = await verifyFirebaseToken(token)
+    console.log(`[AUTH] Firebase user = ${tokenUserId}`)
 
     // Parse request body
     const metadata = await request.json()
+    console.log(`[POST] Received metadata for userId: ${metadata.userId}`)
 
     // Validate metadata structure
     if (!metadata.userId || !metadata.version) {
+      console.error('[POST] Invalid metadata structure - missing userId or version')
       return new Response(
         JSON.stringify({ error: 'Invalid metadata structure' }),
         {
@@ -213,6 +238,7 @@ async function handlePostMetadata(request, env, corsHeaders) {
 
     // Ensure user can only save their own metadata
     if (tokenUserId !== metadata.userId) {
+      console.error(`[AUTH] Token userId (${tokenUserId}) does not match metadata userId (${metadata.userId})`)
       return new Response(JSON.stringify({ error: 'Forbidden' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -221,7 +247,7 @@ async function handlePostMetadata(request, env, corsHeaders) {
 
     // Write to R2
     const objectKey = `${metadata.userId}/metadata.json`
-    console.log(`[POST] Writing metadata: ${objectKey}`)
+    console.log(`[POST] Writing metadata to R2: ${objectKey}`)
 
     await env.PIXTR_METADATA.put(objectKey, JSON.stringify(metadata, null, 2), {
       httpMetadata: {
@@ -234,14 +260,11 @@ async function handlePostMetadata(request, env, corsHeaders) {
       },
     })
 
-    console.log(`[POST] Metadata saved successfully: ${objectKey}`)
+    console.log(`[POST] Saved metadata for = ${metadata.userId} (${JSON.stringify(metadata).length} bytes)`)
 
+    // Return the full metadata object so frontend can update store
     return new Response(
-      JSON.stringify({
-        success: true,
-        userId: metadata.userId,
-        lastUpdated: metadata.lastUpdated,
-      }),
+      JSON.stringify(metadata),
       {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -274,8 +297,11 @@ async function verifyFirebaseToken(token) {
     // MVP: Basic JWT decoding without signature verification
     // TODO: Implement proper verification with Firebase public keys for production
 
+    console.log(`[AUTH] Verifying token (length: ${token.length}, prefix: ${token.substring(0, 15)}...)`)
+
     const parts = token.split('.')
     if (parts.length !== 3) {
+      console.error('[AUTH] Invalid token format - expected 3 parts, got:', parts.length)
       throw new Error('Invalid token format')
     }
 
@@ -286,18 +312,24 @@ async function verifyFirebaseToken(token) {
 
     // Basic validation
     if (!payload.user_id && !payload.sub) {
+      console.error('[AUTH] Invalid token - missing user_id/sub in payload')
       throw new Error('Invalid token: missing user_id')
     }
 
     // Check expiration
-    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
+    const now = Math.floor(Date.now() / 1000)
+    if (payload.exp && payload.exp < now) {
+      console.error(`[AUTH] Token expired - exp: ${payload.exp}, now: ${now}`)
       throw new Error('Token expired')
     }
 
+    const userId = payload.user_id || payload.sub
+    console.log(`[AUTH] Token verified successfully for user: ${userId}`)
+
     // Return user ID
-    return payload.user_id || payload.sub
+    return userId
   } catch (error) {
-    console.error('Token verification error:', error)
+    console.error('[AUTH] Token verification error:', error.message)
     throw new Error('Invalid or expired token')
   }
 }
