@@ -1,0 +1,69 @@
+# ============================================================================
+# Wrangler Configuration for Pixtr Metadata Worker
+# ============================================================================
+
+name = "pixtr-metadata-worker"
+main = "metadata-worker.js"
+compatibility_date = "2024-12-08"
+workers_dev = true
+
+# ============================================================================
+# R2 BUCKET BINDING
+# ============================================================================
+[[r2_buckets]]
+binding = "PIXTR_STORAGE"
+bucket_name = "pixtr-photos"
+preview_bucket_name = "pixtr-photos-preview" # Optional: for testing
+
+# ============================================================================
+# KV NAMESPACE BINDING
+# ============================================================================
+# Create KV namespace first:
+# wrangler kv:namespace create "PIXTR_METADATA_KV"
+# wrangler kv:namespace create "PIXTR_METADATA_KV" --preview
+
+[[kv_namespaces]]
+binding = "PIXTR_METADATA_KV"
+id = "YOUR_KV_NAMESPACE_ID_HERE" # Replace with actual KV namespace ID
+preview_id = "YOUR_KV_PREVIEW_NAMESPACE_ID_HERE" # Replace with actual preview ID
+
+# ============================================================================
+# ENVIRONMENT VARIABLES
+# ============================================================================
+[vars]
+ADMIN_TOKEN = "your-secure-admin-token-here" # Replace with actual secure token
+
+# ============================================================================
+# DEPLOYMENT SETTINGS
+# ============================================================================
+# Production environment
+[env.production]
+name = "pixtr-metadata-worker-production"
+workers_dev = false
+routes = [
+  { pattern = "metadata.your-domain.com/*", zone_name = "your-domain.com" }
+]
+
+# Staging environment
+[env.staging]
+name = "pixtr-metadata-worker-staging"
+workers_dev = false
+routes = [
+  { pattern = "metadata-staging.your-domain.com/*", zone_name = "your-domain.com" }
+]
+
+# ============================================================================
+# USAGE NOTES
+# ============================================================================
+# 1. Install Wrangler CLI: npm install -g wrangler
+# 2. Login: wrangler login
+# 3. Create KV namespace: wrangler kv:namespace create "PIXTR_METADATA_KV"
+# 4. Update the KV namespace IDs above
+# 5. Set ADMIN_TOKEN to a secure random value
+# 6. Deploy: wrangler deploy
+#
+# For development:
+# wrangler dev --local
+#
+# For production deployment:
+# wrangler deploy --env production
