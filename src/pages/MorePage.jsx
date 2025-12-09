@@ -62,6 +62,7 @@ import { getStorage, ref as storageRef, listAll } from 'firebase/storage'
 import { db, migrateAlbumsAddUserId, migratePhotosAddUserId } from '../firebase'
 import ComingSoonModal from '../components/ComingSoonModal'
 import { useStorageCalc } from '../hooks/useStorageCalc'
+import SystemStatus from '../components/admin/SystemStatus'
 
 const MorePage = ({
   user,
@@ -1083,6 +1084,11 @@ const MorePage = ({
               </div>
               <ChevronRight className="w-5 h-5 opacity-50" />
             </button>
+          </div>
+
+          {/* System Status - Storage Integrity */}
+          <div className="mt-4 pt-4 border-t border-yellow-500/20">
+            <SystemStatus />
           </div>
 
           {/* Migration Tools - Developer/Debug */}
