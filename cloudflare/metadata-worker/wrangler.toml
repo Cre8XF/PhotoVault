@@ -10,22 +10,26 @@ workers_dev = true
 # ============================================================================
 # R2 BUCKET BINDING
 # ============================================================================
+# CRITICAL: This R2 bucket stores BOTH photo files AND metadata JSON files
+# - Photo files: users/{userId}/{albumId}/{filename}
+# - Metadata files: pixtr-metadata/{userId}.json
 [[r2_buckets]]
 binding = "PIXTR_STORAGE"
 bucket_name = "pixtr-photos"
 preview_bucket_name = "pixtr-photos-preview" # Optional: for testing
 
 # ============================================================================
-# KV NAMESPACE BINDING
+# KV NAMESPACE BINDING (DEPRECATED - NOT USED FOR METADATA)
 # ============================================================================
-# Create KV namespace first:
-# wrangler kv:namespace create "PIXTR_METADATA_KV"
-# wrangler kv:namespace create "PIXTR_METADATA_KV" --preview
+# NOTE: KV is NO LONGER used for metadata storage
+# Metadata is now stored in R2 as pixtr-metadata/{userId}.json
+# This binding is kept for backward compatibility only
+# You can remove this section if you're not using KV for anything else
 
-[[kv_namespaces]]
-binding = "PIXTR_METADATA_KV"
-id = "YOUR_KV_NAMESPACE_ID_HERE" # Replace with actual KV namespace ID
-preview_id = "YOUR_KV_PREVIEW_NAMESPACE_ID_HERE" # Replace with actual preview ID
+# [[kv_namespaces]]
+# binding = "PIXTR_METADATA_KV"
+# id = "YOUR_KV_NAMESPACE_ID_HERE"
+# preview_id = "YOUR_KV_PREVIEW_NAMESPACE_ID_HERE"
 
 # ============================================================================
 # ENVIRONMENT VARIABLES

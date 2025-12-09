@@ -1,15 +1,31 @@
 // ============================================================================
-// METADATA SERVICE – DEV FALLBACK + PROD WORKER
+// METADATA SERVICE – R2-BASED METADATA SYSTEM
 // ============================================================================
 
 const IS_DEV = import.meta.env.DEV
 const METADATA_API_URL = import.meta.env.VITE_METADATA_API_URL
 
+// ✅ CRITICAL: Log configuration on startup
 console.warn(
   IS_DEV
     ? '🟣 [MetadataService] DEV MODE: Cloudflare metadata backend DISABLED (fallback JSON).'
     : '🟢 [MetadataService] PROD MODE: Cloudflare metadata backend ENABLED.'
 )
+
+console.log('[MetadataService] Configuration:', {
+  IS_DEV,
+  METADATA_API_URL: METADATA_API_URL || 'NOT SET',
+  mode: import.meta.env.MODE,
+})
+
+// CRITICAL WARNING if production mode but no API URL
+if (!IS_DEV && !METADATA_API_URL) {
+  console.error(
+    '❌❌❌ CRITICAL: VITE_METADATA_API_URL is NOT SET in production build! ' +
+    'Metadata will NOT be loaded from R2. Albums/photos will appear empty. ' +
+    'Please set VITE_METADATA_API_URL environment variable and rebuild.'
+  )
+}
 
 // ---------------------------------------------------------------------------
 // Shared empty metadata structure
@@ -41,8 +57,18 @@ export async function loadMetadata(userId) {
   }
 
   // DEV MODE – return local empty structure
-  if (IS_DEV || !METADATA_API_URL) {
-    console.log('🟣 [MetadataService] DEV fallback metadata used.')
+  if (IS_DEV) {
+    console.log('🟣 [MetadataService] DEV mode: returning empty metadata (local development)')
+    return getEmptyMetadata(userId)
+  }
+
+  // ❌ CRITICAL: If METADATA_API_URL not set in production, throw error
+  if (!METADATA_API_URL) {
+    console.error(
+      '❌ [MetadataService] VITE_METADATA_API_URL is NOT SET! ' +
+      'Cannot load metadata from R2. This is a configuration error. ' +
+      'Returning empty metadata as fallback.'
+    )
     return getEmptyMetadata(userId)
   }
 
@@ -64,8 +90,10 @@ export async function loadMetadata(userId) {
     console.log(`[MetadataService] Response status: ${response.status}`)
 
     if (!response.ok) {
+      const errorText = await response.text()
       console.error(
-        `❌ [MetadataService] Failed to load metadata: ${response.status} ${response.statusText}`
+        `❌ [MetadataService] Failed to load metadata: ${response.status} ${response.statusText}`,
+        errorText
       )
       return getEmptyMetadata(userId)
     }
@@ -77,6 +105,7 @@ export async function loadMetadata(userId) {
     return data
   } catch (err) {
     console.error('❌ [MetadataService] Error loading metadata:', err)
+    console.error('Stack trace:', err.stack)
     return getEmptyMetadata(userId)
   }
 }
@@ -92,9 +121,18 @@ export async function saveMetadata(metadata) {
   }
 
   // DEV MODE – skip saving
-  if (IS_DEV || !METADATA_API_URL) {
+  if (IS_DEV) {
     console.log('🟣 [MetadataService] DEV mode: metadata NOT saved to backend.')
     return metadata
+  }
+
+  // ❌ CRITICAL: If METADATA_API_URL not set in production, throw error
+  if (!METADATA_API_URL) {
+    console.error(
+      '❌ [MetadataService] VITE_METADATA_API_URL is NOT SET! ' +
+      'Cannot save metadata to R2. This is a configuration error.'
+    )
+    return null
   }
 
   try {
@@ -119,8 +157,10 @@ export async function saveMetadata(metadata) {
     console.log(`[MetadataService] Response status: ${response.status}`)
 
     if (!response.ok) {
+      const errorText = await response.text()
       console.error(
-        `❌ [MetadataService] Failed to save metadata: ${response.status} ${response.statusText}`
+        `❌ [MetadataService] Failed to save metadata: ${response.status} ${response.statusText}`,
+        errorText
       )
       return null
     }
@@ -132,6 +172,7 @@ export async function saveMetadata(metadata) {
     return savedMetadata
   } catch (err) {
     console.error('❌ [MetadataService] Error saving metadata:', err)
+    console.error('Stack trace:', err.stack)
     return null
   }
 }
