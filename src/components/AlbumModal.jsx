@@ -25,18 +25,43 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
   }, [editingAlbum])
 
   // Prevent body scroll when modal is open (mobile-friendly approach)
-  // ⚠️ DISABLED: position: fixed breaks iOS keyboard when switching inputs
-  // Instead, we rely on modal overlay preventing scroll
+  // ⚠️ CRITICAL: NO position: fixed! It breaks iOS keyboard when switching inputs
+  // iOS needs to adjust viewport when keyboard appears - position:fixed blocks this
   useEffect(() => {
-    console.log('📱 AlbumModal: Mobile-friendly scroll prevention (no position:fixed)')
+    console.log('═══════════════════════════════════════')
+    console.log('📱 SCROLL LOCK: Applying mobile-safe overflow lock')
+    console.log('═══════════════════════════════════════')
 
-    // Only disable scroll, don't use position: fixed
-    const originalOverflow = document.body.style.overflow
+    // Store original values
+    const originalBodyOverflow = document.body.style.overflow
+    const originalHtmlOverflow = document.documentElement.style.overflow
+    const originalBodyPosition = document.body.style.position
+
+    console.log('BEFORE lock:')
+    console.log('  body.style.overflow:', originalBodyOverflow || '(empty)')
+    console.log('  body.style.position:', originalBodyPosition || '(empty)')
+    console.log('  html.style.overflow:', originalHtmlOverflow || '(empty)')
+
+    // Apply iOS-safe scroll lock (overflow only, NO position)
     document.body.style.overflow = 'hidden'
+    document.documentElement.style.overflow = 'hidden'
+
+    console.log('AFTER lock:')
+    console.log('  body.style.overflow:', document.body.style.overflow)
+    console.log('  html.style.overflow:', document.documentElement.style.overflow)
+    console.log('  body.style.position:', document.body.style.position || '(none - CORRECT!)')
+    console.log('═══════════════════════════════════════')
 
     return () => {
-      console.log('📱 AlbumModal: Restoring scroll')
-      document.body.style.overflow = originalOverflow
+      console.log('📱 SCROLL LOCK: Restoring original overflow')
+      document.body.style.overflow = originalBodyOverflow
+      document.documentElement.style.overflow = originalHtmlOverflow
+
+      // Safety check: ensure position:fixed was never applied
+      if (document.body.style.position === 'fixed') {
+        console.warn('⚠️ WARNING: body.style.position was "fixed" - removing it!')
+        document.body.style.position = originalBodyPosition
+      }
     }
   }, [])
 
@@ -118,7 +143,7 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
     console.log('═══════════════════════════════════════')
   }
 
-  // Enhanced component mount debugging
+  // Enhanced component mount debugging + viewport monitoring
   useEffect(() => {
     console.log('═══════════════════════════════════════')
     console.log('🚀 ALBUM MODAL MOUNTED')
@@ -127,9 +152,25 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
     console.log('Device:', /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? 'MOBILE' : 'DESKTOP')
     console.log('Touch support:', 'ontouchstart' in window ? 'YES' : 'NO')
     console.log('Screen size:', `${window.innerWidth}x${window.innerHeight}`)
+    console.log('Visual viewport:', window.visualViewport ? `${window.visualViewport.width}x${window.visualViewport.height}` : 'NOT SUPPORTED')
     console.log('Viewport meta:', document.querySelector('meta[name="viewport"]')?.content || 'NOT FOUND')
     console.log('Body overflow:', document.body.style.overflow)
-    console.log('Body position:', document.body.style.position)
+    console.log('Body position:', document.body.style.position || '(none)')
+    console.log('HTML overflow:', document.documentElement.style.overflow || '(none)')
+
+    // Monitor viewport changes (keyboard appearing/disappearing)
+    const handleViewportChange = () => {
+      console.log('📐 VIEWPORT CHANGED:')
+      console.log('  • Window height:', window.innerHeight)
+      console.log('  • Visual viewport height:', window.visualViewport?.height || 'N/A')
+      console.log('  • Active element:', document.activeElement?.id || 'none')
+      console.log('  • Body position:', document.body.style.position || '(none)')
+    }
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleViewportChange)
+      window.visualViewport.addEventListener('scroll', handleViewportChange)
+    }
 
     // Test input accessibility after a short delay
     setTimeout(() => {
@@ -145,6 +186,7 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
         console.log('  • Touch action:', style.touchAction)
         console.log('  • Display:', style.display)
         console.log('  • Visibility:', style.visibility)
+        console.log('  • User-select:', style.userSelect)
         console.log('─────────────────────────────────────')
         console.log('🎯 Attempting programmatic focus...')
         nameInput.focus()
@@ -157,6 +199,13 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
       }
       console.log('═══════════════════════════════════════')
     }, 200)
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleViewportChange)
+        window.visualViewport.removeEventListener('scroll', handleViewportChange)
+      }
+    }
   }, [])
 
   // Enhanced submit handler
