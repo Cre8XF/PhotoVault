@@ -86,18 +86,87 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
 
   // Mobile debug logging helper
   const handleMobileInputDebug = (fieldName, eventType) => {
+    const inputElement = document.getElementById(`${fieldName}-input`)
+
     console.log('═══════════════════════════════════════')
-    console.log('📱 MOBILE INPUT DEBUG - AlbumModal')
+    console.log('📱 MOBILE INPUT DEBUG - AlbumModal v2')
     console.log('═══════════════════════════════════════')
     console.log('Field:', fieldName)
     console.log('Event:', eventType)
-    console.log('Is mobile:', /iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
-    console.log('Touch support:', 'ontouchstart' in window)
-    console.log('Viewport width:', window.innerWidth)
-    console.log('Input disabled:', loading)
-    console.log('Modal mode:', editingAlbum ? 'edit' : 'create')
+    console.log('Timestamp:', new Date().toISOString())
+    console.log('─────────────────────────────────────')
+    console.log('Device Info:')
+    console.log('  • User Agent:', navigator.userAgent)
+    console.log('  • Is mobile:', /iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
+    console.log('  • Touch support:', 'ontouchstart' in window)
+    console.log('  • Viewport width:', window.innerWidth)
+    console.log('  • Viewport height:', window.innerHeight)
+    console.log('─────────────────────────────────────')
+    console.log('Input State:')
+    console.log('  • Loading state:', loading)
+    console.log('  • Modal mode:', editingAlbum ? 'edit' : 'create')
+
+    if (inputElement) {
+      const computedStyle = window.getComputedStyle(inputElement)
+      console.log('─────────────────────────────────────')
+      console.log('Input Element Properties:')
+      console.log('  • Disabled:', inputElement.disabled)
+      console.log('  • ReadOnly:', inputElement.readOnly)
+      console.log('  • Display:', computedStyle.display)
+      console.log('  • Visibility:', computedStyle.visibility)
+      console.log('  • Pointer Events:', computedStyle.pointerEvents)
+      console.log('  • Touch Action:', computedStyle.touchAction)
+      console.log('  • User Select:', computedStyle.userSelect)
+      console.log('  • Z-index:', computedStyle.zIndex)
+      console.log('  • Position:', computedStyle.position)
+      console.log('  • Is focused:', document.activeElement === inputElement)
+      console.log('  • Can focus:', inputElement.tabIndex >= -1)
+    } else {
+      console.log('⚠️ Input element not found:', `${fieldName}-input`)
+    }
     console.log('═══════════════════════════════════════')
   }
+
+  // Enhanced component mount debugging
+  useEffect(() => {
+    console.log('═══════════════════════════════════════')
+    console.log('🚀 ALBUM MODAL MOUNTED')
+    console.log('═══════════════════════════════════════')
+    console.log('Mode:', editingAlbum ? 'EDIT' : 'CREATE')
+    console.log('Device:', /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? 'MOBILE' : 'DESKTOP')
+    console.log('Touch support:', 'ontouchstart' in window ? 'YES' : 'NO')
+    console.log('Screen size:', `${window.innerWidth}x${window.innerHeight}`)
+    console.log('Viewport meta:', document.querySelector('meta[name="viewport"]')?.content || 'NOT FOUND')
+    console.log('Body overflow:', document.body.style.overflow)
+    console.log('Body position:', document.body.style.position)
+
+    // Test input accessibility after a short delay
+    setTimeout(() => {
+      const nameInput = document.getElementById('album-name-input')
+      if (nameInput) {
+        console.log('─────────────────────────────────────')
+        console.log('🔍 Testing name input accessibility:')
+        console.log('  • Element found:', !!nameInput)
+        console.log('  • Disabled:', nameInput.disabled)
+        console.log('  • ReadOnly:', nameInput.readOnly)
+        const style = window.getComputedStyle(nameInput)
+        console.log('  • Pointer events:', style.pointerEvents)
+        console.log('  • Touch action:', style.touchAction)
+        console.log('  • Display:', style.display)
+        console.log('  • Visibility:', style.visibility)
+        console.log('─────────────────────────────────────')
+        console.log('🎯 Attempting programmatic focus...')
+        nameInput.focus()
+        setTimeout(() => {
+          console.log('✓ Focus result:', document.activeElement === nameInput ? 'SUCCESS' : 'FAILED')
+          console.log('  • Active element:', document.activeElement?.id || 'unknown')
+        }, 100)
+      } else {
+        console.log('❌ Name input not found in DOM')
+      }
+      console.log('═══════════════════════════════════════')
+    }, 200)
+  }, [])
 
   // Enhanced submit handler
   const handleSave = async (e) => {
@@ -141,7 +210,10 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
       onClick={onClose}
       style={{
         overflowY: 'auto',
-        WebkitOverflowScrolling: 'touch'
+        WebkitOverflowScrolling: 'touch',
+        // ✅ CRITICAL: Allow pointer events on overlay
+        pointerEvents: 'auto',
+        touchAction: 'auto'
       }}
     >
       <div
@@ -149,7 +221,10 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
         tabIndex={-1}
         className="glass card-premium w-full max-w-md rounded-2xl shadow-2xl p-6"
         style={{
-          marginBottom: 'env(safe-area-inset-bottom, 20px)'
+          marginBottom: 'env(safe-area-inset-bottom, 20px)',
+          // ✅ CRITICAL: Allow pointer events and touch on modal content
+          pointerEvents: 'auto',
+          touchAction: 'auto'
         }}
       >
         {/* Header */}
@@ -174,7 +249,8 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               {t('albums:name')} <span className="text-red-500">*</span>
             </label>
             <input
-              autoFocus
+              id="album-name-input"
+              name="album-name"
               type="text"
               value={name}
               onChange={(e) => {
@@ -184,13 +260,23 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               }}
               onFocus={() => handleMobileInputDebug('album-name', 'focus')}
               onBlur={() => console.log('📱 Album name input blurred')}
-              onTouchStart={() => handleMobileInputDebug('album-name', 'touchstart')}
+              onTouchStart={(e) => {
+                handleMobileInputDebug('album-name', 'touchstart')
+                // ✅ FORCE FOCUS on touch
+                e.currentTarget.focus()
+              }}
+              onClick={(e) => {
+                console.log('📱 Album name input clicked')
+                // ✅ FORCE FOCUS on click
+                e.currentTarget.focus()
+              }}
               placeholder={
                 t('albums:namePlaceholder') ||
                 'Enter album name (max 50 characters)'
               }
               maxLength={50}
-              disabled={loading}
+              disabled={false}
+              readOnly={loading}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="words"
@@ -200,9 +286,15 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               className="input-premium disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 fontSize: '16px', // Prevent iOS zoom
+                minHeight: '44px', // Apple's minimum tap target
+                padding: '12px 16px',
                 WebkitUserSelect: 'text',
                 WebkitTouchCallout: 'default',
-                touchAction: 'manipulation'
+                userSelect: 'text',
+                touchAction: 'manipulation',
+                pointerEvents: 'auto',
+                WebkitAppearance: 'none',
+                appearance: 'none'
               }}
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -215,6 +307,8 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               {t('albums:description')}
             </label>
             <textarea
+              id="album-description-input"
+              name="album-description"
               value={description}
               onChange={(e) => {
                 console.log('📱 Album description changed:', e.target.value)
@@ -222,14 +316,24 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               }}
               onFocus={() => handleMobileInputDebug('album-description', 'focus')}
               onBlur={() => console.log('📱 Description input blurred')}
-              onTouchStart={() => handleMobileInputDebug('album-description', 'touchstart')}
+              onTouchStart={(e) => {
+                handleMobileInputDebug('album-description', 'touchstart')
+                // ✅ FORCE FOCUS on touch
+                e.currentTarget.focus()
+              }}
+              onClick={(e) => {
+                console.log('📱 Album description input clicked')
+                // ✅ FORCE FOCUS on click
+                e.currentTarget.focus()
+              }}
               placeholder={
                 t('albums:descriptionPlaceholder') ||
                 'Add a description (optional, max 200 characters)'
               }
               maxLength={200}
               rows="3"
-              disabled={loading}
+              disabled={false}
+              readOnly={loading}
               autoComplete="off"
               autoCorrect="on"
               autoCapitalize="sentences"
@@ -239,10 +343,16 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               className="input-premium disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 fontSize: '16px', // Prevent iOS zoom
+                minHeight: '44px', // Apple's minimum tap target
+                padding: '12px 16px',
                 WebkitUserSelect: 'text',
                 WebkitTouchCallout: 'default',
+                userSelect: 'text',
                 touchAction: 'manipulation',
-                resize: 'none' // Prevent resizing on mobile
+                pointerEvents: 'auto',
+                resize: 'none', // Prevent resizing on mobile
+                WebkitAppearance: 'none',
+                appearance: 'none'
               }}
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -256,6 +366,8 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               {t('albums:coverImage')}
             </label>
             <input
+              id="album-cover-input"
+              name="album-cover"
               type="url"
               value={cover}
               onChange={(e) => {
@@ -264,9 +376,19 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               }}
               onFocus={() => handleMobileInputDebug('cover-url', 'focus')}
               onBlur={() => console.log('📱 Cover URL input blurred')}
-              onTouchStart={() => handleMobileInputDebug('cover-url', 'touchstart')}
+              onTouchStart={(e) => {
+                handleMobileInputDebug('cover-url', 'touchstart')
+                // ✅ FORCE FOCUS on touch
+                e.currentTarget.focus()
+              }}
+              onClick={(e) => {
+                console.log('📱 Album cover input clicked')
+                // ✅ FORCE FOCUS on click
+                e.currentTarget.focus()
+              }}
               placeholder="https://..."
-              disabled={loading}
+              disabled={false}
+              readOnly={loading}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
@@ -276,9 +398,15 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               className="input-premium disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 fontSize: '16px', // Prevent iOS zoom
+                minHeight: '44px', // Apple's minimum tap target
+                padding: '12px 16px',
                 WebkitUserSelect: 'text',
                 WebkitTouchCallout: 'default',
-                touchAction: 'manipulation'
+                userSelect: 'text',
+                touchAction: 'manipulation',
+                pointerEvents: 'auto',
+                WebkitAppearance: 'none',
+                appearance: 'none'
               }}
             />
             {cover && (
