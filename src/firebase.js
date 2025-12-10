@@ -209,6 +209,33 @@ export function listenToAlbumsByUser(userId, callback) {
 export function listenToPhotosByUser(userId, callback) {
   const q = query(collection(db, 'photos'), where('userId', '==', userId))
   return onSnapshot(q, (snapshot) => {
+    console.log('🔄 Firestore listener triggered:', {
+      size: snapshot.size,
+      docChanges: snapshot.docChanges().length
+    })
+
+    // Log individual changes for debugging
+    snapshot.docChanges().forEach((change) => {
+      const photoData = { id: change.doc.id, ...change.doc.data() }
+
+      if (change.type === 'modified') {
+        console.log('📝 Photo modified in Firestore:', {
+          id: photoData.id,
+          favorite: photoData.favorite,
+          name: photoData.name
+        })
+      } else if (change.type === 'added') {
+        console.log('➕ Photo added to Firestore:', {
+          id: photoData.id,
+          name: photoData.name
+        })
+      } else if (change.type === 'removed') {
+        console.log('➖ Photo removed from Firestore:', {
+          id: photoData.id
+        })
+      }
+    })
+
     const photos = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
     callback(photos)
   })
@@ -318,6 +345,7 @@ export async function updatePhoto(photoId, updates) {
     })
   } catch (err) {
     console.error('🔥 updatePhoto:', err)
+    throw err // ✅ BUGFIX: Properly throw errors so callers can handle them
   }
 }
 
@@ -360,21 +388,81 @@ export async function updatePhotoCaption(photoId, caption, userId) {
 
 // ⭐ Toggle favoritt-status
 export async function toggleFavorite(photoId, currentStatus) {
-  try {
-    const refDoc = doc(db, 'photos', photoId)
-    const newStatus = !currentStatus
+  console.log('═══════════════════════════════════════════════')
+  console.log('🔍 FAVORITT-TOGGLE DEBUG START')
+  console.log('═══════════════════════════════════════════════')
+  console.log('📥 Input parameters:', {
+    photoId,
+    currentFavoriteStatus: currentStatus,
+    expectedNewStatus: !currentStatus,
+    timestamp: new Date().toISOString()
+  })
 
-    await updateDoc(refDoc, {
+  try {
+    // Step 1: Get document reference
+    const photoRef = doc(db, 'photos', photoId)
+    console.log('📄 Document reference created:', photoRef.path)
+
+    // Step 2: Check if document exists
+    console.log('🔎 Checking if document exists...')
+    const photoSnap = await getDoc(photoRef)
+
+    if (!photoSnap.exists()) {
+      console.error('❌ FATAL: Document does not exist!')
+      console.error('   PhotoId:', photoId)
+      console.error('   Path:', photoRef.path)
+      throw new Error(`Photo document ${photoId} not found`)
+    }
+    console.log('✅ Document exists')
+    console.log('📊 Current document data:', photoSnap.data())
+
+    // Step 3: Calculate new status
+    const newStatus = !currentStatus
+    console.log('🔄 Status change:', {
+      from: currentStatus,
+      to: newStatus
+    })
+
+    // Step 4: Update Firestore
+    console.log('💾 Starting Firestore updateDoc()...')
+    await updateDoc(photoRef, {
       favorite: newStatus,
       updatedAt: new Date().toISOString(),
     })
+    console.log('✅ Firestore updateDoc() completed')
 
-    console.log(`⭐ Favoritt oppdatert: ${photoId} → ${newStatus}`)
+    // Step 5: Verify update
+    console.log('🔍 Verifying update...')
+    const verifySnap = await getDoc(photoRef)
+    const verifyData = verifySnap.data()
+    console.log('📊 Post-update document data:', verifyData)
+
+    if (verifyData.favorite === newStatus) {
+      console.log('✅ Post-update verification: ✅ MATCH')
+    } else {
+      console.error('❌ Post-update verification: ❌ MISMATCH')
+      console.error('   Expected:', newStatus)
+      console.error('   Got:', verifyData.favorite)
+    }
+
+    console.log('═══════════════════════════════════════════════')
+    console.log('🎉 FAVORITT-TOGGLE DEBUG END - SUCCESS')
+    console.log('═══════════════════════════════════════════════')
+
     return newStatus
-  } catch (err) {
-    console.error('🔥 toggleFavorite error:', err)
-    console.error('PhotoId:', photoId, 'CurrentStatus:', currentStatus)
-    throw err
+
+  } catch (error) {
+    console.error('═══════════════════════════════════════════════')
+    console.error('💥 FAVORITT-TOGGLE ERROR')
+    console.error('═══════════════════════════════════════════════')
+    console.error('Error type:', error.constructor.name)
+    console.error('Error message:', error.message)
+    console.error('Error code:', error.code)
+    console.error('Full error:', error)
+    console.error('PhotoId:', photoId)
+    console.error('Current status:', currentStatus)
+    console.error('═══════════════════════════════════════════════')
+    throw error
   }
 }
 
