@@ -1,5 +1,5 @@
 // ============================================================================
-// usePhotoData Hook - Phase 1: R2 METADATA PERSISTENCE
+// usePhotoData Hook - Firestore-based data management
 // ============================================================================
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -7,6 +7,8 @@ import { doc, deleteDoc } from 'firebase/firestore'
 import {
   getAlbumsByUser,
   getPhotosByUser,
+  listenToAlbumsByUser,
+  listenToPhotosByUser,
   addAlbum,
   updateAlbum,
   uploadPhoto,
@@ -18,8 +20,6 @@ import {
 } from '../firebase'
 import { db } from '../firebase'
 import useStore from '../state/store'
-
-// PHASE 1: Firestore listeners removed - using R2 metadata instead
 
 /**
  * Custom hook for photo and album data management
@@ -50,11 +50,9 @@ export const usePhotoData = () => {
   const setCurrentPage = useStore((state) => state.setCurrentPage)
   const setSelectedAlbum = useStore((state) => state.setSelectedAlbum)
   const closePhotoModal = useStore((state) => state.closePhotoModal)
-  const saveMetadata = useStore((state) => state.saveMetadata) // R2 metadata persistence
 
   /**
-   * Refresh all data (albums + photos) for current user from R2
-   * R2 METADATA ARCHITECTURE: Load from R2, NOT from Firestore
+   * Refresh all data (albums + photos) for current user from Firestore
    */
   const refreshAllData = useCallback(
     async (uid) => {
@@ -64,73 +62,78 @@ export const usePhotoData = () => {
       }
 
       try {
-        console.log('🔄 [usePhotoData] Refreshing metadata from R2...')
+        const [fetchedAlbums, fetchedPhotos] = await Promise.all([
+          getAlbumsByUser(uid),
+          getPhotosByUser(uid),
+        ])
 
-        // Get ID token
-        const idToken = user?.uid ? await user.getIdToken() : null
-        if (!idToken) {
-          console.error('❌ [usePhotoData] No ID token available')
-          throw new Error('No authentication token')
-        }
+        // Validate arrays
+        const safeAlbums = Array.isArray(fetchedAlbums) ? fetchedAlbums : []
+        const safePhotos = Array.isArray(fetchedPhotos) ? fetchedPhotos : []
 
-        // Load metadata from R2 via store's loadMetadata
-        const loadMetadataFn = useStore.getState().loadMetadata
-        const result = await loadMetadataFn(uid, idToken)
-
-        if (!result.success) {
-          throw new Error(result.error || 'Failed to load metadata')
-        }
-
-        // Metadata is already loaded into the store by loadMetadata
-        // Just get the current state
-        const currentState = useStore.getState()
-        const safeAlbums = Array.isArray(currentState.albums) ? currentState.albums : []
-        const safePhotos = Array.isArray(currentState.photos) ? currentState.photos : []
-
-        console.log('✅ Refresh complete from R2:', {
+        console.log('✅ Refresh complete from Firestore:', {
           albums: safeAlbums.length,
           photos: safePhotos.length,
         })
 
+        setAlbums(safeAlbums)
+        setPhotos(safePhotos)
         updateStorageUsed()
 
         return { albums: safeAlbums, photos: safePhotos }
       } catch (err) {
-        console.error('❌ Error refreshing data from R2:', err)
+        console.error('❌ Error refreshing data from Firestore:', err)
         setNotification({
           message: t('common:notifications.errorLoadingData'),
           type: 'error',
         })
 
-        // On error, DON'T reset to empty - keep existing data
-        const currentState = useStore.getState()
-        return {
-          albums: Array.isArray(currentState.albums) ? currentState.albums : [],
-          photos: Array.isArray(currentState.photos) ? currentState.photos : [],
-        }
+        // On error, reset to empty arrays (safe state)
+        setAlbums([])
+        setPhotos([])
+        return { albums: [], photos: [] }
       }
     },
-    [user, updateStorageUsed, setNotification, t]
+    [setAlbums, setPhotos, updateStorageUsed, setNotification, t]
   )
 
   // Alias for backwards compatibility
   const refreshData = refreshAllData
 
   /**
-   * R2 METADATA ARCHITECTURE:
-   * Metadata is loaded from R2 on login via useAuth hook
-   * This effect only runs once to confirm the user is logged in
-   * DO NOT clear data here as it races with metadata loading
+   * Set up Firestore listeners for albums and photos
+   * Real-time updates from Firestore
    */
   useEffect(() => {
-    if (user?.uid) {
-      console.log('✅ [usePhotoData] User authenticated, metadata should be loaded from R2 via useAuth')
-    } else {
-      console.log('⏸ [usePhotoData] No user authenticated yet')
+    if (!user?.uid) {
+      console.log('⏸ [usePhotoData] No user - clearing data')
+      setAlbums([])
+      setPhotos([])
+      return
     }
-    // DO NOT clear albums/photos here - it races with metadata loading
-    // Clearing happens in store.logout() instead
-  }, [user?.uid])
+
+    console.log('✅ [usePhotoData] Setting up Firestore listeners for user:', user.uid)
+
+    // Listen to albums
+    const unsubscribeAlbums = listenToAlbumsByUser(user.uid, (albums) => {
+      console.log('📥 [usePhotoData] Albums updated from Firestore:', albums.length)
+      setAlbums(albums)
+    })
+
+    // Listen to photos
+    const unsubscribePhotos = listenToPhotosByUser(user.uid, (photos) => {
+      console.log('📥 [usePhotoData] Photos updated from Firestore:', photos.length)
+      setPhotos(photos)
+      updateStorageUsed()
+    })
+
+    // Cleanup listeners on unmount
+    return () => {
+      console.log('🧹 [usePhotoData] Cleaning up Firestore listeners')
+      unsubscribeAlbums()
+      unsubscribePhotos()
+    }
+  }, [user?.uid, setAlbums, setPhotos, updateStorageUsed])
 
   /**
    * Handle photo upload
@@ -226,10 +229,7 @@ export const usePhotoData = () => {
           )
         })
 
-        // Persist to R2
-        saveMetadata() // Debounced
-
-        // Sync to backend in background
+        // Sync to backend
         await updateAlbum(editingAlbum.id, albumData)
 
         setNotification({
@@ -325,9 +325,6 @@ export const usePhotoData = () => {
               )
             })
 
-            // Persist to R2
-            saveMetadata() // Debounced
-
             // Navigate away if viewing this album
             if (currentPage === 'album' && selectedAlbum?.id === album.id) {
               setCurrentPage('albums')
@@ -406,9 +403,6 @@ export const usePhotoData = () => {
               return safePrev.filter((p) => p.id !== photo.id)
             })
 
-            // Persist to R2
-            saveMetadata() // Debounced
-
             closePhotoModal()
 
             // Sync to backend
@@ -475,9 +469,6 @@ export const usePhotoData = () => {
           )
         })
 
-        // Persist to R2
-        saveMetadata() // Debounced
-
         // Sync to backend
         await updatePhoto(photo.id, { favorite: newFavoriteState })
 
@@ -531,9 +522,6 @@ export const usePhotoData = () => {
               : p
           )
         })
-
-        // Persist to R2
-        saveMetadata() // Debounced
 
         setNotification({
           message: t('common:captionSaved'),
@@ -601,9 +589,6 @@ export const usePhotoData = () => {
           )
         })
 
-        // Persist to R2
-        saveMetadata() // Debounced
-
         // Sync to backend
         await setAlbumCover(albumId, coverUrl)
 
@@ -654,9 +639,6 @@ export const usePhotoData = () => {
             album.id === albumId ? { ...album, photoCount: count } : album
           )
         })
-
-        // Persist to R2
-        saveMetadata() // Debounced
 
         // Sync to backend
         await updateAlbumPhotoCount(albumId, count)
