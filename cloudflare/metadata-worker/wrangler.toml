@@ -8,24 +8,23 @@ compatibility_date = "2024-12-08"
 workers_dev = true
 
 # ============================================================================
-# R2 BUCKET BINDING
+# R2 BUCKET BINDINGS
 # ============================================================================
+
+# PIXTR_STORAGE: Stores photo/video FILES only
+# Structure: users/{userId}/{albumId}/{filename}
 [[r2_buckets]]
 binding = "PIXTR_STORAGE"
 bucket_name = "pixtr-photos"
 preview_bucket_name = "pixtr-photos-preview" # Optional: for testing
 
-# ============================================================================
-# KV NAMESPACE BINDING
-# ============================================================================
-# Create KV namespace first:
-# wrangler kv:namespace create "PIXTR_METADATA_KV"
-# wrangler kv:namespace create "PIXTR_METADATA_KV" --preview
-
-[[kv_namespaces]]
-binding = "PIXTR_METADATA_KV"
-id = "YOUR_KV_NAMESPACE_ID_HERE" # Replace with actual KV namespace ID
-preview_id = "YOUR_KV_PREVIEW_NAMESPACE_ID_HERE" # Replace with actual preview ID
+# PIXTR_METADATA: Stores metadata JSON files ONLY (SEPARATE BUCKET)
+# Structure: {userId}.json
+# CRITICAL: This is a SEPARATE bucket from PIXTR_STORAGE
+[[r2_buckets]]
+binding = "PIXTR_METADATA"
+bucket_name = "pixtr-metadata"
+preview_bucket_name = "pixtr-metadata-preview" # Optional: for testing
 
 # ============================================================================
 # ENVIRONMENT VARIABLES
@@ -41,7 +40,8 @@ ADMIN_TOKEN = "your-secure-admin-token-here" # Replace with actual secure token
 name = "pixtr-metadata-worker-production"
 workers_dev = false
 routes = [
-  { pattern = "metadata.your-domain.com/*", zone_name = "your-domain.com" }
+  { pattern = "pixtr.cloud/api/*", zone_name = "pixtr.cloud" },
+  { pattern = "www.pixtr.cloud/api/*", zone_name = "pixtr.cloud" }
 ]
 
 # Staging environment
@@ -49,21 +49,26 @@ routes = [
 name = "pixtr-metadata-worker-staging"
 workers_dev = false
 routes = [
-  { pattern = "metadata-staging.your-domain.com/*", zone_name = "your-domain.com" }
+  { pattern = "staging.pixtr.cloud/api/*", zone_name = "pixtr.cloud" }
 ]
 
 # ============================================================================
-# USAGE NOTES
+# DEPLOYMENT INSTRUCTIONS
 # ============================================================================
 # 1. Install Wrangler CLI: npm install -g wrangler
 # 2. Login: wrangler login
-# 3. Create KV namespace: wrangler kv:namespace create "PIXTR_METADATA_KV"
-# 4. Update the KV namespace IDs above
-# 5. Set ADMIN_TOKEN to a secure random value
-# 6. Deploy: wrangler deploy
+# 3. Create R2 buckets:
+#    wrangler r2 bucket create pixtr-photos
+#    wrangler r2 bucket create pixtr-metadata
+# 4. Set ADMIN_TOKEN to a secure random value in wrangler.toml
+# 5. Deploy to production:
+#    wrangler deploy --env production
 #
 # For development:
 # wrangler dev --local
 #
-# For production deployment:
-# wrangler deploy --env production
+# CRITICAL: The Worker responds on these routes:
+# - https://pixtr.cloud/api/metadata (GET/POST)
+# - https://www.pixtr.cloud/api/metadata (GET/POST)
+#
+# Frontend must set: VITE_METADATA_API_URL=https://www.pixtr.cloud
