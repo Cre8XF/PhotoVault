@@ -358,53 +358,61 @@ export const sanitizeImageUrl = (url, fallback = '') => {
   }
 
   // Block dangerous protocols (XSS vectors)
-  const dangerousProtocols = /^(javascript:|data:(?!image\/))/i
+  const dangerousProtocols = /^(javascript:|vbscript:|data:(?!image\/))/i
 
   if (dangerousProtocols.test(trimmed)) {
     console.error('🚨 SECURITY XSS: Blocked dangerous protocol in URL:', trimmed.substring(0, 100))
     return fallback
   }
 
-  // Only allow safe protocols
-  const allowedProtocols = /^(https?:|data:image\/|blob:https?:)/i
-
-  if (!allowedProtocols.test(trimmed)) {
-    console.error('🚨 SECURITY XSS: Invalid/unsafe protocol in URL:', trimmed.substring(0, 100))
-    return fallback
-  }
-
-  // Additional validation for data URLs
-  if (trimmed.startsWith('data:')) {
-    // Strictly validate data URL format for images
-    const validDataUrl = /^data:image\/(jpeg|jpg|png|gif|webp|svg\+xml|bmp|ico);base64,/i
-
-    if (!validDataUrl.test(trimmed)) {
-      console.error('🚨 SECURITY XSS: Invalid data URL format (must be base64 encoded image)')
-      return fallback
-    }
-
-    // Check for suspicious content in data URL
-    const dataUrlContent = trimmed.substring(0, 200).toLowerCase()
-    const suspiciousPatterns = ['<script', 'onerror', 'onload', 'javascript:', '<iframe']
-
-    for (const pattern of suspiciousPatterns) {
-      if (dataUrlContent.includes(pattern)) {
-        console.error('🚨 SECURITY XSS: Suspicious content detected in data URL')
+  // Normalize and check protocol for remote URLs
+  try {
+    // Only allow HTTPS for remote images
+    if (/^https?:\/\//i.test(trimmed)) {
+      const urlObj = new URL(trimmed, window.location.origin)
+      if (urlObj.protocol !== 'https:' && urlObj.protocol !== 'http:') {
+        console.error('🚨 SECURITY XSS: Only http(s) images allowed')
         return fallback
       }
+      // Block inline event handler fragment attempts
+      if ((trimmed.includes('onerror=') || trimmed.includes('onload='))) {
+        console.error('🚨 SECURITY XSS: Event handler detected in image URL')
+        return fallback
+      }
+      // Disallow angle brackets or suspicious characters
+      if (/[<>'"`]/.test(trimmed)) {
+        console.error('🚨 SECURITY XSS: Malicious meta-characters found in image URL')
+        return fallback
+      }
+      return trimmed
     }
-  }
-
-  // Check for event handler injection attempts (e.g., "image.jpg?x=' onerror='alert(1)")
-  const eventHandlerPattern = /\bon(error|load|click|mouseover|focus)\s*=/i
-
-  if (eventHandlerPattern.test(trimmed)) {
-    console.error('🚨 SECURITY XSS: Event handler injection attempt detected')
+    // Allow base64 image data URLs only, strictly validated
+    if (trimmed.startsWith('data:image/')) {
+      // Only allow whitelisted image mime types, strict base64, and no suspicious substrings
+      const validDataUrl = /^data:image\/(jpeg|jpg|png|gif|webp|bmp|ico|svg\+xml);base64,[A-Za-z0-9+\/=]+$/i
+      if (!validDataUrl.test(trimmed)) {
+        console.error('🚨 SECURITY XSS: Invalid base64 image data URL format')
+        return fallback
+      }
+      // Defensive: sure there's no event handler injection or decoded meta-characters in the header
+      const lowerPart = trimmed.slice(0, 200).toLowerCase()
+      if (lowerPart.includes('<script') || lowerPart.includes('onerror') || lowerPart.includes('onload') || lowerPart.includes('javascript:')) {
+        console.error('🚨 SECURITY XSS: Suspicious pattern detected in data URL')
+        return fallback
+      }
+      if (/[<>'"`]/.test(lowerPart)) {
+        console.error('🚨 SECURITY XSS: Malicious meta-characters found in image data URL')
+        return fallback
+      }
+      return trimmed
+    }
+    // Block all other protocols (blob: & file: & others)
+    console.error('🚨 SECURITY XSS: Only HTTPS images and validated base64 image data URLs are permitted.')
+    return fallback
+  } catch (err) {
+    console.error('🚨 Security XSS: Exception during URL validation', err)
     return fallback
   }
-
-  // URL looks safe
-  return trimmed
 }
 
 /**
