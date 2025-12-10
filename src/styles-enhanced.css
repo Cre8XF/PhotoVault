@@ -1120,13 +1120,21 @@ textarea {
   }
 }
 
-/* Modal scroll lock for mobile - Better than overflow: hidden */
-body.modal-open {
-  position: fixed;
-  overflow: hidden;
-  width: 100%;
-  height: 100%;
-}
+/* 🔥 REMOVED: This breaks iOS keyboard when switching inputs!
+   REASON: position: fixed on body prevents iOS from adjusting viewport
+   when virtual keyboard appears. iOS then dismisses keyboard instead.
+
+   OLD RULE (DO NOT RESTORE):
+   body.modal-open {
+     position: fixed;
+     overflow: hidden;
+     width: 100%;
+     height: 100%;
+   }
+
+   ✅ CORRECT APPROACH: Each modal handles its own scroll lock with
+   overflow: hidden only (no position: fixed). See AlbumModal.jsx.
+*/
 
 /* Ensure modals are scrollable when content overflows */
 .modal-content-enhanced,
