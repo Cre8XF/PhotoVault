@@ -10,21 +10,31 @@ import {
   Info,
   MoreVertical,
   Presentation,
+  Trash2,
+  Download,
+  Share2,
+  FolderInput,
+  X,
 } from 'lucide-react'
 import { format } from 'date-fns'
+import { useTranslation } from 'react-i18next'
 import useStore from '../state/store'
 import { usePhotoById } from '../hooks/usePhotoById'
 import { usePhotoContext } from '../hooks/usePhotoContext'
 import { usePrefetchAdjacentPhotos } from '../hooks/usePrefetchAdjacentPhotos'
+import { usePhotoData } from '../hooks/usePhotoData'
 
 export default function PhotoPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
+  const { t } = useTranslation(['common'])
 
   // State
   const [uiVisible, setUiVisible] = useState(true)
   const [imageLoaded, setImageLoaded] = useState(false)
+  const [showInfo, setShowInfo] = useState(false)
+  const [showMoreMenu, setShowMoreMenu] = useState(false)
   const uiTimerRef = useRef(null)
   const touchStartX = useRef(0)
   const touchEndX = useRef(0)
@@ -32,7 +42,11 @@ export default function PhotoPage() {
   // Store
   const setIsWorldView = useStore((state) => state.setIsWorldView)
   const photos = useStore((state) => state.photos)
+  const albums = useStore((state) => state.albums)
   const updatePhotoInStore = useStore((state) => state.updatePhoto)
+
+  // Hooks
+  const { handleDeletePhoto } = usePhotoData()
 
   // Custom hooks
   const { photo, loading, error } = usePhotoById(id)
@@ -157,6 +171,92 @@ export default function PhotoPage() {
     // Navigate to slideshow page with current photo
     navigate(`/slideshow/${photo.id}`, { state: { from: location } })
   }, [photo, navigate, location])
+
+  // Delete photo
+  const handleDelete = useCallback(() => {
+    if (!photo) return
+
+    console.log('🗑️ PhotoPage: Delete clicked', { photoId: photo.id })
+
+    const confirmMessage = t('common:notifications.deletePhotoMessage')
+
+    if (window.confirm(confirmMessage)) {
+      console.log('✅ Delete confirmed, executing...')
+
+      // Delete photo using hook
+      handleDeletePhoto(photo)
+
+      // Navigate back to home
+      handleBack()
+    } else {
+      console.log('❌ Delete cancelled by user')
+    }
+
+    resetUiTimer()
+  }, [photo, handleDeletePhoto, handleBack, t, resetUiTimer])
+
+  // Toggle info panel
+  const handleToggleInfo = useCallback(() => {
+    console.log('ℹ️ PhotoPage: Info toggled', {
+      photoId: photo?.id,
+      currentState: showInfo
+    })
+    setShowInfo(!showInfo)
+    resetUiTimer()
+  }, [photo, showInfo, resetUiTimer])
+
+  // Download photo
+  const handleDownload = useCallback(() => {
+    if (!photo) return
+
+    console.log('📥 PhotoPage: Download clicked', { photoId: photo.id })
+
+    const link = document.createElement('a')
+    link.href = photo.url
+    link.download = photo.name || 'photo.jpg'
+    link.click()
+
+    setShowMoreMenu(false)
+    resetUiTimer()
+  }, [photo, resetUiTimer])
+
+  // Share photo
+  const handleShare = useCallback(() => {
+    if (!photo) return
+
+    console.log('🔗 PhotoPage: Share clicked', { photoId: photo.id })
+
+    if (navigator.share) {
+      navigator.share({
+        title: photo.name || 'Photo',
+        url: photo.url
+      }).catch(err => {
+        if (err.name !== 'AbortError') {
+          console.error('Share failed:', err)
+        }
+      })
+    } else {
+      alert('Share not supported on this browser')
+    }
+
+    setShowMoreMenu(false)
+    resetUiTimer()
+  }, [photo, resetUiTimer])
+
+  // Format file size
+  const formatFileSize = useCallback((bytes) => {
+    if (!bytes) return t('common:unknown')
+    if (bytes < 1024) return bytes + ' B'
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+  }, [t])
+
+  // Get album name
+  const getAlbumName = useCallback(() => {
+    if (!photo?.albumId) return t('common:unassigned')
+    const album = albums.find(a => a.id === photo.albumId)
+    return album?.name || t('common:unknown')
+  }, [photo, albums, t])
 
   // Keyboard navigation
   useEffect(() => {
@@ -322,7 +422,7 @@ export default function PhotoPage() {
           </div>
 
           {/* Right: Actions */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 relative">
             {/* Favorite button */}
             <button
               onClick={handleToggleFavorite}
@@ -339,6 +439,15 @@ export default function PhotoPage() {
               />
             </button>
 
+            {/* Delete button */}
+            <button
+              onClick={handleDelete}
+              className="text-white hover:bg-red-500/10 hover:text-red-400 p-2 rounded-full transition active:scale-95"
+              aria-label={t('common:delete')}
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+
             {/* Slideshow button - Phase 2B */}
             {photoOrder && photoOrder.length > 1 && (
               <button
@@ -352,13 +461,13 @@ export default function PhotoPage() {
 
             {/* Info button */}
             <button
-              onClick={() => {
-                // TODO: Show info modal in future phase
-                console.log('Info clicked')
-                resetUiTimer()
-              }}
-              className="text-white hover:bg-white/10 p-2 rounded-full transition active:scale-95"
-              aria-label="Photo info"
+              onClick={handleToggleInfo}
+              className={`p-2 rounded-full transition active:scale-95 ${
+                showInfo
+                  ? 'text-blue-400 bg-blue-500/10'
+                  : 'text-white hover:bg-white/10'
+              }`}
+              aria-label={t('common:showInfo')}
             >
               <Info className="w-5 h-5" />
             </button>
@@ -366,15 +475,53 @@ export default function PhotoPage() {
             {/* More menu */}
             <button
               onClick={() => {
-                // TODO: Show more menu in future phase
-                console.log('More clicked')
+                console.log('📋 PhotoPage: More menu toggled')
+                setShowMoreMenu(!showMoreMenu)
                 resetUiTimer()
               }}
-              className="text-white hover:bg-white/10 p-2 rounded-full transition active:scale-95"
-              aria-label="More options"
+              className={`p-2 rounded-full transition active:scale-95 ${
+                showMoreMenu
+                  ? 'text-blue-400 bg-blue-500/10'
+                  : 'text-white hover:bg-white/10'
+              }`}
+              aria-label={t('common:more') || 'More options'}
             >
               <MoreVertical className="w-5 h-5" />
             </button>
+
+            {/* More menu dropdown */}
+            {showMoreMenu && (
+              <div className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
+                <button
+                  onClick={handleDownload}
+                  className="flex items-center gap-3 w-full px-4 py-3 text-left text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                >
+                  <Download className="w-5 h-5" />
+                  <span>{t('common:download')}</span>
+                </button>
+
+                <button
+                  onClick={handleShare}
+                  className="flex items-center gap-3 w-full px-4 py-3 text-left text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                >
+                  <Share2 className="w-5 h-5" />
+                  <span>{t('common:share') || 'Share'}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    console.log('📁 Move to album - TODO')
+                    alert(t('common:comingSoon.title') || 'Coming soon')
+                    setShowMoreMenu(false)
+                    resetUiTimer()
+                  }}
+                  className="flex items-center gap-3 w-full px-4 py-3 text-left text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                >
+                  <FolderInput className="w-5 h-5" />
+                  <span>{t('common:moveToAlbum')}</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -433,6 +580,121 @@ export default function PhotoPage() {
           )}
         </div>
       )}
+
+      {/* Info Panel */}
+      {showInfo && (
+        <div
+          className="fixed right-0 top-0 h-full w-80 bg-black/95 backdrop-blur-md border-l border-white/10 z-[10001] overflow-y-auto"
+          style={{
+            animation: 'slideInRight 0.3s ease-out'
+          }}
+        >
+          <div className="p-6">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-white">
+                {t('common:photoInfo')}
+              </h2>
+              <button
+                onClick={() => setShowInfo(false)}
+                className="text-white/60 hover:text-white hover:bg-white/10 p-2 rounded-full transition"
+                aria-label="Close info"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Info content */}
+            <div className="space-y-4 text-sm">
+              {/* Filename */}
+              <div>
+                <div className="text-white/60 mb-1">{t('common:name')}</div>
+                <div className="text-white break-all">
+                  {photo.name || t('common:unknown')}
+                </div>
+              </div>
+
+              {/* Size */}
+              {photo.size && (
+                <div>
+                  <div className="text-white/60 mb-1">{t('common:size')}</div>
+                  <div className="text-white">{formatFileSize(photo.size)}</div>
+                </div>
+              )}
+
+              {/* Date uploaded */}
+              {photo.createdAt && (
+                <div>
+                  <div className="text-white/60 mb-1">{t('common:uploaded')}</div>
+                  <div className="text-white">
+                    {typeof photo.createdAt === 'string'
+                      ? format(new Date(photo.createdAt), 'PPP')
+                      : photo.createdAt.toDate
+                      ? format(photo.createdAt.toDate(), 'PPP')
+                      : t('common:unknown')}
+                  </div>
+                </div>
+              )}
+
+              {/* Album */}
+              <div>
+                <div className="text-white/60 mb-1">{t('common:album')}</div>
+                <div className="text-white">{getAlbumName()}</div>
+              </div>
+
+              {/* Resolution */}
+              {(photo.width || photo.height) && (
+                <div>
+                  <div className="text-white/60 mb-1">
+                    {t('common:video.resolution') || 'Resolution'}
+                  </div>
+                  <div className="text-white">
+                    {photo.width} × {photo.height}
+                  </div>
+                </div>
+              )}
+
+              {/* File type */}
+              {photo.type && (
+                <div>
+                  <div className="text-white/60 mb-1">Type</div>
+                  <div className="text-white">{photo.type}</div>
+                </div>
+              )}
+
+              {/* Favorite status */}
+              <div>
+                <div className="text-white/60 mb-1">{t('common:favorite')}</div>
+                <div className="text-white">
+                  {photo.favorite ? '⭐ Yes' : 'No'}
+                </div>
+              </div>
+
+              {/* Caption (if exists) */}
+              {photo.caption && (
+                <div>
+                  <div className="text-white/60 mb-1">{t('common:caption')}</div>
+                  <div className="text-white break-words">{photo.caption}</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Inline keyframe animation */}
+      <style jsx>{`
+        @keyframes slideInRight {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+      `}</style>
     </div>
   )
 }
