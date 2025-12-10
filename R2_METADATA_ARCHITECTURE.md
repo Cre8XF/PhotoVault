@@ -52,18 +52,22 @@ Pixtr uses **Cloudflare R2 as the SINGLE SOURCE OF TRUTH** for all metadata (alb
         └──────────────────┬──────────────────────────────┘
                            │
                            ▼
-              ┌────────────────────────────┐
-              │   Cloudflare R2 Bucket     │
-              │   (pixtr-photos)           │
-              ├────────────────────────────┤
-              │                            │
-              │  📁 users/{uid}/{albumId}/ │
-              │     └── photo files        │
-              │                            │
-              │  📄 pixtr-metadata/        │
-              │     └── {uid}.json  ⭐      │
-              │                            │
-              └────────────────────────────┘
+        ┌──────────────────┬──────────────────────────┐
+        │                  │                          │
+        ▼                  ▼                          │
+┌──────────────────┐  ┌──────────────────────────┐  │
+│  R2: pixtr-photos│  │  R2: pixtr-metadata      │◄─┘
+│  (Photo Files)   │  │  (Metadata JSON)  ⭐      │
+├──────────────────┤  ├──────────────────────────┤
+│                  │  │                          │
+│ users/           │  │ {uid}.json               │
+│  ├─{uid}/        │  │ {uid2}.json              │
+│    ├─{albumId}/  │  │ {uid3}.json              │
+│      └─photos    │  │                          │
+│                  │  │                          │
+└──────────────────┘  └──────────────────────────┘
+  PIXTR_STORAGE         PIXTR_METADATA
+  (binding)             (binding) ⭐
 ```
 
 ### 🔴 WHAT CHANGED FROM OLD ARCHITECTURE
@@ -147,19 +151,34 @@ curl -H "Authorization: Bearer YOUR_FIREBASE_TOKEN" \
 
 ### 3. **R2 Bucket Configuration**
 
-**Bucket name:** `pixtr-photos`
+**CRITICAL: Pixtr uses TWO SEPARATE R2 buckets:**
 
-**Required structure:**
+1. **`pixtr-photos`** - Stores photo/video files
+2. **`pixtr-metadata`** - Stores metadata JSON files (SEPARATE!)
+
+**Bucket 1: pixtr-photos**
 ```
 pixtr-photos/
-├── users/{userId}/{albumId}/{photo-files}   # Photo files
-└── pixtr-metadata/{userId}.json             # Metadata files ⭐
+└── users/{userId}/{albumId}/{photo-files}
 ```
 
-**Create bucket:**
+**Bucket 2: pixtr-metadata** ⭐
+```
+pixtr-metadata/
+├── {userId}.json
+├── {userId2}.json
+└── {userId3}.json
+```
+
+**Create both buckets:**
 ```bash
 wrangler r2 bucket create pixtr-photos
+wrangler r2 bucket create pixtr-metadata
 ```
+
+**IMPORTANT:** The Worker uses TWO bindings:
+- `PIXTR_STORAGE` → `pixtr-photos` (photo files)
+- `PIXTR_METADATA` → `pixtr-metadata` (metadata JSON)
 
 ### 4. **Firebase Authentication**
 
@@ -181,19 +200,24 @@ Worker validates Firebase ID tokens. Ensure:
 
 ### Worker Deployment (Cloudflare)
 
-- [ ] Update `wrangler.toml` with correct R2 bucket binding
-- [ ] Deploy worker: `wrangler deploy`
+- [ ] Create BOTH R2 buckets: `pixtr-photos` AND `pixtr-metadata`
+- [ ] Update `wrangler.toml` with TWO R2 bucket bindings (PIXTR_STORAGE, PIXTR_METADATA)
+- [ ] Update routes to match actual domain: `pixtr.cloud/api/*` and `www.pixtr.cloud/api/*`
+- [ ] Deploy worker: `wrangler deploy --env production`
 - [ ] Verify worker URL: `https://www.pixtr.cloud/api/metadata`
 - [ ] Test GET endpoint with valid Firebase token
 - [ ] Test POST endpoint with valid metadata payload
-- [ ] Check worker logs for errors
+- [ ] Check worker logs for successful read/write to pixtr-metadata bucket
 
 ### R2 Bucket Setup
 
-- [ ] Create R2 bucket: `pixtr-photos`
-- [ ] Bind bucket to worker in `wrangler.toml`
+- [ ] Create R2 bucket for photos: `wrangler r2 bucket create pixtr-photos`
+- [ ] Create R2 bucket for metadata: `wrangler r2 bucket create pixtr-metadata`
+- [ ] Bind BOTH buckets to worker in `wrangler.toml`:
+  - `PIXTR_STORAGE` → `pixtr-photos`
+  - `PIXTR_METADATA` → `pixtr-metadata`
 - [ ] Verify bucket permissions allow worker to read/write
-- [ ] (Optional) Migrate existing metadata from KV to R2
+- [ ] Test metadata save creates `{userId}.json` in pixtr-metadata bucket
 
 ### Firestore Rules (Minimal)
 
@@ -266,11 +290,25 @@ service cloud.firestore {
    Check worker logs for:
    ✅ Loaded metadata from R2 for user {userId}
    OR
-   ❌ Metadata not found, returning empty
+   ⚠️ No metadata found for user {userId}, returning empty metadata
 
    Fix:
+   - Verify pixtr-metadata bucket exists: wrangler r2 bucket list
    - Trigger metadata save by creating/modifying album
-   - Check R2 bucket for pixtr-metadata/{userId}.json
+   - Check R2 bucket: wrangler r2 object list pixtr-metadata
+   - Verify {userId}.json file exists in pixtr-metadata bucket
+   ```
+
+5. **Wrong R2 bucket being used**
+   ```
+   Symptom:
+   - Metadata saves but isn't found on next load
+   - Worker logs show "pixtr-photos" instead of "pixtr-metadata"
+
+   Fix:
+   - Verify Worker uses env.PIXTR_METADATA (not env.PIXTR_STORAGE)
+   - Check wrangler.toml has BOTH bucket bindings
+   - Redeploy worker: wrangler deploy --env production
    ```
 
 ### Problem: Worker returns 401 Unauthorized
@@ -296,7 +334,33 @@ service cloud.firestore {
 
 ## 📊 Architecture Diagrams
 
+### R2 Bucket Structure
+
+**Bucket: pixtr-metadata**
+```
+pixtr-metadata/
+├── user123.json          # Metadata for user123
+├── user456.json          # Metadata for user456
+└── user789.json          # Metadata for user789
+```
+
+**Bucket: pixtr-photos**
+```
+pixtr-photos/
+└── users/
+    ├── user123/
+    │   ├── vacation-2024/
+    │   │   ├── photo1.jpg
+    │   │   └── photo2.jpg
+    │   └── family/
+    │       └── photo3.jpg
+    └── user456/
+        └── ...
+```
+
 ### Metadata Structure (R2 JSON)
+
+Each `{userId}.json` file contains:
 
 ```json
 {
@@ -395,16 +459,20 @@ Response:
 
 ## 🎯 Key Takeaways
 
-1. **R2 is the ONLY metadata source** - Firestore is for search/access only
-2. **VITE_METADATA_API_URL MUST be set** in production builds
-3. **Metadata loads ONCE on login** from R2 via Worker
-4. **Metadata saves are DEBOUNCED** (2s) and sent to R2 via Worker
-5. **Worker validates ALL requests** with Firebase ID tokens
-6. **Each user has ONE JSON file** in R2: `pixtr-metadata/{uid}.json`
+1. **TWO SEPARATE R2 buckets** - `pixtr-photos` for files, `pixtr-metadata` for JSON
+2. **R2 is the ONLY metadata source** - Firestore is for search/access only
+3. **VITE_METADATA_API_URL MUST be set** in production builds
+4. **Metadata loads ONCE on login** from R2 via Worker
+5. **Metadata saves are DEBOUNCED** (2s) and sent to R2 via Worker
+6. **Worker validates ALL requests** with Firebase ID tokens
+7. **Each user has ONE JSON file** in pixtr-metadata bucket: `{uid}.json`
+8. **Worker uses TWO bindings** - `PIXTR_STORAGE` and `PIXTR_METADATA`
 
 ---
 
 ## 📝 Migration Notes
+
+### Migrating from KV to R2
 
 If migrating from KV-based metadata:
 
@@ -414,17 +482,49 @@ If migrating from KV-based metadata:
    wrangler kv:key list --namespace-id={KV_ID}
 
    # Export each user's metadata
-   wrangler kv:key get "user:{userId}" --namespace-id={KV_ID}
+   wrangler kv:key get "user:{userId}" --namespace-id={KV_ID} > {userId}.json
    ```
 
-2. **Upload to R2:**
+2. **Upload to R2 pixtr-metadata bucket:**
    ```bash
    # For each user
-   wrangler r2 object put pixtr-photos/pixtr-metadata/{userId}.json \
-     --file=metadata-{userId}.json
+   wrangler r2 object put pixtr-metadata/{userId}.json \
+     --file={userId}.json
    ```
 
-3. **Remove KV binding** from wrangler.toml after migration complete
+3. **Verify migration:**
+   ```bash
+   # List all metadata files
+   wrangler r2 object list pixtr-metadata
+   ```
+
+4. **Remove KV binding** from wrangler.toml after migration complete
+
+### Migrating from pixtr-photos/pixtr-metadata/ to pixtr-metadata/
+
+If you previously stored metadata in `pixtr-photos/pixtr-metadata/{userId}.json`:
+
+1. **List all metadata files:**
+   ```bash
+   wrangler r2 object list pixtr-photos --prefix="pixtr-metadata/"
+   ```
+
+2. **Copy to new bucket:**
+   ```bash
+   # For each file
+   wrangler r2 object get pixtr-photos/pixtr-metadata/{userId}.json > {userId}.json
+   wrangler r2 object put pixtr-metadata/{userId}.json --file={userId}.json
+   ```
+
+3. **Verify migration:**
+   ```bash
+   wrangler r2 object list pixtr-metadata
+   ```
+
+4. **Clean up old files** (optional):
+   ```bash
+   wrangler r2 object delete pixtr-photos/pixtr-metadata/{userId}.json
+   ```
 
 ---
 

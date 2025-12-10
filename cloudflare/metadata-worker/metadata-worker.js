@@ -5,9 +5,13 @@
 
 /**
  * Cloudflare Worker Environment Bindings:
- * - PIXTR_STORAGE: R2 bucket binding (pixtr-photos)
- * - PIXTR_METADATA: R2 bucket binding for metadata (pixtr-metadata)
+ * - PIXTR_STORAGE: R2 bucket binding for photo files (pixtr-photos)
+ * - PIXTR_METADATA: R2 bucket binding for metadata JSON files (pixtr-metadata)
  * - ADMIN_TOKEN: Admin authentication token (from wrangler.toml vars)
+ *
+ * CRITICAL: PIXTR_METADATA is a SEPARATE R2 bucket from PIXTR_STORAGE
+ * - PIXTR_STORAGE stores: users/{userId}/{albumId}/{photo-files}
+ * - PIXTR_METADATA stores: {userId}.json (metadata only)
  */
 
 export default {
@@ -131,18 +135,21 @@ async function verifyFirebaseToken(request) {
 }
 
 /**
- * Load metadata from R2
+ * Load metadata from R2 (pixtr-metadata bucket)
  * @param {Object} env - Worker environment bindings
  * @param {string} userId - User ID
  * @returns {Promise<Object>} - Metadata object
  */
 async function loadMetadataFromR2(env, userId) {
   try {
-    const key = `pixtr-metadata/${userId}.json`
-    const object = await env.PIXTR_STORAGE.get(key)
+    // CRITICAL: Use PIXTR_METADATA bucket (not PIXTR_STORAGE)
+    // Key is just {userId}.json (bucket already named pixtr-metadata)
+    const key = `${userId}.json`
+    const object = await env.PIXTR_METADATA.get(key)
 
     if (!object) {
-      // Return empty metadata if not found
+      // Return empty metadata if not found (new user)
+      console.log(`⚠️ No metadata found for user ${userId}, returning empty metadata`)
       return {
         version: '1.0',
         userId: userId,
@@ -160,16 +167,16 @@ async function loadMetadataFromR2(env, userId) {
     const metadataText = await object.text()
     const metadata = JSON.parse(metadataText)
 
-    console.log(`✅ Loaded metadata from R2 for user ${userId}`)
+    console.log(`✅ Loaded metadata from R2 for user ${userId} (albums: ${Object.keys(metadata.albums || {}).length}, photos: ${Object.keys(metadata.photos || {}).length})`)
     return metadata
   } catch (error) {
-    console.error(`Error loading metadata from R2 for user ${userId}:`, error)
+    console.error(`❌ Error loading metadata from R2 for user ${userId}:`, error)
     throw error
   }
 }
 
 /**
- * Save metadata to R2
+ * Save metadata to R2 (pixtr-metadata bucket)
  * @param {Object} env - Worker environment bindings
  * @param {string} userId - User ID
  * @param {Object} metadata - Metadata object
@@ -177,7 +184,9 @@ async function loadMetadataFromR2(env, userId) {
  */
 async function saveMetadataToR2(env, userId, metadata) {
   try {
-    const key = `pixtr-metadata/${userId}.json`
+    // CRITICAL: Use PIXTR_METADATA bucket (not PIXTR_STORAGE)
+    // Key is just {userId}.json (bucket already named pixtr-metadata)
+    const key = `${userId}.json`
 
     // Ensure metadata has required fields
     metadata.version = metadata.version || '1.0'
@@ -187,17 +196,17 @@ async function saveMetadataToR2(env, userId, metadata) {
     // Convert to JSON string
     const metadataJson = JSON.stringify(metadata, null, 2)
 
-    // Save to R2
-    await env.PIXTR_STORAGE.put(key, metadataJson, {
+    // Save to R2 pixtr-metadata bucket
+    await env.PIXTR_METADATA.put(key, metadataJson, {
       httpMetadata: {
         contentType: 'application/json',
       },
     })
 
-    console.log(`✅ Saved metadata to R2 for user ${userId}`)
+    console.log(`✅ Saved metadata to R2 for user ${userId} (albums: ${Object.keys(metadata.albums || {}).length}, photos: ${Object.keys(metadata.photos || {}).length})`)
     return metadata
   } catch (error) {
-    console.error(`Error saving metadata to R2 for user ${userId}:`, error)
+    console.error(`❌ Error saving metadata to R2 for user ${userId}:`, error)
     throw error
   }
 }
