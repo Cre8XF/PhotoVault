@@ -1,9 +1,10 @@
 // ============================================================================
-// COMPONENT: AlbumModal.jsx – v2.1 med i18n
+// COMPONENT: AlbumModal.jsx – v2.2 med i18n + XSS Protection
 // ============================================================================
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, FolderPlus, Image as ImageIcon } from 'lucide-react'
+import { sanitizeImageUrl, PLACEHOLDER_ALBUM } from '../utils/security'
 
 const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
   const { t } = useTranslation(['albums'])
@@ -23,11 +24,28 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
     }
   }, [editingAlbum])
 
-  // Prevent body scroll when modal is open
+  // Prevent body scroll when modal is open (mobile-friendly approach)
   useEffect(() => {
+    console.log('📱 AlbumModal: Locking body scroll (mobile-friendly)')
+
+    // Store current scroll position
+    const scrollY = window.scrollY
+
+    // Lock body scroll (better for mobile)
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${scrollY}px`
+    document.body.style.width = '100%'
     document.body.style.overflow = 'hidden'
+
     return () => {
-      document.body.style.overflow = 'auto'
+      console.log('📱 AlbumModal: Unlocking body scroll')
+
+      // Restore scroll
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+      document.body.style.overflow = ''
+      window.scrollTo(0, scrollY)
     }
   }, [])
 
@@ -64,6 +82,21 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
     }
 
     return true
+  }
+
+  // Mobile debug logging helper
+  const handleMobileInputDebug = (fieldName, eventType) => {
+    console.log('═══════════════════════════════════════')
+    console.log('📱 MOBILE INPUT DEBUG - AlbumModal')
+    console.log('═══════════════════════════════════════')
+    console.log('Field:', fieldName)
+    console.log('Event:', eventType)
+    console.log('Is mobile:', /iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
+    console.log('Touch support:', 'ontouchstart' in window)
+    console.log('Viewport width:', window.innerWidth)
+    console.log('Input disabled:', loading)
+    console.log('Modal mode:', editingAlbum ? 'edit' : 'create')
+    console.log('═══════════════════════════════════════')
   }
 
   // Enhanced submit handler
@@ -106,11 +139,18 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
     <div
       className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
       onClick={onClose}
+      style={{
+        overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch'
+      }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
         tabIndex={-1}
         className="glass card-premium w-full max-w-md rounded-2xl shadow-2xl p-6"
+        style={{
+          marginBottom: 'env(safe-area-inset-bottom, 20px)'
+        }}
       >
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
@@ -138,16 +178,32 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               type="text"
               value={name}
               onChange={(e) => {
+                console.log('📱 Album name changed:', e.target.value)
                 setName(e.target.value)
                 setError('') // Clear error on change
               }}
+              onFocus={() => handleMobileInputDebug('album-name', 'focus')}
+              onBlur={() => console.log('📱 Album name input blurred')}
+              onTouchStart={() => handleMobileInputDebug('album-name', 'touchstart')}
               placeholder={
                 t('albums:namePlaceholder') ||
                 'Enter album name (max 50 characters)'
               }
               maxLength={50}
               disabled={loading}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="words"
+              spellCheck="false"
+              inputMode="text"
+              enterKeyHint="next"
               className="input-premium disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                fontSize: '16px', // Prevent iOS zoom
+                WebkitUserSelect: 'text',
+                WebkitTouchCallout: 'default',
+                touchAction: 'manipulation'
+              }}
             />
             <p className="text-xs text-gray-500 mt-1">
               {name.length}/50 {t('albums:characters')}
@@ -160,7 +216,13 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
             </label>
             <textarea
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => {
+                console.log('📱 Album description changed:', e.target.value)
+                setDescription(e.target.value)
+              }}
+              onFocus={() => handleMobileInputDebug('album-description', 'focus')}
+              onBlur={() => console.log('📱 Description input blurred')}
+              onTouchStart={() => handleMobileInputDebug('album-description', 'touchstart')}
               placeholder={
                 t('albums:descriptionPlaceholder') ||
                 'Add a description (optional, max 200 characters)'
@@ -168,7 +230,20 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               maxLength={200}
               rows="3"
               disabled={loading}
+              autoComplete="off"
+              autoCorrect="on"
+              autoCapitalize="sentences"
+              spellCheck="true"
+              inputMode="text"
+              enterKeyHint="done"
               className="input-premium disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                fontSize: '16px', // Prevent iOS zoom
+                WebkitUserSelect: 'text',
+                WebkitTouchCallout: 'default',
+                touchAction: 'manipulation',
+                resize: 'none' // Prevent resizing on mobile
+              }}
             />
             <p className="text-xs text-gray-500 mt-1">
               {description.length}/200 {t('albums:characters')}
@@ -183,15 +258,37 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
             <input
               type="url"
               value={cover}
-              onChange={(e) => setCover(e.target.value)}
+              onChange={(e) => {
+                console.log('📱 Cover URL changed:', e.target.value)
+                setCover(e.target.value)
+              }}
+              onFocus={() => handleMobileInputDebug('cover-url', 'focus')}
+              onBlur={() => console.log('📱 Cover URL input blurred')}
+              onTouchStart={() => handleMobileInputDebug('cover-url', 'touchstart')}
               placeholder="https://..."
               disabled={loading}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
+              inputMode="url"
+              enterKeyHint="done"
               className="input-premium disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                fontSize: '16px', // Prevent iOS zoom
+                WebkitUserSelect: 'text',
+                WebkitTouchCallout: 'default',
+                touchAction: 'manipulation'
+              }}
             />
             {cover && (
               <img
-                src={cover}
+                src={sanitizeImageUrl(cover, PLACEHOLDER_ALBUM)}
                 alt={t('albums:coverPreview')}
+                onError={(e) => {
+                  console.error('❌ Failed to load album cover:', cover)
+                  e.target.src = PLACEHOLDER_ALBUM
+                }}
                 className="w-full h-40 object-cover rounded-xl mt-2 border border-gray-700"
               />
             )}
