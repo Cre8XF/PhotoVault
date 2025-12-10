@@ -468,14 +468,49 @@ export async function toggleFavorite(photoId, currentStatus) {
 
 // 🔹 Slett bilde fra Firestore + Storage
 export async function deletePhoto(photoId, storagePath) {
+  console.log('═══════════════════════════════════════════════')
+  console.log('🗑️ DELETE PHOTO DEBUG START')
+  console.log('═══════════════════════════════════════════════')
+  console.log('📥 Input parameters:', {
+    photoId,
+    storagePath,
+    timestamp: new Date().toISOString()
+  })
+
   try {
+    // Step 1: Delete from Storage (if path provided)
     if (storagePath) {
+      console.log('🔥 Deleting from Storage:', storagePath)
       const storageRef = ref(storage, storagePath)
       await deleteObject(storageRef)
+      console.log('✅ Deleted from Storage successfully')
+    } else {
+      console.log('⚠️ No storagePath provided, skipping Storage deletion')
     }
-    await deleteDoc(doc(db, 'photos', photoId))
+
+    // Step 2: Delete from Firestore
+    console.log('🔥 Deleting from Firestore:', photoId)
+    const photoRef = doc(db, 'photos', photoId)
+    await deleteDoc(photoRef)
+    console.log('✅ Deleted from Firestore successfully')
+
+    console.log('═══════════════════════════════════════════════')
+    console.log('🎉 DELETE PHOTO DEBUG END - SUCCESS')
+    console.log('═══════════════════════════════════════════════')
+
+    return true
   } catch (err) {
-    console.error('🔥 deletePhoto:', err)
+    console.error('═══════════════════════════════════════════════')
+    console.error('💥 DELETE PHOTO ERROR')
+    console.error('═══════════════════════════════════════════════')
+    console.error('Error type:', err.constructor.name)
+    console.error('Error message:', err.message)
+    console.error('Error code:', err.code)
+    console.error('Full error:', err)
+    console.error('PhotoId:', photoId)
+    console.error('StoragePath:', storagePath)
+    console.error('═══════════════════════════════════════════════')
+    throw err // ✅ BUGFIX: Properly throw errors so callers can handle them
   }
 }
 

@@ -22,7 +22,8 @@ import useStore from '../state/store'
 import { usePhotoById } from '../hooks/usePhotoById'
 import { usePhotoContext } from '../hooks/usePhotoContext'
 import { usePrefetchAdjacentPhotos } from '../hooks/usePrefetchAdjacentPhotos'
-import { usePhotoData } from '../hooks/usePhotoData'
+import { deletePhoto as firebaseDeletePhoto } from '../firebase'
+import ConfirmModal from '../components/ConfirmModal'
 
 export default function PhotoPage() {
   const { id } = useParams()
@@ -35,6 +36,7 @@ export default function PhotoPage() {
   const [imageLoaded, setImageLoaded] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
   const [showMoreMenu, setShowMoreMenu] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const uiTimerRef = useRef(null)
   const touchStartX = useRef(0)
   const touchEndX = useRef(0)
@@ -44,9 +46,8 @@ export default function PhotoPage() {
   const photos = useStore((state) => state.photos)
   const albums = useStore((state) => state.albums)
   const updatePhotoInStore = useStore((state) => state.updatePhoto)
-
-  // Hooks
-  const { handleDeletePhoto } = usePhotoData()
+  const deletePhotoFromStore = useStore((state) => state.deletePhoto)
+  const setNotification = useStore((state) => state.setNotification)
 
   // Custom hooks
   const { photo, loading, error } = usePhotoById(id)
@@ -176,24 +177,52 @@ export default function PhotoPage() {
   const handleDelete = useCallback(() => {
     if (!photo) return
 
-    console.log('🗑️ PhotoPage: Delete clicked', { photoId: photo.id })
+    console.log('🗑️ PhotoPage: Delete button clicked, showing confirm modal')
+    setShowDeleteConfirm(true)
+    resetUiTimer()
+  }, [photo, resetUiTimer])
 
-    const confirmMessage = t('common:notifications.deletePhotoMessage')
+  // Execute delete after confirmation
+  const executeDelete = useCallback(async () => {
+    if (!photo) return
 
-    if (window.confirm(confirmMessage)) {
-      console.log('✅ Delete confirmed, executing...')
+    console.log('✅ Delete confirmed, executing...')
+    console.log('🗑️ Deleting photo:', {
+      photoId: photo.id,
+      storagePath: photo.storagePath,
+      filename: photo.name
+    })
 
-      // Delete photo using hook
-      handleDeletePhoto(photo)
+    try {
+      // Optimistically remove from UI
+      deletePhotoFromStore(photo.id)
+
+      // Delete from Firebase (Storage + Firestore)
+      await firebaseDeletePhoto(photo.id, photo.storagePath)
+
+      console.log('✅ Photo deleted successfully from Firebase')
+
+      // Show success notification
+      setNotification({
+        message: t('common:notifications.photoDeleted'),
+        type: 'success'
+      })
 
       // Navigate back to home
       handleBack()
-    } else {
-      console.log('❌ Delete cancelled by user')
-    }
+    } catch (error) {
+      console.error('❌ Delete failed:', error)
 
-    resetUiTimer()
-  }, [photo, handleDeletePhoto, handleBack, t, resetUiTimer])
+      // Show error notification
+      setNotification({
+        message: t('common:notifications.photoDeleteError') || 'Failed to delete photo',
+        type: 'error'
+      })
+
+      // Rollback: refresh data from server
+      // The photo will reappear if delete failed
+    }
+  }, [photo, deletePhotoFromStore, setNotification, handleBack, t])
 
   // Toggle info panel
   const handleToggleInfo = useCallback(() => {
@@ -695,6 +724,22 @@ export default function PhotoPage() {
           }
         }
       `}</style>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <ConfirmModal
+          isOpen={showDeleteConfirm}
+          title={t('common:notifications.deletePhotoTitle')}
+          message={t('common:notifications.deletePhotoMessage')}
+          confirmLabel={t('common:delete')}
+          cancelLabel={t('common:cancel')}
+          onConfirm={executeDelete}
+          onClose={() => {
+            console.log('❌ Delete cancelled')
+            setShowDeleteConfirm(false)
+          }}
+        />
+      )}
     </div>
   )
 }
