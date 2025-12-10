@@ -193,36 +193,46 @@ export default function PhotoPage() {
       filename: photo.name
     })
 
+    // CRITICAL: Navigate away IMMEDIATELY to prevent "Photo not found" error
+    // The usePhotoById hook will try to re-fetch the photo after deletion,
+    // causing a "not found" error. By navigating first, we unmount the component
+    // before that can happen.
+    console.log('🚀 Navigating away immediately to prevent re-fetch')
+
+    // Close confirmation modal first
+    setShowDeleteConfirm(false)
+
+    // Optimistically remove from UI
+    deletePhotoFromStore(photo.id)
+
+    // Navigate back to home BEFORE async delete
+    handleBack()
+
+    // Delete from Firebase in background
+    // This happens after navigation, so any errors won't affect the user
     try {
-      // Optimistically remove from UI
-      deletePhotoFromStore(photo.id)
-
-      // Delete from Firebase (Storage + Firestore)
+      console.log('🗑️ Deleting photo from Firebase in background...')
       await firebaseDeletePhoto(photo.id, photo.storagePath)
-
       console.log('✅ Photo deleted successfully from Firebase')
 
-      // Show success notification
+      // Show success notification (user already on Home page)
       setNotification({
         message: t('common:notifications.photoDeleted'),
         type: 'success'
       })
-
-      // Navigate back to home
-      handleBack()
     } catch (error) {
-      console.error('❌ Delete failed:', error)
+      console.error('❌ Background delete failed:', error)
 
-      // Show error notification
+      // Show error notification (user already on Home page)
       setNotification({
         message: t('common:notifications.photoDeleteError') || 'Failed to delete photo',
         type: 'error'
       })
 
-      // Rollback: refresh data from server
-      // The photo will reappear if delete failed
+      // Note: Photo already removed from UI, so error is just logged
+      // Consider refreshing data from server to restore photo if needed
     }
-  }, [photo, deletePhotoFromStore, setNotification, handleBack, t])
+  }, [photo, deletePhotoFromStore, setNotification, handleBack, t, setShowDeleteConfirm])
 
   // Toggle info panel
   const handleToggleInfo = useCallback(() => {
