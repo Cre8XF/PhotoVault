@@ -427,3 +427,36 @@ body.light-mode ::-webkit-scrollbar-thumb {
 .animate-scale-in {
   animation: scale-in 0.25s ease-out forwards;
 }
+
+/* ============================================================================
+   🔥 CRITICAL MOBILE INPUT FIX - NEVER BLOCK INPUTS
+   ============================================================================ */
+input,
+textarea,
+select,
+button,
+[contenteditable] {
+  /* ✅ FORCE ENABLE pointer events for all interactive elements */
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  -webkit-touch-callout: default !important;
+}
+
+/* Ensure buttons can still use none for specific cases */
+button {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+/* 🔥 FORCE override for inputs and textareas specifically */
+input:not([type="submit"]):not([type="button"]):not([type="reset"]),
+textarea {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  -webkit-touch-callout: default !important;
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: rgba(139, 92, 246, 0.3);
+}
