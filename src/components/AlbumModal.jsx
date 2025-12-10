@@ -25,27 +25,18 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
   }, [editingAlbum])
 
   // Prevent body scroll when modal is open (mobile-friendly approach)
+  // ⚠️ DISABLED: position: fixed breaks iOS keyboard when switching inputs
+  // Instead, we rely on modal overlay preventing scroll
   useEffect(() => {
-    console.log('📱 AlbumModal: Locking body scroll (mobile-friendly)')
+    console.log('📱 AlbumModal: Mobile-friendly scroll prevention (no position:fixed)')
 
-    // Store current scroll position
-    const scrollY = window.scrollY
-
-    // Lock body scroll (better for mobile)
-    document.body.style.position = 'fixed'
-    document.body.style.top = `-${scrollY}px`
-    document.body.style.width = '100%'
+    // Only disable scroll, don't use position: fixed
+    const originalOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
 
     return () => {
-      console.log('📱 AlbumModal: Unlocking body scroll')
-
-      // Restore scroll
-      document.body.style.position = ''
-      document.body.style.top = ''
-      document.body.style.width = ''
-      document.body.style.overflow = ''
-      window.scrollTo(0, scrollY)
+      console.log('📱 AlbumModal: Restoring scroll')
+      document.body.style.overflow = originalOverflow
     }
   }, [])
 
@@ -221,10 +212,14 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
         tabIndex={-1}
         className="glass card-premium w-full max-w-md rounded-2xl shadow-2xl p-6"
         style={{
-          marginBottom: 'env(safe-area-inset-bottom, 20px)',
+          marginTop: 'auto',
+          marginBottom: 'auto',
+          maxHeight: '90vh',
+          overflowY: 'auto',
           // ✅ CRITICAL: Allow pointer events and touch on modal content
           pointerEvents: 'auto',
-          touchAction: 'auto'
+          touchAction: 'auto',
+          WebkitOverflowScrolling: 'touch'
         }}
       >
         {/* Header */}
@@ -258,7 +253,11 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
                 setName(e.target.value)
                 setError('') // Clear error on change
               }}
-              onFocus={() => handleMobileInputDebug('album-name', 'focus')}
+              onFocus={(e) => {
+                handleMobileInputDebug('album-name', 'focus')
+                // ✅ Scroll input into view on mobile
+                setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100)
+              }}
               onBlur={() => console.log('📱 Album name input blurred')}
               onTouchStart={(e) => {
                 handleMobileInputDebug('album-name', 'touchstart')
@@ -314,7 +313,11 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
                 console.log('📱 Album description changed:', e.target.value)
                 setDescription(e.target.value)
               }}
-              onFocus={() => handleMobileInputDebug('album-description', 'focus')}
+              onFocus={(e) => {
+                handleMobileInputDebug('album-description', 'focus')
+                // ✅ Scroll input into view on mobile
+                setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100)
+              }}
               onBlur={() => console.log('📱 Description input blurred')}
               onTouchStart={(e) => {
                 handleMobileInputDebug('album-description', 'touchstart')
@@ -374,7 +377,11 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
                 console.log('📱 Cover URL changed:', e.target.value)
                 setCover(e.target.value)
               }}
-              onFocus={() => handleMobileInputDebug('cover-url', 'focus')}
+              onFocus={(e) => {
+                handleMobileInputDebug('cover-url', 'focus')
+                // ✅ Scroll input into view on mobile
+                setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100)
+              }}
               onBlur={() => console.log('📱 Cover URL input blurred')}
               onTouchStart={(e) => {
                 handleMobileInputDebug('cover-url', 'touchstart')
