@@ -447,9 +447,14 @@ export const sanitizeText = (text) => {
     return ''
   }
 
-  // Remove HTML tags and escape special characters
-  return text
-    .replace(/<[^>]*>/g, '') // Remove HTML tags
+  // Remove HTML tags (repeatedly) and escape special characters
+  let sanitized = text;
+  let previous;
+  do {
+    previous = sanitized;
+    sanitized = sanitized.replace(/<[^>]*>/g, '');
+  } while (sanitized !== previous);
+  return sanitized
     .replace(/[<>'"&]/g, (char) => {
       const entities = {
         '<': '&lt;',
