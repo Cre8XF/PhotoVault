@@ -1,5 +1,5 @@
 // ============================================================================
-// ProfilePage - Phase 2: User Profile Management
+// ProfilePage - Phase 2: User Profile Management + XSS Protection
 // ============================================================================
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +9,7 @@ import { updateProfile, updateEmail } from 'firebase/auth';
 import { db } from '../firebase';
 import useAuth from '../hooks/useAuth';
 import useStore from '../state/store';
+import { sanitizeImageUrl, PLACEHOLDER_IMAGE } from '../utils/security';
 import {
   ArrowLeft,
   User,
@@ -142,8 +143,12 @@ const ProfilePage = () => {
             <div className="relative mb-4">
               {formData.photoURL ? (
                 <img
-                  src={formData.photoURL}
+                  src={sanitizeImageUrl(formData.photoURL, PLACEHOLDER_IMAGE)}
                   alt="Profile"
+                  onError={(e) => {
+                    console.error('❌ Failed to load profile photo:', formData.photoURL)
+                    e.target.src = PLACEHOLDER_IMAGE
+                  }}
                   className="w-32 h-32 rounded-full object-cover border-4 border-purple-500"
                 />
               ) : (

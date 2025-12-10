@@ -319,7 +319,190 @@ export function checkPINStrength(pin) {
   return { strength, score };
 }
 
+// ============================================================================
+// XSS PROTECTION - Prevents Cross-Site Scripting attacks
+// ============================================================================
+
+/**
+ * Validates and sanitizes image URLs to prevent XSS attacks
+ *
+ * 🚨 SECURITY: Blocks dangerous protocols like:
+ * - javascript:alert('XSS')
+ * - data:text/html,<script>alert('XSS')</script>
+ * - vbscript:msgbox('XSS')
+ *
+ * ✅ Allows safe protocols:
+ * - https://example.com/image.jpg
+ * - http://example.com/image.jpg (localhost only)
+ * - data:image/png;base64,...
+ * - blob:http://localhost:3000/...
+ *
+ * @param {string} url - The URL to validate
+ * @param {string} fallback - Fallback URL if validation fails
+ * @returns {string} - Sanitized URL or fallback
+ */
+export const sanitizeImageUrl = (url, fallback = '') => {
+  // Null/undefined/empty check
+  if (!url || typeof url !== 'string') {
+    if (url !== '' && url !== null && url !== undefined) {
+      console.warn('⚠️ Security: Invalid image URL type:', typeof url)
+    }
+    return fallback
+  }
+
+  // Trim whitespace
+  const trimmed = url.trim()
+
+  if (trimmed.length === 0) {
+    return fallback
+  }
+
+  // Block dangerous protocols (XSS vectors)
+  const dangerousProtocols = /^(javascript:|data:(?!image\/))/i
+
+  if (dangerousProtocols.test(trimmed)) {
+    console.error('🚨 SECURITY XSS: Blocked dangerous protocol in URL:', trimmed.substring(0, 100))
+    return fallback
+  }
+
+  // Only allow safe protocols
+  const allowedProtocols = /^(https?:|data:image\/|blob:https?:)/i
+
+  if (!allowedProtocols.test(trimmed)) {
+    console.error('🚨 SECURITY XSS: Invalid/unsafe protocol in URL:', trimmed.substring(0, 100))
+    return fallback
+  }
+
+  // Additional validation for data URLs
+  if (trimmed.startsWith('data:')) {
+    // Strictly validate data URL format for images
+    const validDataUrl = /^data:image\/(jpeg|jpg|png|gif|webp|svg\+xml|bmp|ico);base64,/i
+
+    if (!validDataUrl.test(trimmed)) {
+      console.error('🚨 SECURITY XSS: Invalid data URL format (must be base64 encoded image)')
+      return fallback
+    }
+
+    // Check for suspicious content in data URL
+    const dataUrlContent = trimmed.substring(0, 200).toLowerCase()
+    const suspiciousPatterns = ['<script', 'onerror', 'onload', 'javascript:', '<iframe']
+
+    for (const pattern of suspiciousPatterns) {
+      if (dataUrlContent.includes(pattern)) {
+        console.error('🚨 SECURITY XSS: Suspicious content detected in data URL')
+        return fallback
+      }
+    }
+  }
+
+  // Check for event handler injection attempts (e.g., "image.jpg?x=' onerror='alert(1)")
+  const eventHandlerPattern = /\bon(error|load|click|mouseover|focus)\s*=/i
+
+  if (eventHandlerPattern.test(trimmed)) {
+    console.error('🚨 SECURITY XSS: Event handler injection attempt detected')
+    return fallback
+  }
+
+  // URL looks safe
+  return trimmed
+}
+
+/**
+ * Validates that a string is safe to use as HTML attribute
+ * Removes potentially dangerous characters
+ *
+ * @param {string} value - The value to validate
+ * @returns {string} - Sanitized value
+ */
+export const sanitizeAttribute = (value) => {
+  if (!value || typeof value !== 'string') {
+    return ''
+  }
+
+  // Remove HTML/JavaScript dangerous characters
+  return value
+    .replace(/[<>'"&]/g, (char) => {
+      // HTML entity encoding
+      const entities = {
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        '&': '&amp;'
+      }
+      return entities[char] || char
+    })
+    .trim()
+}
+
+/**
+ * Sanitizes text content to prevent XSS
+ * Use this for rendering user-generated text content
+ *
+ * @param {string} text - The text to sanitize
+ * @returns {string} - Sanitized text
+ */
+export const sanitizeText = (text) => {
+  if (!text || typeof text !== 'string') {
+    return ''
+  }
+
+  // Remove HTML tags and escape special characters
+  return text
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/[<>'"&]/g, (char) => {
+      const entities = {
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        '&': '&amp;'
+      }
+      return entities[char] || char
+    })
+    .trim()
+}
+
+/**
+ * Validates Firebase Storage URLs
+ * Ensures URL is from trusted Firebase storage domain
+ *
+ * @param {string} url - The Firebase storage URL
+ * @returns {boolean} - True if valid Firebase storage URL
+ */
+export const isValidFirebaseStorageUrl = (url) => {
+  if (!url || typeof url !== 'string') {
+    return false
+  }
+
+  // Firebase storage domains
+  const firebaseStorageDomains = [
+    'firebasestorage.googleapis.com',
+    'storage.googleapis.com'
+  ]
+
+  try {
+    const urlObj = new URL(url)
+    return firebaseStorageDomains.some(domain => urlObj.hostname.includes(domain))
+  } catch (e) {
+    console.warn('Invalid URL format:', url)
+    return false
+  }
+}
+
+/**
+ * Inline SVG placeholder for missing images
+ * Safe to use as it's controlled content, not user input
+ */
+export const PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23334155" width="400" height="300"/%3E%3Ctext fill="%2394a3b8" font-family="sans-serif" font-size="18" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3EImage not available%3C/text%3E%3C/svg%3E'
+
+/**
+ * Album placeholder
+ */
+export const PLACEHOLDER_ALBUM = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%234c1d95" width="400" height="300"/%3E%3Ctext fill="%23a78bfa" font-family="sans-serif" font-size="18" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3ENo cover image%3C/text%3E%3C/svg%3E'
+
 export default {
+  // PIN & Encryption
   hashPIN,
   verifyPIN,
   validatePIN,
@@ -328,5 +511,12 @@ export default {
   encryptPhoto,
   decryptPhoto,
   generateRandomPIN,
-  checkPINStrength
+  checkPINStrength,
+  // XSS Protection
+  sanitizeImageUrl,
+  sanitizeAttribute,
+  sanitizeText,
+  isValidFirebaseStorageUrl,
+  PLACEHOLDER_IMAGE,
+  PLACEHOLDER_ALBUM
 };

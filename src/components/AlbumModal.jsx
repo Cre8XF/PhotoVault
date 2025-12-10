@@ -1,9 +1,10 @@
 // ============================================================================
-// COMPONENT: AlbumModal.jsx – v2.1 med i18n
+// COMPONENT: AlbumModal.jsx – v2.2 med i18n + XSS Protection
 // ============================================================================
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, FolderPlus, Image as ImageIcon } from 'lucide-react'
+import { sanitizeImageUrl, PLACEHOLDER_ALBUM } from '../utils/security'
 
 const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
   const { t } = useTranslation(['albums'])
@@ -282,8 +283,12 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
             />
             {cover && (
               <img
-                src={cover}
+                src={sanitizeImageUrl(cover, PLACEHOLDER_ALBUM)}
                 alt={t('albums:coverPreview')}
+                onError={(e) => {
+                  console.error('❌ Failed to load album cover:', cover)
+                  e.target.src = PLACEHOLDER_ALBUM
+                }}
                 className="w-full h-40 object-cover rounded-xl mt-2 border border-gray-700"
               />
             )}

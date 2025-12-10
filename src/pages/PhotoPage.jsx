@@ -1,5 +1,5 @@
 // ============================================================================
-// PhotoPage - Phase 2A: Fullscreen Photo Viewer
+// PhotoPage - Phase 2A: Fullscreen Photo Viewer + XSS Protection
 // ============================================================================
 import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { toggleFavorite as firebaseToggleFavorite } from '../firebase'
@@ -24,6 +24,7 @@ import { usePhotoContext } from '../hooks/usePhotoContext'
 import { usePrefetchAdjacentPhotos } from '../hooks/usePrefetchAdjacentPhotos'
 import { deletePhoto as firebaseDeletePhoto } from '../firebase'
 import ConfirmModal from '../components/ConfirmModal'
+import { sanitizeImageUrl, PLACEHOLDER_IMAGE } from '../utils/security'
 
 export default function PhotoPage() {
   const { id } = useParams()
@@ -568,8 +569,12 @@ export default function PhotoPage() {
       {/* Image Canvas */}
       <main className="flex-1 flex items-center justify-center p-0">
         <img
-          src={photo.displayUrl || photo.url}
+          src={sanitizeImageUrl(photo.displayUrl || photo.url, PLACEHOLDER_IMAGE)}
           alt={photo.caption || photo.name || 'Photo'}
+          onError={(e) => {
+            console.error('❌ Failed to load photo:', photo.displayUrl || photo.url)
+            e.target.src = PLACEHOLDER_IMAGE
+          }}
           className={`max-w-full max-h-[100vh] object-contain transition-opacity duration-300 cursor-pointer ${
             imageLoaded ? 'opacity-100' : 'opacity-0'
           }`}
