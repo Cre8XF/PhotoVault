@@ -2,7 +2,7 @@
 // PhotoPage - Phase 2A: Fullscreen Photo Viewer
 // ============================================================================
 import React, { useEffect, useState, useRef, useCallback } from 'react'
-import { updatePhoto } from '../firebase'
+import { toggleFavorite as firebaseToggleFavorite } from '../firebase'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -32,8 +32,7 @@ export default function PhotoPage() {
   // Store
   const setIsWorldView = useStore((state) => state.setIsWorldView)
   const photos = useStore((state) => state.photos)
-  const updatePhoto = useStore((state) => state.updatePhoto)
-  const saveMetadata = useStore((state) => state.saveMetadata) // R2 persistence
+  const updatePhotoInStore = useStore((state) => state.updatePhoto)
 
   // Custom hooks
   const { photo, loading, error } = usePhotoById(id)
@@ -125,24 +124,32 @@ export default function PhotoPage() {
   const handleToggleFavorite = useCallback(async () => {
     if (!photo) return
 
+    console.log('🎯 PhotoPage.handleToggleFavorite called:', {
+      photoId: photo.id,
+      currentFavorite: photo.favorite,
+      timestamp: new Date().toISOString()
+    })
+
     const newFavoriteStatus = !photo.favorite
 
-    // Optimistic update
-    updatePhoto(photo.id, { favorite: newFavoriteStatus })
-
-    // Persist to R2
-    saveMetadata() // Debounced
+    // Optimistic update in Zustand
+    console.log('⚡ Optimistically updating Zustand store...')
+    updatePhotoInStore(photo.id, { favorite: newFavoriteStatus })
 
     try {
-      await updatePhoto(photo.id, { favorite: newFavoriteStatus })
+      // Sync to Firestore using toggleFavorite
+      console.log('🔥 Calling firebase.toggleFavorite()...')
+      const result = await firebaseToggleFavorite(photo.id, photo.favorite)
+      console.log('✅ firebase.toggleFavorite() returned:', result)
     } catch (err) {
-      console.error('Error updating favorite:', err)
+      console.error('❌ PhotoPage favorite toggle failed:', err)
       // Revert UI state on error
-      updatePhoto(photo.id, { favorite: !newFavoriteStatus })
+      console.log('↩️ Reverting optimistic update...')
+      updatePhotoInStore(photo.id, { favorite: !newFavoriteStatus })
     }
 
     resetUiTimer()
-  }, [photo, updatePhoto, saveMetadata, resetUiTimer])
+  }, [photo, updatePhotoInStore, resetUiTimer])
 
   // Start slideshow - Phase 2B
   const handleStartSlideshow = useCallback(() => {

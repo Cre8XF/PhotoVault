@@ -17,6 +17,7 @@ import {
   setAlbumCover,
   updateAlbumPhotoCount,
   updatePhotoCaption,
+  toggleFavorite as firebaseToggleFavorite,
 } from '../firebase'
 import { db } from '../firebase'
 import useStore from '../state/store'
@@ -446,9 +447,16 @@ export const usePhotoData = () => {
   /**
    * Toggle favorite status
    * PHASE 4: Optimistic update
+   * PHASE 5 BUGFIX: Now uses toggleFavorite from firebase.js with extensive logging
    */
   const toggleFavorite = useCallback(
     async (photo) => {
+      console.log('🎯 usePhotoData.toggleFavorite called:', {
+        photoId: photo.id,
+        currentFavorite: photo.favorite,
+        timestamp: new Date().toISOString()
+      })
+
       if (isTogglingFavorite) {
         console.warn(
           '⚠️ Toggle favorite already in progress, ignoring duplicate call'
@@ -460,6 +468,7 @@ export const usePhotoData = () => {
 
       try {
         const newFavoriteState = !photo.favorite
+        console.log('⚡ Applying optimistic update to Zustand...')
 
         // OPTIMISTIC UPDATE
         setPhotos((prev) => {
@@ -468,9 +477,21 @@ export const usePhotoData = () => {
             p.id === photo.id ? { ...p, favorite: newFavoriteState } : p
           )
         })
+        console.log('✅ Zustand optimistically updated')
 
-        // Sync to backend
-        await updatePhoto(photo.id, { favorite: newFavoriteState })
+        // Sync to backend using toggleFavorite (NOT updatePhoto)
+        console.log('🔥 Calling firebase.toggleFavorite()...')
+        const result = await firebaseToggleFavorite(photo.id, photo.favorite)
+        console.log('✅ firebase.toggleFavorite() returned:', result)
+
+        // Verify Zustand state after Firestore update
+        const updatedPhoto = photos.find(p => p.id === photo.id)
+        console.log('🔍 Zustand state after Firestore update:', {
+          photoId: photo.id,
+          zustandFavorite: updatedPhoto?.favorite,
+          firestoreResult: result,
+          match: updatedPhoto?.favorite === result
+        })
 
         setNotification({
           message: newFavoriteState
@@ -478,10 +499,15 @@ export const usePhotoData = () => {
             : t('common:notifications.removedFromFavorites'),
           type: 'success',
         })
+        console.log('📢 Notification shown')
+
+        return result
+
       } catch (err) {
-        console.error('❌ Error toggling favorite:', err)
+        console.error('❌ usePhotoData.toggleFavorite failed:', err)
 
         // ROLLBACK
+        console.log('↩️ Reverting optimistic update...')
         if (user?.uid) {
           await refreshAllData(user.uid)
         }
@@ -498,6 +524,7 @@ export const usePhotoData = () => {
     [
       isTogglingFavorite,
       user?.uid,
+      photos,
       setPhotos,
       refreshAllData,
       setNotification,
