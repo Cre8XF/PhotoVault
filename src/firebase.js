@@ -40,12 +40,55 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
-// 🔍 Enkel validering (Uten process.env – helt Vite-kompatibelt)
+// ============================================================================
+// 🔍 Environment Validation & DEV Diagnostics
+// ============================================================================
+
+const isDev = import.meta.env.DEV
+const mode = import.meta.env.MODE
+
+// Comprehensive environment validation
 const missing = Object.entries(firebaseConfig)
   .filter(([key, value]) => !value)
   .map(([key]) => key)
 
-if (missing.length > 0) {
+// DEV MODE: Enhanced diagnostics
+if (isDev) {
+  console.log('═══════════════════════════════════════════════')
+  console.log('🔧 FIREBASE DEV MODE DIAGNOSTICS')
+  console.log('═══════════════════════════════════════════════')
+  console.log('Environment:', {
+    DEV: isDev,
+    MODE: mode,
+    timestamp: new Date().toISOString(),
+  })
+  console.log('Firebase Config:', {
+    apiKey: firebaseConfig.apiKey ? '✅ SET' : '❌ MISSING',
+    authDomain: firebaseConfig.authDomain || '❌ MISSING',
+    projectId: firebaseConfig.projectId || '❌ MISSING',
+    storageBucket: firebaseConfig.storageBucket ? '✅ SET' : '❌ MISSING',
+    messagingSenderId: firebaseConfig.messagingSenderId ? '✅ SET' : '❌ MISSING',
+    appId: firebaseConfig.appId ? '✅ SET' : '❌ MISSING',
+  })
+
+  if (missing.length > 0) {
+    console.error('❌ Missing Firebase environment variables:', missing)
+    console.error('⚠️ Please check your .env.local file!')
+    console.error('⚠️ Make sure all VITE_FIREBASE_* variables are set')
+  } else {
+    console.log('✅ All Firebase environment variables loaded')
+  }
+
+  console.log('Current URL:', window.location.href)
+  console.log('Current Origin:', window.location.origin)
+  console.log('═══════════════════════════════════════════════')
+  console.log('⚠️ App Check: DISABLED in DEV mode')
+  console.log('⚠️ All Firebase requests will use production endpoints')
+  console.log('═══════════════════════════════════════════════')
+}
+
+// PRODUCTION MODE: Simple error logging
+if (!isDev && missing.length > 0) {
   console.error(
     '❌ Missing Firebase environment variables in firebaseConfig:',
     missing
@@ -55,26 +98,66 @@ if (missing.length > 0) {
 // 🚀 Initialiser Firebase
 const app = initializeApp(firebaseConfig)
 
+// Log successful initialization in DEV
+if (isDev) {
+  console.log('✅ Firebase app initialized successfully')
+  console.log('📱 App name:', app.name)
+  console.log('🔑 Project ID:', firebaseConfig.projectId)
+}
+
 // Eksporter Firebase-tjenestene
 export const db = getFirestore(app)
 export const storage = getStorage(app)
 export const auth = getAuth(app)
 
 // ============================================================================
-// 🛠️ Localhost Auth Fix (Firebase referer blocking workaround)
+// 🛠️ Firebase Auth Configuration for Local Development
 // ============================================================================
 //
-// Firebase har nylig aktivert streng referer-beskyttelse som blokkerer
-// http://localhost:5173 fra å kjøre signInWithEmailAndPassword.
+// Firebase Auth security measures may block requests from local development
+// origins (localhost, 127.0.0.1, local network IPs) if they are not properly
+// configured in your Firebase Console.
 //
-// connectAuthEmulator() med disableWarnings TRUE bypasser sperren
-// uten at du må kjøre Emulator eller oppgradere prosjektet.
+// REQUIRED SETUP FOR LOCAL DEVELOPMENT:
+// 1. Go to Firebase Console → Authentication → Settings → Authorized domains
+// 2. Add the following domains:
+//    - localhost
+//    - 127.0.0.1 (if not already present)
+//    - Your local network IP (e.g., 192.168.x.x)
 //
-// Produksjon påvirkes ikke.
+// This configuration ensures that signInWithEmailAndPassword and other auth
+// methods work correctly in development without requiring Firebase Emulator.
 //
+// Production is NOT affected by local development configuration.
+//
+// ============================================================================
 
-// Emulator disabled – use real Firebase Auth everywhere
-console.log('ENV AUTH DOMAIN:', import.meta.env.VITE_FIREBASE_AUTH_DOMAIN)
+if (isDev) {
+  console.log('🔐 Auth Configuration:')
+  console.log('   Auth Domain:', firebaseConfig.authDomain)
+  console.log('   Current Origin:', window.location.origin)
+  console.log('   ⚠️ If auth fails, check Firebase Console → Authorized domains')
+}
+
+// ============================================================================
+// 🛡️ AppCheck Configuration (Production Only)
+// ============================================================================
+//
+// AppCheck is NOT implemented in this application yet.
+// When implemented, it MUST be disabled in development mode:
+//
+// Example (DO NOT UNCOMMENT until needed):
+// if (!isDev) {
+//   const appCheck = initializeAppCheck(app, {
+//     provider: new ReCaptchaV3Provider('RECAPTCHA_SITE_KEY'),
+//     isTokenAutoRefreshEnabled: true
+//   })
+// }
+//
+// DEV mode: AppCheck DISABLED (no crypto.randomUUID calls)
+// PROD mode: AppCheck ENABLED (when implemented)
+//
+// ============================================================================
 
 // ============================================================================
 // 📁 Firestore-funksjoner
