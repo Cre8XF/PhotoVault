@@ -1,238 +1,208 @@
 // ============================================================================
-// COMPONENT: AlbumModal.jsx – v2.1 med i18n
+// MINIMAL TEST VERSION - AlbumModal (stripped down to find focus issue)
 // ============================================================================
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, FolderPlus, Image as ImageIcon } from 'lucide-react'
+import { X, FolderPlus } from 'lucide-react'
 
 const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
   const { t } = useTranslation(['albums'])
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [cover, setCover] = useState('')
+  const [name, setName] = useState(editingAlbum?.name || '')
+  const [description, setDescription] = useState(editingAlbum?.description || '')
+  const [cover, setCover] = useState(editingAlbum?.cover || '')
 
-  // New state for UX
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-
-  useEffect(() => {
-    if (editingAlbum) {
-      setName(editingAlbum.name || '')
-      setDescription(editingAlbum.description || '')
-      setCover(editingAlbum.cover || '')
-    }
-  }, [editingAlbum])
-
-  // Prevent body scroll when modal is open
-  useEffect(() => {
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = 'auto'
-    }
-  }, [])
-
-  // ESC key to close modal
-  useEffect(() => {
-    const handleEsc = (e) => {
-      if (e.key === 'Escape' && !loading) {
-        onClose()
-      }
-    }
-    window.addEventListener('keydown', handleEsc)
-    return () => window.removeEventListener('keydown', handleEsc)
-  }, [onClose, loading])
-
-  // Validation helper
-  const validateForm = () => {
-    // Clear previous errors
-    setError('')
-
-    // Validate name
-    if (!name.trim()) {
-      setError(t('albums:needsAlbumName'))
-      return false
-    }
-
-    if (name.length > 50) {
-      setError(t('albums:errors.nameTooLong'))
-      return false
-    }
-
-    if (description.length > 200) {
-      setError(t('albums:errors.descriptionTooLong'))
-      return false
-    }
-
-    return true
-  }
-
-  // Enhanced submit handler
-  const handleSave = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
+    if (!name.trim()) return
 
-    // Validate form
-    if (!validateForm()) {
-      return
-    }
+    onSave({
+      name: name.trim(),
+      description: description.trim(),
+      cover: cover.trim()
+    }, editingAlbum)
 
-    try {
-      setLoading(true)
-      setError('')
-
-      const albumData = {
-        name: name.trim(),
-        description: description.trim(),
-        cover: cover.trim(),
-      }
-
-      // Let parent handle both create and update
-      await onSave(albumData, editingAlbum)
-
-      // Close modal on success
-      onClose()
-    } catch (err) {
-      console.error('Error saving album:', err)
-      setError(err.message || t('albums:errors.couldNotCreateAlbum'))
-
-      if (window.showToast) {
-        window.showToast(t('albums:errors.albumCreationError'), 'error')
-      }
-    } finally {
-      setLoading(false)
-    }
+    onClose()
   }
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        padding: '16px'
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose()
+      }}
     >
       <div
+        style={{
+          backgroundColor: '#1f2937',
+          padding: '32px',
+          borderRadius: '16px',
+          width: '100%',
+          maxWidth: '500px',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          color: 'white'
+        }}
         onClick={(e) => e.stopPropagation()}
-        tabIndex={-1}
-        className="glass card-premium w-full max-w-md rounded-2xl shadow-2xl p-6"
       >
         {/* Header */}
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <FolderPlus className="w-5 h-5 text-purple-400" />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <FolderPlus style={{ width: '20px', height: '20px', color: '#a78bfa' }} />
             {editingAlbum ? t('albums:editAlbum') : t('albums:newAlbum')}
           </h2>
           <button
             onClick={onClose}
-            disabled={loading}
-            className="ripple-effect text-gray-400 hover:text-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#9ca3af',
+              cursor: 'pointer',
+              padding: '4px'
+            }}
           >
-            <X className="w-5 h-5" />
+            <X style={{ width: '20px', height: '20px' }} />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSave} className="space-y-4">
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Name Input */}
           <div>
-            <label className="block text-sm text-gray-300 mb-1">
-              {t('albums:name')} <span className="text-red-500">*</span>
+            <label
+              htmlFor="album-name-input"
+              style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#d1d5db' }}
+            >
+              {t('albums:name')} <span style={{ color: '#ef4444' }}>*</span>
             </label>
             <input
-              autoFocus
+              id="album-name-input"
               type="text"
               value={name}
-              onChange={(e) => {
-                setName(e.target.value)
-                setError('') // Clear error on change
-              }}
-              placeholder={
-                t('albums:namePlaceholder') ||
-                'Enter album name (max 50 characters)'
-              }
+              onChange={(e) => setName(e.target.value)}
+              placeholder={t('albums:namePlaceholder') || 'Album name...'}
               maxLength={50}
-              disabled={loading}
-              className="input-premium disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                fontSize: '16px',
+                border: '1px solid #4b5563',
+                borderRadius: '8px',
+                backgroundColor: '#374151',
+                color: 'white',
+                outline: 'none'
+              }}
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
               {name.length}/50 {t('albums:characters')}
             </p>
           </div>
 
+          {/* Description Input */}
           <div>
-            <label className="block text-sm text-gray-300 mb-1">
+            <label
+              htmlFor="album-description-input"
+              style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#d1d5db' }}
+            >
               {t('albums:description')}
             </label>
             <textarea
+              id="album-description-input"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder={
-                t('albums:descriptionPlaceholder') ||
-                'Add a description (optional, max 200 characters)'
-              }
+              placeholder={t('albums:descriptionPlaceholder') || 'Description...'}
               maxLength={200}
-              rows="3"
-              disabled={loading}
-              className="input-premium disabled:opacity-50 disabled:cursor-not-allowed"
+              rows={3}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                fontSize: '16px',
+                border: '1px solid #4b5563',
+                borderRadius: '8px',
+                backgroundColor: '#374151',
+                color: 'white',
+                outline: 'none',
+                resize: 'none'
+              }}
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
               {description.length}/200 {t('albums:characters')}
             </p>
           </div>
 
+          {/* Cover URL Input */}
           <div>
-            <label className="block text-sm text-gray-300 mb-1 flex items-center gap-2">
-              <ImageIcon className="w-4 h-4 text-purple-400" />
-              {t('albums:coverImage')}
+            <label
+              htmlFor="album-cover-input"
+              style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#d1d5db' }}
+            >
+              {t('albums:coverImage')} (optional)
             </label>
             <input
+              id="album-cover-input"
               type="url"
               value={cover}
               onChange={(e) => setCover(e.target.value)}
               placeholder="https://..."
-              disabled={loading}
-              className="input-premium disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                fontSize: '16px',
+                border: '1px solid #4b5563',
+                borderRadius: '8px',
+                backgroundColor: '#374151',
+                color: 'white',
+                outline: 'none'
+              }}
             />
-            {cover && (
-              <img
-                src={cover}
-                alt={t('albums:coverPreview')}
-                className="w-full h-40 object-cover rounded-xl mt-2 border border-gray-700"
-              />
-            )}
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-            </div>
-          )}
-
-          <div className="flex justify-end gap-3 pt-4">
+          {/* Buttons */}
+          <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
             <button
               type="button"
               onClick={onClose}
-              disabled={loading}
-              className="ripple-effect px-5 py-2 rounded-xl bg-gray-700/60 hover:bg-gray-600/70
-                         text-gray-200 text-sm font-semibold transition-colors
-                         disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                flex: 1,
+                padding: '12px',
+                fontSize: '16px',
+                fontWeight: '600',
+                border: '1px solid #4b5563',
+                borderRadius: '8px',
+                backgroundColor: '#374151',
+                color: '#d1d5db',
+                cursor: 'pointer'
+              }}
             >
               {t('albums:cancel')}
             </button>
             <button
               type="submit"
-              disabled={loading || !name.trim()}
-              className="ripple-effect px-5 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500
-                         hover:from-purple-600 hover:to-pink-600 text-white text-sm font-semibold transition-colors
-                         disabled:opacity-50 disabled:cursor-not-allowed
-                         flex items-center justify-center gap-2"
+              disabled={!name.trim()}
+              style={{
+                flex: 1,
+                padding: '12px',
+                fontSize: '16px',
+                fontWeight: '600',
+                border: 'none',
+                borderRadius: '8px',
+                background: name.trim()
+                  ? 'linear-gradient(to right, #a855f7, #ec4899)'
+                  : '#4b5563',
+                color: 'white',
+                cursor: name.trim() ? 'pointer' : 'not-allowed',
+                opacity: name.trim() ? 1 : 0.5
+              }}
             >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  {editingAlbum ? t('albums:updating') : t('albums:creating')}
-                </>
-              ) : editingAlbum ? (
-                t('albums:saveChanges')
-              ) : (
-                t('albums:createAlbum')
-              )}
+              {editingAlbum ? t('albums:saveChanges') : t('albums:createAlbum')}
             </button>
           </div>
         </form>

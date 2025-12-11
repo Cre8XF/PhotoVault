@@ -68,6 +68,15 @@ const CollageNewPage = () => {
   // ============================================================================
 
   useEffect(() => {
+    console.log('═══════════════════════════════════════');
+    console.log('📍 COLLAGE BUILDER MOUNTED');
+    console.log('═══════════════════════════════════════');
+    console.log('Current path:', window.location.pathname);
+    console.log('History length:', window.history.length);
+    console.log('Template ID:', templateId);
+    console.log('Referrer:', document.referrer);
+    console.log('═══════════════════════════════════════');
+
     setIsWorldView(true);
 
     // Load template and initialize collage
@@ -90,10 +99,22 @@ const CollageNewPage = () => {
   // ============================================================================
 
   const handleBack = useCallback(() => {
+    console.log('═══════════════════════════════════════');
+    console.log('⬅️ COLLAGE BACK BUTTON DEBUG');
+    console.log('═══════════════════════════════════════');
+    console.log('Current path:', window.location.pathname);
+    console.log('History length:', window.history.length);
+    console.log('Has unsaved changes:', isDirty);
+
     if (isDirty) {
+      console.log('⚠️ Showing exit warning (unsaved changes)');
       setShowExitWarning(true);
     } else {
-      navigate(-1);
+      console.log('🏠 Navigating to Home with replace: true');
+      console.log('═══════════════════════════════════════');
+      // FIX: Navigate to Home (not back!)
+      // Using replace: true removes collage builder from history
+      navigate('/', { replace: true });
     }
   }, [isDirty, navigate]);
 
@@ -145,6 +166,12 @@ const CollageNewPage = () => {
       setIsSaving(true);
       setSaveError(null);
 
+      console.log('═══════════════════════════════════════');
+      console.log('💾 COLLAGE SAVE DEBUG');
+      console.log('═══════════════════════════════════════');
+      console.log('Current path:', window.location.pathname);
+      console.log('History length:', window.history.length);
+
       const collageData = getCollageData();
       const validation = validateCollageData(collageData);
 
@@ -172,12 +199,21 @@ const CollageNewPage = () => {
       markAsSaved(docRef.id);
 
       // Show success message
-      console.log('✅ Collage saved:', docRef.id);
+      console.log('✅ Collage saved successfully:', docRef.id);
+      console.log('🏠 Navigating to Home with replace: true');
+      console.log('═══════════════════════════════════════');
 
-      // Navigate back or to collage list
-      navigate(-1);
+      // FIX: Navigate directly to Home (not back!)
+      // Using replace: true removes collage builder from history
+      navigate('/', {
+        replace: true,
+        state: {
+          message: 'Kollasj lagret!',
+          type: 'success'
+        }
+      });
     } catch (error) {
-      console.error('Error saving collage:', error);
+      console.error('❌ Failed to save collage:', error);
       setSaveError(t('collage.errors.saveFailed', 'Failed to save collage'));
     } finally {
       setIsSaving(false);
@@ -330,7 +366,10 @@ const CollageNewPage = () => {
                   {t('common:cancel', 'Cancel')}
                 </button>
                 <button
-                  onClick={() => navigate(-1)}
+                  onClick={() => {
+                    console.log('🗑️ User confirmed: Discard changes and go Home');
+                    navigate('/', { replace: true });
+                  }}
                   className="flex-1 bg-red-600 hover:bg-red-700 py-3 rounded-xl font-semibold transition"
                 >
                   {t('collage.discardChanges', 'Discard')}

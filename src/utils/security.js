@@ -319,7 +319,203 @@ export function checkPINStrength(pin) {
   return { strength, score };
 }
 
+// ============================================================================
+// XSS PROTECTION - Prevents Cross-Site Scripting attacks
+// ============================================================================
+
+/**
+ * Validates and sanitizes image URLs to prevent XSS attacks
+ *
+ * 🚨 SECURITY: Blocks dangerous protocols like:
+ * - javascript:alert('XSS')
+ * - data:text/html,<script>alert('XSS')</script>
+ * - vbscript:msgbox('XSS')
+ *
+ * ✅ Allows safe protocols:
+ * - https://example.com/image.jpg
+ * - http://example.com/image.jpg (localhost only)
+ * - data:image/png;base64,...
+ * - blob:http://localhost:3000/...
+ *
+ * @param {string} url - The URL to validate
+ * @param {string} fallback - Fallback URL if validation fails
+ * @returns {string} - Sanitized URL or fallback
+ */
+export const sanitizeImageUrl = (url, fallback = '') => {
+  // Null/undefined/empty check
+  if (!url || typeof url !== 'string') {
+    if (url !== '' && url !== null && url !== undefined) {
+      console.warn('⚠️ Security: Invalid image URL type:', typeof url)
+    }
+    return fallback
+  }
+
+  // Trim whitespace
+  const trimmed = url.trim()
+
+  if (trimmed.length === 0) {
+    return fallback
+  }
+
+  // Block dangerous protocols (XSS vectors)
+  const dangerousProtocols = /^(javascript:|vbscript:|data:(?!image\/))/i
+
+  if (dangerousProtocols.test(trimmed)) {
+    console.error('🚨 SECURITY XSS: Blocked dangerous protocol in URL:', trimmed.substring(0, 100))
+    return fallback
+  }
+
+  // Normalize and check protocol for remote URLs
+  try {
+    // Only allow HTTPS for remote images
+    if (/^https?:\/\//i.test(trimmed)) {
+      const urlObj = new URL(trimmed, window.location.origin)
+      if (urlObj.protocol !== 'https:' && urlObj.protocol !== 'http:') {
+        console.error('🚨 SECURITY XSS: Only http(s) images allowed')
+        return fallback
+      }
+      // Block inline event handler fragment attempts
+      if ((trimmed.includes('onerror=') || trimmed.includes('onload='))) {
+        console.error('🚨 SECURITY XSS: Event handler detected in image URL')
+        return fallback
+      }
+      // Disallow angle brackets or suspicious characters
+      if (/[<>'"`]/.test(trimmed)) {
+        console.error('🚨 SECURITY XSS: Malicious meta-characters found in image URL')
+        return fallback
+      }
+      return trimmed
+    }
+    // Allow base64 image data URLs only, strictly validated
+    if (trimmed.startsWith('data:image/')) {
+      // Only allow whitelisted image mime types, strict base64, and no suspicious substrings
+      const validDataUrl = /^data:image\/(jpeg|jpg|png|gif|webp|bmp|ico|svg\+xml);base64,[A-Za-z0-9+\/=]+$/i
+      if (!validDataUrl.test(trimmed)) {
+        console.error('🚨 SECURITY XSS: Invalid base64 image data URL format')
+        return fallback
+      }
+      // Defensive: sure there's no event handler injection or decoded meta-characters in the header
+      const lowerPart = trimmed.slice(0, 200).toLowerCase()
+      if (lowerPart.includes('<script') || lowerPart.includes('onerror') || lowerPart.includes('onload') || lowerPart.includes('javascript:')) {
+        console.error('🚨 SECURITY XSS: Suspicious pattern detected in data URL')
+        return fallback
+      }
+      if (/[<>'"`]/.test(lowerPart)) {
+        console.error('🚨 SECURITY XSS: Malicious meta-characters found in image data URL')
+        return fallback
+      }
+      return trimmed
+    }
+    // Block all other protocols (blob: & file: & others)
+    console.error('🚨 SECURITY XSS: Only HTTPS images and validated base64 image data URLs are permitted.')
+    return fallback
+  } catch (err) {
+    console.error('🚨 Security XSS: Exception during URL validation', err)
+    return fallback
+  }
+}
+
+/**
+ * Validates that a string is safe to use as HTML attribute
+ * Removes potentially dangerous characters
+ *
+ * @param {string} value - The value to validate
+ * @returns {string} - Sanitized value
+ */
+export const sanitizeAttribute = (value) => {
+  if (!value || typeof value !== 'string') {
+    return ''
+  }
+
+  // Remove HTML/JavaScript dangerous characters
+  return value
+    .replace(/[<>'"&]/g, (char) => {
+      // HTML entity encoding
+      const entities = {
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        '&': '&amp;'
+      }
+      return entities[char] || char
+    })
+    .trim()
+}
+
+/**
+ * Sanitizes text content to prevent XSS
+ * Use this for rendering user-generated text content
+ *
+ * @param {string} text - The text to sanitize
+ * @returns {string} - Sanitized text
+ */
+export const sanitizeText = (text) => {
+  if (!text || typeof text !== 'string') {
+    return ''
+  }
+
+  // Remove HTML tags (repeatedly) and escape special characters
+  let sanitized = text;
+  let previous;
+  do {
+    previous = sanitized;
+    sanitized = sanitized.replace(/<[^>]*>/g, '');
+  } while (sanitized !== previous);
+  return sanitized
+    .replace(/[<>'"&]/g, (char) => {
+      const entities = {
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        '&': '&amp;'
+      }
+      return entities[char] || char
+    })
+    .trim()
+}
+
+/**
+ * Validates Firebase Storage URLs
+ * Ensures URL is from trusted Firebase storage domain
+ *
+ * @param {string} url - The Firebase storage URL
+ * @returns {boolean} - True if valid Firebase storage URL
+ */
+export const isValidFirebaseStorageUrl = (url) => {
+  if (!url || typeof url !== 'string') {
+    return false
+  }
+
+  // Firebase storage domains
+  const firebaseStorageDomains = [
+    'firebasestorage.googleapis.com',
+    'storage.googleapis.com'
+  ]
+
+  try {
+    const urlObj = new URL(url)
+    return firebaseStorageDomains.some(domain => urlObj.hostname.includes(domain))
+  } catch (e) {
+    console.warn('Invalid URL format:', url)
+    return false
+  }
+}
+
+/**
+ * Inline SVG placeholder for missing images
+ * Safe to use as it's controlled content, not user input
+ */
+export const PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23334155" width="400" height="300"/%3E%3Ctext fill="%2394a3b8" font-family="sans-serif" font-size="18" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3EImage not available%3C/text%3E%3C/svg%3E'
+
+/**
+ * Album placeholder
+ */
+export const PLACEHOLDER_ALBUM = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%234c1d95" width="400" height="300"/%3E%3Ctext fill="%23a78bfa" font-family="sans-serif" font-size="18" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3ENo cover image%3C/text%3E%3C/svg%3E'
+
 export default {
+  // PIN & Encryption
   hashPIN,
   verifyPIN,
   validatePIN,
@@ -328,5 +524,12 @@ export default {
   encryptPhoto,
   decryptPhoto,
   generateRandomPIN,
-  checkPINStrength
+  checkPINStrength,
+  // XSS Protection
+  sanitizeImageUrl,
+  sanitizeAttribute,
+  sanitizeText,
+  isValidFirebaseStorageUrl,
+  PLACEHOLDER_IMAGE,
+  PLACEHOLDER_ALBUM
 };

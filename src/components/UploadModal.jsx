@@ -58,6 +58,7 @@ const UploadModal = ({
   onCreateAlbum,
   albums = [],
   selectedAlbum = null,
+  initialMode = 'upload', // 'upload' or 'album'
 }) => {
   // ✅ FIRST: Get all hook values that provide data
   const isNative = isNativePlatform()
@@ -136,6 +137,17 @@ const UploadModal = ({
       document.removeEventListener('keydown', handleKeyDown)
     }
   }, [isOpen, handleKeyDown, showAlbumModal]) // Add showAlbumModal dependency
+
+  // Auto-open AlbumModal if initialMode is 'album'
+  useEffect(() => {
+    if (isOpen && initialMode === 'album' && !showAlbumModal) {
+      console.log('📁 UploadModal opened in ALBUM mode - opening AlbumModal');
+      // Delay to ensure modal is fully rendered
+      setTimeout(() => {
+        setShowAlbumModal(true);
+      }, 100);
+    }
+  }, [isOpen, initialMode]);
 
   // Drag and drop handlers
   const handleDrag = (e) => {

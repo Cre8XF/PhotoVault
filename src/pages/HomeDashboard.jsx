@@ -45,6 +45,7 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
   const navigate = useNavigate();
   const { t } = useTranslation(["common", "home"]);
   const [isUploadOpen, setUploadOpen] = useState(false);
+  const [uploadMode, setUploadMode] = useState('upload'); // 'upload' or 'album'
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   // Determine user plan (default to "free" if not set)
@@ -239,13 +240,39 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
       {/* Quick Actions Bar */}
       {!isInitialLoading && (
         <QuickActionsBar
-          onUpload={() => setUploadOpen(true)}
-          onNewAlbum={() => {
-            setUploadOpen(true)
-            // The UploadModal will handle album creation through its AlbumModal
+          onUpload={() => {
+            console.log('📤 QUICK ACTION: LAST OPP');
+            setUploadMode('upload');
+            setUploadOpen(true);
           }}
-          onCreateCollage={() => navigate('/tools/collage/templates')}
-          onSearchFaces={() => navigate('/search', { state: { filter: 'faces' } })}
+          onNewAlbum={() => {
+            console.log('═══════════════════════════════════════');
+            console.log('📁 QUICK ACTION: NYTT ALBUM');
+            console.log('═══════════════════════════════════════');
+            console.log('Setting upload mode to: album');
+            console.log('Opening UploadModal with AlbumModal auto-open');
+            console.log('═══════════════════════════════════════');
+            setUploadMode('album');
+            setUploadOpen(true);
+          }}
+          onCreateCollage={() => {
+            console.log('═══════════════════════════════════════');
+            console.log('🎨 QUICK ACTION: LAG KOLLASJ');
+            console.log('═══════════════════════════════════════');
+            console.log('Starting from:', window.location.pathname);
+            console.log('History length:', window.history.length);
+            console.log('Navigating to: /tools/collage/templates');
+            console.log('═══════════════════════════════════════');
+            navigate('/tools/collage/templates');
+          }}
+          onSearchFaces={() => {
+            console.log('═══════════════════════════════════════');
+            console.log('👤 QUICK ACTION: SØK ANSIKTER');
+            console.log('═══════════════════════════════════════');
+            console.log('Navigating to: /search?faces=true');
+            console.log('═══════════════════════════════════════');
+            navigate('/search?faces=true');
+          }}
         />
       )}
 
@@ -280,7 +307,15 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
                   {t("home:favoritesTitle")}
                 </h2>
                 <button
-                  onClick={() => navigate("/search?favorites=true")}
+                  onClick={() => {
+                    console.log('═══════════════════════════════════════');
+                    console.log('⭐ SE ALLE FAVORITTER');
+                    console.log('═══════════════════════════════════════');
+                    console.log('Total favorites:', stats.favorites);
+                    console.log('Navigating to: /search?favorites=true');
+                    console.log('═══════════════════════════════════════');
+                    navigate('/search?favorites=true');
+                  }}
                   className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition whitespace-nowrap flex items-center"
                 >
                   {t("common:seeAll", { count: stats.favorites })} →
@@ -340,7 +375,15 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
           </h2>
           {timeGroups.length > 0 && (
             <button
-              onClick={() => navigate('/search', { state: { view: 'recent' } })}
+              onClick={() => {
+                console.log('═══════════════════════════════════════');
+                console.log('📸 SE ALLE SISTE OPPLASTNINGER');
+                console.log('═══════════════════════════════════════');
+                console.log('Total recent photos:', timeGroups.reduce((sum, g) => sum + g.photos.length, 0));
+                console.log('Navigating to: /search?range=month');
+                console.log('═══════════════════════════════════════');
+                navigate('/search?range=month');
+              }}
               className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition whitespace-nowrap flex items-center"
             >
               {t("common:seeAll")} →
@@ -364,13 +407,30 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
                 group={group}
                 onPhotoClick={onPhotoClick}
                 onHeaderClick={(group) => {
-                  // Navigate to SearchPage filtered by time period
-                  navigate('/search', {
-                    state: {
-                      timeFilter: group.key,
-                      timeLabel: group.label
-                    }
-                  })
+                  console.log('═══════════════════════════════════════');
+                  console.log('📅 TIME GROUP CLICKED');
+                  console.log('═══════════════════════════════════════');
+                  console.log('Group:', group.label || group.labelEN);
+                  console.log('Key:', group.key);
+                  console.log('Photos:', group.photos.length);
+
+                  // Map time group keys to SearchPage URL params
+                  let searchUrl = '/search?range=month'; // default to month
+
+                  // Map specific time periods to search filters
+                  if (group.key.includes('today') || group.key.includes('idag')) {
+                    searchUrl = '/search?range=week';
+                  } else if (group.key.includes('week') || group.key.includes('uke')) {
+                    searchUrl = '/search?range=week';
+                  } else if (group.key.includes('month') || group.key.includes('måned')) {
+                    searchUrl = '/search?range=month';
+                  }
+
+                  console.log('Navigating to:', searchUrl);
+                  console.log('═══════════════════════════════════════');
+
+                  // Navigate to SearchPage with date range filter
+                  navigate(searchUrl);
                 }}
               />
             ))}
@@ -380,7 +440,11 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
 
       {/* Upload Button - Moved here for FREE users (primary action) */}
       <button
-        onClick={() => setUploadOpen(true)}
+        onClick={() => {
+          console.log('📤 LARGE UPLOAD BUTTON CLICKED');
+          setUploadMode('upload');
+          setUploadOpen(true);
+        }}
         className="ripple-effect glass p-4 md:p-5 rounded-xl hover:bg-white/15 transition flex items-center justify-center gap-3 mb-6 md:mb-10 w-full bg-purple-600/20 border-2 border-purple-500/30 hover:border-purple-400/50 free-upload-btn"
       >
         <ImagePlus className="w-5 h-5 md:w-6 md:h-6 text-purple-400" />
@@ -464,10 +528,14 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
       {/* Upload Modal */}
       <UploadModal
         isOpen={isUploadOpen}
-        onClose={() => setUploadOpen(false)}
+        onClose={() => {
+          setUploadOpen(false);
+          setUploadMode('upload'); // Reset to default mode
+        }}
         onUpload={onUpload}
         onCreateAlbum={handleCreateAlbum}
         albums={albums}
+        initialMode={uploadMode}
       />
     </div>
   );

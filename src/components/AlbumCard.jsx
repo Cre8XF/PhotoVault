@@ -2,10 +2,12 @@
 // COMPONENT: AlbumCard.jsx – Twilight Theme med 3D Tilt Effect og cover-støtte
 // Phase 2: Optimized with React.memo
 // Phase 3: i18n support added
+// Phase 4: XSS Protection added
 // ============================================================================
 import React, { useState, memo } from 'react'
 import { Edit3 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { sanitizeImageUrl, PLACEHOLDER_ALBUM } from '../utils/security'
 
 const AlbumCard = memo(
   ({ album, photos = [], onOpen, onEdit }) => {
@@ -73,8 +75,12 @@ const AlbumCard = memo(
         {coverUrl ? (
           <div className="photo-container-enhanced relative aspect-[16/9] w-full flex items-center justify-center">
             <img
-              src={coverUrl}
+              src={sanitizeImageUrl(coverUrl, PLACEHOLDER_ALBUM)}
               alt={album.name || 'Album'}
+              onError={(e) => {
+                console.error('❌ Failed to load album cover:', coverUrl)
+                e.target.src = PLACEHOLDER_ALBUM
+              }}
               className="max-h-full max-w-full object-contain rounded-xl"
               loading="lazy"
             />
