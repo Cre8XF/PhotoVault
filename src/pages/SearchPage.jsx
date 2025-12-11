@@ -91,6 +91,9 @@ const SearchPage = ({
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [photoToDelete, setPhotoToDelete] = useState(null)
 
+  // Track special filters that bypass normal filtering
+  const [specialFilter, setSpecialFilter] = useState(null)
+
   // Read filters from URL query params
   useEffect(() => {
     const params = new URLSearchParams(location.search)
@@ -119,9 +122,41 @@ const SearchPage = ({
       hasChanges = true
     }
 
-    // Check for recent filter
+    // Check for recent filter (FIXED - Issue 1)
     if (params.has('recent') && params.get('recent') === 'true') {
-      newFilters.dateRange = 'month'
+      const limit = parseInt(params.get('limit')) || 50
+      console.log('🔵 RECENT FILTER ACTIVATED:', {
+        limit,
+        totalPhotos: safePhotos.length,
+        explanation: 'Will show most recent photos sorted by createdAt/uploadedAt'
+      })
+      setSpecialFilter({ type: 'recent', limit })
+    } else {
+      setSpecialFilter(null)
+    }
+
+    // Check for day filter (FIXED - Issue 2)
+    if (params.has('day')) {
+      const dayValue = params.get('day')
+      console.log('🔵 DAY FILTER ACTIVATED:', dayValue)
+
+      if (dayValue === 'today') {
+        newFilters.dateRange = 'today'
+        hasChanges = true
+      } else if (dayValue === 'yesterday') {
+        newFilters.dateRange = 'yesterday'
+        hasChanges = true
+      } else {
+        // Specific date (YYYY-MM-DD format)
+        newFilters.dateRange = `date:${dayValue}`
+        hasChanges = true
+      }
+    }
+
+    // Check for week filter (FIXED - Issue 2)
+    if (params.has('week') && params.get('week') === 'true') {
+      console.log('🔵 WEEK FILTER ACTIVATED')
+      newFilters.dateRange = 'week'
       hasChanges = true
     }
 
@@ -148,7 +183,7 @@ const SearchPage = ({
       setActiveFilters(newFilters)
       console.log('✅ Applied filters from URL params:', newFilters)
     }
-  }, [location.search]) // Re-run when URL query params change
+  }, [location.search, safePhotos.length]) // Re-run when URL query params change
 
   // 🔒 SIKRET: Kategorier med array-guard
   const categories = useMemo(() => {
@@ -175,16 +210,45 @@ const SearchPage = ({
   const filteredPhotos = useMemo(() => {
     let res = safePhotos
 
+    // SPECIAL FILTER: Recent photos (Issue 1 fix)
+    if (specialFilter?.type === 'recent') {
+      console.log('🔍 Applying RECENT filter...')
+      // Sort by most recent first (createdAt or uploadedAt)
+      const sorted = [...res].sort((a, b) => {
+        const dateA = new Date(a.createdAt || a.uploadedAt || 0).getTime()
+        const dateB = new Date(b.createdAt || b.uploadedAt || 0).getTime()
+        return dateB - dateA // Most recent first
+      })
+      // Limit to specified number
+      res = sorted.slice(0, specialFilter.limit)
+      console.log(`✅ Recent filter applied: showing ${res.length} photos`)
+      return res // Skip other filters when showing recent
+    }
+
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase()
+      console.log('🔍 Searching for:', q)
+
       res = res.filter((p) => {
+        // Search in filename
         const inName = p.name?.toLowerCase().includes(q)
+
+        // Search in AI tags
         const inTags = Array.isArray(p.aiTags)
           ? p.aiTags.some((t) => t.toLowerCase().includes(q))
           : false
+
+        // Search in category
         const inCat = p.category?.toLowerCase().includes(q)
-        return inName || inTags || inCat
+
+        // Search in album name (FIXED - Issue 3)
+        const album = safeAlbums.find((a) => a.id === p.albumId)
+        const inAlbum = album?.name?.toLowerCase().includes(q)
+
+        return inName || inTags || inCat || inAlbum
       })
+
+      console.log(`✅ Search complete: ${res.length} results for "${q}"`)
     }
 
     if (activeFilters.favorites) res = res.filter((p) => p.favorite)
@@ -205,19 +269,72 @@ const SearchPage = ({
 
     if (activeFilters.dateRange) {
       const now = Date.now()
-      const days =
-        { today: 1, week: 7, month: 30, year: 365 }[activeFilters.dateRange] ||
-        0
-      if (days > 0) {
-        const cutoff = now - days * 24 * 60 * 60 * 1000
-        res = res.filter(
-          (p) => new Date(p.createdAt || p.uploadedAt || 0).getTime() >= cutoff
-        )
+
+      // Handle special day filters (today, yesterday) - Issue 2 fix
+      if (activeFilters.dateRange === 'today') {
+        const todayStart = new Date()
+        todayStart.setHours(0, 0, 0, 0)
+        const todayEnd = new Date()
+        todayEnd.setHours(23, 59, 59, 999)
+
+        console.log('🔍 Filtering photos from TODAY:', {
+          start: todayStart.toISOString(),
+          end: todayEnd.toISOString()
+        })
+
+        res = res.filter((p) => {
+          const photoDate = new Date(p.createdAt || p.uploadedAt || 0).getTime()
+          return photoDate >= todayStart.getTime() && photoDate <= todayEnd.getTime()
+        })
+        console.log(`✅ Today filter applied: ${res.length} photos`)
+      } else if (activeFilters.dateRange === 'yesterday') {
+        const yesterdayStart = new Date()
+        yesterdayStart.setDate(yesterdayStart.getDate() - 1)
+        yesterdayStart.setHours(0, 0, 0, 0)
+        const yesterdayEnd = new Date()
+        yesterdayEnd.setDate(yesterdayEnd.getDate() - 1)
+        yesterdayEnd.setHours(23, 59, 59, 999)
+
+        console.log('🔍 Filtering photos from YESTERDAY:', {
+          start: yesterdayStart.toISOString(),
+          end: yesterdayEnd.toISOString()
+        })
+
+        res = res.filter((p) => {
+          const photoDate = new Date(p.createdAt || p.uploadedAt || 0).getTime()
+          return photoDate >= yesterdayStart.getTime() && photoDate <= yesterdayEnd.getTime()
+        })
+        console.log(`✅ Yesterday filter applied: ${res.length} photos`)
+      } else if (activeFilters.dateRange.startsWith('date:')) {
+        // Specific date (YYYY-MM-DD)
+        const dateStr = activeFilters.dateRange.replace('date:', '')
+        const targetDate = new Date(dateStr)
+        targetDate.setHours(0, 0, 0, 0)
+        const nextDay = new Date(targetDate)
+        nextDay.setDate(nextDay.getDate() + 1)
+
+        console.log('🔍 Filtering photos from specific date:', dateStr)
+
+        res = res.filter((p) => {
+          const photoDate = new Date(p.createdAt || p.uploadedAt || 0).getTime()
+          return photoDate >= targetDate.getTime() && photoDate < nextDay.getTime()
+        })
+        console.log(`✅ Date filter applied: ${res.length} photos`)
+      } else {
+        // Original range-based filtering (week, month, year)
+        const days =
+          { week: 7, month: 30, year: 365 }[activeFilters.dateRange] || 0
+        if (days > 0) {
+          const cutoff = now - days * 24 * 60 * 60 * 1000
+          res = res.filter(
+            (p) => new Date(p.createdAt || p.uploadedAt || 0).getTime() >= cutoff
+          )
+        }
       }
     }
 
     return res
-  }, [safePhotos, searchQuery, activeFilters])
+  }, [safePhotos, searchQuery, activeFilters, specialFilter])
 
   const activeFilterCount = useMemo(() => {
     return Object.values(activeFilters).filter(Boolean).length
@@ -352,48 +469,52 @@ const SearchPage = ({
 
   return (
     <div className="container-premium max-w-7xl mx-auto p-4">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-3">
-          <SearchIcon className="w-7 h-7" />
-          {t('search:title')}
-        </h1>
+      {/* Header - FIXED LAYOUT (Issue 4) */}
+      <div className={`sticky top-0 z-40 bg-gradient-to-b from-gray-900 to-transparent pb-4 mb-4 ${editMode ? 'edit-mode' : ''}`}>
+        {/* Top row - always visible */}
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold flex items-center gap-2">
+            <SearchIcon className="w-6 h-6 md:w-7 md:h-7" />
+            <span className="hidden sm:inline">{t('search:title')}</span>
+            <span className="sm:hidden">Søk</span>
+          </h1>
 
-        <div className="flex gap-2">
-          <button
-            onClick={() => {
-              setEditMode(!editMode)
-              if (editMode) {
-                setSelectedPhotos([])
-              }
-            }}
-            className={`ripple-effect px-4 py-2 rounded-xl flex items-center gap-2 transition ${
-              editMode
-                ? 'bg-purple-600 hover:bg-purple-700'
-                : 'bg-white/10 hover:bg-white/20'
-            }`}
-          >
-            {editMode && (
-              <span className="text-sm text-indigo-200 dark:text-indigo-100 bg-indigo-700/30 dark:bg-indigo-500/40 px-3 py-1 rounded-lg ml-2 transition">
-                {t('search:clickToManage')}
-              </span>
-            )}
-            {editMode ? <Check size={18} /> : <Edit3 size={18} />}
-            {editMode ? t('search:done') : t('search:edit')}
-          </button>
+          <div className="flex gap-2">
+            {/* Filter button - always show */}
+            <button
+              onClick={() => setShowFilters((v) => !v)}
+              className="ripple-effect px-3 py-2 md:px-4 md:py-2 rounded-xl bg-white/10 hover:bg-white/20 flex items-center gap-2"
+              title={t('search:filters')}
+            >
+              <SlidersHorizontal size={18} />
+              <span className="hidden md:inline">{t('search:filters')}</span>
+              {activeFilterCount > 0 && (
+                <span className="ml-1 rounded-md px-2 py-0.5 text-sm bg-purple-600">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
 
-          <button
-            onClick={() => setShowFilters((v) => !v)}
-            className="ripple-effect px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 flex items-center gap-2"
-          >
-            <SlidersHorizontal size={18} />
-            {t('search:filters')}
-            {activeFilterCount > 0 && (
-              <span className="ml-1 rounded-md px-2 py-0.5 text-sm bg-purple-600">
-                {activeFilterCount}
+            {/* Edit/Done toggle */}
+            <button
+              onClick={() => {
+                setEditMode(!editMode)
+                if (editMode) {
+                  setSelectedPhotos([])
+                }
+              }}
+              className={`ripple-effect px-3 py-2 md:px-4 md:py-2 rounded-xl flex items-center gap-2 transition ${
+                editMode
+                  ? 'bg-purple-600 hover:bg-purple-700'
+                  : 'bg-white/10 hover:bg-white/20'
+              }`}
+            >
+              {editMode ? <Check size={18} /> : <Edit3 size={18} />}
+              <span className="hidden sm:inline">
+                {editMode ? t('search:done') : t('search:edit')}
               </span>
-            )}
-          </button>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -441,19 +562,66 @@ const SearchPage = ({
                 <Move size={18} /> {t('search:move')}
               </button>
               <button
-                onClick={() => {
-                  if (selectedPhotos.length === 1) {
-                    const photo = safePhotos.find(
-                      (p) => p.id === selectedPhotos[0]
-                    )
-                    if (photo) requestDelete(photo)
-                  } else {
-                    alert(t('search:errors.multiDeleteNotSupported'))
+                onClick={async () => {
+                  // FIXED - Issue 5: Support multiple photo deletion
+                  console.log('🗑️ Delete button clicked:', {
+                    count: selectedPhotos.length,
+                    photoIds: selectedPhotos
+                  })
+
+                  if (selectedPhotos.length === 0) {
+                    console.warn('No photos selected')
+                    return
+                  }
+
+                  // Confirmation message
+                  const confirmMessage = selectedPhotos.length === 1
+                    ? t('search:confirmDeleteMessage')
+                    : t('search:confirmDeleteMultiple', { count: selectedPhotos.length })
+
+                  if (!window.confirm(confirmMessage)) {
+                    console.log('Delete cancelled by user')
+                    return
+                  }
+
+                  try {
+                    console.log('🔥 Starting deletion process...')
+
+                    // Delete each selected photo
+                    for (const photoId of selectedPhotos) {
+                      const photo = safePhotos.find((p) => p.id === photoId)
+                      if (photo) {
+                        console.log(`Deleting photo: ${photo.name} (${photoId})`)
+                        await deletePhoto(photo.id, photo.storagePath)
+                      }
+                    }
+
+                    console.log('✅ All photos deleted successfully')
+
+                    // Clear selection and exit edit mode
+                    setSelectedPhotos([])
+                    setEditMode(false)
+
+                    // Refresh data
+                    if (refreshData) {
+                      await refreshData()
+                    }
+
+                    // Success message
+                    const successMessage = selectedPhotos.length === 1
+                      ? t('common:notifications.photoDeleted')
+                      : t('search:photosDeleted', { count: selectedPhotos.length })
+
+                    alert(successMessage)
+                  } catch (error) {
+                    console.error('❌ Delete failed:', error)
+                    alert(t('search:errors.couldNotDelete'))
                   }
                 }}
                 className="ripple-effect px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 flex items-center gap-2 touch-target"
               >
-                <Trash2 size={18} /> {t('search:delete')}
+                <Trash2 size={18} />
+                <span>{t('search:delete')} ({selectedPhotos.length})</span>
               </button>
             </div>
           )}

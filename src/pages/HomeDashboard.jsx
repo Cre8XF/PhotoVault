@@ -381,9 +381,10 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
                 console.log('📸 SE ALLE SISTE OPPLASTNINGER');
                 console.log('═══════════════════════════════════════');
                 console.log('Total recent photos:', totalRecentPhotos);
-                console.log('Navigating to: /search?range=month');
+                console.log('Navigating to: /search?recent=true&limit=50');
+                console.log('This should show ONLY recent photos, not all photos');
                 console.log('═══════════════════════════════════════');
-                navigate('/search?range=month');
+                navigate('/search?recent=true&limit=50');
               }}
               className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition whitespace-nowrap flex items-center"
             >
@@ -415,26 +416,31 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
                   console.log('Key:', group.key);
                   console.log('Photos:', group.photos.length);
 
-                  // Map time group keys to SearchPage URL params
-                  // All time groups (today, yesterday, thisWeek) are recent, so use week filter
-                  let searchUrl = '/search?range=week';
+                  // Map time group keys to SearchPage URL params (FIXED - Issue 2)
+                  let searchUrl = '/search';
 
-                  // Handle specific time period keys
                   switch(group.key) {
                     case 'today':
+                      searchUrl = '/search?day=today';
+                      console.log('✅ Using day=today filter');
+                      break;
                     case 'yesterday':
+                      searchUrl = '/search?day=yesterday';
+                      console.log('✅ Using day=yesterday filter');
+                      break;
                     case 'thisWeek':
-                      searchUrl = '/search?range=week'; // Last 7 days
+                      searchUrl = '/search?week=true';
+                      console.log('✅ Using week=true filter');
                       break;
                     default:
                       // If somehow we get a different key, default to month
                       searchUrl = '/search?range=month';
+                      console.log('⚠️ Unknown key, using range=month fallback');
                   }
 
                   console.log('Navigating to:', searchUrl);
                   console.log('═══════════════════════════════════════');
 
-                  // Navigate to SearchPage with date range filter
                   navigate(searchUrl);
                 }}
               />
