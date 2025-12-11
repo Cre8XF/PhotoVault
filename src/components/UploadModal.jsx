@@ -354,16 +354,27 @@ const UploadModal = ({
     try {
       setIsCreatingAlbum(true)
 
+      console.log('📁 Creating album:', cleanAlbum.name)
+
       // Single Firestore write - creates album document
       const newAlbumRef = await addAlbum(cleanAlbum)
 
-      window.showToast?.('Album created 🎉', 'success')
+      console.log('✅ Album created:', { id: newAlbumRef.id, name: cleanAlbum.name })
+
+      window.showToast?.(`Album "${cleanAlbum.name}" created! 🎉 Ready to upload photos.`, 'success')
+
+      // Close AlbumModal
       setShowAlbumModal(false)
+
+      // CRITICAL: Pre-select the new album for photo upload
+      setSelectedAlbumId(newAlbumRef.id)
+
+      console.log('📸 Album pre-selected for upload:', newAlbumRef.id)
 
       // Notify parent to refresh UI - does NOT create another document
       if (onCreateAlbum) onCreateAlbum({ id: newAlbumRef.id, ...cleanAlbum })
     } catch (error) {
-      console.error('Error creating album:', error)
+      console.error('❌ Error creating album:', error)
       window.showToast?.('Failed to create album', 'error')
     } finally {
       // Reset guard after a delay to allow modal close animations
