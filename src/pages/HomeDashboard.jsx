@@ -376,17 +376,18 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
           {timeGroups.length > 0 && (
             <button
               onClick={() => {
+                const totalRecentPhotos = timeGroups.reduce((sum, g) => sum + g.photos.length, 0);
                 console.log('═══════════════════════════════════════');
                 console.log('📸 SE ALLE SISTE OPPLASTNINGER');
                 console.log('═══════════════════════════════════════');
-                console.log('Total recent photos:', timeGroups.reduce((sum, g) => sum + g.photos.length, 0));
+                console.log('Total recent photos:', totalRecentPhotos);
                 console.log('Navigating to: /search?range=month');
                 console.log('═══════════════════════════════════════');
                 navigate('/search?range=month');
               }}
               className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition whitespace-nowrap flex items-center"
             >
-              {t("common:seeAll")} →
+              {t("common:seeAll", { count: timeGroups.reduce((sum, g) => sum + g.photos.length, 0) })} →
             </button>
           )}
         </div>
@@ -415,15 +416,19 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
                   console.log('Photos:', group.photos.length);
 
                   // Map time group keys to SearchPage URL params
-                  let searchUrl = '/search?range=month'; // default to month
+                  // All time groups (today, yesterday, thisWeek) are recent, so use week filter
+                  let searchUrl = '/search?range=week';
 
-                  // Map specific time periods to search filters
-                  if (group.key.includes('today') || group.key.includes('idag')) {
-                    searchUrl = '/search?range=week';
-                  } else if (group.key.includes('week') || group.key.includes('uke')) {
-                    searchUrl = '/search?range=week';
-                  } else if (group.key.includes('month') || group.key.includes('måned')) {
-                    searchUrl = '/search?range=month';
+                  // Handle specific time period keys
+                  switch(group.key) {
+                    case 'today':
+                    case 'yesterday':
+                    case 'thisWeek':
+                      searchUrl = '/search?range=week'; // Last 7 days
+                      break;
+                    default:
+                      // If somehow we get a different key, default to month
+                      searchUrl = '/search?range=month';
                   }
 
                   console.log('Navigating to:', searchUrl);
