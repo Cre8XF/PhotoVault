@@ -257,14 +257,9 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
       }}
     >
       <div
-        onClick={(e) => {
-          // CRITICAL: Only handle clicks on the modal div itself, NOT on children (inputs, etc.)
-          if (e.target === e.currentTarget) {
-            console.log('[MODAL BACKGROUND CLICK] - Not an input')
-          }
-          // Always stop propagation to prevent closing modal when clicking inside
-          e.stopPropagation()
-        }}
+        onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
         className="glass card-premium w-full max-w-md rounded-2xl shadow-2xl p-6"
         style={{
           marginTop: 'auto',
