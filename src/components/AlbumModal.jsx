@@ -257,8 +257,10 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
       }}
     >
       <div
-        onClick={(e) => e.stopPropagation()}
-        tabIndex={-1}
+        onClick={(e) => {
+          console.log('[MODAL CONTENT CLICK]', e.target.id || e.target.tagName)
+          e.stopPropagation()
+        }}
         className="glass card-premium w-full max-w-md rounded-2xl shadow-2xl p-6"
         style={{
           marginTop: 'auto',
@@ -303,20 +305,30 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
                 setError('') // Clear error on change
               }}
               onFocus={(e) => {
+                const timestamp = new Date().toISOString()
+                console.log(`[FOCUS] album-name @ ${timestamp}`)
+                console.log('  • activeElement:', document.activeElement?.id || '(none)')
+                console.log('  • body.position:', getComputedStyle(document.body).position)
+                console.log('  • body.overflow:', getComputedStyle(document.body).overflow)
+                if (window.visualViewport) {
+                  console.log('  • visualViewport.height:', window.visualViewport.height)
+                }
                 handleMobileInputDebug('album-name', 'focus')
-                // ✅ Scroll input into view on mobile
-                setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100)
               }}
-              onBlur={() => console.log('📱 Album name input blurred')}
+              onBlur={(e) => {
+                const timestamp = new Date().toISOString()
+                console.log(`[BLUR] album-name @ ${timestamp}`)
+                console.log('  • activeElement:', document.activeElement?.id || '(none)')
+                console.log('  • relatedTarget:', e.relatedTarget?.id || '(none)')
+              }}
               onTouchStart={(e) => {
-                handleMobileInputDebug('album-name', 'touchstart')
-                // ✅ FORCE FOCUS on touch
-                e.currentTarget.focus()
+                console.log('[TOUCH] album-name')
+                // Don't force focus - let natural focus happen
               }}
               onClick={(e) => {
-                console.log('📱 Album name input clicked')
-                // ✅ FORCE FOCUS on click
-                e.currentTarget.focus()
+                console.log('[CLICK] album-name')
+                console.log('  • target:', e.target.id)
+                console.log('  • currentTarget:', e.currentTarget.id)
               }}
               placeholder={
                 t('albums:namePlaceholder') ||
@@ -363,20 +375,30 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
                 setDescription(e.target.value)
               }}
               onFocus={(e) => {
+                const timestamp = new Date().toISOString()
+                console.log(`[FOCUS] album-description @ ${timestamp}`)
+                console.log('  • activeElement:', document.activeElement?.id || '(none)')
+                console.log('  • body.position:', getComputedStyle(document.body).position)
+                console.log('  • body.overflow:', getComputedStyle(document.body).overflow)
+                if (window.visualViewport) {
+                  console.log('  • visualViewport.height:', window.visualViewport.height)
+                }
                 handleMobileInputDebug('album-description', 'focus')
-                // ✅ Scroll input into view on mobile
-                setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100)
               }}
-              onBlur={() => console.log('📱 Description input blurred')}
+              onBlur={(e) => {
+                const timestamp = new Date().toISOString()
+                console.log(`[BLUR] album-description @ ${timestamp}`)
+                console.log('  • activeElement:', document.activeElement?.id || '(none)')
+                console.log('  • relatedTarget:', e.relatedTarget?.id || '(none)')
+              }}
               onTouchStart={(e) => {
-                handleMobileInputDebug('album-description', 'touchstart')
-                // ✅ FORCE FOCUS on touch
-                e.currentTarget.focus()
+                console.log('[TOUCH] album-description')
+                // Don't force focus - let natural focus happen
               }}
               onClick={(e) => {
-                console.log('📱 Album description input clicked')
-                // ✅ FORCE FOCUS on click
-                e.currentTarget.focus()
+                console.log('[CLICK] album-description')
+                console.log('  • target:', e.target.id)
+                console.log('  • currentTarget:', e.currentTarget.id)
               }}
               placeholder={
                 t('albums:descriptionPlaceholder') ||
@@ -427,20 +449,30 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
                 setCover(e.target.value)
               }}
               onFocus={(e) => {
+                const timestamp = new Date().toISOString()
+                console.log(`[FOCUS] album-cover @ ${timestamp}`)
+                console.log('  • activeElement:', document.activeElement?.id || '(none)')
+                console.log('  • body.position:', getComputedStyle(document.body).position)
+                console.log('  • body.overflow:', getComputedStyle(document.body).overflow)
+                if (window.visualViewport) {
+                  console.log('  • visualViewport.height:', window.visualViewport.height)
+                }
                 handleMobileInputDebug('cover-url', 'focus')
-                // ✅ Scroll input into view on mobile
-                setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100)
               }}
-              onBlur={() => console.log('📱 Cover URL input blurred')}
+              onBlur={(e) => {
+                const timestamp = new Date().toISOString()
+                console.log(`[BLUR] album-cover @ ${timestamp}`)
+                console.log('  • activeElement:', document.activeElement?.id || '(none)')
+                console.log('  • relatedTarget:', e.relatedTarget?.id || '(none)')
+              }}
               onTouchStart={(e) => {
-                handleMobileInputDebug('cover-url', 'touchstart')
-                // ✅ FORCE FOCUS on touch
-                e.currentTarget.focus()
+                console.log('[TOUCH] album-cover')
+                // Don't force focus - let natural focus happen
               }}
               onClick={(e) => {
-                console.log('📱 Album cover input clicked')
-                // ✅ FORCE FOCUS on click
-                e.currentTarget.focus()
+                console.log('[CLICK] album-cover')
+                console.log('  • target:', e.target.id)
+                console.log('  • currentTarget:', e.currentTarget.id)
               }}
               placeholder="https://..."
               disabled={false}
