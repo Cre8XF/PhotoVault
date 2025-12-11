@@ -429,6 +429,19 @@ body.light-mode ::-webkit-scrollbar-thumb {
 }
 
 /* ============================================================================
+   🔥 CRITICAL FIX: Disable transform on modal cards (prevents focus loss)
+   ============================================================================ */
+/* The hover transform on .card-premium causes modals to "jump" when clicking
+   inputs, which breaks focus transitions. Disable for fixed/modal contexts. */
+.fixed .card-premium {
+  transform: none !important;
+}
+
+.fixed .card-premium:hover {
+  transform: none !important;
+}
+
+/* ============================================================================
    🔥 CRITICAL MOBILE INPUT FIX - NEVER BLOCK INPUTS
    ============================================================================ */
 input,
