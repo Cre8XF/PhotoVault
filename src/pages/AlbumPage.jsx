@@ -30,6 +30,7 @@ import {
   Layout,
   Video,
   Presentation,
+  Settings,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
@@ -388,42 +389,42 @@ const AlbumPage = ({
 
   return (
     <div className="min-h-screen p-3 md:p-6 pb-24 animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-2.5 md:mb-3">
-        <div className="flex items-center gap-4">
+      {/* Header - Optimized for mobile to prevent button overflow */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2.5 md:mb-3 gap-2">
+        <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
           <button
             onClick={() => navigate('/albums')}
-            className="ripple-effect p-2 hover:bg-white/10 rounded-lg transition"
+            className="ripple-effect p-2 hover:bg-white/10 rounded-lg transition flex-shrink-0"
           >
-            <ArrowLeft className="w-6 h-6" />
+            <ArrowLeft className="w-5 h-5 md:w-6 md:h-6" />
           </button>
-          <div>
-            <h1 className="text-3xl font-bold">{album.name}</h1>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl md:text-3xl font-bold truncate">{album.name}</h1>
             {album.description && (
-              <p className="text-gray-400 mt-1">{album.description}</p>
+              <p className="text-gray-400 text-sm md:text-base mt-0.5 md:mt-1 truncate">{album.description}</p>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 md:gap-2 flex-wrap justify-end">
           {/* Edit Mode Toggle */}
           <button
             onClick={() => {
               setEditMode(!editMode)
               setSelectedPhotos([])
             }}
-            className={`ripple-effect px-3 py-2 md:px-4 md:py-2.5 rounded-lg flex items-center gap-2 transition ${
+            className={`ripple-effect px-2 py-1.5 md:px-4 md:py-2.5 rounded-lg flex items-center gap-1.5 md:gap-2 transition text-xs md:text-base ${
               editMode
                 ? 'bg-purple-600 text-white'
                 : 'bg-white/10 hover:bg-white/20'
             }`}
           >
             {editMode ? (
-              <Check className="w-5 h-5" />
+              <Check className="w-4 h-4 md:w-5 md:h-5" />
             ) : (
-              <Edit3 className="w-5 h-5" />
+              <Edit3 className="w-4 h-4 md:w-5 md:h-5" />
             )}
-            <span className="hidden sm:inline text-sm md:text-base">
+            <span className="hidden sm:inline">
               {editMode ? t('common:done') : t('common:edit')}
             </span>
           </button>
@@ -432,15 +433,15 @@ const AlbumPage = ({
           <button
             onClick={() => navigate(ROUTES.COLLAGE_NEW)}
             disabled={albumPhotos.length < 2}
-            className="ripple-effect px-3 py-2 md:px-4 md:py-2.5 rounded-lg bg-purple-600 hover:bg-purple-700 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="ripple-effect px-2 py-1.5 md:px-4 md:py-2.5 rounded-lg bg-purple-600 hover:bg-purple-700 transition flex items-center gap-1.5 md:gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-xs md:text-base"
             title={
               albumPhotos.length < 2
                 ? t('albums:minTwoPhotos')
                 : t('albums:createCollage')
             }
           >
-            <Layout className="w-5 h-5" />
-            <span className="hidden sm:inline text-sm md:text-base">
+            <Layout className="w-4 h-4 md:w-5 md:h-5" />
+            <span className="hidden sm:inline">
               {t('albums:createCollage')}
             </span>
           </button>
@@ -461,7 +462,7 @@ const AlbumPage = ({
                   state: { from: location },
                 })
               }}
-              className="ripple-effect px-3 py-1.5 md:px-4 md:py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 flex items-center gap-1.5 md:gap-2 text-sm md:text-base"
+              className="ripple-effect px-2 py-1.5 md:px-4 md:py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 flex items-center gap-1.5 md:gap-2 text-xs md:text-base"
             >
               <Presentation className="w-4 md:w-5 h-4 md:h-5" />
               <span className="hidden sm:inline">
@@ -473,21 +474,28 @@ const AlbumPage = ({
           {/* Share Album Button */}
           <button
             onClick={() => setShareModalOpen(true)}
-            className="ripple-effect px-3 py-2 md:px-4 md:py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 transition flex items-center gap-2"
+            className="ripple-effect px-2 py-1.5 md:px-4 md:py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 transition flex items-center gap-1.5 md:gap-2 text-xs md:text-base"
           >
-            <Share2 className="w-5 h-5" />
-            <span className="hidden sm:inline text-sm md:text-base">
+            <Share2 className="w-4 h-4 md:w-5 md:h-5" />
+            <span className="hidden sm:inline">
               {t('albums:shareAlbum')}
             </span>
           </button>
 
-          {/* Edit Album Button */}
+          {/* Edit Album Button - Using Settings icon to distinguish from Edit Mode */}
           <button
-            onClick={() => setEditingAlbum(album)}
-            className="ripple-effect p-2 hover:bg-white/10 rounded-lg transition"
+            onClick={() => {
+              console.log('🔧 Edit album clicked:', {
+                albumId: album.id,
+                albumName: album.name,
+                albumDescription: album.description
+              })
+              setEditingAlbum(album)
+            }}
+            className="ripple-effect p-1.5 md:p-2 hover:bg-white/10 rounded-lg transition"
             title={t('albums:editAlbum')}
           >
-            <Edit3 className="w-5 h-5" />
+            <Settings className="w-4 h-4 md:w-5 md:h-5" />
           </button>
         </div>
       </div>
@@ -864,9 +872,39 @@ const AlbumPage = ({
         <AlbumModal
           editingAlbum={editingAlbum}
           onClose={() => setEditingAlbum(null)}
-          onSave={async (data, editingAlbum) => {
-            await onSaveAlbum(data, editingAlbum)
-            setEditingAlbum(null)
+          onSave={async (data, editingAlbumParam) => {
+            console.log('💾 Saving album changes:', {
+              data,
+              editingAlbumParam,
+              editingAlbumState: editingAlbum,
+              currentAlbum: album
+            })
+
+            // Use editingAlbumParam (from modal), fallback to state, then to current album
+            const albumToSave = editingAlbumParam || editingAlbum || album
+
+            if (!albumToSave || !albumToSave.id) {
+              console.error('❌ No valid album to save')
+              setNotification({
+                message: t('albums:errors.couldNotSaveAlbum'),
+                type: 'error',
+              })
+              return
+            }
+
+            console.log('✅ Using album for save:', albumToSave.id, albumToSave.name)
+
+            try {
+              await onSaveAlbum(data, albumToSave)
+              console.log('✅ Album saved successfully')
+              setEditingAlbum(null)
+            } catch (error) {
+              console.error('❌ Failed to save album:', error)
+              setNotification({
+                message: error.message || t('albums:errors.couldNotSaveAlbum'),
+                type: 'error',
+              })
+            }
           }}
         />
       )}
