@@ -211,6 +211,13 @@
   "uploaded": "Uploaded",
   "uploadImages": "Upload images",
   "uploadPhotos": "Upload photos",
+  "dateTaken": "Date taken",
+  "location": "Location",
+  "altitude": "Altitude",
+  "camera": "Camera",
+  "lens": "Lens",
+  "technicalDetails": "Technical Details",
+  "shutterSpeed": "Shutter Speed",
   "user": "there",
   "video": {
     "duration": "Duration",

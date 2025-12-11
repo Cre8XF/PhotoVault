@@ -211,6 +211,13 @@
   "uploaded": "Lastet opp",
   "uploadImages": "Last opp bilder",
   "uploadPhotos": "Last opp bilder",
+  "dateTaken": "Tatt",
+  "location": "Lokasjon",
+  "altitude": "Høyde",
+  "camera": "Kamera",
+  "lens": "Objektiv",
+  "technicalDetails": "Tekniske detaljer",
+  "shutterSpeed": "Lukkertid",
   "user": "der",
   "video": {
     "duration": "Varighet",

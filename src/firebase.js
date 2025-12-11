@@ -687,28 +687,85 @@ export async function uploadPhoto(
       }
     }
 
-    // 2. Extract EXIF data (for photos only)
+    // 2. Extract comprehensive EXIF data (for photos only)
     let takenAt = null
+    let location = null
+    let camera = null
+    let technicalDetails = null
+
     if (!isVideo) {
       try {
+        console.log('📊 Extracting comprehensive EXIF metadata...')
         const exifData = await exifr.parse(file, {
-          pick: ['DateTimeOriginal', 'CreateDate', 'ModifyDate']
+          gps: true,
+          exif: true,
+          iptc: true,
+          ifd0: true,
+          ifd1: true,
+          pick: [
+            'DateTimeOriginal', 'CreateDate', 'ModifyDate', 'DateTime',
+            'latitude', 'longitude', 'altitude',
+            'Make', 'Model', 'LensModel',
+            'ISO', 'ExposureTime', 'FNumber', 'FocalLength',
+            'ImageWidth', 'ImageHeight', 'Orientation'
+          ]
         })
 
         if (exifData) {
-          // Try DateTimeOriginal first (most accurate)
-          takenAt = exifData.DateTimeOriginal || exifData.CreateDate || exifData.ModifyDate
+          console.log('📊 Raw EXIF data:', exifData)
+
+          // Extract date taken
+          takenAt = exifData.DateTimeOriginal ||
+                    exifData.CreateDate ||
+                    exifData.ModifyDate ||
+                    exifData.DateTime
 
           if (takenAt) {
             // Convert to ISO string if it's a Date object
             if (takenAt instanceof Date) {
               takenAt = takenAt.toISOString()
             }
-            console.log(`📅 EXIF date found: ${takenAt}`)
+            console.log(`📅 Original date found: ${takenAt}`)
           }
+
+          // Extract GPS location
+          if (exifData.latitude && exifData.longitude) {
+            location = {
+              latitude: exifData.latitude,
+              longitude: exifData.longitude,
+              altitude: exifData.altitude || null
+            }
+            console.log('📍 GPS location found:', location)
+          }
+
+          // Extract camera info
+          if (exifData.Make || exifData.Model || exifData.LensModel) {
+            camera = {
+              make: exifData.Make || null,
+              model: exifData.Model || null,
+              lens: exifData.LensModel || null
+            }
+            console.log('📷 Camera info found:', camera)
+          }
+
+          // Extract technical details
+          if (exifData.ISO || exifData.ExposureTime || exifData.FNumber || exifData.FocalLength) {
+            technicalDetails = {
+              iso: exifData.ISO || null,
+              shutterSpeed: exifData.ExposureTime || null,
+              aperture: exifData.FNumber || null,
+              focalLength: exifData.FocalLength || null,
+              width: exifData.ImageWidth || null,
+              height: exifData.ImageHeight || null,
+              orientation: exifData.Orientation || null
+            }
+            console.log('🔧 Technical details found:', technicalDetails)
+          }
+        } else {
+          console.log('⚠️ No EXIF data found (screenshot or edited photo)')
         }
       } catch (exifError) {
-        console.warn('Could not read EXIF data:', exifError)
+        console.warn('⚠️ Could not read EXIF data:', exifError.message)
       }
     }
 
@@ -732,7 +789,7 @@ export async function uploadPhoto(
       `📸 ${isVideo ? 'Video' : 'Bilde'} lastet opp til Storage: ${safeName}`
     )
 
-    // 4. Prepare metadata
+    // 4. Prepare metadata with comprehensive EXIF data
     const photoData = {
       name: file.name,
       url: downloadURL,
@@ -742,7 +799,18 @@ export async function uploadPhoto(
       size: file.size,
       type: isVideo ? 'video' : fileType,
       favorite: false,
-      takenAt: takenAt, // ✅ EXIF date or current date
+
+      // Date fields (EXIF-enhanced)
+      dateTaken: takenAt, // ✅ Original EXIF date or current date
+      uploadedAt: new Date().toISOString(),
+      displayDate: takenAt, // ✅ Use dateTaken for sorting/display
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+
+      // EXIF metadata (photos only)
+      ...(!isVideo && location && { location }),
+      ...(!isVideo && camera && { camera }),
+      ...(!isVideo && technicalDetails && { technicalDetails }),
 
       // Video-specific fields
       ...(isVideo && {
@@ -766,9 +834,6 @@ export async function uploadPhoto(
       bgRemoved: false,
       noBgUrl: null,
       bgRemovedAt: null,
-
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     }
 
     // 3. AI-tagging (deaktivert i Pixtr MVP)
