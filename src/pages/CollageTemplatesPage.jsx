@@ -43,15 +43,39 @@ export default function CollageTemplatesPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('═══════════════════════════════════════');
+    console.log('📍 COLLAGE TEMPLATES PAGE MOUNTED');
+    console.log('═══════════════════════════════════════');
+    console.log('Current path:', window.location.pathname);
+    console.log('History length:', window.history.length);
+    console.log('Referrer:', document.referrer);
+    console.log('═══════════════════════════════════════');
+
     setIsWorldView(true);
     return () => setIsWorldView(false);
   }, [setIsWorldView]);
 
   const handleBack = () => {
-    navigate(ROUTES.TOOLS);
+    console.log('═══════════════════════════════════════');
+    console.log('⬅️ COLLAGE TEMPLATES BACK BUTTON DEBUG');
+    console.log('═══════════════════════════════════════');
+    console.log('Current path:', window.location.pathname);
+    console.log('History length:', window.history.length);
+    console.log('🏠 Navigating to Home with replace: true');
+    console.log('═══════════════════════════════════════');
+    // FIX: Navigate to Home (not to /tools!)
+    // Using replace: true removes templates page from history
+    navigate('/', { replace: true });
   };
 
   const handleSelectTemplate = (template) => {
+    console.log('═══════════════════════════════════════');
+    console.log('📐 TEMPLATE SELECTED');
+    console.log('═══════════════════════════════════════');
+    console.log('Template:', template.name, `(${template.id})`);
+    console.log('Current path:', window.location.pathname);
+    console.log('Navigating to:', `${ROUTES.COLLAGE_NEW}?template=${template.id}`);
+    console.log('═══════════════════════════════════════');
     // Navigate to CollageNewPage with template ID
     navigate(`${ROUTES.COLLAGE_NEW}?template=${template.id}`);
   };
