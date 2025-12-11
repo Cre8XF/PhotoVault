@@ -150,6 +150,7 @@ function AppContent() {
 
   // Zustand store
   const uploadModalOpen = useStore((state) => state.uploadModalOpen)
+  const uploadInitialMode = useStore((state) => state.uploadInitialMode)
   const albumModalOpen = useStore((state) => state.albumModalOpen)
   const confirmModal = useStore((state) => state.confirmModal)
   const notification = useStore((state) => state.notification)
@@ -163,6 +164,7 @@ function AppContent() {
   const isWorldView = useStore((state) => state.isWorldView)
 
   const setUploadModalOpen = useStore((state) => state.setUploadModalOpen)
+  const setUploadInitialMode = useStore((state) => state.setUploadInitialMode)
   const setAlbumModalOpen = useStore((state) => state.setAlbumModalOpen)
   const setEditingAlbum = useStore((state) => state.setEditingAlbum)
   const setConfirmModal = useStore((state) => state.setConfirmModal)
@@ -509,8 +511,12 @@ function AppContent() {
       {uploadModalOpen && (
         <UploadModal
           isOpen={uploadModalOpen}
+          initialMode={uploadInitialMode}
           albums={albums}
-          onClose={() => setUploadModalOpen(false)}
+          onClose={() => {
+            setUploadModalOpen(false)
+            setUploadInitialMode('upload') // Reset to default
+          }}
           onUpload={handleUpload}
           onCreateAlbum={handleCreateAlbumFromUpload}
         />

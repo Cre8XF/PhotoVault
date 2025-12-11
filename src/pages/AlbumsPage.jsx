@@ -57,6 +57,7 @@ const AlbumsPage = ({
   const setAlbumModalOpen = useStore((s) => s.setAlbumModalOpen)
   const setEditingAlbum = useStore((s) => s.setEditingAlbum)
   const setCurrentPage = useStore((s) => s.setCurrentPage)
+  const openUploadModal = useStore((s) => s.openUploadModal)
 
   // Load collages once
   useEffect(() => {
@@ -223,7 +224,10 @@ const AlbumsPage = ({
       ) : (
         <>
           <button
-            onClick={() => setAlbumModalOpen(true)}
+            onClick={() => {
+              console.log('📁 AlbumsPage: Create new album clicked - opening UploadModal in album mode')
+              openUploadModal('album')
+            }}
             className="ripple-effect px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center gap-2 transition"
           >
             <Plus className="w-4 h-4" />
