@@ -209,19 +209,21 @@ const useStore = create(
         // MODAL STATE
         // =====================================================================
         uploadModalOpen: false,
+        uploadInitialMode: 'upload', // 'upload' | 'album'
         albumModalOpen: false,
         confirmModal: null,
         editingAlbum: null,
         isFullscreen: false,
 
         setUploadModalOpen: (open) => set({ uploadModalOpen: open }),
+        setUploadInitialMode: (mode) => set({ uploadInitialMode: mode }),
         setAlbumModalOpen: (open) => set({ albumModalOpen: open }),
         setConfirmModal: (modal) => set({ confirmModal: modal }),
         setEditingAlbum: (album) => set({ editingAlbum: album }),
         setIsFullscreen: (fullscreen) => set({ isFullscreen: fullscreen }),
 
-        openUploadModal: () => set({ uploadModalOpen: true }),
-        closeUploadModal: () => set({ uploadModalOpen: false }),
+        openUploadModal: (mode = 'upload') => set({ uploadModalOpen: true, uploadInitialMode: mode }),
+        closeUploadModal: () => set({ uploadModalOpen: false, uploadInitialMode: 'upload' }),
 
         openAlbumModal: (album = null) =>
           set({
