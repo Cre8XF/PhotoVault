@@ -6,6 +6,10 @@
   "done": "Ferdig",
   "filters": "Filtre",
   "move": "Flytt",
+  "delete": "Slett",
+  "selected": "valgt",
+  "selectAll": "Velg alle",
+  "deselectAll": "Fjern alle",
   "activeFilters": "Aktive filtre",
   "resetFilters": "Nullstill filtre",
   "noResults": "Ingen bilder matcher filteret",
@@ -18,7 +22,11 @@
     "allAlbums": "Alle album",
     "noAlbum": "Uten album",
     "allCategories": "Alle kategorier",
-    "allDates": "Alle datoer"
+    "allDates": "Alle datoer",
+    "today": "I dag",
+    "week": "Denne uken",
+    "month": "Denne måneden",
+    "year": "Dette året"
   },
   "dateRanges": {
     "today": "I dag",
@@ -31,10 +39,13 @@
   "hits_plural": "{{count}} treff",
   "setCover": "Sett som forside",
   "deletePhoto": "Slett bilde",
-  "confirmDelete": {
-    "title": "Bekreft sletting",
-    "message": "Er du sikker på at du vil slette dette bildet permanent?",
-    "confirm": "Slett bilde",
-    "cancel": "Avbryt"
+  "confirmDelete": "Bekreft sletting",
+  "confirmDeleteMessage": "Er du sikker på at du vil slette dette bildet permanent?",
+  "confirmDeleteMultiple": "Er du sikker på at du vil slette {{count}} bilder permanent? Dette kan ikke angres.",
+  "photosDeleted": "{{count}} bilder slettet",
+  "errors": {
+    "couldNotDelete": "Kunne ikke slette bilde(r)",
+    "couldNotMove": "Kunne ikke flytte bilde(r)",
+    "multiDeleteNotSupported": "Sletting av flere bilder ikke støttet"
   }
 }
