@@ -244,7 +244,16 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
             setUploadOpen(true)
             // The UploadModal will handle album creation through its AlbumModal
           }}
-          onCreateCollage={() => navigate('/tools/collage/templates')}
+          onCreateCollage={() => {
+            console.log('═══════════════════════════════════════');
+            console.log('🎨 QUICK ACTION: LAG KOLLASJ');
+            console.log('═══════════════════════════════════════');
+            console.log('Starting from:', window.location.pathname);
+            console.log('History length:', window.history.length);
+            console.log('Navigating to: /tools/collage/templates');
+            console.log('═══════════════════════════════════════');
+            navigate('/tools/collage/templates');
+          }}
           onSearchFaces={() => navigate('/search', { state: { filter: 'faces' } })}
         />
       )}
