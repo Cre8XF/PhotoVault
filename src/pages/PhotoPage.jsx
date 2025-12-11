@@ -666,16 +666,94 @@ export default function PhotoPage() {
                 </div>
               )}
 
+              {/* Date taken (EXIF) */}
+              {photo.dateTaken && (
+                <div>
+                  <div className="text-white/60 mb-1">{t('common:dateTaken') || 'Date taken'}</div>
+                  <div className="text-white">
+                    {typeof photo.dateTaken === 'string'
+                      ? format(new Date(photo.dateTaken), 'PPP p')
+                      : photo.dateTaken.toDate
+                      ? format(photo.dateTaken.toDate(), 'PPP p')
+                      : t('common:unknown')}
+                  </div>
+                </div>
+              )}
+
               {/* Date uploaded */}
-              {photo.createdAt && (
+              {photo.uploadedAt && (
                 <div>
                   <div className="text-white/60 mb-1">{t('common:uploaded')}</div>
                   <div className="text-white">
-                    {typeof photo.createdAt === 'string'
-                      ? format(new Date(photo.createdAt), 'PPP')
-                      : photo.createdAt.toDate
-                      ? format(photo.createdAt.toDate(), 'PPP')
+                    {typeof photo.uploadedAt === 'string'
+                      ? format(new Date(photo.uploadedAt), 'PPP')
+                      : photo.uploadedAt.toDate
+                      ? format(photo.uploadedAt.toDate(), 'PPP')
                       : t('common:unknown')}
+                  </div>
+                </div>
+              )}
+
+              {/* GPS Location (EXIF) */}
+              {photo.location && photo.location.latitude && photo.location.longitude && (
+                <div>
+                  <div className="text-white/60 mb-1">{t('common:location') || 'Location'}</div>
+                  <div className="text-white font-mono text-xs">
+                    {photo.location.latitude.toFixed(6)}, {photo.location.longitude.toFixed(6)}
+                  </div>
+                  {photo.location.altitude && (
+                    <div className="text-white/70 text-xs mt-1">
+                      {t('common:altitude') || 'Altitude'}: {Math.round(photo.location.altitude)}m
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Camera info (EXIF) */}
+              {photo.camera && (photo.camera.make || photo.camera.model) && (
+                <div>
+                  <div className="text-white/60 mb-1">{t('common:camera') || 'Camera'}</div>
+                  <div className="text-white">
+                    {photo.camera.make && photo.camera.model
+                      ? `${photo.camera.make} ${photo.camera.model}`
+                      : photo.camera.make || photo.camera.model}
+                  </div>
+                  {photo.camera.lens && (
+                    <div className="text-white/70 text-xs mt-1">
+                      {t('common:lens') || 'Lens'}: {photo.camera.lens}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Technical details (EXIF) */}
+              {photo.technicalDetails && (photo.technicalDetails.iso || photo.technicalDetails.shutterSpeed || photo.technicalDetails.aperture || photo.technicalDetails.focalLength) && (
+                <div>
+                  <div className="text-white/60 mb-1">{t('common:technicalDetails') || 'Technical Details'}</div>
+                  <div className="text-white space-y-1 text-xs">
+                    {photo.technicalDetails.iso && (
+                      <div>ISO {photo.technicalDetails.iso}</div>
+                    )}
+                    {photo.technicalDetails.shutterSpeed && (
+                      <div>
+                        {t('common:shutterSpeed') || 'Shutter'}: {
+                          photo.technicalDetails.shutterSpeed < 1
+                            ? `1/${Math.round(1 / photo.technicalDetails.shutterSpeed)}s`
+                            : `${photo.technicalDetails.shutterSpeed}s`
+                        }
+                      </div>
+                    )}
+                    {photo.technicalDetails.aperture && (
+                      <div>f/{photo.technicalDetails.aperture}</div>
+                    )}
+                    {photo.technicalDetails.focalLength && (
+                      <div>{photo.technicalDetails.focalLength}mm</div>
+                    )}
+                    {(photo.technicalDetails.width || photo.technicalDetails.height) && (
+                      <div>
+                        {photo.technicalDetails.width} × {photo.technicalDetails.height}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
