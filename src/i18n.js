@@ -68,6 +68,9 @@ import storageEN from './locales/en/storage.json'
 import emptyNO from './locales/no/empty.json'
 import emptyEN from './locales/en/empty.json'
 
+import settingsNO from './locales/no/settings.json'
+import settingsEN from './locales/en/settings.json'
+
 const resources = {
   no: {
     translation: translationNO,
@@ -90,7 +93,7 @@ const resources = {
     stats: statsNO,
     storage: storageNO,
     empty: emptyNO,
-    // ⭐ ADDED
+    settings: settingsNO,
   },
   en: {
     translation: translationEN,
@@ -113,7 +116,7 @@ const resources = {
     stats: statsEN,
     storage: storageEN,
     empty: emptyEN,
-    // ⭐ ADDED
+    settings: settingsEN,
   },
 }
 
@@ -145,7 +148,7 @@ i18n
       'stats',
       'storage',
       'empty',
-      // ⭐ ADDED
+      'settings',
     ],
 
     interpolation: {

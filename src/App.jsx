@@ -1,7 +1,7 @@
 // ============================================================================
 // APP.js – v6.0 Phase 2: Modern Architecture with Zustand & Hooks
 // ============================================================================
-import React from 'react'
+import React, { lazy, Suspense } from 'react'
 import {
   BrowserRouter,
   Routes,
@@ -19,38 +19,39 @@ import {
 } from './contexts/SecurityContext'
 import { ToastProvider } from './contexts/ToastContext'
 
-// Pages
-import LoginPage from './pages/LoginPage'
-import HomeDashboard from './pages/HomeDashboard'
-import AlbumsPage from './pages/AlbumsPage'
-import SearchPage from './pages/SearchPage'
-import MorePage from './pages/MorePage'
-import AlbumPage from './pages/AlbumPage'
-import AdminDashboard from './pages/AdminDashboard'
-import SecuritySettings from './pages/SecuritySettings'
-import VaultPage from './pages/VaultPage'
-import ProfilePage from './pages/ProfilePage'
-import SubscriptionPage from './pages/SubscriptionPage'
-import PublicAlbumPage from './pages/PublicAlbumPage'
+// Pages - Lazy loaded for performance
+const LoginPage = lazy(() => import('./pages/LoginPage'))
+const HomeDashboard = lazy(() => import('./pages/HomeDashboard'))
+const AlbumsPage = lazy(() => import('./pages/AlbumsPage'))
+const SearchPage = lazy(() => import('./pages/SearchPage'))
+const MorePage = lazy(() => import('./pages/MorePage'))
+const AlbumPage = lazy(() => import('./pages/AlbumPage'))
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
+const SecuritySettings = lazy(() => import('./pages/SecuritySettings'))
+const VaultPage = lazy(() => import('./pages/VaultPage'))
+const ProfilePage = lazy(() => import('./pages/ProfilePage'))
+const SubscriptionPage = lazy(() => import('./pages/SubscriptionPage'))
+const PublicAlbumPage = lazy(() => import('./pages/PublicAlbumPage'))
+const SettingsPage = lazy(() => import('./pages/SettingsPage'))
 
-// Function Worlds - Phase 1
-import ToolsPage from './pages/ToolsPage'
-import CollageTemplatesPage from './pages/CollageTemplatesPage'
-import CollageNewPage from './pages/CollageNewPage'
-import CollageEditPage from './pages/CollageEditPage'
-import PhotoPage from './pages/PhotoPage'
-import SlideshowPage from './pages/SlideshowPage'
+// Function Worlds - Phase 1 - Lazy loaded
+const ToolsPage = lazy(() => import('./pages/ToolsPage'))
+const CollageTemplatesPage = lazy(() => import('./pages/CollageTemplatesPage'))
+const CollageNewPage = lazy(() => import('./pages/CollageNewPage'))
+const CollageEditPage = lazy(() => import('./pages/CollageEditPage'))
+const PhotoPage = lazy(() => import('./pages/PhotoPage'))
+const SlideshowPage = lazy(() => import('./pages/SlideshowPage'))
 
-// AI Tools - Phase 5
-import AIToolsPage from './pages/ai/AIToolsPage'
-import AIEnhancePage from './pages/ai/AIEnhancePage'
-import AIRemoveBgPage from './pages/ai/AIRemoveBgPage'
-import AIPortraitPage from './pages/ai/AIPortraitPage'
-import AIColorPage from './pages/ai/AIColorPage'
-import AIUpscalePage from './pages/ai/AIUpscalePage'
+// AI Tools - Phase 5 - Lazy loaded
+const AIToolsPage = lazy(() => import('./pages/ai/AIToolsPage'))
+const AIEnhancePage = lazy(() => import('./pages/ai/AIEnhancePage'))
+const AIRemoveBgPage = lazy(() => import('./pages/ai/AIRemoveBgPage'))
+const AIPortraitPage = lazy(() => import('./pages/ai/AIPortraitPage'))
+const AIColorPage = lazy(() => import('./pages/ai/AIColorPage'))
+const AIUpscalePage = lazy(() => import('./pages/ai/AIUpscalePage'))
 
-// Collage View (for viewing saved collages)
-import CollageView from './features/collage/pages/CollageView'
+// Collage View (for viewing saved collages) - Lazy loaded
+const CollageView = lazy(() => import('./features/collage/pages/CollageView'))
 
 // Route map
 import { ROUTES } from './routes'
@@ -65,6 +66,7 @@ import Particles from './components/Particles'
 import PINLockScreen from './components/PINLockScreen'
 import NotificationPanel from './components/NotificationPanel'
 import ToastContainer from './components/ToastContainer'
+import LoadingSpinner from './components/LoadingSpinner'
 
 // Hooks
 import useAuth from './hooks/useAuth'
@@ -330,6 +332,7 @@ function AppContent() {
     currentPath !== '/security' &&
     currentPath !== '/vault' &&
     currentPath !== '/profile' &&
+    currentPath !== '/settings' &&
     currentPath !== '/subscription' &&
     !currentPath.startsWith('/collage/')
 
@@ -339,7 +342,12 @@ function AppContent() {
 
       {/* Main content - React Router based rendering */}
       <main className="relative z-10">
-        <Routes>
+        <Suspense fallback={
+          <div className="fixed inset-0 flex items-center justify-center">
+            <LoadingSpinner size="xl" />
+          </div>
+        }>
+          <Routes>
           <Route
             path="/"
             element={
@@ -414,6 +422,11 @@ function AppContent() {
           />
 
           <Route
+            path="/settings"
+            element={<SettingsPage />}
+          />
+
+          <Route
             path="/subscription"
             element={<SubscriptionPage user={userProfile || user} />}
           />
@@ -442,7 +455,8 @@ function AppContent() {
               element={<AdminDashboard />}
             />
           )}
-        </Routes>
+          </Routes>
+        </Suspense>
       </main>
 
       {/* Floating Notification Bell - Bottom left */}
