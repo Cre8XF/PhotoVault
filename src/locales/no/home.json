@@ -1,6 +1,9 @@
 {
   "greeting": "Hei, {{name}}",
   "user": "der",
+  "defaultName": "deg",
+  "subtitle": "{{count}} nytt bilde siden i går",
+  "subtitle_plural": "{{count}} nye bilder siden i går",
   "newPhoto": "nytt bilde",
   "newPhotos": "nye bilder",
   "sinceYesterday": "siden i går",

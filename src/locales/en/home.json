@@ -1,6 +1,9 @@
 {
   "greeting": "Hi, {{name}}",
   "user": "there",
+  "defaultName": "there",
+  "subtitle": "{{count}} new photo since yesterday",
+  "subtitle_plural": "{{count}} new photos since yesterday",
   "newPhoto": "new photo",
   "newPhotos": "new photos",
   "sinceYesterday": "since yesterday",
