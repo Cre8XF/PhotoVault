@@ -1,15 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { usePhotoData } from '../hooks/usePhotoData'
-import {
-  Image,
-  Folder,
-  Sparkles,
-  Heart,
-  Clock,
-  ChevronDown,
-  ChevronUp
-} from 'lucide-react'
+import { Image, Folder, Sparkles, Heart, Clock } from 'lucide-react'
 
 const ActivityFeed = () => {
   const { t } = useTranslation()
@@ -52,12 +44,12 @@ const ActivityFeed = () => {
       })
       .slice(0, 5)
 
-    recentPhotos.forEach(photo => {
+    recentPhotos.forEach((photo) => {
       items.push({
         id: photo.id,
         type: 'photo',
         timestamp: toDate(photo.uploadedAt),
-        data: photo
+        data: photo,
       })
     })
 
@@ -70,18 +62,18 @@ const ActivityFeed = () => {
       })
       .slice(0, 3)
 
-    recentAlbums.forEach(album => {
+    recentAlbums.forEach((album) => {
       items.push({
         id: album.id,
         type: 'album',
         timestamp: toDate(album.createdAt),
-        data: album
+        data: album,
       })
     })
 
     // Recent favorites (last 3)
     const recentFavorites = photos
-      .filter(p => p.favorite)
+      .filter((p) => p.favorite)
       .sort((a, b) => {
         const dateA = toDate(a.updatedAt)
         const dateB = toDate(b.updatedAt)
@@ -89,12 +81,12 @@ const ActivityFeed = () => {
       })
       .slice(0, 3)
 
-    recentFavorites.forEach(photo => {
+    recentFavorites.forEach((photo) => {
       items.push({
         id: `fav-${photo.id}`,
         type: 'favorite',
         timestamp: toDate(photo.updatedAt),
-        data: photo
+        data: photo,
       })
     })
 
@@ -126,20 +118,23 @@ const ActivityFeed = () => {
         icon: Image,
         color: 'text-blue-600 dark:text-blue-400',
         bgColor: 'bg-blue-100 dark:bg-blue-900/30',
-        label: (data) => t('activity:photoUploaded', { name: data.filename || t('common:photo') })
+        label: (data) =>
+          t('activity:photoUploaded', {
+            name: data.filename || t('common:photo'),
+          }),
       },
       album: {
         icon: Folder,
         color: 'text-purple-600 dark:text-purple-400',
         bgColor: 'bg-purple-100 dark:bg-purple-900/30',
-        label: (data) => t('activity:albumCreated', { name: data.name })
+        label: (data) => t('activity:albumCreated', { name: data.name }),
       },
       favorite: {
         icon: Heart,
         color: 'text-red-600 dark:text-red-400',
         bgColor: 'bg-red-100 dark:bg-red-900/30',
-        label: (data) => t('activity:addedToFavorites')
-      }
+        label: (data) => t('activity:addedToFavorites'),
+      },
     }
     return configs[type]
   }
@@ -152,37 +147,31 @@ const ActivityFeed = () => {
   const displayedActivities = isExpanded ? activities : activities.slice(0, 3)
 
   return (
-    <div className="activity-feed glass card-premium rounded-2xl mb-6 overflow-hidden">
-      {/* Header - Always visible, clickable to expand/collapse */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-6 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors"
-      >
-        <div className="flex items-center gap-2">
-          <Clock className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {t('activity:recentActivity')}
-          </h3>
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            ({activities.length})
-          </span>
-        </div>
+    <div className="activity-feed glass card-premium p-6 rounded-2xl mb-6">
+      <div className="flex items-center gap-2 mb-4">
+        <Clock className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          {t('activity:recentActivity')}
+        </h3>
+      </div>
 
-        {isExpanded ? (
-          <ChevronUp className="w-5 h-5 text-gray-500" />
-        ) : (
-          <ChevronDown className="w-5 h-5 text-gray-500" />
-        )}
-      </button>
+      <div className="space-y-3">
+        {activities.map((activity) => {
+          const config = getActivityConfig(activity.type)
+          if (!config) return null
 
-      {/* Activity list - Only shown when expanded */}
-      {isExpanded && (
-        <div className="px-6 pb-6 space-y-3 animate-slide-up">
-          {displayedActivities.map(activity => {
-            const config = getActivityConfig(activity.type)
-            if (!config) return null
+          const Icon = config.icon
 
-            const Icon = config.icon
+          return (
+            <div
+              key={activity.id}
+              className="activity-item flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+            >
+              <div
+                className={`flex-shrink-0 w-10 h-10 rounded-full ${config.bgColor} flex items-center justify-center`}
+              >
+                <Icon className={`w-5 h-5 ${config.color}`} />
+              </div>
 
             return (
               <div
