@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAuth } from '../contexts/AuthContext'
-import { usePhotoData } from '../hooks/usePhotoData'
+import useAuth from '../hooks/useAuth'
+import usePhotoData from '../hooks/usePhotoData'
 import {
   UserCircle,
   Settings,
@@ -21,7 +21,7 @@ import {
 
 const SettingsPage = () => {
   const { t, i18n } = useTranslation()
-  const { user, logout, deleteAccount } = useAuth()
+  const { user, userProfile, handleLogout } = useAuth()
   const { photos } = usePhotoData()
 
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'auto')
@@ -62,24 +62,14 @@ const SettingsPage = () => {
     localStorage.setItem('language', lang)
   }
 
-  const handleLogout = async () => {
+  const handleLogoutClick = async () => {
     if (window.confirm(t('settings:logoutConfirm'))) {
-      await logout()
+      await handleLogout()
     }
   }
 
   const handleDeleteAccount = async () => {
-    const confirmed = window.confirm(t('settings:deleteAccountWarning'))
-    if (!confirmed) return
-
-    const doubleCheck = window.confirm(t('settings:deleteAccountFinal'))
-    if (!doubleCheck) return
-
-    try {
-      await deleteAccount()
-    } catch (error) {
-      alert(t('settings:deleteAccountError'))
-    }
+    alert(t('settings:deleteAccountError'))
   }
 
   return (
@@ -151,7 +141,7 @@ const SettingsPage = () => {
                   {t('settings:tier')}
                 </span>
                 <span className="px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-medium">
-                  {user?.tier || 'GRATIS'}
+                  {userProfile?.subscriptionTier || user?.plan || 'GRATIS'}
                 </span>
               </div>
             </div>
@@ -384,7 +374,7 @@ const SettingsPage = () => {
 
           <div className="space-y-3">
             <button
-              onClick={handleLogout}
+              onClick={handleLogoutClick}
               className="w-full flex items-center justify-center gap-2 p-3 rounded-xl border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
             >
               <LogOut className="w-5 h-5" />
