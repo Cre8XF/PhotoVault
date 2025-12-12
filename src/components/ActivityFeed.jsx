@@ -14,6 +14,28 @@ const ActivityFeed = () => {
   const { photos, albums } = usePhotoData()
   const [activities, setActivities] = useState([])
 
+  // Helper function to safely convert various date formats to Date object
+  const toDate = (dateValue) => {
+    if (!dateValue) return new Date(0)
+
+    // Already a Date object
+    if (dateValue instanceof Date) return dateValue
+
+    // Firestore Timestamp with toDate method
+    if (dateValue.toDate && typeof dateValue.toDate === 'function') {
+      return dateValue.toDate()
+    }
+
+    // Unix timestamp (number)
+    if (typeof dateValue === 'number') return new Date(dateValue)
+
+    // String date
+    if (typeof dateValue === 'string') return new Date(dateValue)
+
+    // Fallback
+    return new Date(0)
+  }
+
   useEffect(() => {
     // Generate activity items from photos and albums
     const items = []
@@ -21,8 +43,8 @@ const ActivityFeed = () => {
     // Recent photos (last 5)
     const recentPhotos = [...photos]
       .sort((a, b) => {
-        const dateA = a.uploadedAt?.toDate() || new Date(0)
-        const dateB = b.uploadedAt?.toDate() || new Date(0)
+        const dateA = toDate(a.uploadedAt)
+        const dateB = toDate(b.uploadedAt)
         return dateB - dateA
       })
       .slice(0, 5)
@@ -31,7 +53,7 @@ const ActivityFeed = () => {
       items.push({
         id: photo.id,
         type: 'photo',
-        timestamp: photo.uploadedAt?.toDate(),
+        timestamp: toDate(photo.uploadedAt),
         data: photo
       })
     })
@@ -39,8 +61,8 @@ const ActivityFeed = () => {
     // Recent albums (last 3)
     const recentAlbums = [...albums]
       .sort((a, b) => {
-        const dateA = a.createdAt?.toDate() || new Date(0)
-        const dateB = b.createdAt?.toDate() || new Date(0)
+        const dateA = toDate(a.createdAt)
+        const dateB = toDate(b.createdAt)
         return dateB - dateA
       })
       .slice(0, 3)
@@ -49,7 +71,7 @@ const ActivityFeed = () => {
       items.push({
         id: album.id,
         type: 'album',
-        timestamp: album.createdAt?.toDate(),
+        timestamp: toDate(album.createdAt),
         data: album
       })
     })
@@ -58,8 +80,8 @@ const ActivityFeed = () => {
     const recentFavorites = photos
       .filter(p => p.favorite)
       .sort((a, b) => {
-        const dateA = a.updatedAt?.toDate() || new Date(0)
-        const dateB = b.updatedAt?.toDate() || new Date(0)
+        const dateA = toDate(a.updatedAt)
+        const dateB = toDate(b.updatedAt)
         return dateB - dateA
       })
       .slice(0, 3)
@@ -68,7 +90,7 @@ const ActivityFeed = () => {
       items.push({
         id: `fav-${photo.id}`,
         type: 'favorite',
-        timestamp: photo.updatedAt?.toDate(),
+        timestamp: toDate(photo.updatedAt),
         data: photo
       })
     })
