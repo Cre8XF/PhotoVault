@@ -1,0 +1,13 @@
+{
+  "recentActivity": "Nylig aktivitet",
+  "photoUploaded": "Bilde lastet opp: {{name}}",
+  "albumCreated": "Album opprettet: {{name}}",
+  "addedToFavorites": "Lagt til favoritter",
+  "justNow": "Akkurat nå",
+  "minutesAgo": "{{count}} minutt siden",
+  "minutesAgo_plural": "{{count}} minutter siden",
+  "hoursAgo": "{{count}} time siden",
+  "hoursAgo_plural": "{{count}} timer siden",
+  "daysAgo": "{{count}} dag siden",
+  "daysAgo_plural": "{{count}} dager siden"
+}

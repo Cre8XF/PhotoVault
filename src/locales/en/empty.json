@@ -1,0 +1,12 @@
+{
+  "noPhotos": "No photos yet",
+  "noPhotosMessage": "Start by uploading your first photo to get started",
+  "uploadPhotos": "Upload Photos",
+  "noAlbums": "No albums yet",
+  "noAlbumsMessage": "Create an album to organize your photos",
+  "createAlbum": "Create Album",
+  "noResults": "No results found",
+  "noResultsMessage": "Try adjusting your search or filters",
+  "noFavorites": "No favorites yet",
+  "noFavoritesMessage": "Mark photos as favorites to see them here"
+}

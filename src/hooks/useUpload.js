@@ -14,6 +14,7 @@ import {
   compressVideo,
 } from '../utils/videoTools'
 import useAuth from './useAuth' // ✅ ADD
+import * as exifr from 'exifr' // ✅ ADD: For EXIF extraction BEFORE compression
 
 export function useUpload() {
   const { t } = useTranslation(['upload'])
@@ -202,6 +203,35 @@ export function useUpload() {
         }
         // ✅ TIER-AWARE IMAGE PROCESSING
         else {
+          // ✅ CRITICAL FIX: Extract EXIF from ORIGINAL file BEFORE compression
+          // Compression strips all EXIF metadata, so we must extract it first!
+          let exifData = null
+          try {
+            console.log(`📊 [PRE-COMPRESSION] Extracting EXIF from: ${file.name}`)
+            exifData = await exifr.parse(file, {
+              tiff: true,
+              exif: true,
+              gps: true,
+              interop: true,
+              ifd0: true,
+              ifd1: true,
+              iptc: true,
+              jfif: true,
+              ihdr: true,
+            })
+            if (exifData) {
+              console.log(`✅ [PRE-COMPRESSION] EXIF extracted successfully:`, {
+                hasDate: !!(exifData.DateTimeOriginal || exifData.DateTime),
+                hasGPS: !!(exifData.latitude && exifData.longitude),
+                hasCamera: !!(exifData.Make || exifData.Model)
+              })
+            } else {
+              console.log(`⚠️ [PRE-COMPRESSION] No EXIF data in original file`)
+            }
+          } catch (exifError) {
+            console.warn(`⚠️ [PRE-COMPRESSION] EXIF extraction failed:`, exifError.message)
+          }
+
           if (shouldCompress) {
             // LITE and PRO: Compress images
             const compressedBlob = await compressImage(file, {
@@ -223,6 +253,7 @@ export function useUpload() {
               name: compressedFile.name,
               size: compressedFile.size,
               type: 'photo',
+              exifData: exifData, // ✅ Pass pre-extracted EXIF
             })
 
             console.log(
@@ -237,6 +268,7 @@ export function useUpload() {
               name: file.name,
               size: file.size,
               type: 'photo',
+              exifData: exifData, // ✅ Pass pre-extracted EXIF
             })
 
             console.log(

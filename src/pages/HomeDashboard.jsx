@@ -33,6 +33,9 @@ import QuickActionsBar from "../components/QuickActionsBar";
 import HomeMemoriesWidget from "../components/HomeMemoriesWidget";
 import TimeGroupSection from "../components/TimeGroupSection";
 import CollageTeaser from "../components/CollageTeaser";
+import StatsCard from "../components/StatsCard";
+import ActivityFeed from "../components/ActivityFeed";
+import TipsCarousel from "../components/TipsCarousel";
 import { groupPhotosByTime } from "../utils/groupPhotosByTime";
 import "../styles/emptyState.css";
 import "../styles/scrollToTop.css";
@@ -227,6 +230,15 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
           </p>
         )}
       </section>
+
+      {/* Stats Card */}
+      {!isInitialLoading && <StatsCard />}
+
+      {/* Tips Carousel */}
+      {!isInitialLoading && <TipsCarousel />}
+
+      {/* Activity Feed */}
+      {!isInitialLoading && <ActivityFeed />}
 
       {/* Memories Widget - "On This Day" */}
       {!isInitialLoading && (
