@@ -191,6 +191,7 @@ const ActivityFeed = () => {
                   <img
                     src={activity.data.url}
                     alt=""
+                    loading="lazy"
                     className="w-12 h-12 rounded-lg object-cover"
                   />
                 )}
@@ -217,6 +218,7 @@ const ActivityFeed = () => {
                     <img
                       src={activity.data.url}
                       alt=""
+                      loading="lazy"
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
