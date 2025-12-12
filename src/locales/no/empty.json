@@ -1,0 +1,12 @@
+{
+  "noPhotos": "Ingen bilder ennå",
+  "noPhotosMessage": "Start med å laste opp ditt første bilde",
+  "uploadPhotos": "Last opp bilder",
+  "noAlbums": "Ingen album ennå",
+  "noAlbumsMessage": "Opprett et album for å organisere bildene dine",
+  "createAlbum": "Opprett album",
+  "noResults": "Ingen resultater",
+  "noResultsMessage": "Prøv å justere søket eller filtrene dine",
+  "noFavorites": "Ingen favoritter ennå",
+  "noFavoritesMessage": "Merk bilder som favoritter for å se dem her"
+}
