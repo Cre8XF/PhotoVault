@@ -6,13 +6,16 @@ import {
   Folder,
   Sparkles,
   Heart,
-  Clock
+  Clock,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react'
 
 const ActivityFeed = () => {
   const { t } = useTranslation()
   const { photos, albums } = usePhotoData()
   const [activities, setActivities] = useState([])
+  const [isExpanded, setIsExpanded] = useState(false) // Start collapsed
 
   // Helper function to safely convert various date formats to Date object
   const toDate = (dateValue) => {
@@ -145,51 +148,110 @@ const ActivityFeed = () => {
     return null
   }
 
+  // Show only first 3 when collapsed
+  const displayedActivities = isExpanded ? activities : activities.slice(0, 3)
+
   return (
-    <div className="activity-feed glass card-premium p-6 rounded-2xl mb-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Clock className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          {t('activity:recentActivity')}
-        </h3>
-      </div>
+    <div className="activity-feed glass card-premium rounded-2xl mb-6 overflow-hidden">
+      {/* Header - Always visible, clickable to expand/collapse */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center justify-between p-6 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <Clock className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            {t('activity:recentActivity')}
+          </h3>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            ({activities.length})
+          </span>
+        </div>
 
-      <div className="space-y-3">
-        {activities.map(activity => {
-          const config = getActivityConfig(activity.type)
-          if (!config) return null
+        {isExpanded ? (
+          <ChevronUp className="w-5 h-5 text-gray-500" />
+        ) : (
+          <ChevronDown className="w-5 h-5 text-gray-500" />
+        )}
+      </button>
 
-          const Icon = config.icon
+      {/* Activity list - Only shown when expanded */}
+      {isExpanded && (
+        <div className="px-6 pb-6 space-y-3 animate-slide-up">
+          {displayedActivities.map(activity => {
+            const config = getActivityConfig(activity.type)
+            if (!config) return null
 
-          return (
-            <div
-              key={activity.id}
-              className="activity-item flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
-            >
-              <div className={`flex-shrink-0 w-10 h-10 rounded-full ${config.bgColor} flex items-center justify-center`}>
-                <Icon className={`w-5 h-5 ${config.color}`} />
+            const Icon = config.icon
+
+            return (
+              <div
+                key={activity.id}
+                className="activity-item flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+              >
+                <div className={`flex-shrink-0 w-10 h-10 rounded-full ${config.bgColor} flex items-center justify-center`}>
+                  <Icon className={`w-5 h-5 ${config.color}`} />
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    {config.label(activity.data)}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {getRelativeTime(activity.timestamp)}
+                  </p>
+                </div>
+
+                {activity.type === 'photo' && activity.data.url && (
+                  <img
+                    src={activity.data.url}
+                    alt=""
+                    className="w-12 h-12 rounded-lg object-cover"
+                  />
+                )}
               </div>
+            )
+          })}
+        </div>
+      )}
 
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                  {config.label(activity.data)}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {getRelativeTime(activity.timestamp)}
-                </p>
+      {/* Collapsed preview - Show when NOT expanded */}
+      {!isExpanded && displayedActivities.length > 0 && (
+        <div className="px-6 pb-6">
+          <div className="flex items-center gap-2 overflow-x-auto">
+            {displayedActivities.slice(0, 3).map(activity => {
+              const config = getActivityConfig(activity.type)
+              if (!config) return null
+              const Icon = config.icon
+
+              return (
+                <div
+                  key={activity.id}
+                  className={`flex-shrink-0 w-12 h-12 rounded-full ${config.bgColor} flex items-center justify-center`}
+                >
+                  {activity.type === 'photo' && activity.data.url ? (
+                    <img
+                      src={activity.data.url}
+                      alt=""
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    <Icon className={`w-6 h-6 ${config.color}`} />
+                  )}
+                </div>
+              )
+            })}
+
+            {activities.length > 3 && (
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                  +{activities.length - 3}
+                </span>
               </div>
-
-              {activity.type === 'photo' && activity.data.url && (
-                <img
-                  src={activity.data.url}
-                  alt=""
-                  className="w-12 h-12 rounded-lg object-cover"
-                />
-              )}
-            </div>
-          )
-        })}
-      </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
