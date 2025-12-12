@@ -1,0 +1,10 @@
+{
+  "title": "Storage",
+  "of": "of",
+  "used": "used",
+  "nearLimit": "Storage almost full!",
+  "upgradeMessage": "Need more space?",
+  "liteOffer": "LITE: 5 GB for 29 NOK/month",
+  "proOffer": "PRO: 50 GB for 79 NOK/month",
+  "upgrade": "Upgrade"
+}

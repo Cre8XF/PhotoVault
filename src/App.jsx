@@ -64,11 +64,13 @@ import Notification from './components/Notification'
 import Particles from './components/Particles'
 import PINLockScreen from './components/PINLockScreen'
 import NotificationPanel from './components/NotificationPanel'
+import ToastContainer from './components/ToastContainer'
 
 // Hooks
 import useAuth from './hooks/useAuth'
 import usePhotoData from './hooks/usePhotoData'
 import useStore from './state/store'
+import { useToast } from './hooks/useToast'
 
 // Icons
 import { Home, FolderOpen, Plus, Search, Menu, Bell } from 'lucide-react'
@@ -147,6 +149,9 @@ function AppContent() {
 
   // Security context
   const { isLocked, pinEnabled } = useSecurityContext()
+
+  // Toast notifications
+  const { toasts, removeToast } = useToast()
 
   // Zustand store
   const uploadModalOpen = useStore((state) => state.uploadModalOpen)
@@ -548,6 +553,9 @@ function AppContent() {
       {notification && (
         <Notification notification={notification} onClose={clearNotification} />
       )}
+
+      {/* Toast notifications */}
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
     </div>
   )
 }
