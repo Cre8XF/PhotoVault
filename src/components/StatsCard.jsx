@@ -1,6 +1,6 @@
 import { usePhotoData } from '../hooks/usePhotoData'
 import { useTranslation } from 'react-i18next'
-import { PhotoIcon, FolderIcon, SparklesIcon, ServerIcon } from '@heroicons/react/24/outline'
+import { Image, Folder, Sparkles, Server } from 'lucide-react'
 
 const StatsCard = () => {
   const { t } = useTranslation()
@@ -17,25 +17,25 @@ const StatsCard = () => {
 
   const stats = [
     {
-      icon: PhotoIcon,
+      icon: Image,
       label: t('stats:photos'),
       value: photoCount.toLocaleString(),
       color: 'text-blue-600'
     },
     {
-      icon: FolderIcon,
+      icon: Folder,
       label: t('stats:albums'),
       value: albumCount,
       color: 'text-purple-600'
     },
     {
-      icon: SparklesIcon,
+      icon: Sparkles,
       label: t('stats:collages'),
       value: collageCount,
       color: 'text-pink-600'
     },
     {
-      icon: ServerIcon,
+      icon: Server,
       label: t('stats:storage'),
       value: `${storageUsedMB} MB`,
       color: 'text-green-600'

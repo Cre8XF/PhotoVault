@@ -1,30 +1,30 @@
 import { useTranslation } from 'react-i18next'
-import { PhotoIcon, FolderIcon, MagnifyingGlassIcon, HeartIcon } from '@heroicons/react/24/outline'
+import { Image, Folder, Search, Heart } from 'lucide-react'
 
 const EmptyStateNew = ({ type, action }) => {
   const { t } = useTranslation()
 
   const config = {
     photos: {
-      icon: PhotoIcon,
+      icon: Image,
       title: t('empty:noPhotos'),
       message: t('empty:noPhotosMessage'),
       actionLabel: t('empty:uploadPhotos')
     },
     albums: {
-      icon: FolderIcon,
+      icon: Folder,
       title: t('empty:noAlbums'),
       message: t('empty:noAlbumsMessage'),
       actionLabel: t('empty:createAlbum')
     },
     search: {
-      icon: MagnifyingGlassIcon,
+      icon: Search,
       title: t('empty:noResults'),
       message: t('empty:noResultsMessage'),
       actionLabel: null
     },
     favorites: {
-      icon: HeartIcon,
+      icon: Heart,
       title: t('empty:noFavorites'),
       message: t('empty:noFavoritesMessage'),
       actionLabel: null
