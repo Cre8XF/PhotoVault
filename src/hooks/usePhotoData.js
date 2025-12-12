@@ -162,14 +162,15 @@ export const usePhotoData = () => {
         let successCount = 0
 
         for (const fileObj of selectedFiles) {
-          // Pass thumbnail and metadata for videos
+          // Pass thumbnail and metadata for videos, exifData for photos
           await uploadPhoto(
             user.uid,
             fileObj.file,
             albumId,
             aiTagging,
             fileObj.thumbnail || null,
-            fileObj.metadata || null
+            fileObj.metadata || null,
+            fileObj.exifData || null // ✅ Pass pre-extracted EXIF (from useUpload.js)
           )
           successCount++
         }

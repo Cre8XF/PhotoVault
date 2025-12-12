@@ -635,7 +635,8 @@ export async function uploadPhoto(
   albumId = null,
   aiTagging = false,
   thumbnailBlob = null,
-  videoMetadata = null
+  videoMetadata = null,
+  preExtractedExif = null // ✅ NEW: Pre-extracted EXIF data (before compression)
 ) {
   try {
     // Validate inputs
@@ -700,13 +701,23 @@ export async function uploadPhoto(
       console.log('File name:', file.name)
       console.log('File type:', file.type)
       console.log('File size:', file.size, 'bytes')
+      console.log('Pre-extracted EXIF available?', !!preExtractedExif)
       console.log('═══════════════════════════════════════')
 
-      try {
-        console.log('📊 Calling exifr.parse()...')
+      let exifData = null
 
-        // Try parsing with ALL options enabled (no pick filter)
-        const exifData = await exifr.parse(file, {
+      // ✅ CRITICAL: Use pre-extracted EXIF if available (extracted BEFORE compression)
+      if (preExtractedExif) {
+        console.log('✅ Using pre-extracted EXIF data (from original file before compression)')
+        exifData = preExtractedExif
+        console.log('📊 Pre-extracted EXIF data keys:', Object.keys(exifData))
+      } else {
+        // Fallback: Extract from current file (may have no EXIF if compressed)
+        try {
+          console.log('📊 No pre-extracted EXIF - calling exifr.parse() on current file...')
+
+          // Try parsing with ALL options enabled (no pick filter)
+          exifData = await exifr.parse(file, {
           tiff: true,
           exif: true,
           gps: true,
@@ -715,25 +726,44 @@ export async function uploadPhoto(
           ifd1: true,
           iptc: true,
           jfif: true,
-          ihdr: true,
-          // Don't use 'pick' - get everything!
-        })
+            ihdr: true,
+            // Don't use 'pick' - get everything!
+          })
 
-        console.log('✅ exifr.parse() completed')
-        console.log('📊 EXIF data type:', typeof exifData)
-        console.log('📊 EXIF data is null?', exifData === null)
-        console.log('📊 EXIF data is undefined?', exifData === undefined)
+          console.log('✅ exifr.parse() completed')
+          console.log('📊 EXIF data type:', typeof exifData)
+          console.log('📊 EXIF data is null?', exifData === null)
+          console.log('📊 EXIF data is undefined?', exifData === undefined)
 
-        if (exifData) {
-          console.log('📊 Raw EXIF data keys:', Object.keys(exifData))
-          console.log('📊 Raw EXIF data (full):', JSON.stringify(exifData, null, 2))
+          if (exifData) {
+            console.log('📊 Raw EXIF data keys:', Object.keys(exifData))
+            console.log('📊 Raw EXIF data (full):', JSON.stringify(exifData, null, 2))
+          } else {
+            console.warn('⚠️ exifr.parse() returned null/undefined')
+            console.warn('This is normal for screenshots or heavily edited photos')
+          }
 
-          // STEP 1: Extract date taken (try ALL possible fields)
-          console.log('─────────────────────────────────────')
-          console.log('📅 SEARCHING FOR DATE FIELDS...')
-          console.log('─────────────────────────────────────')
+        } catch (exifError) {
+          console.error('═══════════════════════════════════════')
+          console.error('❌ EXIF EXTRACTION FAILED')
+          console.error('═══════════════════════════════════════')
+          console.error('Error name:', exifError.name)
+          console.error('Error message:', exifError.message)
+          console.error('Error stack:', exifError.stack)
+          console.error('═══════════════════════════════════════')
+        }
+      }
 
-          const dateFields = [
+      // Process EXIF data (whether pre-extracted or freshly extracted)
+      if (exifData) {
+        console.log('📊 Processing EXIF data...')
+
+        // STEP 1: Extract date taken (try ALL possible fields)
+        console.log('─────────────────────────────────────')
+        console.log('📅 SEARCHING FOR DATE FIELDS...')
+        console.log('─────────────────────────────────────')
+
+        const dateFields = [
             'DateTimeOriginal',
             'CreateDate',
             'DateTime',
@@ -841,23 +871,9 @@ export async function uploadPhoto(
               orientation: exifData.Orientation || null
             }
             console.log('✅ Technical details found:', technicalDetails)
-          } else {
-            console.log('❌ No technical details in EXIF')
-          }
-
         } else {
-          console.warn('⚠️ exifr.parse() returned null/undefined')
-          console.warn('This is normal for screenshots or heavily edited photos')
+          console.log('❌ No technical details in EXIF')
         }
-
-      } catch (exifError) {
-        console.error('═══════════════════════════════════════')
-        console.error('❌ EXIF EXTRACTION FAILED')
-        console.error('═══════════════════════════════════════')
-        console.error('Error name:', exifError.name)
-        console.error('Error message:', exifError.message)
-        console.error('Error stack:', exifError.stack)
-        console.error('═══════════════════════════════════════')
       }
 
       console.log('═══════════════════════════════════════')
