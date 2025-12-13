@@ -431,7 +431,6 @@ const UploadModal = ({
             </div>
             <div>
               <h2 className="text-2xl font-bold">{t('upload:title')}</h2>
-              <p className="text-sm text-gray-400">{t('upload:subtitle')}</p>
             </div>
           </div>
           <button
