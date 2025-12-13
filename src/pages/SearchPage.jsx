@@ -1,7 +1,7 @@
 // ============================================================================
 // PAGE: SearchPage.jsx – v5.7 MED MULTISELECT + VELG ALLE
 // ============================================================================
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -71,6 +71,8 @@ const SearchPage = ({
 
   // Søk og filter
   const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('')
+  const debounceTimerRef = useRef(null)
   const [activeFilters, setActiveFilters] = useState({
     favorites: false,
     withFaces: false,
@@ -93,6 +95,23 @@ const SearchPage = ({
 
   // Track special filters that bypass normal filtering
   const [specialFilter, setSpecialFilter] = useState(null)
+
+  // Debounce search query for performance
+  useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery)
+    }, 300)
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+    }
+  }, [searchQuery])
 
   // Read filters from URL query params
   useEffect(() => {
@@ -225,8 +244,8 @@ const SearchPage = ({
       return res // Skip other filters when showing recent
     }
 
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase()
+    if (debouncedSearchQuery.trim()) {
+      const q = debouncedSearchQuery.toLowerCase()
       console.log('🔍 Searching for:', q)
 
       res = res.filter((p) => {
@@ -334,7 +353,7 @@ const SearchPage = ({
     }
 
     return res
-  }, [safePhotos, searchQuery, activeFilters, specialFilter])
+  }, [safePhotos, debouncedSearchQuery, activeFilters, specialFilter, safeAlbums])
 
   const activeFilterCount = useMemo(() => {
     return Object.values(activeFilters).filter(Boolean).length

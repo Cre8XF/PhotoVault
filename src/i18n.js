@@ -52,6 +52,25 @@ import profileEN from './locales/en/profile.json'
 import infoNO from './locales/no/info.json'
 import infoEN from './locales/en/info.json'
 
+// ⭐ Phase 2.1 & 2.2: Core UI Components translations
+import tipsNO from './locales/no/tips.json'
+import tipsEN from './locales/en/tips.json'
+
+import activityNO from './locales/no/activity.json'
+import activityEN from './locales/en/activity.json'
+
+import statsNO from './locales/no/stats.json'
+import statsEN from './locales/en/stats.json'
+
+import storageNO from './locales/no/storage.json'
+import storageEN from './locales/en/storage.json'
+
+import emptyNO from './locales/no/empty.json'
+import emptyEN from './locales/en/empty.json'
+
+import settingsNO from './locales/no/settings.json'
+import settingsEN from './locales/en/settings.json'
+
 const resources = {
   no: {
     translation: translationNO,
@@ -69,7 +88,12 @@ const resources = {
     timeline: timelineNO,
     profile: profileNO,
     info: infoNO,
-    // ⭐ ADDED
+    tips: tipsNO,
+    activity: activityNO,
+    stats: statsNO,
+    storage: storageNO,
+    empty: emptyNO,
+    settings: settingsNO,
   },
   en: {
     translation: translationEN,
@@ -87,7 +111,12 @@ const resources = {
     timeline: timelineEN,
     profile: profileEN,
     info: infoEN,
-    // ⭐ ADDED
+    tips: tipsEN,
+    activity: activityEN,
+    stats: statsEN,
+    storage: storageEN,
+    empty: emptyEN,
+    settings: settingsEN,
   },
 }
 
@@ -114,7 +143,12 @@ i18n
       'timeline',
       'profile',
       'info',
-      // ⭐ ADDED
+      'tips',
+      'activity',
+      'stats',
+      'storage',
+      'empty',
+      'settings',
     ],
 
     interpolation: {
