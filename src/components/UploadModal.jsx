@@ -42,11 +42,11 @@ const formatFileSize = (bytes) => {
  * Checks both MIME type AND file extension to catch edge cases
  */
 const detectVideo = (file) => {
-  const name = file.name?.toLowerCase() || ""
+  const name = file.name?.toLowerCase() || ''
   const extMatch = /\.(mp4|mov|m4v|webm|avi|3gp|mkv|flv)$/i.test(name)
 
-  const mime = file.type?.toLowerCase() || ""
-  const mimeMatch = mime.startsWith("video/")
+  const mime = file.type?.toLowerCase() || ''
+  const mimeMatch = mime.startsWith('video/')
 
   return extMatch || mimeMatch
 }
@@ -61,7 +61,12 @@ const UploadModal = ({
   initialMode = 'upload', // 'upload' or 'album'
 }) => {
   // ✅ FIRST: Get all hook values that provide data
-  const isNative = isNativePlatform()
+  const [isNative, setIsNative] = useState(false)
+
+  useEffect(() => {
+    setIsNative(isNativePlatform())
+  }, [])
+
   const { t } = useTranslation(['common', 'upload'])
   const { tier, canUploadVideo, shouldCompress } = useAuth()
   const setNotification = useStore((state) => state.setNotification) // ✅ ADD
@@ -102,7 +107,8 @@ const UploadModal = ({
 
   // Permission check for native platforms
   useEffect(() => {
-    if (isNative) checkPermissionsAsync()
+    if (!isNative) return
+    checkPermissionsAsync()
   }, [isNative])
 
   // Update localStorage when autoCompress changes (only for LITE/PRO users)
@@ -141,13 +147,13 @@ const UploadModal = ({
   // Auto-open AlbumModal if initialMode is 'album'
   useEffect(() => {
     if (isOpen && initialMode === 'album' && !showAlbumModal) {
-      console.log('📁 UploadModal opened in ALBUM mode - opening AlbumModal');
+      console.log('📁 UploadModal opened in ALBUM mode - opening AlbumModal')
       // Delay to ensure modal is fully rendered
       setTimeout(() => {
-        setShowAlbumModal(true);
-      }, 100);
+        setShowAlbumModal(true)
+      }, 100)
     }
-  }, [isOpen, initialMode]);
+  }, [isOpen, initialMode])
 
   // Drag and drop handlers
   const handleDrag = (e) => {
@@ -180,7 +186,9 @@ const UploadModal = ({
       files.forEach((file) => {
         // ✅ FIXED: Use robust video detection
         const isVideo = detectVideo(file)
-        console.log(`🔍 Video check: ${file.name}, MIME: ${file.type}, isVideo: ${isVideo}`)
+        console.log(
+          `🔍 Video check: ${file.name}, MIME: ${file.type}, isVideo: ${isVideo}`
+        )
         if (isVideo) {
           blockedVideos.push(file.name)
         } else {
@@ -190,11 +198,14 @@ const UploadModal = ({
 
       // Show feedback if videos were blocked
       if (blockedVideos.length > 0) {
-        const baseMessage = tier() === 'GRATIS'
-          ? t('upload:errors.videoNotAllowedGratis')
-          : t('upload:errors.videoNotAllowedLite')
+        const baseMessage =
+          tier() === 'GRATIS'
+            ? t('upload:errors.videoNotAllowedGratis')
+            : t('upload:errors.videoNotAllowedLite')
 
-        const message = `${baseMessage}\n\n${t('upload:errors.blockedFiles')}\n${blockedVideos.join('\n')}`
+        const message = `${baseMessage}\n\n${t(
+          'upload:errors.blockedFiles'
+        )}\n${blockedVideos.join('\n')}`
 
         setNotification({
           message,
@@ -359,9 +370,15 @@ const UploadModal = ({
       // Single Firestore write - creates album document
       const newAlbumRef = await addAlbum(cleanAlbum)
 
-      console.log('✅ Album created:', { id: newAlbumRef.id, name: cleanAlbum.name })
+      console.log('✅ Album created:', {
+        id: newAlbumRef.id,
+        name: cleanAlbum.name,
+      })
 
-      window.showToast?.(`Album "${cleanAlbum.name}" created! 🎉 Ready to upload photos.`, 'success')
+      window.showToast?.(
+        `Album "${cleanAlbum.name}" created! 🎉 Ready to upload photos.`,
+        'success'
+      )
 
       // Close AlbumModal
       setShowAlbumModal(false)
