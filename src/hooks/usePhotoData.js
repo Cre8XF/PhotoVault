@@ -1,7 +1,7 @@
 // ============================================================================
 // usePhotoData Hook - Firestore-based data management
 // ============================================================================
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, startTransition } from 'react'
 import { useTranslation } from 'react-i18next'
 import { doc, deleteDoc } from 'firebase/firestore'
 import {
@@ -107,23 +107,30 @@ export const usePhotoData = () => {
    */
   useEffect(() => {
     if (!user?.uid) {
-      console.log('⏸ [usePhotoData] No user - clearing data')
-      setAlbums([])
-      setPhotos([])
+      console.log('⏸ [usePhotoData] No user - skipping listeners')
       return
     }
 
-    console.log('✅ [usePhotoData] Setting up Firestore listeners for user:', user.uid)
+    console.log(
+      '✅ [usePhotoData] Setting up Firestore listeners for user:',
+      user.uid
+    )
 
     // Listen to albums
     const unsubscribeAlbums = listenToAlbumsByUser(user.uid, (albums) => {
-      console.log('📥 [usePhotoData] Albums updated from Firestore:', albums.length)
+      console.log(
+        '📥 [usePhotoData] Albums updated from Firestore:',
+        albums.length
+      )
       setAlbums(albums)
     })
 
     // Listen to photos
     const unsubscribePhotos = listenToPhotosByUser(user.uid, (photos) => {
-      console.log('📥 [usePhotoData] Photos updated from Firestore:', photos.length)
+      console.log(
+        '📥 [usePhotoData] Photos updated from Firestore:',
+        photos.length
+      )
       setPhotos(photos)
       updateStorageUsed()
     })
@@ -455,7 +462,7 @@ export const usePhotoData = () => {
       console.log('🎯 usePhotoData.toggleFavorite called:', {
         photoId: photo.id,
         currentFavorite: photo.favorite,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       })
 
       if (isTogglingFavorite) {
@@ -486,12 +493,12 @@ export const usePhotoData = () => {
         console.log('✅ firebase.toggleFavorite() returned:', result)
 
         // Verify Zustand state after Firestore update
-        const updatedPhoto = photos.find(p => p.id === photo.id)
+        const updatedPhoto = photos.find((p) => p.id === photo.id)
         console.log('🔍 Zustand state after Firestore update:', {
           photoId: photo.id,
           zustandFavorite: updatedPhoto?.favorite,
           firestoreResult: result,
-          match: updatedPhoto?.favorite === result
+          match: updatedPhoto?.favorite === result,
         })
 
         setNotification({
@@ -503,7 +510,6 @@ export const usePhotoData = () => {
         console.log('📢 Notification shown')
 
         return result
-
       } catch (err) {
         console.error('❌ usePhotoData.toggleFavorite failed:', err)
 

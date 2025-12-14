@@ -86,35 +86,49 @@ function App() {
       <ErrorBoundary>
         <ToastProvider>
           <SecurityProvider>
-            <Routes>
-              {/* Public route - no authentication required */}
-              <Route path="/share/:slug" element={<PublicAlbumPage />} />
+            <Suspense
+              fallback={
+                <div className="fixed inset-0 flex items-center justify-center">
+                  <LoadingSpinner size="xl" />
+                </div>
+              }
+            >
+              <Routes>
+                {/* Public routes */}
+                <Route path="/share/:slug" element={<PublicAlbumPage />} />
 
-              {/* Function Worlds - Phase 1 */}
-              <Route path={ROUTES.TOOLS} element={<ToolsPage />} />
-              <Route
-                path={ROUTES.COLLAGE_TEMPLATES}
-                element={<CollageTemplatesPage />}
-              />
-              <Route path={ROUTES.COLLAGE_NEW} element={<CollageNewPage />} />
-              <Route path={ROUTES.COLLAGE_EDIT} element={<CollageEditPage />} />
-              <Route path={ROUTES.PHOTO} element={<PhotoPage />} />
-              <Route path={ROUTES.SLIDESHOW} element={<SlideshowPage />} />
+                {/* Function Worlds */}
+                <Route path={ROUTES.TOOLS} element={<ToolsPage />} />
+                <Route
+                  path={ROUTES.COLLAGE_TEMPLATES}
+                  element={<CollageTemplatesPage />}
+                />
+                <Route path={ROUTES.COLLAGE_NEW} element={<CollageNewPage />} />
+                <Route
+                  path={ROUTES.COLLAGE_EDIT}
+                  element={<CollageEditPage />}
+                />
+                <Route path={ROUTES.PHOTO} element={<PhotoPage />} />
+                <Route path={ROUTES.SLIDESHOW} element={<SlideshowPage />} />
 
-              {/* AI Tools - Phase 5 */}
-              <Route path={ROUTES.AI_TOOLS} element={<AIToolsPage />} />
-              <Route path={ROUTES.AI_ENHANCE} element={<AIEnhancePage />} />
-              <Route path={ROUTES.AI_REMOVE_BG} element={<AIRemoveBgPage />} />
-              <Route path={ROUTES.AI_PORTRAIT} element={<AIPortraitPage />} />
-              <Route path={ROUTES.AI_COLOR} element={<AIColorPage />} />
-              <Route path={ROUTES.AI_UPSCALE} element={<AIUpscalePage />} />
+                {/* AI Tools */}
+                <Route path={ROUTES.AI_TOOLS} element={<AIToolsPage />} />
+                <Route path={ROUTES.AI_ENHANCE} element={<AIEnhancePage />} />
+                <Route
+                  path={ROUTES.AI_REMOVE_BG}
+                  element={<AIRemoveBgPage />}
+                />
+                <Route path={ROUTES.AI_PORTRAIT} element={<AIPortraitPage />} />
+                <Route path={ROUTES.AI_COLOR} element={<AIColorPage />} />
+                <Route path={ROUTES.AI_UPSCALE} element={<AIUpscalePage />} />
 
-              {/* Collage view route (for viewing saved collages) */}
-              <Route path="/collage/:id" element={<CollageView />} />
+                {/* Collage view */}
+                <Route path="/collage/:id" element={<CollageView />} />
 
-              {/* All other routes - authenticated */}
-              <Route path="*" element={<AppContent />} />
-            </Routes>
+                {/* All authenticated routes */}
+                <Route path="/*" element={<AppContent />} />
+              </Routes>
+            </Suspense>
           </SecurityProvider>
         </ToastProvider>
       </ErrorBoundary>
@@ -199,7 +213,11 @@ function AppContent() {
     // Determine context based on current page
     const currentPath = location.pathname
     let context = 'all'
-    if (currentPath.startsWith('/albums') || currentPath.startsWith('/album/') || selectedAlbum) {
+    if (
+      currentPath.startsWith('/albums') ||
+      currentPath.startsWith('/album/') ||
+      selectedAlbum
+    ) {
       context = 'album'
     } else if (currentPath === '/search') {
       context = 'search'
@@ -303,7 +321,8 @@ function AppContent() {
   }, [])
 
   // Show loading spinner
-  if (loading) {
+  // ⛔ BLOCK ALL RENDERING UNTIL AUTH IS READY
+  if (loading || user === undefined) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
         <div className="spinner" />
@@ -342,12 +361,7 @@ function AppContent() {
 
       {/* Main content - React Router based rendering */}
       <main className="relative z-10">
-        <Suspense fallback={
-          <div className="fixed inset-0 flex items-center justify-center">
-            <LoadingSpinner size="xl" />
-          </div>
-        }>
-          <Routes>
+        <Routes>
           <Route
             path="/"
             element={
@@ -406,25 +420,13 @@ function AppContent() {
             }
           />
 
-          <Route
-            path="/security"
-            element={<SecuritySettings />}
-          />
+          <Route path="/security" element={<SecuritySettings />} />
 
-          <Route
-            path="/vault"
-            element={<VaultPage />}
-          />
+          <Route path="/vault" element={<VaultPage />} />
 
-          <Route
-            path="/profile"
-            element={<ProfilePage />}
-          />
+          <Route path="/profile" element={<ProfilePage />} />
 
-          <Route
-            path="/settings"
-            element={<SettingsPage />}
-          />
+          <Route path="/settings" element={<SettingsPage />} />
 
           <Route
             path="/subscription"
@@ -449,14 +451,8 @@ function AppContent() {
             }
           />
 
-          {isAdmin && (
-            <Route
-              path="/admin"
-              element={<AdminDashboard />}
-            />
-          )}
-          </Routes>
-        </Suspense>
+          {isAdmin && <Route path="/admin" element={<AdminDashboard />} />}
+        </Routes>
       </main>
 
       {/* Floating Notification Bell - Bottom left */}
