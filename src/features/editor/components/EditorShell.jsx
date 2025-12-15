@@ -87,12 +87,9 @@ export default function EditorShell({
       </div>
 
       {/* Canvas area - optimized for mobile */}
-      <div
-  className="flex-1 overflow-hidden"
-  style={{ minHeight: '40vh' }}
->
+      <div className="flex-1 min-h-0 overflow-hidden">
   <EditorCanvas imageUrl={imageUrl} />
-</div>>
+</div>
 
       {/* Tools section - compact on mobile */}
       <div className="border-t border-[#2a2a2a] max-h-[50vh] md:max-h-[400px] flex flex-col">
