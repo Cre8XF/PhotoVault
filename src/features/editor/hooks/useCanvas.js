@@ -1,14 +1,16 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { loadImage, drawImageCentered } from '../utils/imagePipeline'
+import { getCombinedFilters } from '../utils/adjustments'
 
 /**
  * Custom hook for canvas management
- * Handles canvas lifecycle, image loading, and rendering
+ * NOW WITH ADJUSTMENTS SUPPORT
  *
  * @param {string} imageUrl - URL of image to render
+ * @param {Object} adjustments - Adjustment values to apply
  * @returns {object} Canvas ref and render state
  */
-export function useCanvas(imageUrl) {
+export function useCanvas(imageUrl, adjustments = {}) {
   const canvasRef = useRef(null)
   const containerRef = useRef(null)
   const imageRef = useRef(null) // Store loaded image
@@ -18,7 +20,7 @@ export function useCanvas(imageUrl) {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
 
   /**
-   * Render the image to canvas
+   * Render the image to canvas with adjustments
    */
   const render = useCallback(() => {
     const canvas = canvasRef.current
@@ -46,11 +48,18 @@ export function useCanvas(imageUrl) {
     canvas.style.height = `${height}px`
     ctx.scale(dpr, dpr)
 
+    // Apply CSS filters to context
+    const filterString = getCombinedFilters(adjustments)
+    ctx.filter = filterString
+
     // Draw image centered
     drawImageCentered(ctx, image, width, height)
 
+    // Reset filter for any future drawing
+    ctx.filter = 'none'
+
     setDimensions({ width, height })
-  }, [])
+  }, [adjustments])
 
   /**
    * Load image and render
@@ -93,6 +102,15 @@ export function useCanvas(imageUrl) {
       mounted = false
     }
   }, [imageUrl, render])
+
+  /**
+   * Re-render when adjustments change
+   */
+  useEffect(() => {
+    if (imageRef.current) {
+      render()
+    }
+  }, [render])
 
   /**
    * Re-render on window resize

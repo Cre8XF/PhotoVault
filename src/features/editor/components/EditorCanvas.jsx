@@ -1,13 +1,21 @@
 import { useCanvas } from '../hooks/useCanvas'
+import useEditorStore from '../store/editorStore'
 
 /**
  * Canvas component for editor
- * Handles image rendering with proper sizing and scaling
+ * NOW CONNECTED TO ADJUSTMENTS
  *
  * @param {string} imageUrl - URL of image to display
  */
 export default function EditorCanvas({ imageUrl }) {
-  const { canvasRef, containerRef, isLoading, error } = useCanvas(imageUrl)
+  // Get adjustments from store
+  const adjustments = useEditorStore((state) => state.transform.adjustments)
+
+  // Pass adjustments to canvas hook
+  const { canvasRef, containerRef, isLoading, error } = useCanvas(
+    imageUrl,
+    adjustments
+  )
 
   if (error) {
     return (

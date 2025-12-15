@@ -137,11 +137,6 @@ export default function AdjustPanel() {
         onChange={(v) => handleChange('vignette', v)}
         onReset={() => handleResetAdjustment('vignette')}
       />
-
-      {/* Info text */}
-      <p className="text-xs text-gray-500 mt-4">
-        Visual changes will appear in Patch 05
-      </p>
     </div>
   )
 }
