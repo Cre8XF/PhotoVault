@@ -1,16 +1,35 @@
 import { useParams, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import EditorShell from '../components/EditorShell'
 import { usePhotoData } from '../../../hooks/usePhotoData'
+import useEditorStore from '../store/editorStore'
 
-// TEMP: Minimal page for Patch 01B
-// Will be expanded with editorStore in Patch 03
+// TEMP: Minimal page for Patch 01B-03
+// Will be expanded with tools in Patch 04
 export default function EditorPage() {
   const { photoId } = useParams()
   const navigate = useNavigate()
   const { getPhotoById } = usePhotoData()
 
-  // Get photo from existing data layer (synchronous)
+  // Editor store
+  const setOriginalUrl = useEditorStore((state) => state.setOriginalUrl)
+  const resetAll = useEditorStore((state) => state.resetAll)
+  const cleanup = useEditorStore((state) => state.cleanup)
+
+  // Get photo from data layer
   const photo = getPhotoById(photoId)
+
+  // Initialize store with photo URL
+  useEffect(() => {
+    if (photo?.url) {
+      setOriginalUrl(photo.url)
+    }
+
+    // Cleanup on unmount
+    return () => {
+      cleanup()
+    }
+  }, [photo?.url, setOriginalUrl, cleanup])
 
   const handleClose = () => {
     navigate(-1)
@@ -20,6 +39,12 @@ export default function EditorPage() {
     // TODO: Save logic kommer i Patch 09
     console.log('✅ Save clicked - will implement in Patch 09')
     navigate(-1)
+  }
+
+  const handleReset = () => {
+    // Reset all transforms
+    resetAll()
+    console.log('✅ Reset to original')
   }
 
   // Simple guard - no photo found
@@ -46,6 +71,7 @@ export default function EditorPage() {
       photoName={photo.name || 'Untitled'}
       onClose={handleClose}
       onSave={handleSave}
+      onReset={handleReset}
     />
   )
 }

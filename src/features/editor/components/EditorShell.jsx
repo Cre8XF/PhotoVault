@@ -1,11 +1,18 @@
-// TEMP: Minimal layout for Patch 01B
+// TEMP: Minimal layout for Patch 01B-03
 // Updated in Patch 02 to use canvas
+// Updated in Patch 03 to add Reset button
 import EditorCanvas from './EditorCanvas'
 
-export default function EditorShell({ imageUrl, photoName, onClose, onSave }) {
+export default function EditorShell({
+  imageUrl,
+  photoName,
+  onClose,
+  onSave,
+  onReset,
+}) {
   return (
     <div className="fixed inset-0 bg-[#0a0a0a] flex flex-col">
-      {/* Top bar */}
+      {/* Top bar - with Reset button */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a2a]">
         <button
           onClick={onClose}
@@ -15,9 +22,21 @@ export default function EditorShell({ imageUrl, photoName, onClose, onSave }) {
           <span className="text-sm font-medium">Close</span>
         </button>
 
-        <h1 className="text-white font-semibold text-lg truncate max-w-[200px]">
-          {photoName}
-        </h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-white font-semibold text-lg truncate max-w-[200px]">
+            {photoName}
+          </h1>
+
+          {/* Reset button - NEW */}
+          {onReset && (
+            <button
+              onClick={onReset}
+              className="text-gray-400 hover:text-gray-300 transition-colors text-sm"
+            >
+              Reset
+            </button>
+          )}
+        </div>
 
         <button
           onClick={onSave}
