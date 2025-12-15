@@ -41,6 +41,7 @@ const CollageNewPage = lazy(() => import('./pages/CollageNewPage'))
 const CollageEditPage = lazy(() => import('./pages/CollageEditPage'))
 const PhotoPage = lazy(() => import('./pages/PhotoPage'))
 const SlideshowPage = lazy(() => import('./pages/SlideshowPage'))
+const EditorPage = lazy(() => import('./features/editor/pages/EditorPage'))
 
 // AI Tools - Phase 5 - Lazy loaded
 const AIToolsPage = lazy(() => import('./pages/ai/AIToolsPage'))
@@ -110,6 +111,18 @@ function App() {
                 />
                 <Route path={ROUTES.PHOTO} element={<PhotoPage />} />
                 <Route path={ROUTES.SLIDESHOW} element={<SlideshowPage />} />
+                <Route
+                  path="/edit/:photoId"
+                  element={
+                    <Suspense fallback={
+                      <div className="fixed inset-0 flex items-center justify-center bg-[#0a0a0a]">
+                        <LoadingSpinner size="xl" />
+                      </div>
+                    }>
+                      <EditorPage />
+                    </Suspense>
+                  }
+                />
 
                 {/* AI Tools */}
                 <Route path={ROUTES.AI_TOOLS} element={<AIToolsPage />} />
