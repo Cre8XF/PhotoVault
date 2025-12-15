@@ -78,17 +78,17 @@ export default function RotatePanel() {
       {/* Quick Rotate Buttons */}
       <div className="mb-6">
         <p className="text-sm text-gray-400 mb-3">Quick Rotate</p>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           <button
             onClick={handleRotateCCW}
-            className="py-3 bg-[#2a2a2a] hover:bg-[#3a3a3a] text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+            className="py-3 bg-[#2a2a2a] hover:bg-[#3a3a3a] text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation"
           >
             <span className="text-xl">↶</span>
             <span>90° Left</span>
           </button>
           <button
             onClick={handleRotateCW}
-            className="py-3 bg-[#2a2a2a] hover:bg-[#3a3a3a] text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+            className="py-3 bg-[#2a2a2a] hover:bg-[#3a3a3a] text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation"
           >
             <span className="text-xl">↷</span>
             <span>90° Right</span>
@@ -150,10 +150,10 @@ export default function RotatePanel() {
       {/* Flip Buttons */}
       <div>
         <p className="text-sm text-gray-400 mb-3">Flip</p>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           <button
             onClick={handleFlipH}
-            className={`py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+            className={`py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation ${
               flipH
                 ? 'bg-blue-600 text-white'
                 : 'bg-[#2a2a2a] text-white hover:bg-[#3a3a3a]'
@@ -164,7 +164,7 @@ export default function RotatePanel() {
           </button>
           <button
             onClick={handleFlipV}
-            className={`py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+            className={`py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation ${
               flipV
                 ? 'bg-blue-600 text-white'
                 : 'bg-[#2a2a2a] text-white hover:bg-[#3a3a3a]'
@@ -176,15 +176,12 @@ export default function RotatePanel() {
         </div>
       </div>
 
-      {/* Current State Display */}
+      {/* Current Transform - Compact */}
       {hasChanges && (
-        <div className="mt-4 p-3 bg-[#1a1a1a] rounded-lg">
-          <p className="text-xs text-gray-400 mb-1">Current Transform:</p>
-          <div className="text-xs text-gray-300 space-y-1">
-            {rotation !== 0 && <p>• Rotated {rotation}°</p>}
-            {flipH && <p>• Flipped horizontally</p>}
-            {flipV && <p>• Flipped vertically</p>}
-          </div>
+        <div className="mt-3 px-3 py-2 bg-[#1a1a1a] rounded-lg text-xs text-gray-400">
+          {rotation !== 0 && `${rotation}° `}
+          {flipH && `↔ `}
+          {flipV && `↕`}
         </div>
       )}
     </div>

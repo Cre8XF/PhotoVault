@@ -27,11 +27,14 @@ export default function CropOverlay({ crop, onChange, containerDimensions }) {
   }
 
   /**
-   * Start drag operation
+   * Start drag operation (Pointer Events)
    */
-  const handleMouseDown = (e, mode) => {
+  const handlePointerDown = (e, mode) => {
     e.preventDefault()
     e.stopPropagation()
+
+    // Capture pointer for stable dragging (prevents losing events if finger moves off handle)
+    e.currentTarget.setPointerCapture(e.pointerId)
 
     setIsDragging(true)
     setDragMode(mode)
@@ -43,9 +46,9 @@ export default function CropOverlay({ crop, onChange, containerDimensions }) {
   }
 
   /**
-   * Handle drag move
+   * Handle drag move (Pointer Events)
    */
-  const handleMouseMove = (e) => {
+  const handlePointerMove = (e) => {
     if (!isDragging || !dragMode) return
 
     const deltaX = (e.clientX - dragStart.x) / width
@@ -144,22 +147,22 @@ export default function CropOverlay({ crop, onChange, containerDimensions }) {
   }
 
   /**
-   * End drag operation
+   * End drag operation (Pointer Events)
    */
-  const handleMouseUp = () => {
+  const handlePointerUp = () => {
     setIsDragging(false)
     setDragMode(null)
   }
 
-  // Add global mouse listeners when dragging
+  // Add global pointer listeners when dragging
   useEffect(() => {
     if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove)
-      window.addEventListener('mouseup', handleMouseUp)
+      window.addEventListener('pointermove', handlePointerMove)
+      window.addEventListener('pointerup', handlePointerUp)
 
       return () => {
-        window.removeEventListener('mousemove', handleMouseMove)
-        window.removeEventListener('mouseup', handleMouseUp)
+        window.removeEventListener('pointermove', handlePointerMove)
+        window.removeEventListener('pointerup', handlePointerUp)
       }
     }
   }, [isDragging, dragMode, dragStart])
@@ -181,8 +184,9 @@ export default function CropOverlay({ crop, onChange, containerDimensions }) {
           top: `${rect.top}px`,
           width: `${rect.width}px`,
           height: `${rect.height}px`,
+          touchAction: 'none',
         }}
-        onMouseDown={(e) => handleMouseDown(e, 'move')}
+        onPointerDown={(e) => handlePointerDown(e, 'move')}
       >
         {/* Grid overlay (rule of thirds) */}
         <div className="absolute inset-0 grid grid-cols-3 grid-rows-3">
@@ -191,22 +195,26 @@ export default function CropOverlay({ crop, onChange, containerDimensions }) {
           ))}
         </div>
 
-        {/* Corner handles */}
+        {/* Corner handles - bigger for mobile */}
         <div
-          className="absolute w-4 h-4 bg-white border-2 border-blue-400 rounded-full -left-2 -top-2 cursor-nwse-resize"
-          onMouseDown={(e) => handleMouseDown(e, 'nw')}
+          className="absolute w-6 h-6 bg-white border-2 border-blue-400 rounded-full -left-3 -top-3 cursor-nwse-resize"
+          style={{ touchAction: 'none', pointerEvents: 'auto' }}
+          onPointerDown={(e) => handlePointerDown(e, 'nw')}
         />
         <div
-          className="absolute w-4 h-4 bg-white border-2 border-blue-400 rounded-full -right-2 -top-2 cursor-nesw-resize"
-          onMouseDown={(e) => handleMouseDown(e, 'ne')}
+          className="absolute w-6 h-6 bg-white border-2 border-blue-400 rounded-full -right-3 -top-3 cursor-nesw-resize"
+          style={{ touchAction: 'none', pointerEvents: 'auto' }}
+          onPointerDown={(e) => handlePointerDown(e, 'ne')}
         />
         <div
-          className="absolute w-4 h-4 bg-white border-2 border-blue-400 rounded-full -left-2 -bottom-2 cursor-nesw-resize"
-          onMouseDown={(e) => handleMouseDown(e, 'sw')}
+          className="absolute w-6 h-6 bg-white border-2 border-blue-400 rounded-full -left-3 -bottom-3 cursor-nesw-resize"
+          style={{ touchAction: 'none', pointerEvents: 'auto' }}
+          onPointerDown={(e) => handlePointerDown(e, 'sw')}
         />
         <div
-          className="absolute w-4 h-4 bg-white border-2 border-blue-400 rounded-full -right-2 -bottom-2 cursor-nwse-resize"
-          onMouseDown={(e) => handleMouseDown(e, 'se')}
+          className="absolute w-6 h-6 bg-white border-2 border-blue-400 rounded-full -right-3 -bottom-3 cursor-nwse-resize"
+          style={{ touchAction: 'none', pointerEvents: 'auto' }}
+          onPointerDown={(e) => handlePointerDown(e, 'se')}
         />
       </div>
     </div>

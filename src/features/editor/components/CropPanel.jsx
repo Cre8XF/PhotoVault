@@ -123,7 +123,7 @@ export default function CropPanel() {
       {!crop && (
         <button
           onClick={initializeCrop}
-          className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors mb-4"
+          className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors mb-4 touch-manipulation"
         >
           Start Cropping
         </button>
@@ -133,7 +133,7 @@ export default function CropPanel() {
       {crop && (
         <>
           <p className="text-sm text-gray-400 mb-3">Aspect Ratio</p>
-          <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="grid grid-cols-3 gap-2 mb-3">
             {aspectRatios.map((preset) => {
               const isActive = crop.aspectRatio === preset.ratio
 
@@ -141,7 +141,7 @@ export default function CropPanel() {
                 <button
                   key={preset.label}
                   onClick={() => applyAspectRatio(preset.ratio, preset.label)}
-                  className={`py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                  className={`py-2 px-3 rounded-lg text-sm font-medium transition-colors touch-manipulation ${
                     isActive
                       ? 'bg-blue-600 text-white'
                       : 'bg-[#2a2a2a] text-gray-300 hover:bg-[#3a3a3a]'
