@@ -56,7 +56,7 @@ export default function FiltersPanel() {
       </div>
 
       {/* Filter Grid */}
-      <div className="grid grid-cols-4 gap-3 mb-4">
+      <div className="grid grid-cols-4 gap-2 mb-3">
         {FILTER_PRESETS.map((filterName) => {
           const metadata = getFilterMetadata(filterName)
           const isActive = filter.active === filterName

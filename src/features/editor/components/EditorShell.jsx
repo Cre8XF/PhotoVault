@@ -86,13 +86,15 @@ export default function EditorShell({
         </button>
       </div>
 
-      {/* Canvas area */}
-      <EditorCanvas imageUrl={imageUrl} />
+      {/* Canvas area - optimized for mobile */}
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <EditorCanvas imageUrl={imageUrl} />
+      </div>
 
-      {/* Tools section */}
-      <div className="border-t border-[#2a2a2a]">
+      {/* Tools section - compact on mobile */}
+      <div className="border-t border-[#2a2a2a] max-h-[50vh] md:max-h-[400px] flex flex-col">
         <ToolSelector activeTool={activeTool} onToolChange={setActiveTool} />
-        {renderToolPanel()}
+        <div className="overflow-y-auto flex-1">{renderToolPanel()}</div>
       </div>
 
       {/* Saving overlay */}

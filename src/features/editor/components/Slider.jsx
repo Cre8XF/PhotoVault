@@ -13,7 +13,7 @@ export default function Slider({ label, value, min, max, onChange, onReset }) {
   const displayValue = value > 0 ? `+${value}` : value
 
   return (
-    <div className="mb-4">
+    <div className="mb-3">
       <div className="flex items-center justify-between mb-2">
         <label className="text-sm text-gray-300 font-medium">{label}</label>
         <div className="flex items-center gap-2">
@@ -26,7 +26,7 @@ export default function Slider({ label, value, min, max, onChange, onReset }) {
               className="text-xs text-gray-500 hover:text-gray-400 transition-colors"
               title="Reset to 0"
             >
-              º
+              ï¿½
             </button>
           )}
         </div>
