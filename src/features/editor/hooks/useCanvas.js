@@ -1,16 +1,20 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { loadImage, drawImageCentered } from '../utils/imagePipeline'
 import { getCombinedFilters } from '../utils/adjustments'
+import { applyRotationTransform, restoreRotationTransform, getRotatedDimensions } from '../utils/rotation'
 
 /**
  * Custom hook for canvas management
- * NOW WITH ADJUSTMENTS SUPPORT
+ * NOW WITH ROTATION AND FLIP SUPPORT
  *
  * @param {string} imageUrl - URL of image to render
  * @param {Object} adjustments - Adjustment values to apply
+ * @param {number} rotation - Rotation in degrees
+ * @param {boolean} flipH - Flip horizontal
+ * @param {boolean} flipV - Flip vertical
  * @returns {object} Canvas ref and render state
  */
-export function useCanvas(imageUrl, adjustments = {}) {
+export function useCanvas(imageUrl, adjustments = {}, rotation = 0, flipH = false, flipV = false) {
   const canvasRef = useRef(null)
   const containerRef = useRef(null)
   const imageRef = useRef(null) // Store loaded image
@@ -20,7 +24,7 @@ export function useCanvas(imageUrl, adjustments = {}) {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
 
   /**
-   * Render the image to canvas with adjustments
+   * Render the image to canvas with all transformations
    */
   const render = useCallback(() => {
     const canvas = canvasRef.current
@@ -48,18 +52,47 @@ export function useCanvas(imageUrl, adjustments = {}) {
     canvas.style.height = `${height}px`
     ctx.scale(dpr, dpr)
 
-    // Apply CSS filters to context
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height)
+
+    // Apply CSS filters (adjustments)
     const filterString = getCombinedFilters(adjustments)
     ctx.filter = filterString
 
-    // Draw image centered
-    drawImageCentered(ctx, image, width, height)
+    // Apply rotation and flip transformations
+    applyRotationTransform(ctx, width, height, rotation, flipH, flipV)
 
-    // Reset filter for any future drawing
+    // Calculate image dimensions considering rotation
+    const rotatedDims = getRotatedDimensions(image.naturalWidth, image.naturalHeight, rotation)
+
+    // Calculate fit dimensions for rotated image
+    const imageAspect = rotatedDims.width / rotatedDims.height
+    const containerAspect = width / height
+
+    let drawWidth, drawHeight
+    if (imageAspect > containerAspect) {
+      drawWidth = width
+      drawHeight = width / imageAspect
+    } else {
+      drawHeight = height
+      drawWidth = height * imageAspect
+    }
+
+    // Center position
+    const x = (width - drawWidth) / 2
+    const y = (height - drawHeight) / 2
+
+    // Draw image
+    ctx.drawImage(image, x, y, drawWidth, drawHeight)
+
+    // Restore transformations
+    restoreRotationTransform(ctx)
+
+    // Reset filter
     ctx.filter = 'none'
 
     setDimensions({ width, height })
-  }, [adjustments])
+  }, [adjustments, rotation, flipH, flipV])
 
   /**
    * Load image and render
