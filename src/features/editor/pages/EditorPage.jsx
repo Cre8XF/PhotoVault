@@ -1,53 +1,11 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import EditorShell from '../components/EditorShell'
 import { usePhotoData } from '../../../hooks/usePhotoData'
 import useEditorStore from '../store/editorStore'
 import { exportEditedImage } from '../utils/imageExport'
 import { uploadEditedPhoto } from '../../../firebase'
 import useStore from '../../../state/store'
-
-/**
- * Smart URL selection helper for editor
- * Priority: r2Url > editedUrl > enhancedUrl > url (with environment checks)
- * @param {Object} photo - Photo object
- * @returns {string|null} - Selected URL or null if invalid
- */
-function selectEditorImageUrl(photo) {
-  if (!photo) return null
-
-  const isDev = import.meta.env.DEV
-
-  // Priority 1: R2 URL (future-proof, CORS-friendly)
-  if (photo.r2Url) {
-    return photo.r2Url
-  }
-
-  // Priority 2: Edited URL (might be R2 in future)
-  if (photo.editedUrl) {
-    return photo.editedUrl
-  }
-
-  // Priority 3: Enhanced URL (AI-enhanced version)
-  if (photo.enhancedUrl) {
-    return photo.enhancedUrl
-  }
-
-  // Priority 4: Original URL (with environment-based validation)
-  if (photo.url) {
-    const isFirebaseStorage = !photo.url.includes('r2.dev') && !photo.url.includes('r2')
-
-    // PRODUCTION: Block Firebase Storage URLs
-    if (isFirebaseStorage && !isDev) {
-      console.error('❌ PRODUCTION: Firebase Storage URLs blocked in editor')
-      return null
-    }
-
-    return photo.url
-  }
-
-  return null
-}
 
 export default function EditorPage() {
   const { photoId } = useParams()
@@ -69,53 +27,48 @@ export default function EditorPage() {
   // Get photo from data layer
   const photo = getPhotoById(photoId)
 
-  // Initialize store with photo URL
+  // ✅ Image loading state (Firebase Storage CORS fix)
+  const [imageLoaded, setImageLoaded] = useState(false)
+  const [imageError, setImageError] = useState(null)
+
+  // ✅ Preload image with crossOrigin for Firebase Storage
   useEffect(() => {
-    if (photo) {
-      const imageUrl = selectEditorImageUrl(photo)
-      const isDev = import.meta.env.DEV
+    if (!photo?.url) return
 
-      // Determine source for logging
-      let source = 'Unknown'
-      if (imageUrl) {
-        const isR2 = imageUrl.includes('r2.dev') || imageUrl.includes('r2')
-        if (photo.r2Url && imageUrl === photo.r2Url) {
-          source = 'R2 ✅'
-        } else if (photo.editedUrl && imageUrl === photo.editedUrl) {
-          source = isR2 ? 'R2 (Edited) ✅' : 'Firebase Storage (Edited) ⚠️'
-        } else if (photo.enhancedUrl && imageUrl === photo.enhancedUrl) {
-          source = isR2 ? 'R2 (Enhanced) ✅' : 'Firebase Storage (Enhanced) ⚠️'
-        } else {
-          source = isR2 ? 'R2 (Original) ✅' : `Firebase Storage (Original) ${isDev ? '(DEV ONLY) ⚠️' : '❌ BLOCKED'}`
-        }
-      }
+    console.log('🔍 Preloading image from Firebase Storage')
+    console.log('   URL:', photo.url.substring(0, 80) + '...')
 
-      // Final validation
-      if (!imageUrl) {
-        console.error('❌ No valid image URL found for photo:', photo.id)
-        console.error('Available fields:', {
-          hasR2Url: !!photo.r2Url,
-          hasEditedUrl: !!photo.editedUrl,
-          hasEnhancedUrl: !!photo.enhancedUrl,
-          hasUrl: !!photo.url,
-        })
-        console.error('Environment:', isDev ? 'DEV' : 'PRODUCTION')
-        setOriginalUrl(null)
-        return
-      }
+    const img = new Image()
 
-      console.log('📸 Editor loading image from:', source)
-      console.log('   URL:', imageUrl.substring(0, 80) + '...')
-      console.log('   Environment:', isDev ? 'DEV' : 'PRODUCTION')
+    // ✅ KRITISK: crossOrigin må settes FØR src (for canvas export)
+    img.crossOrigin = 'anonymous'
 
-      setOriginalUrl(imageUrl)
+    img.onload = () => {
+      console.log('✅ Image loaded successfully')
+      setImageLoaded(true)
+      setImageError(null)
+      setOriginalUrl(photo.url)
     }
+
+    img.onerror = (e) => {
+      console.error('❌ Image load failed:', {
+        url: photo.url,
+        error: e,
+      })
+      setImageError(
+        'Failed to load image. Check Firebase Storage CORS settings.'
+      )
+      setImageLoaded(false)
+    }
+
+    // ✅ Set src AFTER crossOrigin
+    img.src = photo.url
 
     // Cleanup on unmount
     return () => {
       cleanup()
     }
-  }, [photo, setOriginalUrl, cleanup])
+  }, [photo?.url, setOriginalUrl, cleanup])
 
   const handleClose = () => {
     navigate(-1)
@@ -150,12 +103,7 @@ export default function EditorPage() {
 
       // Step 1: Export edited image
       console.log('Exporting edited image...')
-      const imageUrl = selectEditorImageUrl(photo)
-
-      if (!imageUrl) {
-        throw new Error('No valid image URL available for export')
-      }
-
+      const imageUrl = photo.url
       const editedBlob = await exportEditedImage(imageUrl, transform)
 
       // Step 2: Upload to storage and update Firestore
@@ -209,42 +157,59 @@ export default function EditorPage() {
     )
   }
 
-  // Render editor
-  const imageUrl = selectEditorImageUrl(photo)
-
-  // Show error state if no valid URL
-  if (!imageUrl) {
-    const isDev = import.meta.env.DEV
+  // ✅ Show error state (Firebase Storage CORS)
+  if (imageError) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-[#0a0a0a] p-8">
         <div className="max-w-md text-center">
-          <p className="text-red-400 text-lg mb-4">❌ Cannot load image in editor</p>
-          <p className="text-gray-400 text-sm mb-4">
-            {isDev
-              ? 'Photo URL is invalid or unavailable.'
-              : 'This photo uses Firebase Storage which is not supported in production. Photo must be migrated to R2 storage.'}
-          </p>
-          <div className="text-xs text-gray-500 mb-6 space-y-1">
-            <p>Photo ID: {photo.id}</p>
-            <p>Has R2 URL: {photo.r2Url ? '✅' : '❌'}</p>
-            <p>Has Edited URL: {photo.editedUrl ? '✅' : '❌'}</p>
-            <p>Has Enhanced URL: {photo.enhancedUrl ? '✅' : '❌'}</p>
-            <p>Has Original URL: {photo.url ? '✅' : '❌'}</p>
+          <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+            <div className="text-red-400 text-5xl">⚠️</div>
           </div>
-          <button
-            onClick={() => navigate(-1)}
-            className="text-blue-400 hover:text-blue-300 transition-colors px-4 py-2 bg-blue-400/10 rounded-lg"
-          >
-            Go back
-          </button>
+          <p className="text-red-300 text-lg mb-2">{imageError}</p>
+          <p className="text-gray-400 text-sm mb-4">
+            Firebase Storage CORS must be configured by Roger.
+          </p>
+          <div className="text-xs text-gray-500 mb-6 p-3 bg-[#1a1a1a] rounded-lg break-all">
+            <p className="font-mono">{photo.url.substring(0, 100)}...</p>
+          </div>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+            >
+              Retry
+            </button>
+            <button
+              onClick={() => navigate(-1)}
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition"
+            >
+              Go back
+            </button>
+          </div>
         </div>
       </div>
     )
   }
 
+  // ✅ Show loading state
+  if (!imageLoaded) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-[#0a0a0a]">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading image from Firebase Storage...</p>
+          <p className="text-xs text-gray-600 mt-2">
+            Verifying CORS configuration...
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // ✅ Render editor (image loaded successfully)
   return (
     <EditorShell
-      imageUrl={imageUrl}
+      imageUrl={photo.url}
       photoName={photo.name || 'Untitled'}
       onClose={handleClose}
       onSave={handleSave}
