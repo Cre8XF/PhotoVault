@@ -30,6 +30,12 @@ import {
 } from 'firebase/storage'
 import * as exifr from 'exifr'
 
+console.log('🔥 Firebase ENV CHECK', {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+})
+
 // 🔗 Firebase-konfig (fra Vite environment variabler)
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -67,7 +73,9 @@ if (isDev) {
     authDomain: firebaseConfig.authDomain || '❌ MISSING',
     projectId: firebaseConfig.projectId || '❌ MISSING',
     storageBucket: firebaseConfig.storageBucket ? '✅ SET' : '❌ MISSING',
-    messagingSenderId: firebaseConfig.messagingSenderId ? '✅ SET' : '❌ MISSING',
+    messagingSenderId: firebaseConfig.messagingSenderId
+      ? '✅ SET'
+      : '❌ MISSING',
     appId: firebaseConfig.appId ? '✅ SET' : '❌ MISSING',
   })
 
@@ -136,7 +144,9 @@ if (isDev) {
   console.log('🔐 Auth Configuration:')
   console.log('   Auth Domain:', firebaseConfig.authDomain)
   console.log('   Current Origin:', window.location.origin)
-  console.log('   ⚠️ If auth fails, check Firebase Console → Authorized domains')
+  console.log(
+    '   ⚠️ If auth fails, check Firebase Console → Authorized domains'
+  )
 }
 
 // ============================================================================
@@ -294,7 +304,7 @@ export function listenToPhotosByUser(userId, callback) {
   return onSnapshot(q, (snapshot) => {
     console.log('🔄 Firestore listener triggered:', {
       size: snapshot.size,
-      docChanges: snapshot.docChanges().length
+      docChanges: snapshot.docChanges().length,
     })
 
     // Log individual changes for debugging
@@ -305,16 +315,16 @@ export function listenToPhotosByUser(userId, callback) {
         console.log('📝 Photo modified in Firestore:', {
           id: photoData.id,
           favorite: photoData.favorite,
-          name: photoData.name
+          name: photoData.name,
         })
       } else if (change.type === 'added') {
         console.log('➕ Photo added to Firestore:', {
           id: photoData.id,
-          name: photoData.name
+          name: photoData.name,
         })
       } else if (change.type === 'removed') {
         console.log('➖ Photo removed from Firestore:', {
-          id: photoData.id
+          id: photoData.id,
         })
       }
     })
@@ -478,7 +488,7 @@ export async function toggleFavorite(photoId, currentStatus) {
     photoId,
     currentFavoriteStatus: currentStatus,
     expectedNewStatus: !currentStatus,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   })
 
   try {
@@ -503,7 +513,7 @@ export async function toggleFavorite(photoId, currentStatus) {
     const newStatus = !currentStatus
     console.log('🔄 Status change:', {
       from: currentStatus,
-      to: newStatus
+      to: newStatus,
     })
 
     // Step 4: Update Firestore
@@ -533,7 +543,6 @@ export async function toggleFavorite(photoId, currentStatus) {
     console.log('═══════════════════════════════════════════════')
 
     return newStatus
-
   } catch (error) {
     console.error('═══════════════════════════════════════════════')
     console.error('💥 FAVORITT-TOGGLE ERROR')
@@ -557,7 +566,7 @@ export async function deletePhoto(photoId, storagePath) {
   console.log('📥 Input parameters:', {
     photoId,
     storagePath,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   })
 
   try {
@@ -708,24 +717,28 @@ export async function uploadPhoto(
 
       // ✅ CRITICAL: Use pre-extracted EXIF if available (extracted BEFORE compression)
       if (preExtractedExif) {
-        console.log('✅ Using pre-extracted EXIF data (from original file before compression)')
+        console.log(
+          '✅ Using pre-extracted EXIF data (from original file before compression)'
+        )
         exifData = preExtractedExif
         console.log('📊 Pre-extracted EXIF data keys:', Object.keys(exifData))
       } else {
         // Fallback: Extract from current file (may have no EXIF if compressed)
         try {
-          console.log('📊 No pre-extracted EXIF - calling exifr.parse() on current file...')
+          console.log(
+            '📊 No pre-extracted EXIF - calling exifr.parse() on current file...'
+          )
 
           // Try parsing with ALL options enabled (no pick filter)
           exifData = await exifr.parse(file, {
-          tiff: true,
-          exif: true,
-          gps: true,
-          interop: true,
-          ifd0: true,
-          ifd1: true,
-          iptc: true,
-          jfif: true,
+            tiff: true,
+            exif: true,
+            gps: true,
+            interop: true,
+            ifd0: true,
+            ifd1: true,
+            iptc: true,
+            jfif: true,
             ihdr: true,
             // Don't use 'pick' - get everything!
           })
@@ -737,12 +750,16 @@ export async function uploadPhoto(
 
           if (exifData) {
             console.log('📊 Raw EXIF data keys:', Object.keys(exifData))
-            console.log('📊 Raw EXIF data (full):', JSON.stringify(exifData, null, 2))
+            console.log(
+              '📊 Raw EXIF data (full):',
+              JSON.stringify(exifData, null, 2)
+            )
           } else {
             console.warn('⚠️ exifr.parse() returned null/undefined')
-            console.warn('This is normal for screenshots or heavily edited photos')
+            console.warn(
+              'This is normal for screenshots or heavily edited photos'
+            )
           }
-
         } catch (exifError) {
           console.error('═══════════════════════════════════════')
           console.error('❌ EXIF EXTRACTION FAILED')
@@ -764,113 +781,118 @@ export async function uploadPhoto(
         console.log('─────────────────────────────────────')
 
         const dateFields = [
-            'DateTimeOriginal',
-            'CreateDate',
-            'DateTime',
-            'DateTimeDigitized',
-            'ModifyDate',
-            'DateCreated',
-            'CreationDate'
-          ]
+          'DateTimeOriginal',
+          'CreateDate',
+          'DateTime',
+          'DateTimeDigitized',
+          'ModifyDate',
+          'DateCreated',
+          'CreationDate',
+        ]
 
-          for (const field of dateFields) {
-            const value = exifData[field]
-            console.log(`  ${field}:`, value || 'NOT FOUND')
+        for (const field of dateFields) {
+          const value = exifData[field]
+          console.log(`  ${field}:`, value || 'NOT FOUND')
 
-            if (value && !takenAt) {
-              takenAt = value
-              console.log(`  ✅ Using ${field}: ${takenAt}`)
-            }
+          if (value && !takenAt) {
+            takenAt = value
+            console.log(`  ✅ Using ${field}: ${takenAt}`)
           }
+        }
 
-          if (!takenAt) {
-            console.warn('❌ No date field found in EXIF!')
-            console.warn('Available fields:', Object.keys(exifData))
-          } else {
-            console.log('✅ Final takenAt value:', takenAt)
-            console.log('   Type:', typeof takenAt)
-            console.log('   Is Date?', takenAt instanceof Date)
+        if (!takenAt) {
+          console.warn('❌ No date field found in EXIF!')
+          console.warn('Available fields:', Object.keys(exifData))
+        } else {
+          console.log('✅ Final takenAt value:', takenAt)
+          console.log('   Type:', typeof takenAt)
+          console.log('   Is Date?', takenAt instanceof Date)
 
-            // Convert to ISO string if it's a Date object
-            if (takenAt instanceof Date) {
-              takenAt = takenAt.toISOString()
-              console.log('   Converted to ISO:', takenAt)
-            } else if (typeof takenAt === 'string') {
-              // Try parsing string date
-              try {
-                const parsed = new Date(takenAt)
-                if (!isNaN(parsed.getTime())) {
-                  takenAt = parsed.toISOString()
-                  console.log('   Parsed string to ISO:', takenAt)
-                } else {
-                  console.warn('   ⚠️ Could not parse date string')
-                }
-              } catch (parseError) {
-                console.error('   ❌ Date parsing error:', parseError.message)
+          // Convert to ISO string if it's a Date object
+          if (takenAt instanceof Date) {
+            takenAt = takenAt.toISOString()
+            console.log('   Converted to ISO:', takenAt)
+          } else if (typeof takenAt === 'string') {
+            // Try parsing string date
+            try {
+              const parsed = new Date(takenAt)
+              if (!isNaN(parsed.getTime())) {
+                takenAt = parsed.toISOString()
+                console.log('   Parsed string to ISO:', takenAt)
+              } else {
+                console.warn('   ⚠️ Could not parse date string')
               }
+            } catch (parseError) {
+              console.error('   ❌ Date parsing error:', parseError.message)
             }
           }
+        }
 
-          // STEP 2: Extract GPS location
-          console.log('─────────────────────────────────────')
-          console.log('📍 SEARCHING FOR GPS DATA...')
-          console.log('─────────────────────────────────────')
-          console.log('  latitude:', exifData.latitude || 'NOT FOUND')
-          console.log('  longitude:', exifData.longitude || 'NOT FOUND')
-          console.log('  altitude:', exifData.altitude || 'NOT FOUND')
+        // STEP 2: Extract GPS location
+        console.log('─────────────────────────────────────')
+        console.log('📍 SEARCHING FOR GPS DATA...')
+        console.log('─────────────────────────────────────')
+        console.log('  latitude:', exifData.latitude || 'NOT FOUND')
+        console.log('  longitude:', exifData.longitude || 'NOT FOUND')
+        console.log('  altitude:', exifData.altitude || 'NOT FOUND')
 
-          if (exifData.latitude && exifData.longitude) {
-            location = {
-              latitude: exifData.latitude,
-              longitude: exifData.longitude,
-              altitude: exifData.altitude || null
-            }
-            console.log('✅ GPS location found:', location)
-          } else {
-            console.log('❌ No GPS data in EXIF')
+        if (exifData.latitude && exifData.longitude) {
+          location = {
+            latitude: exifData.latitude,
+            longitude: exifData.longitude,
+            altitude: exifData.altitude || null,
           }
+          console.log('✅ GPS location found:', location)
+        } else {
+          console.log('❌ No GPS data in EXIF')
+        }
 
-          // STEP 3: Extract camera info
-          console.log('─────────────────────────────────────')
-          console.log('📷 SEARCHING FOR CAMERA INFO...')
-          console.log('─────────────────────────────────────')
-          console.log('  Make:', exifData.Make || 'NOT FOUND')
-          console.log('  Model:', exifData.Model || 'NOT FOUND')
-          console.log('  LensModel:', exifData.LensModel || 'NOT FOUND')
+        // STEP 3: Extract camera info
+        console.log('─────────────────────────────────────')
+        console.log('📷 SEARCHING FOR CAMERA INFO...')
+        console.log('─────────────────────────────────────')
+        console.log('  Make:', exifData.Make || 'NOT FOUND')
+        console.log('  Model:', exifData.Model || 'NOT FOUND')
+        console.log('  LensModel:', exifData.LensModel || 'NOT FOUND')
 
-          if (exifData.Make || exifData.Model || exifData.LensModel) {
-            camera = {
-              make: exifData.Make || null,
-              model: exifData.Model || null,
-              lens: exifData.LensModel || null
-            }
-            console.log('✅ Camera info found:', camera)
-          } else {
-            console.log('❌ No camera info in EXIF')
+        if (exifData.Make || exifData.Model || exifData.LensModel) {
+          camera = {
+            make: exifData.Make || null,
+            model: exifData.Model || null,
+            lens: exifData.LensModel || null,
           }
+          console.log('✅ Camera info found:', camera)
+        } else {
+          console.log('❌ No camera info in EXIF')
+        }
 
-          // STEP 4: Extract technical details
-          console.log('─────────────────────────────────────')
-          console.log('🔧 SEARCHING FOR TECHNICAL DETAILS...')
-          console.log('─────────────────────────────────────')
-          console.log('  ISO:', exifData.ISO || 'NOT FOUND')
-          console.log('  ExposureTime:', exifData.ExposureTime || 'NOT FOUND')
-          console.log('  FNumber:', exifData.FNumber || 'NOT FOUND')
-          console.log('  FocalLength:', exifData.FocalLength || 'NOT FOUND')
-          console.log('  ImageWidth:', exifData.ImageWidth || 'NOT FOUND')
-          console.log('  ImageHeight:', exifData.ImageHeight || 'NOT FOUND')
+        // STEP 4: Extract technical details
+        console.log('─────────────────────────────────────')
+        console.log('🔧 SEARCHING FOR TECHNICAL DETAILS...')
+        console.log('─────────────────────────────────────')
+        console.log('  ISO:', exifData.ISO || 'NOT FOUND')
+        console.log('  ExposureTime:', exifData.ExposureTime || 'NOT FOUND')
+        console.log('  FNumber:', exifData.FNumber || 'NOT FOUND')
+        console.log('  FocalLength:', exifData.FocalLength || 'NOT FOUND')
+        console.log('  ImageWidth:', exifData.ImageWidth || 'NOT FOUND')
+        console.log('  ImageHeight:', exifData.ImageHeight || 'NOT FOUND')
 
-          if (exifData.ISO || exifData.ExposureTime || exifData.FNumber || exifData.FocalLength) {
-            technicalDetails = {
-              iso: exifData.ISO || null,
-              shutterSpeed: exifData.ExposureTime || null,
-              aperture: exifData.FNumber || null,
-              focalLength: exifData.FocalLength || null,
-              width: exifData.ImageWidth || null,
-              height: exifData.ImageHeight || null,
-              orientation: exifData.Orientation || null
-            }
-            console.log('✅ Technical details found:', technicalDetails)
+        if (
+          exifData.ISO ||
+          exifData.ExposureTime ||
+          exifData.FNumber ||
+          exifData.FocalLength
+        ) {
+          technicalDetails = {
+            iso: exifData.ISO || null,
+            shutterSpeed: exifData.ExposureTime || null,
+            aperture: exifData.FNumber || null,
+            focalLength: exifData.FocalLength || null,
+            width: exifData.ImageWidth || null,
+            height: exifData.ImageHeight || null,
+            orientation: exifData.Orientation || null,
+          }
+          console.log('✅ Technical details found:', technicalDetails)
         } else {
           console.log('❌ No technical details in EXIF')
         }
@@ -884,7 +906,9 @@ export async function uploadPhoto(
     // Fallback to current date if no EXIF date
     if (!takenAt) {
       takenAt = new Date().toISOString()
-      console.log(`📅 No EXIF date found - using current date as fallback: ${takenAt}`)
+      console.log(
+        `📅 No EXIF date found - using current date as fallback: ${takenAt}`
+      )
     } else {
       console.log(`✅ Using EXIF date: ${takenAt}`)
     }

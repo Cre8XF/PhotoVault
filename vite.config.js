@@ -5,11 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    host: true, // ← viktig når du bruker custom hosts
-    allowedHosts: [
-      'pixtr.local', // ← legg til denne
-      'localhost',
-      '127.0.0.1',
-    ],
+    strictPort: true,
+    host: 'localhost',
   },
 })
