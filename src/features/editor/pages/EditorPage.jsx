@@ -3,18 +3,26 @@ import { useEffect } from 'react'
 import EditorShell from '../components/EditorShell'
 import { usePhotoData } from '../../../hooks/usePhotoData'
 import useEditorStore from '../store/editorStore'
+import { exportEditedImage } from '../utils/imageExport'
+import { uploadEditedPhoto } from '../../../firebase'
+import useStore from '../../../state/store'
 
-// TEMP: Minimal page for Patch 01B-03
-// Will be expanded with tools in Patch 04
 export default function EditorPage() {
   const { photoId } = useParams()
   const navigate = useNavigate()
   const { getPhotoById } = usePhotoData()
 
   // Editor store
+  const transform = useEditorStore((state) => state.transform)
   const setOriginalUrl = useEditorStore((state) => state.setOriginalUrl)
   const resetAll = useEditorStore((state) => state.resetAll)
   const cleanup = useEditorStore((state) => state.cleanup)
+  const isProcessing = useEditorStore((state) => state.isProcessing)
+  const setProcessing = useEditorStore((state) => state.setProcessing)
+
+  // App store
+  const user = useStore((state) => state.user)
+  const showNotification = useStore((state) => state.showNotification)
 
   // Get photo from data layer
   const photo = getPhotoById(photoId)
@@ -35,14 +43,67 @@ export default function EditorPage() {
     navigate(-1)
   }
 
-  const handleSave = () => {
-    // TODO: Save logic kommer i Patch 09
-    console.log('✅ Save clicked - will implement in Patch 09')
-    navigate(-1)
+  /**
+   * Save edited image
+   */
+  const handleSave = async () => {
+    if (!photo || !user) {
+      console.error('No photo or user found')
+      return
+    }
+
+    // Check if any edits were made
+    const hasEdits =
+      transform.crop !== null ||
+      transform.rotation !== 0 ||
+      transform.flipH !== false ||
+      transform.flipV !== false ||
+      Object.values(transform.adjustments).some((v) => v !== 0) ||
+      (transform.filter?.active && transform.filter.active !== 'none')
+
+    if (!hasEdits) {
+      showNotification('No changes to save', 'info')
+      navigate(-1)
+      return
+    }
+
+    try {
+      setProcessing(true)
+
+      // Step 1: Export edited image
+      console.log('Exporting edited image...')
+      const editedBlob = await exportEditedImage(photo.url, transform)
+
+      // Step 2: Upload to storage and update Firestore
+      console.log('Uploading to storage...')
+      const filterName = transform.filter?.active || 'none'
+      await uploadEditedPhoto(
+        user.uid,
+        photoId,
+        editedBlob,
+        transform,
+        filterName,
+        null // thumbnailBlob - can be added later
+      )
+
+      // Step 3: Success notification
+      showNotification('Photo saved successfully!', 'success')
+
+      // Step 4: Navigate back
+      navigate(-1)
+    } catch (error) {
+      console.error('Save failed:', error)
+
+      showNotification(
+        'Failed to save photo. Please try again.',
+        'error'
+      )
+    } finally {
+      setProcessing(false)
+    }
   }
 
   const handleReset = () => {
-    // Reset all transforms
     resetAll()
     console.log('✅ Reset to original')
   }
@@ -72,6 +133,7 @@ export default function EditorPage() {
       onClose={handleClose}
       onSave={handleSave}
       onReset={handleReset}
+      isSaving={isProcessing}
     />
   )
 }

@@ -13,6 +13,7 @@ export default function EditorShell({
   onClose,
   onSave,
   onReset,
+  isSaving = false,
 }) {
   const activeTool = useEditorStore((state) => state.activeTool)
   const setActiveTool = useEditorStore((state) => state.setActiveTool)
@@ -42,7 +43,8 @@ export default function EditorShell({
       <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a2a]">
         <button
           onClick={onClose}
-          className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
+          disabled={isSaving}
+          className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span className="text-xl">✕</span>
           <span className="text-sm font-medium">Close</span>
@@ -53,11 +55,12 @@ export default function EditorShell({
             {photoName}
           </h1>
 
-          {/* Reset button - NEW */}
+          {/* Reset button */}
           {onReset && (
             <button
               onClick={onReset}
-              className="text-gray-400 hover:text-gray-300 transition-colors text-sm"
+              disabled={isSaving}
+              className="text-gray-400 hover:text-gray-300 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Reset
             </button>
@@ -66,21 +69,50 @@ export default function EditorShell({
 
         <button
           onClick={onSave}
-          className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
+          disabled={isSaving}
+          className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <span className="text-sm font-medium">Save</span>
-          <span className="text-xl">✓</span>
+          {isSaving ? (
+            <>
+              <span className="text-sm font-medium">Saving...</span>
+              <span className="animate-spin">⟳</span>
+            </>
+          ) : (
+            <>
+              <span className="text-sm font-medium">Save</span>
+              <span className="text-xl">✓</span>
+            </>
+          )}
         </button>
       </div>
 
       {/* Canvas area */}
       <EditorCanvas imageUrl={imageUrl} />
 
-      {/* Tools section - NEW in Patch 04 */}
+      {/* Tools section */}
       <div className="border-t border-[#2a2a2a]">
         <ToolSelector activeTool={activeTool} onToolChange={setActiveTool} />
         {renderToolPanel()}
       </div>
+
+      {/* Saving overlay */}
+      {isSaving && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-[#1a1a1a] rounded-lg p-6 max-w-sm mx-4">
+            <div className="flex items-center gap-4">
+              <span className="text-4xl animate-spin">⟳</span>
+              <div>
+                <p className="text-white font-semibold mb-1">
+                  Saving your photo
+                </p>
+                <p className="text-gray-400 text-sm">
+                  Applying all edits...
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
