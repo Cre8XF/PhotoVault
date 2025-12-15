@@ -573,6 +573,17 @@ export const usePhotoData = () => {
   )
 
   /**
+   * Get photo by ID
+   */
+  const getPhotoById = useCallback(
+    (photoId) => {
+      const safePhotos = Array.isArray(photos) ? photos : []
+      return safePhotos.find((photo) => photo.id === photoId)
+    },
+    [photos]
+  )
+
+  /**
    * Get photos by album ID
    */
   const getPhotosByAlbum = useCallback(
@@ -714,6 +725,7 @@ export const usePhotoData = () => {
     updateCaption,
 
     // Utilities
+    getPhotoById,
     getPhotosByAlbum,
     getPhotosWithoutAlbum,
     getFavoritePhotos,
