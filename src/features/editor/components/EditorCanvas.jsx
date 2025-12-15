@@ -1,21 +1,32 @@
 import { useCanvas } from '../hooks/useCanvas'
 import useEditorStore from '../store/editorStore'
+import CropOverlay from './CropOverlay'
 
 /**
  * Canvas component for editor
- * NOW CONNECTED TO ADJUSTMENTS
+ * NOW CONNECTED TO ADJUSTMENTS AND CROP OVERLAY
  *
  * @param {string} imageUrl - URL of image to display
  */
 export default function EditorCanvas({ imageUrl }) {
-  // Get adjustments from store
+  // Get adjustments and crop from store
   const adjustments = useEditorStore((state) => state.transform.adjustments)
+  const crop = useEditorStore((state) => state.transform.crop)
+  const activeTool = useEditorStore((state) => state.activeTool)
+  const applyTransform = useEditorStore((state) => state.applyTransform)
 
   // Pass adjustments to canvas hook
-  const { canvasRef, containerRef, isLoading, error } = useCanvas(
+  const { canvasRef, containerRef, isLoading, error, dimensions } = useCanvas(
     imageUrl,
     adjustments
   )
+
+  /**
+   * Handle crop changes from overlay
+   */
+  const handleCropChange = (newCrop) => {
+    applyTransform('crop', newCrop)
+  }
 
   if (error) {
     return (
@@ -42,6 +53,15 @@ export default function EditorCanvas({ imageUrl }) {
           objectFit: 'contain',
         }}
       />
+
+      {/* Crop overlay when crop tool is active */}
+      {activeTool === 'crop' && crop && (
+        <CropOverlay
+          crop={crop}
+          onChange={handleCropChange}
+          containerDimensions={dimensions}
+        />
+      )}
     </div>
   )
 }
