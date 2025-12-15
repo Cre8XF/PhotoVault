@@ -1,5 +1,7 @@
 // TEMP: Minimal layout for Patch 01B
-// Replaced by proper editor layout in later patches
+// Updated in Patch 02 to use canvas
+import EditorCanvas from './EditorCanvas'
+
 export default function EditorShell({ imageUrl, photoName, onClose, onSave }) {
   return (
     <div className="fixed inset-0 bg-[#0a0a0a] flex flex-col">
@@ -26,15 +28,8 @@ export default function EditorShell({ imageUrl, photoName, onClose, onSave }) {
         </button>
       </div>
 
-      {/* Canvas area - just image for now */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <img
-          src={imageUrl}
-          alt="Edit preview"
-          className="max-w-full max-h-full object-contain"
-          draggable={false}
-        />
-      </div>
+      {/* Canvas area - UPDATED in Patch 02 */}
+      <EditorCanvas imageUrl={imageUrl} />
 
       {/* Bottom placeholder */}
       <div className="py-6 text-center border-t border-[#2a2a2a]">
