@@ -140,3 +140,185 @@ export function getCombinedFilters(adjustments) {
 
   return filters.length > 0 ? filters.join(' ') : 'none'
 }
+
+/**
+ * FILTER PRESETS
+ * Pre-configured adjustment combinations for common filter styles
+ */
+
+/**
+ * Get adjustment values for a filter preset
+ * @param {string} filterName - Filter preset name
+ * @param {number} intensity - Filter intensity (0-100)
+ * @returns {Object} Adjustment values
+ */
+export function getFilterPreset(filterName, intensity = 100) {
+  // Scale factor based on intensity
+  const scale = intensity / 100
+
+  const presets = {
+    none: {
+      brightness: 0,
+      contrast: 0,
+      saturation: 0,
+      temperature: 0,
+      tint: 0,
+      highlights: 0,
+      shadows: 0,
+      sharpness: 0,
+      vignette: 0,
+    },
+
+    vivid: {
+      brightness: Math.round(5 * scale),
+      contrast: Math.round(15 * scale),
+      saturation: Math.round(25 * scale),
+      temperature: Math.round(5 * scale),
+      tint: 0,
+      highlights: Math.round(-5 * scale),
+      shadows: Math.round(10 * scale),
+      sharpness: Math.round(10 * scale),
+      vignette: 0,
+    },
+
+    warm: {
+      brightness: Math.round(8 * scale),
+      contrast: Math.round(5 * scale),
+      saturation: Math.round(10 * scale),
+      temperature: Math.round(30 * scale),
+      tint: Math.round(-5 * scale),
+      highlights: Math.round(5 * scale),
+      shadows: Math.round(-5 * scale),
+      sharpness: 0,
+      vignette: Math.round(15 * scale),
+    },
+
+    cool: {
+      brightness: Math.round(-3 * scale),
+      contrast: Math.round(10 * scale),
+      saturation: Math.round(5 * scale),
+      temperature: Math.round(-30 * scale),
+      tint: Math.round(5 * scale),
+      highlights: Math.round(-10 * scale),
+      shadows: Math.round(5 * scale),
+      sharpness: Math.round(5 * scale),
+      vignette: 0,
+    },
+
+    bw: {
+      brightness: Math.round(5 * scale),
+      contrast: Math.round(20 * scale),
+      saturation: Math.round(-100 * scale),
+      temperature: 0,
+      tint: 0,
+      highlights: Math.round(-5 * scale),
+      shadows: Math.round(10 * scale),
+      sharpness: Math.round(15 * scale),
+      vignette: Math.round(20 * scale),
+    },
+
+    vintage: {
+      brightness: Math.round(3 * scale),
+      contrast: Math.round(-10 * scale),
+      saturation: Math.round(-15 * scale),
+      temperature: Math.round(20 * scale),
+      tint: Math.round(-10 * scale),
+      highlights: Math.round(-15 * scale),
+      shadows: Math.round(-10 * scale),
+      sharpness: Math.round(-5 * scale),
+      vignette: Math.round(30 * scale),
+    },
+
+    dramatic: {
+      brightness: Math.round(-5 * scale),
+      contrast: Math.round(35 * scale),
+      saturation: Math.round(15 * scale),
+      temperature: Math.round(-5 * scale),
+      tint: 0,
+      highlights: Math.round(-20 * scale),
+      shadows: Math.round(20 * scale),
+      sharpness: Math.round(20 * scale),
+      vignette: Math.round(40 * scale),
+    },
+
+    soft: {
+      brightness: Math.round(10 * scale),
+      contrast: Math.round(-15 * scale),
+      saturation: Math.round(-10 * scale),
+      temperature: Math.round(10 * scale),
+      tint: Math.round(5 * scale),
+      highlights: Math.round(10 * scale),
+      shadows: Math.round(-15 * scale),
+      sharpness: Math.round(-10 * scale),
+      vignette: Math.round(10 * scale),
+    },
+  }
+
+  return presets[filterName] || presets.none
+}
+
+/**
+ * Get filter preset metadata
+ * @param {string} filterName - Filter preset name
+ * @returns {Object} Filter metadata
+ */
+export function getFilterMetadata(filterName) {
+  const metadata = {
+    none: {
+      name: 'None',
+      description: 'Original image',
+      icon: '🚫',
+    },
+    vivid: {
+      name: 'Vivid',
+      description: 'Boost colors and contrast',
+      icon: '🌈',
+    },
+    warm: {
+      name: 'Warm',
+      description: 'Sunset-like warmth',
+      icon: '🌅',
+    },
+    cool: {
+      name: 'Cool',
+      description: 'Cool blue tones',
+      icon: '❄️',
+    },
+    bw: {
+      name: 'B&W',
+      description: 'Classic black and white',
+      icon: '⚫',
+    },
+    vintage: {
+      name: 'Vintage',
+      description: 'Retro faded look',
+      icon: '📷',
+    },
+    dramatic: {
+      name: 'Dramatic',
+      description: 'High contrast and shadows',
+      icon: '⚡',
+    },
+    soft: {
+      name: 'Soft',
+      description: 'Dreamy soft focus',
+      icon: '☁️',
+    },
+  }
+
+  return metadata[filterName] || metadata.none
+}
+
+/**
+ * List of all available filter presets
+ */
+export const FILTER_PRESETS = [
+  'none',
+  'vivid',
+  'warm',
+  'cool',
+  'bw',
+  'vintage',
+  'dramatic',
+  'soft',
+]

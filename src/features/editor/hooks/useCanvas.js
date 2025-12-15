@@ -1,20 +1,21 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { loadImage, drawImageCentered } from '../utils/imagePipeline'
-import { getCombinedFilters } from '../utils/adjustments'
+import { getCombinedFilters, getFilterPreset } from '../utils/adjustments'
 import { applyRotationTransform, restoreRotationTransform, getRotatedDimensions } from '../utils/rotation'
 
 /**
  * Custom hook for canvas management
- * NOW WITH ROTATION AND FLIP SUPPORT
+ * NOW WITH FILTER PRESETS
  *
  * @param {string} imageUrl - URL of image to render
- * @param {Object} adjustments - Adjustment values to apply
+ * @param {Object} adjustments - Manual adjustment values
+ * @param {Object} filter - Filter preset { active, intensity }
  * @param {number} rotation - Rotation in degrees
  * @param {boolean} flipH - Flip horizontal
  * @param {boolean} flipV - Flip vertical
  * @returns {object} Canvas ref and render state
  */
-export function useCanvas(imageUrl, adjustments = {}, rotation = 0, flipH = false, flipV = false) {
+export function useCanvas(imageUrl, adjustments = {}, filter = {}, rotation = 0, flipH = false, flipV = false) {
   const canvasRef = useRef(null)
   const containerRef = useRef(null)
   const imageRef = useRef(null) // Store loaded image
@@ -55,8 +56,29 @@ export function useCanvas(imageUrl, adjustments = {}, rotation = 0, flipH = fals
     // Clear canvas
     ctx.clearRect(0, 0, width, height)
 
-    // Apply CSS filters (adjustments)
-    const filterString = getCombinedFilters(adjustments)
+    // Merge filter preset with manual adjustments
+    let finalAdjustments = { ...adjustments }
+
+    if (filter.active && filter.active !== 'none') {
+      const filterAdjustments = getFilterPreset(filter.active, filter.intensity)
+
+      // Add filter adjustments to manual adjustments
+      Object.keys(filterAdjustments).forEach((key) => {
+        finalAdjustments[key] = (finalAdjustments[key] || 0) + filterAdjustments[key]
+
+        // Clamp to valid ranges
+        if (key === 'sharpness' || key === 'vignette') {
+          finalAdjustments[key] = Math.max(0, Math.min(100, finalAdjustments[key]))
+        } else if (key === 'saturation' && finalAdjustments[key] < -100) {
+          finalAdjustments[key] = -100 // Saturation can't go below -100
+        } else {
+          finalAdjustments[key] = Math.max(-100, Math.min(100, finalAdjustments[key]))
+        }
+      })
+    }
+
+    // Apply CSS filters (adjustments + filter preset)
+    const filterString = getCombinedFilters(finalAdjustments)
     ctx.filter = filterString
 
     // Apply rotation and flip transformations
@@ -92,7 +114,7 @@ export function useCanvas(imageUrl, adjustments = {}, rotation = 0, flipH = fals
     ctx.filter = 'none'
 
     setDimensions({ width, height })
-  }, [adjustments, rotation, flipH, flipV])
+  }, [adjustments, filter, rotation, flipH, flipV])
 
   /**
    * Load image and render
