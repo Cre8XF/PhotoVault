@@ -1,7 +1,11 @@
-// TEMP: Minimal layout for Patch 01B-03
-// Updated in Patch 02 to use canvas
-// Updated in Patch 03 to add Reset button
+// TEMP: Layout updated in Patch 04 to include tools
 import EditorCanvas from './EditorCanvas'
+import ToolSelector from './ToolSelector'
+import AdjustPanel from './AdjustPanel'
+import CropPanel from './CropPanel'
+import RotatePanel from './RotatePanel'
+import FiltersPanel from './FiltersPanel'
+import useEditorStore from '../store/editorStore'
 
 export default function EditorShell({
   imageUrl,
@@ -10,6 +14,28 @@ export default function EditorShell({
   onSave,
   onReset,
 }) {
+  const activeTool = useEditorStore((state) => state.activeTool)
+  const setActiveTool = useEditorStore((state) => state.setActiveTool)
+
+  // Render active tool panel
+  const renderToolPanel = () => {
+    switch (activeTool) {
+      case 'adjust':
+        return <AdjustPanel />
+      case 'crop':
+        return <CropPanel />
+      case 'rotate':
+        return <RotatePanel />
+      case 'filters':
+        return <FiltersPanel />
+      default:
+        return (
+          <div className="p-4 bg-[#0a0a0a] text-center">
+            <p className="text-gray-400">Select a tool to get started</p>
+          </div>
+        )
+    }
+  }
   return (
     <div className="fixed inset-0 bg-[#0a0a0a] flex flex-col">
       {/* Top bar - with Reset button */}
@@ -47,14 +73,13 @@ export default function EditorShell({
         </button>
       </div>
 
-      {/* Canvas area - UPDATED in Patch 02 */}
+      {/* Canvas area */}
       <EditorCanvas imageUrl={imageUrl} />
 
-      {/* Bottom placeholder */}
-      <div className="py-6 text-center border-t border-[#2a2a2a]">
-        <p className="text-gray-500 text-sm">
-          Tools will appear here (Patch 04+)
-        </p>
+      {/* Tools section - NEW in Patch 04 */}
+      <div className="border-t border-[#2a2a2a]">
+        <ToolSelector activeTool={activeTool} onToolChange={setActiveTool} />
+        {renderToolPanel()}
       </div>
     </div>
   )
