@@ -4,21 +4,27 @@ import CropOverlay from './CropOverlay'
 
 /**
  * Canvas component for editor
- * NOW CONNECTED TO ADJUSTMENTS AND CROP OVERLAY
+ * NOW WITH ROTATION AND FLIP
  *
  * @param {string} imageUrl - URL of image to display
  */
 export default function EditorCanvas({ imageUrl }) {
-  // Get adjustments and crop from store
+  // Get state from store
   const adjustments = useEditorStore((state) => state.transform.adjustments)
   const crop = useEditorStore((state) => state.transform.crop)
+  const rotation = useEditorStore((state) => state.transform.rotation)
+  const flipH = useEditorStore((state) => state.transform.flipH)
+  const flipV = useEditorStore((state) => state.transform.flipV)
   const activeTool = useEditorStore((state) => state.activeTool)
   const applyTransform = useEditorStore((state) => state.applyTransform)
 
-  // Pass adjustments to canvas hook
+  // Canvas hook with all transformations
   const { canvasRef, containerRef, isLoading, error, dimensions } = useCanvas(
     imageUrl,
-    adjustments
+    adjustments,
+    rotation,
+    flipH,
+    flipV
   )
 
   /**
