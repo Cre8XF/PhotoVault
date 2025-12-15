@@ -87,9 +87,9 @@ export default function EditorShell({
       </div>
 
       {/* Canvas area - optimized for mobile */}
-      <div className="flex-1 min-h-0 overflow-hidden">
-  <EditorCanvas imageUrl={imageUrl} />
-</div>
+      <div className="flex-1 relative">
+        <EditorCanvas imageUrl={imageUrl} />
+      </div>
 
       {/* Tools section - compact on mobile */}
       <div className="border-t border-[#2a2a2a] max-h-[50vh] md:max-h-[400px] flex flex-col">
@@ -107,9 +107,7 @@ export default function EditorShell({
                 <p className="text-white font-semibold mb-1">
                   Saving your photo
                 </p>
-                <p className="text-gray-400 text-sm">
-                  Applying all edits...
-                </p>
+                <p className="text-gray-400 text-sm">Applying all edits...</p>
               </div>
             </div>
           </div>
