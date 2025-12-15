@@ -15,6 +15,7 @@ import {
   Share2,
   FolderInput,
   X,
+  Edit2,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { useTranslation } from 'react-i18next'
@@ -477,6 +478,19 @@ export default function PhotoPage() {
                 className="w-5 h-5"
                 fill={photo.favorite ? 'currentColor' : 'none'}
               />
+            </button>
+
+            {/* Edit button */}
+            <button
+              onClick={() => {
+                console.log('✏️ Edit button clicked, navigating to editor')
+                navigate(`/edit/${id}`)
+              }}
+              className="text-white hover:bg-blue-500/10 hover:text-blue-400 p-2 rounded-full transition active:scale-95"
+              aria-label={t('common:edit')}
+              title={t('common:edit')}
+            >
+              <Edit2 className="w-5 h-5" />
             </button>
 
             {/* Delete button */}
