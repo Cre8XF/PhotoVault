@@ -29,15 +29,25 @@ export default function EditorPage() {
 
   // Initialize store with photo URL
   useEffect(() => {
-    if (photo?.url) {
-      setOriginalUrl(photo.url)
+    if (photo) {
+      // Prefer R2 URL to avoid Firebase Storage CORS issues
+      const imageUrl = photo.r2Url || photo.url
+
+      console.log(
+        '📸 Editor loading image from:',
+        imageUrl.includes('r2.dev') || imageUrl.includes('r2')
+          ? 'R2 ✅'
+          : 'Firebase Storage ⚠️'
+      )
+
+      setOriginalUrl(imageUrl)
     }
 
     // Cleanup on unmount
     return () => {
       cleanup()
     }
-  }, [photo?.url, setOriginalUrl, cleanup])
+  }, [photo, setOriginalUrl, cleanup])
 
   const handleClose = () => {
     navigate(-1)
@@ -72,7 +82,8 @@ export default function EditorPage() {
 
       // Step 1: Export edited image
       console.log('Exporting edited image...')
-      const editedBlob = await exportEditedImage(photo.url, transform)
+      const imageUrl = photo.r2Url || photo.url
+      const editedBlob = await exportEditedImage(imageUrl, transform)
 
       // Step 2: Upload to storage and update Firestore
       console.log('Uploading to storage...')
@@ -128,7 +139,7 @@ export default function EditorPage() {
   // Render editor
   return (
     <EditorShell
-      imageUrl={photo.url}
+      imageUrl={photo.r2Url || photo.url}
       photoName={photo.name || 'Untitled'}
       onClose={handleClose}
       onSave={handleSave}
