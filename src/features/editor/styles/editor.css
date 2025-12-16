@@ -48,3 +48,24 @@
     max-height: 85vh; /* Mer plass til bildet på mobil */
   }
 }
+/* =========================================================
+   EDITOR TOOLS – FINJUSTERT HØYDE OG SPACING
+   (Trygg V3-justering – påvirker kun UI)
+   ========================================================= */
+
+/* Desktop */
+.editor-tools {
+  max-height: 32vh;
+}
+
+/* Selve panelet med sliders / buttons */
+.editor-tools-panel {
+  padding-bottom: 12px;
+}
+
+/* Mobil */
+@media (max-width: 768px) {
+  .editor-tools {
+    max-height: 40vh;
+  }
+}

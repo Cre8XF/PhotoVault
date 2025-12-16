@@ -106,7 +106,7 @@ export default function EditorShell({
       </div>
 
       {/* Tools section - compact on mobile */}
-      <div className="border-t border-[#2a2a2a] max-h-[50vh] md:max-h-[400px] flex flex-col">
+      <div className="editor-tools border-t border-[#2a2a2a] max-h-[50vh] md:max-h-[400px] flex flex-col">
         <ToolSelector activeTool={activeTool} onToolChange={setActiveTool} />
         <div className="overflow-y-auto flex-1">{renderToolPanel()}</div>
       </div>
