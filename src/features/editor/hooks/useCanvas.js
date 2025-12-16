@@ -2,6 +2,7 @@ import { useRef, useEffect, useState, useCallback } from 'react'
 import { loadImage, drawImageCentered } from '../utils/imagePipeline'
 import { getCombinedFilters, getFilterPreset } from '../utils/adjustments'
 import { applyRotationTransform, restoreRotationTransform, getRotatedDimensions } from '../utils/rotation'
+import useEditorStore from '../store/editorStore'
 
 /**
  * Custom hook for canvas management
@@ -23,6 +24,9 @@ export function useCanvas(imageUrl, adjustments = {}, filter = {}, rotation = 0,
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
+
+  // ✅ Get preloaded image from store (CORS fix - prevents double loading)
+  const preloadedImage = useEditorStore((state) => state.preloadedImage)
 
   /**
    * Render the image to canvas with all transformations
@@ -117,19 +121,31 @@ export function useCanvas(imageUrl, adjustments = {}, filter = {}, rotation = 0,
   }, [adjustments, filter, rotation, flipH, flipV])
 
   /**
-   * Load image and render
+   * Use preloaded image or load from URL
    */
   useEffect(() => {
     let mounted = true
 
     async function loadAndRender() {
-      if (!imageUrl) return
-
       try {
         setIsLoading(true)
         setError(null)
 
-        const { image } = await loadImage(imageUrl)
+        let image
+
+        // ✅ PRIORITY 1: Use preloaded image (already has CORS, faster)
+        if (preloadedImage) {
+          console.log('✅ Using preloaded image for canvas')
+          image = preloadedImage
+        }
+        // ✅ FALLBACK: Load from URL (should rarely happen)
+        else if (imageUrl) {
+          console.log('⚠️ Preloaded image not found, loading from URL')
+          const result = await loadImage(imageUrl)
+          image = result.image
+        } else {
+          return
+        }
 
         if (!mounted) return
 
@@ -140,6 +156,7 @@ export function useCanvas(imageUrl, adjustments = {}, filter = {}, rotation = 0,
           if (mounted) {
             render()
             setIsLoading(false)
+            console.log('✅ Canvas rendered with image')
           }
         })
       } catch (err) {
@@ -156,7 +173,7 @@ export function useCanvas(imageUrl, adjustments = {}, filter = {}, rotation = 0,
     return () => {
       mounted = false
     }
-  }, [imageUrl, render])
+  }, [preloadedImage, imageUrl, render])
 
   /**
    * Re-render when adjustments change

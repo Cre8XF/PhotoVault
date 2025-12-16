@@ -15,6 +15,7 @@ export default function EditorPage() {
   // Editor store
   const transform = useEditorStore((state) => state.transform)
   const setOriginalUrl = useEditorStore((state) => state.setOriginalUrl)
+  const setPreloadedImage = useEditorStore((state) => state.setPreloadedImage)
   const resetAll = useEditorStore((state) => state.resetAll)
   const cleanup = useEditorStore((state) => state.cleanup)
   const isProcessing = useEditorStore((state) => state.isProcessing)
@@ -44,10 +45,14 @@ export default function EditorPage() {
     img.crossOrigin = 'anonymous'
 
     img.onload = () => {
-      console.log('✅ Image loaded successfully')
+      console.log('🎨 Image ready for canvas render', {
+        width: img.naturalWidth,
+        height: img.naturalHeight,
+      })
       setImageLoaded(true)
       setImageError(null)
       setOriginalUrl(photo.url)
+      setPreloadedImage(img) // ✅ Store HTMLImageElement for canvas
     }
 
     img.onerror = (e) => {
@@ -59,6 +64,7 @@ export default function EditorPage() {
         'Failed to load image. Check Firebase Storage CORS settings.'
       )
       setImageLoaded(false)
+      setPreloadedImage(null)
     }
 
     // ✅ Set src AFTER crossOrigin
@@ -68,7 +74,7 @@ export default function EditorPage() {
     return () => {
       cleanup()
     }
-  }, [photo?.url, setOriginalUrl, cleanup])
+  }, [photo?.url, setOriginalUrl, setPreloadedImage, cleanup])
 
   const handleClose = () => {
     navigate(-1)
