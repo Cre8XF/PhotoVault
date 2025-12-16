@@ -92,7 +92,7 @@ export default function ToolsPage() {
                 className={`relative rounded-2xl shadow-md overflow-hidden text-left transition-all ${
                   isAvailable
                     ? 'hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] cursor-pointer'
-                    : 'opacity-50 cursor-not-allowed'
+                    : 'cursor-not-allowed'
                 }`}
               >
                 {/* Gradient Background */}
@@ -112,13 +112,16 @@ export default function ToolsPage() {
                         {tool.description}
                       </p>
                     </div>
-
-                    {!isAvailable && (
-                      <div className="text-xs bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
-                        Coming soon
-                      </div>
-                    )}
                   </div>
+
+                  {/* Coming Soon Badge */}
+                  {!isAvailable && (
+                    <div className="absolute top-4 right-4 px-2 py-1 bg-purple-500/20 border border-purple-500/30 rounded-full">
+                      <span className="text-xs text-purple-300 font-medium">
+                        Coming soon
+                      </span>
+                    </div>
+                  )}
 
                   {/* Decorative Pattern */}
                   <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
