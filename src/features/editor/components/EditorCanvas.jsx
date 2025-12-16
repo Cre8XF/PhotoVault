@@ -52,16 +52,19 @@ export default function EditorCanvas({ imageUrl }) {
         </div>
       )}
 
-      <canvas ref={canvasRef} />
+      {/* Wrapper to constrain overlay to canvas size */}
+      <div className="relative" style={{ display: 'inline-block' }}>
+        <canvas ref={canvasRef} />
 
-      {/* Crop overlay when crop tool is active */}
-      {activeTool === 'crop' && crop && (
-        <CropOverlay
-          crop={crop}
-          onChange={handleCropChange}
-          containerDimensions={dimensions}
-        />
-      )}
+        {/* Crop overlay when crop tool is active */}
+        {activeTool === 'crop' && crop && (
+          <CropOverlay
+            crop={crop}
+            onChange={handleCropChange}
+            containerDimensions={dimensions}
+          />
+        )}
+      </div>
     </div>
   )
 }
