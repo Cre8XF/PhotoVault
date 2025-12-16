@@ -18,11 +18,13 @@ const useEditorStore = create((set, get) => ({
   workingUrl: null, // Current state after transforms
   previewUrl: null, // Temporary preview during adjustment
   preloadedImage: null, // ✅ Preloaded HTMLImageElement for canvas (CORS fix)
+  canvasRef: null, // ✅ Active editor canvas for export
 
   setOriginalUrl: (url) => set({ originalUrl: url, workingUrl: url }),
   setWorkingUrl: (url) => set({ workingUrl: url }),
   setPreviewUrl: (url) => set({ previewUrl: url }),
   setPreloadedImage: (image) => set({ preloadedImage: image }),
+  setCanvasRef: (ref) => set({ canvasRef: ref }),
 
   // ============================================================================
   // TRANSFORM STATE
@@ -253,6 +255,7 @@ const useEditorStore = create((set, get) => ({
       workingUrl: null,
       previewUrl: null,
       preloadedImage: null,
+      canvasRef: null,
       transform: {
         crop: null,
         rotation: 0,

@@ -54,11 +54,12 @@ export default function EditorCanvas({ imageUrl }) {
 
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 m-auto"
+        className="block"
         style={{
           maxWidth: '100%',
           maxHeight: '100%',
-          objectFit: 'contain',
+          margin: 'auto',
+          display: 'block',
         }}
       />
 

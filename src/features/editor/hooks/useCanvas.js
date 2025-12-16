@@ -27,6 +27,15 @@ export function useCanvas(imageUrl, adjustments = {}, filter = {}, rotation = 0,
 
   // ✅ Get preloaded image from store (CORS fix - prevents double loading)
   const preloadedImage = useEditorStore((state) => state.preloadedImage)
+  const setCanvasRef = useEditorStore((state) => state.setCanvasRef)
+
+  // ✅ Store canvasRef in store for export
+  useEffect(() => {
+    if (canvasRef.current) {
+      setCanvasRef(canvasRef.current)
+    }
+    return () => setCanvasRef(null)
+  }, [setCanvasRef])
 
   /**
    * Render the image to canvas with all transformations
