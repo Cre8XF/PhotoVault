@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import EditorShell from '../components/EditorShell'
 import { usePhotoData } from '../../../hooks/usePhotoData'
 import useEditorStore from '../store/editorStore'
-import { uploadEditedPhoto } from '../../../firebase'
+import { uploadEditedPhoto, updatePhoto } from '../../../firebase'
 import useStore from '../../../state/store'
 
 export default function EditorPage() {
@@ -171,6 +171,49 @@ export default function EditorPage() {
     console.log('✅ Reset to original')
   }
 
+  /**
+   * Revert to original (unedited) photo
+   * Only available if photo.edited === true
+   */
+  const handleRevertToOriginal = async () => {
+    if (!photo || !photo.originalUrl) {
+      console.error('Cannot revert: No original URL found')
+      showNotification('Cannot revert to original', 'error')
+      return
+    }
+
+    try {
+      setProcessing(true)
+
+      console.log('🔄 Reverting to original photo:', {
+        photoId: photo.id,
+        currentUrl: photo.url,
+        originalUrl: photo.originalUrl,
+      })
+
+      // Update Firestore: Reset to original URL
+      await updatePhoto(photo.id, {
+        url: photo.originalUrl,
+        edited: false,
+        editedUrl: null,
+        editedAt: null,
+        transforms: null,
+        filter: null,
+      })
+
+      console.log('✅ Reverted to original successfully')
+      showNotification('Reverted to original image', 'success')
+
+      // Navigate back
+      navigate(-1)
+    } catch (error) {
+      console.error('❌ Revert failed:', error)
+      showNotification('Failed to revert. Please try again.', 'error')
+    } finally {
+      setProcessing(false)
+    }
+  }
+
   // Simple guard - no photo found
   if (!photo) {
     return (
@@ -245,6 +288,8 @@ export default function EditorPage() {
       onClose={handleClose}
       onSave={handleSave}
       onReset={handleReset}
+      onRevert={handleRevertToOriginal}
+      isEdited={photo.edited || false}
       isSaving={isProcessing}
     />
   )
