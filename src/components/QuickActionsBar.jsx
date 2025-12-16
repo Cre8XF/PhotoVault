@@ -15,7 +15,7 @@ const QuickActionsBar = ({
     {
       id: 'upload',
       icon: Upload,
-      label: t('home:quickActions.upload'),
+      label: t('home:uploadPhotos'),
       onClick: onUpload,
       gradient: 'from-purple-500 to-blue-500',
     },

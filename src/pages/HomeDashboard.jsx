@@ -471,7 +471,7 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
         className="ripple-effect glass p-4 md:p-5 rounded-xl hover:bg-white/15 transition flex items-center justify-center gap-3 mb-6 md:mb-10 w-full bg-purple-600/20 border-2 border-purple-500/30 hover:border-purple-400/50 free-upload-btn"
       >
         <ImagePlus className="w-5 h-5 md:w-6 md:h-6 text-purple-400" />
-        <span className="font-semibold text-base md:text-lg">{t("home:uploadOrCreateAlbum")}</span>
+        <span className="font-semibold text-base md:text-lg">{t("home:uploadPhotos")}</span>
       </button>
 
       {/* Smart Albums - Minimized (Phase 5) */}

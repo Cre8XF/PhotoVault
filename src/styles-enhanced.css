@@ -42,6 +42,8 @@ button {
   font-family: inherit;
   position: relative;
   overflow: hidden;
+  /* Ensure minimum touch target size (iOS/Android guideline: 44x44px) */
+  min-height: 44px;
 }
 
 button:hover:not(:disabled) {
