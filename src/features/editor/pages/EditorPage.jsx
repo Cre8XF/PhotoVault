@@ -117,10 +117,57 @@ export default function EditorPage() {
       console.log('✅ Using active editor canvas', {
         width: canvasRef.width,
         height: canvasRef.height,
+        hasCrop: !!transform.crop,
       })
 
+      // Determine which canvas to export
+      let canvasToExport = canvasRef
+
+      // If crop is active, create offscreen canvas with cropped region
+      if (transform.crop) {
+        console.log('🔪 Applying crop before export:', transform.crop)
+
+        const crop = transform.crop
+        const cropX = crop.x1 * canvasRef.width
+        const cropY = crop.y1 * canvasRef.height
+        const cropWidth = (crop.x2 - crop.x1) * canvasRef.width
+        const cropHeight = (crop.y2 - crop.y1) * canvasRef.height
+
+        console.log('   Crop region (pixels):', {
+          x: Math.round(cropX),
+          y: Math.round(cropY),
+          width: Math.round(cropWidth),
+          height: Math.round(cropHeight),
+        })
+
+        // Create offscreen canvas for cropped output
+        const offscreenCanvas = document.createElement('canvas')
+        offscreenCanvas.width = Math.round(cropWidth)
+        offscreenCanvas.height = Math.round(cropHeight)
+        const ctx = offscreenCanvas.getContext('2d')
+
+        // Draw cropped area from main canvas to offscreen canvas
+        ctx.drawImage(
+          canvasRef,
+          cropX,
+          cropY,
+          cropWidth,
+          cropHeight, // source (crop rect on main canvas)
+          0,
+          0,
+          cropWidth,
+          cropHeight // destination (full offscreen canvas)
+        )
+
+        canvasToExport = offscreenCanvas
+        console.log('✅ Cropped canvas ready', {
+          width: offscreenCanvas.width,
+          height: offscreenCanvas.height,
+        })
+      }
+
       const editedBlob = await new Promise((resolve, reject) => {
-        canvasRef.toBlob(
+        canvasToExport.toBlob(
           (blob) => {
             if (blob) {
               console.log('✅ Canvas exported successfully', {
