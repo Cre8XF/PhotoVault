@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import EditorShell from '../components/EditorShell'
 import { usePhotoData } from '../../../hooks/usePhotoData'
 import useEditorStore from '../store/editorStore'
-import { exportEditedImage } from '../utils/imageExport'
 import { uploadEditedPhoto } from '../../../firebase'
 import useStore from '../../../state/store'
 
@@ -14,6 +13,7 @@ export default function EditorPage() {
 
   // Editor store
   const transform = useEditorStore((state) => state.transform)
+  const canvasRef = useEditorStore((state) => state.canvasRef)
   const setOriginalUrl = useEditorStore((state) => state.setOriginalUrl)
   const setPreloadedImage = useEditorStore((state) => state.setPreloadedImage)
   const resetAll = useEditorStore((state) => state.resetAll)
@@ -107,10 +107,35 @@ export default function EditorPage() {
     try {
       setProcessing(true)
 
-      // Step 1: Export edited image
-      console.log('Exporting edited image...')
-      const imageUrl = photo.url
-      const editedBlob = await exportEditedImage(imageUrl, transform)
+      // Step 1: Export from active canvas
+      console.log('💾 Exporting from editor canvas...')
+
+      if (!canvasRef) {
+        throw new Error('Editor canvas not found. Cannot save.')
+      }
+
+      console.log('✅ Using active editor canvas', {
+        width: canvasRef.width,
+        height: canvasRef.height,
+      })
+
+      const editedBlob = await new Promise((resolve, reject) => {
+        canvasRef.toBlob(
+          (blob) => {
+            if (blob) {
+              console.log('✅ Canvas exported successfully', {
+                size: blob.size,
+                type: blob.type,
+              })
+              resolve(blob)
+            } else {
+              reject(new Error('Canvas toBlob failed'))
+            }
+          },
+          'image/jpeg',
+          0.92
+        )
+      })
 
       // Step 2: Upload to storage and update Firestore
       console.log('Uploading to storage...')
