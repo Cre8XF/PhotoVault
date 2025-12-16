@@ -56,7 +56,7 @@ export default function ToolsPage() {
   ];
 
   const handleBack = () => {
-    navigate(-1);
+    navigate('/more', { replace: true });
   };
 
   return (
