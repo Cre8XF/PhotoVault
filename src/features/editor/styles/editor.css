@@ -1,1 +1,37 @@
-/* TODO: Editor styles (Patch 01B+) */
+/* ============================================================================
+   EDITOR POLISH – PHASE 1: VIEWPORT SCALING FIX
+   ============================================================================ */
+
+/* ============================================================================
+   VIEWPORT - Fyller resterende plass mellom header og toolbar
+   ============================================================================ */
+.editor-viewport {
+  flex: 1; /* Tar all tilgjengelig plass */
+  display: flex;
+  align-items: center; /* Vertikal sentrering */
+  justify-content: center; /* Horisontal sentrering */
+  overflow: hidden;
+  background: #0a0a0a;
+  position: relative; /* For crop overlay positioning */
+}
+
+/* ============================================================================
+   CANVAS - CSS-skalering (IKKE JavaScript!)
+   ============================================================================ */
+.editor-viewport canvas {
+  max-width: 100%; /* Aldri bredere enn viewport */
+  max-height: 100%; /* Aldri høyere enn viewport */
+  width: auto; /* La browser regne ut bredde basert på høyde */
+  height: auto; /* La browser regne ut høyde basert på bredde */
+  display: block;
+  object-fit: contain; /* Behold aspect ratio */
+}
+
+/* ============================================================================
+   RESPONSIV: Ekstra spacing på mobil
+   ============================================================================ */
+@media (max-width: 768px) {
+  .editor-viewport {
+    padding: 8px; /* Litt luft rundt bildet på mobil */
+  }
+}
