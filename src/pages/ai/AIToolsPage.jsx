@@ -79,7 +79,7 @@ export default function AIToolsPage() {
   };
 
   const handleBack = () => {
-    navigate(ROUTES.TOOLS);
+    navigate(ROUTES.TOOLS, { replace: true });
   };
 
   return (
