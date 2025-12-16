@@ -3,7 +3,7 @@
 // ============================================================================
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Layout, Video, Sparkles, Wand2 } from 'lucide-react';
+import { Layout, Video, Sparkles, Wand2, ArrowLeft } from 'lucide-react';
 import useStore from '../state/store';
 import { ROUTES } from '../routes';
 
@@ -55,18 +55,30 @@ export default function ToolsPage() {
     },
   ];
 
+  const handleBack = () => {
+    navigate(-1);
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      {/* Header */}
-      <header className="px-4 pt-6 pb-4">
-        <h1 className="text-3xl font-bold tracking-tight">Your tools</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Create collages and more with Pixtr.
-        </p>
+      {/* Top Bar */}
+      <header className="fixed top-0 inset-x-0 z-50 h-14 bg-black/40 backdrop-blur-md border-b border-white/10">
+        <div className="flex items-center justify-between px-4 h-full">
+          <button
+            onClick={handleBack}
+            className="flex items-center gap-2 text-white hover:bg-white/10 rounded-full p-2 transition"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+
+          <h1 className="text-white font-semibold">Your tools</h1>
+
+          <div className="w-10" /> {/* Spacer */}
+        </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 px-4 pb-6">
+      <main className="flex-1 px-4 pt-20 pb-6">
         <div className="grid grid-cols-1 gap-4 max-w-2xl">
           {tools.map((tool) => {
             const Icon = tool.icon;
