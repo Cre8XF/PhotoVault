@@ -76,7 +76,7 @@ import useStore from './state/store'
 import { useToast } from './hooks/useToast'
 
 // Icons
-import { Home, FolderOpen, Plus, Search, Menu, Bell } from 'lucide-react'
+import { Home, FolderOpen, Plus, Search, Menu, Bell, User } from 'lucide-react'
 
 /**
  * Main App Component with new architecture
@@ -521,15 +521,15 @@ function AppContent() {
               <span className="text-xs font-medium">{t('nav:search')}</span>
             </button>
 
-            {/* More */}
+            {/* Account */}
             <button
               onClick={() => navigate('/more')}
               className={`ripple-effect nav-item-premium ${
                 location.pathname === '/more' ? 'active' : ''
               }`}
             >
-              <Menu className="w-6 h-6" />
-              <span className="text-xs font-medium">{t('nav:more')}</span>
+              <User className="w-6 h-6" />
+              <span className="text-xs font-medium">{t('nav:account')}</span>
             </button>
           </div>
         </nav>
