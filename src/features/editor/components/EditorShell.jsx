@@ -6,6 +6,7 @@ import CropPanel from './CropPanel'
 import RotatePanel from './RotatePanel'
 import FiltersPanel from './FiltersPanel'
 import useEditorStore from '../store/editorStore'
+import '../styles/editor.css'
 
 export default function EditorShell({
   imageUrl,

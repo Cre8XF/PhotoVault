@@ -14,6 +14,7 @@ photovault-*.json
 # 🏗️ Bygg og avhengigheter
 /node_modules/
 /build/
+/dist/
 /Backup/
 
 # ⚙️ Systemfiler

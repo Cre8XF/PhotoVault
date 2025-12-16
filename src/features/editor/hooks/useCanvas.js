@@ -47,24 +47,16 @@ export function useCanvas(imageUrl, adjustments = {}, filter = {}, rotation = 0,
     if (!canvas || !image) return
 
     const ctx = canvas.getContext('2d')
-    const dpr = window.devicePixelRatio || 1
 
-    // Get container dimensions
-    const container = containerRef.current
-    if (!container) return
+    // ✅ Set canvas size to actual image size (CSS handles visual scaling)
+    canvas.width = image.naturalWidth
+    canvas.height = image.naturalHeight
 
-    const rect = container.getBoundingClientRect()
-    const width = rect.width
-    const height = rect.height
+    // No inline styles - CSS handles display scaling
 
-    // Set canvas size (accounting for device pixel ratio)
-    canvas.width = width * dpr
-    canvas.height = height * dpr
-
-    // Scale context to match device pixel ratio
-    canvas.style.width = `${width}px`
-    canvas.style.height = `${height}px`
-    ctx.scale(dpr, dpr)
+    // Use canvas dimensions (which are now image dimensions)
+    const width = canvas.width
+    const height = canvas.height
 
     // Clear canvas
     ctx.clearRect(0, 0, width, height)
@@ -97,28 +89,8 @@ export function useCanvas(imageUrl, adjustments = {}, filter = {}, rotation = 0,
     // Apply rotation and flip transformations
     applyRotationTransform(ctx, width, height, rotation, flipH, flipV)
 
-    // Calculate image dimensions considering rotation
-    const rotatedDims = getRotatedDimensions(image.naturalWidth, image.naturalHeight, rotation)
-
-    // Calculate fit dimensions for rotated image
-    const imageAspect = rotatedDims.width / rotatedDims.height
-    const containerAspect = width / height
-
-    let drawWidth, drawHeight
-    if (imageAspect > containerAspect) {
-      drawWidth = width
-      drawHeight = width / imageAspect
-    } else {
-      drawHeight = height
-      drawWidth = height * imageAspect
-    }
-
-    // Center position
-    const x = (width - drawWidth) / 2
-    const y = (height - drawHeight) / 2
-
-    // Draw image
-    ctx.drawImage(image, x, y, drawWidth, drawHeight)
+    // Draw image at full size (canvas is already image size)
+    ctx.drawImage(image, 0, 0, width, height)
 
     // Restore transformations
     restoreRotationTransform(ctx)
@@ -126,6 +98,7 @@ export function useCanvas(imageUrl, adjustments = {}, filter = {}, rotation = 0,
     // Reset filter
     ctx.filter = 'none'
 
+    // Store dimensions for crop overlay (visual dimensions will be scaled by CSS)
     setDimensions({ width, height })
   }, [adjustments, filter, rotation, flipH, flipV])
 
@@ -193,22 +166,7 @@ export function useCanvas(imageUrl, adjustments = {}, filter = {}, rotation = 0,
     }
   }, [render])
 
-  /**
-   * Re-render on window resize
-   */
-  useEffect(() => {
-    if (!imageRef.current) return
-
-    const handleResize = () => {
-      render()
-    }
-
-    window.addEventListener('resize', handleResize)
-
-    return () => {
-      window.removeEventListener('resize', handleResize)
-    }
-  }, [render])
+  // ✅ No window resize handler - CSS handles viewport scaling
 
   return {
     canvasRef,
