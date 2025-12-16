@@ -216,6 +216,12 @@ function AppContent() {
   const [photoSourceList, setPhotoSourceList] = React.useState([])
   const [photoSourceIndex, setPhotoSourceIndex] = React.useState(0)
 
+  // Mobile keyboard detection - hide bottom nav when keyboard is open
+  const [isKeyboardOpen, setIsKeyboardOpen] = React.useState(false)
+  const [initialHeight, setInitialHeight] = React.useState(
+    typeof window !== 'undefined' ? window.innerHeight : 0
+  )
+
   // Phase 2A: Handle photo click - Navigate to PhotoPage
   const handlePhotoClick = (photo, sourceList) => {
     const list = Array.isArray(sourceList) ? sourceList : photos
@@ -332,6 +338,48 @@ function AppContent() {
     const savedLang = localStorage.getItem('photoVaultLanguage') || 'no'
     i18n.changeLanguage(savedLang)
   }, [])
+
+  // Detect keyboard open/close on mobile - hide bottom nav when keyboard opens
+  React.useEffect(() => {
+    // Only run on mobile devices (width < 768px)
+    if (window.innerWidth >= 768) return
+
+    // Store initial viewport height on mount
+    const initialVH = window.visualViewport?.height || window.innerHeight
+    setInitialHeight(initialVH)
+
+    const handleResize = () => {
+      // Skip on desktop/tablet
+      if (window.innerWidth >= 768) {
+        setIsKeyboardOpen(false)
+        return
+      }
+
+      // Use visualViewport if available (more accurate on iOS)
+      const currentHeight = window.visualViewport?.height || window.innerHeight
+
+      // Keyboard is considered open if viewport height shrinks by >25%
+      // (keyboard typically takes 40-60% of screen on mobile)
+      const heightDifference = initialHeight - currentHeight
+      const threshold = 0.25
+      const isOpen = heightDifference > initialHeight * threshold
+
+      setIsKeyboardOpen(isOpen)
+    }
+
+    // Listen to both events for better cross-browser support
+    window.addEventListener('resize', handleResize)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleResize)
+    }
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleResize)
+      }
+    }
+  }, [initialHeight])
 
   // Show loading spinner
   // ⛔ BLOCK ALL RENDERING UNTIL AUTH IS READY
@@ -476,7 +524,7 @@ function AppContent() {
       )}
 
       {/* Bottom Navigation */}
-      {showBottomNav && (
+      {showBottomNav && !isKeyboardOpen && (
         <nav className="bottom-nav-float">
           <div className="flex justify-around items-center gap-2">
             {/* Home */}
