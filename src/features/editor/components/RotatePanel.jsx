@@ -63,7 +63,7 @@ export default function RotatePanel() {
   return (
     <div className="p-4 bg-[#0a0a0a]">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3">
         <h3 className="text-white font-semibold">Rotate & Flip</h3>
         {hasChanges && (
           <button
@@ -76,28 +76,28 @@ export default function RotatePanel() {
       </div>
 
       {/* Quick Rotate Buttons */}
-      <div className="mb-6">
+      <div className="mb-3">
         <p className="text-sm text-gray-400 mb-3">Quick Rotate</p>
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={handleRotateCCW}
-            className="py-3 bg-[#2a2a2a] hover:bg-[#3a3a3a] text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation"
+            className="py-1.5 bg-[#2a2a2a] hover:bg-[#3a3a3a] text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation"
           >
-            <span className="text-xl">↶</span>
+            <span className="text-lg">↶</span>
             <span>90° Left</span>
           </button>
           <button
             onClick={handleRotateCW}
-            className="py-3 bg-[#2a2a2a] hover:bg-[#3a3a3a] text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation"
+            className="py-1.5 bg-[#2a2a2a] hover:bg-[#3a3a3a] text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation"
           >
-            <span className="text-xl">↷</span>
+            <span className="text-lg">↷</span>
             <span>90° Right</span>
           </button>
         </div>
       </div>
 
       {/* Free Rotation Slider */}
-      <div className="mb-6">
+      <div className="mb-3">
         <div className="flex items-center justify-between mb-2">
           <label className="text-sm text-gray-300 font-medium">
             Free Rotation
@@ -125,7 +125,7 @@ export default function RotatePanel() {
           step={1}
           value={rotation}
           onChange={(e) => handleFreeRotation(parseInt(e.target.value))}
-          className="w-full h-2 bg-[#2a2a2a] rounded-lg appearance-none cursor-pointer
+          className="w-full max-w-xs h-1 bg-[#2a2a2a] rounded-lg appearance-none cursor-pointer
                      [&::-webkit-slider-thumb]:appearance-none
                      [&::-webkit-slider-thumb]:w-4
                      [&::-webkit-slider-thumb]:h-4
@@ -153,24 +153,24 @@ export default function RotatePanel() {
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={handleFlipH}
-            className={`py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation ${
+            className={`py-1.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation ${
               flipH
                 ? 'bg-blue-600 text-white'
                 : 'bg-[#2a2a2a] text-white hover:bg-[#3a3a3a]'
             }`}
           >
-            <span className="text-xl">↔</span>
+            <span className="text-lg">↔</span>
             <span>Horizontal</span>
           </button>
           <button
             onClick={handleFlipV}
-            className={`py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation ${
+            className={`py-1.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation ${
               flipV
                 ? 'bg-blue-600 text-white'
                 : 'bg-[#2a2a2a] text-white hover:bg-[#3a3a3a]'
             }`}
           >
-            <span className="text-xl">↕</span>
+            <span className="text-lg">↕</span>
             <span>Vertical</span>
           </button>
         </div>
@@ -178,7 +178,7 @@ export default function RotatePanel() {
 
       {/* Current Transform - Compact */}
       {hasChanges && (
-        <div className="mt-3 px-3 py-2 bg-[#1a1a1a] rounded-lg text-xs text-gray-400">
+        <div className="mt-3 px-3 py-1.5 bg-[#1a1a1a] rounded-lg text-xs text-gray-400">
           {rotation !== 0 && `${rotation}° `}
           {flipH && `↔ `}
           {flipV && `↕`}

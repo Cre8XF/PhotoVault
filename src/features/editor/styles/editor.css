@@ -69,3 +69,28 @@
     max-height: 40vh;
   }
 }
+.rotate-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px;
+  width: 100%;
+}
+
+.rotate-container input[type='range'] {
+  width: 80%;
+  height: 6px; /* smaller height for slider */
+  background: #3a3a3a;
+  border-radius: 4px;
+  -webkit-appearance: none;
+}
+
+.rotate-container input[type='range']:focus {
+  outline: none;
+}
+
+.rotate-container span {
+  margin-top: 8px;
+  color: #b3b3b3;
+  font-size: 12px;
+}

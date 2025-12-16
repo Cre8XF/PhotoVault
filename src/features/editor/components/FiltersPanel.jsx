@@ -65,15 +65,17 @@ export default function FiltersPanel() {
             <button
               key={filterName}
               onClick={() => handleFilterSelect(filterName)}
-              className={`aspect-square rounded-lg flex flex-col items-center justify-center gap-1 transition-all ${
+              className={`filter-thumb transition-all ${
                 isActive
                   ? 'bg-blue-600 text-white ring-2 ring-blue-400'
                   : 'bg-[#2a2a2a] text-gray-300 hover:bg-[#3a3a3a]'
               }`}
               title={metadata.description}
             >
-              <span className="text-2xl">{metadata.icon}</span>
-              <span className="text-xs font-medium">{metadata.name}</span>
+              <span className="text-lg leading-none">{metadata.icon}</span>
+              <span className="text-[11px] font-medium leading-tight">
+                {metadata.name}
+              </span>
             </button>
           )
         })}
@@ -83,7 +85,9 @@ export default function FiltersPanel() {
       {hasFilter && (
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
-            <label className="text-sm text-gray-300 font-medium">Intensity</label>
+            <label className="text-sm text-gray-300 font-medium">
+              Intensity
+            </label>
             <span className="text-sm font-mono text-gray-400">
               {filter.intensity}%
             </span>
@@ -124,7 +128,9 @@ export default function FiltersPanel() {
         <div className="p-3 bg-[#1a1a1a] rounded-lg">
           <p className="text-xs text-gray-400 mb-1">Active Filter:</p>
           <div className="flex items-center gap-2">
-            <span className="text-xl">{getFilterMetadata(filter.active).icon}</span>
+            <span className="text-xl">
+              {getFilterMetadata(filter.active).icon}
+            </span>
             <div>
               <p className="text-sm text-white font-medium">
                 {getFilterMetadata(filter.active).name}
