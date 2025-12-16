@@ -28,10 +28,23 @@
 }
 
 /* ============================================================================
-   RESPONSIV: Ekstra spacing på mobil
+   RESPONSIV: Desktop og mobil tilpasninger
    ============================================================================ */
+
+/* Desktop: Begrens canvas-størrelse for å sikre at UI er tilgjengelig */
+@media (min-width: 769px) {
+  .editor-viewport canvas {
+    max-height: 70vh; /* Forhindrer at canvas skyver toolbar ut av viewport */
+  }
+}
+
+/* Mobil: Ekstra spacing og optimal bruk av plass */
 @media (max-width: 768px) {
   .editor-viewport {
     padding: 8px; /* Litt luft rundt bildet på mobil */
+  }
+
+  .editor-viewport canvas {
+    max-height: 85vh; /* Mer plass til bildet på mobil */
   }
 }

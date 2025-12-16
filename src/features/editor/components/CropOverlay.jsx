@@ -13,10 +13,32 @@ export default function CropOverlay({ crop, onChange, containerDimensions }) {
   const [isDragging, setIsDragging] = useState(false)
   const [dragMode, setDragMode] = useState(null) // 'move', 'nw', 'ne', 'sw', 'se'
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+  const [visualDimensions, setVisualDimensions] = useState({ width: 0, height: 0 })
 
-  if (!crop || !containerDimensions.width) return null
+  // Update visual dimensions when overlay mounts or resizes
+  useEffect(() => {
+    if (!overlayRef.current) return
 
-  const { width, height } = containerDimensions
+    const updateDimensions = () => {
+      const rect = overlayRef.current?.getBoundingClientRect()
+      if (rect) {
+        setVisualDimensions({ width: rect.width, height: rect.height })
+      }
+    }
+
+    updateDimensions()
+
+    // Update on window resize
+    window.addEventListener('resize', updateDimensions)
+    return () => window.removeEventListener('resize', updateDimensions)
+  }, [])
+
+  if (!crop) return null
+
+  const { width, height } = visualDimensions
+
+  // If dimensions not ready yet, don't render
+  if (!width || !height) return <div ref={overlayRef} className="absolute inset-0 pointer-events-none" />
 
   // Convert normalized coordinates (0-1) to pixels
   const rect = {
@@ -171,7 +193,6 @@ export default function CropOverlay({ crop, onChange, containerDimensions }) {
     <div
       ref={overlayRef}
       className="absolute inset-0 pointer-events-none"
-      style={{ width: `${width}px`, height: `${height}px` }}
     >
       {/* Darkened areas outside crop */}
       <div className="absolute inset-0 bg-black/50" />
