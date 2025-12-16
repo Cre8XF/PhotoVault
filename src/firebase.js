@@ -1102,13 +1102,27 @@ export async function uploadEditedPhoto(
     }
 
     // 3. Update Firestore document
-    await updateDoc(doc(db, 'photos', photoId), {
+    const photoDoc = await getDoc(doc(db, 'photos', photoId))
+    const currentPhotoData = photoDoc.data()
+
+    // ✅ Preserve originalUrl on first edit
+    const updates = {
+      url: editedUrl, // Active image is now the edited version
       editedUrl: editedUrl,
       editedAt: new Date().toISOString(),
       transforms: transform,
       filter: filter,
+      edited: true,
       updatedAt: new Date().toISOString(),
-    })
+    }
+
+    // Set originalUrl only if it doesn't exist (first time editing)
+    if (!currentPhotoData.originalUrl) {
+      updates.originalUrl = currentPhotoData.url // Backup the original
+      console.log('✅ [EditedPhoto] Preserving originalUrl:', currentPhotoData.url)
+    }
+
+    await updateDoc(doc(db, 'photos', photoId), updates)
 
     console.log(`✅ [EditedPhoto] Firestore updated for ${photoId}`)
 

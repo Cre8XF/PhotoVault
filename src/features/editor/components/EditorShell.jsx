@@ -13,6 +13,8 @@ export default function EditorShell({
   onClose,
   onSave,
   onReset,
+  onRevert,
+  isEdited = false,
   isSaving = false,
 }) {
   const activeTool = useEditorStore((state) => state.activeTool)
@@ -55,7 +57,18 @@ export default function EditorShell({
             {photoName}
           </h1>
 
-          {/* Reset button */}
+          {/* Revert to Original button - only show if photo was previously edited */}
+          {isEdited && onRevert && (
+            <button
+              onClick={onRevert}
+              disabled={isSaving}
+              className="text-red-400 hover:text-red-300 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Revert to Original
+            </button>
+          )}
+
+          {/* Reset button - resets current editing session */}
           {onReset && (
             <button
               onClick={onReset}
