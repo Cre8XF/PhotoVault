@@ -343,7 +343,7 @@ body.light-mode .bg-gray-800 {
 }
 
 /* ============================================================================
-   LIGHT MODE - TEXT COLORS
+   LIGHT MODE - TEXT COLORS (Removed global overrides)
    ============================================================================ */
 body.light-mode h1,
 body.light-mode h2,
