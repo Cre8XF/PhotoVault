@@ -483,7 +483,7 @@ const MorePage = ({
 
       {/* Loading Overlay */}
       {loading && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center text-on-glass">
           <div className="glass rounded-2xl p-6 flex items-center gap-3">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500"></div>
             <span className="font-medium">{t('notifications.processing')}</span>
@@ -492,7 +492,7 @@ const MorePage = ({
       )}
 
       {/* === PROFILE HEADER === */}
-      <div className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600 via-pink-500 to-orange-500 p-8">
+      <div className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600 via-pink-500 to-orange-500 p-8 text-on-brand">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative z-10">
           <div className="flex items-start justify-between mb-6">

@@ -432,7 +432,7 @@ export default function PhotoPage() {
     <div className="fixed inset-0 z-[9999] bg-black flex flex-col">
       {/* Top Bar */}
       <header
-        className={`fixed top-0 inset-x-0 z-[10000] h-14 transition-opacity duration-300 ${
+        className={`fixed top-0 inset-x-0 z-[10000] h-14 transition-opacity duration-300 text-on-glass ${
           uiVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         style={{
@@ -607,7 +607,7 @@ export default function PhotoPage() {
       {/* Navigation Arrows */}
       {photoOrder && photoOrder.length > 1 && (
         <div
-          className={`fixed inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-4 pointer-events-none transition-opacity duration-300 ${
+          className={`fixed inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-4 pointer-events-none transition-opacity duration-300 text-on-glass ${
             uiVisible ? 'opacity-100' : 'opacity-0'
           }`}
         >
@@ -642,7 +642,7 @@ export default function PhotoPage() {
       {/* Info Panel */}
       {showInfo && (
         <div
-          className="fixed right-0 top-0 h-full w-80 bg-black/95 backdrop-blur-md border-l border-white/10 z-[10001] overflow-y-auto"
+          className="fixed right-0 top-0 h-full w-80 bg-black/95 backdrop-blur-md border-l border-white/10 z-[10001] overflow-y-auto text-on-glass"
           style={{
             animation: 'slideInRight 0.3s ease-out'
           }}
