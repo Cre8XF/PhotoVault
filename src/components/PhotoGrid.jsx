@@ -125,21 +125,21 @@ const PhotoGrid = ({
                 )}
 
                 {/* Play Icon Overlay */}
-                <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-on-glass">
                   <div className="bg-white/30 backdrop-blur-sm rounded-full p-4 scale-90 group-hover:scale-100 transition-transform duration-200">
-                    <Play className="w-10 h-10 text-white fill-white" />
+                    <Play className="w-10 h-10 fill-white" />
                   </div>
                 </div>
 
                 {/* Duration Badge (if metadata exists) */}
                 {photo.metadata?.duration && photo.metadata.duration > 0 && (
-                  <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium px-2 py-1 rounded backdrop-blur-sm">
+                  <div className="absolute bottom-2 right-2 bg-black/80 text-on-glass text-xs font-medium px-2 py-1 rounded backdrop-blur-sm">
                     {formatDuration(photo.metadata.duration)}
                   </div>
                 )}
 
                 {/* Video Type Badge */}
-                <div className="absolute top-2 left-2 bg-purple-600/90 text-white text-xs font-medium px-2 py-1 rounded flex items-center gap-1 backdrop-blur-sm">
+                <div className="absolute top-2 left-2 bg-purple-600/90 text-on-glass text-xs font-medium px-2 py-1 rounded flex items-center gap-1 backdrop-blur-sm">
                   <Video className="w-3 h-3" />
                   <span>{t('common:grid.video')}</span>
                 </div>

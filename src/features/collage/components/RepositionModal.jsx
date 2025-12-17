@@ -215,7 +215,7 @@ const RepositionModal = ({
     <div
       ref={modalRef}
       tabIndex={-1}
-      className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[1100] flex flex-col animate-fade-in"
+      className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[1100] flex flex-col animate-fade-in text-on-glass"
       onClick={(e) => {
         // Close on backdrop click (not on image/controls)
         if (e.target === e.currentTarget) {

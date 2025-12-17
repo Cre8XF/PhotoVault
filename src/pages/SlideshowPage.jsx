@@ -262,7 +262,7 @@ export default function SlideshowPage() {
     <div className="fixed inset-0 z-[9999] bg-black flex flex-col">
       {/* Top Bar */}
       <header
-        className={`fixed top-0 inset-x-0 z-[10000] h-14 transition-opacity duration-300 ${
+        className={`fixed top-0 inset-x-0 z-[10000] h-14 transition-opacity duration-300 text-on-glass ${
           uiVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         style={{
@@ -326,7 +326,7 @@ export default function SlideshowPage() {
           uiVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
-        <div className="bg-black/40 dark:bg-black/60 backdrop-blur-md rounded-full flex items-center gap-4 px-6 py-3 text-white drop-shadow-lg">
+        <div className="bg-black/40 dark:bg-black/60 backdrop-blur-md rounded-full flex items-center gap-4 px-6 py-3 text-on-glass drop-shadow-lg">
           {/* Previous Button */}
           <button
             onClick={handlePrev}
