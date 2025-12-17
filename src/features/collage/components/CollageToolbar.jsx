@@ -30,7 +30,7 @@ const CollageToolbar = ({
 
   return (
     <div
-      className={`fixed bottom-20 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/80 backdrop-blur-xl border border-white/20 rounded-full px-4 py-3 shadow-2xl z-30 animate-scale-in ${className}`}
+      className={`fixed bottom-20 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/80 backdrop-blur-xl border border-white/20 rounded-full px-4 py-3 shadow-2xl z-30 animate-scale-in text-on-glass ${className}`}
     >
       {/* Slot indicator */}
       <div className="px-3 py-1 bg-purple-600/30 rounded-full text-xs font-medium mr-1">

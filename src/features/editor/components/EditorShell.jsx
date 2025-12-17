@@ -113,15 +113,15 @@ export default function EditorShell({
 
       {/* Saving overlay */}
       {isSaving && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 text-on-glass">
           <div className="bg-[#1a1a1a] rounded-lg p-6 max-w-sm mx-4">
             <div className="flex items-center gap-4">
               <span className="text-4xl animate-spin">⟳</span>
               <div>
-                <p className="text-white font-semibold mb-1">
+                <p className="font-semibold mb-1">
                   Saving your photo
                 </p>
-                <p className="text-gray-400 text-sm">Applying all edits...</p>
+                <p className="opacity-70 text-sm">Applying all edits...</p>
               </div>
             </div>
           </div>

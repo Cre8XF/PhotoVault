@@ -46,14 +46,14 @@ const DateSection = ({ date, photos, onPhotoClick }) => {
 
             {/* Video Badge */}
             {photo.type === 'video' && (
-              <div className="absolute top-2 right-2 bg-black/70 backdrop-blur-sm px-2 py-1 rounded-lg">
+              <div className="absolute top-2 right-2 bg-black/70 backdrop-blur-sm px-2 py-1 rounded-lg text-on-glass">
                 <span className="text-xs">🎥</span>
               </div>
             )}
 
             {/* Favorite Badge */}
             {photo.isFavorite && (
-              <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-sm px-2 py-1 rounded-lg">
+              <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-sm px-2 py-1 rounded-lg text-on-glass">
                 <span className="text-xs">⭐</span>
               </div>
             )}
