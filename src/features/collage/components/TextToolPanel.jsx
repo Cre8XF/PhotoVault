@@ -136,10 +136,10 @@ const TextToolPanel = ({ textLayers, onAddText, onUpdateText, onDeleteText }) =>
                       key={colorObj.value}
                       onClick={() => setNewText({ ...newText, color: colorObj.value })}
                       className={`
-                        w-full aspect-square rounded-lg border-2 transition
+                        w-full aspect-square rounded-lg border-2 transition text-color-picker
                         ${newText.color === colorObj.value ? 'border-purple-500' : 'border-white/20'}
                       `}
-                      style={{ backgroundColor: colorObj.value }}
+                      style={{ '--picker-color': colorObj.value }}
                       title={t(`collage:colors.${colorKey}`)}
                     />
                   )

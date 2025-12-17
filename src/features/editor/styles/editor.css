@@ -91,6 +91,66 @@
 
 .rotate-container span {
   margin-top: 8px;
-  color: #b3b3b3;
+  color: var(--text-muted);
   font-size: 12px;
+}
+
+/* ============================================================================
+   EDITOR THEME-AWARE UTILITIES
+   ============================================================================ */
+
+/* Editor backgrounds */
+.editor-bg-primary {
+  background-color: #0a0a0a;
+}
+
+.editor-bg-secondary {
+  background-color: #1a1a1a;
+}
+
+.editor-bg-tertiary {
+  background-color: #2a2a2a;
+}
+
+.editor-bg-tertiary-hover:hover {
+  background-color: #3a3a3a;
+}
+
+/* Editor text colors */
+.editor-text-primary {
+  color: var(--text-primary);
+}
+
+.editor-text-secondary {
+  color: var(--text-secondary);
+}
+
+.editor-text-muted {
+  color: var(--text-muted);
+}
+
+/* Editor borders */
+.editor-border {
+  border-color: #2a2a2a;
+}
+
+/* Light mode overrides for editor */
+body.light-mode .editor-bg-primary {
+  background-color: var(--bg-primary);
+}
+
+body.light-mode .editor-bg-secondary {
+  background-color: var(--bg-secondary);
+}
+
+body.light-mode .editor-bg-tertiary {
+  background-color: var(--bg-tertiary);
+}
+
+body.light-mode .editor-bg-tertiary-hover:hover {
+  background-color: var(--interactive-hover);
+}
+
+body.light-mode .editor-border {
+  border-color: var(--border-color);
 }

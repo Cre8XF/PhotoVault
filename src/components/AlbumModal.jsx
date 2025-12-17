@@ -4,6 +4,7 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, FolderPlus } from 'lucide-react'
+import './AlbumModal.css'
 
 const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
   const { t } = useTranslation(['albums'])
@@ -26,62 +27,38 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
 
   return (
     <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 9999,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
-        padding: '16px'
-      }}
+      className="album-modal-overlay"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}
     >
       <div
-        style={{
-          backgroundColor: '#1f2937',
-          padding: '32px',
-          borderRadius: '16px',
-          width: '100%',
-          maxWidth: '500px',
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          color: 'white'
-        }}
+        className="album-modal-content"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <FolderPlus style={{ width: '20px', height: '20px', color: '#a78bfa' }} />
+        <div className="album-modal-header">
+          <h2 className="album-modal-title">
+            <FolderPlus className="album-modal-icon" />
             {editingAlbum ? t('albums:editAlbum') : t('albums:newAlbum')}
           </h2>
           <button
             onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#9ca3af',
-              cursor: 'pointer',
-              padding: '4px'
-            }}
+            className="album-modal-close"
           >
-            <X style={{ width: '20px', height: '20px' }} />
+            <X className="album-modal-close-icon" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <form onSubmit={handleSubmit} className="album-modal-form">
           {/* Name Input */}
-          <div>
+          <div className="album-modal-field">
             <label
               htmlFor="album-name-input"
-              style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#d1d5db' }}
+              className="album-modal-label"
             >
-              {t('albums:name')} <span style={{ color: '#ef4444' }}>*</span>
+              {t('albums:name')} <span className="album-modal-required">*</span>
             </label>
             <input
               id="album-name-input"
@@ -90,27 +67,18 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               onChange={(e) => setName(e.target.value)}
               placeholder={t('albums:namePlaceholder') || 'Album name...'}
               maxLength={50}
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                fontSize: '16px',
-                border: '1px solid #4b5563',
-                borderRadius: '8px',
-                backgroundColor: '#374151',
-                color: 'white',
-                outline: 'none'
-              }}
+              className="album-modal-input"
             />
-            <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+            <p className="album-modal-hint">
               {name.length}/50 {t('albums:characters')}
             </p>
           </div>
 
           {/* Description Input */}
-          <div>
+          <div className="album-modal-field">
             <label
               htmlFor="album-description-input"
-              style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#d1d5db' }}
+              className="album-modal-label"
             >
               {t('albums:description')}
             </label>
@@ -121,28 +89,18 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               placeholder={t('albums:descriptionPlaceholder') || 'Description...'}
               maxLength={200}
               rows={3}
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                fontSize: '16px',
-                border: '1px solid #4b5563',
-                borderRadius: '8px',
-                backgroundColor: '#374151',
-                color: 'white',
-                outline: 'none',
-                resize: 'none'
-              }}
+              className="album-modal-textarea"
             />
-            <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+            <p className="album-modal-hint">
               {description.length}/200 {t('albums:characters')}
             </p>
           </div>
 
           {/* Cover URL Input */}
-          <div>
+          <div className="album-modal-field">
             <label
               htmlFor="album-cover-input"
-              style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#d1d5db' }}
+              className="album-modal-label"
             >
               {t('albums:coverImage')} (optional)
             </label>
@@ -152,55 +110,23 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
               value={cover}
               onChange={(e) => setCover(e.target.value)}
               placeholder="https://..."
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                fontSize: '16px',
-                border: '1px solid #4b5563',
-                borderRadius: '8px',
-                backgroundColor: '#374151',
-                color: 'white',
-                outline: 'none'
-              }}
+              className="album-modal-input"
             />
           </div>
 
           {/* Buttons */}
-          <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+          <div className="album-modal-actions">
             <button
               type="button"
               onClick={onClose}
-              style={{
-                flex: 1,
-                padding: '12px',
-                fontSize: '16px',
-                fontWeight: '600',
-                border: '1px solid #4b5563',
-                borderRadius: '8px',
-                backgroundColor: '#374151',
-                color: '#d1d5db',
-                cursor: 'pointer'
-              }}
+              className="album-modal-btn-cancel"
             >
               {t('albums:cancel')}
             </button>
             <button
               type="submit"
               disabled={!name.trim()}
-              style={{
-                flex: 1,
-                padding: '12px',
-                fontSize: '16px',
-                fontWeight: '600',
-                border: 'none',
-                borderRadius: '8px',
-                background: name.trim()
-                  ? 'linear-gradient(to right, #a855f7, #ec4899)'
-                  : '#4b5563',
-                color: 'white',
-                cursor: name.trim() ? 'pointer' : 'not-allowed',
-                opacity: name.trim() ? 1 : 0.5
-              }}
+              className={`album-modal-btn-submit ${!name.trim() ? 'disabled' : ''}`}
             >
               {editingAlbum ? t('albums:saveChanges') : t('albums:createAlbum')}
             </button>

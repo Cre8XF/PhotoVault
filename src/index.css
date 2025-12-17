@@ -1,4 +1,264 @@
 /* ============================================================================
+   THEME TOKENS - Single source of truth for colors
+   ============================================================================ */
+
+/* Dark Mode (default) */
+:root,
+:root[data-theme="dark"],
+body.dark-mode {
+  /* Backgrounds */
+  --bg-primary: #0b0f1a;
+  --bg-secondary: #131a2a;
+  --bg-tertiary: #1e293b;
+  --bg-elevated: #1e293b;
+  --bg-surface: rgba(255, 255, 255, 0.08);
+  --bg-surface-hover: rgba(255, 255, 255, 0.12);
+
+  /* Text */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-disabled: #64748b;
+
+  /* Borders */
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-hover: rgba(255, 255, 255, 0.2);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+
+  /* Interactive */
+  --interactive-hover: rgba(255, 255, 255, 0.05);
+  --interactive-active: rgba(255, 255, 255, 0.1);
+
+  /* Glass morphism */
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-bg-hover: rgba(255, 255, 255, 0.12);
+  --glass-border-hover: rgba(255, 255, 255, 0.25);
+}
+
+/* Light Mode */
+:root[data-theme="light"],
+body.light-mode {
+  /* Backgrounds */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --bg-elevated: #ffffff;
+  --bg-surface: rgba(139, 92, 246, 0.08);
+  --bg-surface-hover: rgba(139, 92, 246, 0.12);
+
+  /* Text - Dark text for light backgrounds */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-disabled: #94a3b8;
+
+  /* Borders */
+  --border-color: #e2e8f0;
+  --border-hover: #cbd5e1;
+  --border-subtle: #f1f5f9;
+
+  /* Interactive */
+  --interactive-hover: rgba(139, 92, 246, 0.08);
+  --interactive-active: rgba(139, 92, 246, 0.15);
+
+  /* Glass morphism */
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(139, 92, 246, 0.15);
+  --glass-bg-hover: rgba(255, 255, 255, 0.95);
+  --glass-border-hover: rgba(139, 92, 246, 0.3);
+}
+
+/* ============================================================================
+   UTILITY CLASSES - Use theme tokens
+   ============================================================================ */
+
+/* Text colors */
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-disabled {
+  color: var(--text-disabled);
+}
+
+/* Background colors */
+.bg-primary {
+  background-color: var(--bg-primary);
+}
+
+.bg-secondary {
+  background-color: var(--bg-secondary);
+}
+
+.bg-tertiary {
+  background-color: var(--bg-tertiary);
+}
+
+.bg-elevated {
+  background-color: var(--bg-elevated);
+}
+
+.bg-surface {
+  background-color: var(--bg-surface);
+}
+
+.bg-surface-hover:hover {
+  background-color: var(--bg-surface-hover);
+}
+
+/* Border colors */
+.border-default {
+  border-color: var(--border-color);
+}
+
+.border-hover:hover {
+  border-color: var(--border-hover);
+}
+
+.border-subtle {
+  border-color: var(--border-subtle);
+}
+
+/* Interactive states */
+.interactive-hover:hover {
+  background-color: var(--interactive-hover);
+}
+
+.interactive-active:active {
+  background-color: var(--interactive-active);
+}
+
+/* Modal specific */
+.modal-overlay {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.modal-content {
+  background-color: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+/* Input/Form styles */
+.input-field {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.input-field::placeholder {
+  color: var(--text-muted);
+}
+
+.input-field:focus {
+  border-color: #a78bfa;
+  outline: none;
+}
+
+/* Button styles */
+.btn-secondary {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  background-color: var(--interactive-hover);
+  color: var(--text-primary);
+}
+
+/* Particles canvas */
+.particles-canvas {
+  opacity: 0.6;
+}
+
+/* Color picker button (uses CSS variable for dynamic color) */
+.text-color-picker {
+  background-color: var(--picker-color);
+}
+
+/* ============================================================================
+   TAILWIND CLASS OVERRIDES - Automatically apply theme tokens
+   ============================================================================ */
+
+/* Override hardcoded Tailwind text colors in Light mode */
+body.light-mode .text-white {
+  color: var(--text-primary);
+}
+
+body.light-mode .text-gray-100 {
+  color: var(--text-primary);
+}
+
+body.light-mode .text-gray-200 {
+  color: var(--text-secondary);
+}
+
+body.light-mode .text-gray-300 {
+  color: var(--text-secondary);
+}
+
+body.light-mode .text-gray-400 {
+  color: var(--text-secondary);
+}
+
+body.light-mode .text-gray-500 {
+  color: var(--text-muted);
+}
+
+body.light-mode .text-gray-600 {
+  color: var(--text-muted);
+}
+
+/* Override hardcoded backgrounds in Light mode */
+body.light-mode .bg-gray-800 {
+  background-color: var(--bg-secondary);
+}
+
+body.light-mode .bg-gray-900 {
+  background-color: var(--bg-primary);
+}
+
+body.light-mode .bg-\[\#0a0a0a\],
+body.light-mode .bg-\[0a0a0a\] {
+  background-color: var(--bg-primary);
+}
+
+body.light-mode .bg-\[\#1a1a1a\],
+body.light-mode .bg-\[1a1a1a\] {
+  background-color: var(--bg-secondary);
+}
+
+body.light-mode .bg-\[\#2a2a2a\],
+body.light-mode .bg-\[2a2a2a\] {
+  background-color: var(--bg-tertiary);
+}
+
+body.light-mode .bg-\[\#3a3a3a\],
+body.light-mode .bg-\[3a3a3a\] {
+  background-color: var(--interactive-hover);
+}
+
+/* Override borders in Light mode */
+body.light-mode .border-\[\#2a2a2a\],
+body.light-mode .border-\[2a2a2a\] {
+  border-color: var(--border-color);
+}
+
+body.light-mode .border-gray-700,
+body.light-mode .border-gray-800 {
+  border-color: var(--border-color);
+}
+
+/* ============================================================================
    ANIMATED TWILIGHT GRADIENT BACKGROUND – refined version
    ============================================================================ */
 body {
@@ -68,18 +328,18 @@ main,
    LIGHT MODE - IMAGE BACKGROUNDS
    ============================================================================ */
 body.light-mode img {
-  background: #f8fafc !important;
-  border-color: #e2e8f0 !important;
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
 }
 
 body.light-mode .album-thumb {
-  background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
+  background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
 }
 
 body.light-mode .bg-gray-900,
 body.light-mode .bg-gray-800 {
-  background: #f8fafc !important;
-  border-color: #e2e8f0 !important;
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
 }
 
 /* ============================================================================
@@ -88,67 +348,55 @@ body.light-mode .bg-gray-800 {
 body.light-mode h1,
 body.light-mode h2,
 body.light-mode h3 {
-  color: #1f2937 !important;
+  color: var(--text-primary);
 }
 
 body.light-mode .text-gray-100,
 body.light-mode .text-white {
-  color: #1f2937 !important;
+  color: var(--text-primary);
 }
 
 body.light-mode .text-gray-400,
 body.light-mode .text-gray-500,
 body.light-mode .text-gray-300 {
-  color: #6b7280 !important;
+  color: var(--text-secondary);
 }
 
 body.light-mode .text-gray-200 {
-  color: #4b5563 !important;
+  color: var(--text-secondary);
 }
 
-/* Override opacity classes for better contrast in light mode */
-body.light-mode .opacity-70 {
-  opacity: 0.85 !important;
-}
-
-body.light-mode .opacity-60 {
-  opacity: 0.75 !important;
-}
-
-body.light-mode .opacity-50 {
-  opacity: 0.65 !important;
-}
+/* Remove opacity hacks - use proper color tokens instead */
 
 /* Placeholder text contrast */
 body.light-mode input::placeholder,
 body.light-mode textarea::placeholder {
-  color: #6b7280 !important;
-  opacity: 0.8 !important;
+  color: var(--text-muted);
 }
 
 /* Button text on colored backgrounds */
 body.light-mode .bg-purple-600,
 body.light-mode .bg-purple-500,
 body.light-mode .bg-purple-700 {
-  color: #ffffff !important;
+  color: #ffffff;
 }
 
 /* Ensure good contrast for small text */
 body.light-mode .text-xs {
-  color: #374151 !important;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 body.light-mode .text-sm {
-  color: #1f2937 !important;
+  color: var(--text-primary);
 }
 
 /* ============================================================================
    PREMIUM GLASSMORPHISM
    ============================================================================ */
 .glass {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-radius: 20px;
@@ -156,37 +404,31 @@ body.light-mode .text-sm {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Light mode glass */
+/* Light mode glass - inherited from tokens */
 body.light-mode .glass {
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(139, 92, 246, 0.15);
   box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.9);
 }
 
 .glass:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.25);
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
   box-shadow: 0 12px 40px rgba(139, 92, 246, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.15);
   transform: translateY(-2px);
 }
 
 body.light-mode .glass:hover {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: rgba(139, 92, 246, 0.3);
   box-shadow: 0 8px 32px rgba(139, 92, 246, 0.15), inset 0 1px 1px rgba(255, 255, 255, 1);
 }
 
 .glass-sm {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--glass-bg);
+  border: 1px solid var(--border-color);
   backdrop-filter: blur(16px);
   border-radius: 16px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
 body.light-mode .glass-sm {
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(139, 92, 246, 0.1);
   box-shadow: 0 2px 12px rgba(139, 92, 246, 0.08);
 }
 
@@ -194,13 +436,13 @@ body.light-mode .glass-sm {
    LIGHT MODE - CARDS
    ============================================================================ */
 body.light-mode .card-premium {
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(139, 92, 246, 0.15);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   box-shadow: 0 4px 20px rgba(139, 92, 246, 0.08);
 }
 
 body.light-mode .card-premium:hover {
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--glass-bg-hover);
   box-shadow: 0 12px 40px rgba(139, 92, 246, 0.15);
 }
 
@@ -208,20 +450,20 @@ body.light-mode .card-premium:hover {
    LIGHT MODE - BUTTONS
    ============================================================================ */
 body.light-mode .bg-white\/10 {
-  background: rgba(139, 92, 246, 0.08) !important;
+  background: var(--bg-surface);
 }
 
 body.light-mode .bg-white\/20 {
-  background: rgba(139, 92, 246, 0.15) !important;
+  background: var(--interactive-active);
 }
 
 body.light-mode .bg-black\/50,
 body.light-mode .bg-black\/60 {
-  background: rgba(139, 92, 246, 0.15) !important;
+  background: var(--interactive-active);
 }
 
 body.light-mode .hover\:bg-white\/20:hover {
-  background: rgba(139, 92, 246, 0.2) !important;
+  background: var(--interactive-active);
 }
 
 /* ============================================================================
@@ -230,7 +472,7 @@ body.light-mode .hover\:bg-white\/20:hover {
 body.light-mode .border-white\/10,
 body.light-mode .border-gray-700,
 body.light-mode .border-gray-800 {
-  border-color: rgba(139, 92, 246, 0.15) !important;
+  border-color: var(--border-color);
 }
 
 /* ============================================================================
