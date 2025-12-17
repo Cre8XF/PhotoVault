@@ -34,11 +34,6 @@ body.dark-mode {
   --glass-border: rgba(255, 255, 255, 0.18);
   --glass-bg-hover: rgba(255, 255, 255, 0.12);
   --glass-border-hover: rgba(255, 255, 255, 0.25);
-
-  /* Semantic text tokens - context-dependent */
-  --text-on-brand: #ffffff;
-  --text-on-glass: #ffffff;
-  --text-on-surface: #f8fafc;
 }
 
 /* Light Mode */
@@ -72,11 +67,6 @@ body.light-mode {
   --glass-border: rgba(139, 92, 246, 0.15);
   --glass-bg-hover: rgba(255, 255, 255, 0.95);
   --glass-border-hover: rgba(139, 92, 246, 0.3);
-
-  /* Semantic text tokens - context-dependent */
-  --text-on-brand: #ffffff;
-  --text-on-glass: #ffffff;
-  --text-on-surface: #0f172a;
 }
 
 /* ============================================================================
@@ -195,35 +185,38 @@ body.light-mode {
   background-color: var(--picker-color);
 }
 
-/* Semantic text utilities - context-dependent */
-.text-on-brand {
-  color: var(--text-on-brand);
-}
-
-.text-on-glass {
-  color: var(--text-on-glass);
-}
-
-.text-on-surface {
-  color: var(--text-on-surface);
-}
-
-/* Icon utilities that follow text context */
-.icon-on-brand {
-  color: var(--text-on-brand);
-}
-
-.icon-on-glass {
-  color: var(--text-on-glass);
-}
-
-.icon-on-surface {
-  color: var(--text-on-surface);
-}
-
 /* ============================================================================
-   TAILWIND CLASS OVERRIDES - Apply theme tokens (backgrounds/borders only)
+   TAILWIND CLASS OVERRIDES - Automatically apply theme tokens
    ============================================================================ */
+
+/* Override hardcoded Tailwind text colors in Light mode */
+body.light-mode .text-white {
+  color: var(--text-primary);
+}
+
+body.light-mode .text-gray-100 {
+  color: var(--text-primary);
+}
+
+body.light-mode .text-gray-200 {
+  color: var(--text-secondary);
+}
+
+body.light-mode .text-gray-300 {
+  color: var(--text-secondary);
+}
+
+body.light-mode .text-gray-400 {
+  color: var(--text-secondary);
+}
+
+body.light-mode .text-gray-500 {
+  color: var(--text-muted);
+}
+
+body.light-mode .text-gray-600 {
+  color: var(--text-muted);
+}
 
 /* Override hardcoded backgrounds in Light mode */
 body.light-mode .bg-gray-800 {
@@ -352,10 +345,28 @@ body.light-mode .bg-gray-800 {
 /* ============================================================================
    LIGHT MODE - TEXT COLORS (Removed global overrides)
    ============================================================================ */
-/* REMOVED: Global text-white and text-gray-* overrides
-   These broke readability on brand/glass backgrounds.
-   Use semantic classes instead: .text-on-brand, .text-on-glass, .text-on-surface
-*/
+body.light-mode h1,
+body.light-mode h2,
+body.light-mode h3 {
+  color: var(--text-primary);
+}
+
+body.light-mode .text-gray-100,
+body.light-mode .text-white {
+  color: var(--text-primary);
+}
+
+body.light-mode .text-gray-400,
+body.light-mode .text-gray-500,
+body.light-mode .text-gray-300 {
+  color: var(--text-secondary);
+}
+
+body.light-mode .text-gray-200 {
+  color: var(--text-secondary);
+}
+
+/* Remove opacity hacks - use proper color tokens instead */
 
 /* Placeholder text contrast */
 body.light-mode input::placeholder,
