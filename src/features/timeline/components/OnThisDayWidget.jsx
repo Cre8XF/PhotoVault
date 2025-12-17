@@ -66,16 +66,16 @@ const OnThisDayWidget = ({ photos, onPhotoClick, referenceDate = new Date() }) =
             />
 
             {/* Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-100 group-hover:opacity-90 transition-opacity" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-100 group-hover:opacity-90 transition-opacity text-on-glass" />
 
             {/* Year Badge */}
-            <div className="absolute bottom-0 left-0 right-0 p-3">
+            <div className="absolute bottom-0 left-0 right-0 p-3 text-on-glass">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-bold text-white">
+                  <p className="text-sm font-bold">
                     {t('timeline:onThisDay.yearsAgo', { count: photo.yearsAgo })}
                   </p>
-                  <p className="text-xs text-gray-300">
+                  <p className="text-xs opacity-70">
                     {new Date(photo.createdAt?.toDate ? photo.createdAt.toDate() : photo.createdAt).getFullYear()}
                   </p>
                 </div>
@@ -85,7 +85,7 @@ const OnThisDayWidget = ({ photos, onPhotoClick, referenceDate = new Date() }) =
 
             {/* Video Badge */}
             {photo.type === 'video' && (
-              <div className="absolute top-2 right-2 bg-black/70 backdrop-blur-sm px-2 py-1 rounded-lg">
+              <div className="absolute top-2 right-2 bg-black/70 backdrop-blur-sm px-2 py-1 rounded-lg text-on-glass">
                 <span className="text-xs">🎥</span>
               </div>
             )}

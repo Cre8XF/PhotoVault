@@ -202,7 +202,7 @@ const CollageView = () => {
   return (
     <div className="min-h-screen pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-black/40 backdrop-blur-xl border-b border-white/10">
+      <header className="sticky top-0 z-20 bg-black/40 backdrop-blur-xl border-b border-white/10 text-on-glass">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
             <button
@@ -240,7 +240,7 @@ const CollageView = () => {
                 />
 
                 {/* Menu */}
-                <div className="absolute right-0 top-12 z-20 w-48 bg-black/90 backdrop-blur-xl rounded-xl border border-white/20 shadow-2xl overflow-hidden">
+                <div className="absolute right-0 top-12 z-20 w-48 bg-black/90 backdrop-blur-xl rounded-xl border border-white/20 shadow-2xl overflow-hidden text-on-glass">
                   <button
                     onClick={() => {
                       handleEdit()

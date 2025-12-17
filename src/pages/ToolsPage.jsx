@@ -62,16 +62,16 @@ export default function ToolsPage() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Top Bar */}
-      <header className="fixed top-0 inset-x-0 z-50 h-14 bg-black/40 backdrop-blur-md border-b border-white/10">
+      <header className="fixed top-0 inset-x-0 z-50 h-14 bg-black/40 backdrop-blur-md border-b border-white/10 text-on-glass">
         <div className="flex items-center justify-between px-4 h-full">
           <button
             onClick={handleBack}
-            className="flex items-center gap-2 text-white hover:bg-white/10 rounded-full p-2 transition"
+            className="flex items-center gap-2 hover:bg-white/10 rounded-full p-2 transition"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
 
-          <h1 className="text-white font-semibold">Your tools</h1>
+          <h1 className="font-semibold">Your tools</h1>
 
           <div className="w-10" /> {/* Spacer */}
         </div>
@@ -101,14 +101,14 @@ export default function ToolsPage() {
                 />
 
                 {/* Content */}
-                <div className="relative z-10 p-6 text-white">
+                <div className="relative z-10 p-6 text-on-brand">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <Icon className="w-8 h-8" />
                         <h2 className="text-2xl font-semibold">{tool.name}</h2>
                       </div>
-                      <p className="text-sm text-white/90">
+                      <p className="text-sm opacity-90">
                         {tool.description}
                       </p>
                     </div>

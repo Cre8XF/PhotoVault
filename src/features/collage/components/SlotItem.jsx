@@ -85,20 +85,20 @@ const SlotItem = ({
 
       {/* Actions Toolbar (only show when slot has photo and is selected/hovered) */}
       {hasPhoto && (
-        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity text-on-glass">
           <button
             onClick={handleRotate}
             className="p-1.5 bg-black/60 backdrop-blur-sm rounded-lg hover:bg-black/80 transition"
             title={t('collage.builder.rotate', 'Rotate')}
           >
-            <RotateCw className="w-4 h-4 text-white" />
+            <RotateCw className="w-4 h-4" />
           </button>
           <button
             onClick={handleRemove}
             className="p-1.5 bg-black/60 backdrop-blur-sm rounded-lg hover:bg-red-600/80 transition"
             title={t('collage.builder.remove', 'Remove')}
           >
-            <X className="w-4 h-4 text-white" />
+            <X className="w-4 h-4" />
           </button>
         </div>
       )}
