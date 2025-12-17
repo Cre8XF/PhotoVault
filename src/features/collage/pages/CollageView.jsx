@@ -202,7 +202,7 @@ const CollageView = () => {
   return (
     <div className="min-h-screen pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-black/40 backdrop-blur-xl border-b border-white/10 text-on-glass">
+      <header className="sticky top-0 z-20 bg-black/85 backdrop-blur-xl border-b border-white/10 text-on-glass">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
             <button
