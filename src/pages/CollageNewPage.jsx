@@ -305,7 +305,7 @@ const CollageNewPage = () => {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 pt-20 p-4 md:p-8">
+        <div className="flex-1 pt-24 pb-4 px-4 md:pt-28 md:pb-8 md:px-8">
           <div className="max-w-4xl mx-auto">
             <CollageCanvas
               template={template}
