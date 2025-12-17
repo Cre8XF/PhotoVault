@@ -55,7 +55,7 @@ const PhotoPickerPanel = ({ isOpen, onClose, photos, onSelectPhoto, selectedSlot
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-fade-in"
+        className="fixed inset-0 bg-black/80 backdrop-blur-md z-40 animate-fade-in"
         onClick={onClose}
       />
 
@@ -65,20 +65,20 @@ const PhotoPickerPanel = ({ isOpen, onClose, photos, onSelectPhoto, selectedSlot
         style={{ maxHeight: '70vh', height: 'auto' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-white/10 flex-shrink-0">
+        <div className="flex items-center justify-between p-4 border-b border-white/20 bg-black/40 flex-shrink-0">
           <div>
-            <h3 className="font-semibold text-lg">
+            <h3 className="font-semibold text-lg text-white">
               {t('collage.photoPicker.title', 'Select Photo')}
             </h3>
             {selectedSlotIndex !== null && (
-              <p className="text-xs opacity-50">
+              <p className="text-xs text-white/60">
                 {t('collage.photoPicker.forSlot', 'For slot')} #{selectedSlotIndex + 1}
               </p>
             )}
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-white/10 rounded-lg transition"
+            className="p-2 hover:bg-white/20 rounded-lg transition text-white"
           >
             <X className="w-5 h-5" />
           </button>
@@ -87,13 +87,13 @@ const PhotoPickerPanel = ({ isOpen, onClose, photos, onSelectPhoto, selectedSlot
         {/* Search Bar */}
         <div className="p-4 border-b border-white/10 flex-shrink-0">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 opacity-50" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('collage.photoPicker.search', 'Search photos...')}
-              className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+              className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white/15 transition"
             />
           </div>
         </div>
@@ -105,7 +105,7 @@ const PhotoPickerPanel = ({ isOpen, onClose, photos, onSelectPhoto, selectedSlot
             className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
               filter === 'all'
                 ? 'bg-purple-600 text-white'
-                : 'bg-white/5 hover:bg-white/10'
+                : 'bg-white/10 text-white/90 hover:bg-white/15'
             }`}
           >
             <ImageIcon className="w-4 h-4 inline mr-1" />
@@ -116,7 +116,7 @@ const PhotoPickerPanel = ({ isOpen, onClose, photos, onSelectPhoto, selectedSlot
             className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
               filter === 'favorites'
                 ? 'bg-purple-600 text-white'
-                : 'bg-white/5 hover:bg-white/10'
+                : 'bg-white/10 text-white/90 hover:bg-white/15'
             }`}
           >
             <Star className="w-4 h-4 inline mr-1" />
@@ -128,8 +128,8 @@ const PhotoPickerPanel = ({ isOpen, onClose, photos, onSelectPhoto, selectedSlot
         <div className="flex-1 overflow-y-auto p-4">
           {filteredPhotos.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-12">
-              <ImageIcon className="w-12 h-12 opacity-20 mb-3" />
-              <p className="text-sm opacity-50">
+              <ImageIcon className="w-12 h-12 text-white/30 mb-3" />
+              <p className="text-sm text-white/60">
                 {t('collage.photoPicker.noPhotos', 'No photos found')}
               </p>
             </div>
@@ -159,8 +159,8 @@ const PhotoPickerPanel = ({ isOpen, onClose, photos, onSelectPhoto, selectedSlot
         </div>
 
         {/* Footer hint */}
-        <div className="p-3 border-t border-white/10 text-center flex-shrink-0">
-          <p className="text-xs opacity-50">
+        <div className="p-3 border-t border-white/20 bg-black/30 text-center flex-shrink-0">
+          <p className="text-xs text-white/70">
             {t('collage.photoPicker.hint', 'Tap a photo to add it to the selected slot')}
           </p>
         </div>
