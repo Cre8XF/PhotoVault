@@ -265,9 +265,6 @@ export default function SlideshowPage() {
         className={`fixed top-0 inset-x-0 z-[10000] h-14 transition-opacity duration-300 text-on-glass ${
           uiVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
-        style={{
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%)',
-        }}
       >
         <div className="flex items-center justify-between px-4 h-full">
           {/* Left: Back button */}

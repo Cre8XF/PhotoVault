@@ -815,3 +815,24 @@ textarea {
 .gradient-pink {
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 }
+
+/* ============================================================================
+   SEMANTIC OVERLAY - For headers on image backgrounds
+   ============================================================================ */
+.overlay-on-image {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.65),
+    rgba(0, 0, 0, 0.35),
+    transparent
+  );
+}
+
+body.light-mode .overlay-on-image {
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.65),
+    rgba(255, 255, 255, 0.35),
+    transparent
+  );
+}
