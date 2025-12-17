@@ -62,7 +62,7 @@ export default function ToolsPage() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Top Bar */}
-      <header className="fixed top-0 inset-x-0 z-50 h-14 bg-black/40 backdrop-blur-md border-b border-white/10 text-on-glass">
+      <header className="fixed top-0 inset-x-0 z-50 h-14 bg-black/85 backdrop-blur-xl border-b border-white/10 text-on-glass">
         <div className="flex items-center justify-between px-4 h-full">
           <button
             onClick={handleBack}

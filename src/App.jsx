@@ -277,7 +277,7 @@ function AppContent() {
   // Apply theme on mount
   React.useEffect(() => {
     const savedTheme = localStorage.getItem('theme')
-    const isDark = savedTheme !== 'light'
+    const isDark = savedTheme === 'dark'
     setTheme(isDark)
   }, [setTheme])
 
