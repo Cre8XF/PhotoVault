@@ -20,9 +20,11 @@ export const useAuth = () => {
   const user = useStore((state) => state.user)
   const userProfile = useStore((state) => state.userProfile)
   const loading = useStore((state) => state.loading)
+  const emailVerified = useStore((state) => state.emailVerified)
   const setUser = useStore((state) => state.setUser)
   const setUserProfile = useStore((state) => state.setUserProfile)
   const setLoading = useStore((state) => state.setLoading)
+  const setEmailVerified = useStore((state) => state.setEmailVerified)
   const logout = useStore((state) => state.logout)
   const setNotification = useStore((state) => state.setNotification)
   const setConfirmModal = useStore((state) => state.setConfirmModal)
@@ -109,14 +111,17 @@ export const useAuth = () => {
       setLoading(false)
 
       if (currentUser) {
+        // Update email verification status from Firebase Auth
+        setEmailVerified(currentUser.emailVerified)
         await fetchUserProfile(currentUser.uid)
       } else {
         setUserProfile(null)
+        setEmailVerified(false)
       }
     })
 
     return () => unsubscribe()
-  }, [auth, setUser, setLoading, setUserProfile, fetchUserProfile])
+  }, [auth, setUser, setLoading, setUserProfile, setEmailVerified, fetchUserProfile])
 
   // ==========================================
   // ✅ TIER-BASED HELPERS
@@ -213,6 +218,7 @@ export const useAuth = () => {
     user,
     userProfile,
     loading,
+    emailVerified,
     handleLogout,
     fetchUserProfile,
 

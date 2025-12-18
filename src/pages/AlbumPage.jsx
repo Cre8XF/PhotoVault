@@ -40,6 +40,7 @@ import MoveModal from '../components/MoveModal'
 import PhotoGrid from '../components/PhotoGrid'
 import AlbumModal from '../components/AlbumModal'
 import QRShareModal from '../features/qr-sharing/components/QRShareModal'
+import VerificationModal from '../components/VerificationModal'
 import { SkeletonPhoto } from '../components/SkeletonCard'
 import useStore from '../state/store'
 import { ROUTES } from '../routes'
@@ -87,8 +88,10 @@ const AlbumPage = ({
   const [isUploadOpen, setUploadOpen] = useState(false)
   const [editingAlbum, setEditingAlbum] = useState(null)
   const [isShareModalOpen, setShareModalOpen] = useState(false)
+  const [isVerificationModalOpen, setVerificationModalOpen] = useState(false)
 
   // Zustand store
+  const emailVerified = useStore((state) => state.emailVerified)
   const setNotification = useStore((state) => state.setNotification)
   const setConfirmModal = useStore((state) => state.setConfirmModal)
 
@@ -473,7 +476,13 @@ const AlbumPage = ({
 
           {/* Share Album Button */}
           <button
-            onClick={() => setShareModalOpen(true)}
+            onClick={() => {
+              if (!emailVerified) {
+                setVerificationModalOpen(true)
+              } else {
+                setShareModalOpen(true)
+              }
+            }}
             className="ripple-effect px-2 py-1.5 md:px-4 md:py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 transition flex items-center gap-1.5 md:gap-2 text-xs md:text-base"
           >
             <Share2 className="w-4 h-4 md:w-5 md:h-5" />
@@ -913,6 +922,12 @@ const AlbumPage = ({
         isOpen={isShareModalOpen}
         onClose={() => setShareModalOpen(false)}
         album={album}
+      />
+
+      <VerificationModal
+        isOpen={isVerificationModalOpen}
+        onClose={() => setVerificationModalOpen(false)}
+        feature={t('albums:shareAlbum')}
       />
     </div>
   )

@@ -68,6 +68,7 @@ import PINLockScreen from './components/PINLockScreen'
 import NotificationPanel from './components/NotificationPanel'
 import ToastContainer from './components/ToastContainer'
 import LoadingSpinner from './components/LoadingSpinner'
+import VerificationBanner from './components/VerificationBanner'
 
 // Hooks
 import useAuth from './hooks/useAuth'
@@ -419,6 +420,9 @@ function AppContent() {
   return (
     <div className="min-h-screen relative">
       <Particles />
+
+      {/* Email Verification Banner */}
+      <VerificationBanner user={user} />
 
       {/* Main content - React Router based rendering */}
       <main className="relative z-10">
