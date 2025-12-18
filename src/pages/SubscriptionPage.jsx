@@ -27,6 +27,8 @@ const SubscriptionPage = ({ user }) => {
   const navigate = useNavigate()
   const { t } = useTranslation(['common', 'subscription'])
   const { userProfile, tier } = useAuth() // ✅ Use tier ONLY
+  // Single source of truth for subscription
+  const currentTier = tier()
   const { photos } = usePhotoData()
   const storageUsed = useStore((state) => state.storageUsed)
   const storageLimit = useStore((state) => state.storageLimit)
@@ -57,8 +59,6 @@ const SubscriptionPage = ({ user }) => {
    * Get current plan details based ONLY on subscriptionTier
    */
   const currentPlan = useMemo(() => {
-    const currentTier = tier || 'GRATIS'
-
     switch (currentTier) {
       case 'PRO':
         return {
@@ -89,7 +89,7 @@ const SubscriptionPage = ({ user }) => {
           icon: <Database className="w-6 h-6" />,
         }
     }
-  }, [tier])
+  }, [currentTier])
 
   /**
    * Subscription plans
@@ -113,7 +113,7 @@ const SubscriptionPage = ({ user }) => {
         'Søk i bilder',
       ],
       color: 'from-gray-600 to-gray-700',
-      current: tier === 'GRATIS',
+      current: currentTier === 'GRATIS',
     },
     {
       id: 'LITE',
@@ -130,7 +130,7 @@ const SubscriptionPage = ({ user }) => {
         'Prioritert support',
       ],
       color: 'from-blue-600 to-cyan-600',
-      current: tier === 'LITE',
+      current: currentTier === 'LITE',
       recommended: false,
     },
     {
@@ -151,7 +151,7 @@ const SubscriptionPage = ({ user }) => {
         'Early access til nye features',
       ],
       color: 'from-purple-600 to-pink-600',
-      current: tier === 'PRO',
+      current: currentTier === 'PRO',
       recommended: true,
     },
   ]
@@ -257,7 +257,7 @@ const SubscriptionPage = ({ user }) => {
               <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
                 <p className="text-sm text-yellow-400">
                   Du holder på å gå tom for lagring. Vurder å oppgradere til
-                  {tier === 'GRATIS' ? ' LITE eller PRO' : ' PRO'}.
+                  {currentTier === 'GRATIS' ? ' LITE eller PRO' : ' PRO'}.
                 </p>
               </div>
             )}
