@@ -324,6 +324,7 @@ const UploadModal = ({
       selectedFiles,
       selectedAlbumId,
       aiTagging,
+      autoCompress, // ✅ CRITICAL FIX: Pass user's toggle preference
       onUpload,
       t
     )
