@@ -111,6 +111,15 @@ export const useAuth = () => {
       setLoading(false)
 
       if (currentUser) {
+        // ✅ P0 FIX: Reload user to sync emailVerified state after verification
+        try {
+          await currentUser.reload()
+          console.log('✅ Auth state reloaded - emailVerified:', currentUser.emailVerified)
+        } catch (reloadError) {
+          console.warn('⚠️ Failed to reload auth state:', reloadError.message)
+          // Continue without crashing - use cached state
+        }
+
         // Update email verification status from Firebase Auth
         setEmailVerified(currentUser.emailVerified)
         await fetchUserProfile(currentUser.uid)
@@ -205,6 +214,42 @@ export const useAuth = () => {
     return isPro() // Only PRO tier
   }, [isAdmin, isPro])
 
+  /**
+   * ✅ P0: Get storage limit in bytes for a given tier
+   */
+  const getTierLimit = useCallback((tier) => {
+    const limits = {
+      GRATIS: 500 * 1024 * 1024, // 500 MB
+      LITE: 5 * 1024 * 1024 * 1024, // 5 GB
+      PRO: 50 * 1024 * 1024 * 1024, // 50 GB
+    }
+    return limits[tier] || limits.GRATIS
+  }, [])
+
+  /**
+   * ✅ P0: Check if email is verified, show toast if not
+   * @returns {boolean} - true if verified, false if not
+   */
+  const ensureEmailVerified = useCallback(() => {
+    if (!user) {
+      setNotification({
+        message: 'Du må være logget inn for å utføre denne handlingen.',
+        type: 'error',
+      })
+      return false
+    }
+
+    if (!emailVerified) {
+      setNotification({
+        message: 'Bekreft e-postadressen din for å utføre denne handlingen.',
+        type: 'error',
+      })
+      return false
+    }
+
+    return true
+  }, [user, emailVerified, setNotification])
+
   return {
     user,
     userProfile,
@@ -223,6 +268,8 @@ export const useAuth = () => {
     // Capabilities
     canUploadVideo,
     storageQuota: getStorageQuota,
+    getTierLimit,
+    ensureEmailVerified,
 
     // Legacy
     isAuthenticated: !!user,

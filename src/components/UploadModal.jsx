@@ -68,7 +68,7 @@ const UploadModal = ({
   }, [])
 
   const { t } = useTranslation(['common', 'upload'])
-  const { tier, canUploadVideo } = useAuth() // ✅ Removed shouldCompress
+  const { tier, canUploadVideo, ensureEmailVerified } = useAuth() // ✅ P0: Add ensureEmailVerified
   const setNotification = useStore((state) => state.setNotification) // ✅ ADD
   const {
     uploading,
@@ -327,6 +327,11 @@ const UploadModal = ({
 
   // Handle upload
   const handleUploadClick = async () => {
+    // ✅ P0: EMAIL VERIFICATION GATING
+    if (!ensureEmailVerified()) {
+      return // Abort upload if email not verified
+    }
+
     // ✅ Derive explicit compression permission: tier allows it AND user enabled it
     const canUseCompression = tier() !== 'GRATIS' && autoCompress === true
 
@@ -350,6 +355,11 @@ const UploadModal = ({
 
   // Handle create album
   const handleAlbumSave = async (albumData) => {
+    // ✅ P0: EMAIL VERIFICATION GATING
+    if (!ensureEmailVerified()) {
+      return // Abort album creation if email not verified
+    }
+
     // Reentrancy guard - prevent double creation in StrictMode
     if (isCreatingAlbum) {
       return

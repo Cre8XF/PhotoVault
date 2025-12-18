@@ -22,6 +22,7 @@ import { db, storage } from '../firebase'
 import useStore from '../state/store'
 import { renderCollageThumbnail } from '../utils/renderCollageToCanvas'
 import { LAYOUTS_V3 } from '../features/collage/layouts/layouts_v3'
+import useAuth from './useAuth' // ✅ P0: For email verification check
 
 /**
  * Custom hook for collage data management
@@ -42,6 +43,7 @@ import { LAYOUTS_V3 } from '../features/collage/layouts/layouts_v3'
  */
 export const useCollageData = () => {
   const { t } = useTranslation(['collage'])
+  const { ensureEmailVerified } = useAuth() // ✅ P0: Email verification check
 
   // Reentrancy guards
   const [isSaving, setIsSaving] = useState(false)
@@ -59,6 +61,11 @@ export const useCollageData = () => {
    */
   const createCollage = useCallback(
     async (collageData) => {
+      // ✅ P0: EMAIL VERIFICATION GATING
+      if (!ensureEmailVerified()) {
+        return null // Abort collage creation if email not verified
+      }
+
       if (!user?.uid) {
         throw new Error('No user logged in')
       }
@@ -155,7 +162,7 @@ export const useCollageData = () => {
         setIsSaving(false)
       }
     },
-    [user, isSaving, setNotification, t]
+    [user, isSaving, setNotification, t, ensureEmailVerified]
   )
 
   /**
