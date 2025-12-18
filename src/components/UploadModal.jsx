@@ -98,6 +98,13 @@ const UploadModal = ({
     const saved = localStorage.getItem('autoCompress')
     return saved !== 'false' // Default true for LITE/PRO
   })
+  // 🔒 FORCE autoCompress OFF for GRATIS users (visual + state safety)
+  useEffect(() => {
+    if (tier() === 'GRATIS') {
+      setAutoCompress(false)
+    }
+  }, [tier])
+
   const [aiTagging] = useState(false) // Always false for MVP
   const [isCreatingAlbum, setIsCreatingAlbum] = useState(false) // Reentrancy guard
 
