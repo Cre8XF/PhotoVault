@@ -205,15 +205,6 @@ export const useAuth = () => {
     return isPro() // Only PRO tier
   }, [isAdmin, isPro])
 
-  /**
-   * Check if compression should be applied
-   */
-  const shouldCompress = useCallback(() => {
-    if (isAdmin()) return true // Admin can choose
-    if (isGratis()) return false // GRATIS: Original quality
-    return true // LITE and PRO: Compress
-  }, [isAdmin, isGratis])
-
   return {
     user,
     userProfile,
@@ -231,7 +222,6 @@ export const useAuth = () => {
 
     // Capabilities
     canUploadVideo,
-    shouldCompress,
     storageQuota: getStorageQuota,
 
     // Legacy
