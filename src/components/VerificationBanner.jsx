@@ -1,139 +1,143 @@
-// ============================================================================
-// COMPONENT: VerificationBanner.jsx – Email verification reminder banner
-// ============================================================================
-import React, { useState } from 'react'
-import { Mail, X, RefreshCw, Edit } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { sendEmailVerification, updateEmail } from 'firebase/auth'
-import { auth } from '../firebase'
-import useStore from '../state/store'
+import React, { useState } from 'react';
+import { Mail, RotateCw, Edit, RefreshCw } from 'lucide-react';
+import { auth } from '../firebase';
+import { sendVerificationEmail, checkEmailVerification } from '../utils/emailVerification';
 
-const VerificationBanner = ({ user }) => {
-  const { t } = useTranslation(['auth', 'common'])
-  const [resending, setResending] = useState(false)
-  const [showEmailChange, setShowEmailChange] = useState(false)
-  const [newEmail, setNewEmail] = useState('')
-  const setNotification = useStore((state) => state.setNotification)
+/**
+ * Email Verification Banner
+ * Shows at top of app when user's email is not verified
+ * Provides manual resend and verification check buttons
+ */
+export default function VerificationBanner({ user }) {
+  const [sending, setSending] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [message, setMessage] = useState('');
 
-  // Don't show if verified
-  if (!user || user.emailVerified) return null
-
+  /**
+   * Resend verification email
+   */
   const handleResendVerification = async () => {
-    setResending(true)
-    try {
-      await sendEmailVerification(user)
-      setNotification({
-        message: t('auth:verificationEmailSent') || 'Verification email sent! Check your inbox.',
-        type: 'success',
-      })
-    } catch (error) {
-      console.error('Failed to resend verification:', error)
-      setNotification({
-        message: t('auth:verificationEmailFailed') || 'Failed to send verification email',
-        type: 'error',
-      })
-    } finally {
-      setResending(false)
-    }
-  }
-
-  const handleChangeEmail = async (e) => {
-    e.preventDefault()
-    if (!newEmail || newEmail === user.email) return
+    setSending(true);
+    setMessage('');
 
     try {
-      await updateEmail(user, newEmail)
-      await sendEmailVerification(user)
-      setNotification({
-        message: t('auth:emailUpdated') || 'Email updated! Verification sent to new address.',
-        type: 'success',
-      })
-      setShowEmailChange(false)
-      setNewEmail('')
+      await sendVerificationEmail(auth.currentUser);
+      setMessage('✅ Verification email sent! Check your inbox (and spam folder).');
+      setTimeout(() => setMessage(''), 8000);
     } catch (error) {
-      console.error('Failed to update email:', error)
-      let errorMessage = t('auth:emailUpdateFailed') || 'Failed to update email'
+      console.error('❌ Resend error:', error);
 
-      if (error.code === 'auth/requires-recent-login') {
-        errorMessage = t('auth:recentLoginRequired') || 'Please log out and log in again to change your email'
-      } else if (error.code === 'auth/email-already-in-use') {
-        errorMessage = t('auth:errors.emailInUse') || 'Email already in use'
+      // Better error messages
+      if (error.code === 'auth/too-many-requests') {
+        setMessage('⚠️ Too many requests. Wait a few minutes and try again.');
+      } else {
+        setMessage('❌ Could not send email. Try again later.');
       }
 
-      setNotification({
-        message: errorMessage,
-        type: 'error',
-      })
+      setTimeout(() => setMessage(''), 5000);
+    } finally {
+      setSending(false);
     }
+  };
+
+  /**
+   * Check if email has been verified and refresh app
+   * Uses window.location.reload() for deterministic state sync
+   */
+  const handleCheckVerification = async () => {
+    setChecking(true);
+    setMessage('');
+
+    try {
+      const isVerified = await checkEmailVerification(auth.currentUser);
+
+      if (isVerified) {
+        setMessage('✅ Email verified! Reloading app...');
+
+        // ✅ DETERMINISTIC SOLUTION: Full page reload
+        // This ensures ALL state (React, Zustand, Firebase) syncs correctly
+        // Works reliably on mobile, desktop, PWA, and WebView
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        setMessage('⚠️ Email not verified yet. Please click the link in your email first.');
+        setTimeout(() => setMessage(''), 6000);
+      }
+    } catch (error) {
+      console.error('❌ Check verification error:', error);
+      setMessage('❌ Error checking status. Try again.');
+      setTimeout(() => setMessage(''), 5000);
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  /**
+   * Navigate to profile page to change email
+   */
+  const handleChangeEmail = () => {
+    window.location.href = '/profile';
+  };
+
+  // Hide banner if email is already verified
+  if (user?.emailVerified) {
+    return null;
   }
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-60 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-b border-purple-500/30 backdrop-blur-sm" style={{ zIndex: 60 }}>
-      <div className="max-w-7xl mx-auto px-4 py-3">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-          <div className="flex items-center gap-3 flex-1">
-            <Mail className="w-5 h-5 text-purple-400 flex-shrink-0" />
-            <div className="flex-1">
-              {showEmailChange ? (
-                <form onSubmit={handleChangeEmail} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                  <input
-                    type="email"
-                    value={newEmail}
-                    onChange={(e) => setNewEmail(e.target.value)}
-                    placeholder={user.email}
-                    className="bg-white/10 text-white px-3 py-2 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm flex-1"
-                  />
-                  <div className="flex gap-2">
-                    <button
-                      type="submit"
-                      className="ripple-effect flex-1 sm:flex-none px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
-                    >
-                      {t('common:save')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowEmailChange(false)
-                        setNewEmail('')
-                      }}
-                      className="ripple-effect flex-1 sm:flex-none px-4 py-2 text-gray-300 hover:text-white text-sm"
-                    >
-                      {t('common:cancel')}
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <p className="text-sm text-white">
-                  {t('auth:verifyEmailPrompt') || 'Please verify your email to unlock sharing and Pro features.'}
-                </p>
-              )}
-            </div>
+    <div className="fixed top-0 left-0 right-0 z-[60] bg-pink-100 dark:bg-pink-900/20 border-b border-pink-200 dark:border-pink-800/30 backdrop-blur-md">
+      <div className="container mx-auto px-4 py-3">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          {/* Left: Message */}
+          <div className="flex items-center gap-3">
+            <Mail className="w-5 h-5 text-pink-600 dark:text-pink-400 flex-shrink-0" />
+            <p className="text-sm font-medium text-pink-800 dark:text-pink-200">
+              Please verify your email to unlock sharing and Pro features.
+            </p>
           </div>
 
-          {!showEmailChange && (
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-              <button
-                onClick={handleResendVerification}
-                disabled={resending}
-                className="ripple-effect flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
-              >
-                <RefreshCw className={`w-4 h-4 ${resending ? 'animate-spin' : ''}`} />
-                {t('auth:resendVerification') || 'Resend'}
-              </button>
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Resend Email Button */}
+            <button
+              onClick={handleResendVerification}
+              disabled={sending}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <RotateCw className={`w-4 h-4 ${sending ? 'animate-spin' : ''}`} />
+              {sending ? 'Sending...' : 'Resend Email'}
+            </button>
 
-              <button
-                onClick={() => setShowEmailChange(true)}
-                className="ripple-effect flex items-center justify-center gap-2 px-4 py-2 bg-white/10 text-white rounded-lg text-sm font-medium hover:bg-white/20 transition-colors"
-              >
-                <Edit className="w-4 h-4" />
-                {t('auth:changeEmail') || 'Change Email'}
-              </button>
-            </div>
-          )}
+            {/* I Verified Button - BETA HELPER */}
+            <button
+              onClick={handleCheckVerification}
+              disabled={checking}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Click after verifying your email"
+            >
+              <RefreshCw className={`w-4 h-4 ${checking ? 'animate-spin' : ''}`} />
+              {checking ? 'Checking...' : 'I Verified'}
+            </button>
+
+            {/* Change Email Button */}
+            <button
+              onClick={handleChangeEmail}
+              className="flex items-center gap-2 px-4 py-2 bg-white/50 dark:bg-white/10 hover:bg-white/70 dark:hover:bg-white/20 rounded-lg text-sm font-medium transition"
+            >
+              <Edit className="w-4 h-4" />
+              Change Email
+            </button>
+          </div>
         </div>
+
+        {/* Status Message */}
+        {message && (
+          <div className="mt-2 text-xs text-pink-700 dark:text-pink-300 animate-fade-in">
+            {message}
+          </div>
+        )}
       </div>
     </div>
-  )
+  );
 }
-
-export default VerificationBanner
