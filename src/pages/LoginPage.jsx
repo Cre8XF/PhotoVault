@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Lock, Mail, Eye, EyeOff, Fingerprint } from "lucide-react";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification } from "firebase/auth";
 import { auth } from "../firebase";
 import {
   isBiometricAvailable,
@@ -118,8 +118,17 @@ const LoginPage = ({ onLogin = () => window.location.reload() }) => {
           return;
         }
 
-        await createUserWithEmailAndPassword(auth, email, password);
-        
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+        // Send email verification
+        try {
+          await sendEmailVerification(userCredential.user);
+          await showToast(t('verificationEmailSent') || 'Verification email sent! Check your inbox.');
+        } catch (verifyError) {
+          console.warn('Failed to send verification email:', verifyError);
+          // Don't block signup if verification email fails
+        }
+
         if (isNative() && biometricAvailable) {
           await setCredentials(email, password);
         }
@@ -127,7 +136,7 @@ const LoginPage = ({ onLogin = () => window.location.reload() }) => {
         await showToast(t('accountCreated'));
       } else {
         await signInWithEmailAndPassword(auth, email, password);
-        
+
         if (isNative() && biometricAvailable) {
           await setCredentials(email, password);
         }

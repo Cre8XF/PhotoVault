@@ -1,12 +1,13 @@
 // ============================================================================
 // SubscriptionPage - Phase 2: Subscription & Storage Management
 // ============================================================================
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import useAuth from '../hooks/useAuth';
 import usePhotoData from '../hooks/usePhotoData';
 import useStore from '../state/store';
+import VerificationModal from '../components/VerificationModal';
 import {
   ArrowLeft,
   Crown,
@@ -30,6 +31,9 @@ const SubscriptionPage = ({ user }) => {
   const { photos } = usePhotoData();
   const storageUsed = useStore((state) => state.storageUsed);
   const storageLimit = useStore((state) => state.storageLimit);
+  const emailVerified = useStore((state) => state.emailVerified);
+  const [isVerificationModalOpen, setVerificationModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
 
   /**
    * Calculate storage usage percentage
@@ -318,6 +322,15 @@ const SubscriptionPage = ({ user }) => {
                   </ul>
 
                   <button
+                    onClick={() => {
+                      if (!plan.current && !emailVerified) {
+                        setSelectedPlan(plan.name);
+                        setVerificationModalOpen(true);
+                      } else if (!plan.current) {
+                        // TODO: Implement actual upgrade flow
+                        alert('Upgrade functionality coming soon!');
+                      }
+                    }}
                     className={`w-full py-3 rounded-lg font-semibold transition ${
                       plan.current
                         ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
@@ -346,6 +359,15 @@ const SubscriptionPage = ({ user }) => {
           </div>
         </div>
       </div>
+
+      <VerificationModal
+        isOpen={isVerificationModalOpen}
+        onClose={() => {
+          setVerificationModalOpen(false);
+          setSelectedPlan(null);
+        }}
+        feature={selectedPlan ? `upgrade to ${selectedPlan}` : 'plan upgrades'}
+      />
     </div>
   )
 }

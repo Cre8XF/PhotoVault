@@ -22,17 +22,20 @@ const useStore = create(
         userProfile: null,
         loading: true,
         idToken: null, // Firebase ID token for R2 API authentication
+        emailVerified: false, // Email verification status from Firebase Auth
 
         setUser: (user) => set({ user }),
         setUserProfile: (profile) => set({ userProfile: profile }),
         setLoading: (loading) => set({ loading }),
         setIdToken: (token) => set({ idToken: token }),
+        setEmailVerified: (verified) => set({ emailVerified: verified }),
 
         logout: () =>
           set({
             user: null,
             userProfile: null,
             idToken: null,
+            emailVerified: false,
             albums: [],
             photos: [],
             currentPage: 'home',
@@ -395,6 +398,7 @@ const useStore = create(
             user: null,
             userProfile: null,
             idToken: null,
+            emailVerified: false,
             albums: [],
             photos: [],
             currentPage: 'home',
