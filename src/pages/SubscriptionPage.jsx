@@ -1,13 +1,13 @@
 // ============================================================================
 // SubscriptionPage - Phase 2: Subscription & Storage Management
 // ============================================================================
-import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import useAuth from '../hooks/useAuth';
-import usePhotoData from '../hooks/usePhotoData';
-import useStore from '../state/store';
-import VerificationModal from '../components/VerificationModal';
+import React, { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import useAuth from '../hooks/useAuth'
+import usePhotoData from '../hooks/usePhotoData'
+import useStore from '../state/store'
+import VerificationModal from '../components/VerificationModal'
 import {
   ArrowLeft,
   Crown,
@@ -24,15 +24,15 @@ import {
  * Shows current plan, storage usage, and AI quota
  */
 const SubscriptionPage = ({ user }) => {
-  const navigate = useNavigate();
-  const { t } = useTranslation(['common', 'subscription']);
-  const { userProfile, tier } = useAuth(); // ✅ Use tier ONLY
-  const { photos } = usePhotoData();
-  const storageUsed = useStore((state) => state.storageUsed);
-  const storageLimit = useStore((state) => state.storageLimit);
-  const emailVerified = useStore((state) => state.emailVerified);
-  const [isVerificationModalOpen, setVerificationModalOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState(null);
+  const navigate = useNavigate()
+  const { t } = useTranslation(['common', 'subscription'])
+  const { userProfile, tier } = useAuth() // ✅ Use tier ONLY
+  const { photos } = usePhotoData()
+  const storageUsed = useStore((state) => state.storageUsed)
+  const storageLimit = useStore((state) => state.storageLimit)
+  const emailVerified = useStore((state) => state.emailVerified)
+  const [isVerificationModalOpen, setVerificationModalOpen] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState(null)
 
   /**
    * Calculate storage usage percentage
@@ -59,7 +59,7 @@ const SubscriptionPage = ({ user }) => {
   const currentPlan = useMemo(() => {
     const currentTier = tier || 'GRATIS'
 
-    switch(currentTier) {
+    switch (currentTier) {
       case 'PRO':
         return {
           name: 'PRO',
@@ -110,7 +110,7 @@ const SubscriptionPage = ({ user }) => {
         'QR-kode deling',
         'Collage Builder',
         'Timeline',
-        'Søk i bilder'
+        'Søk i bilder',
       ],
       color: 'from-gray-600 to-gray-700',
       current: tier === 'GRATIS',
@@ -127,7 +127,7 @@ const SubscriptionPage = ({ user }) => {
         'Alt i GRATIS',
         '5 GB lagring',
         'Bildekomprimering',
-        'Prioritert support'
+        'Prioritert support',
       ],
       color: 'from-blue-600 to-cyan-600',
       current: tier === 'LITE',
@@ -148,7 +148,7 @@ const SubscriptionPage = ({ user }) => {
         'Bildekomprimering',
         'AI-funksjoner (fremtidig)',
         'Prioritert support',
-        'Early access til nye features'
+        'Early access til nye features',
       ],
       color: 'from-purple-600 to-pink-600',
       current: tier === 'PRO',
@@ -157,7 +157,7 @@ const SubscriptionPage = ({ user }) => {
   ]
   const setCurrentPage = useStore((state) => state.setCurrentPage)
   return (
-    <div className="min-h-screen pb-24">
+    <>
       {/* Header */}
       <div className="sticky top-0 z-10 glass-card border-b border-white/20 px-4 py-4">
         <div className="flex items-center gap-3">
@@ -171,99 +171,100 @@ const SubscriptionPage = ({ user }) => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
-        {/* Current Plan Card */}
-        <div className="glass-card p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Current Plan</h2>
-            <div
-              className={`px-4 py-2 bg-gradient-to-r ${currentPlan.color} rounded-full text-white font-medium flex items-center gap-2`}
-            >
-              {currentPlan.icon}
-              {currentPlan.name}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Storage */}
-            <div className="p-4 bg-white/5 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <HardDrive className="w-5 h-5 text-purple-400" />
-                <span className="text-sm text-gray-400">Lagring</span>
-              </div>
-              <p className="text-2xl font-bold">{currentPlan.storage}</p>
-            </div>
-
-            {/* Photos */}
-            <div className="p-4 bg-white/5 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Image className="w-5 h-5 text-pink-400" />
-                <span className="text-sm text-gray-400">Bilder</span>
-              </div>
-              <p className="text-2xl font-bold">{photos.length}</p>
-            </div>
-
-            {/* Compression */}
-            <div className="p-4 bg-white/5 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="w-5 h-5 text-blue-400" />
-                <span className="text-sm text-gray-400">Komprimering</span>
-              </div>
-              <p className="text-lg font-bold">{currentPlan.compression}</p>
-            </div>
-
-            {/* Video */}
-            <div className="p-4 bg-white/5 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Zap className="w-5 h-5 text-yellow-400" />
-                <span className="text-sm text-gray-400">Video</span>
-              </div>
-              <p className="text-lg font-bold">{currentPlan.video}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Storage Usage */}
-        <div className="glass-card p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Lagringsbruk</h2>
-
-          <div className="mb-4">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-gray-400">
-                {formatBytes(storageUsed)} / {formatBytes(storageLimit)}
-              </span>
-              <span className="text-gray-400">
-                {storagePercentage.toFixed(1)}%
-              </span>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="w-full h-3 bg-gray-700 rounded-full overflow-hidden">
+      <div className="min-h-screen pb-24">
+        <div className="container mx-auto px-4 py-6 max-w-4xl">
+          {/* Current Plan Card */}
+          <div className="glass-card p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Current Plan</h2>
               <div
-                className={`h-full bg-gradient-to-r ${
-                  storagePercentage > 90
-                    ? 'from-red-500 to-red-600'
-                    : storagePercentage > 70
-                    ? 'from-yellow-500 to-orange-600'
-                    : 'from-purple-600 to-pink-600'
-                } transition-all duration-500`}
-                style={{ width: `${storagePercentage}%` }}
-              />
+                className={`px-4 py-2 bg-gradient-to-r ${currentPlan.color} rounded-full text-white font-medium flex items-center gap-2`}
+              >
+                {currentPlan.icon}
+                {currentPlan.name}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {/* Storage */}
+              <div className="p-4 bg-white/5 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <HardDrive className="w-5 h-5 text-purple-400" />
+                  <span className="text-sm text-gray-400">Lagring</span>
+                </div>
+                <p className="text-2xl font-bold">{currentPlan.storage}</p>
+              </div>
+
+              {/* Photos */}
+              <div className="p-4 bg-white/5 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Image className="w-5 h-5 text-pink-400" />
+                  <span className="text-sm text-gray-400">Bilder</span>
+                </div>
+                <p className="text-2xl font-bold">{photos.length}</p>
+              </div>
+
+              {/* Compression */}
+              <div className="p-4 bg-white/5 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="w-5 h-5 text-blue-400" />
+                  <span className="text-sm text-gray-400">Komprimering</span>
+                </div>
+                <p className="text-lg font-bold">{currentPlan.compression}</p>
+              </div>
+
+              {/* Video */}
+              <div className="p-4 bg-white/5 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap className="w-5 h-5 text-yellow-400" />
+                  <span className="text-sm text-gray-400">Video</span>
+                </div>
+                <p className="text-lg font-bold">{currentPlan.video}</p>
+              </div>
             </div>
           </div>
 
-          {storagePercentage > 80 && (
-            <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-              <p className="text-sm text-yellow-400">
-                Du holder på å gå tom for lagring. Vurder å oppgradere til
-                {tier === 'GRATIS' ? ' LITE eller PRO' : ' PRO'}.
-              </p>
-            </div>
-          )}
-        </div>
+          {/* Storage Usage */}
+          <div className="glass-card p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Lagringsbruk</h2>
 
-        {/* Available Plans */}
-        <div className="mb-6">
+            <div className="mb-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-gray-400">
+                  {formatBytes(storageUsed)} / {formatBytes(storageLimit)}
+                </span>
+                <span className="text-gray-400">
+                  {storagePercentage.toFixed(1)}%
+                </span>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="w-full h-3 bg-gray-700 rounded-full overflow-hidden">
+                <div
+                  className={`h-full bg-gradient-to-r ${
+                    storagePercentage > 90
+                      ? 'from-red-500 to-red-600'
+                      : storagePercentage > 70
+                      ? 'from-yellow-500 to-orange-600'
+                      : 'from-purple-600 to-pink-600'
+                  } transition-all duration-500`}
+                  style={{ width: `${storagePercentage}%` }}
+                />
+              </div>
+            </div>
+
+            {storagePercentage > 80 && (
+              <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                <p className="text-sm text-yellow-400">
+                  Du holder på å gå tom for lagring. Vurder å oppgradere til
+                  {tier === 'GRATIS' ? ' LITE eller PRO' : ' PRO'}.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Available Plans */}
+          <div className="mb-6">
             <h2 className="text-2xl font-bold mb-6 text-center">
               Velg Din Plan
             </h2>
@@ -312,11 +313,11 @@ const SubscriptionPage = ({ user }) => {
                   <button
                     onClick={() => {
                       if (!plan.current && !emailVerified) {
-                        setSelectedPlan(plan.name);
-                        setVerificationModalOpen(true);
+                        setSelectedPlan(plan.name)
+                        setVerificationModalOpen(true)
                       } else if (!plan.current) {
                         // TODO: Implement actual upgrade flow
-                        alert('Upgrade functionality coming soon!');
+                        alert('Upgrade functionality coming soon!')
                       }
                     }}
                     className={`w-full py-3 rounded-lg font-semibold transition ${
@@ -326,24 +327,36 @@ const SubscriptionPage = ({ user }) => {
                     }`}
                     disabled={plan.current}
                   >
-                    {plan.current ? 'Nåværende Plan' : `Oppgrader til ${plan.name}`}
+                    {plan.current
+                      ? 'Nåværende Plan'
+                      : `Oppgrader til ${plan.name}`}
                   </button>
                 </div>
               ))}
             </div>
           </div>
-        </div>
 
-        {/* Info Section */}
-        <div className="glass-card p-6">
-          <h3 className="text-lg font-semibold mb-3">Om Abonnementene</h3>
-          <div className="space-y-2 text-sm text-gray-400">
-            <p>• <strong>GRATIS:</strong> Perfekt for å teste ut Pixtr. Original bildekvalitet uten komprimering.</p>
-            <p>• <strong>LITE:</strong> For deg som trenger mer plass med bildekomprimering for optimal lagring.</p>
-            <p>• <strong>PRO:</strong> Full pakke med video support, mye lagring og tilgang til alle fremtidige AI-funksjoner.</p>
-            <p className="pt-2 border-t border-white/10">
-              Alle planer inkluderer QR-kode deling, Collage Builder, Timeline og søkefunksjonalitet.
-            </p>
+          {/* Info Section */}
+          <div className="glass-card p-6">
+            <h3 className="text-lg font-semibold mb-3">Om Abonnementene</h3>
+            <div className="space-y-2 text-sm text-gray-400">
+              <p>
+                • <strong>GRATIS:</strong> Perfekt for å teste ut Pixtr.
+                Original bildekvalitet uten komprimering.
+              </p>
+              <p>
+                • <strong>LITE:</strong> For deg som trenger mer plass med
+                bildekomprimering for optimal lagring.
+              </p>
+              <p>
+                • <strong>PRO:</strong> Full pakke med video support, mye
+                lagring og tilgang til alle fremtidige AI-funksjoner.
+              </p>
+              <p className="pt-2 border-t border-white/10">
+                Alle planer inkluderer QR-kode deling, Collage Builder, Timeline
+                og søkefunksjonalitet.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -351,12 +364,12 @@ const SubscriptionPage = ({ user }) => {
       <VerificationModal
         isOpen={isVerificationModalOpen}
         onClose={() => {
-          setVerificationModalOpen(false);
-          setSelectedPlan(null);
+          setVerificationModalOpen(false)
+          setSelectedPlan(null)
         }}
         feature={selectedPlan ? `upgrade to ${selectedPlan}` : 'plan upgrades'}
       />
-    </div>
+    </>
   )
 }
 
