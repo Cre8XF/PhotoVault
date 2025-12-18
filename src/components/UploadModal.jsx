@@ -636,7 +636,7 @@ const UploadModal = ({
                       }`}
                     >
                       {tier() === 'GRATIS'
-                        ? 'Original kvalitet (GRATIS tier)'
+                        ? 'Available on Lite & Pro'
                         : t('upload:autoCompressDesc')}
                     </p>
                   </div>

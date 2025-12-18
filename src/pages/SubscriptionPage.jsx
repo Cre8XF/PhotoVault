@@ -16,7 +16,6 @@ import {
   Zap,
   Check,
   Sparkles,
-  Shield,
   Database,
 } from 'lucide-react'
 
@@ -27,7 +26,7 @@ import {
 const SubscriptionPage = ({ user }) => {
   const navigate = useNavigate();
   const { t } = useTranslation(['common', 'subscription']);
-  const { userProfile, tier, isAdmin } = useAuth(); // ✅ Use tier
+  const { userProfile, tier } = useAuth(); // ✅ Use tier ONLY
   const { photos } = usePhotoData();
   const storageUsed = useStore((state) => state.storageUsed);
   const storageLimit = useStore((state) => state.storageLimit);
@@ -39,9 +38,9 @@ const SubscriptionPage = ({ user }) => {
    * Calculate storage usage percentage
    */
   const storagePercentage = useMemo(() => {
-    if (isAdmin) return 0 // Unlimited for admins
+    if (storageLimit === 0) return 0
     return Math.min((storageUsed / storageLimit) * 100, 100)
-  }, [storageUsed, storageLimit, isAdmin])
+  }, [storageUsed, storageLimit])
 
   /**
    * Format bytes to human-readable size
@@ -55,21 +54,12 @@ const SubscriptionPage = ({ user }) => {
   }
 
   /**
-   * Get current plan details
+   * Get current plan details based ONLY on subscriptionTier
    */
   const currentPlan = useMemo(() => {
-    if (isAdmin) {
-      return {
-        name: 'Admin',
-        storage: 'Unlimited',
-        compression: 'Valgfri',
-        video: 'Ja',
-        color: 'from-red-600 to-red-800',
-        icon: <Shield className="w-6 h-6" />,
-      }
-    }
+    const currentTier = tier || 'GRATIS'
 
-    switch(tier) {
+    switch(currentTier) {
       case 'PRO':
         return {
           name: 'PRO',
@@ -99,7 +89,7 @@ const SubscriptionPage = ({ user }) => {
           icon: <Database className="w-6 h-6" />,
         }
     }
-  }, [tier, isAdmin])
+  }, [tier])
 
   /**
    * Subscription plans
@@ -240,11 +230,10 @@ const SubscriptionPage = ({ user }) => {
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
               <span className="text-gray-400">
-                {formatBytes(storageUsed)} /{' '}
-                {isAdmin ? '∞' : formatBytes(storageLimit)}
+                {formatBytes(storageUsed)} / {formatBytes(storageLimit)}
               </span>
               <span className="text-gray-400">
-                {isAdmin ? 'Ubegrenset' : `${storagePercentage.toFixed(1)}%`}
+                {storagePercentage.toFixed(1)}%
               </span>
             </div>
 
@@ -258,12 +247,12 @@ const SubscriptionPage = ({ user }) => {
                     ? 'from-yellow-500 to-orange-600'
                     : 'from-purple-600 to-pink-600'
                 } transition-all duration-500`}
-                style={{ width: `${isAdmin ? 20 : storagePercentage}%` }}
+                style={{ width: `${storagePercentage}%` }}
               />
             </div>
           </div>
 
-          {storagePercentage > 80 && !isAdmin && (
+          {storagePercentage > 80 && (
             <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
               <p className="text-sm text-yellow-400">
                 Du holder på å gå tom for lagring. Vurder å oppgradere til
@@ -274,8 +263,7 @@ const SubscriptionPage = ({ user }) => {
         </div>
 
         {/* Available Plans */}
-        {!isAdmin && (
-          <div className="mb-6">
+        <div className="mb-6">
             <h2 className="text-2xl font-bold mb-6 text-center">
               Velg Din Plan
             </h2>
@@ -344,7 +332,7 @@ const SubscriptionPage = ({ user }) => {
               ))}
             </div>
           </div>
-        )}
+        </div>
 
         {/* Info Section */}
         <div className="glass-card p-6">
