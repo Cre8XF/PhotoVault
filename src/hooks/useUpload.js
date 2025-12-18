@@ -14,11 +14,14 @@ import {
   compressVideo,
 } from '../utils/videoTools'
 import useAuth from './useAuth' // ✅ ADD
+import useStore from '../state/store' // ✅ P0: For storageUsed
 import * as exifr from 'exifr' // ✅ ADD: For EXIF extraction BEFORE compression
 
 export function useUpload() {
   const { t } = useTranslation(['upload'])
-  const { tier, canUploadVideo } = useAuth() // ✅ Removed shouldCompress
+  const { tier, canUploadVideo, getTierLimit, isAdmin } = useAuth() // ✅ P0: Add getTierLimit, isAdmin
+  const storageUsed = useStore((state) => state.storageUsed) // ✅ P0: Get current storage usage
+  const setNotification = useStore((state) => state.setNotification) // ✅ P0: For error notifications
   const [uploading, setUploading] = useState(false)
   const [processingProgress, setProcessingProgress] = useState(0)
   const [compressionStats, setCompressionStats] = useState(null)
@@ -125,6 +128,56 @@ export function useUpload() {
   ) => {
     if (uploading || !selectedFiles || selectedFiles.length === 0) {
       return { success: false, error: 'No files selected' }
+    }
+
+    // ✅ P0: HARD STORAGE LIMIT ENFORCEMENT
+    // Calculate total size of new files BEFORE upload starts
+    const newFileBytes = selectedFiles.reduce((total, fileObj) => {
+      return total + (fileObj.file?.size || 0)
+    }, 0)
+
+    const currentTier = tier()
+    const tierLimit = getTierLimit(currentTier)
+
+    // Admin bypass
+    if (!isAdmin()) {
+      const wouldExceed = storageUsed + newFileBytes > tierLimit
+
+      if (wouldExceed) {
+        const formatBytes = (bytes) => {
+          if (bytes === 0) return '0 B'
+          const k = 1024
+          const sizes = ['B', 'KB', 'MB', 'GB']
+          const i = Math.floor(Math.log(bytes) / Math.log(k))
+          return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`
+        }
+
+        const errorMessage = `Du har ikke nok lagringsplass.\n\nBruk: ${formatBytes(storageUsed)} / ${formatBytes(tierLimit)}\nNye filer: ${formatBytes(newFileBytes)}\n\nOppgrader abonnementet ditt for mer plass.`
+
+        setNotification({
+          message: errorMessage,
+          type: 'error',
+        })
+
+        console.warn('❌ Storage limit exceeded:', {
+          currentUsage: storageUsed,
+          newFiles: newFileBytes,
+          limit: tierLimit,
+          tier: currentTier,
+        })
+
+        return { success: false, error: 'Storage limit exceeded' }
+      }
+
+      console.log('✅ Storage check passed:', {
+        currentUsage: storageUsed,
+        newFiles: newFileBytes,
+        afterUpload: storageUsed + newFileBytes,
+        limit: tierLimit,
+        tier: currentTier,
+      })
+    } else {
+      console.log('✅ Admin bypass - no storage limit')
     }
 
     setUploading(true)
