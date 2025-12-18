@@ -40,14 +40,8 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
   }, [isOpen, album])
 
   const generateAndSaveSlug = async () => {
-    // Debug logging
-    console.log('🔍 DEBUG - generateAndSaveSlug called')
-    console.log('User object:', user)
-    console.log('User UID:', user?.uid)
-    console.log('Album:', album)
-
     if (!user || !user.uid) {
-      console.error('❌ ERROR: User or user.uid is undefined')
+      console.error('❌ ERROR: User not loaded')
       alert(t('qrshare:errors.userNotLoaded'))
       return
     }
@@ -143,11 +137,8 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
   }
 
   const handleTogglePublic = async () => {
-    console.log('🔍 DEBUG - handleTogglePublic called')
-    console.log('User UID:', user?.uid)
-
     if (!user || !user.uid) {
-      console.error('❌ ERROR: User or user.uid is undefined')
+      console.error('❌ ERROR: User not loaded')
       alert(t('qrshare:errors.userNotLoaded'))
       return
     }

@@ -116,7 +116,7 @@ const AlbumCard = memo(
         )}
 
         <div className="album-meta mt-2 px-1">
-          <div className="album-title font-semibold">
+          <div className="album-title font-semibold truncate">
             {typeof album.name === 'object'
               ? album.name.name || JSON.stringify(album.name)
               : album.name || t('common:noName')}

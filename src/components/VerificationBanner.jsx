@@ -10,14 +10,13 @@ import useStore from '../state/store'
 
 const VerificationBanner = ({ user }) => {
   const { t } = useTranslation(['auth', 'common'])
-  const [dismissed, setDismissed] = useState(false)
   const [resending, setResending] = useState(false)
   const [showEmailChange, setShowEmailChange] = useState(false)
   const [newEmail, setNewEmail] = useState('')
   const setNotification = useStore((state) => state.setNotification)
 
-  // Don't show if verified or dismissed
-  if (!user || user.emailVerified || dismissed) return null
+  // Don't show if verified
+  if (!user || user.emailVerified) return null
 
   const handleResendVerification = async () => {
     setResending(true)
@@ -69,37 +68,39 @@ const VerificationBanner = ({ user }) => {
   }
 
   return (
-    <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-b border-purple-500/30 backdrop-blur-sm">
+    <div className="fixed top-0 left-0 right-0 z-60 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-b border-purple-500/30 backdrop-blur-sm" style={{ zIndex: 60 }}>
       <div className="max-w-7xl mx-auto px-4 py-3">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div className="flex items-center gap-3 flex-1">
             <Mail className="w-5 h-5 text-purple-400 flex-shrink-0" />
             <div className="flex-1">
               {showEmailChange ? (
-                <form onSubmit={handleChangeEmail} className="flex items-center gap-2">
+                <form onSubmit={handleChangeEmail} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   <input
                     type="email"
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
                     placeholder={user.email}
-                    className="bg-white/10 text-white px-3 py-1.5 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm flex-1"
+                    className="bg-white/10 text-white px-3 py-2 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm flex-1"
                   />
-                  <button
-                    type="submit"
-                    className="ripple-effect px-3 py-1.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
-                  >
-                    {t('common:save')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowEmailChange(false)
-                      setNewEmail('')
-                    }}
-                    className="ripple-effect px-3 py-1.5 text-gray-300 hover:text-white text-sm"
-                  >
-                    {t('common:cancel')}
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      type="submit"
+                      className="ripple-effect flex-1 sm:flex-none px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
+                    >
+                      {t('common:save')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowEmailChange(false)
+                        setNewEmail('')
+                      }}
+                      className="ripple-effect flex-1 sm:flex-none px-4 py-2 text-gray-300 hover:text-white text-sm"
+                    >
+                      {t('common:cancel')}
+                    </button>
+                  </div>
                 </form>
               ) : (
                 <p className="text-sm text-white">
@@ -110,11 +111,11 @@ const VerificationBanner = ({ user }) => {
           </div>
 
           {!showEmailChange && (
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <button
                 onClick={handleResendVerification}
                 disabled={resending}
-                className="ripple-effect flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
+                className="ripple-effect flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
               >
                 <RefreshCw className={`w-4 h-4 ${resending ? 'animate-spin' : ''}`} />
                 {t('auth:resendVerification') || 'Resend'}
@@ -122,18 +123,10 @@ const VerificationBanner = ({ user }) => {
 
               <button
                 onClick={() => setShowEmailChange(true)}
-                className="ripple-effect flex items-center gap-2 px-4 py-2 bg-white/10 text-white rounded-lg text-sm font-medium hover:bg-white/20 transition-colors"
+                className="ripple-effect flex items-center justify-center gap-2 px-4 py-2 bg-white/10 text-white rounded-lg text-sm font-medium hover:bg-white/20 transition-colors"
               >
                 <Edit className="w-4 h-4" />
                 {t('auth:changeEmail') || 'Change Email'}
-              </button>
-
-              <button
-                onClick={() => setDismissed(true)}
-                className="ripple-effect p-2 hover:bg-white/10 rounded-lg transition-colors"
-                aria-label={t('common:dismiss')}
-              >
-                <X className="w-4 h-4 text-white/80" />
               </button>
             </div>
           )}
