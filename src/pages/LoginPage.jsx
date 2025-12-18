@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Lock, Mail, Eye, EyeOff, Fingerprint } from "lucide-react";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification } from "firebase/auth";
 import { auth } from "../firebase";
+import { sendVerificationEmail } from '../utils/emailVerification';
 import {
   isBiometricAvailable,
   verifyBiometric,
@@ -118,22 +119,24 @@ const LoginPage = ({ onLogin = () => window.location.reload() }) => {
           return;
         }
 
+        // Create account
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const newUser = userCredential.user;
 
-        // Send email verification
+        // ✅ SEND VERIFICATION EMAIL with proper config
         try {
-          await sendEmailVerification(userCredential.user);
-          await showToast(t('verificationEmailSent') || 'Verification email sent! Check your inbox.');
-        } catch (verifyError) {
-          console.warn('Failed to send verification email:', verifyError);
-          // Don't block signup if verification email fails
+          await sendVerificationEmail(newUser);
+          console.log('✅ Verification email sent successfully');
+        } catch (emailError) {
+          console.error('⚠️ Could not send verification email:', emailError);
+          // Don't block signup if email fails - user can resend later from banner
         }
 
         if (isNative() && biometricAvailable) {
           await setCredentials(email, password);
         }
 
-        await showToast(t('accountCreated'));
+        await showToast('Konto opprettet! Sjekk e-posten din for å verifisere.');
       } else {
         await signInWithEmailAndPassword(auth, email, password);
 
