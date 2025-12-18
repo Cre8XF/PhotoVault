@@ -68,7 +68,7 @@ const UploadModal = ({
   }, [])
 
   const { t } = useTranslation(['common', 'upload'])
-  const { tier, canUploadVideo, shouldCompress } = useAuth()
+  const { tier, canUploadVideo } = useAuth() // ✅ Removed shouldCompress
   const setNotification = useStore((state) => state.setNotification) // ✅ ADD
   const {
     uploading,
@@ -320,11 +320,14 @@ const UploadModal = ({
 
   // Handle upload
   const handleUploadClick = async () => {
+    // ✅ Derive explicit compression permission: tier allows it AND user enabled it
+    const canUseCompression = tier() !== 'GRATIS' && autoCompress === true
+
     const result = await uploadFiles(
       selectedFiles,
       selectedAlbumId,
       aiTagging,
-      autoCompress, // ✅ CRITICAL FIX: Pass user's toggle preference
+      canUseCompression, // ✅ Pass explicit boolean based on BOTH tier and preference
       onUpload,
       t
     )
