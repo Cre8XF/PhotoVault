@@ -119,6 +119,7 @@ export function useUpload() {
     selectedFiles,
     albumId,
     aiTagging,
+    autoCompressEnabled,
     onUpload,
     t
   ) => {
@@ -160,8 +161,8 @@ export function useUpload() {
             metadata = await extractVideoMetadata(file)
             thumbnailBlob = await generateThumbnail(file, 2.0)
 
-            // ✅ Compress video only if tier allows AND file > 50MB
-            if (shouldCompress && file.size > 50 * 1024 * 1024) {
+            // ✅ Compress video only if tier allows AND toggle enabled AND file > 50MB
+            if (shouldCompress() && autoCompressEnabled && file.size > 50 * 1024 * 1024) {
               const compressedVideo = await compressVideo(file)
               if (compressedVideo) {
                 videoToUpload = new File([compressedVideo], file.name, {
@@ -232,8 +233,11 @@ export function useUpload() {
             console.warn(`⚠️ [PRE-COMPRESSION] EXIF extraction failed:`, exifError.message)
           }
 
-          if (shouldCompress) {
-            // LITE and PRO: Compress images
+          // ✅ CRITICAL FIX: Check BOTH tier permission AND user toggle
+          const canCompress = shouldCompress() && autoCompressEnabled
+
+          if (canCompress) {
+            // LITE and PRO: Compress images (only if toggle is ON)
             const compressedBlob = await compressImage(file, {
               maxWidth: 1920,
               maxHeight: 1080,
@@ -260,7 +264,7 @@ export function useUpload() {
               `🖼️ Image compressed: ${(file.size / 1024 / 1024).toFixed(1)}MB → ${(compressedFile.size / 1024 / 1024).toFixed(1)}MB`
             )
           } else {
-            // GRATIS: Original quality, no compression
+            // Original quality (GRATIS tier OR toggle OFF)
             totalCompressedSize += file.size
             processedFiles.push({
               file: file, // ✅ Original file
@@ -282,8 +286,9 @@ export function useUpload() {
         }
       }
 
-      // Store compression stats
-      if (shouldCompress) {
+      // Store compression stats - only if compression was actually applied
+      const compressionWasApplied = shouldCompress() && autoCompressEnabled
+      if (compressionWasApplied) {
         setCompressionStats({
           originalSize: totalOriginalSize,
           compressedSize: totalCompressedSize,
@@ -292,12 +297,16 @@ export function useUpload() {
             ((totalOriginalSize - totalCompressedSize) / totalOriginalSize) * 100,
         })
       } else {
+        // No compression applied
+        const reason = !shouldCompress()
+          ? 'Original quality (GRATIS tier)'
+          : 'Original quality (Auto-compress OFF)'
         setCompressionStats({
           originalSize: totalOriginalSize,
           compressedSize: totalOriginalSize,
           savings: 0,
           savingsPercent: 0,
-          message: 'Original quality (GRATIS tier)'
+          message: reason
         })
       }
 
