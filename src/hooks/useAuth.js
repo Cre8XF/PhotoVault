@@ -105,6 +105,9 @@ export const useAuth = () => {
   /**
    * Force refresh of Firebase user (emailVerified, claims, etc)
    * Used after email verification
+   *
+   * ✅ Email verification state is single-source-of-truth via useAuth.refreshUser()
+   * ⚠️  Do not assume Firebase emailVerified is immediately consistent after verifyEmail redirect – handle propagation delay.
    */
   const refreshUser = useCallback(async () => {
     if (!auth.currentUser) return false
@@ -112,6 +115,8 @@ export const useAuth = () => {
     try {
       await auth.currentUser.reload()
       const refreshedUser = auth.currentUser
+
+      console.log('[AUTH] Reloaded user via refreshUser(), emailVerified:', refreshedUser.emailVerified)
 
       // Force new reference to ensure Zustand detects the change
       setUser({ ...refreshedUser })
@@ -135,9 +140,9 @@ export const useAuth = () => {
         // ✅ P0 FIX: Reload user to sync emailVerified state after verification
         try {
           await currentUser.reload()
-          console.log('✅ Auth state reloaded - emailVerified:', currentUser.emailVerified)
+          console.log('[AUTH] Reloaded user via onAuthStateChanged, emailVerified:', currentUser.emailVerified)
         } catch (reloadError) {
-          console.warn('⚠️ Failed to reload auth state:', reloadError.message)
+          console.warn('[AUTH] Failed to reload auth state:', reloadError.message)
           // Continue without crashing - use cached state
         }
 

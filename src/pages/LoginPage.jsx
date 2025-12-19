@@ -15,7 +15,7 @@ import { isNative, triggerHaptic, showToast } from "../utils/nativeUtils";
 import Particles from "../components/Particles";
 import LogoLight from '../assets/logo_light.png';
 import LogoDark from '../assets/logo_dark.png';
-const LoginPage = ({ onLogin = () => window.location.reload() }) => {
+const LoginPage = ({ onLogin = () => {} }) => {
   const { t } = useTranslation('auth');
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
