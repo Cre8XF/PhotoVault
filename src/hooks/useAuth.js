@@ -114,43 +114,9 @@ export const useAuth = () => {
     }
   }, [auth, setUser, setEmailVerified])
 
-  /**
-   * Initialize auth listener
-   */
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setLoading(false)
-
-      if (currentUser) {
-        // ✅ P0 FIX: Reload user to sync emailVerified state after verification
-        try {
-          await currentUser.reload()
-          console.log('[AUTH] Reloaded user via onAuthStateChanged, emailVerified:', currentUser.emailVerified)
-        } catch (reloadError) {
-          console.warn('[AUTH] Failed to reload auth state:', reloadError.message)
-          // Continue without crashing - use cached state
-        }
-
-        // Force new reference to ensure Zustand detects the change
-        setUser({ ...currentUser })
-        setEmailVerified(currentUser.emailVerified)
-        await fetchUserProfile(currentUser.uid)
-      } else {
-        setUser(null)
-        setUserProfile(null)
-        setEmailVerified(false)
-      }
-    })
-
-    return () => unsubscribe()
-  }, [
-    auth,
-    setUser,
-    setLoading,
-    setUserProfile,
-    setEmailVerified,
-    fetchUserProfile,
-  ])
+  // ✅ CRITICAL: onAuthStateChanged removed from useAuth
+  // Auth listener is now ONLY in AuthProvider (src/providers/AuthProvider.jsx)
+  // This prevents multiple concurrent listeners that race and thrash state
 
   // ==========================================
   // ✅ TIER-BASED HELPERS
