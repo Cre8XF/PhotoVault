@@ -1,0 +1,92 @@
+{
+  "hero": {
+    "title": "Your Photos. Your Control.",
+    "subtitle": "Privacy-first alternative to Google Photos. Norwegian-built. No tracking. No ads.",
+    "noCreditCard": "No credit card required • 1 GB free storage"
+  },
+  "cta": {
+    "getStarted": "Get Started",
+    "startFree": "Start Free",
+    "learnMore": "Learn More"
+  },
+  "why": {
+    "title": "Why Pixtr?",
+    "subtitle": "An alternative that respects your privacy",
+    "noTracking": {
+      "title": "No Tracking",
+      "desc": "We don't track your activity. No ads. No data collection."
+    },
+    "yourData": {
+      "title": "Your Data",
+      "desc": "You own your photos. We never sell your data to third parties."
+    },
+    "creative": {
+      "title": "Creative Tools",
+      "desc": "Create collages, share via QR codes, and organize your way."
+    }
+  },
+  "features": {
+    "title": "Everything You Need",
+    "subtitle": "Professional features without compromises",
+    "privacy": {
+      "title": "Privacy-first",
+      "desc": "Strong security and full control over your data"
+    },
+    "albums": {
+      "title": "Smart Organization",
+      "desc": "Albums, favorites, and smart filters for large libraries"
+    },
+    "search": {
+      "title": "Powerful Search",
+      "desc": "Find photos by faces, dates, albums and metadata"
+    },
+    "collage": {
+      "title": "Collage Builder",
+      "desc": "Create beautiful layouts in seconds with professional templates"
+    },
+    "sharing": {
+      "title": "QR Sharing",
+      "desc": "Share albums securely via QR codes – perfect for events"
+    },
+    "control": {
+      "title": "Full Control",
+      "desc": "PIN lock, biometric security, and offline access"
+    }
+  },
+  "pricing": {
+    "title": "Choose Your Plan",
+    "subtitle": "Start free. Upgrade when you need more.",
+    "recommended": "RECOMMENDED",
+    "storage": "storage",
+    "free": {
+      "period": "forever",
+      "feature1": "1 GB original quality",
+      "feature2": "Albums & search",
+      "feature3": "Collage Builder",
+      "feature4": "QR sharing"
+    },
+    "lite": {
+      "period": "mo",
+      "feature1": "Everything in FREE",
+      "feature2": "5 GB storage",
+      "feature3": "Image compression",
+      "feature4": "Priority support"
+    },
+    "pro": {
+      "period": "mo",
+      "feature1": "Everything in LITE",
+      "feature2": "50 GB storage",
+      "feature3": "Video uploads",
+      "feature4": "AI features (coming)"
+    }
+  },
+  "finalCta": {
+    "title": "Ready to Start?",
+    "subtitle": "Join early users taking control of their photos"
+  },
+  "footer": {
+    "tagline": "Norwegian-built photo management app",
+    "privacy": "Privacy",
+    "terms": "Terms"
+  }
+}

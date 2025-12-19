@@ -71,6 +71,9 @@ import emptyEN from './locales/en/empty.json'
 import settingsNO from './locales/no/settings.json'
 import settingsEN from './locales/en/settings.json'
 
+import landingNO from './locales/no/landing.json'
+import landingEN from './locales/en/landing.json'
+
 const resources = {
   no: {
     translation: translationNO,
@@ -94,6 +97,7 @@ const resources = {
     storage: storageNO,
     empty: emptyNO,
     settings: settingsNO,
+    landing: landingNO,
   },
   en: {
     translation: translationEN,
@@ -117,6 +121,7 @@ const resources = {
     storage: storageEN,
     empty: emptyEN,
     settings: settingsEN,
+    landing: landingEN,
   },
 }
 
@@ -149,6 +154,7 @@ i18n
       'storage',
       'empty',
       'settings',
+      'landing',
     ],
 
     interpolation: {

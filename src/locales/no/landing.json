@@ -1,0 +1,92 @@
+{
+  "hero": {
+    "title": "Dine bilder. Din kontroll.",
+    "subtitle": "Privacy-first alternativ til Google Photos. Norskutviklet. Ingen tracking. Ingen annonser.",
+    "noCreditCard": "Ingen kredittkort nødvendig • 1 GB gratis lagring"
+  },
+  "cta": {
+    "getStarted": "Kom i gang",
+    "startFree": "Start gratis",
+    "learnMore": "Les mer"
+  },
+  "why": {
+    "title": "Hvorfor Pixtr?",
+    "subtitle": "Et alternativ som respekterer personvernet ditt",
+    "noTracking": {
+      "title": "Ingen tracking",
+      "desc": "Vi sporer ikke aktiviteten din. Ingen annonser. Ingen datainnsamling."
+    },
+    "yourData": {
+      "title": "Dine data",
+      "desc": "Du eier bildene dine. Vi selger aldri dataene dine til tredjeparter."
+    },
+    "creative": {
+      "title": "Kreative verktøy",
+      "desc": "Lag kollasjer, del via QR-koder, og organiser bildene som du vil."
+    }
+  },
+  "features": {
+    "title": "Alt du trenger",
+    "subtitle": "Profesjonelle funksjoner uten kompromisser",
+    "privacy": {
+      "title": "Privacy-first",
+      "desc": "Sterk sikkerhet og full kontroll over dine egne data"
+    },
+    "albums": {
+      "title": "Smart organisering",
+      "desc": "Album, favoritter og smarte filter for store bibliotek"
+    },
+    "search": {
+      "title": "Kraftig søk",
+      "desc": "Finn bilder med ansikter, datoer, album og metadata"
+    },
+    "collage": {
+      "title": "Collage Builder",
+      "desc": "Lag vakre layouts på sekunder med profesjonelle templates"
+    },
+    "sharing": {
+      "title": "QR-deling",
+      "desc": "Del album trygt via QR-koder – perfekt for arrangementer"
+    },
+    "control": {
+      "title": "Full kontroll",
+      "desc": "PIN-lås, biometrisk sikkerhet og offline tilgang"
+    }
+  },
+  "pricing": {
+    "title": "Velg din plan",
+    "subtitle": "Start gratis. Oppgrader når du trenger mer.",
+    "recommended": "ANBEFALT",
+    "storage": "lagring",
+    "free": {
+      "period": "for alltid",
+      "feature1": "1 GB original kvalitet",
+      "feature2": "Album og søk",
+      "feature3": "Collage Builder",
+      "feature4": "QR-deling"
+    },
+    "lite": {
+      "period": "mnd",
+      "feature1": "Alt i GRATIS",
+      "feature2": "5 GB lagring",
+      "feature3": "Bildekomprimering",
+      "feature4": "Prioritert support"
+    },
+    "pro": {
+      "period": "mnd",
+      "feature1": "Alt i LITE",
+      "feature2": "50 GB lagring",
+      "feature3": "Videoopplasting",
+      "feature4": "AI-funksjoner (kommer)"
+    }
+  },
+  "finalCta": {
+    "title": "Klar til å begynne?",
+    "subtitle": "Bli med de første brukerne som tar kontroll over bildene sine"
+  },
+  "footer": {
+    "tagline": "Norskutviklet photo management app",
+    "privacy": "Personvern",
+    "terms": "Vilkår"
+  }
+}
