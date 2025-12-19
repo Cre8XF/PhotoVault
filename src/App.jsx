@@ -21,6 +21,7 @@ import {
 import { ToastProvider } from './contexts/ToastContext'
 
 // Pages - Lazy loaded for performance
+const LandingPage = lazy(() => import('./pages/LandingPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const AuthActionHandler = lazy(() => import('./pages/AuthActionHandler'))
 const HomeDashboard = lazy(() => import('./pages/HomeDashboard'))
@@ -99,8 +100,15 @@ function App() {
                 }
               >
               <Routes>
-                {/* Public routes */}
+                {/* Public landing page */}
+                <Route path="/" element={<PublicRoute />} />
+
+                {/* Login page */}
+                <Route path="/login" element={<LoginPage />} />
+
+                {/* Public album sharing */}
                 <Route path="/share/:slug" element={<PublicAlbumPage />} />
+
                 {/* Firebase auth action handler - handles email verification links from Netlify */}
                 <Route path="/__/auth/action" element={<AuthActionHandler />} />
 
@@ -154,6 +162,32 @@ function App() {
     </ErrorBoundary>
   </BrowserRouter>
   )
+}
+
+/**
+ * Public Route Component - Shows landing page or redirects to app
+ */
+function PublicRoute() {
+  const { user, loading } = useAuth()
+  const navigate = useNavigate()
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="xl" />
+      </div>
+    )
+  }
+
+  if (user) {
+    // Redirect to app if already logged in
+    React.useEffect(() => {
+      navigate('/albums', { replace: true })
+    }, [navigate])
+    return null
+  }
+
+  return <LandingPage />
 }
 
 /**
@@ -398,9 +432,12 @@ function AppContent() {
     )
   }
 
-  // Show login if not authenticated
+  // Redirect to login if not authenticated
   if (!user) {
-    return <LoginPage />
+    React.useEffect(() => {
+      navigate('/login', { replace: true })
+    }, [navigate])
+    return null
   }
 
   // Show PIN lock screen if locked
