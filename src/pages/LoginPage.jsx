@@ -159,6 +159,8 @@ const LoginPage = ({ onLogin = () => {} }) => {
         errorMessage = t('errors.userNotFound');
       } else if (error.code === "auth/wrong-password") {
         errorMessage = t('errors.wrongPassword');
+      } else if (error.code === "auth/invalid-credential") {
+        errorMessage = t('errors.invalidCredential');
       } else if (error.code === "auth/email-already-in-use") {
         errorMessage = t('errors.emailInUse');
       } else if (error.code === "auth/weak-password") {
