@@ -2,41 +2,8 @@
    THEME TOKENS - Single source of truth for colors
    ============================================================================ */
 
-/* Dark Mode (default) */
+/* Light Mode (default) */
 :root,
-:root[data-theme="dark"],
-body.dark-mode {
-  /* Backgrounds */
-  --bg-primary: #0b0f1a;
-  --bg-secondary: #131a2a;
-  --bg-tertiary: #1e293b;
-  --bg-elevated: #1e293b;
-  --bg-surface: rgba(255, 255, 255, 0.08);
-  --bg-surface-hover: rgba(255, 255, 255, 0.12);
-
-  /* Text */
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-  --text-disabled: #64748b;
-
-  /* Borders */
-  --border-color: rgba(255, 255, 255, 0.1);
-  --border-hover: rgba(255, 255, 255, 0.2);
-  --border-subtle: rgba(255, 255, 255, 0.05);
-
-  /* Interactive */
-  --interactive-hover: rgba(255, 255, 255, 0.05);
-  --interactive-active: rgba(255, 255, 255, 0.1);
-
-  /* Glass morphism */
-  --glass-bg: rgba(255, 255, 255, 0.08);
-  --glass-border: rgba(255, 255, 255, 0.18);
-  --glass-bg-hover: rgba(255, 255, 255, 0.12);
-  --glass-border-hover: rgba(255, 255, 255, 0.25);
-}
-
-/* Light Mode */
 :root[data-theme="light"],
 body.light-mode {
   /* Backgrounds */
@@ -67,6 +34,39 @@ body.light-mode {
   --glass-border: rgba(139, 92, 246, 0.15);
   --glass-bg-hover: rgba(255, 255, 255, 0.95);
   --glass-border-hover: rgba(139, 92, 246, 0.3);
+}
+
+/* Dark Mode */
+:root[data-theme="dark"],
+body.dark-mode {
+  /* Backgrounds */
+  --bg-primary: #0b0f1a;
+  --bg-secondary: #131a2a;
+  --bg-tertiary: #1e293b;
+  --bg-elevated: #1e293b;
+  --bg-surface: rgba(255, 255, 255, 0.08);
+  --bg-surface-hover: rgba(255, 255, 255, 0.12);
+
+  /* Text */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-disabled: #64748b;
+
+  /* Borders */
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-hover: rgba(255, 255, 255, 0.2);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+
+  /* Interactive */
+  --interactive-hover: rgba(255, 255, 255, 0.05);
+  --interactive-active: rgba(255, 255, 255, 0.1);
+
+  /* Glass morphism */
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-bg-hover: rgba(255, 255, 255, 0.12);
+  --glass-border-hover: rgba(255, 255, 255, 0.25);
 }
 
 /* ============================================================================
@@ -266,11 +266,18 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-  color: #e8e6f0;
+  color: #1f2937;
   overflow-x: hidden;
   position: relative;
 
-  /* Animated gradient background - DARK MODE */
+  /* Animated gradient background - LIGHT MODE (default) */
+  background: linear-gradient(135deg, #ffffff 0%, #fdf4ff 20%, #f3e8ff 40%, #e9d5ff 60%, #ddd6fe 80%, #fae8ff 100%);
+  background-size: 400% 400%;
+  animation: twilightGradient 20s ease infinite;
+}
+
+/* DARK MODE - Deep twilight gradient */
+body.dark-mode {
   background: linear-gradient(
     135deg,
     #1e1b4b 0%,
@@ -280,14 +287,7 @@ body {
     /* lilla-blå */ #7c62f5 80%,
     /* mykere lys lilla */ #9b8dfb 100% /* dus høylys */
   );
-  background-size: 400% 400%;
-  animation: twilightGradient 20s ease infinite;
-}
-
-/* LIGHT MODE - Soft pastel gradient */
-body.light-mode {
-  background: linear-gradient(135deg, #ffffff 0%, #fdf4ff 20%, #f3e8ff 40%, #e9d5ff 60%, #ddd6fe 80%, #fae8ff 100%);
-  color: #1f2937;
+  color: #e8e6f0;
 }
 
 /* Gradient animation */
@@ -308,13 +308,13 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(15, 23, 42, 0.3) 100%);
+  background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(233, 213, 255, 0.2) 100%);
   pointer-events: none;
   z-index: 0;
 }
 
-body.light-mode::before {
-  background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(233, 213, 255, 0.2) 100%);
+body.dark-mode::before {
+  background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(15, 23, 42, 0.3) 100%);
 }
 
 main,
