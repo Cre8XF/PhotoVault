@@ -15,10 +15,10 @@ const VerificationBanner = ({ user }) => {
   const [showEmailChange, setShowEmailChange] = useState(false)
   const [newEmail, setNewEmail] = useState('')
   const setNotification = useStore((state) => state.setNotification)
-  const { refreshUser } = useAuth()
+  const { refreshUser, emailVerified } = useAuth()
 
   // Don't show if verified or dismissed
-  if (!user || user.emailVerified || dismissed) return null
+  if (!user || emailVerified || dismissed) return null
 
   // --------------------------------------------------
   // Resend verification email

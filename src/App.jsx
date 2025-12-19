@@ -159,7 +159,7 @@ function AppContent() {
   const location = useLocation()
 
   // Custom hooks
-  const { user, userProfile, loading, handleLogout, isAdmin } = useAuth()
+  const { user, userProfile, loading, handleLogout, isAdmin, emailVerified } = useAuth()
   const {
     albums,
     photos,
@@ -418,7 +418,7 @@ function AppContent() {
     !currentPath.startsWith('/collage/')
 
   // Check if email verification banner should be shown
-  const showVerificationBanner = user && !user.emailVerified
+  const showVerificationBanner = user && !emailVerified
 
   return (
     <div className="min-h-screen relative">

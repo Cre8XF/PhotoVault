@@ -113,7 +113,8 @@ export const useAuth = () => {
       await auth.currentUser.reload()
       const refreshedUser = auth.currentUser
 
-      setUser(refreshedUser)
+      // Force new reference to ensure Zustand detects the change
+      setUser({ ...refreshedUser })
       setEmailVerified(refreshedUser.emailVerified)
 
       return refreshedUser.emailVerified
@@ -128,7 +129,6 @@ export const useAuth = () => {
    */
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser)
       setLoading(false)
 
       if (currentUser) {
@@ -141,10 +141,12 @@ export const useAuth = () => {
           // Continue without crashing - use cached state
         }
 
-        // Update email verification status from Firebase Auth
+        // Force new reference to ensure Zustand detects the change
+        setUser({ ...currentUser })
         setEmailVerified(currentUser.emailVerified)
         await fetchUserProfile(currentUser.uid)
       } else {
+        setUser(null)
         setUserProfile(null)
         setEmailVerified(false)
       }

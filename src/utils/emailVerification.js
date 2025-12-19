@@ -25,24 +25,5 @@ export const sendVerificationEmail = async (user) => {
   }
 };
 
-/**
- * Check email verification status
- * @param {Object} user - Firebase user object
- * @returns {Promise<boolean>} - True if email is verified
- */
-export const checkEmailVerification = async (user) => {
-  if (!user) return false;
-
-  try {
-    // Reload user from Firebase to get fresh emailVerified status
-    await user.reload();
-
-    const isVerified = user.emailVerified;
-    console.log('📧 Email verified status:', isVerified);
-
-    return isVerified;
-  } catch (error) {
-    console.error('❌ Error checking verification:', error);
-    return false;
-  }
-};
+// ✅ checkEmailVerification removed - use useAuth().refreshUser() instead
+// Single source of truth: emailVerified from Zustand store
