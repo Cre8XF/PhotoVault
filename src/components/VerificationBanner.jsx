@@ -86,6 +86,8 @@ const VerificationBanner = ({ user }) => {
 
   // --------------------------------------------------
   // Manual verification check
+  // ✅ Email verification state is single-source-of-truth via useAuth.refreshUser()
+  // This triggers Firebase reload and syncs to Zustand - banner disappears automatically when emailVerified === true
   // --------------------------------------------------
   const handleCheckVerification = async () => {
     const verified = await refreshUser()
@@ -95,6 +97,7 @@ const VerificationBanner = ({ user }) => {
         message: t('auth:emailVerified') || 'Email verified successfully!',
         type: 'success',
       })
+      // Banner will automatically disappear because emailVerified is now true in Zustand
     } else {
       setNotification({
         message:
