@@ -417,6 +417,9 @@ function AppContent() {
     currentPath !== '/subscription' &&
     !currentPath.startsWith('/collage/')
 
+  // Check if email verification banner should be shown
+  const showVerificationBanner = user && !user.emailVerified
+
   return (
     <div className="min-h-screen relative">
       <Particles />
@@ -425,7 +428,7 @@ function AppContent() {
       <VerificationBanner user={user} />
 
       {/* Main content - React Router based rendering */}
-      <main className="relative z-10">
+      <main className={`relative z-10 ${showVerificationBanner ? 'pt-16 md:pt-14' : ''}`}>
         <Routes>
           <Route
             path="/"

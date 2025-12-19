@@ -3,7 +3,7 @@
 // View saved collage with options to edit, share, download, and delete
 // ============================================================================
 import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   ArrowLeft,
@@ -100,8 +100,14 @@ const CollageView = () => {
   }, [collage, allPhotos])
 
   // Handle back navigation
+  const location = useLocation()
   const handleBack = () => {
-    navigate('/albums')
+    // Use context-aware navigation if available, fallback to albums
+    if (location.state?.from) {
+      navigate(-1)
+    } else {
+      navigate('/albums')
+    }
   }
 
   // Handle edit collage

@@ -5,11 +5,11 @@ import { Server, ArrowUp } from 'lucide-react'
 
 const StorageIndicator = () => {
   const { t } = useTranslation()
-  const { user } = useAuth()
+  const { user, userProfile } = useAuth()
   const { photos } = usePhotoData()
 
-  // Get user tier (from Firestore user document)
-  const userTier = user?.tier || 'GRATIS'
+  // Get user tier (from Firestore user document or subscription tier)
+  const userTier = userProfile?.subscriptionTier || user?.tier || 'GRATIS'
 
   // Storage limits (in bytes)
   const limits = {

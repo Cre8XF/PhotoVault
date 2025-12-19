@@ -5,7 +5,6 @@ import React, { useState } from 'react'
 import { Mail, X, RefreshCw, Edit } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { sendEmailVerification, updateEmail } from 'firebase/auth'
-import { auth } from '../firebase'
 import useStore from '../state/store'
 import { useAuth } from '../hooks/useAuth'
 
@@ -21,6 +20,9 @@ const VerificationBanner = ({ user }) => {
   // Don't show if verified or dismissed
   if (!user || user.emailVerified || dismissed) return null
 
+  // --------------------------------------------------
+  // Resend verification email
+  // --------------------------------------------------
   const handleResendVerification = async () => {
     setResending(true)
     try {
@@ -44,6 +46,9 @@ const VerificationBanner = ({ user }) => {
     }
   }
 
+  // --------------------------------------------------
+  // Change email address
+  // --------------------------------------------------
   const handleChangeEmail = async (e) => {
     e.preventDefault()
     if (!newEmail || newEmail === user.email) return
@@ -61,6 +66,7 @@ const VerificationBanner = ({ user }) => {
       setNewEmail('')
     } catch (error) {
       console.error('Failed to update email:', error)
+
       let errorMessage = t('auth:emailUpdateFailed') || 'Failed to update email'
 
       if (error.code === 'auth/requires-recent-login') {
@@ -78,6 +84,9 @@ const VerificationBanner = ({ user }) => {
     }
   }
 
+  // --------------------------------------------------
+  // Manual verification check
+  // --------------------------------------------------
   const handleCheckVerification = async () => {
     const verified = await refreshUser()
 
@@ -117,7 +126,7 @@ const VerificationBanner = ({ user }) => {
                   />
                   <button
                     type="submit"
-                    className="ripple-effect px-3 py-1.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
+                    className="px-3 py-1.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700"
                   >
                     {t('common:save')}
                   </button>
@@ -127,7 +136,7 @@ const VerificationBanner = ({ user }) => {
                       setShowEmailChange(false)
                       setNewEmail('')
                     }}
-                    className="ripple-effect px-3 py-1.5 text-gray-300 hover:text-white text-sm"
+                    className="px-3 py-1.5 text-gray-300 hover:text-white text-sm"
                   >
                     {t('common:cancel')}
                   </button>
@@ -146,7 +155,7 @@ const VerificationBanner = ({ user }) => {
               <button
                 onClick={handleResendVerification}
                 disabled={resending}
-                className="ripple-effect flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50"
               >
                 <RefreshCw
                   className={`w-4 h-4 ${resending ? 'animate-spin' : ''}`}
@@ -155,23 +164,15 @@ const VerificationBanner = ({ user }) => {
               </button>
 
               <button
-                onClick={() => setShowEmailChange(true)}
-                className="ripple-effect flex items-center gap-2 px-4 py-2 bg-white/10 text-white rounded-lg text-sm font-medium hover:bg-white/20 transition-colors"
-              >
-                <Edit className="w-4 h-4" />
-                {t('auth:changeEmail') || 'Change Email'}
-              </button>
-
-              <button
                 onClick={handleCheckVerification}
-                className="ripple-effect flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
               >
                 ✓ {t('auth:iVerified') || 'I verified'}
               </button>
 
               <button
                 onClick={() => setDismissed(true)}
-                className="ripple-effect p-2 hover:bg-white/10 rounded-lg transition-colors"
+                className="p-2 hover:bg-white/10 rounded-lg"
                 aria-label={t('common:dismiss')}
               >
                 <X className="w-4 h-4 text-white/80" />
