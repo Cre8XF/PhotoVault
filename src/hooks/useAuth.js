@@ -103,6 +103,27 @@ export const useAuth = () => {
   }, [auth, logout, setConfirmModal, setNotification, t])
 
   /**
+   * Force refresh of Firebase user (emailVerified, claims, etc)
+   * Used after email verification
+   */
+  const refreshUser = useCallback(async () => {
+    if (!auth.currentUser) return false
+
+    try {
+      await auth.currentUser.reload()
+      const refreshedUser = auth.currentUser
+
+      setUser(refreshedUser)
+      setEmailVerified(refreshedUser.emailVerified)
+
+      return refreshedUser.emailVerified
+    } catch (err) {
+      console.error('❌ Failed to refresh user:', err)
+      return false
+    }
+  }, [auth, setUser, setEmailVerified])
+
+  /**
    * Initialize auth listener
    */
   useEffect(() => {
@@ -121,7 +142,14 @@ export const useAuth = () => {
     })
 
     return () => unsubscribe()
-  }, [auth, setUser, setLoading, setUserProfile, setEmailVerified, fetchUserProfile])
+  }, [
+    auth,
+    setUser,
+    setLoading,
+    setUserProfile,
+    setEmailVerified,
+    fetchUserProfile,
+  ])
 
   // ==========================================
   // ✅ TIER-BASED HELPERS
@@ -210,6 +238,9 @@ export const useAuth = () => {
     userProfile,
     loading,
     emailVerified,
+    refreshUser,
+
+    // Actions
     handleLogout,
     fetchUserProfile,
 

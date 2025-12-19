@@ -327,14 +327,21 @@ const UploadModal = ({
 
   // Handle upload
   const handleUploadClick = async () => {
-    // ✅ Derive explicit compression permission: tier allows it AND user enabled it
+    // ✅ Derive explicit compression permission
     const canUseCompression = tier() !== 'GRATIS' && autoCompress === true
+
+    console.log('🔒 Compression check:', {
+      tier: tier(),
+      autoCompress,
+      canUseCompression,
+      willCompress: canUseCompression,
+    })
 
     const result = await uploadFiles(
       selectedFiles,
       selectedAlbumId,
       aiTagging,
-      canUseCompression, // ✅ Pass explicit boolean based on BOTH tier and preference
+      canUseCompression, // ✅ Pass explicit boolean
       onUpload,
       t
     )

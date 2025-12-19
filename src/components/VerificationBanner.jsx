@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { sendEmailVerification, updateEmail } from 'firebase/auth'
 import { auth } from '../firebase'
 import useStore from '../state/store'
+import { useAuth } from '../hooks/useAuth'
 
 const VerificationBanner = ({ user }) => {
   const { t } = useTranslation(['auth', 'common'])
@@ -15,6 +16,7 @@ const VerificationBanner = ({ user }) => {
   const [showEmailChange, setShowEmailChange] = useState(false)
   const [newEmail, setNewEmail] = useState('')
   const setNotification = useStore((state) => state.setNotification)
+  const { refreshUser } = useAuth()
 
   // Don't show if verified or dismissed
   if (!user || user.emailVerified || dismissed) return null
@@ -24,13 +26,17 @@ const VerificationBanner = ({ user }) => {
     try {
       await sendEmailVerification(user)
       setNotification({
-        message: t('auth:verificationEmailSent') || 'Verification email sent! Check your inbox.',
+        message:
+          t('auth:verificationEmailSent') ||
+          'Verification email sent! Check your inbox.',
         type: 'success',
       })
     } catch (error) {
       console.error('Failed to resend verification:', error)
       setNotification({
-        message: t('auth:verificationEmailFailed') || 'Failed to send verification email',
+        message:
+          t('auth:verificationEmailFailed') ||
+          'Failed to send verification email',
         type: 'error',
       })
     } finally {
@@ -46,7 +52,9 @@ const VerificationBanner = ({ user }) => {
       await updateEmail(user, newEmail)
       await sendEmailVerification(user)
       setNotification({
-        message: t('auth:emailUpdated') || 'Email updated! Verification sent to new address.',
+        message:
+          t('auth:emailUpdated') ||
+          'Email updated! Verification sent to new address.',
         type: 'success',
       })
       setShowEmailChange(false)
@@ -56,7 +64,9 @@ const VerificationBanner = ({ user }) => {
       let errorMessage = t('auth:emailUpdateFailed') || 'Failed to update email'
 
       if (error.code === 'auth/requires-recent-login') {
-        errorMessage = t('auth:recentLoginRequired') || 'Please log out and log in again to change your email'
+        errorMessage =
+          t('auth:recentLoginRequired') ||
+          'Please log out and log in again to change your email'
       } else if (error.code === 'auth/email-already-in-use') {
         errorMessage = t('auth:errors.emailInUse') || 'Email already in use'
       }
@@ -64,6 +74,24 @@ const VerificationBanner = ({ user }) => {
       setNotification({
         message: errorMessage,
         type: 'error',
+      })
+    }
+  }
+
+  const handleCheckVerification = async () => {
+    const verified = await refreshUser()
+
+    if (verified) {
+      setNotification({
+        message: t('auth:emailVerified') || 'Email verified successfully!',
+        type: 'success',
+      })
+    } else {
+      setNotification({
+        message:
+          t('auth:emailNotVerifiedYet') ||
+          'Email not verified yet. Please click the link in your email and try again.',
+        type: 'info',
       })
     }
   }
@@ -76,7 +104,10 @@ const VerificationBanner = ({ user }) => {
             <Mail className="w-5 h-5 text-purple-400 flex-shrink-0" />
             <div className="flex-1">
               {showEmailChange ? (
-                <form onSubmit={handleChangeEmail} className="flex items-center gap-2">
+                <form
+                  onSubmit={handleChangeEmail}
+                  className="flex items-center gap-2"
+                >
                   <input
                     type="email"
                     value={newEmail}
@@ -103,7 +134,8 @@ const VerificationBanner = ({ user }) => {
                 </form>
               ) : (
                 <p className="text-sm text-white">
-                  {t('auth:verifyEmailPrompt') || 'Please verify your email to unlock sharing and Pro features.'}
+                  {t('auth:verifyEmailPrompt') ||
+                    'Please verify your email to unlock sharing and Pro features.'}
                 </p>
               )}
             </div>
@@ -116,7 +148,9 @@ const VerificationBanner = ({ user }) => {
                 disabled={resending}
                 className="ripple-effect flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
               >
-                <RefreshCw className={`w-4 h-4 ${resending ? 'animate-spin' : ''}`} />
+                <RefreshCw
+                  className={`w-4 h-4 ${resending ? 'animate-spin' : ''}`}
+                />
                 {t('auth:resendVerification') || 'Resend'}
               </button>
 
@@ -126,6 +160,13 @@ const VerificationBanner = ({ user }) => {
               >
                 <Edit className="w-4 h-4" />
                 {t('auth:changeEmail') || 'Change Email'}
+              </button>
+
+              <button
+                onClick={handleCheckVerification}
+                className="ripple-effect flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+              >
+                ✓ {t('auth:iVerified') || 'I verified'}
               </button>
 
               <button
