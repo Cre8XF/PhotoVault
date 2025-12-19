@@ -22,6 +22,7 @@ import { ToastProvider } from './contexts/ToastContext'
 
 // Pages - Lazy loaded for performance
 const LoginPage = lazy(() => import('./pages/LoginPage'))
+const AuthActionHandler = lazy(() => import('./pages/AuthActionHandler'))
 const HomeDashboard = lazy(() => import('./pages/HomeDashboard'))
 const AlbumsPage = lazy(() => import('./pages/AlbumsPage'))
 const SearchPage = lazy(() => import('./pages/SearchPage'))
@@ -100,6 +101,8 @@ function App() {
               <Routes>
                 {/* Public routes */}
                 <Route path="/share/:slug" element={<PublicAlbumPage />} />
+                {/* Firebase auth action handler - handles email verification links from Netlify */}
+                <Route path="/__/auth/action" element={<AuthActionHandler />} />
 
                 {/* Function Worlds */}
                 <Route path={ROUTES.TOOLS} element={<ToolsPage />} />
