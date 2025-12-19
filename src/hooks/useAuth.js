@@ -116,8 +116,6 @@ export const useAuth = () => {
       await auth.currentUser.reload()
       const refreshedUser = auth.currentUser
 
-      console.log('[AUTH] Reloaded user via refreshUser(), emailVerified:', refreshedUser.emailVerified)
-
       // Force new reference to ensure Zustand detects the change
       setUser({ ...refreshedUser })
       setEmailVerified(refreshedUser.emailVerified)
