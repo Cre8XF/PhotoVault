@@ -12,7 +12,8 @@ import {
 import { useTranslation } from 'react-i18next'
 import i18n from './i18n'
 
-// Contexts
+// Contexts & Providers
+import AuthProvider from './providers/AuthProvider'
 import {
   SecurityProvider,
   useSecurityContext,
@@ -86,15 +87,16 @@ function App() {
   return (
     <BrowserRouter>
       <ErrorBoundary>
-        <ToastProvider>
-          <SecurityProvider>
-            <Suspense
-              fallback={
-                <div className="fixed inset-0 flex items-center justify-center">
-                  <LoadingSpinner size="xl" />
-                </div>
-              }
-            >
+        <AuthProvider>
+          <ToastProvider>
+            <SecurityProvider>
+              <Suspense
+                fallback={
+                  <div className="fixed inset-0 flex items-center justify-center">
+                    <LoadingSpinner size="xl" />
+                  </div>
+                }
+              >
               <Routes>
                 {/* Public routes */}
                 <Route path="/share/:slug" element={<PublicAlbumPage />} />
@@ -145,8 +147,9 @@ function App() {
             </Suspense>
           </SecurityProvider>
         </ToastProvider>
-      </ErrorBoundary>
-    </BrowserRouter>
+      </AuthProvider>
+    </ErrorBoundary>
+  </BrowserRouter>
   )
 }
 

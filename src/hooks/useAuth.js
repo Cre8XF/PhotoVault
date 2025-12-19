@@ -1,29 +1,33 @@
 // ============================================================================
-// useAuth Hook - Phase 2: Authentication Logic Extraction (fixed admin logic)
+// useAuth Hook - PURE STATE ACCESS (NO AUTH LISTENER)
 // ============================================================================
-import { useEffect, useCallback } from 'react'
-import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
-import { db } from '../firebase'
+// CRITICAL: This hook does NOT set up auth listeners
+// Auth state is managed by AuthProvider (src/providers/AuthProvider.jsx)
+// This hook ONLY reads from Zustand and provides helper functions
+// ============================================================================
+import { useCallback } from 'react'
+import { getAuth, signOut } from 'firebase/auth'
 import useStore from '../state/store'
 import { useTranslation } from 'react-i18next'
 
 /**
  * Custom hook for authentication management
- * Handles login, logout, user state, and role management
+ * Handles auth state access, logout, and role management
+ *
+ * ✅ This hook does NOT set up onAuthStateChanged
+ * ✅ Auth state is managed by AuthProvider
+ * ✅ This hook ONLY reads from Zustand store
  */
 export const useAuth = () => {
   const { t } = useTranslation(['common'])
   const auth = getAuth()
 
-  // Zustand store selectors
+  // Zustand store selectors - READ ONLY
   const user = useStore((state) => state.user)
   const userProfile = useStore((state) => state.userProfile)
   const loading = useStore((state) => state.loading)
   const emailVerified = useStore((state) => state.emailVerified)
   const setUser = useStore((state) => state.setUser)
-  const setUserProfile = useStore((state) => state.setUserProfile)
-  const setLoading = useStore((state) => state.setLoading)
   const setEmailVerified = useStore((state) => state.setEmailVerified)
   const logout = useStore((state) => state.logout)
   const setNotification = useStore((state) => state.setNotification)
@@ -31,49 +35,29 @@ export const useAuth = () => {
 
   /**
    * Fetch user profile from Firestore
+   * Used when profile needs to be refreshed (e.g., after profile update)
    */
   const fetchUserProfile = useCallback(
     async (uid) => {
       try {
+        const { doc, getDoc } = await import('firebase/firestore')
+        const { db } = await import('../firebase')
+
         const userRef = doc(db, 'users', uid)
         const userDoc = await getDoc(userRef)
 
         if (userDoc.exists()) {
-          setUserProfile(userDoc.data())
-        } else {
-          // 🔹 Opprett et nytt bruker-dokument hvis det ikke finnes
-          const defaultProfile = {
-            uid,
-            userId: uid,
-            role: 'user',
-            subscriptionTier: 'GRATIS', // ✅ Default tier
-            storageLimit: 1073741824, // ✅ 1GB for GRATIS
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          }
-
-          // Forsøk å skrive dokumentet (håndter permissions trygt)
-          try {
-            await setDoc(userRef, defaultProfile)
-            console.log('✅ Opprettet nytt brukerprofil-dokument for:', uid)
-          } catch (writeErr) {
-            console.warn('⚠️ Kunne ikke skrive brukerprofil:', writeErr.message)
-          }
-
-          setUserProfile(defaultProfile)
+          useStore.getState().setUserProfile(userDoc.data())
         }
       } catch (error) {
-        console.warn(
-          '⚠️ Firestore read error i fetchUserProfile:',
-          error.message
-        )
+        console.error('[useAuth] Error fetching user profile:', error)
         setNotification({
           message: t('common:notifications.errorLoadingData'),
           type: 'error',
         })
       }
     },
-    [setUserProfile, setNotification, t]
+    [setNotification, t]
   )
 
   /**
@@ -104,7 +88,7 @@ export const useAuth = () => {
 
   /**
    * Force refresh of Firebase user (emailVerified, claims, etc)
-   * Used after email verification
+   * Used after email verification (e.g., when user clicks "I verified" button)
    *
    * ✅ Email verification state is single-source-of-truth via useAuth.refreshUser()
    * ⚠️  Do not assume Firebase emailVerified is immediately consistent after verifyEmail redirect – handle propagation delay.
@@ -113,57 +97,26 @@ export const useAuth = () => {
     if (!auth.currentUser) return false
 
     try {
+      // Reload user from Firebase to get fresh emailVerified status
       await auth.currentUser.reload()
       const refreshedUser = auth.currentUser
 
-      // Force new reference to ensure Zustand detects the change
+      console.log('[AUTH] Manual refresh via refreshUser(), emailVerified:', refreshedUser.emailVerified)
+
+      // Update Zustand with new reference to force re-renders
       setUser({ ...refreshedUser })
       setEmailVerified(refreshedUser.emailVerified)
 
       return refreshedUser.emailVerified
     } catch (err) {
-      console.error('❌ Failed to refresh user:', err)
+      console.error('[AUTH] Failed to refresh user:', err)
       return false
     }
   }, [auth, setUser, setEmailVerified])
 
-  /**
-   * Initialize auth listener
-   */
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setLoading(false)
-
-      if (currentUser) {
-        // ✅ P0 FIX: Reload user to sync emailVerified state after verification
-        try {
-          await currentUser.reload()
-          console.log('[AUTH] Reloaded user via onAuthStateChanged, emailVerified:', currentUser.emailVerified)
-        } catch (reloadError) {
-          console.warn('[AUTH] Failed to reload auth state:', reloadError.message)
-          // Continue without crashing - use cached state
-        }
-
-        // Force new reference to ensure Zustand detects the change
-        setUser({ ...currentUser })
-        setEmailVerified(currentUser.emailVerified)
-        await fetchUserProfile(currentUser.uid)
-      } else {
-        setUser(null)
-        setUserProfile(null)
-        setEmailVerified(false)
-      }
-    })
-
-    return () => unsubscribe()
-  }, [
-    auth,
-    setUser,
-    setLoading,
-    setUserProfile,
-    setEmailVerified,
-    fetchUserProfile,
-  ])
+  // ✅ CRITICAL: onAuthStateChanged removed from useAuth
+  // Auth listener is now ONLY in AuthProvider (src/providers/AuthProvider.jsx)
+  // This prevents multiple concurrent listeners that race and thrash state
 
   // ==========================================
   // ✅ TIER-BASED HELPERS
