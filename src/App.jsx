@@ -171,6 +171,13 @@ function PublicRoute() {
   const { user, loading } = useAuth()
   const navigate = useNavigate()
 
+  // Redirect to app if already logged in
+  React.useEffect(() => {
+    if (user) {
+      navigate('/albums', { replace: true })
+    }
+  }, [user, navigate])
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -180,10 +187,6 @@ function PublicRoute() {
   }
 
   if (user) {
-    // Redirect to app if already logged in
-    React.useEffect(() => {
-      navigate('/albums', { replace: true })
-    }, [navigate])
     return null
   }
 
