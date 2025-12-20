@@ -263,7 +263,7 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Suspense fallback={
-                        <div className="fixed inset-0 flex items-center justify-center bg-[#0a0a0a]">
+                        <div className="fixed inset-0 flex items-center justify-center editor-bg-primary">
                           <LoadingSpinner size="xl" />
                         </div>
                       }>
