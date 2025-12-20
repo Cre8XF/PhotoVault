@@ -432,15 +432,22 @@ export default function PhotoPage() {
     <div className="fixed inset-0 z-[9999] bg-black flex flex-col">
       {/* Top Bar */}
       <header
-        className={`fixed top-0 inset-x-0 z-[10000] h-14 bg-black/85 backdrop-blur-xl transition-opacity duration-300 text-on-glass ${
+        className={`fixed top-0 inset-x-0 z-[10000] h-14 backdrop-blur-xl transition-opacity duration-300 ${
           uiVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
+        style={{
+          backgroundColor: 'var(--glass-bg)',
+          color: 'var(--text-primary)'
+        }}
       >
         <div className="flex items-center justify-between px-4 h-full">
           {/* Left: Back button */}
           <button
             onClick={handleBack}
-            className="flex items-center gap-2 text-white hover:bg-white/10 rounded-full p-2 transition active:scale-95"
+            className="flex items-center gap-2 rounded-full p-2 transition active:scale-95"
+            style={{ color: 'var(--text-primary)' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--interactive-hover)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             aria-label="Go back"
           >
             <ArrowLeft className="w-6 h-6" />
