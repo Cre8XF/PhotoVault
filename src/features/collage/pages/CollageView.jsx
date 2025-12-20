@@ -208,12 +208,22 @@ const CollageView = () => {
   return (
     <div className="min-h-screen pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-black/85 backdrop-blur-xl border-b border-white/10 text-on-glass">
+      <header
+        className="sticky top-0 z-20 backdrop-blur-xl"
+        style={{
+          backgroundColor: 'var(--glass-bg)',
+          borderBottom: '1px solid var(--border-color)',
+          color: 'var(--text-primary)'
+        }}
+      >
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
             <button
               onClick={handleBack}
-              className="ripple-effect p-2 hover:bg-white/10 rounded-lg transition"
+              className="ripple-effect p-2 rounded-lg transition"
+              style={{ color: 'var(--text-primary)' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--interactive-hover)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <ArrowLeft className="w-6 h-6" />
             </button>
@@ -222,7 +232,7 @@ const CollageView = () => {
               <h1 className="text-lg font-semibold">
                 {collage.title || t('collage:untitled')}
               </h1>
-              <p className="text-xs opacity-60">
+              <p className="text-xs" style={{ color: 'var(--text-secondary)', opacity: 0.8 }}>
                 {collagePhotos.length} {t('collage:photos')}
               </p>
             </div>
@@ -231,7 +241,10 @@ const CollageView = () => {
           <div className="relative">
             <button
               onClick={() => setShowActions(!showActions)}
-              className="ripple-effect p-2 hover:bg-white/10 rounded-lg transition"
+              className="ripple-effect p-2 rounded-lg transition"
+              style={{ color: 'var(--text-primary)' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--interactive-hover)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <MoreVertical className="w-6 h-6" />
             </button>

@@ -62,16 +62,26 @@ export default function ToolsPage() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Top Bar */}
-      <header className="fixed top-0 inset-x-0 z-50 h-14 bg-black/85 backdrop-blur-xl border-b border-white/10 text-on-glass">
+      <header
+        className="fixed top-0 inset-x-0 z-50 h-14 backdrop-blur-xl"
+        style={{
+          backgroundColor: 'var(--glass-bg)',
+          borderBottom: '1px solid var(--border-color)',
+          color: 'var(--text-primary)'
+        }}
+      >
         <div className="flex items-center justify-between px-4 h-full">
           <button
             onClick={handleBack}
-            className="flex items-center gap-2 hover:bg-white/10 rounded-full p-2 transition"
+            className="flex items-center gap-2 rounded-full p-2 transition"
+            style={{ color: 'var(--text-primary)' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--interactive-hover)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
 
-          <h1 className="font-semibold">Your tools</h1>
+          <h1 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>Your tools</h1>
 
           <div className="w-10" /> {/* Spacer */}
         </div>
