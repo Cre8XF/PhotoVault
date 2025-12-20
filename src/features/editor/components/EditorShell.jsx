@@ -34,27 +34,27 @@ export default function EditorShell({
         return <FiltersPanel />
       default:
         return (
-          <div className="p-4 bg-[#0a0a0a] text-center">
-            <p className="text-gray-400">Select a tool to get started</p>
+          <div className="p-4 editor-bg-primary text-center">
+            <p className="editor-text-muted">Select a tool to get started</p>
           </div>
         )
     }
   }
   return (
-    <div className="fixed inset-0 bg-[#0a0a0a] flex flex-col">
+    <div className="fixed inset-0 editor-bg-primary flex flex-col">
       {/* Top bar - with Reset button */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a2a]">
+      <div className="flex items-center justify-between px-4 py-3 border-b editor-border">
         <button
           onClick={onClose}
           disabled={isSaving}
-          className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 editor-text-primary hover:opacity-80 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span className="text-xl">✕</span>
           <span className="text-sm font-medium">Close</span>
         </button>
 
         <div className="flex items-center gap-4">
-          <h1 className="text-white font-semibold text-lg truncate max-w-[200px]">
+          <h1 className="editor-text-primary font-semibold text-lg truncate max-w-[200px]">
             {photoName}
           </h1>
 
@@ -74,7 +74,7 @@ export default function EditorShell({
             <button
               onClick={onReset}
               disabled={isSaving}
-              className="text-gray-400 hover:text-gray-300 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="editor-text-muted hover:editor-text-secondary transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Reset
             </button>
@@ -106,15 +106,15 @@ export default function EditorShell({
       </div>
 
       {/* Tools section - compact on mobile */}
-      <div className="editor-tools border-t border-[#2a2a2a] max-h-[50vh] md:max-h-[400px] flex flex-col">
+      <div className="editor-tools border-t editor-border max-h-[50vh] md:max-h-[400px] flex flex-col">
         <ToolSelector activeTool={activeTool} onToolChange={setActiveTool} />
         <div className="overflow-y-auto flex-1">{renderToolPanel()}</div>
       </div>
 
       {/* Saving overlay */}
       {isSaving && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 text-on-glass">
-          <div className="bg-[#1a1a1a] rounded-lg p-6 max-w-sm mx-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: 'var(--overlay-bg)' }}>
+          <div className="editor-bg-secondary rounded-lg p-6 max-w-sm mx-4">
             <div className="flex items-center gap-4">
               <span className="text-4xl animate-spin">⟳</span>
               <div>

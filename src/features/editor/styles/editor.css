@@ -15,6 +15,10 @@
   position: relative; /* For crop overlay positioning */
 }
 
+body.light-mode .editor-viewport {
+  background: var(--bg-secondary);
+}
+
 /* ============================================================================
    CANVAS - CSS-skalering (IKKE JavaScript!)
    ============================================================================ */
@@ -83,6 +87,10 @@
   background: #3a3a3a;
   border-radius: 4px;
   -webkit-appearance: none;
+}
+
+body.light-mode .rotate-container input[type='range'] {
+  background: var(--border-color);
 }
 
 .rotate-container input[type='range']:focus {

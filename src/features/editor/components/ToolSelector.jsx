@@ -6,14 +6,14 @@
  */
 export default function ToolSelector({ activeTool, onToolChange }) {
   const tools = [
-    { id: 'adjust', label: 'Adjust', icon: '™' },
+    { id: 'adjust', label: 'Adjust', icon: 'ï¿½' },
     { id: 'crop', label: 'Crop', icon: '' },
-    { id: 'rotate', label: 'Rotate', icon: '»' },
-    { id: 'filters', label: 'Filters', icon: '<¨' },
+    { id: 'rotate', label: 'Rotate', icon: 'ï¿½' },
+    { id: 'filters', label: 'Filters', icon: '<ï¿½' },
   ]
 
   return (
-    <div className="flex items-center justify-around border-b border-[#2a2a2a] bg-[#1a1a1a]">
+    <div className="flex items-center justify-around border-b editor-border editor-bg-secondary">
       {tools.map((tool) => (
         <button
           key={tool.id}
@@ -21,7 +21,7 @@ export default function ToolSelector({ activeTool, onToolChange }) {
           className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
             activeTool === tool.id
               ? 'text-blue-400 border-b-2 border-blue-400'
-              : 'text-gray-400 hover:text-gray-300'
+              : 'editor-text-muted hover:editor-text-secondary'
           }`}
         >
           <span className="mr-2">{tool.icon}</span>
