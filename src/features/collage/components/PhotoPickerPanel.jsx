@@ -55,69 +55,103 @@ const PhotoPickerPanel = ({ isOpen, onClose, photos, onSelectPhoto, selectedSlot
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/80 backdrop-blur-md z-40 animate-fade-in"
+        className="fixed inset-0 backdrop-blur-md z-40 animate-fade-in"
+        style={{ backgroundColor: 'var(--overlay-bg)' }}
         onClick={onClose}
       />
 
       {/* Panel */}
       <div
-        className={`fixed bottom-0 left-0 right-0 md:left-auto md:right-0 md:top-0 md:bottom-0 md:w-96 bg-gradient-to-b from-gray-900 to-black border-t md:border-l border-white/10 z-50 flex flex-col animate-slide-in-bottom md:animate-slide-in-right`}
-        style={{ maxHeight: '70vh', height: 'auto' }}
+        className="fixed bottom-0 left-0 right-0 md:left-auto md:right-0 md:top-0 md:bottom-0 md:w-96 border-t md:border-l z-50 flex flex-col animate-slide-in-bottom md:animate-slide-in-right"
+        style={{
+          backgroundColor: 'var(--bg-secondary)',
+          borderColor: 'var(--border-color)',
+          maxHeight: '70vh',
+          height: 'auto'
+        }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-white/20 bg-black/40 flex-shrink-0">
+        <div
+          className="flex items-center justify-between p-4 border-b flex-shrink-0"
+          style={{
+            borderColor: 'var(--border-color)',
+            backgroundColor: 'var(--bg-surface)'
+          }}
+        >
           <div>
-            <h3 className="font-semibold text-lg text-white">
+            <h3 className="font-semibold text-lg" style={{ color: 'var(--text-primary)' }}>
               {t('collage.photoPicker.title', 'Select Photo')}
             </h3>
             {selectedSlotIndex !== null && (
-              <p className="text-xs text-white/60">
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                 {t('collage.photoPicker.forSlot', 'For slot')} #{selectedSlotIndex + 1}
               </p>
             )}
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-white/20 rounded-lg transition text-white"
+            className="p-2 rounded-lg transition"
+            style={{ color: 'var(--text-primary)' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--interactive-hover)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Search Bar */}
-        <div className="p-4 border-b border-white/10 flex-shrink-0">
+        <div className="p-4 border-b flex-shrink-0" style={{ borderColor: 'var(--border-color)' }}>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--text-muted)' }} />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('collage.photoPicker.search', 'Search photos...')}
-              className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white/15 transition"
+              className="w-full pl-10 pr-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+              style={{
+                backgroundColor: 'var(--bg-surface)',
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                borderColor: 'var(--border-color)',
+                color: 'var(--text-primary)'
+              }}
             />
           </div>
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex gap-2 p-4 border-b border-white/10 flex-shrink-0">
+        <div className="flex gap-2 p-4 border-b flex-shrink-0" style={{ borderColor: 'var(--border-color)' }}>
           <button
             onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-              filter === 'all'
-                ? 'bg-purple-600 text-white'
-                : 'bg-white/10 text-white/90 hover:bg-white/15'
-            }`}
+            className="px-4 py-2 rounded-lg text-sm font-medium transition"
+            style={{
+              backgroundColor: filter === 'all' ? '#8b5cf6' : 'var(--bg-surface)',
+              color: filter === 'all' ? '#ffffff' : 'var(--text-primary)'
+            }}
+            onMouseEnter={(e) => {
+              if (filter !== 'all') e.currentTarget.style.backgroundColor = 'var(--interactive-hover)'
+            }}
+            onMouseLeave={(e) => {
+              if (filter !== 'all') e.currentTarget.style.backgroundColor = 'var(--bg-surface)'
+            }}
           >
             <ImageIcon className="w-4 h-4 inline mr-1" />
             {t('collage.photoPicker.all', 'All')} ({photos?.length || 0})
           </button>
           <button
             onClick={() => setFilter('favorites')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-              filter === 'favorites'
-                ? 'bg-purple-600 text-white'
-                : 'bg-white/10 text-white/90 hover:bg-white/15'
-            }`}
+            className="px-4 py-2 rounded-lg text-sm font-medium transition"
+            style={{
+              backgroundColor: filter === 'favorites' ? '#8b5cf6' : 'var(--bg-surface)',
+              color: filter === 'favorites' ? '#ffffff' : 'var(--text-primary)'
+            }}
+            onMouseEnter={(e) => {
+              if (filter !== 'favorites') e.currentTarget.style.backgroundColor = 'var(--interactive-hover)'
+            }}
+            onMouseLeave={(e) => {
+              if (filter !== 'favorites') e.currentTarget.style.backgroundColor = 'var(--bg-surface)'
+            }}
           >
             <Star className="w-4 h-4 inline mr-1" />
             {t('collage.photoPicker.favorites', 'Favorites')}
@@ -128,8 +162,8 @@ const PhotoPickerPanel = ({ isOpen, onClose, photos, onSelectPhoto, selectedSlot
         <div className="flex-1 overflow-y-auto p-4">
           {filteredPhotos.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-12">
-              <ImageIcon className="w-12 h-12 text-white/30 mb-3" />
-              <p className="text-sm text-white/60">
+              <ImageIcon className="w-12 h-12 mb-3" style={{ color: 'var(--text-disabled)' }} />
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                 {t('collage.photoPicker.noPhotos', 'No photos found')}
               </p>
             </div>
@@ -139,7 +173,8 @@ const PhotoPickerPanel = ({ isOpen, onClose, photos, onSelectPhoto, selectedSlot
                 <div
                   key={photo.id}
                   onClick={() => handlePhotoClick(photo)}
-                  className="relative aspect-square cursor-pointer group rounded-lg overflow-hidden border border-white/10 hover:border-purple-500 transition-all"
+                  className="relative aspect-square cursor-pointer group rounded-lg overflow-hidden border hover:border-purple-500 transition-all"
+                  style={{ borderColor: 'var(--border-color)' }}
                 >
                   <LazyImage
                     src={photo.url}
@@ -159,8 +194,14 @@ const PhotoPickerPanel = ({ isOpen, onClose, photos, onSelectPhoto, selectedSlot
         </div>
 
         {/* Footer hint */}
-        <div className="p-3 border-t border-white/20 bg-black/30 text-center flex-shrink-0">
-          <p className="text-xs text-white/70">
+        <div
+          className="p-3 border-t text-center flex-shrink-0"
+          style={{
+            borderColor: 'var(--border-color)',
+            backgroundColor: 'var(--bg-surface)'
+          }}
+        >
+          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
             {t('collage.photoPicker.hint', 'Tap a photo to add it to the selected slot')}
           </p>
         </div>
