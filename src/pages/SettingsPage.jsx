@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import useAuth from '../hooks/useAuth'
 import usePhotoData from '../hooks/usePhotoData'
+import useStore from '../state/store'
 import {
   UserCircle,
   Settings,
@@ -24,7 +25,10 @@ const SettingsPage = () => {
   const { user, userProfile, handleLogout } = useAuth()
   const { photos } = usePhotoData()
 
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'auto')
+  // ✅ P2 FIX: Use Zustand store for theme instead of local state
+  const isDarkMode = useStore((state) => state.isDarkMode)
+  const setTheme = useStore((state) => state.setTheme)
+
   const [language, setLanguage] = useState(i18n.language)
   const [notifications, setNotifications] = useState({
     uploads: true,
@@ -39,20 +43,16 @@ const SettingsPage = () => {
   const storageUsed = photos.reduce((sum, p) => sum + (p.size || 0), 0)
   const storageUsedMB = (storageUsed / (1024 * 1024)).toFixed(1)
 
+  // ✅ P2 FIX: Use Zustand setTheme which correctly manages dark-mode/light-mode classes on body
   const handleThemeChange = (newTheme) => {
-    setTheme(newTheme)
-    localStorage.setItem('theme', newTheme)
-
     if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark')
+      setTheme(true)
     } else if (newTheme === 'light') {
-      document.documentElement.classList.remove('dark')
+      setTheme(false)
     } else {
-      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.classList.add('dark')
-      } else {
-        document.documentElement.classList.remove('dark')
-      }
+      // Auto mode - check system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      setTheme(prefersDark)
     }
   }
 
@@ -163,11 +163,11 @@ const SettingsPage = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t('settings:theme')}
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => handleThemeChange('light')}
                   className={`p-3 rounded-xl border-2 transition-all ${
-                    theme === 'light'
+                    !isDarkMode
                       ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/30'
                       : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                   }`}
@@ -181,7 +181,7 @@ const SettingsPage = () => {
                 <button
                   onClick={() => handleThemeChange('dark')}
                   className={`p-3 rounded-xl border-2 transition-all ${
-                    theme === 'dark'
+                    isDarkMode
                       ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/30'
                       : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                   }`}
@@ -189,20 +189,6 @@ const SettingsPage = () => {
                   <Moon className="w-6 h-6 mx-auto mb-1 text-gray-700 dark:text-gray-300" />
                   <span className="text-sm text-gray-900 dark:text-white">
                     {t('settings:dark')}
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => handleThemeChange('auto')}
-                  className={`p-3 rounded-xl border-2 transition-all ${
-                    theme === 'auto'
-                      ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/30'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <Settings className="w-6 h-6 mx-auto mb-1 text-gray-700 dark:text-gray-300" />
-                  <span className="text-sm text-gray-900 dark:text-white">
-                    {t('settings:auto')}
                   </span>
                 </button>
               </div>
