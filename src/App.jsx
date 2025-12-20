@@ -152,8 +152,12 @@ function App() {
                 {/* Collage view */}
                 <Route path="/collage/:id" element={<CollageView />} />
 
-                {/* All authenticated routes */}
-                <Route path="/*" element={<AppContent />} />
+                {/* All authenticated routes - wrapped in ProtectedRoute */}
+                <Route path="/*" element={
+                  <ProtectedRoute>
+                    <AppContent />
+                  </ProtectedRoute>
+                } />
               </Routes>
             </Suspense>
           </SecurityProvider>
@@ -165,18 +169,19 @@ function App() {
 }
 
 /**
- * Public Route Component - Shows landing page or redirects to app
+ * Public Route Component - Shows landing page for unauthenticated users
+ * Redirects authenticated users to home
  */
 function PublicRoute() {
   const { user, loading } = useAuth()
   const navigate = useNavigate()
 
-  // Redirect to app if already logged in
+  // Redirect authenticated users to home
   React.useEffect(() => {
-    if (user) {
-      navigate('/albums', { replace: true })
+    if (!loading && user) {
+      navigate('/home', { replace: true })
     }
-  }, [user, navigate])
+  }, [user, loading, navigate])
 
   if (loading) {
     return (
@@ -187,10 +192,40 @@ function PublicRoute() {
   }
 
   if (user) {
-    return null
+    return null // While redirecting
   }
 
   return <LandingPage />
+}
+
+/**
+ * Protected Route Component - Ensures user is authenticated
+ * Redirects unauthenticated users to login
+ */
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth()
+  const navigate = useNavigate()
+
+  // Redirect unauthenticated users to login
+  React.useEffect(() => {
+    if (!loading && !user) {
+      navigate('/login', { replace: true })
+    }
+  }, [user, loading, navigate])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="xl" />
+      </div>
+    )
+  }
+
+  if (!user) {
+    return null // While redirecting
+  }
+
+  return children
 }
 
 /**
@@ -425,30 +460,8 @@ function AppContent() {
     }
   }, [initialHeight])
 
-  // ✅ FIX: Redirect to login if not authenticated
-  // CRITICAL: This useEffect MUST always run to avoid hook order violations
-  // The condition is INSIDE the effect, not wrapping it
-  React.useEffect(() => {
-    if (!loading && !user) {
-      navigate('/login', { replace: true })
-    }
-  }, [loading, user, navigate])
-
-  // Show loading spinner
-  // ⛔ BLOCK ALL RENDERING UNTIL AUTH IS READY
-  if (loading || user === undefined) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="spinner" />
-      </div>
-    )
-  }
-
-  // Return null while redirecting to login
-  // This happens after all hooks have been called
-  if (!user) {
-    return null
-  }
+  // ✅ NOTE: Auth guard moved to ProtectedRoute wrapper
+  // AppContent now assumes user is authenticated
 
   // Show PIN lock screen if locked
   if (isLocked && pinEnabled) {
@@ -484,7 +497,7 @@ function AppContent() {
       <main className={`relative z-10 ${showVerificationBanner ? 'pt-16 md:pt-14' : ''}`}>
         <Routes>
           <Route
-            path="/"
+            path="/home"
             element={
               <HomeDashboard
                 albums={albums}
@@ -589,9 +602,9 @@ function AppContent() {
           <div className="flex justify-around items-center gap-2">
             {/* Home */}
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/home')}
               className={`ripple-effect nav-item-premium ${
-                location.pathname === '/' ? 'active' : ''
+                location.pathname === '/home' ? 'active' : ''
               }`}
             >
               <Home className="w-6 h-6" />

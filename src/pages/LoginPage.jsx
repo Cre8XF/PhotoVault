@@ -45,12 +45,12 @@ const LoginPage = ({ onLogin = () => {} }) => {
     setIsDarkMode(isDark);
   }, []);
 
-  // ✅ FIX: Redirect to /albums when user is authenticated
+  // ✅ FIX: Redirect to /home when user is authenticated
   // CRITICAL: This useEffect must always run to handle post-login redirect
   // Condition is INSIDE the effect, not wrapping it
   useEffect(() => {
     if (!authLoading && user) {
-      navigate('/albums', { replace: true });
+      navigate('/home', { replace: true });
     }
   }, [authLoading, user, navigate]);
 

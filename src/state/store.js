@@ -440,6 +440,12 @@ const useStore = create(
               )
               state.photos = []
             }
+
+            // 🔒 P1 FIX: Never persist emailVerified - always reset to false
+            // AuthProvider will set correct value after Firebase auth state loads
+            // This prevents flash of verification banner when email is actually verified
+            state.emailVerified = false
+            console.log('🔒 [STORE] Reset emailVerified to false on rehydration (AuthProvider will update)')
           }
         },
       }
