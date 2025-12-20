@@ -358,20 +358,14 @@ export function useUpload() {
       }
 
       // Upload to Firebase
-      // ✅ FIKSET: Kaller onUpload én fil av gangen og oppdaterer count
-      for (let i = 0; i < processedFiles.length; i++) {
-        const fileObj = processedFiles[i]
+      // ✅ P2-A FIX: Call onUpload ONCE with all processed files
+      // This prevents multiple success notifications (one per file)
+      // onUpload callback (handleUpload) will show a single success message with correct count
+      await onUpload(processedFiles, albumId, aiTagging)
 
-        // Last opp én fil
-        await onUpload([fileObj], albumId, aiTagging)
-
-        // Oppdater count og progress
-        setUploadCount(i + 1)
-        setProcessingProgress(
-          50 + Math.round(((i + 1) / processedFiles.length) * 50)
-        )
-      }
-      await showToast(t('success.uploaded'), 'success')
+      // Update progress to 100%
+      setUploadCount(processedFiles.length)
+      setProcessingProgress(100)
 
       return { success: true }
     } catch (error) {
