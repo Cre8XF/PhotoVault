@@ -39,12 +39,14 @@ const ConfirmModal = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm animate-fade-in"
+      style={{ backgroundColor: 'var(--overlay-bg)' }}
       onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="glass card-premium relative w-full max-w-sm p-6 rounded-2xl shadow-2xl text-gray-100 animate-scale-in"
+        className="glass card-premium relative w-full max-w-sm p-6 rounded-2xl shadow-2xl animate-scale-in"
+        style={{ color: 'var(--text-primary)' }}
       >
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
@@ -55,7 +57,7 @@ const ConfirmModal = ({
         </div>
 
         {/* Body */}
-        <p className="text-gray-300 text-sm leading-relaxed mb-6">
+        <p className="text-sm leading-relaxed mb-6" style={{ color: 'var(--text-secondary)' }}>
           {finalMessage}
         </p>
 
@@ -64,9 +66,18 @@ const ConfirmModal = ({
           <button
             onClick={onClose}
             disabled={loading}
-            className="ripple-effect px-5 py-2 rounded-xl bg-gray-700/70 hover:bg-gray-600/80
-                       text-gray-200 text-sm font-semibold transition-all duration-150
+            className="ripple-effect px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-150
                        disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              backgroundColor: 'var(--bg-surface)',
+              color: 'var(--text-secondary)'
+            }}
+            onMouseEnter={(e) => {
+              if (!loading) e.currentTarget.style.backgroundColor = 'var(--interactive-hover)'
+            }}
+            onMouseLeave={(e) => {
+              if (!loading) e.currentTarget.style.backgroundColor = 'var(--bg-surface)'
+            }}
           >
             {finalCancelLabel}
           </button>
