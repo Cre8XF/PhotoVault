@@ -34,6 +34,9 @@ body.light-mode {
   --glass-border: rgba(139, 92, 246, 0.15);
   --glass-bg-hover: rgba(255, 255, 255, 0.95);
   --glass-border-hover: rgba(139, 92, 246, 0.3);
+
+  /* Overlays */
+  --overlay-bg: rgba(139, 92, 246, 0.15);
 }
 
 /* Dark Mode */
@@ -67,6 +70,9 @@ body.dark-mode {
   --glass-border: rgba(255, 255, 255, 0.18);
   --glass-bg-hover: rgba(255, 255, 255, 0.12);
   --glass-border-hover: rgba(255, 255, 255, 0.25);
+
+  /* Overlays */
+  --overlay-bg: rgba(0, 0, 0, 0.6);
 }
 
 /* ============================================================================
@@ -139,7 +145,7 @@ body.dark-mode {
 
 /* Modal specific */
 .modal-overlay {
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: var(--overlay-bg);
 }
 
 .modal-content {
