@@ -425,6 +425,15 @@ function AppContent() {
     }
   }, [initialHeight])
 
+  // ✅ FIX: Redirect to login if not authenticated
+  // CRITICAL: This useEffect MUST always run to avoid hook order violations
+  // The condition is INSIDE the effect, not wrapping it
+  React.useEffect(() => {
+    if (!loading && !user) {
+      navigate('/login', { replace: true })
+    }
+  }, [loading, user, navigate])
+
   // Show loading spinner
   // ⛔ BLOCK ALL RENDERING UNTIL AUTH IS READY
   if (loading || user === undefined) {
@@ -435,11 +444,9 @@ function AppContent() {
     )
   }
 
-  // Redirect to login if not authenticated
+  // Return null while redirecting to login
+  // This happens after all hooks have been called
   if (!user) {
-    React.useEffect(() => {
-      navigate('/login', { replace: true })
-    }, [navigate])
     return null
   }
 
