@@ -1,7 +1,17 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Shield, Sparkles, Lock, Search, Image, QrCode, Check, ArrowRight, Globe } from 'lucide-react'
+import {
+  Shield,
+  Sparkles,
+  Lock,
+  Search,
+  Image,
+  QrCode,
+  Check,
+  ArrowRight,
+  Globe,
+} from 'lucide-react'
 
 /**
  * Public landing page for unauthenticated users
@@ -23,38 +33,38 @@ function LandingPage() {
       icon: Shield,
       title: t('landing:features.privacy.title'),
       description: t('landing:features.privacy.desc'),
-      color: 'from-purple-500 to-pink-500'
+      color: 'from-purple-500 to-pink-500',
     },
     {
       icon: Image,
       title: t('landing:features.albums.title'),
       description: t('landing:features.albums.desc'),
-      color: 'from-blue-500 to-cyan-500'
+      color: 'from-blue-500 to-cyan-500',
     },
     {
       icon: Search,
       title: t('landing:features.search.title'),
       description: t('landing:features.search.desc'),
-      color: 'from-green-500 to-emerald-500'
+      color: 'from-green-500 to-emerald-500',
     },
     {
       icon: Sparkles,
       title: t('landing:features.collage.title'),
       description: t('landing:features.collage.desc'),
-      color: 'from-orange-500 to-yellow-500'
+      color: 'from-orange-500 to-yellow-500',
     },
     {
       icon: QrCode,
       title: t('landing:features.sharing.title'),
       description: t('landing:features.sharing.desc'),
-      color: 'from-pink-500 to-rose-500'
+      color: 'from-pink-500 to-rose-500',
     },
     {
       icon: Lock,
       title: t('landing:features.control.title'),
       description: t('landing:features.control.desc'),
-      color: 'from-violet-500 to-purple-500'
-    }
+      color: 'from-violet-500 to-purple-500',
+    },
   ]
 
   const pricing = [
@@ -67,8 +77,8 @@ function LandingPage() {
         t('landing:pricing.free.feature1'),
         t('landing:pricing.free.feature2'),
         t('landing:pricing.free.feature3'),
-        t('landing:pricing.free.feature4')
-      ]
+        t('landing:pricing.free.feature4'),
+      ],
     },
     {
       name: 'LITE',
@@ -80,8 +90,8 @@ function LandingPage() {
         t('landing:pricing.lite.feature1'),
         t('landing:pricing.lite.feature2'),
         t('landing:pricing.lite.feature3'),
-        t('landing:pricing.lite.feature4')
-      ]
+        t('landing:pricing.lite.feature4'),
+      ],
     },
     {
       name: 'PRO',
@@ -92,9 +102,9 @@ function LandingPage() {
         t('landing:pricing.pro.feature1'),
         t('landing:pricing.pro.feature2'),
         t('landing:pricing.pro.feature3'),
-        t('landing:pricing.pro.feature4')
-      ]
-    }
+        t('landing:pricing.pro.feature4'),
+      ],
+    },
   ]
 
   return (
@@ -115,7 +125,9 @@ function LandingPage() {
               className="flex items-center gap-2 px-4 py-2 hover:bg-white/10 rounded-lg transition"
             >
               <Globe className="w-4 h-4" />
-              <span className="text-sm">{currentLang === 'no' ? 'NO' : 'EN'}</span>
+              <span className="text-sm">
+                {currentLang === 'no' ? 'NO' : 'EN'}
+              </span>
             </button>
 
             <button
@@ -191,15 +203,21 @@ function LandingPage() {
               <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center">
                 <Shield className="w-6 h-6" />
               </div>
-              <h3 className="text-2xl font-bold">{t('landing:why.noTracking.title')}</h3>
-              <p className="text-gray-300">{t('landing:why.noTracking.desc')}</p>
+              <h3 className="text-2xl font-bold">
+                {t('landing:why.noTracking.title')}
+              </h3>
+              <p className="text-gray-300">
+                {t('landing:why.noTracking.desc')}
+              </p>
             </div>
 
             <div className="glass-card p-8 space-y-4">
               <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-500 rounded-xl flex items-center justify-center">
                 <Lock className="w-6 h-6" />
               </div>
-              <h3 className="text-2xl font-bold">{t('landing:why.yourData.title')}</h3>
+              <h3 className="text-2xl font-bold">
+                {t('landing:why.yourData.title')}
+              </h3>
               <p className="text-gray-300">{t('landing:why.yourData.desc')}</p>
             </div>
 
@@ -207,7 +225,9 @@ function LandingPage() {
               <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center">
                 <Sparkles className="w-6 h-6" />
               </div>
-              <h3 className="text-2xl font-bold">{t('landing:why.creative.title')}</h3>
+              <h3 className="text-2xl font-bold">
+                {t('landing:why.creative.title')}
+              </h3>
               <p className="text-gray-300">{t('landing:why.creative.desc')}</p>
             </div>
           </div>
@@ -232,7 +252,9 @@ function LandingPage() {
                 key={index}
                 className="glass-card p-6 space-y-4 hover:scale-105 transition"
               >
-                <div className={`w-12 h-12 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center`}>
+                <div
+                  className={`w-12 h-12 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center`}
+                >
                   <feature.icon className="w-6 h-6" />
                 </div>
                 <h3 className="text-xl font-bold">{feature.title}</h3>
@@ -275,7 +297,9 @@ function LandingPage() {
                     <span className="text-5xl font-bold">{plan.price}</span>
                     <span className="text-gray-400">/{plan.period}</span>
                   </div>
-                  <p className="text-sm text-gray-400">{plan.storage} {t('landing:pricing.storage')}</p>
+                  <p className="text-sm text-gray-400">
+                    {plan.storage} {t('landing:pricing.storage')}
+                  </p>
                 </div>
 
                 <ul className="space-y-3">
