@@ -112,45 +112,99 @@ function App() {
                 {/* Firebase auth action handler - handles email verification links from Netlify */}
                 <Route path="/__/auth/action" element={<AuthActionHandler />} />
 
-                {/* Function Worlds */}
-                <Route path={ROUTES.TOOLS} element={<ToolsPage />} />
+                {/* Function Worlds - Protected Routes */}
+                <Route path={ROUTES.TOOLS} element={
+                  <ProtectedRoute>
+                    <ToolsPage />
+                  </ProtectedRoute>
+                } />
                 <Route
                   path={ROUTES.COLLAGE_TEMPLATES}
-                  element={<CollageTemplatesPage />}
+                  element={
+                    <ProtectedRoute>
+                      <CollageTemplatesPage />
+                    </ProtectedRoute>
+                  }
                 />
-                <Route path={ROUTES.COLLAGE_NEW} element={<CollageNewPage />} />
+                <Route path={ROUTES.COLLAGE_NEW} element={
+                  <ProtectedRoute>
+                    <CollageNewPage />
+                  </ProtectedRoute>
+                } />
                 <Route
                   path={ROUTES.COLLAGE_EDIT}
-                  element={<CollageEditPage />}
+                  element={
+                    <ProtectedRoute>
+                      <CollageEditPage />
+                    </ProtectedRoute>
+                  }
                 />
-                <Route path={ROUTES.PHOTO} element={<PhotoPage />} />
-                <Route path={ROUTES.SLIDESHOW} element={<SlideshowPage />} />
+                <Route path={ROUTES.PHOTO} element={
+                  <ProtectedRoute>
+                    <PhotoPage />
+                  </ProtectedRoute>
+                } />
+                <Route path={ROUTES.SLIDESHOW} element={
+                  <ProtectedRoute>
+                    <SlideshowPage />
+                  </ProtectedRoute>
+                } />
                 <Route
                   path="/edit/:photoId"
                   element={
-                    <Suspense fallback={
-                      <div className="fixed inset-0 flex items-center justify-center bg-[#0a0a0a]">
-                        <LoadingSpinner size="xl" />
-                      </div>
-                    }>
-                      <EditorPage />
-                    </Suspense>
+                    <ProtectedRoute>
+                      <Suspense fallback={
+                        <div className="fixed inset-0 flex items-center justify-center bg-[#0a0a0a]">
+                          <LoadingSpinner size="xl" />
+                        </div>
+                      }>
+                        <EditorPage />
+                      </Suspense>
+                    </ProtectedRoute>
                   }
                 />
 
-                {/* AI Tools */}
-                <Route path={ROUTES.AI_TOOLS} element={<AIToolsPage />} />
-                <Route path={ROUTES.AI_ENHANCE} element={<AIEnhancePage />} />
+                {/* AI Tools - Protected Routes */}
+                <Route path={ROUTES.AI_TOOLS} element={
+                  <ProtectedRoute>
+                    <AIToolsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path={ROUTES.AI_ENHANCE} element={
+                  <ProtectedRoute>
+                    <AIEnhancePage />
+                  </ProtectedRoute>
+                } />
                 <Route
                   path={ROUTES.AI_REMOVE_BG}
-                  element={<AIRemoveBgPage />}
+                  element={
+                    <ProtectedRoute>
+                      <AIRemoveBgPage />
+                    </ProtectedRoute>
+                  }
                 />
-                <Route path={ROUTES.AI_PORTRAIT} element={<AIPortraitPage />} />
-                <Route path={ROUTES.AI_COLOR} element={<AIColorPage />} />
-                <Route path={ROUTES.AI_UPSCALE} element={<AIUpscalePage />} />
+                <Route path={ROUTES.AI_PORTRAIT} element={
+                  <ProtectedRoute>
+                    <AIPortraitPage />
+                  </ProtectedRoute>
+                } />
+                <Route path={ROUTES.AI_COLOR} element={
+                  <ProtectedRoute>
+                    <AIColorPage />
+                  </ProtectedRoute>
+                } />
+                <Route path={ROUTES.AI_UPSCALE} element={
+                  <ProtectedRoute>
+                    <AIUpscalePage />
+                  </ProtectedRoute>
+                } />
 
-                {/* Collage view */}
-                <Route path="/collage/:id" element={<CollageView />} />
+                {/* Collage view - Protected Route */}
+                <Route path="/collage/:id" element={
+                  <ProtectedRoute>
+                    <CollageView />
+                  </ProtectedRoute>
+                } />
 
                 {/* All authenticated routes - wrapped in ProtectedRoute */}
                 <Route path="/*" element={
