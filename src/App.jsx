@@ -425,6 +425,13 @@ function AppContent() {
     }
   }, [initialHeight])
 
+  // Redirect to login if not authenticated - MUST be before early returns
+  React.useEffect(() => {
+    if (!user && !loading && user !== undefined) {
+      navigate('/login', { replace: true })
+    }
+  }, [user, loading, navigate])
+
   // Show loading spinner
   // ⛔ BLOCK ALL RENDERING UNTIL AUTH IS READY
   if (loading || user === undefined) {
@@ -437,9 +444,6 @@ function AppContent() {
 
   // Redirect to login if not authenticated
   if (!user) {
-    React.useEffect(() => {
-      navigate('/login', { replace: true })
-    }, [navigate])
     return null
   }
 
