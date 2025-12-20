@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Lock, Mail, Eye, EyeOff, Fingerprint } from "lucide-react";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification } from "firebase/auth";
@@ -12,11 +13,17 @@ import {
   getBiometricTypeText
 } from "../utils/nativeBiometric";
 import { isNative, triggerHaptic, showToast } from "../utils/nativeUtils";
+import useAuth from "../hooks/useAuth";
 import Particles from "../components/Particles";
 import LogoLight from '../assets/logo_light.png';
 import LogoDark from '../assets/logo_dark.png';
 const LoginPage = ({ onLogin = () => {} }) => {
   const { t } = useTranslation('auth');
+  const navigate = useNavigate();
+
+  // ✅ Get auth state to redirect when user logs in
+  const { user, loading: authLoading } = useAuth();
+
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,6 +44,15 @@ const LoginPage = ({ onLogin = () => {} }) => {
     const isDark = savedTheme !== 'light';
     setIsDarkMode(isDark);
   }, []);
+
+  // ✅ FIX: Redirect to /albums when user is authenticated
+  // CRITICAL: This useEffect must always run to handle post-login redirect
+  // Condition is INSIDE the effect, not wrapping it
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate('/albums', { replace: true });
+    }
+  }, [authLoading, user, navigate]);
 
   const handleForgotPassword = async () => {
     if (!email) {
