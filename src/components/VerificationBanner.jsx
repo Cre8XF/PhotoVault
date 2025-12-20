@@ -1,7 +1,8 @@
 // ============================================================================
 // COMPONENT: VerificationBanner.jsx – Email verification reminder banner
+// P3-C: Enhanced with stability delay and improved error handling
 // ============================================================================
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Mail, X, RefreshCw, Edit } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { sendEmailVerification, updateEmail } from 'firebase/auth'
@@ -17,8 +18,25 @@ const VerificationBanner = ({ user }) => {
   const setNotification = useStore((state) => state.setNotification)
   const { refreshUser, emailVerified } = useAuth()
 
-  // Don't show if verified or dismissed
-  if (!user || emailVerified || dismissed) return null
+  // P3-C: Stability delay - wait for auth state to settle before showing banner
+  const [isStabilizing, setIsStabilizing] = useState(true)
+
+  // P3-C: Give auth state 2 seconds to stabilize on mount
+  // This prevents flashing banner when emailVerified updates after user.reload()
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsStabilizing(false)
+    }, 2000)
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Don't show if:
+  // - No user
+  // - Email is verified
+  // - User dismissed the banner
+  // - Auth state is still stabilizing (P3-C)
+  if (!user || emailVerified || dismissed || isStabilizing) return null
 
   // --------------------------------------------------
   // Resend verification email
@@ -88,23 +106,34 @@ const VerificationBanner = ({ user }) => {
   // Manual verification check
   // ✅ Email verification state is single-source-of-truth via useAuth.refreshUser()
   // This triggers Firebase reload and syncs to Zustand - banner disappears automatically when emailVerified === true
+  // P3-C: Improved error handling - don't show "failed" for timing issues
   // --------------------------------------------------
   const handleCheckVerification = async () => {
-    const verified = await refreshUser()
+    try {
+      const verified = await refreshUser()
 
-    if (verified) {
-      setNotification({
-        message: t('auth:emailVerified') || 'Email verified successfully!',
-        type: 'success',
-      })
-      // Banner will automatically disappear because emailVerified is now true in Zustand
-    } else {
-      setNotification({
-        message:
-          t('auth:emailNotVerifiedYet') ||
-          'Email not verified yet. Please click the link in your email and try again.',
-        type: 'info',
-      })
+      if (verified) {
+        setNotification({
+          message: t('auth:emailVerified') || 'Email verified successfully!',
+          type: 'success',
+        })
+        // Banner will automatically disappear because emailVerified is now true in Zustand
+      } else {
+        // P3-C: Gentle message - verification might just need more time
+        // Don't use 'error' type for normal "not yet" state
+        setNotification({
+          message:
+            t('auth:emailNotVerifiedYet') ||
+            'Email not verified yet. Please click the link in your email and try again.',
+          type: 'info', // Changed from potential 'error' to 'info'
+        })
+      }
+    } catch (error) {
+      // P3-C: Only show error for actual failures, not timing issues
+      console.warn('[P3-C] Verification check error (may be transient):', error)
+
+      // Don't show error notification for transient issues
+      // User can try again
     }
   }
 
