@@ -4,6 +4,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Play, Pause, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { format } from 'date-fns';
 import useStore from '../state/store';
 import { usePhotoById } from '../hooks/usePhotoById';
 import { usePhotoContext } from '../hooks/usePhotoContext';
@@ -53,6 +54,48 @@ export default function SlideshowPage() {
       setCurrentPhotoId(null);
     };
   }, [setIsWorldView, setSlideshowActive, setCurrentPhotoId, id]);
+
+  // Get canonical display date (EXIF date taken OR upload date)
+  const getDisplayDate = useCallback(() => {
+    if (!photo) return null;
+    // Prefer EXIF/metadata date if available
+    if (photo.dateTaken) {
+      return typeof photo.dateTaken === 'string'
+        ? new Date(photo.dateTaken)
+        : photo.dateTaken.toDate
+        ? photo.dateTaken.toDate()
+        : null;
+    }
+    // Fallback to upload date
+    if (photo.uploadedAt) {
+      return typeof photo.uploadedAt === 'string'
+        ? new Date(photo.uploadedAt)
+        : photo.uploadedAt.toDate
+        ? photo.uploadedAt.toDate()
+        : null;
+    }
+    // Last resort: createdAt
+    if (photo.createdAt) {
+      return new Date(photo.createdAt);
+    }
+    return null;
+  }, [photo]);
+
+  // Format date for title
+  const getPhotoTitle = useCallback(() => {
+    if (!photo) return 'Slideshow';
+    if (photo.caption) return photo.caption;
+
+    const displayDate = getDisplayDate();
+    if (displayDate) {
+      try {
+        return format(displayDate, 'MMMM d, yyyy');
+      } catch {
+        return photo.name || 'Slideshow';
+      }
+    }
+    return photo.name || 'Slideshow';
+  }, [photo, getDisplayDate]);
 
   // Reset UI timer on any interaction
   const resetUiTimer = useCallback(() => {
@@ -278,7 +321,7 @@ export default function SlideshowPage() {
 
           {/* Center: Title */}
           <div className="flex-1 text-center px-4">
-            <h1 className="text-white text-sm font-medium">Slideshow</h1>
+            <h1 className="text-white text-sm font-medium">{getPhotoTitle()}</h1>
             {photoContext && photoOrder && photoOrder.length > 0 && (
               <p className="text-white/60 text-xs">
                 {photoIndex + 1} / {photoOrder.length}
