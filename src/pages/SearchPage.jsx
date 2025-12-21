@@ -149,7 +149,8 @@ const SearchPage = ({
       console.log('🔵 RECENT FILTER ACTIVATED:', {
         limit,
         totalPhotos: safePhotos.length,
-        explanation: 'Will show most recent photos sorted by createdAt/uploadedAt'
+        explanation:
+          'Will show most recent photos sorted by createdAt/uploadedAt',
       })
       setSpecialFilter({ type: 'recent', limit })
     } else {
@@ -300,12 +301,14 @@ const SearchPage = ({
 
         console.log('🔍 Filtering photos from TODAY:', {
           start: todayStart.toISOString(),
-          end: todayEnd.toISOString()
+          end: todayEnd.toISOString(),
         })
 
         res = res.filter((p) => {
           const photoDate = new Date(p.createdAt || p.uploadedAt || 0).getTime()
-          return photoDate >= todayStart.getTime() && photoDate <= todayEnd.getTime()
+          return (
+            photoDate >= todayStart.getTime() && photoDate <= todayEnd.getTime()
+          )
         })
         console.log(`✅ Today filter applied: ${res.length} photos`)
       } else if (activeFilters.dateRange === 'yesterday') {
@@ -318,12 +321,15 @@ const SearchPage = ({
 
         console.log('🔍 Filtering photos from YESTERDAY:', {
           start: yesterdayStart.toISOString(),
-          end: yesterdayEnd.toISOString()
+          end: yesterdayEnd.toISOString(),
         })
 
         res = res.filter((p) => {
           const photoDate = new Date(p.createdAt || p.uploadedAt || 0).getTime()
-          return photoDate >= yesterdayStart.getTime() && photoDate <= yesterdayEnd.getTime()
+          return (
+            photoDate >= yesterdayStart.getTime() &&
+            photoDate <= yesterdayEnd.getTime()
+          )
         })
         console.log(`✅ Yesterday filter applied: ${res.length} photos`)
       } else if (activeFilters.dateRange.startsWith('date:')) {
@@ -338,7 +344,9 @@ const SearchPage = ({
 
         res = res.filter((p) => {
           const photoDate = new Date(p.createdAt || p.uploadedAt || 0).getTime()
-          return photoDate >= targetDate.getTime() && photoDate < nextDay.getTime()
+          return (
+            photoDate >= targetDate.getTime() && photoDate < nextDay.getTime()
+          )
         })
         console.log(`✅ Date filter applied: ${res.length} photos`)
       } else {
@@ -348,14 +356,21 @@ const SearchPage = ({
         if (days > 0) {
           const cutoff = now - days * 24 * 60 * 60 * 1000
           res = res.filter(
-            (p) => new Date(p.createdAt || p.uploadedAt || 0).getTime() >= cutoff
+            (p) =>
+              new Date(p.createdAt || p.uploadedAt || 0).getTime() >= cutoff
           )
         }
       }
     }
 
     return res
-  }, [safePhotos, debouncedSearchQuery, activeFilters, specialFilter, safeAlbums])
+  }, [
+    safePhotos,
+    debouncedSearchQuery,
+    activeFilters,
+    specialFilter,
+    safeAlbums,
+  ])
 
   // 📅 DATE GROUPING: Group filtered photos by Month + Year
   const photoGroups = useMemo(() => {
@@ -367,7 +382,13 @@ const SearchPage = ({
 
     // Helper: Get displayDate for a photo (takenAt ?? uploadedAt)
     const getDisplayDate = (photo) => {
-      const dateValue = photo.takenAt || photo.uploadedAt || photo.createdAt
+      // ✅ FASIT
+      const dateValue =
+        photo.displayDate ||
+        photo.takenAt ||
+        photo.dateTaken ||
+        photo.uploadedAt ||
+        photo.createdAt
 
       if (!dateValue) {
         console.warn('Photo missing date:', photo.id)
@@ -394,11 +415,11 @@ const SearchPage = ({
 
     // Sort photos by displayDate descending (newest first)
     const sortedPhotos = [...filteredPhotos]
-      .map(photo => ({
+      .map((photo) => ({
         ...photo,
-        _displayDate: getDisplayDate(photo)
+        _displayDate: getDisplayDate(photo),
       }))
-      .filter(photo => photo._displayDate !== null)
+      .filter((photo) => photo._displayDate !== null)
       .sort((a, b) => b._displayDate - a._displayDate)
 
     console.log(`✅ Sorted ${sortedPhotos.length} photos by displayDate`)
@@ -406,7 +427,7 @@ const SearchPage = ({
     // Group by Month + Year
     const groups = {}
 
-    sortedPhotos.forEach(photo => {
+    sortedPhotos.forEach((photo) => {
       const date = photo._displayDate
       const monthKey = format(date, 'yyyy-MM')
       const displayLabel = format(date, 'MMMM yyyy', { locale: nb })
@@ -416,7 +437,7 @@ const SearchPage = ({
           key: monthKey,
           label: displayLabel,
           date: date,
-          photos: []
+          photos: [],
         }
       }
 
@@ -428,7 +449,10 @@ const SearchPage = ({
     // Convert to array and sort by date (newest first)
     const result = Object.values(groups).sort((a, b) => b.date - a.date)
 
-    console.log(`✅ Created ${result.length} month groups:`, result.map(g => `${g.label} (${g.photos.length})`))
+    console.log(
+      `✅ Created ${result.length} month groups:`,
+      result.map((g) => `${g.label} (${g.photos.length})`)
+    )
     return result
   }, [filteredPhotos])
 
@@ -521,21 +545,25 @@ const SearchPage = ({
       console.log('🔵 Moving photos:', {
         count: safeSelected.length,
         targetAlbumId,
-        selectedIds: safeSelected
+        selectedIds: safeSelected,
       })
 
       // Track source albums to update their counts
       const sourceAlbums = new Set()
 
       for (const id of safeSelected) {
-        const photo = safePhotos.find(p => p.id === id)
+        const photo = safePhotos.find((p) => p.id === id)
 
         // Track source album (if photo has one)
         if (photo?.albumId) {
           sourceAlbums.add(photo.albumId)
-          console.log(`📦 Photo ${id} moving from album ${photo.albumId} to ${targetAlbumId}`)
+          console.log(
+            `📦 Photo ${id} moving from album ${photo.albumId} to ${targetAlbumId}`
+          )
         } else {
-          console.log(`📦 Photo ${id} moving from "Uten album" to ${targetAlbumId}`)
+          console.log(
+            `📦 Photo ${id} moving from "Uten album" to ${targetAlbumId}`
+          )
         }
 
         const docRef = doc(db, 'photos', id)
@@ -566,7 +594,11 @@ const SearchPage = ({
   return (
     <div className="container-premium max-w-7xl mx-auto p-4">
       {/* Header - FIXED LAYOUT (Issue 4) */}
-      <div className={`sticky top-0 z-40 bg-gradient-to-b from-gray-900 to-transparent pb-4 mb-4 ${editMode ? 'edit-mode' : ''}`}>
+      <div
+        className={`sticky top-0 z-40 bg-gradient-to-b from-gray-900 to-transparent pb-4 mb-4 ${
+          editMode ? 'edit-mode' : ''
+        }`}
+      >
         {/* Top row - always visible */}
         <div className="flex items-center justify-between gap-3">
           <h1 className="text-xl md:text-2xl lg:text-3xl font-bold flex items-center gap-2">
@@ -662,7 +694,7 @@ const SearchPage = ({
                   // FIXED - Issue 5: Support multiple photo deletion
                   console.log('🗑️ Delete button clicked:', {
                     count: selectedPhotos.length,
-                    photoIds: selectedPhotos
+                    photoIds: selectedPhotos,
                   })
 
                   if (selectedPhotos.length === 0) {
@@ -671,9 +703,12 @@ const SearchPage = ({
                   }
 
                   // Confirmation message
-                  const confirmMessage = selectedPhotos.length === 1
-                    ? t('search:confirmDeleteMessage')
-                    : t('search:confirmDeleteMultiple', { count: selectedPhotos.length })
+                  const confirmMessage =
+                    selectedPhotos.length === 1
+                      ? t('search:confirmDeleteMessage')
+                      : t('search:confirmDeleteMultiple', {
+                          count: selectedPhotos.length,
+                        })
 
                   if (!window.confirm(confirmMessage)) {
                     console.log('Delete cancelled by user')
@@ -687,7 +722,9 @@ const SearchPage = ({
                     for (const photoId of selectedPhotos) {
                       const photo = safePhotos.find((p) => p.id === photoId)
                       if (photo) {
-                        console.log(`Deleting photo: ${photo.name} (${photoId})`)
+                        console.log(
+                          `Deleting photo: ${photo.name} (${photoId})`
+                        )
                         await deletePhoto(photo.id, photo.storagePath)
                       }
                     }
@@ -704,9 +741,12 @@ const SearchPage = ({
                     }
 
                     // Success message
-                    const successMessage = selectedPhotos.length === 1
-                      ? t('common:notifications.photoDeleted')
-                      : t('search:photosDeleted', { count: selectedPhotos.length })
+                    const successMessage =
+                      selectedPhotos.length === 1
+                        ? t('common:notifications.photoDeleted')
+                        : t('search:photosDeleted', {
+                            count: selectedPhotos.length,
+                          })
 
                     alert(successMessage)
                   } catch (error) {
@@ -717,7 +757,9 @@ const SearchPage = ({
                 className="ripple-effect px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 flex items-center gap-2 touch-target"
               >
                 <Trash2 size={18} />
-                <span>{t('search:delete')} ({selectedPhotos.length})</span>
+                <span>
+                  {t('search:delete')} ({selectedPhotos.length})
+                </span>
               </button>
             </div>
           )}
@@ -922,15 +964,15 @@ const SearchPage = ({
           {photoGroups.map((group) => (
             <section key={group.key}>
               {/* Date header */}
-              <h2 className="search-date-header">
-                {group.label}
-              </h2>
+              <h2 className="search-date-header">{group.label}</h2>
 
               {/* Photo grid for this month */}
               <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
                 {group.photos.map((photo) => {
                   // Get the original index from filteredPhotos for navigation
-                  const photoIndex = filteredPhotos.findIndex(p => p.id === photo.id)
+                  const photoIndex = filteredPhotos.findIndex(
+                    (p) => p.id === photo.id
+                  )
 
                   return (
                     <div
@@ -961,9 +1003,15 @@ const SearchPage = ({
                       )}
 
                       <img
-                        src={photo.type === 'video' ? (photo.thumbnailUrl || photo.url) : photo.url}
+                        src={
+                          photo.type === 'video'
+                            ? photo.thumbnailUrl || photo.url
+                            : photo.url
+                        }
                         alt={photo.name}
-                        onClick={() => !editMode && handlePhotoClick(photo, photoIndex)}
+                        onClick={() =>
+                          !editMode && handlePhotoClick(photo, photoIndex)
+                        }
                         className="max-h-full max-w-full object-contain cursor-pointer transition-transform duration-300 group-hover:scale-[1.03]"
                       />
 
