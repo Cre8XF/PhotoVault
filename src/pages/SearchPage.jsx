@@ -963,8 +963,10 @@ const SearchPage = ({
         <div className="space-y-8">
           {photoGroups.map((group) => (
             <section key={group.key}>
-              {/* Date header */}
-              <h2 className="search-date-header">{group.label}</h2>
+              {/* Date header - sticky on mobile */}
+              <h2 className="search-date-header search-date-header-sticky">
+                {group.label}
+              </h2>
 
               {/* Photo grid for this month */}
               <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
