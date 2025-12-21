@@ -37,7 +37,7 @@ const JumpToDatePicker = ({ onDateSelect, availableYears = [] }) => {
 
   const handleJumpToDate = () => {
     const selectedDate = new Date(year, month, 1)
-    console.log('🎯 Jump to date:', selectedDate, `(${MONTHS[month]} ${year})`)
+    if (import.meta.env.DEV) console.log('🎯 Jump to date:', selectedDate, `(${MONTHS[month]} ${year})`)
 
     if (onDateSelect) {
       onDateSelect(selectedDate)

@@ -107,7 +107,7 @@ export function WithNavigationExample() {
   const [completedSteps, setCompletedSteps] = useState([1])
 
   const handleStepClick = (stepNumber) => {
-    console.log('Clicked step:', stepNumber)
+    if (import.meta.env.DEV) console.log('Clicked step:', stepNumber)
     setCurrentStep(stepNumber)
   }
 

@@ -65,7 +65,7 @@ export function useUpload() {
       const isVideo = hasMimeType || hasVideoExtension
       const isImage = fileType.startsWith('image/')
 
-      console.log(`🔍 Validating: ${file.name}, MIME: ${file.type}, isVideo: ${isVideo}, canUploadVideo: ${canUploadVideo}`)
+      if (import.meta.env.DEV) console.log(`🔍 Validating: ${file.name}, MIME: ${file.type}, isVideo: ${isVideo}, canUploadVideo: ${canUploadVideo}`)
 
       // ✅ VIDEO TIER CHECK
       if (isVideo) {
@@ -75,10 +75,10 @@ export function useUpload() {
               ? t('errors.videoNotAllowedGratis')
               : t('errors.videoNotAllowedLite')
           )
-          console.log(`❌ Video blocked: ${file.name} (tier: ${tier()})`)
+          if (import.meta.env.DEV) console.log(`❌ Video blocked: ${file.name} (tier: ${tier()})`)
         } else if (!ALLOWED_VIDEO_TYPES.includes(fileType) && !hasVideoExtension) {
           fileErrors.push(t('errors.unsupportedVideoType'))
-          console.log(`❌ Unsupported video type: ${file.name} (${file.type})`)
+          if (import.meta.env.DEV) console.log(`❌ Unsupported video type: ${file.name} (${file.type})`)
         }
       }
 
@@ -95,11 +95,11 @@ export function useUpload() {
       // Add to results
       if (fileErrors.length > 0) {
         errors.push({ file: file.name, errors: fileErrors })
-        console.log(`❌ File validation failed: ${file.name}`, fileErrors)
+        if (import.meta.env.DEV) console.log(`❌ File validation failed: ${file.name}`, fileErrors)
       } else {
         file.fileType = isVideo ? 'video' : 'photo'
         validFiles.push(file)
-        console.log(`✅ File validated: ${file.name} (${file.fileType})`)
+        if (import.meta.env.DEV) console.log(`✅ File validated: ${file.name} (${file.fileType})`)
 
         // Warn about large files
         if (file.size > 10 * 1024 * 1024) {
@@ -111,7 +111,7 @@ export function useUpload() {
       }
     }
 
-    console.log(`📊 Validation complete: ${validFiles.length} valid, ${errors.length} errors`)
+    if (import.meta.env.DEV) console.log(`📊 Validation complete: ${validFiles.length} valid, ${errors.length} errors`)
     return { validFiles, errors, warnings }
   }
 
@@ -159,7 +159,7 @@ export function useUpload() {
           type: 'error',
         })
 
-        console.warn('❌ Storage limit exceeded:', {
+        if (import.meta.env.DEV) console.warn('❌ Storage limit exceeded:', {
           currentUsage: storageUsed,
           newFiles: newFileBytes,
           limit: tierLimit,
@@ -169,7 +169,7 @@ export function useUpload() {
         return { success: false, error: 'Storage limit exceeded' }
       }
 
-      console.log('✅ Storage check passed:', {
+      if (import.meta.env.DEV) console.log('✅ Storage check passed:', {
         currentUsage: storageUsed,
         newFiles: newFileBytes,
         afterUpload: storageUsed + newFileBytes,
@@ -177,7 +177,7 @@ export function useUpload() {
         tier: currentTier,
       })
     } else {
-      console.log('✅ Admin bypass - no storage limit')
+      if (import.meta.env.DEV) console.log('✅ Admin bypass - no storage limit')
     }
 
     setUploading(true)
@@ -202,7 +202,7 @@ export function useUpload() {
         if (fileObj.type === 'video') {
           // Double-check video permission (should be caught in validation)
           if (!canUploadVideo) {
-            console.warn('Video upload blocked for tier:', tier())
+            if (import.meta.env.DEV) console.warn('Video upload blocked for tier:', tier())
             continue
           }
 
@@ -222,7 +222,7 @@ export function useUpload() {
                   type: file.type,
                   lastModified: Date.now(),
                 })
-                console.log(
+                if (import.meta.env.DEV) console.log(
                   `📹 Video compressed: ${(file.size / 1024 / 1024).toFixed(1)}MB → ${(videoToUpload.size / 1024 / 1024).toFixed(1)}MB`
                 )
                 totalCompressedSize += videoToUpload.size
@@ -261,7 +261,7 @@ export function useUpload() {
           // Compression strips all EXIF metadata, so we must extract it first!
           let exifData = null
           try {
-            console.log(`📊 [PRE-COMPRESSION] Extracting EXIF from: ${file.name}`)
+            if (import.meta.env.DEV) console.log(`📊 [PRE-COMPRESSION] Extracting EXIF from: ${file.name}`)
             exifData = await exifr.parse(file, {
               tiff: true,
               exif: true,
@@ -274,16 +274,16 @@ export function useUpload() {
               ihdr: true,
             })
             if (exifData) {
-              console.log(`✅ [PRE-COMPRESSION] EXIF extracted successfully:`, {
+              if (import.meta.env.DEV) console.log(`✅ [PRE-COMPRESSION] EXIF extracted successfully:`, {
                 hasDate: !!(exifData.DateTimeOriginal || exifData.DateTime),
                 hasGPS: !!(exifData.latitude && exifData.longitude),
                 hasCamera: !!(exifData.Make || exifData.Model)
               })
             } else {
-              console.log(`⚠️ [PRE-COMPRESSION] No EXIF data in original file`)
+              if (import.meta.env.DEV) console.log(`⚠️ [PRE-COMPRESSION] No EXIF data in original file`)
             }
           } catch (exifError) {
-            console.warn(`⚠️ [PRE-COMPRESSION] EXIF extraction failed:`, exifError.message)
+            if (import.meta.env.DEV) console.warn(`⚠️ [PRE-COMPRESSION] EXIF extraction failed:`, exifError.message)
           }
 
           // ✅ Use explicit compression flag from caller
@@ -311,7 +311,7 @@ export function useUpload() {
               exifData: exifData, // ✅ Pass pre-extracted EXIF
             })
 
-            console.log(
+            if (import.meta.env.DEV) console.log(
               `🖼️ Image compressed: ${(file.size / 1024 / 1024).toFixed(1)}MB → ${(compressedFile.size / 1024 / 1024).toFixed(1)}MB`
             )
           } else {
@@ -326,7 +326,7 @@ export function useUpload() {
               exifData: exifData, // ✅ Pass pre-extracted EXIF
             })
 
-            console.log(
+            if (import.meta.env.DEV) console.log(
               `🖼️ Image uploaded (original): ${(file.size / 1024 / 1024).toFixed(1)}MB`
             )
           }

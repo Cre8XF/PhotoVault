@@ -38,13 +38,13 @@ export const useCollageCanvas = (layout, photos = [], textLayers = [], stickerLa
     setCtx(context)
     setIsReady(true)
 
-    console.log('🎨 Canvas initialized:', layout.canvas.width, 'x', layout.canvas.height)
+    if (import.meta.env.DEV) console.log('🎨 Canvas initialized:', layout.canvas.width, 'x', layout.canvas.height)
   }, [layout])
 
   // Draw collage whenever layout or photos change
   const drawCollage = useCallback(async () => {
     if (!ctx || !layout || !isReady) {
-      console.log('⏳ Canvas not ready yet')
+      if (import.meta.env.DEV) console.log('⏳ Canvas not ready yet')
       return
     }
 
@@ -52,7 +52,7 @@ export const useCollageCanvas = (layout, photos = [], textLayers = [], stickerLa
     setError(null)
 
     try {
-      console.log('🎨 Drawing collage with', photos.length, 'photos')
+      if (import.meta.env.DEV) console.log('🎨 Drawing collage with', photos.length, 'photos')
 
       // Clear canvas with background color
       clearCanvas(ctx, layout.canvas.width, layout.canvas.height, backgroundColor)
@@ -72,7 +72,7 @@ export const useCollageCanvas = (layout, photos = [], textLayers = [], stickerLa
           try {
             const img = await loadImage(photo.url)
             drawImageCover(ctx, img, x, y, w, h)
-            console.log(`✅ Drew photo ${i + 1}/${layout.positions.length}`)
+            if (import.meta.env.DEV) console.log(`✅ Drew photo ${i + 1}/${layout.positions.length}`)
           } catch (imgError) {
             console.error(`❌ Failed to load photo ${i}:`, imgError)
             // Draw error placeholder
@@ -86,7 +86,7 @@ export const useCollageCanvas = (layout, photos = [], textLayers = [], stickerLa
 
       // Draw stickers (layer above photos, below text)
       if (stickerLayers && stickerLayers.length > 0) {
-        console.log('🎨 Drawing', stickerLayers.length, 'stickers')
+        if (import.meta.env.DEV) console.log('🎨 Drawing', stickerLayers.length, 'stickers')
         stickerLayers.forEach((sticker) => {
           try {
             drawSticker(ctx, sticker.emoji, sticker.x, sticker.y, sticker.size)
@@ -98,7 +98,7 @@ export const useCollageCanvas = (layout, photos = [], textLayers = [], stickerLa
 
       // Draw text layers (top layer, above everything)
       if (textLayers && textLayers.length > 0) {
-        console.log('🎨 Drawing', textLayers.length, 'text layers')
+        if (import.meta.env.DEV) console.log('🎨 Drawing', textLayers.length, 'text layers')
         textLayers.forEach((textLayer) => {
           try {
             drawText(ctx, textLayer.text, textLayer.x, textLayer.y, {
@@ -115,7 +115,7 @@ export const useCollageCanvas = (layout, photos = [], textLayers = [], stickerLa
         })
       }
 
-      console.log('✅ Collage drawing complete')
+      if (import.meta.env.DEV) console.log('✅ Collage drawing complete')
       setLoading(false)
     } catch (err) {
       console.error('❌ Error drawing collage:', err)
@@ -141,7 +141,7 @@ export const useCollageCanvas = (layout, photos = [], textLayers = [], stickerLa
     const mimeType = format === 'jpg' || format === 'jpeg' ? 'image/jpeg' : 'image/png'
     const dataUrl = canvasToDataURL(canvasRef.current, mimeType, quality)
 
-    console.log('📤 Collage exported as', format)
+    if (import.meta.env.DEV) console.log('📤 Collage exported as', format)
     return dataUrl
   }, [])
 
@@ -155,7 +155,7 @@ export const useCollageCanvas = (layout, photos = [], textLayers = [], stickerLa
     const mimeType = format === 'jpg' || format === 'jpeg' ? 'image/jpeg' : 'image/png'
     const blob = await canvasToBlob(canvasRef.current, mimeType, quality)
 
-    console.log('📤 Collage exported as blob:', {
+    if (import.meta.env.DEV) console.log('📤 Collage exported as blob:', {
       size: blob?.size,
       type: blob?.type,
       mimeType: mimeType
@@ -180,7 +180,7 @@ export const useCollageCanvas = (layout, photos = [], textLayers = [], stickerLa
     link.href = dataUrl
     link.click()
 
-    console.log('💾 Collage downloaded:', filename)
+    if (import.meta.env.DEV) console.log('💾 Collage downloaded:', filename)
   }, [exportCollage])
 
   // Redraw with new options

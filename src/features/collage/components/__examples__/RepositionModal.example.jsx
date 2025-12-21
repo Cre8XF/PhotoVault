@@ -21,7 +21,7 @@ export function BasicExample() {
 
   const handleSave = (newTransform) => {
     setTransform(newTransform)
-    console.log('Transform saved:', newTransform)
+    if (import.meta.env.DEV) console.log('Transform saved:', newTransform)
   }
 
   return (
@@ -96,7 +96,7 @@ export function WithExistingTransformExample() {
           currentTransform={transform}
           onSave={(newTransform) => {
             setTransform(newTransform)
-            console.log('Updated transform:', newTransform)
+            if (import.meta.env.DEV) console.log('Updated transform:', newTransform)
           }}
           onClose={() => setIsOpen(false)}
         />

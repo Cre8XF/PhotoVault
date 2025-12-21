@@ -51,14 +51,14 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
       const slug = generatePublicSlug(album.name)
       const url = getPublicAlbumUrl(slug)
 
-      console.log('✅ Generated slug:', slug)
-      console.log('✅ Generated URL:', url)
+      if (import.meta.env.DEV) console.log('✅ Generated slug:', slug)
+      if (import.meta.env.DEV) console.log('✅ Generated URL:', url)
 
       // Lagre til Firestore
       const db = getFirestore()
       const albumRef = doc(db, `albums/${album.id}`)
 
-      console.log('📝 Saving to Firestore path:', `albums/${album.id}`)
+      if (import.meta.env.DEV) console.log('📝 Saving to Firestore path:', `albums/${album.id}`)
 
      await setDoc(
   albumRef,
@@ -77,7 +77,7 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
 )
 
 
-      console.log('✅ Successfully saved to Firestore')
+      if (import.meta.env.DEV) console.log('✅ Successfully saved to Firestore')
       setPublicUrl(url)
 
       // Track analytics
@@ -150,8 +150,8 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
 
       const newPublicState = !shareSettings.isPublic
 
-      console.log('📝 Toggling public to:', newPublicState)
-      console.log('📝 Saving to Firestore path:', `albums/${album.id}`)
+      if (import.meta.env.DEV) console.log('📝 Toggling public to:', newPublicState)
+      if (import.meta.env.DEV) console.log('📝 Saving to Firestore path:', `albums/${album.id}`)
 
       await setDoc(
         albumRef,
@@ -167,7 +167,7 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
         { merge: true }
       )
 
-      console.log('✅ Successfully toggled public state')
+      if (import.meta.env.DEV) console.log('✅ Successfully toggled public state')
 
       setShareSettings((prev) => ({ ...prev, isPublic: newPublicState }))
 

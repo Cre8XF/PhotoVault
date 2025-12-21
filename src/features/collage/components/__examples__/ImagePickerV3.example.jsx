@@ -25,7 +25,7 @@ export function BasicExample() {
 
   const handleSelect = (photos) => {
     setSelectedPhotos(photos)
-    console.log('Selected photos:', photos)
+    if (import.meta.env.DEV) console.log('Selected photos:', photos)
   }
 
   return (
@@ -77,7 +77,7 @@ export function WithInitialSelectionExample() {
         photos={mockPhotos}
         onSelect={(photos) => {
           setSelectedPhotos(photos)
-          console.log('Updated selection:', photos)
+          if (import.meta.env.DEV) console.log('Updated selection:', photos)
         }}
         maxPhotos={6}
         initialSelection={initialPhotos}
@@ -109,7 +109,7 @@ export function WithBackButtonExample() {
         <ImagePickerV3
           photos={mockPhotos}
           onSelect={(photos) => {
-            console.log('Selected:', photos)
+            if (import.meta.env.DEV) console.log('Selected:', photos)
             setStep(3)
           }}
           onBack={() => setStep(1)}

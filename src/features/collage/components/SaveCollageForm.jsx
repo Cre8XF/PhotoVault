@@ -55,7 +55,7 @@ const SaveCollageForm = ({
         })
 
         if (success) {
-          console.log('✅ Collage updated:', collageId)
+          if (import.meta.env.DEV) console.log('✅ Collage updated:', collageId)
           onComplete(collageId)
         }
       } else {
@@ -70,7 +70,7 @@ const SaveCollageForm = ({
         })
 
         if (newCollageId) {
-          console.log('✅ Collage saved:', newCollageId)
+          if (import.meta.env.DEV) console.log('✅ Collage saved:', newCollageId)
           onComplete(newCollageId)
         }
       }

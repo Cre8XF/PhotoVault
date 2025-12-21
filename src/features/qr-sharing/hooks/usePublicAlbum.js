@@ -32,7 +32,7 @@ export const usePublicAlbum = (slug) => {
         )
         const snap = await getDocs(qAlbum)
         if (snap.empty) {
-          console.warn('❌ [usePublicAlbum] Album not found for slug:', slug)
+          if (import.meta.env.DEV) console.warn('❌ [usePublicAlbum] Album not found for slug:', slug)
           setError('Album ikke funnet')
           setLoading(false)
           return
@@ -43,7 +43,7 @@ export const usePublicAlbum = (slug) => {
 
         // 🔹 2) Sjekk offentlighet og utløp
         if (!albumData.isPublic) {
-          console.warn('❌ [usePublicAlbum] Album is not public')
+          if (import.meta.env.DEV) console.warn('❌ [usePublicAlbum] Album is not public')
           setError('Dette albumet er ikke lenger offentlig tilgjengelig')
           setLoading(false)
           return
@@ -52,7 +52,7 @@ export const usePublicAlbum = (slug) => {
         if (albumData.publicSettings?.expiresAt) {
           const expiry = new Date(albumData.publicSettings.expiresAt)
           if (expiry < new Date()) {
-            console.warn('❌ [usePublicAlbum] Album link expired')
+            if (import.meta.env.DEV) console.warn('❌ [usePublicAlbum] Album link expired')
             setError('Denne delingslenken har utløpt')
             setLoading(false)
             return
@@ -74,7 +74,7 @@ export const usePublicAlbum = (slug) => {
             nestedQ,
             (snapshot) => {
               if (snapshot.empty && !triedRootRef.current) {
-                console.log(
+                if (import.meta.env.DEV) console.log(
                   '⚠️ [usePublicAlbum] No photos under user, trying root/photos'
                 )
                 triedRootRef.current = true
@@ -84,7 +84,7 @@ export const usePublicAlbum = (slug) => {
               }
 
               const rows = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
-              console.log(
+              if (import.meta.env.DEV) console.log(
                 '✅ [usePublicAlbum] Loaded',
                 rows.length,
                 'photos (nested)'
@@ -118,7 +118,7 @@ export const usePublicAlbum = (slug) => {
             rootQ,
             (snapshot) => {
               const rows = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
-              console.log(
+              if (import.meta.env.DEV) console.log(
                 '✅ [usePublicAlbum] Loaded',
                 rows.length,
                 'photos (root)'

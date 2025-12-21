@@ -22,12 +22,13 @@ import {
   Square,
 } from 'lucide-react'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
-import { format, isValid, parseISO } from 'date-fns'
+import { format } from 'date-fns'
 import { nb } from 'date-fns/locale'
 import { deletePhoto, setAlbumCover, updateAlbumPhotoCount } from '../firebase'
 import MoveModal from '../components/MoveModal'
 import ConfirmModal from '../components/ConfirmModal'
 import useStore from '../state/store'
+import { resolvePhotoDate, sortPhotosByDate, groupPhotosByMonth } from '../utils/photoDateUtils'
 
 const SearchPage = ({
   photos = [],
@@ -49,11 +50,13 @@ const SearchPage = ({
   // 🔒 SIKRE AT PROPS ER ARRAYS
   const safePhotos = useMemo(() => {
     if (!Array.isArray(photos)) {
-      console.warn(
-        '⚠️ SearchPage received non-array photos:',
-        typeof photos,
-        photos
-      )
+      if (import.meta.env.DEV) {
+        console.warn(
+          '⚠️ SearchPage received non-array photos:',
+          typeof photos,
+          photos
+        )
+      }
       return []
     }
     return photos
@@ -61,11 +64,13 @@ const SearchPage = ({
 
   const safeAlbums = useMemo(() => {
     if (!Array.isArray(albums)) {
-      console.warn(
-        '⚠️ SearchPage received non-array albums:',
-        typeof albums,
-        albums
-      )
+      if (import.meta.env.DEV) {
+        console.warn(
+          '⚠️ SearchPage received non-array albums:',
+          typeof albums,
+          albums
+        )
+      }
       return []
     }
     return albums
@@ -146,12 +151,14 @@ const SearchPage = ({
     // Check for recent filter (FIXED - Issue 1)
     if (params.has('recent') && params.get('recent') === 'true') {
       const limit = parseInt(params.get('limit')) || 50
-      console.log('🔵 RECENT FILTER ACTIVATED:', {
-        limit,
-        totalPhotos: safePhotos.length,
-        explanation:
-          'Will show most recent photos sorted by createdAt/uploadedAt',
-      })
+      if (import.meta.env.DEV) {
+        console.log('🔵 RECENT FILTER ACTIVATED:', {
+          limit,
+          totalPhotos: safePhotos.length,
+          explanation:
+            'Will show most recent photos sorted by createdAt/uploadedAt',
+        })
+      }
       setSpecialFilter({ type: 'recent', limit })
     } else {
       setSpecialFilter(null)
@@ -160,7 +167,9 @@ const SearchPage = ({
     // Check for day filter (FIXED - Issue 2)
     if (params.has('day')) {
       const dayValue = params.get('day')
-      console.log('🔵 DAY FILTER ACTIVATED:', dayValue)
+      if (import.meta.env.DEV) {
+        console.log('🔵 DAY FILTER ACTIVATED:', dayValue)
+      }
 
       if (dayValue === 'today') {
         newFilters.dateRange = 'today'
@@ -177,7 +186,9 @@ const SearchPage = ({
 
     // Check for week filter (FIXED - Issue 2)
     if (params.has('week') && params.get('week') === 'true') {
-      console.log('🔵 WEEK FILTER ACTIVATED')
+      if (import.meta.env.DEV) {
+        console.log('🔵 WEEK FILTER ACTIVATED')
+      }
       newFilters.dateRange = 'week'
       hasChanges = true
     }
@@ -203,7 +214,9 @@ const SearchPage = ({
     // Apply filters if any were found in URL
     if (hasChanges) {
       setActiveFilters(newFilters)
-      console.log('✅ Applied filters from URL params:', newFilters)
+      if (import.meta.env.DEV) {
+        console.log('✅ Applied filters from URL params:', newFilters)
+      }
     }
   }, [location.search, safePhotos.length]) // Re-run when URL query params change
 
@@ -234,7 +247,9 @@ const SearchPage = ({
 
     // SPECIAL FILTER: Recent photos (Issue 1 fix)
     if (specialFilter?.type === 'recent') {
-      console.log('🔍 Applying RECENT filter...')
+      if (import.meta.env.DEV) {
+        console.log('🔍 Applying RECENT filter...')
+      }
       // Sort by most recent first (createdAt or uploadedAt)
       const sorted = [...res].sort((a, b) => {
         const dateA = new Date(a.createdAt || a.uploadedAt || 0).getTime()
@@ -243,13 +258,17 @@ const SearchPage = ({
       })
       // Limit to specified number
       res = sorted.slice(0, specialFilter.limit)
-      console.log(`✅ Recent filter applied: showing ${res.length} photos`)
+      if (import.meta.env.DEV) {
+        console.log(`✅ Recent filter applied: showing ${res.length} photos`)
+      }
       return res // Skip other filters when showing recent
     }
 
     if (debouncedSearchQuery.trim()) {
       const q = debouncedSearchQuery.toLowerCase()
-      console.log('🔍 Searching for:', q)
+      if (import.meta.env.DEV) {
+        console.log('🔍 Searching for:', q)
+      }
 
       res = res.filter((p) => {
         // Search in filename
@@ -270,7 +289,9 @@ const SearchPage = ({
         return inName || inTags || inCat || inAlbum
       })
 
-      console.log(`✅ Search complete: ${res.length} results for "${q}"`)
+      if (import.meta.env.DEV) {
+        console.log(`✅ Search complete: ${res.length} results for "${q}"`)
+      }
     }
 
     if (activeFilters.favorites) res = res.filter((p) => p.favorite)
@@ -299,10 +320,12 @@ const SearchPage = ({
         const todayEnd = new Date()
         todayEnd.setHours(23, 59, 59, 999)
 
-        console.log('🔍 Filtering photos from TODAY:', {
-          start: todayStart.toISOString(),
-          end: todayEnd.toISOString(),
-        })
+        if (import.meta.env.DEV) {
+          console.log('🔍 Filtering photos from TODAY:', {
+            start: todayStart.toISOString(),
+            end: todayEnd.toISOString(),
+          })
+        }
 
         res = res.filter((p) => {
           const photoDate = new Date(p.createdAt || p.uploadedAt || 0).getTime()
@@ -310,7 +333,9 @@ const SearchPage = ({
             photoDate >= todayStart.getTime() && photoDate <= todayEnd.getTime()
           )
         })
-        console.log(`✅ Today filter applied: ${res.length} photos`)
+        if (import.meta.env.DEV) {
+          console.log(`✅ Today filter applied: ${res.length} photos`)
+        }
       } else if (activeFilters.dateRange === 'yesterday') {
         const yesterdayStart = new Date()
         yesterdayStart.setDate(yesterdayStart.getDate() - 1)
@@ -319,10 +344,12 @@ const SearchPage = ({
         yesterdayEnd.setDate(yesterdayEnd.getDate() - 1)
         yesterdayEnd.setHours(23, 59, 59, 999)
 
-        console.log('🔍 Filtering photos from YESTERDAY:', {
-          start: yesterdayStart.toISOString(),
-          end: yesterdayEnd.toISOString(),
-        })
+        if (import.meta.env.DEV) {
+          console.log('🔍 Filtering photos from YESTERDAY:', {
+            start: yesterdayStart.toISOString(),
+            end: yesterdayEnd.toISOString(),
+          })
+        }
 
         res = res.filter((p) => {
           const photoDate = new Date(p.createdAt || p.uploadedAt || 0).getTime()
@@ -331,7 +358,9 @@ const SearchPage = ({
             photoDate <= yesterdayEnd.getTime()
           )
         })
-        console.log(`✅ Yesterday filter applied: ${res.length} photos`)
+        if (import.meta.env.DEV) {
+          console.log(`✅ Yesterday filter applied: ${res.length} photos`)
+        }
       } else if (activeFilters.dateRange.startsWith('date:')) {
         // Specific date (YYYY-MM-DD)
         const dateStr = activeFilters.dateRange.replace('date:', '')
@@ -340,7 +369,9 @@ const SearchPage = ({
         const nextDay = new Date(targetDate)
         nextDay.setDate(nextDay.getDate() + 1)
 
-        console.log('🔍 Filtering photos from specific date:', dateStr)
+        if (import.meta.env.DEV) {
+          console.log('🔍 Filtering photos from specific date:', dateStr)
+        }
 
         res = res.filter((p) => {
           const photoDate = new Date(p.createdAt || p.uploadedAt || 0).getTime()
@@ -348,7 +379,9 @@ const SearchPage = ({
             photoDate >= targetDate.getTime() && photoDate < nextDay.getTime()
           )
         })
-        console.log(`✅ Date filter applied: ${res.length} photos`)
+        if (import.meta.env.DEV) {
+          console.log(`✅ Date filter applied: ${res.length} photos`)
+        }
       } else {
         // Original range-based filtering (week, month, year)
         const days =
@@ -372,88 +405,27 @@ const SearchPage = ({
     safeAlbums,
   ])
 
-  // 📅 DATE GROUPING: Group filtered photos by Month + Year
+  // 📅 DATE GROUPING: Group filtered photos by Month + Year (using unified utility)
   const photoGroups = useMemo(() => {
     if (filteredPhotos.length === 0) {
       return []
     }
 
-    console.log('📅 Grouping photos by Month + Year...')
-
-    // Helper: Get displayDate for a photo (takenAt ?? uploadedAt)
-    const getDisplayDate = (photo) => {
-      // ✅ FASIT
-      const dateValue =
-        photo.displayDate ||
-        photo.takenAt ||
-        photo.dateTaken ||
-        photo.uploadedAt ||
-        photo.createdAt
-
-      if (!dateValue) {
-        console.warn('Photo missing date:', photo.id)
-        return null
-      }
-
-      let date
-      if (dateValue instanceof Date) {
-        date = dateValue
-      } else if (typeof dateValue === 'string') {
-        date = parseISO(dateValue)
-      } else if (dateValue.toDate && typeof dateValue.toDate === 'function') {
-        // Firestore Timestamp
-        date = dateValue.toDate()
-      } else if (typeof dateValue === 'number') {
-        date = new Date(dateValue)
-      } else {
-        console.warn('Invalid date format:', dateValue)
-        return null
-      }
-
-      return isValid(date) ? date : null
+    if (import.meta.env.DEV) {
+      console.log('📅 Grouping photos by Month + Year (unified utility)...')
     }
 
-    // Sort photos by displayDate descending (newest first)
-    const sortedPhotos = [...filteredPhotos]
-      .map((photo) => ({
-        ...photo,
-        _displayDate: getDisplayDate(photo),
-      }))
-      .filter((photo) => photo._displayDate !== null)
-      .sort((a, b) => b._displayDate - a._displayDate)
+    // Use canonical date resolution utility
+    const groups = groupPhotosByMonth(filteredPhotos, 'nb')
 
-    console.log(`✅ Sorted ${sortedPhotos.length} photos by displayDate`)
+    if (import.meta.env.DEV) {
+      console.log(
+        `✅ Created ${groups.length} month groups:`,
+        groups.map((g) => `${g.label} (${g.photos.length})`)
+      )
+    }
 
-    // Group by Month + Year
-    const groups = {}
-
-    sortedPhotos.forEach((photo) => {
-      const date = photo._displayDate
-      const monthKey = format(date, 'yyyy-MM')
-      const displayLabel = format(date, 'MMMM yyyy', { locale: nb })
-
-      if (!groups[monthKey]) {
-        groups[monthKey] = {
-          key: monthKey,
-          label: displayLabel,
-          date: date,
-          photos: [],
-        }
-      }
-
-      // Remove temporary _displayDate field
-      const { _displayDate, ...cleanPhoto } = photo
-      groups[monthKey].photos.push(cleanPhoto)
-    })
-
-    // Convert to array and sort by date (newest first)
-    const result = Object.values(groups).sort((a, b) => b.date - a.date)
-
-    console.log(
-      `✅ Created ${result.length} month groups:`,
-      result.map((g) => `${g.label} (${g.photos.length})`)
-    )
-    return result
+    return groups
   }, [filteredPhotos])
 
   const activeFilterCount = useMemo(() => {
@@ -542,11 +514,13 @@ const SearchPage = ({
       const db = getFirestore()
       const safeSelected = Array.isArray(selectedPhotos) ? selectedPhotos : []
 
-      console.log('🔵 Moving photos:', {
-        count: safeSelected.length,
-        targetAlbumId,
-        selectedIds: safeSelected,
-      })
+      if (import.meta.env.DEV) {
+        console.log('🔵 Moving photos:', {
+          count: safeSelected.length,
+          targetAlbumId,
+          selectedIds: safeSelected,
+        })
+      }
 
       // Track source albums to update their counts
       const sourceAlbums = new Set()
@@ -557,13 +531,17 @@ const SearchPage = ({
         // Track source album (if photo has one)
         if (photo?.albumId) {
           sourceAlbums.add(photo.albumId)
-          console.log(
-            `📦 Photo ${id} moving from album ${photo.albumId} to ${targetAlbumId}`
-          )
+          if (import.meta.env.DEV) {
+            console.log(
+              `📦 Photo ${id} moving from album ${photo.albumId} to ${targetAlbumId}`
+            )
+          }
         } else {
-          console.log(
-            `📦 Photo ${id} moving from "Uten album" to ${targetAlbumId}`
-          )
+          if (import.meta.env.DEV) {
+            console.log(
+              `📦 Photo ${id} moving from "Uten album" to ${targetAlbumId}`
+            )
+          }
         }
 
         const docRef = doc(db, 'photos', id)
@@ -571,12 +549,16 @@ const SearchPage = ({
       }
 
       // Update target album count
-      console.log(`✅ Updating target album ${targetAlbumId} count`)
+      if (import.meta.env.DEV) {
+        console.log(`✅ Updating target album ${targetAlbumId} count`)
+      }
       await updateAlbumPhotoCount(targetAlbumId)
 
       // Update source album counts (decrement)
       for (const sourceAlbumId of sourceAlbums) {
-        console.log(`✅ Updating source album ${sourceAlbumId} count`)
+        if (import.meta.env.DEV) {
+          console.log(`✅ Updating source album ${sourceAlbumId} count`)
+        }
         await updateAlbumPhotoCount(sourceAlbumId)
       }
 
@@ -692,13 +674,17 @@ const SearchPage = ({
               <button
                 onClick={async () => {
                   // FIXED - Issue 5: Support multiple photo deletion
-                  console.log('🗑️ Delete button clicked:', {
-                    count: selectedPhotos.length,
-                    photoIds: selectedPhotos,
-                  })
+                  if (import.meta.env.DEV) {
+                    console.log('🗑️ Delete button clicked:', {
+                      count: selectedPhotos.length,
+                      photoIds: selectedPhotos,
+                    })
+                  }
 
                   if (selectedPhotos.length === 0) {
-                    console.warn('No photos selected')
+                    if (import.meta.env.DEV) {
+                      console.warn('No photos selected')
+                    }
                     return
                   }
 
@@ -711,25 +697,33 @@ const SearchPage = ({
                         })
 
                   if (!window.confirm(confirmMessage)) {
-                    console.log('Delete cancelled by user')
+                    if (import.meta.env.DEV) {
+                      console.log('Delete cancelled by user')
+                    }
                     return
                   }
 
                   try {
-                    console.log('🔥 Starting deletion process...')
+                    if (import.meta.env.DEV) {
+                      console.log('🔥 Starting deletion process...')
+                    }
 
                     // Delete each selected photo
                     for (const photoId of selectedPhotos) {
                       const photo = safePhotos.find((p) => p.id === photoId)
                       if (photo) {
-                        console.log(
-                          `Deleting photo: ${photo.name} (${photoId})`
-                        )
+                        if (import.meta.env.DEV) {
+                          console.log(
+                            `Deleting photo: ${photo.name} (${photoId})`
+                          )
+                        }
                         await deletePhoto(photo.id, photo.storagePath)
                       }
                     }
 
-                    console.log('✅ All photos deleted successfully')
+                    if (import.meta.env.DEV) {
+                      console.log('✅ All photos deleted successfully')
+                    }
 
                     // Clear selection and exit edit mode
                     setSelectedPhotos([])

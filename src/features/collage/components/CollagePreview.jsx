@@ -45,7 +45,7 @@ const CollagePreview = ({
   const maxPhotos = layout.maxPhotos
 
   if (photoCount < minPhotos) {
-    console.warn(
+    if (import.meta.env.DEV) console.warn(
       `CollagePreview: Expected at least ${minPhotos} photos, got ${photoCount}`
     )
   }

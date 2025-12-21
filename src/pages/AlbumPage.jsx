@@ -44,6 +44,7 @@ import VerificationModal from '../components/VerificationModal'
 import { SkeletonPhoto } from '../components/SkeletonCard'
 import useStore from '../state/store'
 import { ROUTES } from '../routes'
+import { resolvePhotoDate, sortPhotosByDate } from '../utils/photoDateUtils'
 
 function getCategoryIcon(category) {
   const icons = {
@@ -157,21 +158,13 @@ const AlbumPage = ({
       result = result.filter((p) => !p.aiAnalyzed)
     }
 
-    // Sorting
+    // Sorting (using unified date resolution)
     switch (sortBy) {
       case 'date-desc':
-        result.sort(
-          (a, b) =>
-            new Date(b.createdAt || b.uploadedAt || 0) -
-            new Date(a.createdAt || a.uploadedAt || 0)
-        )
+        result = sortPhotosByDate(result, 'desc')
         break
       case 'date-asc':
-        result.sort(
-          (a, b) =>
-            new Date(a.createdAt || a.uploadedAt || 0) -
-            new Date(b.createdAt || b.uploadedAt || 0)
-        )
+        result = sortPhotosByDate(result, 'asc')
         break
       case 'name-asc':
         result.sort((a, b) => (a.name || '').localeCompare(b.name || ''))
@@ -494,7 +487,7 @@ const AlbumPage = ({
           {/* Edit Album Button - Using Settings icon to distinguish from Edit Mode */}
           <button
             onClick={() => {
-              console.log('🔧 Edit album clicked:', {
+              if (import.meta.env.DEV) console.log('🔧 Edit album clicked:', {
                 albumId: album.id,
                 albumName: album.name,
                 albumDescription: album.description
@@ -882,7 +875,7 @@ const AlbumPage = ({
           editingAlbum={editingAlbum}
           onClose={() => setEditingAlbum(null)}
           onSave={async (data, editingAlbumParam) => {
-            console.log('💾 Saving album changes:', {
+            if (import.meta.env.DEV) console.log('💾 Saving album changes:', {
               data,
               editingAlbumParam,
               editingAlbumState: editingAlbum,
@@ -901,11 +894,11 @@ const AlbumPage = ({
               return
             }
 
-            console.log('✅ Using album for save:', albumToSave.id, albumToSave.name)
+            if (import.meta.env.DEV) console.log('✅ Using album for save:', albumToSave.id, albumToSave.name)
 
             try {
               await onSaveAlbum(data, albumToSave)
-              console.log('✅ Album saved successfully')
+              if (import.meta.env.DEV) console.log('✅ Album saved successfully')
               setEditingAlbum(null)
             } catch (error) {
               console.error('❌ Failed to save album:', error)

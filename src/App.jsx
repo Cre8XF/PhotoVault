@@ -107,7 +107,7 @@ function App() {
     // P3-A: Initialize session
     const sessionInfo = initSession()
     if (sessionInfo.hasActiveSession) {
-      console.warn('⚠️ [P3-A] Another Pixtr instance detected')
+      if (import.meta.env.DEV) console.warn('⚠️ [P3-A] Another Pixtr instance detected')
       setHasOtherSession(true)
       setShowMultiInstanceBanner(true)
     }
@@ -564,7 +564,7 @@ function AppContent() {
 
     const handleBeforeUnload = (e) => {
       // Force immediate save before page closes
-      console.log('🔄 [App] Saving metadata before page unload...')
+      if (import.meta.env.DEV) console.log('🔄 [App] Saving metadata before page unload...')
       saveMetadata(true) // immediate save
     }
 

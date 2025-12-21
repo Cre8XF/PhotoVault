@@ -47,7 +47,7 @@ export function initSession() {
   // Listen for other sessions overwriting ours
   window.addEventListener('storage', handleStorageChange)
 
-  console.log('📍 [SESSION] Initialized:', {
+  if (import.meta.env.DEV) console.log('📍 [SESSION] Initialized:', {
     sessionId: currentSessionId,
     hasActiveSession,
     existingSessionId,
@@ -84,7 +84,7 @@ function startHeartbeat() {
  */
 function handleStorageChange(event) {
   if (event.key === SESSION_KEY && event.newValue !== currentSessionId) {
-    console.warn('⚠️ [SESSION] Another instance took over session:', event.newValue)
+    if (import.meta.env.DEV) console.warn('⚠️ [SESSION] Another instance took over session:', event.newValue)
     // Could emit an event here if needed
     // For now, just log - the banner will handle UX
   }
@@ -97,7 +97,7 @@ export function claimSession() {
   const now = Date.now()
   localStorage.setItem(SESSION_KEY, currentSessionId)
   localStorage.setItem(SESSION_HEARTBEAT_KEY, now.toString())
-  console.log('✅ [SESSION] Claimed session:', currentSessionId)
+  if (import.meta.env.DEV) console.log('✅ [SESSION] Claimed session:', currentSessionId)
 }
 
 /**
@@ -133,7 +133,7 @@ export function cleanupSession() {
 
   window.removeEventListener('storage', handleStorageChange)
 
-  console.log('🧹 [SESSION] Cleaned up:', currentSessionId)
+  if (import.meta.env.DEV) console.log('🧹 [SESSION] Cleaned up:', currentSessionId)
 }
 
 /**

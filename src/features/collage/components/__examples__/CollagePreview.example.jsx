@@ -79,7 +79,7 @@ export function InteractiveExample() {
 
   const handleImageClick = (photoId) => {
     setSelectedPhotoId(photoId)
-    console.log('Photo clicked:', photoId)
+    if (import.meta.env.DEV) console.log('Photo clicked:', photoId)
     // Open RepositionModal here
   }
 

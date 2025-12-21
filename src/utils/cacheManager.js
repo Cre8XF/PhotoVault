@@ -287,7 +287,7 @@ export async function clearExpiredCache() {
     
     db.close();
     
-    console.log(`🧹 Cleared ${deletedCount} expired cache entries`);
+    if (import.meta.env.DEV) console.log(`🧹 Cleared ${deletedCount} expired cache entries`);
     
     return { deletedCount };
   } catch (error) {
@@ -359,7 +359,7 @@ export async function clearAllCache() {
     
     db.close();
     
-    console.log('🧹 All cache cleared');
+    if (import.meta.env.DEV) console.log('🧹 All cache cleared');
   } catch (error) {
     console.error('🔥 Clear all cache failed:', error);
   }

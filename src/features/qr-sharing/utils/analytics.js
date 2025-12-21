@@ -18,7 +18,7 @@ export const trackQRGenerated = (albumId, userId) => {
     timestamp: new Date().toISOString(),
   }
 
-  console.log('📊 Analytics - QR Generated:', event)
+  if (import.meta.env.DEV) console.log('📊 Analytics - QR Generated:', event)
 
   // TODO: Send to analytics service
   // Example: gtag('event', 'qr_generated', { albumId, userId })
@@ -38,7 +38,7 @@ export const trackPublicView = (slug, referrer) => {
     timestamp: new Date().toISOString(),
   }
 
-  console.log('📊 Analytics - Public Album Viewed:', event)
+  if (import.meta.env.DEV) console.log('📊 Analytics - Public Album Viewed:', event)
 
   // TODO: Send to analytics service
   // Example: gtag('event', 'public_album_viewed', { slug, referrer })
@@ -57,7 +57,7 @@ export const trackPublicUpload = (slug, photoCount) => {
     timestamp: new Date().toISOString(),
   }
 
-  console.log('📊 Analytics - Public Upload:', event)
+  if (import.meta.env.DEV) console.log('📊 Analytics - Public Upload:', event)
 
   // TODO: Send to analytics service
   // Example: gtag('event', 'public_upload', { slug, photoCount })
@@ -76,7 +76,7 @@ export const trackQRDownload = (albumId, albumName) => {
     timestamp: new Date().toISOString(),
   }
 
-  console.log('📊 Analytics - QR Downloaded:', event)
+  if (import.meta.env.DEV) console.log('📊 Analytics - QR Downloaded:', event)
 
   // TODO: Send to analytics service
 }
@@ -94,7 +94,7 @@ export const trackLinkCopied = (albumId, url) => {
     timestamp: new Date().toISOString(),
   }
 
-  console.log('📊 Analytics - Link Copied:', event)
+  if (import.meta.env.DEV) console.log('📊 Analytics - Link Copied:', event)
 
   // TODO: Send to analytics service
 }
@@ -112,7 +112,7 @@ export const trackSharingToggled = (albumId, isPublic) => {
     timestamp: new Date().toISOString(),
   }
 
-  console.log('📊 Analytics - Sharing Toggled:', event)
+  if (import.meta.env.DEV) console.log('📊 Analytics - Sharing Toggled:', event)
 
   // TODO: Send to analytics service
 }
