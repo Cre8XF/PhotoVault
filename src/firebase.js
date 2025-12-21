@@ -903,14 +903,11 @@ export async function uploadPhoto(
       console.log('═══════════════════════════════════════')
     }
 
-    // Fallback to current date if no EXIF date
-    if (!takenAt) {
-      takenAt = new Date().toISOString()
-      console.log(
-        `📅 No EXIF date found - using current date as fallback: ${takenAt}`
-      )
-    } else {
+    // Log EXIF date status (no fallback - leave undefined if no EXIF date)
+    if (takenAt) {
       console.log(`✅ Using EXIF date: ${takenAt}`)
+    } else {
+      console.log(`⚠️ No EXIF date found - takenAt will be undefined`)
     }
 
     // 3. Upload main file to Storage
@@ -939,9 +936,10 @@ export async function uploadPhoto(
       favorite: false,
 
       // Date fields (EXIF-enhanced)
-      dateTaken: takenAt, // ✅ Original EXIF date or current date
+      ...(takenAt && { takenAt: takenAt }), // ✅ Canonical EXIF date (only if exists)
+      dateTaken: takenAt, // ✅ Keep for backward compatibility
       uploadedAt: new Date().toISOString(),
-      displayDate: takenAt, // ✅ Use dateTaken for sorting/display
+      displayDate: takenAt || new Date().toISOString(), // ✅ Use takenAt if available, else uploadedAt
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
 
