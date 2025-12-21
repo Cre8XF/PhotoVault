@@ -12,6 +12,7 @@ import {
   ArrowRight,
   Globe,
 } from 'lucide-react'
+import heroImage from '@/assets/landing-hero.jpg'
 
 /**
  * Public landing page for unauthenticated users
@@ -176,8 +177,9 @@ function LandingPage() {
           {/* Hero Image */}
           <div className="mt-16 relative">
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 blur-3xl" />
+
             <img
-              src="/public/landing-hero.jpg"
+              src={landingHero}
               alt="Pixtr App Screenshot"
               className="relative mx-auto rounded-2xl shadow-2xl border border-white/10"
               style={{ maxWidth: '900px' }}
