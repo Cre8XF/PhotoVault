@@ -467,7 +467,7 @@ export default function PhotoPage() {
 
           {/* Right: Actions */}
           <div className="flex items-center gap-1 relative">
-            {/* Favorite button */}
+            {/* Favorite button - always visible */}
             <button
               onClick={handleToggleFavorite}
               className={`p-2 rounded-full transition active:scale-95 ${
@@ -483,51 +483,54 @@ export default function PhotoPage() {
               />
             </button>
 
-            {/* Edit button */}
-            <button
-              onClick={() => {
-                console.log('✏️ Edit button clicked, navigating to editor')
-                navigate(`/edit/${id}`)
-              }}
-              className="text-white hover:bg-blue-500/10 hover:text-blue-400 p-2 rounded-full transition active:scale-95"
-              aria-label={t('common:edit')}
-              title={t('common:edit')}
-            >
-              <Edit2 className="w-5 h-5" />
-            </button>
-
-            {/* Delete button */}
-            <button
-              onClick={handleDelete}
-              className="text-white hover:bg-red-500/10 hover:text-red-400 p-2 rounded-full transition active:scale-95"
-              aria-label={t('common:delete')}
-            >
-              <Trash2 className="w-5 h-5" />
-            </button>
-
-            {/* Slideshow button - Phase 2B */}
-            {photoOrder && photoOrder.length > 1 && (
+            {/* Desktop-only actions - hidden on mobile */}
+            <div className="desktop-only-actions flex items-center gap-1">
+              {/* Edit button */}
               <button
-                onClick={handleStartSlideshow}
-                className="text-white hover:bg-white/10 p-2 rounded-full transition active:scale-95"
-                aria-label="Start slideshow"
+                onClick={() => {
+                  console.log('✏️ Edit button clicked, navigating to editor')
+                  navigate(`/edit/${id}`)
+                }}
+                className="text-white hover:bg-blue-500/10 hover:text-blue-400 p-2 rounded-full transition active:scale-95"
+                aria-label={t('common:edit')}
+                title={t('common:edit')}
               >
-                <Presentation className="w-5 h-5" />
+                <Edit2 className="w-5 h-5" />
               </button>
-            )}
 
-            {/* Info button */}
-            <button
-              onClick={handleToggleInfo}
-              className={`p-2 rounded-full transition active:scale-95 ${
-                showInfo
-                  ? 'text-blue-400 bg-blue-500/10'
-                  : 'text-white hover:bg-white/10'
-              }`}
-              aria-label={t('common:showInfo')}
-            >
-              <Info className="w-5 h-5" />
-            </button>
+              {/* Delete button */}
+              <button
+                onClick={handleDelete}
+                className="text-white hover:bg-red-500/10 hover:text-red-400 p-2 rounded-full transition active:scale-95"
+                aria-label={t('common:delete')}
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+
+              {/* Slideshow button - Phase 2B */}
+              {photoOrder && photoOrder.length > 1 && (
+                <button
+                  onClick={handleStartSlideshow}
+                  className="text-white hover:bg-white/10 p-2 rounded-full transition active:scale-95"
+                  aria-label="Start slideshow"
+                >
+                  <Presentation className="w-5 h-5" />
+                </button>
+              )}
+
+              {/* Info button */}
+              <button
+                onClick={handleToggleInfo}
+                className={`p-2 rounded-full transition active:scale-95 ${
+                  showInfo
+                    ? 'text-blue-400 bg-blue-500/10'
+                    : 'text-white hover:bg-white/10'
+                }`}
+                aria-label={t('common:showInfo')}
+              >
+                <Info className="w-5 h-5" />
+              </button>
+            </div>
 
             {/* More menu */}
             <button
@@ -549,6 +552,59 @@ export default function PhotoPage() {
             {/* More menu dropdown */}
             {showMoreMenu && (
               <div className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
+                {/* Mobile-only actions */}
+                <div className="mobile-only-menu-items">
+                  <button
+                    onClick={() => {
+                      console.log('✏️ Edit button clicked (mobile), navigating to editor')
+                      navigate(`/edit/${id}`)
+                      setShowMoreMenu(false)
+                    }}
+                    className="flex items-center gap-3 w-full px-4 py-3 text-left text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                  >
+                    <Edit2 className="w-5 h-5" />
+                    <span>{t('common:edit')}</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      handleDelete()
+                      setShowMoreMenu(false)
+                    }}
+                    className="flex items-center gap-3 w-full px-4 py-3 text-left text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                    <span>{t('common:delete')}</span>
+                  </button>
+
+                  {photoOrder && photoOrder.length > 1 && (
+                    <button
+                      onClick={() => {
+                        handleStartSlideshow()
+                        setShowMoreMenu(false)
+                      }}
+                      className="flex items-center gap-3 w-full px-4 py-3 text-left text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                    >
+                      <Presentation className="w-5 h-5" />
+                      <span>{t('common:slideshow') || 'Slideshow'}</span>
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => {
+                      handleToggleInfo()
+                      setShowMoreMenu(false)
+                    }}
+                    className="flex items-center gap-3 w-full px-4 py-3 text-left text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                  >
+                    <Info className="w-5 h-5" />
+                    <span>{t('common:info') || 'Info'}</span>
+                  </button>
+
+                  <div className="border-t border-gray-200 dark:border-gray-700" />
+                </div>
+
+                {/* Standard menu items - always visible */}
                 <button
                   onClick={handleDownload}
                   className="flex items-center gap-3 w-full px-4 py-3 text-left text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
