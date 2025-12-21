@@ -1,5 +1,5 @@
 // ============================================================================
-// PAGE: SearchPage.jsx – v5.7 MED MULTISELECT + VELG ALLE
+// PAGE: SearchPage.jsx – v5.8 WITH DATE GROUPING (Month + Year)
 // ============================================================================
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -22,6 +22,8 @@ import {
   Square,
 } from 'lucide-react'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
+import { format, isValid, parseISO } from 'date-fns'
+import { nb } from 'date-fns/locale'
 import { deletePhoto, setAlbumCover, updateAlbumPhotoCount } from '../firebase'
 import MoveModal from '../components/MoveModal'
 import ConfirmModal from '../components/ConfirmModal'
@@ -354,6 +356,81 @@ const SearchPage = ({
 
     return res
   }, [safePhotos, debouncedSearchQuery, activeFilters, specialFilter, safeAlbums])
+
+  // 📅 DATE GROUPING: Group filtered photos by Month + Year
+  const photoGroups = useMemo(() => {
+    if (filteredPhotos.length === 0) {
+      return []
+    }
+
+    console.log('📅 Grouping photos by Month + Year...')
+
+    // Helper: Get displayDate for a photo (takenAt ?? uploadedAt)
+    const getDisplayDate = (photo) => {
+      const dateValue = photo.takenAt || photo.uploadedAt || photo.createdAt
+
+      if (!dateValue) {
+        console.warn('Photo missing date:', photo.id)
+        return null
+      }
+
+      let date
+      if (dateValue instanceof Date) {
+        date = dateValue
+      } else if (typeof dateValue === 'string') {
+        date = parseISO(dateValue)
+      } else if (dateValue.toDate && typeof dateValue.toDate === 'function') {
+        // Firestore Timestamp
+        date = dateValue.toDate()
+      } else if (typeof dateValue === 'number') {
+        date = new Date(dateValue)
+      } else {
+        console.warn('Invalid date format:', dateValue)
+        return null
+      }
+
+      return isValid(date) ? date : null
+    }
+
+    // Sort photos by displayDate descending (newest first)
+    const sortedPhotos = [...filteredPhotos]
+      .map(photo => ({
+        ...photo,
+        _displayDate: getDisplayDate(photo)
+      }))
+      .filter(photo => photo._displayDate !== null)
+      .sort((a, b) => b._displayDate - a._displayDate)
+
+    console.log(`✅ Sorted ${sortedPhotos.length} photos by displayDate`)
+
+    // Group by Month + Year
+    const groups = {}
+
+    sortedPhotos.forEach(photo => {
+      const date = photo._displayDate
+      const monthKey = format(date, 'yyyy-MM')
+      const displayLabel = format(date, 'MMMM yyyy', { locale: nb })
+
+      if (!groups[monthKey]) {
+        groups[monthKey] = {
+          key: monthKey,
+          label: displayLabel,
+          date: date,
+          photos: []
+        }
+      }
+
+      // Remove temporary _displayDate field
+      const { _displayDate, ...cleanPhoto } = photo
+      groups[monthKey].photos.push(cleanPhoto)
+    })
+
+    // Convert to array and sort by date (newest first)
+    const result = Object.values(groups).sort((a, b) => b.date - a.date)
+
+    console.log(`✅ Created ${result.length} month groups:`, result.map(g => `${g.label} (${g.photos.length})`))
+    return result
+  }, [filteredPhotos])
 
   const activeFilterCount = useMemo(() => {
     return Object.values(activeFilters).filter(Boolean).length
@@ -839,73 +916,90 @@ const SearchPage = ({
         </button>
       </div>
 
-      {/* 🔒 SIKRET: Resultater med array-guard */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-        {filteredPhotos.map((photo, index) => (
-          <div
-            key={photo.id}
-            className="relative group aspect-[4/5] bg-black/10 rounded-lg flex items-center justify-center overflow-hidden"
-          >
-            {/* Checkbox overlay in edit mode */}
-            {editMode && (
-              <div
-                className="absolute inset-0 z-10 cursor-pointer"
-                onClick={() => togglePhotoSelection(photo.id)}
-              >
-                <div
-                  className={`absolute top-2 right-2 w-6 h-6 rounded border-2 flex items-center justify-center transition ${
-                    selectedPhotos.includes(photo.id)
-                      ? 'bg-purple-600 border-purple-600'
-                      : 'bg-black/60 border-white/60'
-                  }`}
-                >
-                  {selectedPhotos.includes(photo.id) && (
-                    <Check className="w-4 h-4 text-white" />
-                  )}
-                </div>
-                {selectedPhotos.includes(photo.id) && (
-                  <div className="absolute inset-0 bg-purple-600/20 border-2 border-purple-600 rounded-lg" />
-                )}
+      {/* 📅 DATE GROUPED RESULTS */}
+      {photoGroups.length > 0 ? (
+        <div className="space-y-8">
+          {photoGroups.map((group) => (
+            <section key={group.key}>
+              {/* Date header */}
+              <h2 className="search-date-header">
+                {group.label}
+              </h2>
+
+              {/* Photo grid for this month */}
+              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+                {group.photos.map((photo) => {
+                  // Get the original index from filteredPhotos for navigation
+                  const photoIndex = filteredPhotos.findIndex(p => p.id === photo.id)
+
+                  return (
+                    <div
+                      key={photo.id}
+                      className="relative group aspect-[4/5] bg-black/10 rounded-lg flex items-center justify-center overflow-hidden"
+                    >
+                      {/* Checkbox overlay in edit mode */}
+                      {editMode && (
+                        <div
+                          className="absolute inset-0 z-10 cursor-pointer"
+                          onClick={() => togglePhotoSelection(photo.id)}
+                        >
+                          <div
+                            className={`absolute top-2 right-2 w-6 h-6 rounded border-2 flex items-center justify-center transition ${
+                              selectedPhotos.includes(photo.id)
+                                ? 'bg-purple-600 border-purple-600'
+                                : 'bg-black/60 border-white/60'
+                            }`}
+                          >
+                            {selectedPhotos.includes(photo.id) && (
+                              <Check className="w-4 h-4 text-white" />
+                            )}
+                          </div>
+                          {selectedPhotos.includes(photo.id) && (
+                            <div className="absolute inset-0 bg-purple-600/20 border-2 border-purple-600 rounded-lg" />
+                          )}
+                        </div>
+                      )}
+
+                      <img
+                        src={photo.type === 'video' ? (photo.thumbnailUrl || photo.url) : photo.url}
+                        alt={photo.name}
+                        onClick={() => !editMode && handlePhotoClick(photo, photoIndex)}
+                        className="max-h-full max-w-full object-contain cursor-pointer transition-transform duration-300 group-hover:scale-[1.03]"
+                      />
+
+                      {/* Favorite toggle - always visible */}
+                      {!editMode && toggleFavorite && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleFavorite(photo)
+                          }}
+                          className={`absolute top-2 left-2 p-1.5 rounded-full transition opacity-0 group-hover:opacity-100 ${
+                            photo.favorite
+                              ? 'bg-yellow-500/90 hover:bg-yellow-600'
+                              : 'bg-black/60 hover:bg-white/30'
+                          }`}
+                          title={
+                            photo.favorite
+                              ? t('common:removeFavorite')
+                              : t('common:addToFavorites')
+                          }
+                        >
+                          <Star
+                            className="w-3.5 h-3.5"
+                            fill={photo.favorite ? 'currentColor' : 'none'}
+                          />
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
-            )}
-
-            <img
-              src={photo.type === 'video' ? (photo.thumbnailUrl || photo.url) : photo.url}
-              alt={photo.name}
-              onClick={() => !editMode && handlePhotoClick(photo, index)}
-              className="max-h-full max-w-full object-contain cursor-pointer transition-transform duration-300 group-hover:scale-[1.03]"
-            />
-
-            {/* Favorite toggle - always visible */}
-            {!editMode && toggleFavorite && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  toggleFavorite(photo)
-                }}
-                className={`absolute top-2 left-2 p-1.5 rounded-full transition opacity-0 group-hover:opacity-100 ${
-                  photo.favorite
-                    ? 'bg-yellow-500/90 hover:bg-yellow-600'
-                    : 'bg-black/60 hover:bg-white/30'
-                }`}
-                title={
-                  photo.favorite
-                    ? t('common:removeFavorite')
-                    : t('common:addToFavorites')
-                }
-              >
-                <Star
-                  className="w-3.5 h-3.5"
-                  fill={photo.favorite ? 'currentColor' : 'none'}
-                />
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* No results */}
-      {filteredPhotos.length === 0 && (
+            </section>
+          ))}
+        </div>
+      ) : (
+        /* No results */
         <div className="text-center py-12 opacity-60">
           <SearchIcon className="w-12 h-12 mx-auto mb-3" />
           <p>{t('search:noResults')}</p>
