@@ -29,6 +29,7 @@ import {
   deleteObject,
 } from 'firebase/storage'
 import * as exifr from 'exifr'
+import { uploadWithFallback, isR2Enabled } from './utils/r2Upload'
 
 console.log('🔥 Firebase ENV CHECK', {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -634,10 +635,10 @@ export async function updatePhotoAlbum(photoId, targetAlbumId) {
 }
 
 // ============================================================================
-// ☁️ Storage-funksjoner
+// ☁️ Storage-funksjoner (R2 + Firebase Storage Hybrid)
 // ============================================================================
 
-// 🔹 Last opp bildefil komplett (Storage + Firestore) med AI-støtte
+// 🔹 Last opp bildefil komplett (R2/Firebase Storage + Firestore) med AI-støtte
 export async function uploadPhoto(
   userId,
   file,
@@ -645,7 +646,7 @@ export async function uploadPhoto(
   aiTagging = false,
   thumbnailBlob = null,
   videoMetadata = null,
-  preExtractedExif = null // ✅ NEW: Pre-extracted EXIF data (before compression)
+  preExtractedExif = null // ✅ Pre-extracted EXIF data (before compression)
 ) {
   try {
     // Validate inputs
@@ -665,31 +666,49 @@ export async function uploadPhoto(
       size: file.size,
       type: file.type,
       hasType: !!file.type,
+      storageBackend: isR2Enabled() ? 'R2' : 'Firebase Storage',
     })
 
     // Determine if this is a video (with fallback)
     const fileType = file.type || 'image/png' // Fallback to image/png if type is missing
     const isVideo = fileType.startsWith('video/')
 
-    // 1. Upload thumbnail to Storage (if provided for video)
+    // 1. Upload thumbnail to R2/Firebase Storage (if provided for video)
     let thumbnailUrl = null
     if (isVideo && thumbnailBlob) {
       try {
-        const timestamp = Date.now()
+        const thumbTimestamp = Date.now()
         const thumbName = file.name.replace(/\.[^.]+$/, '_thumb.jpg')
         const thumbSafeName = thumbName.replace(/\s+/g, '_')
-        const thumbPath = `users/${userId}/thumbnails/${timestamp}_${thumbSafeName}`
-        const thumbRef = ref(storage, thumbPath)
+        const thumbPath = `users/${userId}/thumbnails/${thumbTimestamp}_${thumbSafeName}`
 
-        await uploadBytes(thumbRef, thumbnailBlob, {
-          contentType: 'image/jpeg',
-          customMetadata: {
-            userId: userId,
+        // Upload thumbnail with R2-first fallback
+        const { url: thumbUrl } = await uploadWithFallback(
+          thumbnailBlob,
+          thumbPath,
+          'image/jpeg',
+          {
+            userId,
             parentVideo: file.name,
             generatedAt: new Date().toISOString(),
+            isThumbnail: 'true',
           },
-        })
-        thumbnailUrl = await getDownloadURL(thumbRef)
+          // Firebase fallback for thumbnail
+          async () => {
+            const thumbRef = ref(storage, thumbPath)
+            await uploadBytes(thumbRef, thumbnailBlob, {
+              contentType: 'image/jpeg',
+              customMetadata: {
+                userId: userId,
+                parentVideo: file.name,
+                generatedAt: new Date().toISOString(),
+              },
+            })
+            return await getDownloadURL(thumbRef)
+          }
+        )
+
+        thumbnailUrl = thumbUrl
         if (import.meta.env.DEV) console.log('✅ [Upload] Thumbnail uploaded:', thumbnailUrl)
       } catch (thumbError) {
         console.error('❌ [Upload] Thumbnail upload failed:', thumbError)
@@ -912,30 +931,50 @@ export async function uploadPhoto(
       if (import.meta.env.DEV) console.log(`⚠️ No EXIF date found - takenAt will be undefined`)
     }
 
-    // 3. Upload main file to Storage
+    // 3. Upload main file to R2/Firebase Storage (with intelligent fallback)
     const timestamp = Date.now()
     const safeName = file.name.replace(/\s+/g, '_')
     const folderPath = albumId || 'unassigned'
     const storagePath = `users/${userId}/${folderPath}/${timestamp}_${safeName}`
-    const storageRef = ref(storage, storagePath)
 
-    await uploadBytes(storageRef, file, { contentType: fileType })
-    const downloadURL = await getDownloadURL(storageRef)
+    // Upload with R2-first fallback to Firebase
+    const { url: downloadURL, storage: storageBackend } = await uploadWithFallback(
+      file,
+      storagePath,
+      fileType,
+      {
+        userId,
+        albumId: albumId || 'unassigned',
+        uploadedAt: new Date().toISOString(),
+        isVideo: isVideo ? 'true' : 'false',
+      },
+      // Firebase fallback function
+      async () => {
+        const storageRef = ref(storage, storagePath)
+        await uploadBytes(storageRef, file, { contentType: fileType })
+        return await getDownloadURL(storageRef)
+      }
+    )
 
     if (import.meta.env.DEV) console.log(
-      `📸 ${isVideo ? 'Video' : 'Bilde'} lastet opp til Storage: ${safeName}`
+      `📸 ${isVideo ? 'Video' : 'Bilde'} lastet opp til ${storageBackend === 'r2' ? 'R2' : 'Firebase Storage'}: ${safeName}`
     )
 
     // 4. Prepare metadata with comprehensive EXIF data
     const photoData = {
       name: file.name,
-      url: downloadURL,
+      url: downloadURL, // Main URL (R2 or Firebase)
       userId: userId,
       albumId: albumId,
       storagePath: storagePath,
       size: file.size,
       type: isVideo ? 'video' : fileType,
       favorite: false,
+
+      // Storage backend tracking
+      storageBackend: storageBackend, // 'r2' or 'firebase'
+      ...(storageBackend === 'r2' && { r2Url: downloadURL }), // ✅ R2-specific URL
+      ...(storageBackend === 'firebase' && { firebaseUrl: downloadURL }), // Legacy URL
 
       // Date fields (EXIF-enhanced)
       ...(takenAt && { takenAt: takenAt }), // ✅ Canonical EXIF date (only if exists)
