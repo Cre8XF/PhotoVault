@@ -70,6 +70,8 @@ const UploadModal = ({
   const { t } = useTranslation(['common', 'upload'])
   const { tier, canUploadVideo } = useAuth() // ✅ Removed shouldCompress
   const setNotification = useStore((state) => state.setNotification) // ✅ ADD
+  const userProfile = useStore((state) => state.userProfile)
+  const authReady = Boolean(userProfile)
   const {
     uploading,
     processingProgress,
@@ -99,11 +101,12 @@ const UploadModal = ({
     return saved !== 'false' // Default true for LITE/PRO
   })
   // 🔒 FORCE autoCompress OFF for GRATIS users (visual + state safety)
+  // Also prevents race condition where localStorage loads before userProfile
   useEffect(() => {
-    if (tier() === 'GRATIS') {
+    if (authReady && tier() === 'GRATIS' && autoCompress) {
       setAutoCompress(false)
     }
-  }, [tier])
+  }, [authReady, tier, autoCompress])
 
   const [aiTagging] = useState(false) // Always false for MVP
   const [isCreatingAlbum, setIsCreatingAlbum] = useState(false) // Reentrancy guard
@@ -184,6 +187,15 @@ const UploadModal = ({
 
   // File validation and preview generation
   const handleFilesAsync = async (files) => {
+    // ✅ CRITICAL: Auth readiness guard - prevent race conditions
+    if (!authReady) {
+      setNotification({
+        message: 'Account information is still loading. Please try again.',
+        type: 'info',
+      })
+      return
+    }
+
     // ✅ Filter video files first if user cannot upload videos
     let filesToValidate = files
     let blockedVideos = []
@@ -317,9 +329,9 @@ const UploadModal = ({
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
   }
 
-  // Toggle compression (disabled for GRATIS users)
+  // Toggle compression (disabled for GRATIS users and before auth is ready)
   const handleCompressToggle = () => {
-    if (tier() === 'GRATIS') return // Cannot toggle for FREE users
+    if (!authReady || tier() === 'GRATIS') return // Cannot toggle before auth or for FREE users
     const newValue = !autoCompress
     setAutoCompress(newValue)
     localStorage.setItem('autoCompress', newValue.toString())
@@ -662,9 +674,9 @@ const UploadModal = ({
                 {/* Toggle switch */}
                 <button
                   onClick={handleCompressToggle}
-                  disabled={uploading || tier() === 'GRATIS'}
+                  disabled={uploading || !authReady || tier() === 'GRATIS'}
                   className={`relative w-14 h-7 rounded-full transition ${
-                    tier() === 'GRATIS'
+                    !authReady || tier() === 'GRATIS'
                       ? 'bg-gray-700 cursor-not-allowed'
                       : autoCompress
                       ? 'bg-green-600'
@@ -673,7 +685,7 @@ const UploadModal = ({
                 >
                   <div
                     className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                      autoCompress && tier() !== 'GRATIS'
+                      authReady && autoCompress && tier() !== 'GRATIS'
                         ? 'translate-x-7'
                         : 'translate-x-0'
                     }`}
