@@ -387,13 +387,41 @@ export default function PhotoPage() {
     }
   }
 
+  // Get canonical display date (EXIF date taken OR upload date)
+  const getDisplayDate = () => {
+    if (!photo) return null
+    // Prefer EXIF/metadata date if available
+    if (photo.dateTaken) {
+      return typeof photo.dateTaken === 'string'
+        ? new Date(photo.dateTaken)
+        : photo.dateTaken.toDate
+        ? photo.dateTaken.toDate()
+        : null
+    }
+    // Fallback to upload date
+    if (photo.uploadedAt) {
+      return typeof photo.uploadedAt === 'string'
+        ? new Date(photo.uploadedAt)
+        : photo.uploadedAt.toDate
+        ? photo.uploadedAt.toDate()
+        : null
+    }
+    // Last resort: createdAt
+    if (photo.createdAt) {
+      return new Date(photo.createdAt)
+    }
+    return null
+  }
+
   // Format date for title
   const getPhotoTitle = () => {
     if (!photo) return ''
     if (photo.caption) return photo.caption
-    if (photo.createdAt) {
+
+    const displayDate = getDisplayDate()
+    if (displayDate) {
       try {
-        return format(new Date(photo.createdAt), 'MMMM d, yyyy')
+        return format(displayDate, 'MMMM d, yyyy')
       } catch {
         return photo.name || 'Photo'
       }
@@ -517,20 +545,20 @@ export default function PhotoPage() {
                   <Presentation className="w-5 h-5" />
                 </button>
               )}
-
-              {/* Info button */}
-              <button
-                onClick={handleToggleInfo}
-                className={`p-2 rounded-full transition active:scale-95 ${
-                  showInfo
-                    ? 'text-blue-400 bg-blue-500/10'
-                    : 'text-white hover:bg-white/10'
-                }`}
-                aria-label={t('common:showInfo')}
-              >
-                <Info className="w-5 h-5" />
-              </button>
             </div>
+
+            {/* Info button - always visible on mobile and desktop */}
+            <button
+              onClick={handleToggleInfo}
+              className={`p-2 rounded-full transition active:scale-95 ${
+                showInfo
+                  ? 'text-blue-400 bg-blue-500/10'
+                  : 'text-white hover:bg-white/10'
+              }`}
+              aria-label={t('common:showInfo')}
+            >
+              <Info className="w-5 h-5" />
+            </button>
 
             {/* More menu */}
             <button
@@ -759,11 +787,11 @@ export default function PhotoPage() {
                 </div>
               )}
 
-              {/* Date uploaded */}
+              {/* Date uploaded - shown as secondary info */}
               {photo.uploadedAt && (
                 <div>
-                  <div className="mb-1" style={{ color: 'var(--text-muted)' }}>{t('common:uploaded')}</div>
-                  <div style={{ color: 'var(--text-primary)' }}>
+                  <div className="mb-1 text-xs" style={{ color: 'var(--text-muted)' }}>{t('common:uploaded') || 'Uploaded'}</div>
+                  <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                     {typeof photo.uploadedAt === 'string'
                       ? format(new Date(photo.uploadedAt), 'PPP')
                       : photo.uploadedAt.toDate
