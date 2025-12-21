@@ -865,3 +865,13 @@ body.light-mode .collage-header button:hover,
 body.light-mode .slideshow-header button:hover {
   background-color: var(--interactive-hover);
 }
+
+/* ============================================================================
+   SEARCH PAGE - Date Group Headers
+   ============================================================================ */
+.search-date-header {
+  margin: 24px 0 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+}
