@@ -842,3 +842,26 @@ body.light-mode .overlay-on-image {
     transparent
   );
 }
+
+/* ============================================================================
+   FULLSCREEN HEADERS - Light mode overrides
+   ============================================================================ */
+/* Override hardcoded dark backgrounds in fullscreen headers for light mode */
+body.light-mode .collage-header,
+body.light-mode .slideshow-header {
+  background-color: var(--glass-bg) !important;
+  border-color: var(--glass-border) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Ensure icons and text inherit proper colors */
+body.light-mode .collage-header *,
+body.light-mode .slideshow-header * {
+  color: inherit;
+}
+
+/* Preserve specific button hover states */
+body.light-mode .collage-header button:hover,
+body.light-mode .slideshow-header button:hover {
+  background-color: var(--interactive-hover);
+}
