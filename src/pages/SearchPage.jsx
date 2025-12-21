@@ -365,37 +365,15 @@ const SearchPage = ({
 
     console.log('📅 Grouping photos by Month + Year...')
 
-    // Helper: Get displayDate for a photo (takenAt ?? uploadedAt ?? createdAt)
-    // 🔍 DATE AUDIT: This function determines which date field is used for grouping/sorting
-    // Fallback order: takenAt (EXIF) → uploadedAt → createdAt
+    // Helper: Get displayDate for a photo (takenAt ?? uploadedAt)
     const getDisplayDate = (photo) => {
-      // 🔍 DATE AUDIT: Check which fields exist on the photo object
       const dateValue = photo.takenAt || photo.uploadedAt || photo.createdAt
 
-      // 🔍 DATE AUDIT: Log which date source was actually used
-      let usedSource = 'NONE'
-      if (photo.takenAt) {
-        usedSource = 'takenAt (EXIF)'
-      } else if (photo.uploadedAt) {
-        usedSource = 'uploadedAt'
-      } else if (photo.createdAt) {
-        usedSource = 'createdAt'
-      }
-
       if (!dateValue) {
-        console.warn('[DATE AUDIT] Photo missing all date fields:', {
-          id: photo.id,
-          name: photo.name,
-          takenAt: photo.takenAt,
-          uploadedAt: photo.uploadedAt,
-          createdAt: photo.createdAt,
-          displayDate: photo.displayDate,
-          dateTaken: photo.dateTaken,
-        })
+        console.warn('Photo missing date:', photo.id)
         return null
       }
 
-      // 🔍 DATE AUDIT: Parse the date value (could be Date, string, Timestamp, or number)
       let date
       if (dateValue instanceof Date) {
         date = dateValue
@@ -407,34 +385,14 @@ const SearchPage = ({
       } else if (typeof dateValue === 'number') {
         date = new Date(dateValue)
       } else {
-        console.warn('[DATE AUDIT] Invalid date format:', {
-          id: photo.id,
-          dateValue,
-          type: typeof dateValue,
-        })
+¹        console.warn('Invalid date format:', dateValue)
         return null
       }
-
-      // 🔍 DATE AUDIT: Log the final result for debugging
-      console.log('[DATE AUDIT]', {
-        id: photo.id,
-        name: photo.name,
-        usedSource: usedSource,
-        takenAt: photo.takenAt,
-        uploadedAt: photo.uploadedAt,
-        createdAt: photo.createdAt,
-        displayDate: photo.displayDate,
-        dateTaken: photo.dateTaken,
-        parsedDate: date?.toISOString(),
-        isValid: isValid(date),
-      })
 
       return isValid(date) ? date : null
     }
 
-    // 🔍 DATE AUDIT: Sort photos by displayDate descending (newest first)
-    // This determines the order of photos within each month group
-    // Uses getDisplayDate() which applies fallback: takenAt → uploadedAt → createdAt
+    // Sort photos by displayDate descending (newest first)
     const sortedPhotos = [...filteredPhotos]
       .map(photo => ({
         ...photo,
@@ -445,8 +403,7 @@ const SearchPage = ({
 
     console.log(`✅ Sorted ${sortedPhotos.length} photos by displayDate`)
 
-    // 🔍 DATE AUDIT: Group by Month + Year
-    // Uses the same _displayDate to determine which month bucket a photo belongs to
+    // Group by Month + Year
     const groups = {}
 
     sortedPhotos.forEach(photo => {
