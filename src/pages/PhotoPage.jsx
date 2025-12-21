@@ -645,20 +645,26 @@ export default function PhotoPage() {
       {/* Info Panel */}
       {showInfo && (
         <div
-          className="fixed right-0 top-0 h-full w-80 bg-black/95 backdrop-blur-md border-l border-white/10 z-[10001] overflow-y-auto text-on-glass"
+          className="fixed right-0 top-0 h-full w-80 backdrop-blur-md border-l z-[10001] overflow-y-auto"
           style={{
+            backgroundColor: 'var(--bg-secondary)',
+            borderColor: 'var(--border-color)',
+            color: 'var(--text-primary)',
             animation: 'slideInRight 0.3s ease-out'
           }}
         >
           <div className="p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-white">
+              <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
                 {t('common:photoInfo')}
               </h2>
               <button
                 onClick={() => setShowInfo(false)}
-                className="text-white/60 hover:text-white hover:bg-white/10 p-2 rounded-full transition"
+                className="p-2 rounded-full transition"
+                style={{ color: 'var(--text-secondary)' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--interactive-hover)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 aria-label="Close info"
               >
                 <X className="w-5 h-5" />
@@ -669,8 +675,8 @@ export default function PhotoPage() {
             <div className="space-y-4 text-sm">
               {/* Filename */}
               <div>
-                <div className="text-white/60 mb-1">{t('common:name')}</div>
-                <div className="text-white break-all">
+                <div className="mb-1" style={{ color: 'var(--text-muted)' }}>{t('common:name')}</div>
+                <div className="break-all" style={{ color: 'var(--text-primary)' }}>
                   {photo.name || t('common:unknown')}
                 </div>
               </div>
@@ -678,16 +684,16 @@ export default function PhotoPage() {
               {/* Size */}
               {photo.size && (
                 <div>
-                  <div className="text-white/60 mb-1">{t('common:size')}</div>
-                  <div className="text-white">{formatFileSize(photo.size)}</div>
+                  <div className="mb-1" style={{ color: 'var(--text-muted)' }}>{t('common:size')}</div>
+                  <div style={{ color: 'var(--text-primary)' }}>{formatFileSize(photo.size)}</div>
                 </div>
               )}
 
               {/* Date taken (EXIF) */}
               {photo.dateTaken && (
                 <div>
-                  <div className="text-white/60 mb-1">{t('common:dateTaken') || 'Date taken'}</div>
-                  <div className="text-white">
+                  <div className="mb-1" style={{ color: 'var(--text-muted)' }}>{t('common:dateTaken') || 'Date taken'}</div>
+                  <div style={{ color: 'var(--text-primary)' }}>
                     {typeof photo.dateTaken === 'string'
                       ? format(new Date(photo.dateTaken), 'PPP p')
                       : photo.dateTaken.toDate
@@ -700,8 +706,8 @@ export default function PhotoPage() {
               {/* Date uploaded */}
               {photo.uploadedAt && (
                 <div>
-                  <div className="text-white/60 mb-1">{t('common:uploaded')}</div>
-                  <div className="text-white">
+                  <div className="mb-1" style={{ color: 'var(--text-muted)' }}>{t('common:uploaded')}</div>
+                  <div style={{ color: 'var(--text-primary)' }}>
                     {typeof photo.uploadedAt === 'string'
                       ? format(new Date(photo.uploadedAt), 'PPP')
                       : photo.uploadedAt.toDate
@@ -714,12 +720,12 @@ export default function PhotoPage() {
               {/* GPS Location (EXIF) */}
               {photo.location && photo.location.latitude && photo.location.longitude && (
                 <div>
-                  <div className="text-white/60 mb-1">{t('common:location') || 'Location'}</div>
-                  <div className="text-white font-mono text-xs">
+                  <div className="mb-1" style={{ color: 'var(--text-muted)' }}>{t('common:location') || 'Location'}</div>
+                  <div className="font-mono text-xs" style={{ color: 'var(--text-primary)' }}>
                     {photo.location.latitude.toFixed(6)}, {photo.location.longitude.toFixed(6)}
                   </div>
                   {photo.location.altitude && (
-                    <div className="text-white/70 text-xs mt-1">
+                    <div className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
                       {t('common:altitude') || 'Altitude'}: {Math.round(photo.location.altitude)}m
                     </div>
                   )}
@@ -729,14 +735,14 @@ export default function PhotoPage() {
               {/* Camera info (EXIF) */}
               {photo.camera && (photo.camera.make || photo.camera.model) && (
                 <div>
-                  <div className="text-white/60 mb-1">{t('common:camera') || 'Camera'}</div>
-                  <div className="text-white">
+                  <div className="mb-1" style={{ color: 'var(--text-muted)' }}>{t('common:camera') || 'Camera'}</div>
+                  <div style={{ color: 'var(--text-primary)' }}>
                     {photo.camera.make && photo.camera.model
                       ? `${photo.camera.make} ${photo.camera.model}`
                       : photo.camera.make || photo.camera.model}
                   </div>
                   {photo.camera.lens && (
-                    <div className="text-white/70 text-xs mt-1">
+                    <div className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
                       {t('common:lens') || 'Lens'}: {photo.camera.lens}
                     </div>
                   )}
@@ -746,7 +752,7 @@ export default function PhotoPage() {
               {/* Technical details (EXIF) */}
               {photo.technicalDetails && (photo.technicalDetails.iso || photo.technicalDetails.shutterSpeed || photo.technicalDetails.aperture || photo.technicalDetails.focalLength) && (
                 <div>
-                  <div className="text-white/60 mb-1">{t('common:technicalDetails') || 'Technical Details'}</div>
+                  <div className="mb-1" style={{ color: 'var(--text-muted)' }}>{t('common:technicalDetails') || 'Technical Details'}</div>
                   <div className="text-white space-y-1 text-xs">
                     {photo.technicalDetails.iso && (
                       <div>ISO {photo.technicalDetails.iso}</div>
