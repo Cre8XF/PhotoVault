@@ -545,20 +545,20 @@ export default function PhotoPage() {
                   <Presentation className="w-5 h-5" />
                 </button>
               )}
-            </div>
 
-            {/* Info button - always visible on mobile and desktop */}
-            <button
-              onClick={handleToggleInfo}
-              className={`p-2 rounded-full transition active:scale-95 ${
-                showInfo
-                  ? 'text-blue-400 bg-blue-500/10'
-                  : 'text-white hover:bg-white/10'
-              }`}
-              aria-label={t('common:showInfo')}
-            >
-              <Info className="w-5 h-5" />
-            </button>
+              {/* Info button */}
+              <button
+                onClick={handleToggleInfo}
+                className={`p-2 rounded-full transition active:scale-95 ${
+                  showInfo
+                    ? 'text-blue-400 bg-blue-500/10'
+                    : 'text-white hover:bg-white/10'
+                }`}
+                aria-label={t('common:showInfo')}
+              >
+                <Info className="w-5 h-5" />
+              </button>
+            </div>
 
             {/* More menu */}
             <button
