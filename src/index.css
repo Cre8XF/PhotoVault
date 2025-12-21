@@ -875,3 +875,33 @@ body.light-mode .slideshow-header button:hover {
   color: var(--text-secondary);
   font-size: 1.125rem;
 }
+
+/* Sticky month headers (mobile only) */
+@media (max-width: 640px) {
+  .search-date-header-sticky {
+    position: sticky;
+    top: 60px; /* Below search header */
+    z-index: 30;
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 12px 16px;
+    margin: 0 -16px 12px -16px; /* Extend to edges */
+    border-bottom: 1px solid var(--glass-border);
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-primary);
+  }
+}
+
+/* ============================================================================
+   PHOTOPAGE - Mobile Bottom Action Bar
+   ============================================================================ */
+/* Safe area support for devices with notches */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .mobile-bottom-bar {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
+  }
+}

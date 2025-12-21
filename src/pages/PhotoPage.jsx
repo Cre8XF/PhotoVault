@@ -493,9 +493,9 @@ export default function PhotoPage() {
             )}
           </div>
 
-          {/* Right: Actions */}
-          <div className="flex items-center gap-1 relative">
-            {/* Favorite button - always visible */}
+          {/* Right: Desktop-only actions */}
+          <div className="hidden sm:flex items-center gap-1 relative">
+            {/* Favorite button */}
             <button
               onClick={handleToggleFavorite}
               className={`p-2 rounded-full transition active:scale-95 ${
@@ -511,54 +511,40 @@ export default function PhotoPage() {
               />
             </button>
 
-            {/* Desktop-only actions - hidden on mobile */}
-            <div className="desktop-only-actions flex items-center gap-1">
-              {/* Edit button */}
-              <button
-                onClick={() => {
-                  console.log('✏️ Edit button clicked, navigating to editor')
-                  navigate(`/edit/${id}`)
-                }}
-                className="text-white hover:bg-blue-500/10 hover:text-blue-400 p-2 rounded-full transition active:scale-95"
-                aria-label={t('common:edit')}
-                title={t('common:edit')}
-              >
-                <Edit2 className="w-5 h-5" />
-              </button>
+            {/* Edit button */}
+            <button
+              onClick={() => {
+                console.log('✏️ Edit button clicked, navigating to editor')
+                navigate(`/edit/${id}`)
+              }}
+              className="text-white hover:bg-blue-500/10 hover:text-blue-400 p-2 rounded-full transition active:scale-95"
+              aria-label={t('common:edit')}
+              title={t('common:edit')}
+            >
+              <Edit2 className="w-5 h-5" />
+            </button>
 
-              {/* Delete button */}
-              <button
-                onClick={handleDelete}
-                className="text-white hover:bg-red-500/10 hover:text-red-400 p-2 rounded-full transition active:scale-95"
-                aria-label={t('common:delete')}
-              >
-                <Trash2 className="w-5 h-5" />
-              </button>
+            {/* Delete button */}
+            <button
+              onClick={handleDelete}
+              className="text-white hover:bg-red-500/10 hover:text-red-400 p-2 rounded-full transition active:scale-95"
+              aria-label={t('common:delete')}
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
 
-              {/* Slideshow button - Phase 2B */}
-              {photoOrder && photoOrder.length > 1 && (
-                <button
-                  onClick={handleStartSlideshow}
-                  className="text-white hover:bg-white/10 p-2 rounded-full transition active:scale-95"
-                  aria-label="Start slideshow"
-                >
-                  <Presentation className="w-5 h-5" />
-                </button>
-              )}
-
-              {/* Info button */}
-              <button
-                onClick={handleToggleInfo}
-                className={`p-2 rounded-full transition active:scale-95 ${
-                  showInfo
-                    ? 'text-blue-400 bg-blue-500/10'
-                    : 'text-white hover:bg-white/10'
-                }`}
-                aria-label={t('common:showInfo')}
-              >
-                <Info className="w-5 h-5" />
-              </button>
-            </div>
+            {/* Info button */}
+            <button
+              onClick={handleToggleInfo}
+              className={`p-2 rounded-full transition active:scale-95 ${
+                showInfo
+                  ? 'text-blue-400 bg-blue-500/10'
+                  : 'text-white hover:bg-white/10'
+              }`}
+              aria-label={t('common:showInfo')}
+            >
+              <Info className="w-5 h-5" />
+            </button>
 
             {/* More menu */}
             <button
@@ -580,59 +566,21 @@ export default function PhotoPage() {
             {/* More menu dropdown */}
             {showMoreMenu && (
               <div className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
-                {/* Mobile-only actions */}
-                <div className="mobile-only-menu-items">
+                {/* Slideshow option */}
+                {photoOrder && photoOrder.length > 1 && (
                   <button
                     onClick={() => {
-                      console.log('✏️ Edit button clicked (mobile), navigating to editor')
-                      navigate(`/edit/${id}`)
+                      handleStartSlideshow()
                       setShowMoreMenu(false)
                     }}
                     className="flex items-center gap-3 w-full px-4 py-3 text-left text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                   >
-                    <Edit2 className="w-5 h-5" />
-                    <span>{t('common:edit')}</span>
+                    <Presentation className="w-5 h-5" />
+                    <span>{t('common:slideshow') || 'Slideshow'}</span>
                   </button>
+                )}
 
-                  <button
-                    onClick={() => {
-                      handleDelete()
-                      setShowMoreMenu(false)
-                    }}
-                    className="flex items-center gap-3 w-full px-4 py-3 text-left text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                    <span>{t('common:delete')}</span>
-                  </button>
-
-                  {photoOrder && photoOrder.length > 1 && (
-                    <button
-                      onClick={() => {
-                        handleStartSlideshow()
-                        setShowMoreMenu(false)
-                      }}
-                      className="flex items-center gap-3 w-full px-4 py-3 text-left text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                    >
-                      <Presentation className="w-5 h-5" />
-                      <span>{t('common:slideshow') || 'Slideshow'}</span>
-                    </button>
-                  )}
-
-                  <button
-                    onClick={() => {
-                      handleToggleInfo()
-                      setShowMoreMenu(false)
-                    }}
-                    className="flex items-center gap-3 w-full px-4 py-3 text-left text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                  >
-                    <Info className="w-5 h-5" />
-                    <span>{t('common:info') || 'Info'}</span>
-                  </button>
-
-                  <div className="border-t border-gray-200 dark:border-gray-700" />
-                </div>
-
-                {/* Standard menu items - always visible */}
+                {/* Standard menu items */}
                 <button
                   onClick={handleDownload}
                   className="flex items-center gap-3 w-full px-4 py-3 text-left text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
@@ -910,6 +858,78 @@ export default function PhotoPage() {
           </div>
         </div>
       )}
+
+      {/* Mobile Bottom Action Bar */}
+      <div
+        className={`sm:hidden fixed bottom-0 inset-x-0 z-[10000] backdrop-blur-xl border-t transition-opacity duration-300 mobile-bottom-bar ${
+          uiVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        style={{
+          backgroundColor: 'var(--glass-bg)',
+          borderColor: 'var(--glass-border)',
+          paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))',
+        }}
+      >
+        <div className="flex items-center justify-around h-16 px-4">
+          {/* Favorite */}
+          <button
+            onClick={handleToggleFavorite}
+            className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] rounded-lg transition active:scale-95 ${
+              photo.favorite
+                ? 'text-red-500'
+                : ''
+            }`}
+            style={{ color: photo.favorite ? '#ef4444' : 'var(--text-primary)' }}
+            aria-label="Toggle favorite"
+          >
+            <Heart
+              className="w-6 h-6"
+              fill={photo.favorite ? 'currentColor' : 'none'}
+            />
+            <span className="text-xs mt-1" style={{ color: 'inherit' }}>
+              {photo.favorite ? 'Loved' : 'Love'}
+            </span>
+          </button>
+
+          {/* Edit */}
+          <button
+            onClick={() => {
+              console.log('✏️ Edit button clicked (mobile), navigating to editor')
+              navigate(`/edit/${id}`)
+            }}
+            className="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] rounded-lg transition active:scale-95"
+            style={{ color: 'var(--text-primary)' }}
+            aria-label={t('common:edit')}
+          >
+            <Edit2 className="w-6 h-6" />
+            <span className="text-xs mt-1">{t('common:edit')}</span>
+          </button>
+
+          {/* Delete */}
+          <button
+            onClick={handleDelete}
+            className="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] rounded-lg transition active:scale-95"
+            style={{ color: 'var(--text-primary)' }}
+            aria-label={t('common:delete')}
+          >
+            <Trash2 className="w-6 h-6" />
+            <span className="text-xs mt-1">{t('common:delete')}</span>
+          </button>
+
+          {/* Info */}
+          <button
+            onClick={handleToggleInfo}
+            className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] rounded-lg transition active:scale-95 ${
+              showInfo ? 'text-blue-400' : ''
+            }`}
+            style={{ color: showInfo ? '#60a5fa' : 'var(--text-primary)' }}
+            aria-label={t('common:showInfo')}
+          >
+            <Info className="w-6 h-6" />
+            <span className="text-xs mt-1">{t('common:info') || 'Info'}</span>
+          </button>
+        </div>
+      </div>
 
       {/* Inline keyframe animation */}
       <style jsx>{`
