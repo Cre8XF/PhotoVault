@@ -406,7 +406,7 @@ const SearchPage = ({
       } else if (typeof dateValue === 'number') {
         date = new Date(dateValue)
       } else {
-¹        console.warn('Invalid date format:', dateValue)
+        console.warn('Invalid date format:', dateValue)
         return null
       }
 
