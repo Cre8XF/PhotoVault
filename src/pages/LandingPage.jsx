@@ -12,7 +12,6 @@ import {
   ArrowRight,
   Globe,
 } from 'lucide-react'
-import landingHero from '../assets/landing-hero.png'
 
 /**
  * Public landing page for unauthenticated users
@@ -179,7 +178,7 @@ function LandingPage() {
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 blur-3xl" />
 
             <img
-              src={landingHero}
+              src="/landing-hero.jpg"
               alt="Pixtr App Screenshot"
               className="relative mx-auto rounded-2xl shadow-2xl border border-white/10"
               style={{ maxWidth: '900px' }}
