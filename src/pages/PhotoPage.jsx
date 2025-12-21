@@ -432,7 +432,7 @@ export default function PhotoPage() {
     <div className="fixed inset-0 z-[9999] bg-black flex flex-col">
       {/* Top Bar */}
       <header
-        className={`photo-header fixed top-0 inset-x-0 z-[10000] h-14 backdrop-blur-xl transition-opacity duration-300 ${
+        className={`fixed top-0 inset-x-0 z-[10000] h-14 backdrop-blur-xl transition-opacity duration-300 ${
           uiVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         style={{
