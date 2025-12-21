@@ -71,11 +71,11 @@ export function useUpload() {
       if (isVideo) {
         if (!canUploadVideo) {
           fileErrors.push(
-            tier === 'GRATIS'
+            tier() === 'GRATIS'
               ? t('errors.videoNotAllowedGratis')
               : t('errors.videoNotAllowedLite')
           )
-          console.log(`❌ Video blocked: ${file.name} (tier: ${tier})`)
+          console.log(`❌ Video blocked: ${file.name} (tier: ${tier()})`)
         } else if (!ALLOWED_VIDEO_TYPES.includes(fileType) && !hasVideoExtension) {
           fileErrors.push(t('errors.unsupportedVideoType'))
           console.log(`❌ Unsupported video type: ${file.name} (${file.type})`)
@@ -202,7 +202,7 @@ export function useUpload() {
         if (fileObj.type === 'video') {
           // Double-check video permission (should be caught in validation)
           if (!canUploadVideo) {
-            console.warn('Video upload blocked for tier:', tier)
+            console.warn('Video upload blocked for tier:', tier())
             continue
           }
 
