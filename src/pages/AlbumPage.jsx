@@ -44,6 +44,7 @@ import VerificationModal from '../components/VerificationModal'
 import { SkeletonPhoto } from '../components/SkeletonCard'
 import useStore from '../state/store'
 import { ROUTES } from '../routes'
+import { resolvePhotoDate, sortPhotosByDate } from '../utils/photoDateUtils'
 
 function getCategoryIcon(category) {
   const icons = {
@@ -157,21 +158,13 @@ const AlbumPage = ({
       result = result.filter((p) => !p.aiAnalyzed)
     }
 
-    // Sorting
+    // Sorting (using unified date resolution)
     switch (sortBy) {
       case 'date-desc':
-        result.sort(
-          (a, b) =>
-            new Date(b.createdAt || b.uploadedAt || 0) -
-            new Date(a.createdAt || a.uploadedAt || 0)
-        )
+        result = sortPhotosByDate(result, 'desc')
         break
       case 'date-asc':
-        result.sort(
-          (a, b) =>
-            new Date(a.createdAt || a.uploadedAt || 0) -
-            new Date(b.createdAt || b.uploadedAt || 0)
-        )
+        result = sortPhotosByDate(result, 'asc')
         break
       case 'name-asc':
         result.sort((a, b) => (a.name || '').localeCompare(b.name || ''))

@@ -22,12 +22,13 @@ import {
   Square,
 } from 'lucide-react'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
-import { format, isValid, parseISO } from 'date-fns'
+import { format } from 'date-fns'
 import { nb } from 'date-fns/locale'
 import { deletePhoto, setAlbumCover, updateAlbumPhotoCount } from '../firebase'
 import MoveModal from '../components/MoveModal'
 import ConfirmModal from '../components/ConfirmModal'
 import useStore from '../state/store'
+import { resolvePhotoDate, sortPhotosByDate, groupPhotosByMonth } from '../utils/photoDateUtils'
 
 const SearchPage = ({
   photos = [],
@@ -404,98 +405,27 @@ const SearchPage = ({
     safeAlbums,
   ])
 
-  // 📅 DATE GROUPING: Group filtered photos by Month + Year
+  // 📅 DATE GROUPING: Group filtered photos by Month + Year (using unified utility)
   const photoGroups = useMemo(() => {
     if (filteredPhotos.length === 0) {
       return []
     }
 
     if (import.meta.env.DEV) {
-      console.log('📅 Grouping photos by Month + Year...')
+      console.log('📅 Grouping photos by Month + Year (unified utility)...')
     }
 
-    // Helper: Get displayDate for a photo (takenAt ?? uploadedAt)
-    const getDisplayDate = (photo) => {
-      // ✅ FASIT
-      const dateValue =
-        photo.displayDate ||
-        photo.takenAt ||
-        photo.dateTaken ||
-        photo.uploadedAt ||
-        photo.createdAt
-
-      if (!dateValue) {
-        if (import.meta.env.DEV) {
-          console.warn('Photo missing date:', photo.id)
-        }
-        return null
-      }
-
-      let date
-      if (dateValue instanceof Date) {
-        date = dateValue
-      } else if (typeof dateValue === 'string') {
-        date = parseISO(dateValue)
-      } else if (dateValue.toDate && typeof dateValue.toDate === 'function') {
-        // Firestore Timestamp
-        date = dateValue.toDate()
-      } else if (typeof dateValue === 'number') {
-        date = new Date(dateValue)
-      } else {
-        if (import.meta.env.DEV) {
-          console.warn('Invalid date format:', dateValue)
-        }
-        return null
-      }
-
-      return isValid(date) ? date : null
-    }
-
-    // Sort photos by displayDate descending (newest first)
-    const sortedPhotos = [...filteredPhotos]
-      .map((photo) => ({
-        ...photo,
-        _displayDate: getDisplayDate(photo),
-      }))
-      .filter((photo) => photo._displayDate !== null)
-      .sort((a, b) => b._displayDate - a._displayDate)
-
-    if (import.meta.env.DEV) {
-      console.log(`✅ Sorted ${sortedPhotos.length} photos by displayDate`)
-    }
-
-    // Group by Month + Year
-    const groups = {}
-
-    sortedPhotos.forEach((photo) => {
-      const date = photo._displayDate
-      const monthKey = format(date, 'yyyy-MM')
-      const displayLabel = format(date, 'MMMM yyyy', { locale: nb })
-
-      if (!groups[monthKey]) {
-        groups[monthKey] = {
-          key: monthKey,
-          label: displayLabel,
-          date: date,
-          photos: [],
-        }
-      }
-
-      // Remove temporary _displayDate field
-      const { _displayDate, ...cleanPhoto } = photo
-      groups[monthKey].photos.push(cleanPhoto)
-    })
-
-    // Convert to array and sort by date (newest first)
-    const result = Object.values(groups).sort((a, b) => b.date - a.date)
+    // Use canonical date resolution utility
+    const groups = groupPhotosByMonth(filteredPhotos, 'nb')
 
     if (import.meta.env.DEV) {
       console.log(
-        `✅ Created ${result.length} month groups:`,
-        result.map((g) => `${g.label} (${g.photos.length})`)
+        `✅ Created ${groups.length} month groups:`,
+        groups.map((g) => `${g.label} (${g.photos.length})`)
       )
     }
-    return result
+
+    return groups
   }, [filteredPhotos])
 
   const activeFilterCount = useMemo(() => {
