@@ -35,7 +35,8 @@ Pixtr is a modern, React-based photo management application designed as a Norweg
 |-----------|-----------|---------|
 | **Authentication** | Firebase Auth | User authentication (email, Google) |
 | **Database** | Firebase Firestore | Real-time NoSQL database |
-| **Storage** | Cloudflare R2 | Object storage for photos/videos |
+| **Storage** | Cloudflare R2 | Primary object storage (S3-compatible) with Firebase fallback |
+| **Worker** | Cloudflare Workers | Presigned URLs, metadata sync for R2 uploads |
 | **CDN** | Cloudflare | DNS, caching, and content delivery |
 | **Offline Storage** | IndexedDB | Client-side data persistence |
 
@@ -81,7 +82,9 @@ PhotoVault/
 │   │   └── ToastContext.jsx
 │   │
 │   ├── utils/               # Utility functions
-│   │   ├── firebase.js      # Firebase configuration
+│   │   ├── firebase.js      # Firebase configuration & upload
+│   │   ├── r2Upload.js      # Cloudflare R2 upload with fallback
+│   │   ├── photoDateUtils.js # Canonical date resolution (EXIF priority)
 │   │   ├── imageProcessing.js
 │   │   └── ...
 │   │
@@ -149,13 +152,23 @@ Pixtr uses multiple state management approaches:
 ### Data Flow
 
 ```
-User Action
+User Action (Upload Photo)
     ↓
 React Component
     ↓
 Firebase Function (firebase.js)
     ↓
-Firestore (metadata) + R2 (files)
+┌─────────────────────────────────┐
+│ R2 Upload (Primary)             │
+│  → Cloudflare Worker            │
+│  → Presigned URL                │
+│  → Direct R2 upload             │
+│                                 │
+│ Fallback: Firebase Storage      │
+│  → If R2 fails or disabled      │
+└─────────────────────────────────┘
+    ↓
+Firestore (metadata + storage backend)
     ↓
 Real-time Listener
     ↓
@@ -188,19 +201,34 @@ Component Re-render
   userId: "user_xyz",
   albumId: "album_def456",
   name: "IMG_1234.jpg",
-  url: "https://r2.pixtr.cloud/...",          // R2 URL
-  thumbnailUrl: "https://r2.pixtr.cloud/...", // Thumbnail
+  url: "https://photos.pixtr.cloud/...",      // Public URL (R2 or Firebase)
+  thumbnailUrl: "https://photos.pixtr.cloud/...", // Thumbnail
   storagePath: "users/xyz/album/...",
+  storageBackend: "r2" | "firebase",          // Storage location
+  r2Url: "https://photos.pixtr.cloud/...",   // R2 URL (if R2)
+  firebaseUrl: "https://firebasestorage...", // Firebase URL (if fallback)
   type: "image" | "video",
   uploadedAt: Timestamp,
+  dateTaken: Timestamp,     // EXIF DateTimeOriginal (PRIORITY)
+  displayDate: Timestamp,   // User override or computed date
+  takenAt: Timestamp,       // Legacy EXIF field
   favorite: boolean,
   metadata: {
-    dateTaken: Timestamp,     // EXIF data
     location: { lat, lng },   // GPS coordinates
-    camera: { make, model }   // Camera info
+    camera: { make, model },  // Camera info
+    // Additional EXIF preserved before compression
   }
 }
 ```
+
+**Date Resolution Priority (Google Photos style):**
+1. `dateTaken` - EXIF DateTimeOriginal (canonical)
+2. `displayDate` - User override or legacy date
+3. `takenAt` - Legacy EXIF field
+4. `uploadedAt` - Upload timestamp (fallback)
+5. `createdAt` - Firestore creation time (last resort)
+
+See `src/utils/photoDateUtils.js` for canonical implementation.
 
 ### Album Document (Firestore)
 ```javascript
@@ -257,12 +285,17 @@ Production (pixtr.cloud)
 ### Environment Variables
 Required `.env` configuration:
 ```env
+# Firebase (Authentication & Database)
 VITE_FIREBASE_API_KEY=...
 VITE_FIREBASE_AUTH_DOMAIN=...
 VITE_FIREBASE_PROJECT_ID=...
 VITE_FIREBASE_STORAGE_BUCKET=...
-VITE_CLOUDFLARE_R2_ENDPOINT=...
-VITE_CLOUDFLARE_ACCOUNT_ID=...
+
+# Cloudflare R2 (Primary Storage)
+VITE_R2_ENABLED=true
+VITE_R2_UPLOAD_ENDPOINT=https://upload.pixtr.cloud
+VITE_R2_PUBLIC_URL=https://photos.pixtr.cloud
+VITE_R2_BUCKET_NAME=pixtr-photos
 ```
 
 ---
@@ -323,6 +356,6 @@ When modifying the architecture:
 
 ---
 
-**Last Updated:** 2025-12-16
-**Architecture Version:** V3 (Post Editor V3 stabilization)
+**Last Updated:** 2025-12-21
+**Architecture Version:** V3 (Post R2 migration & date standardization)
 **Maintainer:** Pixtr Development Team

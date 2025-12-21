@@ -12,22 +12,25 @@ Pixtr (formerly PhotoVault) is a modern, React-based photo management applicatio
 ## ✨ Features
 
 ### Core Features
-- ✅ **Secure Storage** - Cloudflare R2 cloud storage
-- ✅ **Advanced Editor** - Adjust, Crop, Rotate, Filters (Editor V3)
+- ✅ **Cloudflare R2 Storage** - Production-ready cloud storage with Firebase fallback
+- ✅ **Advanced Editor** - Adjust, Crop, Rotate, Filters (Editor V3 - Stable)
 - ✅ **Album Management** - Create, organize, and share albums
+- ✅ **Smart Date Grouping** - Photos organized by EXIF date (Google Photos style)
 - ✅ **World View Navigation** - Immersive photo viewing experience
 - ✅ **Multi-language** - Norwegian and English (i18next)
-- ✅ **Dark/Light Themes** - Modern, customizable interface
+- ✅ **Dark/Light Themes** - Modern, accessible interface (WCAG AA compliant)
 - ✅ **Encrypted Vault** - Secure storage for private photos
-- ✅ **Collage Builder** - Create photo collages
-- ✅ **QR Sharing** - Easy album sharing
+- ✅ **Collage Builder** - Create photo collages with custom layouts
+- ✅ **QR Sharing** - Easy album sharing with QR codes
+- ✅ **Video Support** - Upload and play videos with thumbnails
+- ✅ **EXIF Preservation** - Automatic metadata extraction and preservation
 
 ### Upcoming Features (PRO Tier)
 - 🔜 AI Auto-tagging (Google Vision API)
 - 🔜 Face Recognition
 - 🔜 Smart Search (GPT-4 Vision)
-- 🔜 Background Removal
-- 🔜 Video Support
+- 🔜 Background Removal (Picsart API)
+- 🔜 AI-powered enhancements
 
 ---
 
@@ -54,17 +57,21 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ## 🧩 Technology Stack
 
-| Component | Technology |
-|-----------|-----------|
-| Frontend | React 18 + Vite |
-| Storage | Cloudflare R2 |
-| Database | Firebase Firestore |
-| Authentication | Firebase Auth |
-| State Management | Zustand (Editor) |
-| Styling | Tailwind CSS |
-| i18n | i18next (NO/EN) |
-| Deployment | Netlify |
-| Mobile (Planned) | Capacitor |
+| Component | Technology | Notes |
+|-----------|-----------|-------|
+| Frontend | React 18 + Vite | Fast refresh, ESM |
+| Storage | Cloudflare R2 | S3-compatible, with Firebase Storage fallback |
+| Database | Firebase Firestore | Real-time sync, offline support |
+| Authentication | Firebase Auth | Email/Password + Google OAuth |
+| State Management | Zustand | Lightweight, hooks-based |
+| Styling | Tailwind CSS | Utility-first, theme tokens |
+| i18n | i18next | Norwegian/English (NO/EN) |
+| Image Processing | browser-image-compression | Client-side compression |
+| EXIF Extraction | exifr | Comprehensive metadata support |
+| Date Handling | date-fns | Lightweight, functional |
+| Deployment | Netlify | Edge CDN, automatic deploys |
+| Worker | Cloudflare Workers | Presigned URLs, metadata sync |
+| Mobile (Ready) | Capacitor | iOS/Android builds ready |
 
 **See [Architecture Overview](./docs/architecture/overview.md) for full details**
 

@@ -219,19 +219,19 @@ Total: ~13 weeks from now to full platform
 
 ## 💰 Cost Optimization Strategy
 
-### Current Costs (POST-LAUNCH)
+### Current Costs (POST-LAUNCH - R2 MIGRATED)
 ```
-Firebase (Blaze):
-- Storage: ~100-200 NOK/month (with Cloudflare R2 migration)
-- Firestore: ~50-100 NOK/month
-- Auth: Free (up to 10K users)
-
-Cloudflare R2:
+Cloudflare R2 (Primary Storage):
 - 10 GB storage: FREE
 - Egress: FREE (unlimited)
 - Operations: ~50 NOK/month
 
-Total without AI: ~400-600 NOK/month
+Firebase (Blaze):
+- Firestore: ~50-100 NOK/month
+- Auth: Free (up to 10K users)
+- Storage: Minimal (fallback only, ~20 NOK/month)
+
+Total without AI: ~200-300 NOK/month (50% reduction!)
 ```
 
 ### With AI Features (PRO Tier)
@@ -253,21 +253,22 @@ AI Total: ~1100 NOK/month (if heavily used)
 
 ### Launch Strategy
 ```
-Phase 1: Launch GRATIS without AI
+Phase 1: Launch GRATIS without AI ✅ R2 MIGRATED
          → Build user base
-         → Keep costs minimal (400-600 NOK/month)
+         → Keep costs minimal (200-300 NOK/month)
+         → 50% cost reduction vs Firebase Storage
 
 Phase 2: Add LITE (compression)
          → Generate revenue (29 NOK × N users)
          → Cover baseline costs
 
-Phase 3: Add PRO when revenue > 5000 NOK/month
+Phase 3: Add PRO when revenue > 3000 NOK/month
          → Enable AI features
          → Margin: 79 NOK - AI costs ≈ 40-60 NOK profit/user
 
 Goal: 100 PRO users = 7900 NOK/month revenue
-                      - 2000 NOK costs
-                      = 5900 NOK profit/month
+                      - 1500 NOK costs (R2 savings!)
+                      = 6400 NOK profit/month
 ```
 
 ---
@@ -299,14 +300,14 @@ Week 12: 25 PRO users
 Revenue: 25 × 79 NOK = 1,975 NOK/month
 ```
 
-### 6-Month Goal
+### 6-Month Goal (WITH R2 MIGRATION)
 ```
 500 GRATIS (free)
 50 LITE (1,450 NOK)
 25 PRO (1,975 NOK)
 Total Revenue: 3,425 NOK/month
-Total Costs: 600 NOK/month
-Net Profit: 2,825 NOK/month
+Total Costs: 300 NOK/month (R2 savings!)
+Net Profit: 3,125 NOK/month (+10% vs Firebase)
 ```
 
 ---
@@ -412,6 +413,6 @@ Net Profit: 2,825 NOK/month
 
 ---
 
-**Last Updated**: 2024-11-21  
-**Version**: 1.0  
-**Status**: Ready for GRATIS completion
+**Last Updated**: 2025-12-21
+**Version**: 1.1
+**Status**: GRATIS complete, R2 migrated, ready for launch
