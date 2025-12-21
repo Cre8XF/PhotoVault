@@ -12,7 +12,7 @@ import {
   ArrowRight,
   Globe,
 } from 'lucide-react'
-import heroImage from '@/assets/landing-hero.jpg'
+import landingHero from '../assets/landing-hero.png'
 
 /**
  * Public landing page for unauthenticated users
