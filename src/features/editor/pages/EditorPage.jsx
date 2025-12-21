@@ -36,8 +36,8 @@ export default function EditorPage() {
   useEffect(() => {
     if (!photo?.url) return
 
-    console.log('🔍 Preloading image from Firebase Storage')
-    console.log('   URL:', photo.url.substring(0, 80) + '...')
+    if (import.meta.env.DEV) console.log('🔍 Preloading image from Firebase Storage')
+    if (import.meta.env.DEV) console.log('   URL:', photo.url.substring(0, 80) + '...')
 
     const img = new Image()
 
@@ -45,7 +45,7 @@ export default function EditorPage() {
     img.crossOrigin = 'anonymous'
 
     img.onload = () => {
-      console.log('🎨 Image ready for canvas render', {
+      if (import.meta.env.DEV) console.log('🎨 Image ready for canvas render', {
         width: img.naturalWidth,
         height: img.naturalHeight,
       })
@@ -108,13 +108,13 @@ export default function EditorPage() {
       setProcessing(true)
 
       // Step 1: Export from active canvas
-      console.log('💾 Exporting from editor canvas...')
+      if (import.meta.env.DEV) console.log('💾 Exporting from editor canvas...')
 
       if (!canvasRef) {
         throw new Error('Editor canvas not found. Cannot save.')
       }
 
-      console.log('✅ Using active editor canvas', {
+      if (import.meta.env.DEV) console.log('✅ Using active editor canvas', {
         width: canvasRef.width,
         height: canvasRef.height,
         hasCrop: !!transform.crop,
@@ -125,7 +125,7 @@ export default function EditorPage() {
 
       // If crop is active, create offscreen canvas with cropped region
       if (transform.crop) {
-        console.log('🔪 Applying crop before export:', transform.crop)
+        if (import.meta.env.DEV) console.log('🔪 Applying crop before export:', transform.crop)
 
         const crop = transform.crop
         const cropX = crop.x1 * canvasRef.width
@@ -133,7 +133,7 @@ export default function EditorPage() {
         const cropWidth = (crop.x2 - crop.x1) * canvasRef.width
         const cropHeight = (crop.y2 - crop.y1) * canvasRef.height
 
-        console.log('   Crop region (pixels):', {
+        if (import.meta.env.DEV) console.log('   Crop region (pixels):', {
           x: Math.round(cropX),
           y: Math.round(cropY),
           width: Math.round(cropWidth),
@@ -160,7 +160,7 @@ export default function EditorPage() {
         )
 
         canvasToExport = offscreenCanvas
-        console.log('✅ Cropped canvas ready', {
+        if (import.meta.env.DEV) console.log('✅ Cropped canvas ready', {
           width: offscreenCanvas.width,
           height: offscreenCanvas.height,
         })
@@ -170,7 +170,7 @@ export default function EditorPage() {
         canvasToExport.toBlob(
           (blob) => {
             if (blob) {
-              console.log('✅ Canvas exported successfully', {
+              if (import.meta.env.DEV) console.log('✅ Canvas exported successfully', {
                 size: blob.size,
                 type: blob.type,
               })
@@ -185,7 +185,7 @@ export default function EditorPage() {
       })
 
       // Step 2: Upload to storage and update Firestore
-      console.log('Uploading to storage...')
+      if (import.meta.env.DEV) console.log('Uploading to storage...')
       const filterName = transform.filter?.active || 'none'
       await uploadEditedPhoto(
         user.uid,
@@ -215,7 +215,7 @@ export default function EditorPage() {
 
   const handleReset = () => {
     resetAll()
-    console.log('✅ Reset to original')
+    if (import.meta.env.DEV) console.log('✅ Reset to original')
   }
 
   /**
@@ -232,7 +232,7 @@ export default function EditorPage() {
     try {
       setProcessing(true)
 
-      console.log('🔄 Reverting to original photo:', {
+      if (import.meta.env.DEV) console.log('🔄 Reverting to original photo:', {
         photoId: photo.id,
         currentUrl: photo.url,
         originalUrl: photo.originalUrl,
@@ -248,7 +248,7 @@ export default function EditorPage() {
         filter: null,
       })
 
-      console.log('✅ Reverted to original successfully')
+      if (import.meta.env.DEV) console.log('✅ Reverted to original successfully')
       showNotification('Reverted to original image', 'success')
 
       // Navigate back

@@ -60,15 +60,15 @@ const missing = Object.entries(firebaseConfig)
 
 // DEV MODE: Enhanced diagnostics
 if (isDev) {
-  console.log('═══════════════════════════════════════════════')
-  console.log('🔧 FIREBASE DEV MODE DIAGNOSTICS')
-  console.log('═══════════════════════════════════════════════')
-  console.log('Environment:', {
+  if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
+  if (import.meta.env.DEV) console.log('🔧 FIREBASE DEV MODE DIAGNOSTICS')
+  if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
+  if (import.meta.env.DEV) console.log('Environment:', {
     DEV: isDev,
     MODE: mode,
     timestamp: new Date().toISOString(),
   })
-  console.log('Firebase Config:', {
+  if (import.meta.env.DEV) console.log('Firebase Config:', {
     apiKey: firebaseConfig.apiKey ? '✅ SET' : '❌ MISSING',
     authDomain: firebaseConfig.authDomain || '❌ MISSING',
     projectId: firebaseConfig.projectId || '❌ MISSING',
@@ -84,15 +84,15 @@ if (isDev) {
     console.error('⚠️ Please check your .env.local file!')
     console.error('⚠️ Make sure all VITE_FIREBASE_* variables are set')
   } else {
-    console.log('✅ All Firebase environment variables loaded')
+    if (import.meta.env.DEV) console.log('✅ All Firebase environment variables loaded')
   }
 
-  console.log('Current URL:', window.location.href)
-  console.log('Current Origin:', window.location.origin)
-  console.log('═══════════════════════════════════════════════')
-  console.log('⚠️ App Check: DISABLED in DEV mode')
-  console.log('⚠️ All Firebase requests will use production endpoints')
-  console.log('═══════════════════════════════════════════════')
+  if (import.meta.env.DEV) console.log('Current URL:', window.location.href)
+  if (import.meta.env.DEV) console.log('Current Origin:', window.location.origin)
+  if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
+  if (import.meta.env.DEV) console.log('⚠️ App Check: DISABLED in DEV mode')
+  if (import.meta.env.DEV) console.log('⚠️ All Firebase requests will use production endpoints')
+  if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
 }
 
 // PRODUCTION MODE: Simple error logging
@@ -108,9 +108,9 @@ const app = initializeApp(firebaseConfig)
 
 // Log successful initialization in DEV
 if (isDev) {
-  console.log('✅ Firebase app initialized successfully')
-  console.log('📱 App name:', app.name)
-  console.log('🔑 Project ID:', firebaseConfig.projectId)
+  if (import.meta.env.DEV) console.log('✅ Firebase app initialized successfully')
+  if (import.meta.env.DEV) console.log('📱 App name:', app.name)
+  if (import.meta.env.DEV) console.log('🔑 Project ID:', firebaseConfig.projectId)
 }
 
 // Eksporter Firebase-tjenestene
@@ -141,10 +141,10 @@ export const auth = getAuth(app)
 // ============================================================================
 
 if (isDev) {
-  console.log('🔐 Auth Configuration:')
-  console.log('   Auth Domain:', firebaseConfig.authDomain)
-  console.log('   Current Origin:', window.location.origin)
-  console.log(
+  if (import.meta.env.DEV) console.log('🔐 Auth Configuration:')
+  if (import.meta.env.DEV) console.log('   Auth Domain:', firebaseConfig.authDomain)
+  if (import.meta.env.DEV) console.log('   Current Origin:', window.location.origin)
+  if (import.meta.env.DEV) console.log(
     '   ⚠️ If auth fails, check Firebase Console → Authorized domains'
   )
 }
@@ -210,7 +210,7 @@ export async function addAlbum(data) {
     }
 
     const refDoc = await addDoc(collection(db, 'albums'), cleanAlbum)
-    console.log(`📂 Album opprettet for bruker ${user.uid}: ${cleanAlbum.name}`)
+    if (import.meta.env.DEV) console.log(`📂 Album opprettet for bruker ${user.uid}: ${cleanAlbum.name}`)
 
     if (window.showToast) {
       window.showToast('Album created successfully 🎉', 'success')
@@ -234,7 +234,7 @@ export async function updateAlbum(albumId, updates) {
       ...updates,
       updatedAt: new Date().toISOString(),
     })
-    console.log(`📝 Album oppdatert (${albumId})`)
+    if (import.meta.env.DEV) console.log(`📝 Album oppdatert (${albumId})`)
   } catch (err) {
     console.error('🔥 updateAlbum:', err)
   }
@@ -248,7 +248,7 @@ export async function setAlbumCover(albumId, photoUrl) {
       cover: photoUrl,
       updatedAt: new Date().toISOString(),
     })
-    console.log(`🖼️ Cover oppdatert for album ${albumId}`)
+    if (import.meta.env.DEV) console.log(`🖼️ Cover oppdatert for album ${albumId}`)
   } catch (err) {
     console.error('🔥 setAlbumCover:', err)
     throw err
@@ -302,7 +302,7 @@ export function listenToAlbumsByUser(userId, callback) {
 export function listenToPhotosByUser(userId, callback) {
   const q = query(collection(db, 'photos'), where('userId', '==', userId))
   return onSnapshot(q, (snapshot) => {
-    console.log('🔄 Firestore listener triggered:', {
+    if (import.meta.env.DEV) console.log('🔄 Firestore listener triggered:', {
       size: snapshot.size,
       docChanges: snapshot.docChanges().length,
     })
@@ -312,18 +312,18 @@ export function listenToPhotosByUser(userId, callback) {
       const photoData = { id: change.doc.id, ...change.doc.data() }
 
       if (change.type === 'modified') {
-        console.log('📝 Photo modified in Firestore:', {
+        if (import.meta.env.DEV) console.log('📝 Photo modified in Firestore:', {
           id: photoData.id,
           favorite: photoData.favorite,
           name: photoData.name,
         })
       } else if (change.type === 'added') {
-        console.log('➕ Photo added to Firestore:', {
+        if (import.meta.env.DEV) console.log('➕ Photo added to Firestore:', {
           id: photoData.id,
           name: photoData.name,
         })
       } else if (change.type === 'removed') {
-        console.log('➖ Photo removed from Firestore:', {
+        if (import.meta.env.DEV) console.log('➖ Photo removed from Firestore:', {
           id: photoData.id,
         })
       }
@@ -424,7 +424,7 @@ export async function addPhoto(data) {
   }
 
   const refDoc = await addDoc(collection(db, 'photos'), payload)
-  console.log(`📸 Bilde lagret: ${refDoc.id}`)
+  if (import.meta.env.DEV) console.log(`📸 Bilde lagret: ${refDoc.id}`)
   return refDoc.id
 }
 
@@ -471,7 +471,7 @@ export async function updatePhotoCaption(photoId, caption, userId) {
       updatedAt: new Date().toISOString(),
     })
 
-    console.log(`📝 Caption updated for photo ${photoId}`)
+    if (import.meta.env.DEV) console.log(`📝 Caption updated for photo ${photoId}`)
     return { success: true }
   } catch (err) {
     console.error('🔥 updatePhotoCaption error:', err)
@@ -481,10 +481,10 @@ export async function updatePhotoCaption(photoId, caption, userId) {
 
 // ⭐ Toggle favoritt-status
 export async function toggleFavorite(photoId, currentStatus) {
-  console.log('═══════════════════════════════════════════════')
-  console.log('🔍 FAVORITT-TOGGLE DEBUG START')
-  console.log('═══════════════════════════════════════════════')
-  console.log('📥 Input parameters:', {
+  if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
+  if (import.meta.env.DEV) console.log('🔍 FAVORITT-TOGGLE DEBUG START')
+  if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
+  if (import.meta.env.DEV) console.log('📥 Input parameters:', {
     photoId,
     currentFavoriteStatus: currentStatus,
     expectedNewStatus: !currentStatus,
@@ -494,10 +494,10 @@ export async function toggleFavorite(photoId, currentStatus) {
   try {
     // Step 1: Get document reference
     const photoRef = doc(db, 'photos', photoId)
-    console.log('📄 Document reference created:', photoRef.path)
+    if (import.meta.env.DEV) console.log('📄 Document reference created:', photoRef.path)
 
     // Step 2: Check if document exists
-    console.log('🔎 Checking if document exists...')
+    if (import.meta.env.DEV) console.log('🔎 Checking if document exists...')
     const photoSnap = await getDoc(photoRef)
 
     if (!photoSnap.exists()) {
@@ -506,41 +506,41 @@ export async function toggleFavorite(photoId, currentStatus) {
       console.error('   Path:', photoRef.path)
       throw new Error(`Photo document ${photoId} not found`)
     }
-    console.log('✅ Document exists')
-    console.log('📊 Current document data:', photoSnap.data())
+    if (import.meta.env.DEV) console.log('✅ Document exists')
+    if (import.meta.env.DEV) console.log('📊 Current document data:', photoSnap.data())
 
     // Step 3: Calculate new status
     const newStatus = !currentStatus
-    console.log('🔄 Status change:', {
+    if (import.meta.env.DEV) console.log('🔄 Status change:', {
       from: currentStatus,
       to: newStatus,
     })
 
     // Step 4: Update Firestore
-    console.log('💾 Starting Firestore updateDoc()...')
+    if (import.meta.env.DEV) console.log('💾 Starting Firestore updateDoc()...')
     await updateDoc(photoRef, {
       favorite: newStatus,
       updatedAt: new Date().toISOString(),
     })
-    console.log('✅ Firestore updateDoc() completed')
+    if (import.meta.env.DEV) console.log('✅ Firestore updateDoc() completed')
 
     // Step 5: Verify update
-    console.log('🔍 Verifying update...')
+    if (import.meta.env.DEV) console.log('🔍 Verifying update...')
     const verifySnap = await getDoc(photoRef)
     const verifyData = verifySnap.data()
-    console.log('📊 Post-update document data:', verifyData)
+    if (import.meta.env.DEV) console.log('📊 Post-update document data:', verifyData)
 
     if (verifyData.favorite === newStatus) {
-      console.log('✅ Post-update verification: ✅ MATCH')
+      if (import.meta.env.DEV) console.log('✅ Post-update verification: ✅ MATCH')
     } else {
       console.error('❌ Post-update verification: ❌ MISMATCH')
       console.error('   Expected:', newStatus)
       console.error('   Got:', verifyData.favorite)
     }
 
-    console.log('═══════════════════════════════════════════════')
-    console.log('🎉 FAVORITT-TOGGLE DEBUG END - SUCCESS')
-    console.log('═══════════════════════════════════════════════')
+    if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
+    if (import.meta.env.DEV) console.log('🎉 FAVORITT-TOGGLE DEBUG END - SUCCESS')
+    if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
 
     return newStatus
   } catch (error) {
@@ -560,10 +560,10 @@ export async function toggleFavorite(photoId, currentStatus) {
 
 // 🔹 Slett bilde fra Firestore + Storage
 export async function deletePhoto(photoId, storagePath) {
-  console.log('═══════════════════════════════════════════════')
-  console.log('🗑️ DELETE PHOTO DEBUG START')
-  console.log('═══════════════════════════════════════════════')
-  console.log('📥 Input parameters:', {
+  if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
+  if (import.meta.env.DEV) console.log('🗑️ DELETE PHOTO DEBUG START')
+  if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
+  if (import.meta.env.DEV) console.log('📥 Input parameters:', {
     photoId,
     storagePath,
     timestamp: new Date().toISOString(),
@@ -572,23 +572,23 @@ export async function deletePhoto(photoId, storagePath) {
   try {
     // Step 1: Delete from Storage (if path provided)
     if (storagePath) {
-      console.log('🔥 Deleting from Storage:', storagePath)
+      if (import.meta.env.DEV) console.log('🔥 Deleting from Storage:', storagePath)
       const storageRef = ref(storage, storagePath)
       await deleteObject(storageRef)
-      console.log('✅ Deleted from Storage successfully')
+      if (import.meta.env.DEV) console.log('✅ Deleted from Storage successfully')
     } else {
-      console.log('⚠️ No storagePath provided, skipping Storage deletion')
+      if (import.meta.env.DEV) console.log('⚠️ No storagePath provided, skipping Storage deletion')
     }
 
     // Step 2: Delete from Firestore
-    console.log('🔥 Deleting from Firestore:', photoId)
+    if (import.meta.env.DEV) console.log('🔥 Deleting from Firestore:', photoId)
     const photoRef = doc(db, 'photos', photoId)
     await deleteDoc(photoRef)
-    console.log('✅ Deleted from Firestore successfully')
+    if (import.meta.env.DEV) console.log('✅ Deleted from Firestore successfully')
 
-    console.log('═══════════════════════════════════════════════')
-    console.log('🎉 DELETE PHOTO DEBUG END - SUCCESS')
-    console.log('═══════════════════════════════════════════════')
+    if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
+    if (import.meta.env.DEV) console.log('🎉 DELETE PHOTO DEBUG END - SUCCESS')
+    if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
 
     return true
   } catch (err) {
@@ -660,7 +660,7 @@ export async function uploadPhoto(
     }
 
     // Log file details for debugging
-    console.log('📄 uploadPhoto received file:', {
+    if (import.meta.env.DEV) console.log('📄 uploadPhoto received file:', {
       name: file.name,
       size: file.size,
       type: file.type,
@@ -690,7 +690,7 @@ export async function uploadPhoto(
           },
         })
         thumbnailUrl = await getDownloadURL(thumbRef)
-        console.log('✅ [Upload] Thumbnail uploaded:', thumbnailUrl)
+        if (import.meta.env.DEV) console.log('✅ [Upload] Thumbnail uploaded:', thumbnailUrl)
       } catch (thumbError) {
         console.error('❌ [Upload] Thumbnail upload failed:', thumbError)
         // Continue without thumbnail
@@ -704,28 +704,30 @@ export async function uploadPhoto(
     let technicalDetails = null
 
     if (!isVideo) {
-      console.log('═══════════════════════════════════════')
-      console.log('🔍 EXIF EXTRACTION DEBUG START')
-      console.log('═══════════════════════════════════════')
-      console.log('File name:', file.name)
-      console.log('File type:', file.type)
-      console.log('File size:', file.size, 'bytes')
-      console.log('Pre-extracted EXIF available?', !!preExtractedExif)
-      console.log('═══════════════════════════════════════')
+      if (import.meta.env.DEV) {
+        console.log('═══════════════════════════════════════')
+        console.log('🔍 EXIF EXTRACTION DEBUG START')
+        console.log('═══════════════════════════════════════')
+        console.log('File name:', file.name)
+        console.log('File type:', file.type)
+        console.log('File size:', file.size, 'bytes')
+        console.log('Pre-extracted EXIF available?', !!preExtractedExif)
+        console.log('═══════════════════════════════════════')
+      }
 
       let exifData = null
 
       // ✅ CRITICAL: Use pre-extracted EXIF if available (extracted BEFORE compression)
       if (preExtractedExif) {
-        console.log(
+        if (import.meta.env.DEV) console.log(
           '✅ Using pre-extracted EXIF data (from original file before compression)'
         )
         exifData = preExtractedExif
-        console.log('📊 Pre-extracted EXIF data keys:', Object.keys(exifData))
+        if (import.meta.env.DEV) console.log('📊 Pre-extracted EXIF data keys:', Object.keys(exifData))
       } else {
         // Fallback: Extract from current file (may have no EXIF if compressed)
         try {
-          console.log(
+          if (import.meta.env.DEV) console.log(
             '📊 No pre-extracted EXIF - calling exifr.parse() on current file...'
           )
 
@@ -743,20 +745,20 @@ export async function uploadPhoto(
             // Don't use 'pick' - get everything!
           })
 
-          console.log('✅ exifr.parse() completed')
-          console.log('📊 EXIF data type:', typeof exifData)
-          console.log('📊 EXIF data is null?', exifData === null)
-          console.log('📊 EXIF data is undefined?', exifData === undefined)
+          if (import.meta.env.DEV) console.log('✅ exifr.parse() completed')
+          if (import.meta.env.DEV) console.log('📊 EXIF data type:', typeof exifData)
+          if (import.meta.env.DEV) console.log('📊 EXIF data is null?', exifData === null)
+          if (import.meta.env.DEV) console.log('📊 EXIF data is undefined?', exifData === undefined)
 
           if (exifData) {
-            console.log('📊 Raw EXIF data keys:', Object.keys(exifData))
-            console.log(
+            if (import.meta.env.DEV) console.log('📊 Raw EXIF data keys:', Object.keys(exifData))
+            if (import.meta.env.DEV) console.log(
               '📊 Raw EXIF data (full):',
               JSON.stringify(exifData, null, 2)
             )
           } else {
-            console.warn('⚠️ exifr.parse() returned null/undefined')
-            console.warn(
+            if (import.meta.env.DEV) console.warn('⚠️ exifr.parse() returned null/undefined')
+            if (import.meta.env.DEV) console.warn(
               'This is normal for screenshots or heavily edited photos'
             )
           }
@@ -773,12 +775,12 @@ export async function uploadPhoto(
 
       // Process EXIF data (whether pre-extracted or freshly extracted)
       if (exifData) {
-        console.log('📊 Processing EXIF data...')
+        if (import.meta.env.DEV) console.log('📊 Processing EXIF data...')
 
         // STEP 1: Extract date taken (try ALL possible fields)
-        console.log('─────────────────────────────────────')
-        console.log('📅 SEARCHING FOR DATE FIELDS...')
-        console.log('─────────────────────────────────────')
+        if (import.meta.env.DEV) console.log('─────────────────────────────────────')
+        if (import.meta.env.DEV) console.log('📅 SEARCHING FOR DATE FIELDS...')
+        if (import.meta.env.DEV) console.log('─────────────────────────────────────')
 
         const dateFields = [
           'DateTimeOriginal',
@@ -792,35 +794,35 @@ export async function uploadPhoto(
 
         for (const field of dateFields) {
           const value = exifData[field]
-          console.log(`  ${field}:`, value || 'NOT FOUND')
+          if (import.meta.env.DEV) console.log(`  ${field}:`, value || 'NOT FOUND')
 
           if (value && !takenAt) {
             takenAt = value
-            console.log(`  ✅ Using ${field}: ${takenAt}`)
+            if (import.meta.env.DEV) console.log(`  ✅ Using ${field}: ${takenAt}`)
           }
         }
 
         if (!takenAt) {
-          console.warn('❌ No date field found in EXIF!')
-          console.warn('Available fields:', Object.keys(exifData))
+          if (import.meta.env.DEV) console.warn('❌ No date field found in EXIF!')
+          if (import.meta.env.DEV) console.warn('Available fields:', Object.keys(exifData))
         } else {
-          console.log('✅ Final takenAt value:', takenAt)
-          console.log('   Type:', typeof takenAt)
-          console.log('   Is Date?', takenAt instanceof Date)
+          if (import.meta.env.DEV) console.log('✅ Final takenAt value:', takenAt)
+          if (import.meta.env.DEV) console.log('   Type:', typeof takenAt)
+          if (import.meta.env.DEV) console.log('   Is Date?', takenAt instanceof Date)
 
           // Convert to ISO string if it's a Date object
           if (takenAt instanceof Date) {
             takenAt = takenAt.toISOString()
-            console.log('   Converted to ISO:', takenAt)
+            if (import.meta.env.DEV) console.log('   Converted to ISO:', takenAt)
           } else if (typeof takenAt === 'string') {
             // Try parsing string date
             try {
               const parsed = new Date(takenAt)
               if (!isNaN(parsed.getTime())) {
                 takenAt = parsed.toISOString()
-                console.log('   Parsed string to ISO:', takenAt)
+                if (import.meta.env.DEV) console.log('   Parsed string to ISO:', takenAt)
               } else {
-                console.warn('   ⚠️ Could not parse date string')
+                if (import.meta.env.DEV) console.warn('   ⚠️ Could not parse date string')
               }
             } catch (parseError) {
               console.error('   ❌ Date parsing error:', parseError.message)
@@ -829,12 +831,12 @@ export async function uploadPhoto(
         }
 
         // STEP 2: Extract GPS location
-        console.log('─────────────────────────────────────')
-        console.log('📍 SEARCHING FOR GPS DATA...')
-        console.log('─────────────────────────────────────')
-        console.log('  latitude:', exifData.latitude || 'NOT FOUND')
-        console.log('  longitude:', exifData.longitude || 'NOT FOUND')
-        console.log('  altitude:', exifData.altitude || 'NOT FOUND')
+        if (import.meta.env.DEV) console.log('─────────────────────────────────────')
+        if (import.meta.env.DEV) console.log('📍 SEARCHING FOR GPS DATA...')
+        if (import.meta.env.DEV) console.log('─────────────────────────────────────')
+        if (import.meta.env.DEV) console.log('  latitude:', exifData.latitude || 'NOT FOUND')
+        if (import.meta.env.DEV) console.log('  longitude:', exifData.longitude || 'NOT FOUND')
+        if (import.meta.env.DEV) console.log('  altitude:', exifData.altitude || 'NOT FOUND')
 
         if (exifData.latitude && exifData.longitude) {
           location = {
@@ -842,18 +844,18 @@ export async function uploadPhoto(
             longitude: exifData.longitude,
             altitude: exifData.altitude || null,
           }
-          console.log('✅ GPS location found:', location)
+          if (import.meta.env.DEV) console.log('✅ GPS location found:', location)
         } else {
-          console.log('❌ No GPS data in EXIF')
+          if (import.meta.env.DEV) console.log('❌ No GPS data in EXIF')
         }
 
         // STEP 3: Extract camera info
-        console.log('─────────────────────────────────────')
-        console.log('📷 SEARCHING FOR CAMERA INFO...')
-        console.log('─────────────────────────────────────')
-        console.log('  Make:', exifData.Make || 'NOT FOUND')
-        console.log('  Model:', exifData.Model || 'NOT FOUND')
-        console.log('  LensModel:', exifData.LensModel || 'NOT FOUND')
+        if (import.meta.env.DEV) console.log('─────────────────────────────────────')
+        if (import.meta.env.DEV) console.log('📷 SEARCHING FOR CAMERA INFO...')
+        if (import.meta.env.DEV) console.log('─────────────────────────────────────')
+        if (import.meta.env.DEV) console.log('  Make:', exifData.Make || 'NOT FOUND')
+        if (import.meta.env.DEV) console.log('  Model:', exifData.Model || 'NOT FOUND')
+        if (import.meta.env.DEV) console.log('  LensModel:', exifData.LensModel || 'NOT FOUND')
 
         if (exifData.Make || exifData.Model || exifData.LensModel) {
           camera = {
@@ -861,21 +863,21 @@ export async function uploadPhoto(
             model: exifData.Model || null,
             lens: exifData.LensModel || null,
           }
-          console.log('✅ Camera info found:', camera)
+          if (import.meta.env.DEV) console.log('✅ Camera info found:', camera)
         } else {
-          console.log('❌ No camera info in EXIF')
+          if (import.meta.env.DEV) console.log('❌ No camera info in EXIF')
         }
 
         // STEP 4: Extract technical details
-        console.log('─────────────────────────────────────')
-        console.log('🔧 SEARCHING FOR TECHNICAL DETAILS...')
-        console.log('─────────────────────────────────────')
-        console.log('  ISO:', exifData.ISO || 'NOT FOUND')
-        console.log('  ExposureTime:', exifData.ExposureTime || 'NOT FOUND')
-        console.log('  FNumber:', exifData.FNumber || 'NOT FOUND')
-        console.log('  FocalLength:', exifData.FocalLength || 'NOT FOUND')
-        console.log('  ImageWidth:', exifData.ImageWidth || 'NOT FOUND')
-        console.log('  ImageHeight:', exifData.ImageHeight || 'NOT FOUND')
+        if (import.meta.env.DEV) console.log('─────────────────────────────────────')
+        if (import.meta.env.DEV) console.log('🔧 SEARCHING FOR TECHNICAL DETAILS...')
+        if (import.meta.env.DEV) console.log('─────────────────────────────────────')
+        if (import.meta.env.DEV) console.log('  ISO:', exifData.ISO || 'NOT FOUND')
+        if (import.meta.env.DEV) console.log('  ExposureTime:', exifData.ExposureTime || 'NOT FOUND')
+        if (import.meta.env.DEV) console.log('  FNumber:', exifData.FNumber || 'NOT FOUND')
+        if (import.meta.env.DEV) console.log('  FocalLength:', exifData.FocalLength || 'NOT FOUND')
+        if (import.meta.env.DEV) console.log('  ImageWidth:', exifData.ImageWidth || 'NOT FOUND')
+        if (import.meta.env.DEV) console.log('  ImageHeight:', exifData.ImageHeight || 'NOT FOUND')
 
         if (
           exifData.ISO ||
@@ -892,22 +894,22 @@ export async function uploadPhoto(
             height: exifData.ImageHeight || null,
             orientation: exifData.Orientation || null,
           }
-          console.log('✅ Technical details found:', technicalDetails)
+          if (import.meta.env.DEV) console.log('✅ Technical details found:', technicalDetails)
         } else {
-          console.log('❌ No technical details in EXIF')
+          if (import.meta.env.DEV) console.log('❌ No technical details in EXIF')
         }
       }
 
-      console.log('═══════════════════════════════════════')
-      console.log('🔍 EXIF EXTRACTION DEBUG END')
-      console.log('═══════════════════════════════════════')
+      if (import.meta.env.DEV) console.log('═══════════════════════════════════════')
+      if (import.meta.env.DEV) console.log('🔍 EXIF EXTRACTION DEBUG END')
+      if (import.meta.env.DEV) console.log('═══════════════════════════════════════')
     }
 
     // Log EXIF date status (no fallback - leave undefined if no EXIF date)
     if (takenAt) {
-      console.log(`✅ Using EXIF date: ${takenAt}`)
+      if (import.meta.env.DEV) console.log(`✅ Using EXIF date: ${takenAt}`)
     } else {
-      console.log(`⚠️ No EXIF date found - takenAt will be undefined`)
+      if (import.meta.env.DEV) console.log(`⚠️ No EXIF date found - takenAt will be undefined`)
     }
 
     // 3. Upload main file to Storage
@@ -920,7 +922,7 @@ export async function uploadPhoto(
     await uploadBytes(storageRef, file, { contentType: fileType })
     const downloadURL = await getDownloadURL(storageRef)
 
-    console.log(
+    if (import.meta.env.DEV) console.log(
       `📸 ${isVideo ? 'Video' : 'Bilde'} lastet opp til Storage: ${safeName}`
     )
 
@@ -976,7 +978,7 @@ export async function uploadPhoto(
 
     // 4. Lagre metadata i Firestore
     const photoId = await addPhoto(photoData)
-    console.log(`✅ Bilde lagret i Firestore: ${photoId}`)
+    if (import.meta.env.DEV) console.log(`✅ Bilde lagret i Firestore: ${photoId}`)
 
     // 5. Oppdater album photoCount (hvis albumId finnes)
     if (albumId) {
@@ -986,10 +988,10 @@ export async function uploadPhoto(
         if (albumSnap.exists()) {
           const currentCount = albumSnap.data().photoCount || 0
           await updateAlbumPhotoCount(albumId, currentCount + 1)
-          console.log(`📂 Album photoCount oppdatert: ${albumId}`)
+          if (import.meta.env.DEV) console.log(`📂 Album photoCount oppdatert: ${albumId}`)
         }
       } catch (err) {
-        console.warn('⚠️ Kunne ikke oppdatere album count:', err)
+        if (import.meta.env.DEV) console.warn('⚠️ Kunne ikke oppdatere album count:', err)
       }
     }
 
@@ -1071,7 +1073,7 @@ export async function uploadEditedPhoto(
     })
 
     const editedUrl = await getDownloadURL(storageRef)
-    console.log('✅ [EditedPhoto] Uploaded to R2:', editedUrl)
+    if (import.meta.env.DEV) console.log('✅ [EditedPhoto] Uploaded to R2:', editedUrl)
 
     // 2. Upload thumbnail if provided
     let thumbnailUrl = null
@@ -1092,7 +1094,7 @@ export async function uploadEditedPhoto(
         })
 
         thumbnailUrl = await getDownloadURL(thumbRef)
-        console.log('✅ [EditedPhoto] Thumbnail uploaded:', thumbnailUrl)
+        if (import.meta.env.DEV) console.log('✅ [EditedPhoto] Thumbnail uploaded:', thumbnailUrl)
       } catch (thumbError) {
         console.error('⚠️ [EditedPhoto] Thumbnail upload failed:', thumbError)
         // Continue without thumbnail
@@ -1117,12 +1119,12 @@ export async function uploadEditedPhoto(
     // Set originalUrl only if it doesn't exist (first time editing)
     if (!currentPhotoData.originalUrl) {
       updates.originalUrl = currentPhotoData.url // Backup the original
-      console.log('✅ [EditedPhoto] Preserving originalUrl:', currentPhotoData.url)
+      if (import.meta.env.DEV) console.log('✅ [EditedPhoto] Preserving originalUrl:', currentPhotoData.url)
     }
 
     await updateDoc(doc(db, 'photos', photoId), updates)
 
-    console.log(`✅ [EditedPhoto] Firestore updated for ${photoId}`)
+    if (import.meta.env.DEV) console.log(`✅ [EditedPhoto] Firestore updated for ${photoId}`)
 
     return { editedUrl, thumbnailUrl, storagePath }
   } catch (error) {
@@ -1265,7 +1267,7 @@ export async function migrateAlbumsAddUserId() {
       throw new Error('No user logged in')
     }
 
-    console.log('🔧 Starting migration: Adding userId to albums...')
+    if (import.meta.env.DEV) console.log('🔧 Starting migration: Adding userId to albums...')
 
     const albumsSnapshot = await getDocs(collection(db, 'albums'))
     let fixed = 0
@@ -1276,7 +1278,7 @@ export async function migrateAlbumsAddUserId() {
 
       // If album missing userId, add current user's ID
       if (!albumData.userId) {
-        console.log(
+        if (import.meta.env.DEV) console.log(
           `Fixing album: ${albumDoc.id} - "${albumData.name}" (missing userId)`
         )
         await updateDoc(doc(db, 'albums', albumDoc.id), {
@@ -1289,7 +1291,7 @@ export async function migrateAlbumsAddUserId() {
       }
     }
 
-    console.log(
+    if (import.meta.env.DEV) console.log(
       `✅ Migration complete: ${fixed} albums fixed, ${skipped} already had userId`
     )
     return { fixed, skipped, total: albumsSnapshot.docs.length }
@@ -1310,7 +1312,7 @@ export async function migratePhotosAddUserId() {
       throw new Error('No user logged in')
     }
 
-    console.log('🔧 Starting migration: Adding userId to photos...')
+    if (import.meta.env.DEV) console.log('🔧 Starting migration: Adding userId to photos...')
 
     const photosSnapshot = await getDocs(collection(db, 'photos'))
     let fixed = 0
@@ -1321,7 +1323,7 @@ export async function migratePhotosAddUserId() {
 
       // If photo missing userId, add current user's ID
       if (!photoData.userId) {
-        console.log(
+        if (import.meta.env.DEV) console.log(
           `Fixing photo: ${photoDoc.id} - "${
             photoData.name || 'unnamed'
           }" (missing userId)`
@@ -1336,7 +1338,7 @@ export async function migratePhotosAddUserId() {
       }
     }
 
-    console.log(
+    if (import.meta.env.DEV) console.log(
       `✅ Migration complete: ${fixed} photos fixed, ${skipped} already had userId`
     )
     return { fixed, skipped, total: photosSnapshot.docs.length }

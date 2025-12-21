@@ -6,14 +6,14 @@
 // Load single image
 export const loadImage = (url) => {
   return new Promise((resolve, reject) => {
-    console.log('🖼️ loadImage(): starting...', url)
+    if (import.meta.env.DEV) console.log('🖼️ loadImage(): starting...', url)
 
     const img = new Image()
     // REMOVED: img.crossOrigin = 'anonymous' - causes Firebase Storage images to fail silently
 
     img.onload = () => {
-      console.log('✅ loadImage(): image loaded')
-      console.log('✅ Image loaded:', url.substring(0, 50) + '...')
+      if (import.meta.env.DEV) console.log('✅ loadImage(): image loaded')
+      if (import.meta.env.DEV) console.log('✅ Image loaded:', url.substring(0, 50) + '...')
       resolve(img)
     }
 
@@ -28,12 +28,12 @@ export const loadImage = (url) => {
 
 // Load multiple images in parallel
 export const loadImages = async (urls) => {
-  console.log(`📷 Loading ${urls.length} images...`)
+  if (import.meta.env.DEV) console.log(`📷 Loading ${urls.length} images...`)
 
   try {
     const imagePromises = urls.map(url => loadImage(url))
     const images = await Promise.all(imagePromises)
-    console.log(`✅ All ${images.length} images loaded successfully`)
+    if (import.meta.env.DEV) console.log(`✅ All ${images.length} images loaded successfully`)
     return images
   } catch (error) {
     console.error('❌ Error loading images:', error)

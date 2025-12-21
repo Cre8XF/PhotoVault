@@ -117,12 +117,12 @@ export function useCanvas(imageUrl, adjustments = {}, filter = {}, rotation = 0,
 
         // ✅ PRIORITY 1: Use preloaded image (already has CORS, faster)
         if (preloadedImage) {
-          console.log('✅ Using preloaded image for canvas')
+          if (import.meta.env.DEV) console.log('✅ Using preloaded image for canvas')
           image = preloadedImage
         }
         // ✅ FALLBACK: Load from URL (should rarely happen)
         else if (imageUrl) {
-          console.log('⚠️ Preloaded image not found, loading from URL')
+          if (import.meta.env.DEV) console.log('⚠️ Preloaded image not found, loading from URL')
           const result = await loadImage(imageUrl)
           image = result.image
         } else {
@@ -138,7 +138,7 @@ export function useCanvas(imageUrl, adjustments = {}, filter = {}, rotation = 0,
           if (mounted) {
             render()
             setIsLoading(false)
-            console.log('✅ Canvas rendered with image')
+            if (import.meta.env.DEV) console.log('✅ Canvas rendered with image')
           }
         })
       } catch (err) {

@@ -21,12 +21,12 @@ export async function compressImage(file, options = {}) {
   const compressionOptions = { ...defaultOptions, ...options };
 
   try {
-    console.log(`🖼️ Original størrelse: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+    if (import.meta.env.DEV) console.log(`🖼️ Original størrelse: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
     
     const compressedFile = await imageCompression(file, compressionOptions);
     
-    console.log(`✅ Komprimert størrelse: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
-    console.log(`📉 Reduksjon: ${((1 - compressedFile.size / file.size) * 100).toFixed(1)}%`);
+    if (import.meta.env.DEV) console.log(`✅ Komprimert størrelse: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
+    if (import.meta.env.DEV) console.log(`📉 Reduksjon: ${((1 - compressedFile.size / file.size) * 100).toFixed(1)}%`);
     
     return compressedFile;
   } catch (error) {
@@ -119,10 +119,10 @@ export async function compressLargeImages(files, threshold = 1) {
   return Promise.all(
     files.map(async (file) => {
       if (needsCompression(file, threshold)) {
-        console.log(`🔄 Komprimerer stor fil: ${file.name}`);
+        if (import.meta.env.DEV) console.log(`🔄 Komprimerer stor fil: ${file.name}`);
         return await compressImage(file);
       } else {
-        console.log(`✅ Fil under ${threshold}MB, hopper over: ${file.name}`);
+        if (import.meta.env.DEV) console.log(`✅ Fil under ${threshold}MB, hopper over: ${file.name}`);
         return file;
       }
     })

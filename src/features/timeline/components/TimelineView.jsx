@@ -20,7 +20,7 @@ const TimelineView = ({ photos, onPhotoClick }) => {
 
   // Group photos based on selected view
   const groups = useMemo(() => {
-    console.log(`📊 Timeline: Grouping ${photos?.length || 0} photos by ${groupBy}`)
+    if (import.meta.env.DEV) console.log(`📊 Timeline: Grouping ${photos?.length || 0} photos by ${groupBy}`)
 
     if (!photos || photos.length === 0) {
       return []
@@ -35,7 +35,7 @@ const TimelineView = ({ photos, onPhotoClick }) => {
     }
   }, [photos, groupBy])
 
-  console.log(`✅ Timeline: Created ${groups.length} ${groupBy} groups`)
+  if (import.meta.env.DEV) console.log(`✅ Timeline: Created ${groups.length} ${groupBy} groups`)
 
   // Get available years for date picker
   const availableYears = useMemo(() => {
@@ -44,7 +44,7 @@ const TimelineView = ({ photos, onPhotoClick }) => {
 
   // Handle jump to date
   const handleJumpToDate = useCallback((selectedDate) => {
-    console.log('🎯 Jumping to date:', selectedDate)
+    if (import.meta.env.DEV) console.log('🎯 Jumping to date:', selectedDate)
 
     // Find the closest group to scroll to
     let targetKey = null
@@ -65,11 +65,11 @@ const TimelineView = ({ photos, onPhotoClick }) => {
       targetKey = String(selectedDate.getFullYear())
     }
 
-    console.log('🔍 Looking for section with key:', targetKey)
+    if (import.meta.env.DEV) console.log('🔍 Looking for section with key:', targetKey)
 
     // Try exact match first
     if (sectionRefs.current[targetKey]) {
-      console.log('✅ Found exact match, scrolling...')
+      if (import.meta.env.DEV) console.log('✅ Found exact match, scrolling...')
       sectionRefs.current[targetKey].scrollIntoView({
         behavior: 'smooth',
         block: 'start'
@@ -82,13 +82,13 @@ const TimelineView = ({ photos, onPhotoClick }) => {
     const closestKey = sortedKeys.find(key => key <= targetKey)
 
     if (closestKey && sectionRefs.current[closestKey]) {
-      console.log('✅ Found closest match:', closestKey, '- scrolling...')
+      if (import.meta.env.DEV) console.log('✅ Found closest match:', closestKey, '- scrolling...')
       sectionRefs.current[closestKey].scrollIntoView({
         behavior: 'smooth',
         block: 'start'
       })
     } else {
-      console.warn('⚠️ No matching section found for:', targetKey)
+      if (import.meta.env.DEV) console.warn('⚠️ No matching section found for:', targetKey)
     }
   }, [groupBy])
 

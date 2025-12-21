@@ -345,7 +345,7 @@ export const sanitizeImageUrl = (url, fallback = '') => {
   // Null/undefined/empty check
   if (!url || typeof url !== 'string') {
     if (url !== '' && url !== null && url !== undefined) {
-      console.warn('⚠️ Security: Invalid image URL type:', typeof url)
+      if (import.meta.env.DEV) console.warn('⚠️ Security: Invalid image URL type:', typeof url)
     }
     return fallback
   }
@@ -498,7 +498,7 @@ export const isValidFirebaseStorageUrl = (url) => {
     const urlObj = new URL(url)
     return firebaseStorageDomains.some(domain => urlObj.hostname.includes(domain))
   } catch (e) {
-    console.warn('Invalid URL format:', url)
+    if (import.meta.env.DEV) console.warn('Invalid URL format:', url)
     return false
   }
 }

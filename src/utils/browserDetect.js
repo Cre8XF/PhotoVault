@@ -152,7 +152,7 @@ export function getContextMessage() {
  * Log browser context for debugging
  */
 export function logBrowserContext() {
-  console.log('🌐 [BROWSER] Context:', {
+  if (import.meta.env.DEV) console.log('🌐 [BROWSER] Context:', {
     userAgent: navigator.userAgent,
     isGmailWebView: isGmailWebView(),
     isIOSInAppBrowser: isIOSInAppBrowser(),

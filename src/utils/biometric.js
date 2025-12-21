@@ -13,7 +13,7 @@ export async function checkBiometricSupport() {
   try {
     // Check if WebAuthn is available
     if (!window.PublicKeyCredential) {
-      console.log('WebAuthn not supported');
+      if (import.meta.env.DEV) console.log('WebAuthn not supported');
       return false;
     }
 
@@ -21,9 +21,9 @@ export async function checkBiometricSupport() {
     const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
     
     if (available) {
-      console.log('✓ Biometric authentication available');
+      if (import.meta.env.DEV) console.log('✓ Biometric authentication available');
     } else {
-      console.log('✗ Biometric authentication not available');
+      if (import.meta.env.DEV) console.log('✗ Biometric authentication not available');
     }
 
     return available;

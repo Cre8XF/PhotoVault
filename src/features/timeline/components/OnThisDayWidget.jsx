@@ -18,7 +18,7 @@ const OnThisDayWidget = ({ photos, onPhotoClick, referenceDate = new Date() }) =
     }
 
     const memoriesFromPastYears = getPhotosOnThisDay(photos, referenceDate)
-    console.log(`🎂 OnThisDay: Found ${memoriesFromPastYears.length} memories`)
+    if (import.meta.env.DEV) console.log(`🎂 OnThisDay: Found ${memoriesFromPastYears.length} memories`)
 
     return memoriesFromPastYears
   }, [photos, referenceDate])

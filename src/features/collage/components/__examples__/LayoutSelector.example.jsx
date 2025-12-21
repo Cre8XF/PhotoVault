@@ -20,7 +20,7 @@ export function BasicExample() {
         selectedLayout={selectedLayout}
         onSelect={(layout) => {
           setSelectedLayout(layout)
-          console.log('Selected layout:', layout)
+          if (import.meta.env.DEV) console.log('Selected layout:', layout)
         }}
       />
 
@@ -102,7 +102,7 @@ export function WithBackButtonExample() {
           selectedLayout={selectedLayout}
           onSelect={(layout) => {
             setSelectedLayout(layout)
-            console.log('Selected:', layout)
+            if (import.meta.env.DEV) console.log('Selected:', layout)
             setStep(3) // Move to next step
           }}
           onBack={() => setStep(1)}
@@ -146,7 +146,7 @@ export function WithInitialSelectionExample() {
           selectedLayout={selectedLayout}
           onSelect={(layout) => {
             setSelectedLayout(layout)
-            console.log('Changed layout to:', layout)
+            if (import.meta.env.DEV) console.log('Changed layout to:', layout)
           }}
         />
       </div>
@@ -283,7 +283,7 @@ export function GroupedCategoryExample() {
           selectedLayout={selectedLayout}
           onSelect={(layout) => {
             setSelectedLayout(layout)
-            console.log('Selected:', layout)
+            if (import.meta.env.DEV) console.log('Selected:', layout)
           }}
           showIncompatible={false}
         />

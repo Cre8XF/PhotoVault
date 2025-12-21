@@ -56,17 +56,17 @@ export function formatFileSize(bytes) {
  * @returns {Promise<Blob|null>} Thumbnail image blob or null if failed
  */
 export async function generateThumbnail(videoFile) {
-  console.log('🎬 [Thumbnail] Starting generation for:', videoFile.name)
+  if (import.meta.env.DEV) console.log('🎬 [Thumbnail] Starting generation for:', videoFile.name)
 
   // Validate file type
   if (!videoFile.type || !videoFile.type.startsWith('video/')) {
-    console.warn('❌ [Thumbnail] Invalid MIME type:', videoFile.type)
+    if (import.meta.env.DEV) console.warn('❌ [Thumbnail] Invalid MIME type:', videoFile.type)
     return null
   }
 
   // Validate file size (sanity check)
   if (videoFile.size === 0) {
-    console.warn('❌ [Thumbnail] File is empty')
+    if (import.meta.env.DEV) console.warn('❌ [Thumbnail] File is empty')
     return null
   }
 
@@ -82,7 +82,7 @@ export async function generateThumbnail(videoFile) {
     // 12 second timeout (generous for large files)
     const timeout = setTimeout(() => {
       if (!resolved) {
-        console.warn('⏱️ [Thumbnail] Timeout after 12 seconds')
+        if (import.meta.env.DEV) console.warn('⏱️ [Thumbnail] Timeout after 12 seconds')
         cleanup()
         resolve(null)
         resolved = true
@@ -101,7 +101,7 @@ export async function generateThumbnail(videoFile) {
     video.onloadedmetadata = () => {
       if (resolved) return
 
-      console.log(
+      if (import.meta.env.DEV) console.log(
         '✅ [Thumbnail] Metadata loaded - duration:',
         video.duration.toFixed(2),
         'seconds'
@@ -109,7 +109,7 @@ export async function generateThumbnail(videoFile) {
 
       // Validate duration
       if (!video.duration || video.duration === 0) {
-        console.warn('⚠️ [Thumbnail] Video has no duration')
+        if (import.meta.env.DEV) console.warn('⚠️ [Thumbnail] Video has no duration')
         cleanup()
         clearTimeout(timeout)
         resolve(null)
@@ -119,7 +119,7 @@ export async function generateThumbnail(videoFile) {
 
       // Seek to 1 second or 5% of duration (whichever is smaller)
       const seekTime = Math.min(1, video.duration * 0.05)
-      console.log('⏩ [Thumbnail] Seeking to:', seekTime.toFixed(2), 'seconds')
+      if (import.meta.env.DEV) console.log('⏩ [Thumbnail] Seeking to:', seekTime.toFixed(2), 'seconds')
 
       try {
         video.currentTime = seekTime
@@ -135,7 +135,7 @@ export async function generateThumbnail(videoFile) {
     video.onseeked = () => {
       if (resolved) return
 
-      console.log('📸 [Thumbnail] Seeked successfully, capturing frame...')
+      if (import.meta.env.DEV) console.log('📸 [Thumbnail] Seeked successfully, capturing frame...')
       clearTimeout(timeout)
 
       try {
@@ -148,7 +148,7 @@ export async function generateThumbnail(videoFile) {
           return
         }
 
-        console.log(
+        if (import.meta.env.DEV) console.log(
           `📐 [Thumbnail] Video dimensions: ${video.videoWidth}x${video.videoHeight}`
         )
 
@@ -160,7 +160,7 @@ export async function generateThumbnail(videoFile) {
         canvas.width = Math.floor(video.videoWidth * scale)
         canvas.height = Math.floor(video.videoHeight * scale)
 
-        console.log(
+        if (import.meta.env.DEV) console.log(
           `🖼️ [Thumbnail] Canvas size: ${canvas.width}x${canvas.height}`
         )
 
@@ -180,7 +180,7 @@ export async function generateThumbnail(videoFile) {
         canvas.toBlob(
           (blob) => {
             if (blob && blob.size > 0) {
-              console.log(
+              if (import.meta.env.DEV) console.log(
                 '✅ [Thumbnail] Generated successfully:',
                 (blob.size / 1024).toFixed(1),
                 'KB'
@@ -225,7 +225,7 @@ export async function generateThumbnail(videoFile) {
     try {
       objectUrl = URL.createObjectURL(videoFile)
       video.src = objectUrl
-      console.log('🔗 [Thumbnail] Object URL created')
+      if (import.meta.env.DEV) console.log('🔗 [Thumbnail] Object URL created')
     } catch (error) {
       clearTimeout(timeout)
       console.error('❌ [Thumbnail] Failed to create object URL:', error)
@@ -242,11 +242,11 @@ export async function generateThumbnail(videoFile) {
  * @returns {Promise<Object|null>} { duration, resolution, fps, size } or null
  */
 export async function extractVideoMetadata(videoFile) {
-  console.log('📊 [Metadata] Extracting for:', videoFile.name)
+  if (import.meta.env.DEV) console.log('📊 [Metadata] Extracting for:', videoFile.name)
 
   // Validate file type
   if (!videoFile.type || !videoFile.type.startsWith('video/')) {
-    console.warn('❌ [Metadata] Invalid MIME type:', videoFile.type)
+    if (import.meta.env.DEV) console.warn('❌ [Metadata] Invalid MIME type:', videoFile.type)
     return null
   }
 
@@ -261,7 +261,7 @@ export async function extractVideoMetadata(videoFile) {
     // 8 second timeout
     const timeout = setTimeout(() => {
       if (!resolved) {
-        console.warn('⏱️ [Metadata] Timeout after 8 seconds')
+        if (import.meta.env.DEV) console.warn('⏱️ [Metadata] Timeout after 8 seconds')
         if (objectUrl) URL.revokeObjectURL(objectUrl)
         video.src = ''
         resolve(null)
@@ -285,7 +285,7 @@ export async function extractVideoMetadata(videoFile) {
           size: videoFile.size,
         }
 
-        console.log('✅ [Metadata] Extracted:', metadata)
+        if (import.meta.env.DEV) console.log('✅ [Metadata] Extracted:', metadata)
         if (objectUrl) URL.revokeObjectURL(objectUrl)
         video.src = ''
         resolve(metadata)
@@ -307,7 +307,7 @@ export async function extractVideoMetadata(videoFile) {
     try {
       objectUrl = URL.createObjectURL(videoFile)
       video.src = objectUrl
-      console.log('🔗 [Metadata] Object URL created')
+      if (import.meta.env.DEV) console.log('🔗 [Metadata] Object URL created')
     } catch (error) {
       clearTimeout(timeout)
       console.error('❌ [Metadata] Failed to create object URL:', error)
@@ -330,7 +330,7 @@ export async function compressVideo(videoFile, onProgress = () => {}) {
 
   // Skip compression for small files
   if (videoFile.size < COMPRESSION_THRESHOLD) {
-    console.log('Video size below threshold, skipping compression')
+    if (import.meta.env.DEV) console.log('Video size below threshold, skipping compression')
     return null
   }
 
@@ -346,7 +346,7 @@ export async function compressVideo(videoFile, onProgress = () => {}) {
 
     // Load ffmpeg core
     await ffmpeg.load()
-    console.log('FFmpeg loaded successfully')
+    if (import.meta.env.DEV) console.log('FFmpeg loaded successfully')
 
     // Write input file to ffmpeg virtual filesystem
     const inputName = 'input.mp4'
@@ -383,7 +383,7 @@ export async function compressVideo(videoFile, onProgress = () => {}) {
     const data = await ffmpeg.readFile(outputName)
     const blob = new Blob([data.buffer], { type: 'video/mp4' })
 
-    console.log('Compression complete:', {
+    if (import.meta.env.DEV) console.log('Compression complete:', {
       original: formatFileSize(videoFile.size),
       compressed: formatFileSize(blob.size),
       savings: `${Math.round((1 - blob.size / videoFile.size) * 100)}%`,
@@ -403,7 +403,7 @@ export async function compressVideo(videoFile, onProgress = () => {}) {
  * @returns {Promise<Blob|null>}
  */
 export async function transcodeToMP4(videoFile) {
-  console.warn('Transcoding not yet implemented')
+  if (import.meta.env.DEV) console.warn('Transcoding not yet implemented')
   return null
 }
 

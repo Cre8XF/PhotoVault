@@ -85,7 +85,7 @@ export function groupPhotosByTime(photos) {
     const date = getPhotoDate(photo)
 
     if (!date) {
-      console.warn('Photo missing date:', photo.id)
+      if (import.meta.env.DEV) console.warn('Photo missing date:', photo.id)
       return
     }
 

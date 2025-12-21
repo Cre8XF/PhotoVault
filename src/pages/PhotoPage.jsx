@@ -141,7 +141,7 @@ export default function PhotoPage() {
   const handleToggleFavorite = useCallback(async () => {
     if (!photo) return
 
-    console.log('🎯 PhotoPage.handleToggleFavorite called:', {
+    if (import.meta.env.DEV) console.log('🎯 PhotoPage.handleToggleFavorite called:', {
       photoId: photo.id,
       currentFavorite: photo.favorite,
       timestamp: new Date().toISOString()
@@ -150,18 +150,18 @@ export default function PhotoPage() {
     const newFavoriteStatus = !photo.favorite
 
     // Optimistic update in Zustand
-    console.log('⚡ Optimistically updating Zustand store...')
+    if (import.meta.env.DEV) console.log('⚡ Optimistically updating Zustand store...')
     updatePhotoInStore(photo.id, { favorite: newFavoriteStatus })
 
     try {
       // Sync to Firestore using toggleFavorite
-      console.log('🔥 Calling firebase.toggleFavorite()...')
+      if (import.meta.env.DEV) console.log('🔥 Calling firebase.toggleFavorite()...')
       const result = await firebaseToggleFavorite(photo.id, photo.favorite)
-      console.log('✅ firebase.toggleFavorite() returned:', result)
+      if (import.meta.env.DEV) console.log('✅ firebase.toggleFavorite() returned:', result)
     } catch (err) {
       console.error('❌ PhotoPage favorite toggle failed:', err)
       // Revert UI state on error
-      console.log('↩️ Reverting optimistic update...')
+      if (import.meta.env.DEV) console.log('↩️ Reverting optimistic update...')
       updatePhotoInStore(photo.id, { favorite: !newFavoriteStatus })
     }
 
@@ -179,7 +179,7 @@ export default function PhotoPage() {
   const handleDelete = useCallback(() => {
     if (!photo) return
 
-    console.log('🗑️ PhotoPage: Delete button clicked, showing confirm modal')
+    if (import.meta.env.DEV) console.log('🗑️ PhotoPage: Delete button clicked, showing confirm modal')
     setShowDeleteConfirm(true)
     resetUiTimer()
   }, [photo, resetUiTimer])
@@ -188,8 +188,8 @@ export default function PhotoPage() {
   const executeDelete = useCallback(async () => {
     if (!photo) return
 
-    console.log('✅ Delete confirmed, executing...')
-    console.log('🗑️ Deleting photo:', {
+    if (import.meta.env.DEV) console.log('✅ Delete confirmed, executing...')
+    if (import.meta.env.DEV) console.log('🗑️ Deleting photo:', {
       photoId: photo.id,
       storagePath: photo.storagePath,
       filename: photo.name
@@ -199,7 +199,7 @@ export default function PhotoPage() {
     // The usePhotoById hook will try to re-fetch the photo after deletion,
     // causing a "not found" error. By navigating first, we unmount the component
     // before that can happen.
-    console.log('🚀 Navigating away immediately to prevent re-fetch')
+    if (import.meta.env.DEV) console.log('🚀 Navigating away immediately to prevent re-fetch')
 
     // Close confirmation modal first
     setShowDeleteConfirm(false)
@@ -213,9 +213,9 @@ export default function PhotoPage() {
     // Delete from Firebase in background
     // This happens after navigation, so any errors won't affect the user
     try {
-      console.log('🗑️ Deleting photo from Firebase in background...')
+      if (import.meta.env.DEV) console.log('🗑️ Deleting photo from Firebase in background...')
       await firebaseDeletePhoto(photo.id, photo.storagePath)
-      console.log('✅ Photo deleted successfully from Firebase')
+      if (import.meta.env.DEV) console.log('✅ Photo deleted successfully from Firebase')
 
       // Show success notification (user already on Home page)
       setNotification({
@@ -238,7 +238,7 @@ export default function PhotoPage() {
 
   // Toggle info panel
   const handleToggleInfo = useCallback(() => {
-    console.log('ℹ️ PhotoPage: Info toggled', {
+    if (import.meta.env.DEV) console.log('ℹ️ PhotoPage: Info toggled', {
       photoId: photo?.id,
       currentState: showInfo
     })
@@ -250,7 +250,7 @@ export default function PhotoPage() {
   const handleDownload = useCallback(() => {
     if (!photo) return
 
-    console.log('📥 PhotoPage: Download clicked', { photoId: photo.id })
+    if (import.meta.env.DEV) console.log('📥 PhotoPage: Download clicked', { photoId: photo.id })
 
     const link = document.createElement('a')
     link.href = photo.url
@@ -265,7 +265,7 @@ export default function PhotoPage() {
   const handleShare = useCallback(() => {
     if (!photo) return
 
-    console.log('🔗 PhotoPage: Share clicked', { photoId: photo.id })
+    if (import.meta.env.DEV) console.log('🔗 PhotoPage: Share clicked', { photoId: photo.id })
 
     if (navigator.share) {
       navigator.share({
@@ -514,7 +514,7 @@ export default function PhotoPage() {
             {/* Edit button */}
             <button
               onClick={() => {
-                console.log('✏️ Edit button clicked, navigating to editor')
+                if (import.meta.env.DEV) console.log('✏️ Edit button clicked, navigating to editor')
                 navigate(`/edit/${id}`)
               }}
               className="text-white hover:bg-blue-500/10 hover:text-blue-400 p-2 rounded-full transition active:scale-95"
@@ -549,7 +549,7 @@ export default function PhotoPage() {
             {/* More menu */}
             <button
               onClick={() => {
-                console.log('📋 PhotoPage: More menu toggled')
+                if (import.meta.env.DEV) console.log('📋 PhotoPage: More menu toggled')
                 setShowMoreMenu(!showMoreMenu)
                 resetUiTimer()
               }}
@@ -599,7 +599,7 @@ export default function PhotoPage() {
 
                 <button
                   onClick={() => {
-                    console.log('📁 Move to album - TODO')
+                    if (import.meta.env.DEV) console.log('📁 Move to album - TODO')
                     alert(t('common:comingSoon.title') || 'Coming soon')
                     setShowMoreMenu(false)
                     resetUiTimer()
@@ -894,7 +894,7 @@ export default function PhotoPage() {
           {/* Edit */}
           <button
             onClick={() => {
-              console.log('✏️ Edit button clicked (mobile), navigating to editor')
+              if (import.meta.env.DEV) console.log('✏️ Edit button clicked (mobile), navigating to editor')
               navigate(`/edit/${id}`)
             }}
             className="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] rounded-lg transition active:scale-95"
@@ -955,7 +955,7 @@ export default function PhotoPage() {
           cancelLabel={t('common:cancel')}
           onConfirm={executeDelete}
           onClose={() => {
-            console.log('❌ Delete cancelled')
+            if (import.meta.env.DEV) console.log('❌ Delete cancelled')
             setShowDeleteConfirm(false)
           }}
         />

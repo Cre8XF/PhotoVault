@@ -15,7 +15,7 @@ import { nb } from 'date-fns/locale'
  */
 export const getPhotoDate = (photo) => {
   if (!photo || !photo.createdAt) {
-    console.warn('Photo missing createdAt:', photo)
+    if (import.meta.env.DEV) console.warn('Photo missing createdAt:', photo)
     return null
   }
 
@@ -32,13 +32,13 @@ export const getPhotoDate = (photo) => {
   } else if (typeof photo.createdAt === 'number') {
     date = new Date(photo.createdAt)
   } else {
-    console.warn('Invalid date format:', photo.createdAt)
+    if (import.meta.env.DEV) console.warn('Invalid date format:', photo.createdAt)
     return null
   }
 
   // Validate date
   if (!isValid(date)) {
-    console.warn('Invalid date:', photo.createdAt)
+    if (import.meta.env.DEV) console.warn('Invalid date:', photo.createdAt)
     return null
   }
 
@@ -64,7 +64,7 @@ export const groupPhotosByDate = (photos) => {
     .filter(photo => photo._date !== null)
     .sort((a, b) => b._date - a._date)
 
-  console.log(`📅 Grouping ${validPhotos.length} photos by day`)
+  if (import.meta.env.DEV) console.log(`📅 Grouping ${validPhotos.length} photos by day`)
 
   // Group by day
   const groups = {}
@@ -91,7 +91,7 @@ export const groupPhotosByDate = (photos) => {
   // Convert to array and sort by date (newest first)
   const result = Object.values(groups).sort((a, b) => b.date - a.date)
 
-  console.log(`✅ Created ${result.length} day groups`)
+  if (import.meta.env.DEV) console.log(`✅ Created ${result.length} day groups`)
   return result
 }
 
@@ -114,7 +114,7 @@ export const groupPhotosByMonth = (photos) => {
     .filter(photo => photo._date !== null)
     .sort((a, b) => b._date - a._date)
 
-  console.log(`📅 Grouping ${validPhotos.length} photos by month`)
+  if (import.meta.env.DEV) console.log(`📅 Grouping ${validPhotos.length} photos by month`)
 
   // Group by month
   const groups = {}
@@ -143,7 +143,7 @@ export const groupPhotosByMonth = (photos) => {
   // Convert to array and sort by date (newest first)
   const result = Object.values(groups).sort((a, b) => b.date - a.date)
 
-  console.log(`✅ Created ${result.length} month groups`)
+  if (import.meta.env.DEV) console.log(`✅ Created ${result.length} month groups`)
   return result
 }
 
@@ -166,7 +166,7 @@ export const groupPhotosByYear = (photos) => {
     .filter(photo => photo._date !== null)
     .sort((a, b) => b._date - a._date)
 
-  console.log(`📅 Grouping ${validPhotos.length} photos by year`)
+  if (import.meta.env.DEV) console.log(`📅 Grouping ${validPhotos.length} photos by year`)
 
   // Group by year
   const groups = {}
@@ -193,7 +193,7 @@ export const groupPhotosByYear = (photos) => {
   // Convert to array and sort by date (newest first)
   const result = Object.values(groups).sort((a, b) => b.date - a.date)
 
-  console.log(`✅ Created ${result.length} year groups`)
+  if (import.meta.env.DEV) console.log(`✅ Created ${result.length} year groups`)
   return result
 }
 
@@ -275,7 +275,7 @@ export const getPhotosOnThisDay = (photos, referenceDate = new Date()) => {
       }
     })
 
-  console.log(`🎂 Found ${memories.length} memories from this day in previous years`)
+  if (import.meta.env.DEV) console.log(`🎂 Found ${memories.length} memories from this day in previous years`)
   return memories
 }
 

@@ -58,7 +58,7 @@ export const usePhotoData = () => {
   const refreshAllData = useCallback(
     async (uid) => {
       if (!uid) {
-        console.warn('⚠️ refreshAllData called without uid')
+        if (import.meta.env.DEV) console.warn('⚠️ refreshAllData called without uid')
         return { albums: [], photos: [] }
       }
 
@@ -72,7 +72,7 @@ export const usePhotoData = () => {
         const safeAlbums = Array.isArray(fetchedAlbums) ? fetchedAlbums : []
         const safePhotos = Array.isArray(fetchedPhotos) ? fetchedPhotos : []
 
-        console.log('✅ Refresh complete from Firestore:', {
+        if (import.meta.env.DEV) console.log('✅ Refresh complete from Firestore:', {
           albums: safeAlbums.length,
           photos: safePhotos.length,
         })
@@ -107,18 +107,18 @@ export const usePhotoData = () => {
    */
   useEffect(() => {
     if (!user?.uid) {
-      console.log('⏸ [usePhotoData] No user - skipping listeners')
+      if (import.meta.env.DEV) console.log('⏸ [usePhotoData] No user - skipping listeners')
       return
     }
 
-    console.log(
+    if (import.meta.env.DEV) console.log(
       '✅ [usePhotoData] Setting up Firestore listeners for user:',
       user.uid
     )
 
     // Listen to albums
     const unsubscribeAlbums = listenToAlbumsByUser(user.uid, (albums) => {
-      console.log(
+      if (import.meta.env.DEV) console.log(
         '📥 [usePhotoData] Albums updated from Firestore:',
         albums.length
       )
@@ -127,7 +127,7 @@ export const usePhotoData = () => {
 
     // Listen to photos
     const unsubscribePhotos = listenToPhotosByUser(user.uid, (photos) => {
-      console.log(
+      if (import.meta.env.DEV) console.log(
         '📥 [usePhotoData] Photos updated from Firestore:',
         photos.length
       )
@@ -137,7 +137,7 @@ export const usePhotoData = () => {
 
     // Cleanup listeners on unmount
     return () => {
-      console.log('🧹 [usePhotoData] Cleaning up Firestore listeners')
+      if (import.meta.env.DEV) console.log('🧹 [usePhotoData] Cleaning up Firestore listeners')
       unsubscribeAlbums()
       unsubscribePhotos()
     }
@@ -151,7 +151,7 @@ export const usePhotoData = () => {
     async (selectedFiles, albumId, aiTagging = false) => {
       // GUARD: Prevent duplicate uploads
       if (isUploading) {
-        console.warn('⚠️ Upload already in progress, ignoring duplicate call')
+        if (import.meta.env.DEV) console.warn('⚠️ Upload already in progress, ignoring duplicate call')
         return
       }
 
@@ -216,7 +216,7 @@ export const usePhotoData = () => {
     async (albumData, editingAlbum = null) => {
       // GUARD: Prevent duplicate calls
       if (isSaving) {
-        console.warn(
+        if (import.meta.env.DEV) console.warn(
           '⚠️ Album save already in progress, ignoring duplicate call'
         )
         return
@@ -312,7 +312,7 @@ export const usePhotoData = () => {
         }),
         onConfirm: async () => {
           if (isDeleting) {
-            console.warn(
+            if (import.meta.env.DEV) console.warn(
               '⚠️ Delete already in progress, ignoring duplicate call'
             )
             return
@@ -397,7 +397,7 @@ export const usePhotoData = () => {
         message: t('common:notifications.deletePhotoMessage'),
         onConfirm: async () => {
           if (isDeleting) {
-            console.warn(
+            if (import.meta.env.DEV) console.warn(
               '⚠️ Delete already in progress, ignoring duplicate call'
             )
             return
@@ -459,14 +459,14 @@ export const usePhotoData = () => {
    */
   const toggleFavorite = useCallback(
     async (photo) => {
-      console.log('🎯 usePhotoData.toggleFavorite called:', {
+      if (import.meta.env.DEV) console.log('🎯 usePhotoData.toggleFavorite called:', {
         photoId: photo.id,
         currentFavorite: photo.favorite,
         timestamp: new Date().toISOString(),
       })
 
       if (isTogglingFavorite) {
-        console.warn(
+        if (import.meta.env.DEV) console.warn(
           '⚠️ Toggle favorite already in progress, ignoring duplicate call'
         )
         return
@@ -476,7 +476,7 @@ export const usePhotoData = () => {
 
       try {
         const newFavoriteState = !photo.favorite
-        console.log('⚡ Applying optimistic update to Zustand...')
+        if (import.meta.env.DEV) console.log('⚡ Applying optimistic update to Zustand...')
 
         // OPTIMISTIC UPDATE
         setPhotos((prev) => {
@@ -485,16 +485,16 @@ export const usePhotoData = () => {
             p.id === photo.id ? { ...p, favorite: newFavoriteState } : p
           )
         })
-        console.log('✅ Zustand optimistically updated')
+        if (import.meta.env.DEV) console.log('✅ Zustand optimistically updated')
 
         // Sync to backend using toggleFavorite (NOT updatePhoto)
-        console.log('🔥 Calling firebase.toggleFavorite()...')
+        if (import.meta.env.DEV) console.log('🔥 Calling firebase.toggleFavorite()...')
         const result = await firebaseToggleFavorite(photo.id, photo.favorite)
-        console.log('✅ firebase.toggleFavorite() returned:', result)
+        if (import.meta.env.DEV) console.log('✅ firebase.toggleFavorite() returned:', result)
 
         // Verify Zustand state after Firestore update
         const updatedPhoto = photos.find((p) => p.id === photo.id)
-        console.log('🔍 Zustand state after Firestore update:', {
+        if (import.meta.env.DEV) console.log('🔍 Zustand state after Firestore update:', {
           photoId: photo.id,
           zustandFavorite: updatedPhoto?.favorite,
           firestoreResult: result,
@@ -507,14 +507,14 @@ export const usePhotoData = () => {
             : t('common:notifications.removedFromFavorites'),
           type: 'success',
         })
-        console.log('📢 Notification shown')
+        if (import.meta.env.DEV) console.log('📢 Notification shown')
 
         return result
       } catch (err) {
         console.error('❌ usePhotoData.toggleFavorite failed:', err)
 
         // ROLLBACK
-        console.log('↩️ Reverting optimistic update...')
+        if (import.meta.env.DEV) console.log('↩️ Reverting optimistic update...')
         if (user?.uid) {
           await refreshAllData(user.uid)
         }
@@ -617,7 +617,7 @@ export const usePhotoData = () => {
   const handleSetAlbumCover = useCallback(
     async (albumId, coverUrl) => {
       if (isSaving) {
-        console.warn(
+        if (import.meta.env.DEV) console.warn(
           '⚠️ Save operation already in progress, ignoring duplicate call'
         )
         return
@@ -668,7 +668,7 @@ export const usePhotoData = () => {
   const handleUpdatePhotoCount = useCallback(
     async (albumId, count) => {
       if (isSaving) {
-        console.warn(
+        if (import.meta.env.DEV) console.warn(
           '⚠️ Save operation already in progress, ignoring duplicate call'
         )
         return

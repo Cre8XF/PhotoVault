@@ -18,7 +18,7 @@ export const sendVerificationEmail = async (user) => {
 
   try {
     await sendEmailVerification(user, actionCodeSettings);
-    console.log('✅ Verification email sent to:', user.email);
+    if (import.meta.env.DEV) console.log('✅ Verification email sent to:', user.email);
   } catch (error) {
     console.error('❌ Failed to send verification email:', error);
     throw error;

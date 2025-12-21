@@ -161,7 +161,7 @@ console.log('\nTEST 9: Photo count compatibility matrix')
 
 for (let photoCount = 1; photoCount <= 6; photoCount++) {
   const compatible = getCompatibleLayouts(photoCount)
-  console.log(`${photoCount} photo(s): ${compatible.length} layout(s) - ${compatible.map(l => l.name).join(', ')}`)
+  if (import.meta.env.DEV) console.log(`${photoCount} photo(s): ${compatible.length} layout(s) - ${compatible.map(l => l.name).join(', ')}`)
 }
 
 // ============================================================================
