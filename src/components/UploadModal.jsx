@@ -165,6 +165,21 @@ const UploadModal = ({
     }
   }, [isOpen, initialMode])
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      // Save current overflow style
+      const originalOverflow = document.body.style.overflow
+      // Lock scroll
+      document.body.style.overflow = 'hidden'
+
+      // Cleanup: restore original overflow when modal closes
+      return () => {
+        document.body.style.overflow = originalOverflow
+      }
+    }
+  }, [isOpen])
+
   // Drag and drop handlers
   const handleDrag = (e) => {
     e.preventDefault()
@@ -472,7 +487,7 @@ const UploadModal = ({
           </button>
         </div>
 
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+        <div className="p-6">
           {/* File Selection Methods */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
             {/* Native Camera */}
