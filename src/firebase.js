@@ -966,24 +966,22 @@ export async function uploadPhoto(
     )
 
     if (import.meta.env.DEV) console.log(
-      `📸 ${isVideo ? 'Video' : 'Bilde'} lastet opp til ${storageBackend === 'r2' ? 'R2' : 'Firebase Storage'}: ${safeName}`
+      `📸 ${isVideo ? 'Video' : 'Bilde'} lastet opp til R2: ${safeName}`
     )
 
     // 4. Prepare metadata with comprehensive EXIF data
     const photoData = {
       name: file.name,
-      url: downloadURL, // Main URL (R2 or Firebase)
+      url: downloadURL, // Main URL (R2)
       userId: userId,
       albumId: albumId,
-      storagePath: storagePath,
       size: file.size,
       type: isVideo ? 'video' : fileType,
       favorite: false,
 
-      // Storage backend tracking
-      storageBackend: storageBackend, // 'r2' or 'firebase'
-      ...(storageBackend === 'r2' && { r2Url: downloadURL }), // ✅ R2-specific URL
-      ...(storageBackend === 'firebase' && { firebaseUrl: downloadURL }), // Legacy URL
+      // Storage backend tracking - R2 only
+      storageBackend: 'r2', // Always R2 for new uploads
+      r2Url: downloadURL, // R2 public URL
 
       // Date fields (EXIF-enhanced)
       ...(takenAt && { takenAt: takenAt }), // ✅ Canonical EXIF date (only if exists)

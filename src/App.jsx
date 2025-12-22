@@ -71,7 +71,6 @@ import PINLockScreen from './components/PINLockScreen'
 import NotificationPanel from './components/NotificationPanel'
 import ToastContainer from './components/ToastContainer'
 import LoadingSpinner from './components/LoadingSpinner'
-import VerificationBanner from './components/VerificationBanner'
 
 // Hooks
 import useAuth from './hooks/useAuth'
@@ -79,38 +78,24 @@ import usePhotoData from './hooks/usePhotoData'
 import useStore from './state/store'
 import { useToast } from './hooks/useToast'
 
-// P3-A: Session Management
-import { initSession, cleanupSession, claimSession, hasOtherActiveSession } from './utils/sessionManager'
 // P3-B: Browser Detection
 import { isRestrictedBrowserContext, getContextMessage, logBrowserContext, isLikelyFromEmailLink } from './utils/browserDetect'
 
 // Icons
-import { Home, FolderOpen, Plus, Search, Menu, Bell, User, AlertTriangle, ExternalLink } from 'lucide-react'
+import { Home, FolderOpen, Plus, Search, Menu, Bell, User, ExternalLink } from 'lucide-react'
 
 /**
  * Main App Component with new architecture
  */
 function App() {
-  // P3-A: Multi-instance detection
-  const [showMultiInstanceBanner, setShowMultiInstanceBanner] = React.useState(false)
-  const [hasOtherSession, setHasOtherSession] = React.useState(false)
-
   // P3-B: Browser context detection
   const [showBrowserContextBanner, setShowBrowserContextBanner] = React.useState(false)
   const [browserContextMessage, setBrowserContextMessage] = React.useState(null)
 
-  // Initialize session tracking on mount
+  // Initialize browser context detection on mount
   React.useEffect(() => {
     // Log browser context for debugging
     logBrowserContext()
-
-    // P3-A: Initialize session
-    const sessionInfo = initSession()
-    if (sessionInfo.hasActiveSession) {
-      if (import.meta.env.DEV) console.warn('⚠️ [P3-A] Another Pixtr instance detected')
-      setHasOtherSession(true)
-      setShowMultiInstanceBanner(true)
-    }
 
     // P3-B: Check browser context
     if (isRestrictedBrowserContext() && isLikelyFromEmailLink()) {
@@ -118,24 +103,7 @@ function App() {
       setBrowserContextMessage(message)
       setShowBrowserContextBanner(true)
     }
-
-    // Cleanup on unmount
-    return () => {
-      cleanupSession()
-    }
   }, [])
-
-  // P3-A: Handle user choice to continue in this instance
-  const handleContinueHere = () => {
-    claimSession()
-    setShowMultiInstanceBanner(false)
-    setHasOtherSession(false)
-  }
-
-  // P3-A: Handle user choice to go back
-  const handleGoBack = () => {
-    window.history.back()
-  }
 
   return (
     <BrowserRouter>
@@ -143,39 +111,6 @@ function App() {
         <AuthProvider>
           <ToastProvider>
             <SecurityProvider>
-              {/* P3-A: Multi-instance banner */}
-              {showMultiInstanceBanner && (
-                <div className="fixed top-0 left-0 right-0 z-[9999] bg-gradient-to-r from-orange-600/95 to-red-600/95 backdrop-blur-sm border-b border-white/20 shadow-lg">
-                  <div className="max-w-7xl mx-auto px-4 py-4">
-                    <div className="flex items-center gap-4">
-                      <AlertTriangle className="w-6 h-6 text-white flex-shrink-0" />
-                      <div className="flex-1">
-                        <p className="text-white font-semibold text-sm">
-                          Pixtr er allerede åpen i en annen fane eller app
-                        </p>
-                        <p className="text-white/90 text-xs mt-1">
-                          Å bruke flere instanser samtidig kan føre til uventet oppførsel. Velg hva du vil gjøre:
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={handleContinueHere}
-                          className="px-4 py-2 bg-white text-orange-700 rounded-lg text-sm font-medium hover:bg-gray-100 transition"
-                        >
-                          Fortsett her
-                        </button>
-                        <button
-                          onClick={handleGoBack}
-                          className="px-4 py-2 bg-white/20 text-white rounded-lg text-sm font-medium hover:bg-white/30 transition"
-                        >
-                          Gå tilbake
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {/* P3-B: Browser context banner */}
               {showBrowserContextBanner && browserContextMessage && (
                 <div className="fixed top-0 left-0 right-0 z-[9998] bg-gradient-to-r from-blue-600/95 to-indigo-600/95 backdrop-blur-sm border-b border-white/20 shadow-lg">
@@ -646,18 +581,12 @@ function AppContent() {
     currentPath !== '/subscription' &&
     !currentPath.startsWith('/collage/')
 
-  // Check if email verification banner should be shown
-  const showVerificationBanner = user && !emailVerified
-
   return (
     <div className="min-h-screen relative">
       <Particles />
 
-      {/* Email Verification Banner */}
-      <VerificationBanner user={user} />
-
       {/* Main content - React Router based rendering */}
-      <main className={`relative z-10 ${showVerificationBanner ? 'pt-16 md:pt-14' : ''}`}>
+      <main className="relative z-10">
         <Routes>
           <Route
             path="/home"

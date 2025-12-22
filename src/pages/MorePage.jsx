@@ -43,6 +43,7 @@ import {
   Folder,
   Image,
   Layout,
+  Mail,
 } from 'lucide-react'
 import { ROUTES } from '../routes'
 import { useSecurityContext } from '../contexts/SecurityContext'
@@ -64,6 +65,8 @@ import { db, migrateAlbumsAddUserId, migratePhotosAddUserId } from '../firebase'
 import ComingSoonModal from '../components/ComingSoonModal'
 import { useStorageCalc } from '../hooks/useStorageCalc'
 import SystemStatus from '../components/admin/SystemStatus'
+import useStore from '../state/store'
+import { sendVerificationEmail } from '../utils/emailVerification'
 
 const MorePage = ({
   user,
@@ -81,7 +84,9 @@ const MorePage = ({
     'common',
     'albums',
     'info',
+    'auth',
   ])
+  const emailVerified = useStore((state) => state.emailVerified)
   const [expandedSection, setExpandedSection] = useState(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -91,6 +96,7 @@ const MorePage = ({
   const [aiFeatureDescription, setAIFeatureDescription] = useState('')
   const [migrating, setMigrating] = useState(false)
   const [migrationResult, setMigrationResult] = useState(null)
+  const [sendingVerification, setSendingVerification] = useState(false)
 
   const { pinEnabled, biometricEnabled } = useSecurityContext()
 
@@ -197,6 +203,27 @@ const MorePage = ({
     setAIFeatureName(featureName)
     setAIFeatureDescription(description)
     setShowAIModal(true)
+  }
+
+  // ============================================================================
+  // === EMAIL VERIFICATION ===
+  // ============================================================================
+  const handleSendVerification = async () => {
+    if (!user || sendingVerification) return
+
+    try {
+      setSendingVerification(true)
+      await sendVerificationEmail(user)
+      showNotification(t('auth:verificationEmailSent'), 'success')
+    } catch (error) {
+      console.error('Failed to send verification email:', error)
+      // Silent failure - no blocking toast, just log
+      if (import.meta.env.DEV) {
+        showNotification(t('auth:verificationEmailFailed'), 'info')
+      }
+    } finally {
+      setSendingVerification(false)
+    }
   }
 
   // ============================================================================
@@ -487,6 +514,32 @@ const MorePage = ({
           <div className="glass rounded-2xl p-6 flex items-center gap-3">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500"></div>
             <span className="font-medium">{t('notifications.processing')}</span>
+          </div>
+        </div>
+      )}
+
+      {/* === EMAIL VERIFICATION NOTICE === */}
+      {user && !emailVerified && (
+        <div className="mb-4 glass rounded-2xl p-4 border border-blue-500/30 bg-blue-500/10">
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0">
+              <Mail className="w-5 h-5 text-blue-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-semibold text-on-glass mb-0.5">
+                {t('auth:verifyEmailTitle')}
+              </h3>
+              <p className="text-xs text-on-glass/70">
+                {t('auth:verifyEmailText')}
+              </p>
+            </div>
+            <button
+              onClick={handleSendVerification}
+              disabled={sendingVerification}
+              className="flex-shrink-0 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {sendingVerification ? t('auth:sendingVerification') : t('auth:verify')}
+            </button>
           </div>
         </div>
       )}
