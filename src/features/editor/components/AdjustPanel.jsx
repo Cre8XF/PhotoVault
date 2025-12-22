@@ -42,7 +42,7 @@ export default function AdjustPanel() {
   const hasAdjustments = Object.values(adjustments).some((v) => v !== 0)
 
   return (
-    <div className="p-3 md:p-4 bg-[#0a0a0a] overflow-y-auto max-h-[45vh]">
+    <div className="p-3 md:p-4 bg-[#0a0a0a]">
       {/* Header with reset all button */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-white font-semibold">Adjustments</h3>

@@ -58,12 +58,12 @@ export default function EditorShell({
             {photoName}
           </h1>
 
-          {/* Revert to Original button - only show if photo was previously edited */}
+          {/* Revert to Original button - only show if photo was previously edited (hidden on mobile to save space) */}
           {isEdited && onRevert && (
             <button
               onClick={onRevert}
               disabled={isSaving}
-              className="text-red-400 hover:text-red-300 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="hidden md:inline-flex text-red-400 hover:text-red-300 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Revert to Original
             </button>

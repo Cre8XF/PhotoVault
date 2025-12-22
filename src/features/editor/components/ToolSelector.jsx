@@ -1,3 +1,5 @@
+import { Sliders, Crop, RotateCw, Palette } from 'lucide-react'
+
 /**
  * Tool Selector - Tab navigation for editor tools
  *
@@ -6,10 +8,10 @@
  */
 export default function ToolSelector({ activeTool, onToolChange }) {
   const tools = [
-    { id: 'adjust', label: 'Adjust', icon: '�' },
-    { id: 'crop', label: 'Crop', icon: '' },
-    { id: 'rotate', label: 'Rotate', icon: '�' },
-    { id: 'filters', label: 'Filters', icon: '<�' },
+    { id: 'adjust', label: 'Adjust', Icon: Sliders },
+    { id: 'crop', label: 'Crop', Icon: Crop },
+    { id: 'rotate', label: 'Rotate', Icon: RotateCw },
+    { id: 'filters', label: 'Filters', Icon: Palette },
   ]
 
   return (
@@ -18,13 +20,13 @@ export default function ToolSelector({ activeTool, onToolChange }) {
         <button
           key={tool.id}
           onClick={() => onToolChange(tool.id)}
-          className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
+          className={`flex-1 py-3 px-4 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
             activeTool === tool.id
               ? 'text-blue-400 border-b-2 border-blue-400'
               : 'editor-text-muted hover:editor-text-secondary'
           }`}
         >
-          <span className="mr-2">{tool.icon}</span>
+          <tool.Icon className="w-4 h-4" />
           {tool.label}
         </button>
       ))}
