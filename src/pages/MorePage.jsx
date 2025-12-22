@@ -562,22 +562,6 @@ const MorePage = ({
               )}
             </div>
           </div>
-          {!isPro && (
-            <button
-              onClick={handleUpgradeToPro}
-              disabled={loading}
-              className="ripple-effect bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-xl font-semibold transition flex items-center gap-2 disabled:opacity-50"
-            >
-              <Zap className="w-4 h-4" />
-              {t('subscription.upgrade')}
-            </button>
-          )}
-          {isPro && (
-            <div className="bg-yellow-500/20 border border-yellow-500/30 text-yellow-700 dark:text-yellow-300 px-4 py-2 rounded-xl flex items-center gap-2">
-              <Crown className="w-4 h-4 text-yellow-600 dark:text-yellow-300" />
-              <span className="font-semibold">{t('subscription.pro')}</span>
-            </div>
-          )}
         </div>
       </div>
 
