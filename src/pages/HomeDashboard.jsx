@@ -51,6 +51,15 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
   const [uploadMode, setUploadMode] = useState('upload'); // 'upload' or 'album'
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
+  // ✅ DEFENSIVE GUARD: Prevent render before user is ready (mobile resume stability)
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   // Determine user plan (default to "free" if not set)
   const plan = user?.plan || "free";
   const isFreeUser = plan === "free";
