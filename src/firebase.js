@@ -673,6 +673,10 @@ export async function uploadPhoto(
     const fileType = file.type || 'image/png' // Fallback to image/png if type is missing
     const isVideo = fileType.startsWith('video/')
 
+    // Get Firebase token for R2 authentication
+    const currentUser = auth.currentUser
+    const firebaseToken = currentUser ? await currentUser.getIdToken() : null
+
     // 1. Upload thumbnail to R2/Firebase Storage (if provided for video)
     let thumbnailUrl = null
     if (isVideo && thumbnailBlob) {
@@ -689,6 +693,7 @@ export async function uploadPhoto(
           'image/jpeg',
           {
             userId,
+            albumId: albumId || 'unassigned',
             parentVideo: file.name,
             generatedAt: new Date().toISOString(),
             isThumbnail: 'true',
@@ -705,7 +710,9 @@ export async function uploadPhoto(
               },
             })
             return await getDownloadURL(thumbRef)
-          }
+          },
+          userId,
+          firebaseToken
         )
 
         thumbnailUrl = thumbUrl
@@ -953,7 +960,9 @@ export async function uploadPhoto(
         const storageRef = ref(storage, storagePath)
         await uploadBytes(storageRef, file, { contentType: fileType })
         return await getDownloadURL(storageRef)
-      }
+      },
+      userId,
+      firebaseToken
     )
 
     if (import.meta.env.DEV) console.log(

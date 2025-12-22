@@ -13,15 +13,24 @@
 // ============================================================================
 
 /**
- * Upload a file directly to Cloudflare R2 using presigned URL
+ * Upload a file to Cloudflare R2 via Worker proxy
+ *
+ * ARCHITECTURE:
+ * Browser → Worker → R2
+ *
+ * This approach is required because:
+ * - R2 cannot accept secure uploads directly from the browser
+ * - The Worker verifies authentication and uploads using server-side credentials
  *
  * @param {File|Blob} file - The file to upload
  * @param {string} storagePath - The path in R2 (e.g., "users/abc123/album1/photo.jpg")
  * @param {string} contentType - MIME type of the file
- * @param {Object} metadata - Custom metadata to attach
+ * @param {Object} metadata - Custom metadata (albumId, etc.)
+ * @param {string} userId - User ID (for validation)
+ * @param {string} firebaseToken - Firebase ID token for authentication
  * @returns {Promise<string>} - The R2 URL of the uploaded file
  */
-export async function uploadToR2(file, storagePath, contentType, metadata = {}) {
+export async function uploadToR2(file, storagePath, contentType, metadata = {}, userId, firebaseToken) {
   try {
     // Get R2 upload endpoint from environment
     const R2_UPLOAD_ENDPOINT = import.meta.env.VITE_R2_UPLOAD_ENDPOINT
@@ -31,47 +40,54 @@ export async function uploadToR2(file, storagePath, contentType, metadata = {}) 
       throw new Error('R2 configuration missing. Please set VITE_R2_UPLOAD_ENDPOINT and VITE_R2_PUBLIC_URL in .env')
     }
 
-    // Step 1: Request presigned upload URL from our backend/worker
-    const presignedResponse = await fetch(`${R2_UPLOAD_ENDPOINT}/get-presigned-url`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        path: storagePath,
-        contentType,
-        metadata,
-      }),
-    })
-
-    if (!presignedResponse.ok) {
-      throw new Error(`Failed to get presigned URL: ${presignedResponse.statusText}`)
+    if (!userId) {
+      throw new Error('userId is required for R2 upload')
     }
 
-    const { uploadUrl, publicUrl } = await presignedResponse.json()
+    if (!firebaseToken) {
+      throw new Error('Firebase token is required for R2 upload')
+    }
 
-    // Step 2: Upload file directly to R2 using presigned URL
-    const uploadResponse = await fetch(uploadUrl, {
-      method: 'PUT',
-      body: file,
+    // Create FormData for multipart upload
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('userId', userId)
+    formData.append('storagePath', storagePath)
+    formData.append('contentType', contentType)
+    if (metadata.albumId) {
+      formData.append('albumId', metadata.albumId)
+    }
+
+    // Upload to Worker endpoint
+    const uploadResponse = await fetch(`${R2_UPLOAD_ENDPOINT}/upload`, {
+      method: 'POST',
       headers: {
-        'Content-Type': contentType,
+        'Authorization': `Bearer ${firebaseToken}`,
       },
+      body: formData,
     })
 
     if (!uploadResponse.ok) {
-      throw new Error(`R2 upload failed: ${uploadResponse.statusText}`)
+      const errorData = await uploadResponse.json().catch(() => ({}))
+      throw new Error(errorData.error || `R2 upload failed: ${uploadResponse.statusText}`)
+    }
+
+    const result = await uploadResponse.json()
+
+    if (!result.success || !result.r2Url) {
+      throw new Error('Invalid response from upload worker')
     }
 
     if (import.meta.env.DEV) {
-      console.log('✅ [R2] File uploaded successfully:', {
+      console.log('✅ [R2] File uploaded successfully via Worker:', {
         path: storagePath,
-        url: publicUrl,
-        size: file.size,
+        url: result.r2Url,
+        size: result.size,
+        backend: result.storageBackend,
       })
     }
 
-    return publicUrl
+    return result.r2Url
   } catch (error) {
     console.error('❌ [R2] Upload error:', error)
     throw error
@@ -84,8 +100,10 @@ export async function uploadToR2(file, storagePath, contentType, metadata = {}) 
  * @param {File|Blob} file - The file to upload
  * @param {string} storagePath - Storage path
  * @param {string} contentType - MIME type
- * @param {Object} metadata - Custom metadata
+ * @param {Object} metadata - Custom metadata (should include albumId if applicable)
  * @param {Function} firebaseFallback - Firebase upload function
+ * @param {string} userId - User ID (required for R2)
+ * @param {string} firebaseToken - Firebase ID token (required for R2 auth)
  * @returns {Promise<{url: string, storage: 'r2'|'firebase'}>}
  */
 export async function uploadWithFallback(
@@ -93,14 +111,16 @@ export async function uploadWithFallback(
   storagePath,
   contentType,
   metadata,
-  firebaseFallback
+  firebaseFallback,
+  userId = null,
+  firebaseToken = null
 ) {
   // Try R2 first if configured
   const R2_ENABLED = import.meta.env.VITE_R2_ENABLED === 'true'
 
   if (R2_ENABLED) {
     try {
-      const url = await uploadToR2(file, storagePath, contentType, metadata)
+      const url = await uploadToR2(file, storagePath, contentType, metadata, userId, firebaseToken)
       return { url, storage: 'r2' }
     } catch (r2Error) {
       console.error('❌ [R2] Upload failed, falling back to Firebase:', r2Error)
