@@ -524,62 +524,43 @@ const MorePage = ({
       )}
 
       {/* === PROFILE HEADER === */}
-      <div className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600 via-pink-500 to-orange-500 p-8 text-on-brand">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative z-10">
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <div className="w-20 h-20 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center text-3xl font-bold border-4 border-white/30">
-                  {user?.displayName?.[0]?.toUpperCase() ||
-                    user?.email?.[0]?.toUpperCase() ||
-                    'U'}
-                </div>
-                {(pinEnabled || biometricEnabled) && (
-                  <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1 border-2 border-white">
-                    <Shield className="w-3 h-3 text-white" />
-                  </div>
-                )}
+      <div className="mb-8 glass rounded-2xl p-6 border border-purple-500/20">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-3xl font-bold text-white">
+                {user?.displayName?.[0]?.toUpperCase() ||
+                  user?.email?.[0]?.toUpperCase() ||
+                  'U'}
               </div>
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <h2 className="text-2xl font-bold text-white">
-                    {user?.displayName ||
-                      user?.email?.split('@')[0] ||
-                      t('profile.user')}
-                  </h2>
-                  {isAdmin && (
-                    <span className="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 font-semibold">
-                      <Crown className="w-3 h-3" />
-                      {t('more.admin.badge')}
-                    </span>
-                  )}
+              {(pinEnabled || biometricEnabled) && (
+                <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1.5 border-2 border-white">
+                  <Shield className="w-3 h-3 text-white" />
                 </div>
-                <p className="text-white/90 text-sm">{user?.email}</p>
-                {isAdmin && (
-                  <p className="text-white/70 text-xs mt-1 flex items-center gap-1">
-                    <Shield className="w-3 h-3" />
-                    {t('more.admin.accountLabel', 'Admin account')}
-                  </p>
-                )}
-              </div>
+              )}
             </div>
-            {!isPro && (
-              <button
-                onClick={handleUpgradeToPro}
-                disabled={loading}
-                className="ripple-effect bg-white/20 backdrop-blur-xl hover:bg-white/30 text-white px-4 py-2 rounded-xl font-semibold transition flex items-center gap-2 border border-white/30 disabled:opacity-50"
-              >
-                <Zap className="w-4 h-4" />
-                {t('subscription.upgrade')}
-              </button>
-            )}
-            {isPro && (
-              <div className="bg-yellow-500/20 backdrop-blur-xl border border-yellow-500/30 text-white px-4 py-2 rounded-xl flex items-center gap-2">
-                <Crown className="w-4 h-4 text-yellow-300" />
-                <span className="font-semibold">{t('subscription.pro')}</span>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <h2 className="text-2xl font-bold text-on-glass">
+                  {user?.displayName ||
+                    user?.email?.split('@')[0] ||
+                    t('profile.user')}
+                </h2>
+                {isAdmin && (
+                  <span className="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 font-semibold">
+                    <Crown className="w-3 h-3" />
+                    {t('more.admin.badge')}
+                  </span>
+                )}
               </div>
-            )}
+              <p className="text-on-glass/70 text-sm">{user?.email}</p>
+              {isAdmin && (
+                <p className="text-on-glass/60 text-xs mt-1 flex items-center gap-1">
+                  <Shield className="w-3 h-3" />
+                  {t('more.admin.accountLabel', 'Admin account')}
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>
