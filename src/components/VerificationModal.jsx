@@ -27,10 +27,13 @@ const VerificationModal = ({ isOpen, onClose, feature }) => {
       })
     } catch (error) {
       console.error('Failed to resend verification:', error)
-      setNotification({
-        message: t('auth:verificationEmailFailed') || 'Failed to send verification email',
-        type: 'error',
-      })
+      // Silent failure - only show info in dev mode, not blocking error
+      if (import.meta.env.DEV) {
+        setNotification({
+          message: t('auth:verificationEmailFailed') || 'Failed to send verification email',
+          type: 'info',
+        })
+      }
     } finally {
       setResending(false)
     }

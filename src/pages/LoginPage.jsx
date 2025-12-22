@@ -145,7 +145,7 @@ const LoginPage = ({ onLogin = () => {} }) => {
           console.log('✅ Verification email sent successfully');
         } catch (emailError) {
           console.error('⚠️ Could not send verification email:', emailError);
-          // Don't block signup if email fails - user can resend later from banner
+          // Don't block signup if email fails - user can resend later from Account page
         }
 
         if (isNative() && biometricAvailable) {

@@ -113,16 +113,16 @@ export async function uploadToR2(
 }
 
 /**
- * Upload file to R2 with automatic fallback to Firebase Storage
+ * Upload file to R2 (R2-only, no fallback)
  *
  * @param {File|Blob} file - The file to upload
  * @param {string} storagePath - Storage path
  * @param {string} contentType - MIME type
  * @param {Object} metadata - Custom metadata (should include albumId if applicable)
- * @param {Function} firebaseFallback - Firebase upload function
+ * @param {Function} firebaseFallback - DEPRECATED: Not used (kept for API compatibility)
  * @param {string} userId - User ID (required for R2)
  * @param {string} firebaseToken - Firebase ID token (required for R2 auth)
- * @returns {Promise<{url: string, storage: 'r2'|'firebase'}>}
+ * @returns {Promise<{url: string, storage: 'r2'}>}
  */
 export async function uploadWithFallback(
   file,
@@ -133,10 +133,14 @@ export async function uploadWithFallback(
   userId = null,
   firebaseToken = null
 ) {
-  // Try R2 first if configured
+  // R2-only upload - no Firebase Storage fallback
   const R2_ENABLED = import.meta.env.VITE_R2_ENABLED === 'true'
-  console.log('🟣 [R2] uploadWithFallback called', {
-    R2_ENABLED,
+
+  if (!R2_ENABLED) {
+    throw new Error('R2 storage is not enabled. Please configure R2 environment variables.')
+  }
+
+  console.log('🟣 [R2] R2-only upload (no fallback)', {
     endpoint: import.meta.env.VITE_R2_UPLOAD_ENDPOINT,
     userId,
     hasToken: !!firebaseToken,
@@ -144,35 +148,16 @@ export async function uploadWithFallback(
     fileType: contentType,
   })
 
-  if (R2_ENABLED) {
-    try {
-      const url = await uploadToR2(
-        file,
-        storagePath,
-        contentType,
-        metadata,
-        userId,
-        firebaseToken
-      )
-      return { url, storage: 'r2' }
-    } catch (r2Error) {
-      console.error('❌ [R2] Upload failed → Firebase fallback', {
-        message: r2Error?.message,
-        stack: r2Error?.stack,
-        endpoint: import.meta.env.VITE_R2_UPLOAD_ENDPOINT,
-      })
+  const url = await uploadToR2(
+    file,
+    storagePath,
+    contentType,
+    metadata,
+    userId,
+    firebaseToken
+  )
 
-      // Fall through to Firebase fallback
-    }
-  }
-
-  // Fallback to Firebase Storage
-  if (firebaseFallback) {
-    const url = await firebaseFallback()
-    return { url, storage: 'firebase' }
-  }
-
-  throw new Error('No storage backend available')
+  return { url, storage: 'r2' }
 }
 
 /**
