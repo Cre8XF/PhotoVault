@@ -30,14 +30,23 @@
  * @param {string} firebaseToken - Firebase ID token for authentication
  * @returns {Promise<string>} - The R2 URL of the uploaded file
  */
-export async function uploadToR2(file, storagePath, contentType, metadata = {}, userId, firebaseToken) {
+export async function uploadToR2(
+  file,
+  storagePath,
+  contentType,
+  metadata = {},
+  userId,
+  firebaseToken
+) {
   try {
     // Get R2 upload endpoint from environment
     const R2_UPLOAD_ENDPOINT = import.meta.env.VITE_R2_UPLOAD_ENDPOINT
     const R2_PUBLIC_URL = import.meta.env.VITE_R2_PUBLIC_URL
 
     if (!R2_UPLOAD_ENDPOINT || !R2_PUBLIC_URL) {
-      throw new Error('R2 configuration missing. Please set VITE_R2_UPLOAD_ENDPOINT and VITE_R2_PUBLIC_URL in .env')
+      throw new Error(
+        'R2 configuration missing. Please set VITE_R2_UPLOAD_ENDPOINT and VITE_R2_PUBLIC_URL in .env'
+      )
     }
 
     if (!userId) {
@@ -58,18 +67,27 @@ export async function uploadToR2(file, storagePath, contentType, metadata = {}, 
       formData.append('albumId', metadata.albumId)
     }
 
+    console.log('🟣 [R2] Sending upload to Worker', {
+      url: `${R2_UPLOAD_ENDPOINT}/upload`,
+      storagePath,
+      contentType,
+      albumId: metadata?.albumId,
+    })
+
     // Upload to Worker endpoint
     const uploadResponse = await fetch(`${R2_UPLOAD_ENDPOINT}/upload`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${firebaseToken}`,
+        Authorization: `Bearer ${firebaseToken}`,
       },
       body: formData,
     })
 
     if (!uploadResponse.ok) {
       const errorData = await uploadResponse.json().catch(() => ({}))
-      throw new Error(errorData.error || `R2 upload failed: ${uploadResponse.statusText}`)
+      throw new Error(
+        errorData.error || `R2 upload failed: ${uploadResponse.statusText}`
+      )
     }
 
     const result = await uploadResponse.json()
@@ -117,13 +135,33 @@ export async function uploadWithFallback(
 ) {
   // Try R2 first if configured
   const R2_ENABLED = import.meta.env.VITE_R2_ENABLED === 'true'
+  console.log('🟣 [R2] uploadWithFallback called', {
+    R2_ENABLED,
+    endpoint: import.meta.env.VITE_R2_UPLOAD_ENDPOINT,
+    userId,
+    hasToken: !!firebaseToken,
+    fileName: file?.name,
+    fileType: contentType,
+  })
 
   if (R2_ENABLED) {
     try {
-      const url = await uploadToR2(file, storagePath, contentType, metadata, userId, firebaseToken)
+      const url = await uploadToR2(
+        file,
+        storagePath,
+        contentType,
+        metadata,
+        userId,
+        firebaseToken
+      )
       return { url, storage: 'r2' }
     } catch (r2Error) {
-      console.error('❌ [R2] Upload failed, falling back to Firebase:', r2Error)
+      console.error('❌ [R2] Upload failed → Firebase fallback', {
+        message: r2Error?.message,
+        stack: r2Error?.stack,
+        endpoint: import.meta.env.VITE_R2_UPLOAD_ENDPOINT,
+      })
+
       // Fall through to Firebase fallback
     }
   }
@@ -144,7 +182,8 @@ export async function uploadWithFallback(
  * @returns {string} - Public URL
  */
 export function getR2PublicUrl(storagePath) {
-  const R2_PUBLIC_URL = import.meta.env.VITE_R2_PUBLIC_URL || 'https://photos.pixtr.cloud'
+  const R2_PUBLIC_URL =
+    import.meta.env.VITE_R2_PUBLIC_URL || 'https://photos.pixtr.cloud'
   return `${R2_PUBLIC_URL}/${storagePath}`
 }
 

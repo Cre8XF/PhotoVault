@@ -1,73 +1,45 @@
 # ============================================================================
-# Wrangler Configuration for Pixtr Upload Worker
+# Wrangler Configuration – Pixtr Upload Worker (SAFE MODE)
+# ============================================================================
+# Purpose:
+# - Enable VERIFIED uploads to R2 via Cloudflare Worker
+# - Use workers.dev (no custom domain yet)
+# - Eliminate DNS / routing / zone issues
 # ============================================================================
 
 name = "pixtr-upload-worker"
 main = "upload-worker.js"
 compatibility_date = "2024-12-08"
+
+# ✅ IMPORTANT: Enable workers.dev
 workers_dev = true
 
 # ============================================================================
-# R2 BUCKET BINDINGS
+# R2 BUCKET BINDING
+# ============================================================================
+# Stores user-uploaded photos
+# Path logic enforced inside upload-worker.js
+# Example path:
+#   users/{userId}/{albumId}/{filename}
 # ============================================================================
 
-# PIXTR_PHOTOS: Stores photo/video FILES
-# Structure: users/{userId}/{albumId}/{filename}
 [[r2_buckets]]
-binding = "PIXTR_PHOTOS"
-bucket_name = "pixtr-photos"
-preview_bucket_name = "pixtr-photos-preview" # Optional: for testing
+binding = "PIXTR_USERS"
+bucket_name = "pixtr-users"
 
 # ============================================================================
-# ENVIRONMENT VARIABLES
+# ENVIRONMENT VARIABLES (Worker-side only)
 # ============================================================================
 [vars]
-R2_PUBLIC_URL = "https://photos.pixtr.cloud"
+R2_PUBLIC_URL = "https://images.pixtr.cloud"
 
 # ============================================================================
-# DEPLOYMENT SETTINGS
+# 🚫 INTENTIONALLY REMOVED (FOR NOW)
 # ============================================================================
-
-# Production environment
-[env.production]
-name = "pixtr-upload-worker-production"
-workers_dev = false
-routes = [
-  { pattern = "upload.pixtr.cloud/*", zone_name = "pixtr.cloud" }
-]
-
-[env.production.vars]
-R2_PUBLIC_URL = "https://photos.pixtr.cloud"
-
-# Staging environment
-[env.staging]
-name = "pixtr-upload-worker-staging"
-workers_dev = false
-routes = [
-  { pattern = "upload-staging.pixtr.cloud/*", zone_name = "pixtr.cloud" }
-]
-
-[env.staging.vars]
-R2_PUBLIC_URL = "https://photos-staging.pixtr.cloud"
-
-# ============================================================================
-# DEPLOYMENT INSTRUCTIONS
-# ============================================================================
-# 1. Install Wrangler CLI: npm install -g wrangler
-# 2. Login: wrangler login
-# 3. Create R2 bucket (if not exists):
-#    wrangler r2 bucket create pixtr-photos
-# 4. Deploy to production:
-#    cd cloudflare/upload-worker
-#    wrangler deploy --env production
+# - routes
+# - zone_name
+# - custom domains (upload.pixtr.cloud)
+# - production / staging envs
 #
-# For development/testing:
-# wrangler dev --local
-#
-# IMPORTANT: After deployment, update your .env file:
-# VITE_R2_UPLOAD_ENDPOINT=https://upload.pixtr.cloud
-#
-# The Worker will be available at:
-# - https://upload.pixtr.cloud/upload (POST - file upload)
-# - https://upload.pixtr.cloud/health (GET - health check)
+# These WILL be added back AFTER uploads are verified working.
 # ============================================================================
