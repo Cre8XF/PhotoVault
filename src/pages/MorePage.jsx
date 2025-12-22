@@ -29,10 +29,8 @@ import {
   Languages,
   Download,
   Share2,
-  Heart,
   Zap,
   TrendingUp,
-  Clock,
   AlertCircle,
   ExternalLink,
   Moon,
@@ -42,7 +40,6 @@ import {
   Lock,
   Folder,
   Image,
-  Layout,
   Mail,
 } from 'lucide-react'
 import { ROUTES } from '../routes'
@@ -141,24 +138,6 @@ const MorePage = ({
 
   // Check for isAdmin: check role field
   const isAdmin = user?.role === 'admin' || user?.isAdmin === true
-
-  // 🔒 SIKRET: Statistics med array-guards
-  const stats = React.useMemo(() => {
-    return {
-      totalPhotos: safePhotos.length || 0,
-      totalAlbums: safeAlbums.length || 0,
-      favorites: safePhotos.filter((p) => p.favorite).length || 0,
-      aiAnalyzed: safePhotos.filter((p) => p.aiAnalyzed).length || 0,
-      recentUploads:
-        safePhotos.filter((p) => {
-          if (!p.createdAt) return false
-          const uploadDate = new Date(p.createdAt)
-          const weekAgo = new Date()
-          weekAgo.setDate(weekAgo.getDate() - 7)
-          return uploadDate > weekAgo
-        }).length || 0,
-    }
-  }, [safePhotos, safeAlbums])
 
   // ============================================================================
   // === NOTIFICATION SYSTEM ===
@@ -602,70 +581,11 @@ const MorePage = ({
               </div>
             )}
           </div>
-
-          {/* === QUICK STATS === */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 border border-white/20">
-              <div className="flex items-center gap-2 text-white/70 text-xs mb-1">
-                <Folder className="w-3 h-3" />
-                {t('common:albums')}
-              </div>
-              <p className="text-2xl font-bold text-white">
-                {stats.totalAlbums}
-              </p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 border border-white/20">
-              <div className="flex items-center gap-2 text-white/70 text-xs mb-1">
-                <Image className="w-3 h-3" />
-                {t('common:photos')}
-              </div>
-              <p className="text-2xl font-bold text-white">
-                {stats.totalPhotos}
-              </p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 border border-white/20">
-              <div className="flex items-center gap-2 text-white/70 text-xs mb-1">
-                <Heart className="w-3 h-3" />
-                {t('common:favorites')}
-              </div>
-              <p className="text-2xl font-bold text-white">
-                {stats.favorites}
-              </p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 border border-white/20">
-              <div className="flex items-center gap-2 text-white/70 text-xs mb-1">
-                <Folder className="w-3 h-3" />
-                {t('common:unassigned')}
-              </div>
-              <p className="text-2xl font-bold text-white">
-                {stats.totalPhotos - stats.favorites}
-              </p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 border border-white/20">
-              <div className="flex items-center gap-2 text-white/70 text-xs mb-1">
-                <Clock className="w-3 h-3" />
-                {t('more.stats.recentUploads')}
-              </div>
-              <p className="text-2xl font-bold text-white">
-                {stats.recentUploads}
-              </p>
-            </div>
-          </div>
         </div>
       </div>
 
       {/* === QUICK ACTIONS === */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <button
-          onClick={() => navigate(ROUTES.TOOLS)}
-          className="ripple-effect glass rounded-xl p-4 hover:bg-white/10 transition flex flex-col items-center gap-2 text-center"
-        >
-          <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">
-            <Layout className="w-6 h-6 text-white" />
-          </div>
-          <span className="text-sm font-medium">Create</span>
-        </button>
-
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
         <button
           onClick={() => navigate('/security')}
           className="ripple-effect glass rounded-xl p-4 hover:bg-white/10 transition flex flex-col items-center gap-2 text-center"
