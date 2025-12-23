@@ -213,9 +213,9 @@ export default function PhotoPage() {
     // Delete from Firebase in background
     // This happens after navigation, so any errors won't affect the user
     try {
-      if (import.meta.env.DEV) console.log('🗑️ Deleting photo from Firebase in background...')
-      await firebaseDeletePhoto(photo.id, photo.storagePath)
-      if (import.meta.env.DEV) console.log('✅ Photo deleted successfully from Firebase')
+      if (import.meta.env.DEV) console.log('🗑️ Deleting photo from Firebase + R2 in background...')
+      await firebaseDeletePhoto(photo.id, photo)
+      if (import.meta.env.DEV) console.log('✅ Photo deleted successfully from Firebase + R2')
 
       // Show success notification (user already on Home page)
       setNotification({

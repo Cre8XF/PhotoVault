@@ -489,7 +489,7 @@ const SearchPage = ({
   const handleConfirmDelete = async () => {
     if (!photoToDelete) return
     try {
-      await deletePhoto(photoToDelete.id, photoToDelete.storagePath)
+      await deletePhoto(photoToDelete.id, photoToDelete)
       setPhotoToDelete(null)
       if (refreshData) await refreshData()
     } catch (error) {
@@ -717,7 +717,7 @@ const SearchPage = ({
                             `Deleting photo: ${photo.name} (${photoId})`
                           )
                         }
-                        await deletePhoto(photo.id, photo.storagePath)
+                        await deletePhoto(photo.id, photo)
                       }
                     }
 

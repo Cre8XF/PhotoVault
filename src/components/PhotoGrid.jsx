@@ -31,7 +31,7 @@ const PhotoGrid = ({
 
     setLoading(true);
     try {
-      await deletePhoto(photo.id, photo.storagePath);
+      await deletePhoto(photo.id, photo);
       if (refreshPhotos) await refreshPhotos();
       console.log("🗑️ Bilde slettet:", photo.id);
     } catch (err) {

@@ -30,7 +30,7 @@ export default {
 
     const corsHeaders = {
       'Access-Control-Allow-Origin': allowOrigin,
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Methods': 'POST, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400',
     }
@@ -43,6 +43,10 @@ export default {
     try {
       if (path === '/upload' && request.method === 'POST') {
         return await handleUpload(request, env, corsHeaders)
+      }
+
+      if (path === '/delete' && request.method === 'POST') {
+        return await handleDelete(request, env, corsHeaders)
       }
 
       if (path === '/health') {
@@ -192,6 +196,108 @@ async function handleUpload(request, env, corsHeaders) {
     console.error('🔥 [UPLOAD] Upload failed:', error)
     return new Response(
       JSON.stringify({ error: 'Upload failed', message: error.message }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    )
+  }
+}
+
+// ============================================================================
+// DELETE HANDLER
+// ============================================================================
+
+async function handleDelete(request, env, corsHeaders) {
+  console.log('🗑️ [DELETE] Handler entered')
+
+  try {
+    // ------------------------------------------------------------------------
+    // AUTH
+    // ------------------------------------------------------------------------
+    const authHeader = request.headers.get('Authorization')
+    console.log('🗑️ [DELETE] Authorization header present:', !!authHeader)
+
+    if (!authHeader?.startsWith('Bearer ')) {
+      console.error('❌ [DELETE] Missing Authorization header')
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const token = authHeader.substring(7)
+    const authenticatedUserId = await verifyFirebaseToken(token)
+
+    console.log('🟢 [DELETE] Authenticated user:', authenticatedUserId)
+
+    // ------------------------------------------------------------------------
+    // REQUEST DATA
+    // ------------------------------------------------------------------------
+    const body = await request.json()
+    const { storagePath } = body
+
+    console.log('🟢 [DELETE] Parsed request:', {
+      storagePath,
+      userId: authenticatedUserId,
+    })
+
+    if (!storagePath) {
+      console.error('❌ [DELETE] Missing storagePath')
+      return new Response(
+        JSON.stringify({ error: 'Missing storagePath' }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
+
+    // ------------------------------------------------------------------------
+    // SECURITY: Verify user owns the file
+    // ------------------------------------------------------------------------
+    if (!storagePath.startsWith(`users/${authenticatedUserId}/`)) {
+      console.error('❌ [DELETE] User does not own file', {
+        userId: authenticatedUserId,
+        storagePath,
+      })
+      return new Response(
+        JSON.stringify({ error: 'Forbidden: Cannot delete files from other users' }),
+        {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
+
+    // ------------------------------------------------------------------------
+    // R2 DELETE (Idempotent)
+    // ------------------------------------------------------------------------
+    console.log('🗑️ [DELETE] Deleting from R2 bucket:', {
+      bucketBindingExists: !!env.PIXTR_USERS,
+      storagePath,
+    })
+
+    // R2.delete() is idempotent - no error if file doesn't exist
+    await env.PIXTR_USERS.delete(storagePath)
+
+    console.log('✅ [DELETE] R2 delete successful (or file already missing)')
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: 'File deleted from R2',
+        storagePath,
+      }),
+      {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    )
+  } catch (error) {
+    console.error('🔥 [DELETE] Delete failed:', error)
+    return new Response(
+      JSON.stringify({ error: 'Delete failed', message: error.message }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

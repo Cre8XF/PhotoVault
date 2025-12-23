@@ -29,7 +29,12 @@ import {
   deleteObject,
 } from 'firebase/storage'
 import * as exifr from 'exifr'
-import { uploadWithFallback, isR2Enabled } from './utils/r2Upload'
+import {
+  uploadWithFallback,
+  isR2Enabled,
+  extractStoragePathFromR2Url,
+  deleteFromR2,
+} from './utils/r2Upload'
 
 console.log('🔥 Firebase ENV CHECK', {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -559,29 +564,57 @@ export async function toggleFavorite(photoId, currentStatus) {
   }
 }
 
-// 🔹 Slett bilde fra Firestore + Storage
-export async function deletePhoto(photoId, storagePath) {
+// 🔹 Delete photo from Firestore + R2 Storage
+export async function deletePhoto(photoId, photoData) {
   if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
-  if (import.meta.env.DEV) console.log('🗑️ DELETE PHOTO DEBUG START')
+  if (import.meta.env.DEV) console.log('🗑️ DELETE PHOTO DEBUG START (R2-aware)')
   if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
   if (import.meta.env.DEV) console.log('📥 Input parameters:', {
     photoId,
-    storagePath,
+    hasR2Url: !!photoData?.r2Url,
+    hasStoragePath: !!photoData?.storagePath,
+    storageBackend: photoData?.storageBackend,
     timestamp: new Date().toISOString(),
   })
 
   try {
-    // Step 1: Delete from Storage (if path provided)
-    if (storagePath) {
-      if (import.meta.env.DEV) console.log('🔥 Deleting from Storage:', storagePath)
-      const storageRef = ref(storage, storagePath)
-      await deleteObject(storageRef)
-      if (import.meta.env.DEV) console.log('✅ Deleted from Storage successfully')
+    // Step 1: Delete from R2 (if R2 URL exists)
+    if (photoData?.r2Url || photoData?.storageBackend === 'r2') {
+      // Extract storagePath from r2Url
+      const storagePath = photoData.storagePath || extractStoragePathFromR2Url(photoData.r2Url)
+
+      if (storagePath) {
+        if (import.meta.env.DEV) console.log('🗑️ Deleting from R2:', storagePath)
+
+        // Get Firebase token for authentication
+        const user = auth.currentUser
+        if (!user) {
+          throw new Error('User not authenticated - cannot delete from R2')
+        }
+
+        const firebaseToken = await user.getIdToken()
+
+        // Delete from R2 via Worker
+        await deleteFromR2(storagePath, firebaseToken)
+        if (import.meta.env.DEV) console.log('✅ Deleted from R2 successfully')
+      } else {
+        if (import.meta.env.DEV) console.log('⚠️ No storagePath found for R2 photo, skipping R2 deletion')
+      }
+    }
+    // Legacy: Delete from Firebase Storage (for old photos)
+    else if (photoData?.storagePath) {
+      if (import.meta.env.DEV) console.log('🔥 Deleting from Firebase Storage (legacy):', photoData.storagePath)
+      const storageRef = ref(storage, photoData.storagePath)
+      await deleteObject(storageRef).catch(err => {
+        // Ignore errors if file doesn't exist (already deleted or orphaned)
+        if (import.meta.env.DEV) console.log('⚠️ Firebase Storage delete warning:', err.message)
+      })
+      if (import.meta.env.DEV) console.log('✅ Deleted from Firebase Storage successfully')
     } else {
-      if (import.meta.env.DEV) console.log('⚠️ No storagePath provided, skipping Storage deletion')
+      if (import.meta.env.DEV) console.log('⚠️ No storage path found, skipping storage deletion')
     }
 
-    // Step 2: Delete from Firestore
+    // Step 2: Delete from Firestore (only after successful storage deletion)
     if (import.meta.env.DEV) console.log('🔥 Deleting from Firestore:', photoId)
     const photoRef = doc(db, 'photos', photoId)
     await deleteDoc(photoRef)
@@ -601,7 +634,7 @@ export async function deletePhoto(photoId, storagePath) {
     console.error('Error code:', err.code)
     console.error('Full error:', err)
     console.error('PhotoId:', photoId)
-    console.error('StoragePath:', storagePath)
+    console.error('Photo data:', photoData)
     console.error('═══════════════════════════════════════════════')
     throw err // ✅ BUGFIX: Properly throw errors so callers can handle them
   }

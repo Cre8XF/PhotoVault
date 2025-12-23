@@ -252,7 +252,7 @@ const AlbumPage = ({
       onConfirm: async () => {
         try {
           for (const photo of selectedPhotos) {
-            await deletePhoto(photo.id, photo.storagePath)
+            await deletePhoto(photo.id, photo)
           }
 
           // Refresh for å oppdatere UI

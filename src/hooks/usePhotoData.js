@@ -415,7 +415,7 @@ export const usePhotoData = () => {
             closePhotoModal()
 
             // Sync to backend
-            await deletePhoto(photo.id, photo.storagePath)
+            await deletePhoto(photo.id, photo)
 
             setNotification({
               message: t('common:notifications.photoDeleted'),
