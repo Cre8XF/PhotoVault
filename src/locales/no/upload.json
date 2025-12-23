@@ -33,8 +33,10 @@
     "fileTooLarge": "Filen er for stor (maks {{size}})",
     "unsupportedImageType": "Bildeformat ikke støttet",
     "unsupportedVideoType": "Videoformat ikke støttet",
+    "unsupportedDocumentType": "Dokumentformat ikke støttet",
     "videoNotAllowedGratis": "Video upload er ikke tilgjengelig på GRATIS-kontoen. Oppgrader til PRO for å laste opp videoer.",
     "videoNotAllowedLite": "Video upload er ikke tilgjengelig på LITE-kontoen. Oppgrader til PRO for å laste opp videoer.",
+    "documentNotAllowedGratis": "Dokumentopplasting er tilgjengelig for Lite og Pro",
     "uploadFailed": "Opplasting feilet",
     "blockedFiles": "Blokerte filer:",
     "blockedFilesMessage": "{{message}}\n\n{{label}}\n{{files}}"

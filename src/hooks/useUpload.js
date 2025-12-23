@@ -19,7 +19,7 @@ import * as exifr from 'exifr' // ✅ ADD: For EXIF extraction BEFORE compressio
 
 export function useUpload() {
   const { t } = useTranslation(['upload'])
-  const { tier, canUploadVideo, getTierLimit, isAdmin } = useAuth() // ✅ P0: Add getTierLimit, isAdmin
+  const { tier, canUploadVideo, canUploadDocument, getTierLimit, isAdmin } = useAuth() // ✅ Add canUploadDocument
   const storageUsed = useStore((state) => state.storageUsed) // ✅ P0: Get current storage usage
   const setNotification = useStore((state) => state.setNotification) // ✅ P0: For error notifications
   const [uploading, setUploading] = useState(false)
@@ -50,6 +50,14 @@ export function useUpload() {
       'video/x-msvideo',
       'video/webm',
     ]
+    const ALLOWED_DOCUMENT_TYPES = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+      'application/msword', // .doc
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.ms-excel', // .xls
+      'text/plain', // .txt
+    ]
 
     const validFiles = []
     const errors = []
@@ -65,7 +73,11 @@ export function useUpload() {
       const isVideo = hasMimeType || hasVideoExtension
       const isImage = fileType.startsWith('image/')
 
-      if (import.meta.env.DEV) console.log(`🔍 Validating: ${file.name}, MIME: ${file.type}, isVideo: ${isVideo}, canUploadVideo: ${canUploadVideo}`)
+      // ✅ Document detection
+      const isDocument = ALLOWED_DOCUMENT_TYPES.includes(fileType) ||
+        /\.(pdf|docx?|xlsx?|txt)$/i.test(file.name)
+
+      if (import.meta.env.DEV) console.log(`🔍 Validating: ${file.name}, MIME: ${file.type}, isVideo: ${isVideo}, isDocument: ${isDocument}, canUploadVideo: ${canUploadVideo}, canUploadDocument: ${canUploadDocument}`)
 
       // ✅ VIDEO TIER CHECK
       if (isVideo) {
@@ -79,6 +91,17 @@ export function useUpload() {
         } else if (!ALLOWED_VIDEO_TYPES.includes(fileType) && !hasVideoExtension) {
           fileErrors.push(t('errors.unsupportedVideoType'))
           if (import.meta.env.DEV) console.log(`❌ Unsupported video type: ${file.name} (${file.type})`)
+        }
+      }
+
+      // ✅ DOCUMENT TIER CHECK (LITE + PRO only)
+      if (isDocument) {
+        if (!canUploadDocument) {
+          fileErrors.push(t('errors.documentNotAllowedGratis'))
+          if (import.meta.env.DEV) console.log(`❌ Document blocked: ${file.name} (tier: ${tier()})`)
+        } else if (!ALLOWED_DOCUMENT_TYPES.includes(fileType) && !/\.(pdf|docx?|xlsx?|txt)$/i.test(file.name)) {
+          fileErrors.push(t('errors.unsupportedDocumentType'))
+          if (import.meta.env.DEV) console.log(`❌ Unsupported document type: ${file.name} (${file.type})`)
         }
       }
 
@@ -97,7 +120,15 @@ export function useUpload() {
         errors.push({ file: file.name, errors: fileErrors })
         if (import.meta.env.DEV) console.log(`❌ File validation failed: ${file.name}`, fileErrors)
       } else {
-        file.fileType = isVideo ? 'video' : 'photo'
+        // ✅ Set file type
+        if (isDocument) {
+          file.fileType = 'document'
+        } else if (isVideo) {
+          file.fileType = 'video'
+        } else {
+          file.fileType = 'photo'
+        }
+
         validFiles.push(file)
         if (import.meta.env.DEV) console.log(`✅ File validated: ${file.name} (${file.fileType})`)
 
@@ -198,8 +229,30 @@ export function useUpload() {
 
         totalOriginalSize += file.size
 
+        // ✅ DOCUMENT PROCESSING (no compression, no thumbnail)
+        if (fileObj.type === 'document') {
+          // Double-check document permission (should be caught in validation)
+          if (!canUploadDocument) {
+            if (import.meta.env.DEV) console.warn('Document upload blocked for tier:', tier())
+            continue
+          }
+
+          totalCompressedSize += file.size
+
+          processedFiles.push({
+            file: file,
+            preview: fileObj.preview,
+            name: file.name,
+            size: file.size,
+            type: 'document',
+          })
+
+          setProcessingProgress(
+            Math.round(((i + 1) / selectedFiles.length) * 50)
+          )
+        }
         // ✅ TIER-AWARE VIDEO PROCESSING
-        if (fileObj.type === 'video') {
+        else if (fileObj.type === 'video') {
           // Double-check video permission (should be caught in validation)
           if (!canUploadVideo) {
             if (import.meta.env.DEV) console.warn('Video upload blocked for tier:', tier())

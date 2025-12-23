@@ -615,9 +615,22 @@ export default function PhotoPage() {
         </div>
       </header>
 
-      {/* Media Canvas (Image or Video) */}
+      {/* Media Canvas (Image, Video, or Document) */}
       <main className="flex-1 flex items-center justify-center p-0">
-        {photo.type === 'video' ? (
+        {photo.type === 'document' ? (
+          <div className="flex flex-col items-center justify-center gap-4 p-8 text-white">
+            <div className="text-6xl">📄</div>
+            <h2 className="text-2xl font-semibold">{photo.name}</h2>
+            <p className="text-white/60">Document preview not supported</p>
+            <a
+              href={photo.url}
+              download={photo.name}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition"
+            >
+              Download
+            </a>
+          </div>
+        ) : photo.type === 'video' ? (
           <video
             src={photo.url}
             controls

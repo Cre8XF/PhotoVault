@@ -201,6 +201,14 @@ export const useAuth = () => {
   }, [isAdmin, isPro])
 
   /**
+   * Check if document upload is allowed
+   */
+  const canUploadDocument = useCallback(() => {
+    if (isAdmin()) return true
+    return isLite() || isPro() // LITE and PRO tiers
+  }, [isAdmin, isLite, isPro])
+
+  /**
    * ✅ P0: Get storage limit in bytes for a given tier
    */
   const getTierLimit = useCallback((tier) => {
@@ -256,6 +264,7 @@ export const useAuth = () => {
 
     // Capabilities
     canUploadVideo,
+    canUploadDocument,
     storageQuota: getStorageQuota,
     getTierLimit,
     ensureEmailVerified,
