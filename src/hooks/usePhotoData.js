@@ -144,6 +144,29 @@ export const usePhotoData = () => {
   }, [user?.uid, setAlbums, setPhotos, updateStorageUsed])
 
   /**
+   * Generate upload success message based on file types
+   */
+  const getUploadSuccessMessage = ({ images, videos, aiTagging, t }) => {
+    const hasImages = images > 0
+    const hasVideos = videos > 0
+
+    if (hasImages && hasVideos) {
+      // Mixed upload
+      return aiTagging
+        ? t('common:notifications.imagesAndVideosUploadedWithAI', { images, videos })
+        : t('common:notifications.imagesAndVideosUploaded', { images, videos })
+    } else if (hasVideos) {
+      // Videos only
+      return t('common:notifications.videosUploaded', { count: videos })
+    } else {
+      // Images only (or default)
+      return aiTagging
+        ? t('common:notifications.photosUploadedWithAI', { count: images })
+        : t('common:notifications.photosUploaded', { count: images })
+    }
+  }
+
+  /**
    * Handle photo upload
    * PHASE 4: Refresh only after upload - photos appear immediately
    */
@@ -166,9 +189,17 @@ export const usePhotoData = () => {
       setIsUploading(true)
 
       try {
-        let successCount = 0
+        let imageCount = 0
+        let videoCount = 0
 
         for (const fileObj of selectedFiles) {
+          // Count file types
+          if (fileObj.type === 'video') {
+            videoCount++
+          } else {
+            imageCount++
+          }
+
           // Pass thumbnail and metadata for videos, exifData for photos
           await uploadPhoto(
             user.uid,
@@ -179,17 +210,17 @@ export const usePhotoData = () => {
             fileObj.metadata || null,
             fileObj.exifData || null // ✅ Pass pre-extracted EXIF (from useUpload.js)
           )
-          successCount++
         }
 
         // Refresh to get newly uploaded photos with their IDs
         await refreshAllData(user.uid)
 
-        const message = aiTagging
-          ? t('common:notifications.photosUploadedWithAI', {
-              count: successCount,
-            })
-          : t('common:notifications.photosUploaded', { count: successCount })
+        const message = getUploadSuccessMessage({
+          images: imageCount,
+          videos: videoCount,
+          aiTagging,
+          t
+        })
 
         setNotification({ message, type: 'success' })
       } catch (error) {
