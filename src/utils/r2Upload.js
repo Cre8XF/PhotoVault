@@ -184,3 +184,92 @@ export function isR2Enabled() {
 
   return R2_ENABLED && !!R2_UPLOAD_ENDPOINT && !!R2_PUBLIC_URL
 }
+
+/**
+ * Extract R2 storagePath from r2Url
+ *
+ * Converts: https://images.pixtr.cloud/users/abc123/photos/image.jpg
+ * To:       users/abc123/photos/image.jpg
+ *
+ * @param {string} r2Url - Full R2 URL
+ * @returns {string|null} - storagePath or null if invalid
+ */
+export function extractStoragePathFromR2Url(r2Url) {
+  if (!r2Url) return null
+
+  try {
+    const url = new URL(r2Url)
+    // Remove leading slash from pathname
+    return url.pathname.substring(1)
+  } catch (error) {
+    console.error('❌ [R2] Failed to extract storagePath from r2Url:', error)
+    return null
+  }
+}
+
+/**
+ * Delete file from R2 via Worker proxy
+ *
+ * @param {string} storagePath - The R2 storage path (e.g., "users/abc123/photos/image.jpg")
+ * @param {string} firebaseToken - Firebase ID token for authentication
+ * @returns {Promise<boolean>} - True if deleted successfully
+ */
+export async function deleteFromR2(storagePath, firebaseToken) {
+  try {
+    const R2_UPLOAD_ENDPOINT = import.meta.env.VITE_R2_UPLOAD_ENDPOINT
+
+    if (!R2_UPLOAD_ENDPOINT) {
+      throw new Error('R2 configuration missing. Please set VITE_R2_UPLOAD_ENDPOINT in .env')
+    }
+
+    if (!firebaseToken) {
+      throw new Error('Firebase token is required for R2 deletion')
+    }
+
+    if (!storagePath) {
+      throw new Error('storagePath is required for R2 deletion')
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('🗑️ [R2] Sending delete request to Worker', {
+        url: `${R2_UPLOAD_ENDPOINT}/delete`,
+        storagePath,
+      })
+    }
+
+    // Send DELETE request to Worker
+    const deleteResponse = await fetch(`${R2_UPLOAD_ENDPOINT}/delete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${firebaseToken}`,
+      },
+      body: JSON.stringify({ storagePath }),
+    })
+
+    if (!deleteResponse.ok) {
+      const errorData = await deleteResponse.json().catch(() => ({}))
+      throw new Error(
+        errorData.error || `R2 delete failed: ${deleteResponse.statusText}`
+      )
+    }
+
+    const result = await deleteResponse.json()
+
+    if (!result.success) {
+      throw new Error('Invalid response from delete worker')
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('✅ [R2] File deleted successfully via Worker:', {
+        storagePath,
+        message: result.message,
+      })
+    }
+
+    return true
+  } catch (error) {
+    console.error('❌ [R2] Delete error:', error)
+    throw error
+  }
+}
