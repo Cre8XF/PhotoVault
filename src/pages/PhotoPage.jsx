@@ -615,22 +615,39 @@ export default function PhotoPage() {
         </div>
       </header>
 
-      {/* Image Canvas */}
+      {/* Media Canvas (Image or Video) */}
       <main className="flex-1 flex items-center justify-center p-0">
-        <img
-          src={sanitizeImageUrl(photo.displayUrl || photo.url, PLACEHOLDER_IMAGE)}
-          alt={photo.caption || photo.name || 'Photo'}
-          onError={(e) => {
-            console.error('❌ Failed to load photo:', photo.displayUrl || photo.url)
-            e.target.src = PLACEHOLDER_IMAGE
-          }}
-          className={`max-w-full max-h-[100vh] object-contain transition-opacity duration-300 cursor-pointer ${
-            imageLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-          onLoad={() => setImageLoaded(true)}
-          onClick={handleImageClick}
-          draggable={false}
-        />
+        {photo.type === 'video' ? (
+          <video
+            src={photo.url}
+            controls
+            preload="metadata"
+            poster={photo.thumbnailUrl || undefined}
+            className={`max-w-full max-h-[100vh] object-contain transition-opacity duration-300 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            onLoadedData={() => setImageLoaded(true)}
+            onCanPlay={() => setImageLoaded(true)}
+            style={{ cursor: 'default' }}
+          >
+            Your browser does not support video playback.
+          </video>
+        ) : (
+          <img
+            src={sanitizeImageUrl(photo.displayUrl || photo.url, PLACEHOLDER_IMAGE)}
+            alt={photo.caption || photo.name || 'Photo'}
+            onError={(e) => {
+              console.error('❌ Failed to load photo:', photo.displayUrl || photo.url)
+              e.target.src = PLACEHOLDER_IMAGE
+            }}
+            className={`max-w-full max-h-[100vh] object-contain transition-opacity duration-300 cursor-pointer ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            onLoad={() => setImageLoaded(true)}
+            onClick={handleImageClick}
+            draggable={false}
+          />
+        )}
 
         {!imageLoaded && (
           <div className="absolute inset-0 flex items-center justify-center">

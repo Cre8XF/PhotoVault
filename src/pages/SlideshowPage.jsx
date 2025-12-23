@@ -340,18 +340,35 @@ export default function SlideshowPage() {
         </div>
       </header>
 
-      {/* Image Canvas */}
+      {/* Media Canvas (Image or Video) */}
       <main className="flex-1 flex items-center justify-center p-0">
-        <img
-          src={photo.url}
-          alt={photo.caption || photo.name || 'Photo'}
-          className={`max-w-full max-h-[100vh] object-contain transition-opacity duration-500 cursor-pointer ${
-            imageLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-          onLoad={() => setImageLoaded(true)}
-          onClick={handleImageClick}
-          draggable={false}
-        />
+        {photo.type === 'video' ? (
+          <video
+            src={photo.url}
+            controls
+            preload="metadata"
+            poster={photo.thumbnailUrl || undefined}
+            className={`max-w-full max-h-[100vh] object-contain transition-opacity duration-500 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            onLoadedData={() => setImageLoaded(true)}
+            onCanPlay={() => setImageLoaded(true)}
+            style={{ cursor: 'default' }}
+          >
+            Your browser does not support video playback.
+          </video>
+        ) : (
+          <img
+            src={photo.url}
+            alt={photo.caption || photo.name || 'Photo'}
+            className={`max-w-full max-h-[100vh] object-contain transition-opacity duration-500 cursor-pointer ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            onLoad={() => setImageLoaded(true)}
+            onClick={handleImageClick}
+            draggable={false}
+          />
+        )}
 
         {!imageLoaded && (
           <div className="absolute inset-0 flex items-center justify-center">
