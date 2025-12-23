@@ -45,7 +45,7 @@ export default {
         return await handleUpload(request, env, corsHeaders)
       }
 
-      if (path === '/delete' && request.method === 'POST') {
+      if (path.startsWith('/delete') && request.method === 'POST') {
         return await handleDelete(request, env, corsHeaders)
       }
 
@@ -244,13 +244,10 @@ async function handleDelete(request, env, corsHeaders) {
 
     if (!storagePath) {
       console.error('❌ [DELETE] Missing storagePath')
-      return new Response(
-        JSON.stringify({ error: 'Missing storagePath' }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      )
+      return new Response(JSON.stringify({ error: 'Missing storagePath' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
     }
 
     // ------------------------------------------------------------------------
@@ -262,7 +259,9 @@ async function handleDelete(request, env, corsHeaders) {
         storagePath,
       })
       return new Response(
-        JSON.stringify({ error: 'Forbidden: Cannot delete files from other users' }),
+        JSON.stringify({
+          error: 'Forbidden: Cannot delete files from other users',
+        }),
         {
           status: 403,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
