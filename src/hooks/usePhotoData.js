@@ -146,48 +146,24 @@ export const usePhotoData = () => {
   /**
    * Generate upload success message based on file types
    */
-  const getUploadSuccessMessage = ({ images, videos, documents, aiTagging, t }) => {
+  const getUploadSuccessMessage = ({ images, videos, aiTagging, t }) => {
     const hasImages = images > 0
     const hasVideos = videos > 0
-    const hasDocuments = documents > 0
-    const fileTypeCount = [hasImages, hasVideos, hasDocuments].filter(Boolean).length
 
-    // Single file type
-    if (fileTypeCount === 1) {
-      if (hasDocuments) {
-        return t('common:notifications.documentsUploaded', { count: documents })
-      } else if (hasVideos) {
-        return t('common:notifications.videosUploaded', { count: videos })
-      } else {
-        return aiTagging
-          ? t('common:notifications.photosUploadedWithAI', { count: images })
-          : t('common:notifications.photosUploaded', { count: images })
-      }
-    }
-
-    // Mixed file types
-    if (hasImages && hasVideos && hasDocuments) {
-      // All three types
-      return aiTagging
-        ? t('common:notifications.imagesVideosAndDocumentsUploadedWithAI', { images, videos, documents })
-        : t('common:notifications.imagesVideosAndDocumentsUploaded', { images, videos, documents })
-    } else if (hasImages && hasVideos) {
-      // Images + Videos
+    if (hasImages && hasVideos) {
+      // Mixed upload
       return aiTagging
         ? t('common:notifications.imagesAndVideosUploadedWithAI', { images, videos })
         : t('common:notifications.imagesAndVideosUploaded', { images, videos })
-    } else if (hasImages && hasDocuments) {
-      // Images + Documents
+    } else if (hasVideos) {
+      // Videos only
+      return t('common:notifications.videosUploaded', { count: videos })
+    } else {
+      // Images only (or default)
       return aiTagging
-        ? t('common:notifications.imagesAndDocumentsUploadedWithAI', { images, documents })
-        : t('common:notifications.imagesAndDocumentsUploaded', { images, documents })
-    } else if (hasVideos && hasDocuments) {
-      // Videos + Documents
-      return t('common:notifications.videosAndDocumentsUploaded', { videos, documents })
+        ? t('common:notifications.photosUploadedWithAI', { count: images })
+        : t('common:notifications.photosUploaded', { count: images })
     }
-
-    // Fallback (shouldn't happen)
-    return t('common:notifications.photosUploaded', { count: images })
   }
 
   /**
@@ -215,13 +191,10 @@ export const usePhotoData = () => {
       try {
         let imageCount = 0
         let videoCount = 0
-        let documentCount = 0
 
         for (const fileObj of selectedFiles) {
           // Count file types
-          if (fileObj.type === 'document') {
-            documentCount++
-          } else if (fileObj.type === 'video') {
+          if (fileObj.type === 'video') {
             videoCount++
           } else {
             imageCount++
@@ -245,7 +218,6 @@ export const usePhotoData = () => {
         const message = getUploadSuccessMessage({
           images: imageCount,
           videos: videoCount,
-          documents: documentCount,
           aiTagging,
           t
         })
