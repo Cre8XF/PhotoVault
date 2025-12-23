@@ -33,8 +33,10 @@
     "fileTooLarge": "File too large (max {{size}})",
     "unsupportedImageType": "Image format not supported",
     "unsupportedVideoType": "Video format not supported",
+    "unsupportedDocumentType": "Document format not supported",
     "videoNotAllowedGratis": "Video upload is not available on FREE account. Upgrade to PRO to upload videos.",
     "videoNotAllowedLite": "Video upload is not available on LITE account. Upgrade to PRO to upload videos.",
+    "documentNotAllowedGratis": "Document upload is available for Lite and Pro",
     "uploadFailed": "Upload failed",
     "blockedFiles": "Blocked files:",
     "blockedFilesMessage": "{{message}}\n\n{{label}}\n{{files}}"

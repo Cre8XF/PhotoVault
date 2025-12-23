@@ -702,9 +702,11 @@ export async function uploadPhoto(
       storageBackend: isR2Enabled() ? 'R2' : 'Firebase Storage',
     })
 
-    // Determine if this is a video (with fallback)
+    // Determine file type (with fallback)
     const fileType = file.type || 'image/png' // Fallback to image/png if type is missing
     const isVideo = fileType.startsWith('video/')
+    const isDocument = fileType.startsWith('application/') || fileType === 'text/plain' ||
+      /\.(pdf|docx?|xlsx?|txt)$/i.test(file.name)
 
     // Get Firebase token for R2 authentication
     const currentUser = auth.currentUser
@@ -762,7 +764,7 @@ export async function uploadPhoto(
     let camera = null
     let technicalDetails = null
 
-    if (!isVideo) {
+    if (!isVideo && !isDocument) {
       if (import.meta.env.DEV) {
         console.log('═══════════════════════════════════════')
         console.log('🔍 EXIF EXTRACTION DEBUG START')
@@ -999,7 +1001,7 @@ export async function uploadPhoto(
     )
 
     if (import.meta.env.DEV) console.log(
-      `📸 ${isVideo ? 'Video' : 'Bilde'} lastet opp til R2: ${safeName}`
+      `📸 ${isVideo ? 'Video' : isDocument ? 'Document' : 'Bilde'} lastet opp til R2: ${safeName}`
     )
 
     // 4. Prepare metadata with comprehensive EXIF data
@@ -1009,14 +1011,15 @@ export async function uploadPhoto(
       userId: userId,
       albumId: albumId,
       size: file.size,
-      type: isVideo ? 'video' : fileType,
+      type: isDocument ? 'document' : (isVideo ? 'video' : fileType),
+      ...(isDocument && { mimeType: fileType }), // Store MIME type for documents
       favorite: false,
 
       // Storage backend tracking - R2 only
       storageBackend: 'r2', // Always R2 for new uploads
       r2Url: downloadURL, // R2 public URL
 
-      // Date fields (EXIF-enhanced)
+      // Date fields (EXIF-enhanced for photos only)
       ...(takenAt && { takenAt: takenAt }), // ✅ Canonical EXIF date (only if exists)
       dateTaken: takenAt, // ✅ Keep for backward compatibility
       uploadedAt: new Date().toISOString(),
@@ -1025,9 +1028,9 @@ export async function uploadPhoto(
       updatedAt: new Date().toISOString(),
 
       // EXIF metadata (photos only)
-      ...(!isVideo && location && { location }),
-      ...(!isVideo && camera && { camera }),
-      ...(!isVideo && technicalDetails && { technicalDetails }),
+      ...(!isVideo && !isDocument && location && { location }),
+      ...(!isVideo && !isDocument && camera && { camera }),
+      ...(!isVideo && !isDocument && technicalDetails && { technicalDetails }),
 
       // Video-specific fields
       ...(isVideo && {
@@ -1039,18 +1042,20 @@ export async function uploadPhoto(
         },
       }),
 
-      // AI fields (defaults)
-      aiTags: [],
-      faces: 0,
-      category: null,
-      aiAnalyzed: false,
-      analyzedAt: null,
-      enhanced: false,
-      enhancedUrl: null,
-      enhancedAt: null,
-      bgRemoved: false,
-      noBgUrl: null,
-      bgRemovedAt: null,
+      // AI fields (defaults - not for documents)
+      ...(!isDocument && {
+        aiTags: [],
+        faces: 0,
+        category: null,
+        aiAnalyzed: false,
+        analyzedAt: null,
+        enhanced: false,
+        enhancedUrl: null,
+        enhancedAt: null,
+        bgRemoved: false,
+        noBgUrl: null,
+        bgRemovedAt: null,
+      }),
     }
 
     // 3. AI-tagging (deaktivert i Pixtr MVP)
