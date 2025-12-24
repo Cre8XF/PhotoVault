@@ -88,5 +88,20 @@
     "tagline": "Norskutviklet photo management app",
     "privacy": "Personvern",
     "terms": "Vilkår"
+  },
+  "about": {
+    "pageTitle": "Om Pixtr",
+    "whatIs": {
+      "title": "Hva er Pixtr"
+    },
+    "corePrinciples": {
+      "title": "Grunnprinsipper"
+    },
+    "privacyControl": {
+      "title": "Personvern og kontroll",
+      "para1": "Bildene og dataene dine tilhører deg. Pixtr er bygget på prinsippet om at du skal ha fullstendig kontroll over minnene dine og personlig informasjon.",
+      "para2": "Vi sporer ikke aktiviteten din, selger ikke dataene dine, og viser ingen annonser. Du kan eksportere eller slette dataene dine når som helst direkte fra kontoinnstillingene.",
+      "para3": "For flere detaljer, se personvernerklæringen og vilkårene for bruk i informasjonsseksjonen."
+    }
   }
 }
