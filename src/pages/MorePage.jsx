@@ -974,15 +974,16 @@ const MorePage = ({
                 <ExternalLink className="w-4 h-4 opacity-50 ml-auto" />
               </button>
 
-              <div className="bg-white/5 p-3 rounded-xl flex items-center justify-between border border-white/10">
-                <div className="flex items-center gap-3">
-                  <Info className="w-5 h-5 text-gray-400" />
+              <button
+                onClick={() => navigate('/about')}
+                className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-3 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
+              >
+                <Info className="w-5 h-5 text-gray-400" />
+                <div className="flex-1">
                   <p className="font-medium text-sm">{t('info.about')}</p>
                 </div>
-                <span className="text-xs opacity-70 font-mono">
-                  {t('info.version')} {import.meta.env.VITE_VERSION || '7.1'}
-                </span>
-              </div>
+                <ChevronRight className="w-4 h-4 opacity-50" />
+              </button>
             </div>
           </section>
         </div>

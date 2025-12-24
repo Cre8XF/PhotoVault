@@ -35,6 +35,7 @@ const SecuritySettings = lazy(() => import('./pages/SecuritySettings'))
 const VaultPage = lazy(() => import('./pages/VaultPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const SubscriptionPage = lazy(() => import('./pages/SubscriptionPage'))
+const AboutPage = lazy(() => import('./pages/AboutPage'))
 const PublicAlbumPage = lazy(() => import('./pages/PublicAlbumPage'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
 
@@ -655,6 +656,8 @@ function AppContent() {
           <Route path="/vault" element={<VaultPage />} />
 
           <Route path="/profile" element={<ProfilePage />} />
+
+          <Route path="/about" element={<AboutPage />} />
 
           <Route path="/settings" element={<SettingsPage />} />
 
