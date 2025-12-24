@@ -50,6 +50,6 @@
   },
   "browse": "Browse files",
   "gallery": "Gallery",
-  "supportedFormats": "Supports JPG, PNG, GIF, WebP, MP4, MOV",
+  "supportedFormats": "Supports images, videos and documents (PDF, DOCX, XLS, etc.)",
   "selectedFiles": "Selected files"
 }

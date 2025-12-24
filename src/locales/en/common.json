@@ -157,6 +157,7 @@
     "photosUploaded": "{{count}} photos uploaded",
     "photosUploadedWithAI": "{{count}} photos uploaded with AI tagging",
     "videosUploaded": "{{count}} videos uploaded",
+    "documentsUploaded": "{{count}} documents uploaded",
     "imagesAndVideosUploaded": "{{images}} photos and {{videos}} videos uploaded",
     "imagesAndVideosUploadedWithAI": "{{images}} photos uploaded with AI tagging and {{videos}} videos uploaded",
     "removedFromFavorites": "Removed from favorites",

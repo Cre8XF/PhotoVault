@@ -340,9 +340,20 @@ export default function SlideshowPage() {
         </div>
       </header>
 
-      {/* Media Canvas (Image or Video) */}
+      {/* Media Canvas (Image, Video, or Document message) */}
       <main className="flex-1 flex items-center justify-center p-0">
-        {photo.type === 'video' ? (
+        {photo.type === 'document' ? (
+          <div className="text-center text-white max-w-md px-4">
+            <p className="text-lg font-semibold mb-2">Documents cannot be shown in slideshow</p>
+            <p className="text-white/60 mb-4">{photo.name}</p>
+            <button
+              onClick={handleNext}
+              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-full transition"
+            >
+              Skip to next
+            </button>
+          </div>
+        ) : photo.type === 'video' ? (
           <video
             src={photo.url}
             controls

@@ -24,6 +24,9 @@ const PhotoPickerPanel = ({ isOpen, onClose, photos, onSelectPhoto, selectedSlot
   const filteredPhotos = useMemo(() => {
     let result = photos || [];
 
+    // Exclude documents from collage selection
+    result = result.filter((p) => p.type !== 'document');
+
     // Apply filter
     if (filter === 'favorites') {
       result = result.filter((p) => p.favorite);
