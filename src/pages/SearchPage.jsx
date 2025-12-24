@@ -243,7 +243,8 @@ const SearchPage = ({
 
   // 🔒 SIKRET: Filtrering med array-guards
   const filteredPhotos = useMemo(() => {
-    let res = safePhotos
+    // ✅ EXCLUDE DOCUMENTS: SearchPage shows only images and videos by default
+    let res = safePhotos.filter((p) => p.type !== 'document')
 
     // SPECIAL FILTER: Recent photos (Issue 1 fix)
     if (specialFilter?.type === 'recent') {

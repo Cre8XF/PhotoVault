@@ -92,8 +92,9 @@ const AlbumsPage = ({
   const safePhotos = Array.isArray(photos) ? photos : []
 
   const albumPhotos = useMemo(() => {
+    // ✅ EXCLUDE DOCUMENTS: Unassigned photos are images/videos only
     // photos without albumId (unassigned photos)
-    return safePhotos.filter((p) => !p.albumId)
+    return safePhotos.filter((p) => !p.albumId && p.type !== 'document')
   }, [safePhotos])
 
   const totalAlbums = safeAlbums.length

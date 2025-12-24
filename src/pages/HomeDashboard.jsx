@@ -87,16 +87,18 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
   const stats = useMemo(
     () => {
       const safePhotos = Array.isArray(photos) ? photos : [];
+      // ✅ EXCLUDE DOCUMENTS: Only count images and videos
+      const mediaOnly = safePhotos.filter((p) => p.type !== 'document');
       return {
-        total: safePhotos.length,
-        favorites: safePhotos.filter((p) => p.favorite).length,
-        recent: safePhotos.filter((p) => {
+        total: mediaOnly.length,
+        favorites: mediaOnly.filter((p) => p.favorite).length,
+        recent: mediaOnly.filter((p) => {
           const daysDiff =
             Math.floor((Date.now() - new Date(p.createdAt)) / (1000 * 60 * 60 * 24));
           return daysDiff <= 1;
         }).length,
-        unassigned: safePhotos.filter((p) => !p.albumId).length,
-        withFaces: safePhotos.filter((p) => p.faces > 0).length
+        unassigned: mediaOnly.filter((p) => !p.albumId).length,
+        withFaces: mediaOnly.filter((p) => p.faces > 0).length
       };
     },
     [photos]
@@ -105,9 +107,11 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
   const favoritePhotos = useMemo(
     () => {
       const safePhotos = Array.isArray(photos) ? photos : [];
-      // Limit favorites to 4 on mobile for compact view
+      // ✅ EXCLUDE DOCUMENTS: Only show image/video favorites
+      const mediaOnly = safePhotos.filter((p) => p.type !== 'document');
+      // Limit favorites to 6 for compact view
       const limit = 6;
-      return safePhotos.filter((p) => p.favorite).slice(0, limit);
+      return mediaOnly.filter((p) => p.favorite).slice(0, limit);
     },
     [photos]
   );
@@ -118,8 +122,11 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
       return []
     }
 
+    // ✅ EXCLUDE DOCUMENTS: Only show images and videos in recent uploads
+    const mediaOnly = photos.filter(p => p.type !== 'document');
+
     // Get recent photos (last 50, sorted by date)
-    const recent = photos
+    const recent = mediaOnly
       .filter(p => p.createdAt || p.dateTaken)
       .sort((a, b) => {
         const dateA = a.dateTaken?.toMillis?.() || a.createdAt?.toMillis?.() || new Date(a.createdAt || 0).getTime()
@@ -135,12 +142,15 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
 
   // Smart albums - filter based on plan
   const smartAlbums = useMemo(() => {
+    // ✅ EXCLUDE DOCUMENTS: Smart albums only count media
+    const mediaOnly = safePhotosForSmartAlbums.filter((p) => p.type !== 'document');
+
     const allAlbums = [
       {
         id: "last30days",
         icon: Calendar,
         name: t("home:last30days"),
-        count: safePhotosForSmartAlbums.filter((p) => {
+        count: mediaOnly.filter((p) => {
           const daysDiff =
             Math.floor((Date.now() - new Date(p.createdAt)) / (1000 * 60 * 60 * 24));
           return daysDiff <= 30;
