@@ -582,6 +582,7 @@ function AppContent() {
     currentPath !== '/security' &&
     currentPath !== '/vault' &&
     currentPath !== '/profile' &&
+    currentPath !== '/about' &&
     currentPath !== '/settings' &&
     currentPath !== '/subscription' &&
     !currentPath.startsWith('/collage/')
