@@ -8,20 +8,18 @@ import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getAuth, applyActionCode } from 'firebase/auth'
 import { Loader2, CheckCircle, XCircle } from 'lucide-react'
-import useStore from '../state/store'
 
 /**
  * VerifyEmailPage Component
  *
  * Handles email verification when handleCodeInApp: true
+ * Passive verification endpoint - does NOT attempt to sync app state
  *
  * Flow:
- * 1. Parse URL params (mode, oobCode, continueUrl)
- * 2. Apply action code via Firebase
- * 3. Force auth state refresh
- * 4. Update Zustand store
- * 5. Show success/error notification
- * 6. Navigate to safe internal route
+ * 1. Parse URL params (mode, oobCode)
+ * 2. Apply verification code via Firebase
+ * 3. Show success confirmation with manual return option
+ * 4. User manually returns to app or refreshes to see verified state
  */
 const VerifyEmailPage = () => {
   const [searchParams] = useSearchParams()
@@ -31,10 +29,6 @@ const VerifyEmailPage = () => {
 
   const [status, setStatus] = useState('idle') // 'idle' | 'processing' | 'success' | 'error'
   const [message, setMessage] = useState('')
-
-  const setNotification = useStore((state) => state.setNotification)
-  const setUser = useStore((state) => state.setUser)
-  const setEmailVerified = useStore((state) => state.setEmailVerified)
 
   useEffect(() => {
     // Hard guard: only verify if we have valid params and haven't already attempted
@@ -63,47 +57,20 @@ const VerifyEmailPage = () => {
    */
   const handleEmailVerification = async () => {
     const oobCode = searchParams.get('oobCode')
-    const continueUrl = searchParams.get('continueUrl')
 
     setStatus('processing')
     setMessage('Verifying your email...')
     console.log('[VERIFY EMAIL] Starting verification...')
 
     try {
-      // Step 1: Apply the verification code
+      // Apply the verification code
       console.log('[VERIFY EMAIL] Applying verification code...')
       await applyActionCode(auth, oobCode)
       console.log('[VERIFY EMAIL] ✅ Verification code applied successfully')
 
-      // Step 2: If user is logged in, refresh their auth state
-      if (auth.currentUser) {
-        console.log('[VERIFY EMAIL] Refreshing user auth state...')
-        await auth.currentUser.reload()
-        await auth.currentUser.getIdToken(true)
-
-        // Update Zustand store to force re-renders
-        setUser({ ...auth.currentUser })
-        setEmailVerified(auth.currentUser.emailVerified)
-        console.log('[VERIFY EMAIL] ✅ User state refreshed, emailVerified:', auth.currentUser.emailVerified)
-      }
-
-      // Step 3: Show success state
+      // Show success state
       setStatus('success')
-      setMessage('Email verified successfully!')
-
-      // Step 4: Show success notification
-      setNotification({
-        message: 'Email verified successfully! Welcome to Pixtr.',
-        type: 'success',
-      })
-
-      // Step 5: Navigate to safe internal route
-      const redirectUrl = getSafeContinueUrl(continueUrl)
-      console.log('[VERIFY EMAIL] Redirecting to:', redirectUrl)
-
-      setTimeout(() => {
-        navigate(redirectUrl, { replace: true })
-      }, 2000)
+      setMessage('You can now return to Pixtr. If Pixtr is already open, please refresh the page.')
     } catch (error) {
       console.error('[VERIFY EMAIL] Verification failed:', error)
 
@@ -120,40 +87,6 @@ const VerifyEmailPage = () => {
 
       setStatus('error')
       setMessage(errorMessage)
-
-      setNotification({
-        message: errorMessage,
-        type: 'error',
-      })
-
-      // Redirect to home after error
-      setTimeout(() => {
-        navigate('/', { replace: true })
-      }, 5000)
-    }
-  }
-
-  /**
-   * Validate and sanitize continue URL
-   * Only allow same-origin URLs to prevent open redirect
-   */
-  const getSafeContinueUrl = (continueUrl) => {
-    if (!continueUrl) return '/'
-
-    try {
-      const url = new URL(continueUrl)
-      const currentOrigin = window.location.origin
-
-      // Only allow same-origin redirects
-      if (url.origin === currentOrigin) {
-        return url.pathname + url.search + url.hash
-      }
-
-      console.warn('[VERIFY EMAIL] Blocked cross-origin redirect:', continueUrl)
-      return '/'
-    } catch {
-      // Invalid URL - default to home
-      return '/'
     }
   }
 
@@ -190,9 +123,17 @@ const VerifyEmailPage = () => {
           <p className="text-gray-300 mb-6">{message}</p>
 
           {/* Action Buttons */}
+          {status === 'success' && (
+            <button
+              onClick={() => window.location.href = '/'}
+              className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
+            >
+              Open Pixtr
+            </button>
+          )}
           {status === 'error' && (
             <button
-              onClick={() => navigate('/', { replace: true })}
+              onClick={() => window.location.href = '/'}
               className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
             >
               Go to Home
