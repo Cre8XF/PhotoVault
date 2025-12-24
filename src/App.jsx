@@ -24,6 +24,7 @@ import { ToastProvider } from './contexts/ToastContext'
 const LandingPage = lazy(() => import('./pages/LandingPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const AuthActionHandler = lazy(() => import('./pages/AuthActionHandler'))
+const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'))
 const HomeDashboard = lazy(() => import('./pages/HomeDashboard'))
 const AlbumsPage = lazy(() => import('./pages/AlbumsPage'))
 const SearchPage = lazy(() => import('./pages/SearchPage'))
@@ -152,6 +153,9 @@ function App() {
 
                 {/* Public album sharing */}
                 <Route path="/share/:slug" element={<PublicAlbumPage />} />
+
+                {/* Email verification landing page - handleCodeInApp: true */}
+                <Route path="/verify-email" element={<VerifyEmailPage />} />
 
                 {/* Firebase auth action handler - handles email verification links from Netlify */}
                 <Route path="/__/auth/action" element={<AuthActionHandler />} />
