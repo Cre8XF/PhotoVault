@@ -1,0 +1,70 @@
+# ============================================================================
+# Wrangler Configuration – Pixtr Image Worker (CORS-enabled)
+# ============================================================================
+# Purpose:
+# - Serve images from R2 with proper CORS headers for canvas/editor
+# - Handle GET requests for images.pixtr.cloud
+# - Enable Editor to load and process images without CORS errors
+# ============================================================================
+
+name = "pixtr-image-worker"
+main = "image-worker.js"
+compatibility_date = "2024-12-24"
+
+# ✅ Enable workers.dev for testing
+workers_dev = true
+
+# ============================================================================
+# R2 BUCKET BINDING
+# ============================================================================
+# Binds the R2 bucket containing user photos to this worker
+# Path structure in bucket:
+#   users/{userId}/{albumId}/{filename}
+#   users/{userId}/unassigned/{filename}
+# ============================================================================
+
+[[r2_buckets]]
+binding = "PIXTR_USERS"
+bucket_name = "pixtr-users"
+
+# ============================================================================
+# ROUTES (Enable after testing)
+# ============================================================================
+# Once worker is verified working, uncomment these routes to handle
+# production traffic for images.pixtr.cloud
+#
+# [[routes]]
+# pattern = "images.pixtr.cloud/*"
+# zone_name = "pixtr.cloud"
+#
+# This will route ALL requests to images.pixtr.cloud through this worker,
+# adding proper CORS headers to every image response
+# ============================================================================
+
+# ============================================================================
+# ENVIRONMENT VARIABLES (optional)
+# ============================================================================
+[vars]
+ENVIRONMENT = "production"
+
+# ============================================================================
+# DEPLOYMENT NOTES
+# ============================================================================
+# 1. Test deployment:
+#    wrangler deploy --config cloudflare/image-worker/wrangler.toml
+#
+# 2. Test endpoint:
+#    curl -I -H "Origin: https://pixtr.cloud" \
+#      https://pixtr-image-worker.YOUR-SUBDOMAIN.workers.dev/users/test/photo.jpg
+#
+# 3. Verify CORS headers in response:
+#    - access-control-allow-origin: *
+#    - access-control-allow-methods: GET, HEAD, OPTIONS
+#    - cross-origin-resource-policy: cross-origin
+#
+# 4. Once verified, enable routes (uncomment [[routes]] section above)
+#
+# 5. DNS will route images.pixtr.cloud → this worker → R2 bucket
+#
+# 6. Editor will now load images without CORS errors
+# ============================================================================
