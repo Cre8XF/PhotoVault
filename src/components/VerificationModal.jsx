@@ -4,7 +4,7 @@
 import React, { useState } from 'react'
 import { Mail, ShieldAlert, RefreshCw } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { sendEmailVerification } from 'firebase/auth'
+import { sendVerificationEmail } from '../utils/emailVerification'
 import useStore from '../state/store'
 
 const VerificationModal = ({ isOpen, onClose, feature }) => {
@@ -20,7 +20,7 @@ const VerificationModal = ({ isOpen, onClose, feature }) => {
 
     setResending(true)
     try {
-      await sendEmailVerification(user)
+      await sendVerificationEmail(user)
       setNotification({
         message: t('auth:verificationEmailSent') || 'Verification email sent! Check your inbox.',
         type: 'success',

@@ -12,8 +12,8 @@ export const sendVerificationEmail = async (user) => {
 
   // Action code settings - CRITICAL for proper redirect
   const actionCodeSettings = {
-    url: `${window.location.origin}/more`,
-    handleCodeInApp: false,
+    url: `${window.location.origin}/verify-email`,
+    handleCodeInApp: true,
   };
 
   try {
