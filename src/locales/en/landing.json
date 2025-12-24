@@ -88,5 +88,20 @@
     "tagline": "Norwegian-built photo management app",
     "privacy": "Privacy",
     "terms": "Terms"
+  },
+  "about": {
+    "pageTitle": "About Pixtr",
+    "whatIs": {
+      "title": "What is Pixtr"
+    },
+    "corePrinciples": {
+      "title": "Core Principles"
+    },
+    "privacyControl": {
+      "title": "Privacy & Control",
+      "para1": "Your photos and data belong to you. Pixtr is built on the principle that you should have complete control over your memories and personal information.",
+      "para2": "We don't track your activity, sell your data, or show ads. You can export or delete your data at any time directly from your account settings.",
+      "para3": "For more details, see our Privacy Policy and Terms of Service in the Information section."
+    }
   }
 }

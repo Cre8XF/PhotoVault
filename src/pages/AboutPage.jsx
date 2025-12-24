@@ -100,7 +100,7 @@ const AboutPage = () => {
             <ArrowLeft className="w-6 h-6" />
           </button>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold">About Pixtr</h1>
+            <h1 className="text-2xl font-bold">{t('landing:about.pageTitle')}</h1>
           </div>
           <div className="text-xs opacity-70 font-mono">
             v{import.meta.env.VITE_VERSION || '7.1'}
@@ -115,7 +115,7 @@ const AboutPage = () => {
             <div className="p-2 bg-purple-600/20 rounded-lg">
               <Info className="w-5 h-5 text-purple-400" />
             </div>
-            <h2 className="text-xl font-bold">What is Pixtr</h2>
+            <h2 className="text-xl font-bold">{t('landing:about.whatIs.title')}</h2>
           </div>
           <p className="text-gray-300 leading-relaxed">
             {t('landing:hero.subtitle')}
@@ -124,7 +124,7 @@ const AboutPage = () => {
 
         {/* Core Principles */}
         <section className="glass-card p-6 mb-6">
-          <h2 className="text-xl font-bold mb-4">Core Principles</h2>
+          <h2 className="text-xl font-bold mb-4">{t('landing:about.corePrinciples.title')}</h2>
           <div className="space-y-4">
             <div className="flex gap-3">
               <div className="flex-shrink-0">
@@ -243,21 +243,16 @@ const AboutPage = () => {
 
         {/* Privacy & Control */}
         <section className="glass-card p-6 mb-6">
-          <h2 className="text-xl font-bold mb-4">Privacy & Control</h2>
+          <h2 className="text-xl font-bold mb-4">{t('landing:about.privacyControl.title')}</h2>
           <div className="space-y-3 text-sm text-gray-300">
             <p>
-              Your photos and data belong to you. Pixtr is built on the
-              principle that you should have complete control over your
-              memories and personal information.
+              {t('landing:about.privacyControl.para1')}
             </p>
             <p>
-              We don't track your activity, sell your data, or show ads. You
-              can export or delete your data at any time directly from your
-              account settings.
+              {t('landing:about.privacyControl.para2')}
             </p>
             <p className="text-xs text-gray-400 pt-2">
-              For more details, see our Privacy Policy and Terms of Service
-              in the Information section.
+              {t('landing:about.privacyControl.para3')}
             </p>
           </div>
         </section>
