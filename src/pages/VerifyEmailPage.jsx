@@ -4,7 +4,7 @@
 // Handles email verification using handleCodeInApp: true
 // Processes verification codes directly in the app
 // ============================================================================
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getAuth, applyActionCode } from 'firebase/auth'
 import { Loader2, CheckCircle, XCircle } from 'lucide-react'
@@ -36,6 +36,24 @@ const VerifyEmailPage = () => {
   const setEmailVerified = useStore((state) => state.setEmailVerified)
 
   useEffect(() => {
+    // Hard guard: only verify if we have valid params and haven't already attempted
+    const mode = searchParams.get('mode')
+    const oobCode = searchParams.get('oobCode')
+
+    // Missing params is NOT an error - redirect silently
+    if (!oobCode || mode !== 'verifyEmail') {
+      console.log('[VERIFY EMAIL] Missing params, redirecting to home')
+      navigate('/', { replace: true })
+      return
+    }
+
+    // Prevent double execution
+    if (hasAttemptedVerification.current) {
+      console.log('[VERIFY EMAIL] Already attempted verification, skipping')
+      return
+    }
+
+    hasAttemptedVerification.current = true
     handleEmailVerification()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
