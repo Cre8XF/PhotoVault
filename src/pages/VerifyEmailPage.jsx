@@ -4,7 +4,7 @@
 // Handles email verification using handleCodeInApp: true
 // Processes verification codes directly in the app
 // ============================================================================
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getAuth, applyActionCode } from 'firebase/auth'
 import { Loader2, CheckCircle, XCircle } from 'lucide-react'
@@ -27,15 +27,34 @@ const VerifyEmailPage = () => {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const auth = getAuth()
+  const hasAttemptedVerification = useRef(false)
 
-  const [status, setStatus] = useState('processing') // 'processing' | 'success' | 'error'
-  const [message, setMessage] = useState('Verifying your email...')
+  const [status, setStatus] = useState('idle') // 'idle' | 'processing' | 'success' | 'error'
+  const [message, setMessage] = useState('')
 
   const setNotification = useStore((state) => state.setNotification)
   const setUser = useStore((state) => state.setUser)
   const setEmailVerified = useStore((state) => state.setEmailVerified)
 
   useEffect(() => {
+    // Hard guard: only verify if we have valid params and haven't already attempted
+    const mode = searchParams.get('mode')
+    const oobCode = searchParams.get('oobCode')
+
+    // Missing params is NOT an error - redirect silently
+    if (!oobCode || mode !== 'verifyEmail') {
+      console.log('[VERIFY EMAIL] Missing params, redirecting to home')
+      navigate('/', { replace: true })
+      return
+    }
+
+    // Prevent double execution
+    if (hasAttemptedVerification.current) {
+      console.log('[VERIFY EMAIL] Already attempted verification, skipping')
+      return
+    }
+
+    hasAttemptedVerification.current = true
     handleEmailVerification()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -43,24 +62,14 @@ const VerifyEmailPage = () => {
    * Main handler for email verification
    */
   const handleEmailVerification = async () => {
+    const oobCode = searchParams.get('oobCode')
+    const continueUrl = searchParams.get('continueUrl')
+
+    setStatus('processing')
+    setMessage('Verifying your email...')
+    console.log('[VERIFY EMAIL] Starting verification...')
+
     try {
-      // Parse query parameters
-      const mode = searchParams.get('mode')
-      const oobCode = searchParams.get('oobCode')
-      const continueUrl = searchParams.get('continueUrl')
-
-      console.log('[VERIFY EMAIL] Mode:', mode, 'Code present:', !!oobCode)
-
-      // Validate required params
-      if (!oobCode) {
-        throw new Error('Missing verification code. Please use the link from your email.')
-      }
-
-      // Only handle email verification
-      if (mode !== 'verifyEmail') {
-        throw new Error('Invalid verification mode. This page only handles email verification.')
-      }
-
       // Step 1: Apply the verification code
       console.log('[VERIFY EMAIL] Applying verification code...')
       await applyActionCode(auth, oobCode)
@@ -151,6 +160,11 @@ const VerifyEmailPage = () => {
   /**
    * Render UI based on status
    */
+  // Don't render anything if idle (redirecting)
+  if (status === 'idle') {
+    return null
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[var(--bg-gradient-start)] to-[var(--bg-gradient-end)] p-4">
       <div className="glass-card max-w-md w-full p-8 rounded-2xl shadow-2xl border border-white/10">
