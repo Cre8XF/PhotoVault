@@ -146,23 +146,44 @@ export const usePhotoData = () => {
   /**
    * Generate upload success message based on file types
    */
-  const getUploadSuccessMessage = ({ images, videos, aiTagging, t }) => {
+  const getUploadSuccessMessage = ({ images, videos, documents, aiTagging, t }) => {
     const hasImages = images > 0
     const hasVideos = videos > 0
+    const hasDocuments = documents > 0
 
-    if (hasImages && hasVideos) {
-      // Mixed upload
+    // Build message parts
+    const parts = []
+    if (hasImages) {
+      const msg = aiTagging
+        ? t('common:notifications.photosUploadedWithAI', { count: images })
+        : t('common:notifications.photosUploaded', { count: images })
+      parts.push(msg)
+    }
+    if (hasVideos) {
+      parts.push(t('common:notifications.videosUploaded', { count: videos }))
+    }
+    if (hasDocuments) {
+      parts.push(t('common:notifications.documentsUploaded', { count: documents }))
+    }
+
+    // Legacy support for images and videos only
+    if (!hasDocuments && hasImages && hasVideos) {
       return aiTagging
         ? t('common:notifications.imagesAndVideosUploadedWithAI', { images, videos })
         : t('common:notifications.imagesAndVideosUploaded', { images, videos })
-    } else if (hasVideos) {
-      // Videos only
-      return t('common:notifications.videosUploaded', { count: videos })
+    }
+
+    // Join parts with " and "
+    if (parts.length === 0) {
+      return t('common:notifications.photosUploaded', { count: 0 })
+    } else if (parts.length === 1) {
+      return parts[0]
+    } else if (parts.length === 2) {
+      return parts.join(' and ')
     } else {
-      // Images only (or default)
-      return aiTagging
-        ? t('common:notifications.photosUploadedWithAI', { count: images })
-        : t('common:notifications.photosUploaded', { count: images })
+      // 3 parts: "X photos, Y videos and Z documents uploaded"
+      const last = parts.pop()
+      return parts.join(', ') + ' and ' + last
     }
   }
 
@@ -191,11 +212,14 @@ export const usePhotoData = () => {
       try {
         let imageCount = 0
         let videoCount = 0
+        let documentCount = 0
 
         for (const fileObj of selectedFiles) {
           // Count file types
           if (fileObj.type === 'video') {
             videoCount++
+          } else if (fileObj.type === 'document') {
+            documentCount++
           } else {
             imageCount++
           }
@@ -218,6 +242,7 @@ export const usePhotoData = () => {
         const message = getUploadSuccessMessage({
           images: imageCount,
           videos: videoCount,
+          documents: documentCount,
           aiTagging,
           t
         })

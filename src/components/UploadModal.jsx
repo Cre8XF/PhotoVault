@@ -550,7 +550,7 @@ const UploadModal = ({
             ref={fileInputRef}
             type="file"
             multiple
-            accept="image/*,video/*"
+            accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
             onChange={handleFileInput}
             className="hidden"
           />

@@ -26,6 +26,7 @@ import { usePrefetchAdjacentPhotos } from '../hooks/usePrefetchAdjacentPhotos'
 import { deletePhoto as firebaseDeletePhoto } from '../firebase'
 import ConfirmModal from '../components/ConfirmModal'
 import { sanitizeImageUrl, PLACEHOLDER_IMAGE } from '../utils/security'
+import DocumentCard from '../components/DocumentCard'
 
 export default function PhotoPage() {
   const { id } = useParams()
@@ -171,9 +172,19 @@ export default function PhotoPage() {
   // Start slideshow - Phase 2B
   const handleStartSlideshow = useCallback(() => {
     if (!photo) return
+
+    // Check if current photo is a document
+    if (photo.type === 'document') {
+      setNotification({
+        message: 'Documents cannot be shown in slideshow.',
+        type: 'info',
+      })
+      return
+    }
+
     // Navigate to slideshow page with current photo
     navigate(`/slideshow/${photo.id}`, { state: { from: location } })
-  }, [photo, navigate, location])
+  }, [photo, navigate, location, setNotification])
 
   // Delete photo
   const handleDelete = useCallback(() => {
@@ -615,9 +626,13 @@ export default function PhotoPage() {
         </div>
       </header>
 
-      {/* Media Canvas (Image or Video) */}
+      {/* Media Canvas (Image, Video, or Document) */}
       <main className="flex-1 flex items-center justify-center p-0">
-        {photo.type === 'video' ? (
+        {photo.type === 'document' ? (
+          <div className="max-w-md w-full px-4">
+            <DocumentCard item={photo} />
+          </div>
+        ) : photo.type === 'video' ? (
           <video
             src={photo.url}
             controls

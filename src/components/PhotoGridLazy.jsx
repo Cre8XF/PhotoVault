@@ -3,8 +3,9 @@
 // ============================================================================
 import React, { useState, useRef, useEffect } from "react";
 import { FixedSizeGrid as Grid } from "react-window";
-import { Star, Heart, ImageOff } from "lucide-react";
+import { Star, Heart, ImageOff, FileText } from "lucide-react";
 import { toggleFavorite } from "../firebase";
+import DocumentCard from "./DocumentCard";
 
 /**
  * Optimalisert PhotoGrid med lazy loading
@@ -90,51 +91,68 @@ const PhotoGridLazy = ({
           onClick={() => onPhotoClick && onPhotoClick(photo, index)}
           className="relative group cursor-pointer rounded-lg overflow-hidden bg-gray-800 h-full animate-fade-in"
         >
-          {/* Bilde */}
-          <img
-            src={photo.url}
-            alt={photo.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-            loading="lazy"
-          />
-
-          {/* Overlay med gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-          {/* Favoritt badge (hvis favoritt) */}
-          {photo.favorite && (
-            <div className="absolute top-2 right-2 bg-yellow-500/90 backdrop-blur-sm p-1.5 rounded-full">
-              <Star className="w-4 h-4 text-white fill-white" />
+          {/* Document rendering */}
+          {photo.type === 'document' ? (
+            <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-gradient-to-br from-gray-700 to-gray-800">
+              <FileText className="w-12 h-12 text-blue-400 mb-2" />
+              <p className="text-white text-xs font-medium truncate w-full text-center">
+                {photo.name}
+              </p>
+              {photo.favorite && (
+                <div className="absolute top-2 right-2 bg-yellow-500/90 backdrop-blur-sm p-1.5 rounded-full">
+                  <Star className="w-4 h-4 text-white fill-white" />
+                </div>
+              )}
             </div>
+          ) : (
+            <>
+              {/* Bilde */}
+              <img
+                src={photo.url}
+                alt={photo.name}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                loading="lazy"
+              />
+
+              {/* Overlay med gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+              {/* Favoritt badge (hvis favoritt) */}
+              {photo.favorite && (
+                <div className="absolute top-2 right-2 bg-yellow-500/90 backdrop-blur-sm p-1.5 rounded-full">
+                  <Star className="w-4 h-4 text-white fill-white" />
+                </div>
+              )}
+
+              {/* Hover controls */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                {showFavoriteButton && (
+                  <button
+                    onClick={(e) => handleToggleFavorite(e, photo)}
+                    className={`p-2 rounded-full transition ${
+                      photo.favorite
+                        ? "bg-yellow-500 hover:bg-yellow-600"
+                        : "bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                    }`}
+                    title={photo.favorite ? "Fjern fra favoritter" : "Legg til i favoritter"}
+                  >
+                    <Heart
+                      className={`w-5 h-5 ${
+                        photo.favorite ? "fill-white text-white" : "text-white"
+                      }`}
+                    />
+                  </button>
+                )}
+              </div>
+
+              {/* Navn (vises på hover) */}
+              <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform">
+                <p className="text-white text-sm font-medium truncate">
+                  {photo.name}
+                </p>
+              </div>
+            </>
           )}
-
-          {/* Hover controls */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            {showFavoriteButton && (
-              <button
-                onClick={(e) => handleToggleFavorite(e, photo)}
-                className={`p-2 rounded-full transition ${
-                  photo.favorite
-                    ? "bg-yellow-500 hover:bg-yellow-600"
-                    : "bg-white/20 hover:bg-white/30 backdrop-blur-sm"
-                }`}
-                title={photo.favorite ? "Fjern fra favoritter" : "Legg til i favoritter"}
-              >
-                <Heart
-                  className={`w-5 h-5 ${
-                    photo.favorite ? "fill-white text-white" : "text-white"
-                  }`}
-                />
-              </button>
-            )}
-          </div>
-
-          {/* Navn (vises på hover) */}
-          <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform">
-            <p className="text-white text-sm font-medium truncate">
-              {photo.name}
-            </p>
-          </div>
         </div>
       </div>
     );

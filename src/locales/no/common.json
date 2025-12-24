@@ -157,6 +157,7 @@
     "photosUploaded": "{{count}} bilder lastet opp",
     "photosUploadedWithAI": "{{count}} bilder lastet opp med AI-tagging",
     "videosUploaded": "{{count}} videoer lastet opp",
+    "documentsUploaded": "{{count}} dokumenter lastet opp",
     "imagesAndVideosUploaded": "{{images}} bilder og {{videos}} videoer lastet opp",
     "imagesAndVideosUploadedWithAI": "{{images}} bilder lastet opp med AI-tagging og {{videos}} videoer lastet opp",
     "removedFromFavorites": "Fjernet fra favoritter",

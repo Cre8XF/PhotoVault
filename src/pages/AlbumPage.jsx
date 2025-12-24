@@ -446,9 +446,18 @@ const AlbumPage = ({
           {filteredPhotos.length > 0 && (
             <button
               onClick={() => {
+                // Filter out documents from slideshow
+                const slideshowPhotos = filteredPhotos.filter((p) => p.type !== 'document')
+                if (slideshowPhotos.length === 0) {
+                  setNotification({
+                    message: 'No photos or videos available for slideshow. Documents cannot be shown in slideshow.',
+                    type: 'info',
+                  })
+                  return
+                }
                 // Navigate to SlideshowPage with first photo
-                const firstPhoto = filteredPhotos[0]
-                const photoIds = filteredPhotos.map((p) => p.id)
+                const firstPhoto = slideshowPhotos[0]
+                const photoIds = slideshowPhotos.map((p) => p.id)
                 setCurrentPhotoId(firstPhoto.id)
                 setPhotoContext('album')
                 setPhotoOrder(photoIds)
