@@ -114,6 +114,28 @@ export const useAuth = () => {
     }
   }, [auth, setUser, setEmailVerified])
 
+  /**
+   * Refresh both Firebase user and Firestore profile
+   * Used after subscription changes via Stripe webhook
+   */
+  const refreshUserProfile = useCallback(async () => {
+    if (!auth.currentUser) return false
+
+    try {
+      // Refresh Firebase user
+      await refreshUser()
+
+      // Fetch updated profile from Firestore
+      await fetchUserProfile(auth.currentUser.uid)
+
+      console.log('[AUTH] User profile refreshed successfully')
+      return true
+    } catch (err) {
+      console.error('[AUTH] Failed to refresh user profile:', err)
+      return false
+    }
+  }, [auth, refreshUser, fetchUserProfile])
+
   // ✅ CRITICAL: onAuthStateChanged removed from useAuth
   // Auth listener is now ONLY in AuthProvider (src/providers/AuthProvider.jsx)
   // This prevents multiple concurrent listeners that race and thrash state
@@ -250,6 +272,7 @@ export const useAuth = () => {
     loading,
     emailVerified,
     refreshUser,
+    refreshUserProfile,
 
     // Actions
     handleLogout,
