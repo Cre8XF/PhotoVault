@@ -4,7 +4,7 @@
 // Displays all user documents in a list/table format with:
 // - File icon based on MIME type
 // - File name, size, upload date
-// - Actions: Open, Download, Delete
+// - Actions: Preview (PDF), Download, Delete
 // ============================================================================
 
 import React, { useMemo, useState } from 'react'
@@ -14,7 +14,7 @@ import {
   File,
   FileSpreadsheet,
   Download,
-  ExternalLink,
+  Eye,
   Trash2,
   Search,
   X,
@@ -56,6 +56,13 @@ function getDocumentIcon(mimeType) {
 }
 
 /**
+ * Check if document is a PDF
+ */
+function isPDF(mimeType) {
+  return mimeType && mimeType.includes('pdf')
+}
+
+/**
  * Format file size to human-readable format
  */
 function formatFileSize(bytes) {
@@ -69,6 +76,7 @@ function formatFileSize(bytes) {
 const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
   const { t, i18n } = useTranslation(['common', 'documents'])
   const [searchQuery, setSearchQuery] = useState('')
+  const [previewDoc, setPreviewDoc] = useState(null)
 
   // Store
   const setConfirmModal = useStore((state) => state.setConfirmModal)
@@ -100,16 +108,23 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
   }, [filteredDocuments])
 
   /**
-   * Open document in new tab
+   * Preview document (PDF only) or open in new tab
    */
-  const handleOpenDocument = (doc) => {
-    if (doc.url) {
-      window.open(doc.url, '_blank', 'noopener,noreferrer')
-    } else {
+  const handlePreviewDocument = (doc) => {
+    if (!doc.url) {
       setNotification({
         message: t('common:errorOccurred'),
         type: 'error',
       })
+      return
+    }
+
+    if (isPDF(doc.mimeType)) {
+      // Show inline preview for PDFs
+      setPreviewDoc(doc)
+    } else {
+      // Open non-PDFs in new tab
+      window.open(doc.url, '_blank', 'noopener,noreferrer')
     }
   }
 
@@ -212,6 +227,7 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
             const { icon: Icon, color } = getDocumentIcon(doc.mimeType)
             const uploadDate = doc.createdAt || doc.uploadedAt
             const locale = i18n.language === 'no' ? nb : undefined
+            const isPdf = isPDF(doc.mimeType)
 
             return (
               <div
@@ -254,13 +270,13 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {/* Open */}
+                  {/* Preview (PDF) or Open */}
                   <button
-                    onClick={() => handleOpenDocument(doc)}
+                    onClick={() => handlePreviewDocument(doc)}
                     className="ripple-effect p-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition"
-                    title={t('documents:openDocument', 'Open')}
+                    title={isPdf ? t('documents:previewDocument', 'Preview') : t('documents:openDocument', 'Open')}
                   >
-                    <ExternalLink className="w-4 h-4" />
+                    <Eye className="w-4 h-4" />
                   </button>
 
                   {/* Download */}
@@ -313,6 +329,53 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
           actionLabel={t('common:clearSearch', 'Clear search')}
           onAction={() => setSearchQuery('')}
         />
+      )}
+
+      {/* PDF Preview Modal */}
+      {previewDoc && isPDF(previewDoc.mimeType) && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
+          <div className="w-full h-full max-w-6xl max-h-[90vh] bg-white dark:bg-gray-900 rounded-2xl overflow-hidden flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="font-semibold text-lg truncate flex-1">
+                {previewDoc.name}
+              </h3>
+              <button
+                onClick={() => setPreviewDoc(null)}
+                className="ripple-effect p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* PDF Viewer */}
+            <div className="flex-1 overflow-auto bg-gray-100 dark:bg-gray-800">
+              <iframe
+                src={previewDoc.url}
+                className="w-full h-full"
+                title={previewDoc.name}
+                style={{ minHeight: '500px' }}
+              />
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-200 dark:border-gray-700">
+              <button
+                onClick={() => handleDownloadDocument(previewDoc)}
+                className="ripple-effect px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                {t('documents:downloadDocument', 'Download')}
+              </button>
+              <button
+                onClick={() => setPreviewDoc(null)}
+                className="ripple-effect px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition"
+              >
+                {t('common:close', 'Close')}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

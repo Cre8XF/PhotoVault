@@ -359,13 +359,6 @@ function AppContent() {
   const plan = userProfile?.plan || user?.plan || 'free'
   const isFreeUser = plan === 'free'
 
-  // ✅ DOCUMENTS: Show Documents nav if Lite/Pro/Admin OR has documents
-  const hasDocuments = React.useMemo(() => {
-    const safePhotos = Array.isArray(photos) ? photos : []
-    return safePhotos.some((p) => p.type === 'document')
-  }, [photos])
-  const showDocuments = !isFreeUser || isAdmin || hasDocuments
-
   // Security context
   const { isLocked, pinEnabled } = useSecurityContext()
 
@@ -593,7 +586,6 @@ function AppContent() {
     currentPath !== '/about' &&
     currentPath !== '/settings' &&
     currentPath !== '/subscription' &&
-    currentPath !== '/documents' &&
     !currentPath.startsWith('/collage/')
 
   return (
@@ -777,19 +769,6 @@ function AppContent() {
               <Search className="w-6 h-6" />
               <span className="text-xs font-medium">{t('nav:search')}</span>
             </button>
-
-            {/* Documents (conditionally shown for Lite/Pro/Admin or if user has documents) */}
-            {showDocuments && (
-              <button
-                onClick={() => navigate('/documents')}
-                className={`ripple-effect nav-item-premium ${
-                  location.pathname === '/documents' ? 'active' : ''
-                }`}
-              >
-                <FileText className="w-6 h-6" />
-                <span className="text-xs font-medium">{t('nav:documents', 'Docs')}</span>
-              </button>
-            )}
 
             {/* Account (always visible) */}
             <button
