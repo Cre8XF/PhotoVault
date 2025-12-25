@@ -593,7 +593,6 @@ function AppContent() {
     currentPath !== '/about' &&
     currentPath !== '/settings' &&
     currentPath !== '/subscription' &&
-    currentPath !== '/documents' &&
     !currentPath.startsWith('/collage/')
 
   return (
@@ -657,6 +656,22 @@ function AppContent() {
 
           <Route
             path="/more"
+            element={
+              <MorePage
+                user={userProfile || user}
+                storageUsed={storageUsed}
+                storageLimit={storageLimit}
+                photos={photos}
+                albums={albums}
+                isDarkMode={isDarkMode}
+                setIsDarkMode={setTheme}
+                onLogout={handleLogout}
+              />
+            }
+          />
+
+          <Route
+            path="/account"
             element={
               <MorePage
                 user={userProfile || user}
@@ -763,7 +778,7 @@ function AppContent() {
             </button>
 
             {/* Documents (conditionally shown for Lite/Pro/Admin or if user has documents) */}
-            {showDocuments ? (
+            {showDocuments && (
               <button
                 onClick={() => navigate('/documents')}
                 className={`ripple-effect nav-item-premium ${
@@ -773,18 +788,18 @@ function AppContent() {
                 <FileText className="w-6 h-6" />
                 <span className="text-xs font-medium">{t('nav:documents', 'Docs')}</span>
               </button>
-            ) : (
-              /* Account - shown when Documents is hidden */
-              <button
-                onClick={() => navigate('/more')}
-                className={`ripple-effect nav-item-premium ${
-                  location.pathname === '/more' ? 'active' : ''
-                }`}
-              >
-                <User className="w-6 h-6" />
-                <span className="text-xs font-medium">{t('nav:account')}</span>
-              </button>
             )}
+
+            {/* Account (always visible) */}
+            <button
+              onClick={() => navigate('/account')}
+              className={`ripple-effect nav-item-premium ${
+                location.pathname === '/account' || location.pathname === '/more' ? 'active' : ''
+              }`}
+            >
+              <User className="w-6 h-6" />
+              <span className="text-xs font-medium">{t('nav:account')}</span>
+            </button>
           </div>
         </nav>
       )}
