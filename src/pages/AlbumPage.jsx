@@ -126,7 +126,8 @@ const AlbumPage = ({
   const albumPhotos = useMemo(() => {
     if (!album) return []
     const safePhotos = Array.isArray(photos) ? photos : []
-    return safePhotos.filter((p) => p.albumId === album.id)
+    // ✅ EXCLUDE DOCUMENTS: Albums contain only images and videos
+    return safePhotos.filter((p) => p.albumId === album.id && p.type !== 'document')
   }, [photos, album])
 
   // Filter and sort photos

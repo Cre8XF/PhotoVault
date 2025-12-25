@@ -1,0 +1,19 @@
+{
+  "title": "Dokumenter",
+  "subtitle": "Administrer dine opplastede dokumenter",
+  "searchPlaceholder": "Søk i dokumenter...",
+  "documentCount": "Viser {{count}} av {{total}} dokumenter",
+  "openDocument": "Åpne",
+  "downloadDocument": "Last ned",
+  "deleteDocument": "Slett",
+  "confirmDeleteTitle": "Slett dokument",
+  "confirmDeleteMessage": "Er du sikker på at du vil slette \"{{name}}\"? Dette kan ikke angres.",
+  "downloadSuccess": "{{name}} lastet ned",
+  "downloadError": "Kunne ikke laste ned dokumentet",
+  "untitledDocument": "Uten navn",
+  "emptyTitle": "Ingen dokumenter ennå",
+  "emptyDescription": "Last opp PDF, Word, Excel eller tekstfiler for å få tilgang til dem her.",
+  "uploadFirst": "Last opp ditt første dokument",
+  "noSearchResults": "Ingen dokumenter funnet",
+  "tryDifferentSearch": "Prøv et annet søkeord."
+}

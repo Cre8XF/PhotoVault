@@ -1,0 +1,19 @@
+{
+  "title": "Documents",
+  "subtitle": "Manage your uploaded documents",
+  "searchPlaceholder": "Search documents...",
+  "documentCount": "Showing {{count}} of {{total}} documents",
+  "openDocument": "Open",
+  "downloadDocument": "Download",
+  "deleteDocument": "Delete",
+  "confirmDeleteTitle": "Delete document",
+  "confirmDeleteMessage": "Are you sure you want to delete \"{{name}}\"? This cannot be undone.",
+  "downloadSuccess": "{{name}} downloaded successfully",
+  "downloadError": "Could not download document",
+  "untitledDocument": "Untitled",
+  "emptyTitle": "No documents yet",
+  "emptyDescription": "Upload PDF, Word, Excel, or text files to access them here.",
+  "uploadFirst": "Upload your first document",
+  "noSearchResults": "No documents found",
+  "tryDifferentSearch": "Try a different search term."
+}

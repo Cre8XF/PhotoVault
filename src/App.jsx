@@ -30,6 +30,7 @@ const AlbumsPage = lazy(() => import('./pages/AlbumsPage'))
 const SearchPage = lazy(() => import('./pages/SearchPage'))
 const MorePage = lazy(() => import('./pages/MorePage'))
 const AlbumPage = lazy(() => import('./pages/AlbumPage'))
+const DocumentsPage = lazy(() => import('./pages/DocumentsPage'))
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
 const SecuritySettings = lazy(() => import('./pages/SecuritySettings'))
 const VaultPage = lazy(() => import('./pages/VaultPage'))
@@ -84,7 +85,7 @@ import { useToast } from './hooks/useToast'
 import { isRestrictedBrowserContext, getContextMessage, logBrowserContext, isLikelyFromEmailLink } from './utils/browserDetect'
 
 // Icons
-import { Home, FolderOpen, Plus, Search, Menu, Bell, User, ExternalLink } from 'lucide-react'
+import { Home, FolderOpen, Plus, Search, Menu, Bell, User, ExternalLink, FileText } from 'lucide-react'
 
 /**
  * Main App Component with new architecture
@@ -358,6 +359,13 @@ function AppContent() {
   const plan = userProfile?.plan || user?.plan || 'free'
   const isFreeUser = plan === 'free'
 
+  // ✅ DOCUMENTS: Show Documents nav if Lite/Pro/Admin OR has documents
+  const hasDocuments = React.useMemo(() => {
+    const safePhotos = Array.isArray(photos) ? photos : []
+    return safePhotos.some((p) => p.type === 'document')
+  }, [photos])
+  const showDocuments = !isFreeUser || isAdmin || hasDocuments
+
   // Security context
   const { isLocked, pinEnabled } = useSecurityContext()
 
@@ -585,6 +593,7 @@ function AppContent() {
     currentPath !== '/about' &&
     currentPath !== '/settings' &&
     currentPath !== '/subscription' &&
+    currentPath !== '/documents' &&
     !currentPath.startsWith('/collage/')
 
   return (
@@ -632,6 +641,16 @@ function AppContent() {
                 onPhotoClick={handlePhotoClick}
                 toggleFavorite={toggleFavorite}
                 refreshData={refreshData}
+              />
+            }
+          />
+
+          <Route
+            path="/documents"
+            element={
+              <DocumentsPage
+                photos={photos}
+                onDeletePhoto={handleDeletePhoto}
               />
             }
           />
@@ -699,7 +718,7 @@ function AppContent() {
       {/* Bottom Navigation */}
       {showBottomNav && !isKeyboardOpen && (
         <nav className="bottom-nav-float">
-          <div className="flex justify-around items-center gap-2">
+          <div className="flex justify-around items-center gap-1">
             {/* Home */}
             <button
               onClick={() => navigate('/home')}
@@ -727,6 +746,7 @@ function AppContent() {
               onClick={() => setUploadModalOpen(true)}
               className="ripple-effect bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 p-4 rounded-full shadow-lg transition transform hover:scale-110 -mt-6"
               aria-label={t('nav:upload')}
+              data-upload-trigger
             >
               <Plus className="w-7 h-7 text-white" />
             </button>
@@ -742,16 +762,29 @@ function AppContent() {
               <span className="text-xs font-medium">{t('nav:search')}</span>
             </button>
 
-            {/* Account */}
-            <button
-              onClick={() => navigate('/more')}
-              className={`ripple-effect nav-item-premium ${
-                location.pathname === '/more' ? 'active' : ''
-              }`}
-            >
-              <User className="w-6 h-6" />
-              <span className="text-xs font-medium">{t('nav:account')}</span>
-            </button>
+            {/* Documents (conditionally shown for Lite/Pro/Admin or if user has documents) */}
+            {showDocuments ? (
+              <button
+                onClick={() => navigate('/documents')}
+                className={`ripple-effect nav-item-premium ${
+                  location.pathname === '/documents' ? 'active' : ''
+                }`}
+              >
+                <FileText className="w-6 h-6" />
+                <span className="text-xs font-medium">{t('nav:documents', 'Docs')}</span>
+              </button>
+            ) : (
+              /* Account - shown when Documents is hidden */
+              <button
+                onClick={() => navigate('/more')}
+                className={`ripple-effect nav-item-premium ${
+                  location.pathname === '/more' ? 'active' : ''
+                }`}
+              >
+                <User className="w-6 h-6" />
+                <span className="text-xs font-medium">{t('nav:account')}</span>
+              </button>
+            )}
           </div>
         </nav>
       )}
