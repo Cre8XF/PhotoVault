@@ -3,6 +3,7 @@
   "subtitle": "Manage your uploaded documents",
   "searchPlaceholder": "Search documents...",
   "documentCount": "Showing {{count}} of {{total}} documents",
+  "previewDocument": "Preview",
   "openDocument": "Open",
   "downloadDocument": "Download",
   "deleteDocument": "Delete",

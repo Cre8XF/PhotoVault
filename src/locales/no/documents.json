@@ -3,6 +3,7 @@
   "subtitle": "Administrer dine opplastede dokumenter",
   "searchPlaceholder": "Søk i dokumenter...",
   "documentCount": "Viser {{count}} av {{total}} dokumenter",
+  "previewDocument": "Forhåndsvis",
   "openDocument": "Åpne",
   "downloadDocument": "Last ned",
   "deleteDocument": "Slett",
