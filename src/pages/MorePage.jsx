@@ -599,6 +599,41 @@ const MorePage = ({
         </button>
       </div>
 
+      {/* === CONTENT === */}
+      {((user?.role === 'lite' || isPro || isAdmin) || safePhotos.filter(p => p.type === 'document').length > 0) && (
+        <section className="glass rounded-2xl p-6 mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="p-2 bg-purple-600/20 rounded-lg">
+              <Folder className="w-5 h-5 text-purple-400" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg">
+                {t('content.title', 'Content')}
+              </h3>
+              <p className="text-xs opacity-70">
+                {t('content.subtitle', 'Your uploaded files and protected content')}
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <button
+              onClick={() => navigate('/documents')}
+              className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
+            >
+              <FileText className="w-5 h-5 text-purple-400" />
+              <div className="flex-1">
+                <p className="font-medium">{t('nav:documents', 'Documents')}</p>
+                <p className="text-xs opacity-70">
+                  {t('documents:subtitle', 'PDFs, Word files and other documents')}
+                </p>
+              </div>
+              <ChevronRight className="w-5 h-5 opacity-50" />
+            </button>
+          </div>
+        </section>
+      )}
+
       {/* === MAIN CONTENT GRID === */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* === LEFT COLUMN === */}
@@ -788,20 +823,6 @@ const MorePage = ({
               }`}
             >
               <div className="px-6 pb-6 space-y-2">
-                <button
-                  onClick={() => navigate('/documents')}
-                  className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
-                >
-                  <FileText className="w-5 h-5 text-purple-400" />
-                  <div className="flex-1">
-                    <p className="font-medium">{t('nav:documents', 'Documents')}</p>
-                    <p className="text-xs opacity-70">
-                      {t('documents:subtitle', 'Manage your uploaded documents')}
-                    </p>
-                  </div>
-                  <ChevronRight className="w-5 h-5 opacity-50" />
-                </button>
-
                 <button
                   onClick={() => navigate('/security')}
                   className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
