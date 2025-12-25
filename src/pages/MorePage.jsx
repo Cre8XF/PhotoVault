@@ -64,6 +64,7 @@ import { useStorageCalc } from '../hooks/useStorageCalc'
 import SystemStatus from '../components/admin/SystemStatus'
 import useStore from '../state/store'
 import { sendVerificationEmail } from '../utils/emailVerification'
+import useAuth from '../hooks/useAuth'
 
 const MorePage = ({
   user,
@@ -96,6 +97,9 @@ const MorePage = ({
   const [sendingVerification, setSendingVerification] = useState(false)
 
   const { pinEnabled, biometricEnabled } = useSecurityContext()
+
+  // ✅ DOCUMENT ACCESS CONTROL
+  const { canUploadDocument, isAdmin: checkIsAdmin, userProfile } = useAuth()
 
   // 🔒 SIKRE AT PROPS ER ARRAYS
   const safePhotos = React.useMemo(() => {
@@ -132,12 +136,18 @@ const MorePage = ({
     formatBytes,
   } = useStorageCalc(user?.uid, propStorageUsed, propStorageLimit)
 
-  // Check for isPro: could be boolean field or role field
+  // ✅ FIX: Check for isPro using subscriptionTier (canonical source)
   const isPro =
-    user?.isPro === true || user?.role === 'pro' || user?.role === 'admin'
+    user?.isPro === true ||
+    user?.role === 'pro' ||
+    user?.role === 'admin' ||
+    userProfile?.subscriptionTier === 'PRO'
 
   // Check for isAdmin: check role field
   const isAdmin = user?.role === 'admin' || user?.isAdmin === true
+
+  // ✅ FIX: Check for isLite using subscriptionTier (canonical source)
+  const isLite = userProfile?.subscriptionTier === 'LITE'
 
   // ============================================================================
   // === NOTIFICATION SYSTEM ===
@@ -600,7 +610,7 @@ const MorePage = ({
       </div>
 
       {/* === CONTENT === */}
-      {((user?.role === 'lite' || isPro || isAdmin) || safePhotos.filter(p => p.type === 'document').length > 0) && (
+      {canUploadDocument() && (
         <section className="glass rounded-2xl p-6 mb-6">
           <div className="flex items-center gap-2 mb-4">
             <div className="p-2 bg-purple-600/20 rounded-lg">
