@@ -8,6 +8,7 @@
 // ============================================================================
 
 import React, { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   FileText,
@@ -19,6 +20,7 @@ import {
   Search,
   X,
   FolderOpen,
+  ArrowLeft,
 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { nb } from 'date-fns/locale'
@@ -74,6 +76,7 @@ function formatFileSize(bytes) {
 }
 
 const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
+  const navigate = useNavigate()
   const { t, i18n } = useTranslation(['common', 'documents'])
   const [searchQuery, setSearchQuery] = useState('')
   const [previewDoc, setPreviewDoc] = useState(null)
@@ -176,11 +179,20 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
     <div className="container-premium max-w-7xl mx-auto p-4 pb-20 md:pb-10">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2 mb-2">
-          <FileText className="w-7 h-7" />
-          {t('documents:title', 'Documents')}
-        </h1>
-        <p className="text-sm opacity-70">
+        <div className="flex items-center gap-3 mb-2">
+          <button
+            onClick={() => navigate('/account')}
+            className="ripple-effect p-2 hover:bg-white/10 rounded-xl transition"
+            aria-label="Back to Account"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+            <FileText className="w-7 h-7" />
+            {t('documents:title', 'Documents')}
+          </h1>
+        </div>
+        <p className="text-sm opacity-70 ml-14">
           {t('documents:subtitle', 'Manage your uploaded documents')}
         </p>
       </div>
