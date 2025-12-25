@@ -586,7 +586,6 @@ function AppContent() {
     currentPath !== '/about' &&
     currentPath !== '/settings' &&
     currentPath !== '/subscription' &&
-    currentPath !== '/documents' &&
     !currentPath.startsWith('/collage/')
 
   return (
