@@ -2,11 +2,15 @@
   "hero": {
     "title": "Dine bilder. Din kontroll.",
     "subtitle": "Privacy-first alternativ til Google Photos. Norskutviklet. Ingen tracking. Ingen annonser.",
-    "noCreditCard": "Ingen kredittkort nødvendig • 1 GB gratis lagring"
+    "trustLine": "Laget i Norge • Privacy-first • Ingen tracking",
+    "noCreditCard": "Ingen kredittkort nødvendig"
   },
   "cta": {
-    "getStarted": "Kom i gang",
+    "getStarted": "Start gratis",
     "startFree": "Start gratis",
+    "startLite": "Start Lite",
+    "startPro": "Start Pro",
+    "seePlans": "Se planer",
     "learnMore": "Les mer"
   },
   "why": {
@@ -55,29 +59,36 @@
   },
   "pricing": {
     "title": "Velg din plan",
-    "subtitle": "Start gratis. Oppgrader når du trenger mer.",
-    "recommended": "ANBEFALT",
+    "subtitle": "Start gratis. Oppgrader når som helst.",
+    "recommended": "MEST POPULÆR",
     "storage": "lagring",
     "free": {
       "period": "for alltid",
-      "feature1": "1 GB original kvalitet",
+      "limitation": "Best for å prøve Pixtr",
+      "feature1": "1 GB lagring",
       "feature2": "Album og søk",
       "feature3": "Collage Builder",
       "feature4": "QR-deling"
     },
     "lite": {
       "period": "mnd",
-      "feature1": "Alt i GRATIS",
-      "feature2": "5 GB lagring",
-      "feature3": "Bildekomprimering",
-      "feature4": "Prioritert support"
+      "trustLine": "Perfekt for daglig bruk",
+      "unlocksTitle": "Låser opp:",
+      "unlock1": "Høyere kvalitet på opplasting",
+      "unlock2": "Mindre komprimering",
+      "unlock3": "Raskere opplasting",
+      "unlock4": "Prioritert support",
+      "feature1": "5 GB lagring",
+      "feature2": "Alt i GRATIS",
+      "feature3": "Tidlig tilgang til nye funksjoner"
     },
     "pro": {
       "period": "mnd",
-      "feature1": "Alt i LITE",
-      "feature2": "50 GB lagring",
+      "trustLine": "Alt, nå og fremover",
+      "feature1": "50 GB maksimal lagring",
+      "feature2": "Alle kreative verktøy",
       "feature3": "Videoopplasting",
-      "feature4": "AI-funksjoner (kommer)"
+      "feature4": "AI-funksjoner (kommer snart)"
     }
   },
   "finalCta": {
