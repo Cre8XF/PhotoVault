@@ -316,8 +316,8 @@ const SubscriptionPage = ({ user }) => {
                         setSelectedPlan(plan.name)
                         setVerificationModalOpen(true)
                       } else if (!plan.current) {
-                        // TODO: Implement actual upgrade flow
-                        alert('Upgrade functionality coming soon!')
+                        // Navigate to billing page for Stripe Checkout
+                        navigate('/billing')
                       }
                     }}
                     className={`w-full py-3 rounded-lg font-semibold transition ${

@@ -160,27 +160,9 @@ const MorePage = ({
   // ============================================================================
   // === STRIPE INTEGRATION ===
   // ============================================================================
-  const handleUpgradeToPro = async () => {
-    const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY
-    const stripeCheckoutUrl = import.meta.env.VITE_STRIPE_CHECKOUT_URL
-
-    if (!stripePublicKey || !stripeCheckoutUrl) {
-      console.warn('Stripe keys not configured')
-      showNotification(t('notifications.upgradeUnavailable'), 'error')
-      return
-    }
-
-    try {
-      setLoading(true)
-
-      const checkoutUrl = `${stripeCheckoutUrl}?client_reference_id=${user.uid}&customer_email=${user.email}`
-      window.location.href = checkoutUrl
-    } catch (error) {
-      console.error('Error initiating Stripe checkout:', error)
-      showNotification(t('more.subscription.upgradeError'), 'error')
-    } finally {
-      setLoading(false)
-    }
+  const handleUpgradeToPro = () => {
+    // Navigate to billing page for Stripe Checkout
+    navigate('/billing')
   }
 
   // MVP: Show "Coming Soon" modal for AI features
