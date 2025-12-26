@@ -2,11 +2,15 @@
   "hero": {
     "title": "Your Photos. Your Control.",
     "subtitle": "Privacy-first alternative to Google Photos. Norwegian-built. No tracking. No ads.",
-    "noCreditCard": "No credit card required • 1 GB free storage"
+    "trustLine": "Built in Norway • Privacy-first • No tracking",
+    "noCreditCard": "No credit card required"
   },
   "cta": {
-    "getStarted": "Get Started",
-    "startFree": "Start Free",
+    "getStarted": "Start free",
+    "startFree": "Start free",
+    "startLite": "Start Lite",
+    "startPro": "Start Pro",
+    "seePlans": "See plans",
     "learnMore": "Learn More"
   },
   "why": {
@@ -55,29 +59,36 @@
   },
   "pricing": {
     "title": "Choose Your Plan",
-    "subtitle": "Start free. Upgrade when you need more.",
-    "recommended": "RECOMMENDED",
+    "subtitle": "Start free. Upgrade anytime.",
+    "recommended": "MOST POPULAR",
     "storage": "storage",
     "free": {
       "period": "forever",
-      "feature1": "1 GB original quality",
+      "limitation": "Best for trying Pixtr",
+      "feature1": "1 GB storage",
       "feature2": "Albums & search",
       "feature3": "Collage Builder",
       "feature4": "QR sharing"
     },
     "lite": {
       "period": "mo",
-      "feature1": "Everything in FREE",
-      "feature2": "5 GB storage",
-      "feature3": "Image compression",
-      "feature4": "Priority support"
+      "trustLine": "Perfect for daily use",
+      "unlocksTitle": "Unlocks:",
+      "unlock1": "Higher quality uploads",
+      "unlock2": "Less compression",
+      "unlock3": "Faster uploads",
+      "unlock4": "Priority support",
+      "feature1": "5 GB storage",
+      "feature2": "Everything in FREE",
+      "feature3": "Early access to new features"
     },
     "pro": {
       "period": "mo",
-      "feature1": "Everything in LITE",
-      "feature2": "50 GB storage",
+      "trustLine": "Everything, now and going forward",
+      "feature1": "50 GB maximum storage",
+      "feature2": "All creative tools",
       "feature3": "Video uploads",
-      "feature4": "AI features (coming)"
+      "feature4": "AI features (coming soon)"
     }
   },
   "finalCta": {

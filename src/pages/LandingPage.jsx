@@ -73,6 +73,8 @@ function LandingPage() {
       price: '0 kr',
       period: t('landing:pricing.free.period'),
       storage: '1 GB',
+      limitation: t('landing:pricing.free.limitation'),
+      cta: t('landing:cta.startFree'),
       features: [
         t('landing:pricing.free.feature1'),
         t('landing:pricing.free.feature2'),
@@ -82,15 +84,22 @@ function LandingPage() {
     },
     {
       name: 'LITE',
-      price: '29 kr',
+      price: '39 kr',
       period: t('landing:pricing.lite.period'),
       storage: '5 GB',
       recommended: true,
+      trustLine: t('landing:pricing.lite.trustLine'),
+      cta: t('landing:cta.startLite'),
+      unlocks: [
+        t('landing:pricing.lite.unlock1'),
+        t('landing:pricing.lite.unlock2'),
+        t('landing:pricing.lite.unlock3'),
+        t('landing:pricing.lite.unlock4'),
+      ],
       features: [
         t('landing:pricing.lite.feature1'),
         t('landing:pricing.lite.feature2'),
         t('landing:pricing.lite.feature3'),
-        t('landing:pricing.lite.feature4'),
       ],
     },
     {
@@ -98,6 +107,8 @@ function LandingPage() {
       price: '79 kr',
       period: t('landing:pricing.pro.period'),
       storage: '50 GB',
+      trustLine: t('landing:pricing.pro.trustLine'),
+      cta: t('landing:cta.startPro'),
       features: [
         t('landing:pricing.pro.feature1'),
         t('landing:pricing.pro.feature2'),
@@ -134,7 +145,7 @@ function LandingPage() {
               onClick={() => navigate('/login')}
               className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-lg font-semibold transition"
             >
-              {t('landing:cta.getStarted')}
+              {t('landing:cta.startFree')}
             </button>
           </div>
         </div>
@@ -150,6 +161,9 @@ function LandingPage() {
             <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto">
               {t('landing:hero.subtitle')}
             </p>
+            <p className="text-sm text-gray-400 pt-1">
+              {t('landing:hero.trustLine')}
+            </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
               <button
@@ -161,10 +175,10 @@ function LandingPage() {
               </button>
 
               <a
-                href="#features"
+                href="#pricing"
                 className="px-8 py-4 border border-white/20 hover:bg-white/10 rounded-xl font-semibold text-lg transition"
               >
-                {t('landing:cta.learnMore')}
+                {t('landing:cta.seePlans')}
               </a>
             </div>
 
@@ -267,7 +281,7 @@ function LandingPage() {
       </section>
 
       {/* Pricing */}
-      <section className="py-20 px-4 bg-black/20">
+      <section id="pricing" className="py-20 px-4 bg-black/20">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center space-y-4 mb-16">
             <h2 className="text-4xl md:text-5xl font-bold">
@@ -301,7 +315,34 @@ function LandingPage() {
                   <p className="text-sm text-gray-400">
                     {plan.storage} {t('landing:pricing.storage')}
                   </p>
+                  {plan.trustLine && (
+                    <p className="text-sm font-semibold text-purple-400 pt-1">
+                      {plan.trustLine}
+                    </p>
+                  )}
+                  {plan.limitation && (
+                    <p className="text-xs text-gray-500 italic pt-1">
+                      {plan.limitation}
+                    </p>
+                  )}
                 </div>
+
+                {/* Unlocks section for Lite */}
+                {plan.unlocks && (
+                  <div className="border-t border-white/10 pt-4">
+                    <p className="text-xs font-semibold text-purple-400 mb-2">
+                      {t('landing:pricing.lite.unlocksTitle')}
+                    </p>
+                    <ul className="space-y-2">
+                      {plan.unlocks.map((unlock, idx) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <Sparkles className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
+                          <span className="text-xs text-gray-300">{unlock}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 <ul className="space-y-3">
                   {plan.features.map((feature, idx) => (
@@ -320,7 +361,7 @@ function LandingPage() {
                       : 'border border-white/20 hover:bg-white/10'
                   }`}
                 >
-                  {t('landing:cta.startFree')}
+                  {plan.cta}
                 </button>
               </div>
             ))}
