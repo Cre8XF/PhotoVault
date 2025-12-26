@@ -53,12 +53,19 @@ import {
   getDocs,
 } from 'firebase/firestore'
 
-import { getAuth, deleteUser as deleteAuthUser } from 'firebase/auth'
+import { getAuth } from 'firebase/auth'
 
 // Firebase Storage imports removed - scanning causes 403 errors
 // Storage operations handled by firebase.js CRUD functions
 
-import { db, migrateAlbumsAddUserId, migratePhotosAddUserId } from '../firebase'
+import {
+  db,
+  migrateAlbumsAddUserId,
+  migratePhotosAddUserId,
+  getPhotosByUser,
+} from '../firebase'
+import { reauthenticateUser, deleteAuthUser } from '../utils/authHelpers'
+import { deleteAllUserR2Objects } from '../utils/r2Upload'
 import ComingSoonModal from '../components/ComingSoonModal'
 import { useStorageCalc } from '../hooks/useStorageCalc'
 import SystemStatus from '../components/admin/SystemStatus'
@@ -87,6 +94,8 @@ const MorePage = ({
   const emailVerified = useStore((state) => state.emailVerified)
   const [expandedSection, setExpandedSection] = useState(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showPasswordModal, setShowPasswordModal] = useState(false)
+  const [deletePassword, setDeletePassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [notification, setNotification] = useState(null)
   const [showAIModal, setShowAIModal] = useState(false)
@@ -330,47 +339,175 @@ const MorePage = ({
   }
 
   // ============================================================================
-  // === DELETE ACCOUNT ===
+  // === DELETE ACCOUNT (SAFE & ATOMIC) ===
   // ============================================================================
+
+  /**
+   * Step 1: Show confirmation dialog
+   */
+  const handleDeleteAccountClick = () => {
+    setShowDeleteConfirm(true)
+  }
+
+  /**
+   * Step 2: User confirms deletion - show password modal for re-authentication
+   */
+  const handleConfirmDelete = () => {
+    setShowDeleteConfirm(false)
+    setShowPasswordModal(true)
+    setDeletePassword('')
+  }
+
+  /**
+   * Step 3: Execute safe account deletion after re-authentication
+   * ORDER: Re-auth → R2 → Firestore → Firebase Auth
+   */
   const deleteAccount = async () => {
-    if (!user?.uid) return
+    if (!user?.uid) {
+      showNotification('No user found', 'error')
+      return
+    }
+
+    if (!deletePassword) {
+      showNotification('Password is required', 'error')
+      return
+    }
 
     try {
       setLoading(true)
-      console.log('Deleting account for:', user.uid)
+      console.log('═══════════════════════════════════════════════')
+      console.log('🗑️ SAFE DELETE ACCOUNT STARTED')
+      console.log('═══════════════════════════════════════════════')
+      console.log('User ID:', user.uid)
+      console.log('Email:', user.email)
+      console.log('Timestamp:', new Date().toISOString())
 
+      // ============================================================
+      // STEP 1: RE-AUTHENTICATE (REQUIRED BY FIREBASE)
+      // ============================================================
+      console.log('🔐 STEP 1: Re-authenticating user...')
+      try {
+        await reauthenticateUser(deletePassword)
+        console.log('✅ STEP 1 COMPLETE: User re-authenticated successfully')
+      } catch (error) {
+        console.error('❌ STEP 1 FAILED: Re-authentication failed')
+        throw error // Abort - do NOT proceed if re-auth fails
+      }
+
+      // Get fresh Firebase token after re-auth
       const auth = getAuth()
-      const db = getFirestore()
+      const firebaseToken = await auth.currentUser.getIdToken()
 
-      const collections = ['photos', 'albums', 'shared', 'favorites']
+      // ============================================================
+      // STEP 2: DELETE ALL R2 OBJECTS
+      // ============================================================
+      console.log('🗑️ STEP 2: Deleting all R2 objects...')
+      try {
+        // Fetch all user photos to get R2 URLs
+        const userPhotos = await getPhotosByUser(user.uid)
+        console.log(`Found ${userPhotos.length} photos to delete from R2`)
 
-      for (const collectionName of collections) {
-        const collectionRef = collection(db, 'users', user.uid, collectionName)
-        const snapshot = await getDocs(collectionRef)
+        if (userPhotos.length > 0) {
+          const r2Result = await deleteAllUserR2Objects(
+            userPhotos,
+            firebaseToken
+          )
+          console.log('✅ STEP 2 COMPLETE: R2 deletion result:', r2Result)
 
-        await Promise.all(snapshot.docs.map((doc) => deleteDoc(doc.ref)))
+          if (r2Result.failed > 0) {
+            console.warn(
+              `⚠️ Warning: ${r2Result.failed} R2 objects failed to delete`
+            )
+            // Continue anyway - Firestore is the source of truth
+          }
+        } else {
+          console.log('✅ STEP 2 COMPLETE: No R2 objects to delete')
+        }
+      } catch (error) {
+        console.error('❌ STEP 2 FAILED: R2 deletion error:', error)
+        // Continue anyway - Firestore cleanup is more critical
+        console.warn('⚠️ Continuing with Firestore deletion despite R2 errors')
       }
 
-      await deleteDoc(doc(db, 'users', user.uid))
+      // ============================================================
+      // STEP 3: DELETE FIRESTORE DATA
+      // ============================================================
+      console.log('🗑️ STEP 3: Deleting Firestore data...')
+      try {
+        const db = getFirestore()
 
-      // Storage deletion removed - Firebase Storage scanning causes 403 errors
-      // Individual photo deletions already handled by CRUD operations
-      console.log('✅ User Firestore data deleted')
+        // Delete subcollections under users/{uid}
+        const collections = ['photos', 'albums', 'shared', 'favorites']
 
-      const currentUser = auth.currentUser
-      if (currentUser) {
-        await deleteAuthUser(currentUser)
+        for (const collectionName of collections) {
+          const collectionRef = collection(db, 'users', user.uid, collectionName)
+          const snapshot = await getDocs(collectionRef)
+
+          console.log(
+            `Deleting ${snapshot.size} documents from users/${user.uid}/${collectionName}`
+          )
+
+          await Promise.all(snapshot.docs.map((doc) => deleteDoc(doc.ref)))
+        }
+
+        // Delete main user document
+        await deleteDoc(doc(db, 'users', user.uid))
+        console.log('✅ STEP 3 COMPLETE: All Firestore data deleted')
+      } catch (error) {
+        console.error('❌ STEP 3 FAILED: Firestore deletion error:', error)
+        throw error // Abort - Firestore is critical
       }
 
-      showNotification(t('notifications.deleted'), 'success')
+      // ============================================================
+      // STEP 4: DELETE FIREBASE AUTH USER
+      // ============================================================
+      console.log('🗑️ STEP 4: Deleting Firebase Auth user...')
+      try {
+        await deleteAuthUser()
+        console.log('✅ STEP 4 COMPLETE: Firebase Auth user deleted')
+      } catch (error) {
+        console.error('❌ STEP 4 FAILED: Auth deletion error:', error)
+        throw error // Critical failure - user should retry
+      }
 
+      console.log('═══════════════════════════════════════════════')
+      console.log('🎉 ACCOUNT DELETION COMPLETE - SUCCESS')
+      console.log('═══════════════════════════════════════════════')
+
+      // ============================================================
+      // STEP 5: LOG OUT AND REDIRECT
+      // ============================================================
+      showNotification(
+        'Account deleted successfully. Redirecting...',
+        'success'
+      )
+
+      // Close modals
+      setShowPasswordModal(false)
+      setShowDeleteConfirm(false)
+
+      // Redirect to landing page after short delay
       setTimeout(() => {
         window.location.href = '/'
       }, 1500)
     } catch (error) {
-      console.error('Error deleting account:', error)
-      showNotification(t('more.account.deleteError'), 'error')
+      console.error('═══════════════════════════════════════════════')
+      console.error('💥 ACCOUNT DELETION FAILED')
+      console.error('═══════════════════════════════════════════════')
+      console.error('Error:', error)
+
+      // Show user-friendly error message
+      let errorMessage = 'Failed to delete account. Please try again.'
+      if (error.message) {
+        errorMessage = error.message
+      }
+
+      showNotification(errorMessage, 'error')
+
+      // Reset state
+      setShowPasswordModal(false)
       setShowDeleteConfirm(false)
+      setDeletePassword('')
     } finally {
       setLoading(false)
     }
@@ -981,7 +1118,7 @@ const MorePage = ({
               </button>
 
               <button
-                onClick={() => setShowDeleteConfirm(true)}
+                onClick={handleDeleteAccountClick}
                 disabled={loading}
                 className="ripple-effect w-full bg-red-500/10 hover:bg-red-500/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-red-500/30 text-red-400 disabled:opacity-50"
               >
@@ -1181,7 +1318,7 @@ const MorePage = ({
         </section>
       )}
 
-      {/* === DELETE CONFIRMATION MODAL === */}
+      {/* === DELETE CONFIRMATION MODAL (Step 1) === */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
           <div className="glass rounded-2xl p-6 max-w-md w-full border-2 border-red-500/30 animate-scale-in">
@@ -1193,9 +1330,27 @@ const MorePage = ({
                 {t('modals.deleteAccountTitle')}
               </h3>
             </div>
-            <p className="opacity-70 mb-6">
+
+            {/* EXPLICIT WARNING */}
+            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4">
+              <p className="text-sm font-semibold text-red-400 mb-2">
+                ⚠️ This action is permanent and cannot be undone
+              </p>
+              <p className="text-sm opacity-90 mb-2">
+                The following will be permanently deleted:
+              </p>
+              <ul className="text-sm opacity-90 space-y-1 list-disc list-inside">
+                <li>All your photos, videos and documents</li>
+                <li>All albums and collections</li>
+                <li>All metadata and EXIF data</li>
+                <li>Your account and profile</li>
+              </ul>
+            </div>
+
+            <p className="opacity-70 mb-6 text-sm">
               {t('modals.deleteAccountMessage')}
             </p>
+
             <div className="flex gap-3">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
@@ -1205,8 +1360,63 @@ const MorePage = ({
                 {t('buttons.cancel')}
               </button>
               <button
-                onClick={deleteAccount}
+                onClick={handleConfirmDelete}
                 disabled={loading}
+                className="ripple-effect flex-1 bg-red-600 hover:bg-red-700 py-3 rounded-xl font-semibold transition flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                <Trash2 className="w-4 h-4" />
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* === PASSWORD RE-AUTHENTICATION MODAL (Step 2) === */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="glass rounded-2xl p-6 max-w-md w-full border-2 border-red-500/30 animate-scale-in">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-red-600/20 rounded-xl">
+                <AlertCircle className="w-6 h-6 text-red-400" />
+              </div>
+              <h3 className="text-xl font-bold">Confirm Your Password</h3>
+            </div>
+
+            <p className="opacity-70 mb-4 text-sm">
+              For security, please enter your password to confirm account
+              deletion.
+            </p>
+
+            <input
+              type="password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              placeholder="Enter your password"
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 transition mb-4"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && deletePassword) {
+                  deleteAccount()
+                }
+              }}
+              autoFocus
+              disabled={loading}
+            />
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowPasswordModal(false)
+                  setDeletePassword('')
+                }}
+                disabled={loading}
+                className="ripple-effect flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-xl font-semibold transition disabled:opacity-50"
+              >
+                {t('buttons.cancel')}
+              </button>
+              <button
+                onClick={deleteAccount}
+                disabled={loading || !deletePassword}
                 className="ripple-effect flex-1 bg-red-600 hover:bg-red-700 py-3 rounded-xl font-semibold transition flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {loading ? (
@@ -1214,7 +1424,7 @@ const MorePage = ({
                 ) : (
                   <>
                     <Trash2 className="w-4 h-4" />
-                    {t('buttons.deletePermanent')}
+                    Delete Account
                   </>
                 )}
               </button>
