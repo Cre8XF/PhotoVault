@@ -273,3 +273,71 @@ export async function deleteFromR2(storagePath, firebaseToken) {
     throw error
   }
 }
+
+/**
+ * Delete all R2 objects for a user (bulk deletion)
+ * Used when deleting a user account
+ *
+ * @param {Array} photos - Array of photo objects with r2Url or storagePath
+ * @param {string} firebaseToken - Firebase ID token for authentication
+ * @returns {Promise<{success: number, failed: number, errors: Array}>}
+ */
+export async function deleteAllUserR2Objects(photos, firebaseToken) {
+  if (!photos || photos.length === 0) {
+    console.log('⚠️ [R2] No photos to delete')
+    return { success: 0, failed: 0, errors: [] }
+  }
+
+  console.log(`🗑️ [R2] Starting bulk deletion of ${photos.length} objects...`)
+
+  let successCount = 0
+  let failedCount = 0
+  const errors = []
+
+  // Delete photos in batches to avoid overwhelming the Worker
+  const BATCH_SIZE = 10
+  for (let i = 0; i < photos.length; i += BATCH_SIZE) {
+    const batch = photos.slice(i, i + BATCH_SIZE)
+    const batchPromises = batch.map(async (photo) => {
+      try {
+        // Only delete if photo is stored in R2
+        if (!photo.r2Url && photo.storageBackend !== 'r2') {
+          console.log(`⚠️ [R2] Skipping non-R2 photo: ${photo.id}`)
+          return
+        }
+
+        // Extract storage path
+        const storagePath =
+          photo.storagePath || extractStoragePathFromR2Url(photo.r2Url)
+
+        if (!storagePath) {
+          console.warn(`⚠️ [R2] No storagePath for photo ${photo.id}, skipping`)
+          return
+        }
+
+        // Delete from R2
+        await deleteFromR2(storagePath, firebaseToken)
+        successCount++
+      } catch (error) {
+        console.error(`❌ [R2] Failed to delete photo ${photo.id}:`, error)
+        failedCount++
+        errors.push({
+          photoId: photo.id,
+          error: error.message,
+        })
+      }
+    })
+
+    // Wait for batch to complete before moving to next batch
+    await Promise.allSettled(batchPromises)
+
+    // Log progress
+    console.log(
+      `🗑️ [R2] Batch ${Math.floor(i / BATCH_SIZE) + 1} complete. Progress: ${successCount + failedCount}/${photos.length}`
+    )
+  }
+
+  console.log(`✅ [R2] Bulk deletion complete. Success: ${successCount}, Failed: ${failedCount}`)
+
+  return { success: successCount, failed: failedCount, errors }
+}
