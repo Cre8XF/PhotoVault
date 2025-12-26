@@ -68,7 +68,6 @@ const BillingPage = () => {
   /**
    * Handle upgrade button click
    * Calls Netlify function to create Stripe Checkout session
-   * SECURE: Sends Firebase ID token for backend verification
    */
   const handleUpgrade = async (plan) => {
     if (!user || !userProfile) {
@@ -85,26 +84,21 @@ const BillingPage = () => {
     setLoading(plan.id)
 
     try {
-      // Get Firebase ID token for authentication
-      const idToken = await user.getIdToken()
-
       // Call Netlify function to create checkout session
-      // Backend will verify the token and extract uid/email
       const response = await fetch('/.netlify/functions/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}`,
         },
         body: JSON.stringify({
           priceId: plan.priceId,
-          // userId and userEmail are NO LONGER sent - backend extracts from verified token
+          userId: user.uid,
+          userEmail: user.email,
         }),
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to create checkout session')
+        throw new Error('Failed to create checkout session')
       }
 
       const { url } = await response.json()
