@@ -1,5 +1,5 @@
 import Stripe from 'stripe'
-import admin from 'firebase-admin'
+import { getFirestore, getFieldValue } from './_firebaseAdmin.js'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2023-10-16',
@@ -68,18 +68,6 @@ export async function handler(event) {
     return { statusCode: 400, body: 'Invalid signature' }
   }
 
-  // Firebase Admin INIT — AFTER verification
-  if (!admin.apps.length) {
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-      }),
-    })
-    console.log('Firebase Admin initialized')
-  }
-
   // PHASE 2A: Handle checkout.session.completed
   if (stripeEvent.type === 'checkout.session.completed') {
     const session = stripeEvent.data.object
@@ -144,7 +132,7 @@ export async function handler(event) {
 
     // Write to Firestore
     try {
-      const db = admin.firestore()
+      const db = getFirestore()
       await db.collection('users').doc(uid).set(
         {
           subscriptionTier: tier,
@@ -152,7 +140,7 @@ export async function handler(event) {
           stripeSubscriptionId: stripeSubscriptionId,
           subscriptionStatus: 'active',
           storageLimit: storageLimit,
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: getFieldValue().serverTimestamp(),
         },
         { merge: true }
       )
@@ -195,7 +183,7 @@ export async function handler(event) {
     if (!uid) {
       console.log('UID not in metadata, attempting Firestore lookup by stripeCustomerId')
       try {
-        const db = admin.firestore()
+        const db = getFirestore()
         const usersSnapshot = await db
           .collection('users')
           .where('stripeCustomerId', '==', subscription.customer)
@@ -255,14 +243,14 @@ export async function handler(event) {
 
     // Write to Firestore
     try {
-      const db = admin.firestore()
+      const db = getFirestore()
       await db.collection('users').doc(uid).set(
         {
           subscriptionTier: tier,
           stripeSubscriptionId: subscription.id,
           subscriptionStatus: status,
           storageLimit: storageLimit,
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: getFieldValue().serverTimestamp(),
         },
         { merge: true }
       )
@@ -304,7 +292,7 @@ export async function handler(event) {
     if (!uid) {
       console.log('UID not in metadata, attempting Firestore lookup by stripeCustomerId')
       try {
-        const db = admin.firestore()
+        const db = getFirestore()
         const usersSnapshot = await db
           .collection('users')
           .where('stripeCustomerId', '==', subscription.customer)
@@ -336,14 +324,14 @@ export async function handler(event) {
 
     // Write to Firestore - downgrade to FREE
     try {
-      const db = admin.firestore()
+      const db = getFirestore()
       await db.collection('users').doc(uid).set(
         {
           subscriptionTier: 'FREE',
           subscriptionStatus: 'canceled',
           stripeSubscriptionId: null,
           storageLimit: 1073741824, // 1 GB in bytes for FREE tier
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: getFieldValue().serverTimestamp(),
         },
         { merge: true }
       )
