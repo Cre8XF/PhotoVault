@@ -50,78 +50,12 @@ export async function handler(event) {
     console.log('Firebase Admin initialized')
   }
 
-  // PHASE 2A: Handle checkout.session.completed
-  if (stripeEvent.type === 'checkout.session.completed') {
-    const session = stripeEvent.data.object
-
-    console.log('✔ Checkout completed')
-
-    // Extract UID safely
-    const uid = session.client_reference_id || session.metadata?.uid
-
-    if (!uid) {
-      console.warn('⚠️ No UID found in session (client_reference_id or metadata.uid missing)')
-      return {
-        statusCode: 200,
-        body: JSON.stringify({
-          ok: true,
-          received: true,
-          warning: 'No UID in session metadata',
-        }),
-      }
-    }
-
-    console.log('✔ UID resolved:', uid)
-
-    // Extract subscription data
-    const stripeCustomerId = session.customer
-    const stripeSubscriptionId = session.subscription
-    const plan = session.metadata?.plan || 'lite' // Default to lite if not specified
-
-    // Write to Firestore
-    try {
-      const db = admin.firestore()
-      await db.collection('users').doc(uid).set(
-        {
-          subscriptionTier: plan,
-          stripeCustomerId: stripeCustomerId,
-          stripeSubscriptionId: stripeSubscriptionId,
-          subscriptionStatus: 'active',
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        },
-        { merge: true }
-      )
-
-      console.log('✔ Firestore subscription updated')
-
-      return {
-        statusCode: 200,
-        body: JSON.stringify({
-          ok: true,
-          received: true,
-          type: stripeEvent.type,
-          uid: uid,
-        }),
-      }
-    } catch (error) {
-      console.error('❌ Firestore write failed:', error.message)
-      // Still return 200 to prevent Stripe retries
-      return {
-        statusCode: 200,
-        body: JSON.stringify({
-          ok: true,
-          received: true,
-          error: 'Firestore write failed but acknowledged',
-        }),
-      }
-    }
-  }
-
-  // All other event types: acknowledge but don't process yet
-  console.log('ℹ️ Event type not handled in this phase:', stripeEvent.type)
+  // Phase 1: no side effects
+  console.log('Webhook accepted, no actions executed yet')
 
   return {
     statusCode: 200,
     body: JSON.stringify({ received: true }),
   }
 }
+
