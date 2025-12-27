@@ -6,6 +6,54 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 })
 
 /**
+ * Extract Price ID from checkout session or subscription
+ * CRITICAL: This is the single source of truth for price ID extraction
+ *
+ * @param {Object} sessionOrSubscription - Stripe checkout session or subscription object
+ * @param {string} subscriptionId - Optional subscription ID to fetch if not in session
+ * @returns {Promise<string|null>} Price ID or null if not found
+ */
+async function extractPriceId(sessionOrSubscription, subscriptionId = null) {
+  // Try line_items first (for checkout.session.completed)
+  if (sessionOrSubscription.line_items?.data?.length > 0) {
+    const priceId = sessionOrSubscription.line_items.data[0].price?.id
+    if (priceId) {
+      console.log(`✔ Price ID extracted from line_items: ${priceId}`)
+      return priceId
+    }
+  }
+
+  // Try subscription items directly (for subscription.updated/deleted events)
+  if (sessionOrSubscription.items?.data?.length > 0) {
+    const priceId = sessionOrSubscription.items.data[0].price?.id
+    if (priceId) {
+      console.log(`✔ Price ID extracted from subscription items: ${priceId}`)
+      return priceId
+    }
+  }
+
+  // If line_items not expanded, fetch subscription
+  if (subscriptionId) {
+    try {
+      console.log(`⚙️ Fetching subscription ${subscriptionId} to get price ID...`)
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+      if (subscription.items?.data?.length > 0) {
+        const priceId = subscription.items.data[0].price?.id
+        if (priceId) {
+          console.log(`✔ Price ID extracted from fetched subscription: ${priceId}`)
+          return priceId
+        }
+      }
+    } catch (err) {
+      console.error('❌ Failed to fetch subscription for price ID:', err.message)
+    }
+  }
+
+  console.error('❌ Could not extract price ID from session/subscription')
+  return null
+}
+
+/**
  * Map Stripe Price ID to subscription tier and storage limit
  * Returns: { tier: string, storageLimit: number }
  */
@@ -13,7 +61,12 @@ function mapPriceIdToTierAndStorage(priceId) {
   const STRIPE_LITE_PRICE_ID = process.env.STRIPE_LITE_PRICE_ID
   const STRIPE_PRO_PRICE_ID = process.env.STRIPE_PRO_PRICE_ID
 
+  console.log(`🔍 Mapping price ID: ${priceId}`)
+  console.log(`   LITE Price ID: ${STRIPE_LITE_PRICE_ID}`)
+  console.log(`   PRO Price ID: ${STRIPE_PRO_PRICE_ID}`)
+
   if (priceId === STRIPE_LITE_PRICE_ID) {
+    console.log('✅ Matched LITE tier')
     return {
       tier: 'LITE',
       storageLimit: 5368709120, // 5 GB in bytes
@@ -21,6 +74,7 @@ function mapPriceIdToTierAndStorage(priceId) {
   }
 
   if (priceId === STRIPE_PRO_PRICE_ID) {
+    console.log('✅ Matched PRO tier')
     return {
       tier: 'PRO',
       storageLimit: 53687091200, // 50 GB in bytes
@@ -95,21 +149,8 @@ export async function handler(event) {
     const stripeCustomerId = session.customer
     const stripeSubscriptionId = session.subscription
 
-    // Get the price ID from the session to determine tier
-    let priceId = null
-    if (session.line_items?.data?.length > 0) {
-      priceId = session.line_items.data[0].price.id
-    } else {
-      // If line_items not expanded, fetch the subscription to get price ID
-      try {
-        const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId)
-        if (subscription.items?.data?.length > 0) {
-          priceId = subscription.items.data[0].price.id
-        }
-      } catch (err) {
-        console.error('❌ Failed to fetch subscription for price ID:', err.message)
-      }
-    }
+    // Extract price ID using the centralized helper
+    const priceId = await extractPriceId(session, stripeSubscriptionId)
 
     if (!priceId) {
       console.error('❌ Could not determine price ID from session')
@@ -122,8 +163,6 @@ export async function handler(event) {
         }),
       }
     }
-
-    console.log('✔ Price ID:', priceId)
 
     // Map price ID to tier and storage limit
     const { tier, storageLimit } = mapPriceIdToTierAndStorage(priceId)
@@ -216,11 +255,8 @@ export async function handler(event) {
     // Extract subscription data
     const status = subscription.status
 
-    // Get price ID to determine tier and storage
-    let priceId = null
-    if (subscription.items?.data?.length > 0) {
-      priceId = subscription.items.data[0].price.id
-    }
+    // Extract price ID using the centralized helper
+    const priceId = await extractPriceId(subscription)
 
     if (!priceId) {
       console.error('❌ Could not determine price ID from subscription')
@@ -233,8 +269,6 @@ export async function handler(event) {
         }),
       }
     }
-
-    console.log('✔ Price ID:', priceId)
 
     // Map price ID to tier and storage limit
     const { tier, storageLimit } = mapPriceIdToTierAndStorage(priceId)
