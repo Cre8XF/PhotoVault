@@ -8,14 +8,37 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 export async function handler(event) {
   console.log('=== STRIPE WEBHOOK RECEIVED ===')
 
-  // 1. RAW BODY CHECK
+  // Only allow POST
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, body: 'Method Not Allowed' }
+  }
+
+  // Stripe signature
   const sig = event.headers['stripe-signature']
   if (!sig) {
     console.error('Missing Stripe signature')
     return { statusCode: 400, body: 'Missing signature' }
   }
 
-  // 2. FIREBASE ADMIN INIT (SAFE)
+  // Raw body handling (Netlify)
+  const rawBody = event.isBase64Encoded
+    ? Buffer.from(event.body, 'base64')
+    : event.body
+
+  let stripeEvent
+  try {
+    stripeEvent = stripe.webhooks.constructEvent(
+      rawBody,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    )
+    console.log('✅ Stripe signature verified:', stripeEvent.type)
+  } catch (err) {
+    console.error('❌ Stripe signature verification failed:', err.message)
+    return { statusCode: 400, body: 'Invalid signature' }
+  }
+
+  // Firebase Admin INIT — AFTER verification
   if (!admin.apps.length) {
     admin.initializeApp({
       credential: admin.credential.cert({
@@ -24,48 +47,15 @@ export async function handler(event) {
         privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
       }),
     })
+    console.log('Firebase Admin initialized')
   }
 
-  let stripeEvent
-  try {
-    stripeEvent = stripe.webhooks.constructEvent(
-      event.body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
-    )
-  } catch (err) {
-    console.error('Webhook signature verification failed', err.message)
-    return { statusCode: 400, body: 'Invalid signature' }
-  }
-
-  console.log('Stripe event verified:', stripeEvent.type)
-
-  // 3. TEST EVENT ONLY (NO SIDE EFFECTS YET)
-  if (stripeEvent.type === 'checkout.session.completed') {
-    const session = stripeEvent.data.object
-
-    console.log('Checkout completed:', {
-      sessionId: session.id,
-      customer: session.customer,
-      email: session.customer_details?.email,
-    })
-
-    // 🔒 TEMP: minimal Firestore write
-    await admin
-      .firestore()
-      .collection('stripe_debug')
-      .doc(session.id)
-      .set({
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        customer: session.customer,
-        email: session.customer_details?.email ?? null,
-      })
-
-    console.log('Firestore test write OK')
-  }
+  // Phase 1: no side effects
+  console.log('Webhook accepted, no actions executed yet')
 
   return {
     statusCode: 200,
     body: JSON.stringify({ received: true }),
   }
 }
+
