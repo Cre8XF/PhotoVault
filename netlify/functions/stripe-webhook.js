@@ -172,23 +172,19 @@ export async function handler(event) {
     // Write to Firestore
     try {
       const db = getFirestore()
-      const userData = {
-        subscriptionTier: tier,
-        stripeCustomerId: stripeCustomerId,
-        stripeSubscriptionId: stripeSubscriptionId,
-        subscriptionStatus: 'active',
-        storageLimit: storageLimit,
-        updatedAt: getFieldValue().serverTimestamp(),
-      }
+      await db.collection('users').doc(uid).set(
+        {
+          subscriptionTier: tier,
+          stripeCustomerId: stripeCustomerId,
+          stripeSubscriptionId: stripeSubscriptionId,
+          subscriptionStatus: 'active',
+          storageLimit: storageLimit,
+          updatedAt: getFieldValue().serverTimestamp(),
+        },
+        { merge: true }
+      )
 
-      console.log(`📝 Writing to Firestore for UID: ${uid}`)
-      console.log(`   Tier: ${tier}`)
-      console.log(`   Storage: ${storageLimit} bytes`)
-      console.log(`   Status: active`)
-
-      await db.collection('users').doc(uid).set(userData, { merge: true })
-
-      console.log('✅ Firestore write successful - checkout.session.completed')
+      console.log('✔ Firestore subscription updated')
 
       return {
         statusCode: 200,
@@ -282,22 +278,18 @@ export async function handler(event) {
     // Write to Firestore
     try {
       const db = getFirestore()
-      const userData = {
-        subscriptionTier: tier,
-        stripeSubscriptionId: subscription.id,
-        subscriptionStatus: status,
-        storageLimit: storageLimit,
-        updatedAt: getFieldValue().serverTimestamp(),
-      }
+      await db.collection('users').doc(uid).set(
+        {
+          subscriptionTier: tier,
+          stripeSubscriptionId: subscription.id,
+          subscriptionStatus: status,
+          storageLimit: storageLimit,
+          updatedAt: getFieldValue().serverTimestamp(),
+        },
+        { merge: true }
+      )
 
-      console.log(`📝 Writing to Firestore for UID: ${uid}`)
-      console.log(`   Tier: ${tier}`)
-      console.log(`   Storage: ${storageLimit} bytes`)
-      console.log(`   Status: ${status}`)
-
-      await db.collection('users').doc(uid).set(userData, { merge: true })
-
-      console.log('✅ Firestore write successful - subscription.updated')
+      console.log('✔ Firestore subscription updated')
 
       return {
         statusCode: 200,
@@ -367,22 +359,18 @@ export async function handler(event) {
     // Write to Firestore - downgrade to FREE
     try {
       const db = getFirestore()
-      const userData = {
-        subscriptionTier: 'FREE',
-        subscriptionStatus: 'canceled',
-        stripeSubscriptionId: null,
-        storageLimit: 1073741824, // 1 GB in bytes for FREE tier
-        updatedAt: getFieldValue().serverTimestamp(),
-      }
+      await db.collection('users').doc(uid).set(
+        {
+          subscriptionTier: 'FREE',
+          subscriptionStatus: 'canceled',
+          stripeSubscriptionId: null,
+          storageLimit: 1073741824, // 1 GB in bytes for FREE tier
+          updatedAt: getFieldValue().serverTimestamp(),
+        },
+        { merge: true }
+      )
 
-      console.log(`📝 Writing to Firestore for UID: ${uid}`)
-      console.log(`   Tier: FREE`)
-      console.log(`   Storage: 1073741824 bytes`)
-      console.log(`   Status: canceled`)
-
-      await db.collection('users').doc(uid).set(userData, { merge: true })
-
-      console.log('✅ Firestore write successful - subscription.deleted (downgraded to FREE)')
+      console.log('✔ Firestore subscription downgraded to FREE')
 
       return {
         statusCode: 200,
