@@ -5,6 +5,36 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2023-10-16',
 })
 
+/**
+ * Map Stripe Price ID to subscription tier and storage limit
+ * Returns: { tier: string, storageLimit: number }
+ */
+function mapPriceIdToTierAndStorage(priceId) {
+  const STRIPE_LITE_PRICE_ID = process.env.STRIPE_LITE_PRICE_ID
+  const STRIPE_PRO_PRICE_ID = process.env.STRIPE_PRO_PRICE_ID
+
+  if (priceId === STRIPE_LITE_PRICE_ID) {
+    return {
+      tier: 'LITE',
+      storageLimit: 5368709120, // 5 GB in bytes
+    }
+  }
+
+  if (priceId === STRIPE_PRO_PRICE_ID) {
+    return {
+      tier: 'PRO',
+      storageLimit: 53687091200, // 50 GB in bytes
+    }
+  }
+
+  // Default to FREE if price ID doesn't match
+  console.warn(`⚠️ Unknown price ID: ${priceId}, defaulting to FREE`)
+  return {
+    tier: 'FREE',
+    storageLimit: 1073741824, // 1 GB in bytes
+  }
+}
+
 export async function handler(event) {
   console.log('=== STRIPE WEBHOOK RECEIVED ===')
 
@@ -56,11 +86,11 @@ export async function handler(event) {
 
     console.log('✔ Checkout completed')
 
-    // Extract UID safely
-    const uid = session.client_reference_id || session.metadata?.uid
+    // UID RESOLUTION: Priority order - metadata.uid first, then client_reference_id
+    const uid = session.metadata?.uid || session.client_reference_id
 
     if (!uid) {
-      console.warn('⚠️ No UID found in session (client_reference_id or metadata.uid missing)')
+      console.warn('⚠️ No UID found in session (metadata.uid and client_reference_id both missing)')
       return {
         statusCode: 200,
         body: JSON.stringify({
@@ -76,17 +106,52 @@ export async function handler(event) {
     // Extract subscription data
     const stripeCustomerId = session.customer
     const stripeSubscriptionId = session.subscription
-    const plan = session.metadata?.plan || 'lite' // Default to lite if not specified
+
+    // Get the price ID from the session to determine tier
+    let priceId = null
+    if (session.line_items?.data?.length > 0) {
+      priceId = session.line_items.data[0].price.id
+    } else {
+      // If line_items not expanded, fetch the subscription to get price ID
+      try {
+        const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId)
+        if (subscription.items?.data?.length > 0) {
+          priceId = subscription.items.data[0].price.id
+        }
+      } catch (err) {
+        console.error('❌ Failed to fetch subscription for price ID:', err.message)
+      }
+    }
+
+    if (!priceId) {
+      console.error('❌ Could not determine price ID from session')
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          ok: true,
+          received: true,
+          error: 'Could not determine price ID',
+        }),
+      }
+    }
+
+    console.log('✔ Price ID:', priceId)
+
+    // Map price ID to tier and storage limit
+    const { tier, storageLimit } = mapPriceIdToTierAndStorage(priceId)
+
+    console.log(`✔ Mapped to tier: ${tier}, storage: ${storageLimit} bytes`)
 
     // Write to Firestore
     try {
       const db = admin.firestore()
       await db.collection('users').doc(uid).set(
         {
-          subscriptionTier: plan,
+          subscriptionTier: tier,
           stripeCustomerId: stripeCustomerId,
           stripeSubscriptionId: stripeSubscriptionId,
           subscriptionStatus: 'active',
+          storageLimit: storageLimit,
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         },
         { merge: true }
@@ -101,6 +166,7 @@ export async function handler(event) {
           received: true,
           type: stripeEvent.type,
           uid: uid,
+          tier: tier,
         }),
       }
     } catch (error) {
@@ -160,17 +226,42 @@ export async function handler(event) {
     }
 
     // Extract subscription data
-    const plan = subscription.metadata?.plan || 'lite'
     const status = subscription.status
+
+    // Get price ID to determine tier and storage
+    let priceId = null
+    if (subscription.items?.data?.length > 0) {
+      priceId = subscription.items.data[0].price.id
+    }
+
+    if (!priceId) {
+      console.error('❌ Could not determine price ID from subscription')
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          ok: true,
+          received: true,
+          error: 'Could not determine price ID',
+        }),
+      }
+    }
+
+    console.log('✔ Price ID:', priceId)
+
+    // Map price ID to tier and storage limit
+    const { tier, storageLimit } = mapPriceIdToTierAndStorage(priceId)
+
+    console.log(`✔ Mapped to tier: ${tier}, storage: ${storageLimit} bytes, status: ${status}`)
 
     // Write to Firestore
     try {
       const db = admin.firestore()
       await db.collection('users').doc(uid).set(
         {
-          subscriptionTier: plan,
+          subscriptionTier: tier,
           stripeSubscriptionId: subscription.id,
           subscriptionStatus: status,
+          storageLimit: storageLimit,
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         },
         { merge: true }
@@ -185,6 +276,7 @@ export async function handler(event) {
           received: true,
           type: stripeEvent.type,
           uid: uid,
+          tier: tier,
         }),
       }
     } catch (error) {
@@ -242,20 +334,21 @@ export async function handler(event) {
       }
     }
 
-    // Write to Firestore - downgrade to free
+    // Write to Firestore - downgrade to FREE
     try {
       const db = admin.firestore()
       await db.collection('users').doc(uid).set(
         {
-          subscriptionTier: 'free',
+          subscriptionTier: 'FREE',
           subscriptionStatus: 'canceled',
           stripeSubscriptionId: null,
+          storageLimit: 1073741824, // 1 GB in bytes for FREE tier
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         },
         { merge: true }
       )
 
-      console.log('✔ Firestore subscription downgraded to free')
+      console.log('✔ Firestore subscription downgraded to FREE')
 
       return {
         statusCode: 200,
@@ -264,6 +357,7 @@ export async function handler(event) {
           received: true,
           type: stripeEvent.type,
           uid: uid,
+          tier: 'FREE',
         }),
       }
     } catch (error) {

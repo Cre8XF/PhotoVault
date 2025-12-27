@@ -51,6 +51,8 @@ exports.handler = async (event, context) => {
       metadata: {
         uid: userId,
       },
+      // Also set client_reference_id as fallback for UID resolution
+      client_reference_id: userId,
       // Include customer email if provided
       customer_email: userEmail || undefined,
       // Success and cancel URLs
@@ -60,6 +62,12 @@ exports.handler = async (event, context) => {
       allow_promotion_codes: true,
       // Billing address collection
       billing_address_collection: 'auto',
+      // Set subscription metadata to include uid for future subscription events
+      subscription_data: {
+        metadata: {
+          uid: userId,
+        },
+      },
     });
 
     // Return the session URL for redirect
