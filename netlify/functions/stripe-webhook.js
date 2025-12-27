@@ -185,6 +185,7 @@ export async function handler(event) {
       )
 
       console.log('✔ Firestore subscription updated')
+      console.log('✅ Firestore write success (checkout.session.completed)')
 
       return {
         statusCode: 200,
@@ -290,6 +291,7 @@ export async function handler(event) {
       )
 
       console.log('✔ Firestore subscription updated')
+      console.log('✅ Firestore write success (customer.subscription.updated)')
 
       return {
         statusCode: 200,
@@ -371,6 +373,7 @@ export async function handler(event) {
       )
 
       console.log('✔ Firestore subscription downgraded to FREE')
+      console.log('✅ Firestore write success (customer.subscription.deleted)')
 
       return {
         statusCode: 200,
