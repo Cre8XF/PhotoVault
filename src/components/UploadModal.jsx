@@ -72,6 +72,9 @@ const UploadModal = ({
   const setNotification = useStore((state) => state.setNotification) // ✅ ADD
   const userProfile = useStore((state) => state.userProfile)
   const authReady = Boolean(userProfile)
+  // ✅ Storage tracking for upload pre-check
+  const storageUsed = useStore((state) => state.storageUsed)
+  const storageLimit = useStore((state) => state.storageLimit)
   const {
     uploading,
     processingProgress,
@@ -594,6 +597,62 @@ const UploadModal = ({
                   </div>
                 ))}
               </div>
+
+              {/* ✅ FEATURE #2: Storage Pre-Check & File Size Preview */}
+              {(() => {
+                const totalSelectedSize = selectedFiles.reduce((sum, f) => sum + (f.size || 0), 0)
+                const storageAfterUpload = storageUsed + totalSelectedSize
+                const willExceedStorage = storageAfterUpload > storageLimit
+                const storagePercentageAfterUpload = storageLimit > 0 ? (storageAfterUpload / storageLimit) * 100 : 0
+
+                return (
+                  <div className="mt-4 p-4 bg-white/5 rounded-xl border border-white/10">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-gray-400">Total size:</span>
+                      <span className="text-sm font-semibold">{formatFileSize(totalSelectedSize)}</span>
+                    </div>
+
+                    <div className="flex justify-between items-center text-xs text-gray-400">
+                      <span>Current storage:</span>
+                      <span>{formatFileSize(storageUsed)} / {formatFileSize(storageLimit)}</span>
+                    </div>
+
+                    {/* Critical warning - will exceed storage */}
+                    {willExceedStorage && (
+                      <div className="mt-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                        <p className="text-sm text-red-400 font-semibold mb-1">
+                          ⚠️ Not enough storage space!
+                        </p>
+                        <p className="text-xs text-red-300">
+                          Upload requires {formatFileSize(totalSelectedSize)} but you only have {formatFileSize(storageLimit - storageUsed)} available.
+                          Please remove some files or upgrade your plan.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Warning - close to limit (80-100%) */}
+                    {!willExceedStorage && storagePercentageAfterUpload > 80 && (
+                      <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                        <p className="text-sm text-yellow-400">
+                          ⚠️ After upload: {storagePercentageAfterUpload.toFixed(1)}% of storage used
+                        </p>
+                        <p className="text-xs text-yellow-300 mt-1">
+                          You'll have {formatFileSize(storageLimit - storageAfterUpload)} remaining.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Info - safe upload (< 80%) */}
+                    {!willExceedStorage && storagePercentageAfterUpload <= 80 && (
+                      <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                        <p className="text-xs text-blue-400">
+                          ✓ After upload: {storagePercentageAfterUpload.toFixed(1)}% of storage used
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
             </div>
           )}
 
@@ -777,12 +836,25 @@ const UploadModal = ({
 
           <button
             onClick={handleUploadClick}
-            disabled={selectedFiles.length === 0 || uploading}
+            disabled={(() => {
+              if (selectedFiles.length === 0 || uploading) return true
+              // ✅ Disable if storage will be exceeded
+              const totalSelectedSize = selectedFiles.reduce((sum, f) => sum + (f.size || 0), 0)
+              const storageAfterUpload = storageUsed + totalSelectedSize
+              return storageAfterUpload > storageLimit
+            })()}
             className="ripple-effect w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-3 rounded-lg transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             {uploading
               ? t('upload:uploading', { count: selectedFiles.length })
-              : t('upload:uploadButton', { count: selectedFiles.length })}
+              : (() => {
+                  const totalSelectedSize = selectedFiles.reduce((sum, f) => sum + (f.size || 0), 0)
+                  const storageAfterUpload = storageUsed + totalSelectedSize
+                  if (storageAfterUpload > storageLimit && selectedFiles.length > 0) {
+                    return 'Storage limit exceeded'
+                  }
+                  return t('upload:uploadButton', { count: selectedFiles.length })
+                })()}
           </button>
 
           {showAlbumModal &&
