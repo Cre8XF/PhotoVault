@@ -371,7 +371,7 @@ const navigate = useNavigate();
         )}
 
         {vaultLoading && (
-          <div className="fixed bottom-4 right-4 px-4 py-3 bg-purple-600 text-white rounded-xl shadow-lg">
+          <div className="fixed bottom-4 right-4 px-4 py-3 bg-purple-600 dark:bg-purple-600 text-white rounded-xl shadow-lg">
             {t('vault:unlocked.processing', { defaultValue: 'Processing...' })}
           </div>
         )}
@@ -385,12 +385,12 @@ const navigate = useNavigate();
       {/* Photo Modal */}
       {selectedPhoto && (
         <div
-          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/90 dark:bg-black/90 z-50 flex items-center justify-center p-4"
           onClick={closePhotoModal}
         >
           <button
             onClick={closePhotoModal}
-            className="absolute top-4 right-4 p-2 rounded-full bg-gray-800/80 text-white hover:bg-gray-700 transition"
+            className="absolute top-4 right-4 p-2 rounded-full bg-gray-200 dark:bg-gray-800/80 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-700 transition"
           >
             <X className="w-6 h-6" />
           </button>
@@ -441,10 +441,10 @@ const VaultPhotoCard = ({ photo, onView, onDelete, getDecryptedUrl }) => {
   }, [photo, getDecryptedUrl]);
 
   return (
-    <div className="relative group aspect-square rounded-xl overflow-hidden bg-gray-800/60">
+    <div className="relative group aspect-square rounded-xl overflow-hidden bg-gray-200 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700/50">
       {loading ? (
-        <div className="w-full h-full flex items-center justify-center">
-          <Lock className="w-8 h-8 text-gray-600 animate-pulse" />
+        <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-900/40">
+          <Lock className="w-8 h-8 text-gray-400 dark:text-gray-600 animate-pulse" />
         </div>
       ) : thumbnailUrl ? (
         <>
@@ -457,15 +457,15 @@ const VaultPhotoCard = ({ photo, onView, onDelete, getDecryptedUrl }) => {
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all" />
           <button
             onClick={onDelete}
-            className="absolute top-2 right-2 p-2 rounded-full bg-red-600/80 text-white
+            className="absolute top-2 right-2 p-2 rounded-full bg-red-600/90 text-white
                        opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
           >
             <Trash2 className="w-4 h-4" />
           </button>
         </>
       ) : (
-        <div className="w-full h-full flex items-center justify-center">
-          <AlertCircle className="w-8 h-8 text-red-400" />
+        <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-900/40">
+          <AlertCircle className="w-8 h-8 text-red-500 dark:text-red-400" />
         </div>
       )}
     </div>
