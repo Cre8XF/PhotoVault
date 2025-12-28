@@ -55,21 +55,21 @@ function getFirestore() {
         console.log('   - Length:', rawPrivateKey?.length || 0)
 
         serviceAccount = {
-          projectId: process.env.FIREBASE_PROJECT_ID,
-          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          project_id: process.env.FIREBASE_PROJECT_ID,
+          client_email: process.env.FIREBASE_CLIENT_EMAIL,
           // CRITICAL: Normalize private_key to ensure proper newline characters
-          privateKey: rawPrivateKey?.replace(/\\n/g, '\n'),
+          private_key: rawPrivateKey?.replace(/\\n/g, '\n'),
         }
 
         // Validate required fields
-        if (!serviceAccount.projectId || !serviceAccount.clientEmail || !serviceAccount.privateKey) {
+        if (!serviceAccount.project_id || !serviceAccount.client_email || !serviceAccount.private_key) {
           throw new Error('Missing required Firebase Admin environment variables')
         }
 
         // DIAGNOSTIC: Verify normalization result
         console.log('🔍 DIAGNOSTIC: After normalization')
-        console.log('   - Contains real newlines:', serviceAccount.privateKey?.includes('\n') || false)
-        console.log('   - First 50 chars:', serviceAccount.privateKey?.substring(0, 50))
+        console.log('   - Contains real newlines:', serviceAccount.private_key?.includes('\n') || false)
+        console.log('   - First 50 chars:', serviceAccount.private_key?.substring(0, 50))
       }
 
       // Initialize Firebase Admin with normalized credentials
