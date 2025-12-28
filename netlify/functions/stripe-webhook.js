@@ -81,10 +81,10 @@ function mapPriceIdToTierAndStorage(priceId) {
     }
   }
 
-  // Default to FREE if price ID doesn't match
-  console.warn(`⚠️ Unknown price ID: ${priceId}, defaulting to FREE`)
+  // Default to GRATIS if price ID doesn't match
+  console.warn(`⚠️ Unknown price ID: ${priceId}, defaulting to GRATIS`)
   return {
-    tier: 'FREE',
+    tier: 'GRATIS',
     storageLimit: 1073741824, // 1 GB in bytes
   }
 }
@@ -358,21 +358,21 @@ export async function handler(event) {
       }
     }
 
-    // Write to Firestore - downgrade to FREE
+    // Write to Firestore - downgrade to GRATIS
     try {
       const db = getFirestore()
       await db.collection('users').doc(uid).set(
         {
-          subscriptionTier: 'FREE',
+          subscriptionTier: 'GRATIS',
           subscriptionStatus: 'canceled',
           stripeSubscriptionId: null,
-          storageLimit: 1073741824, // 1 GB in bytes for FREE tier
+          storageLimit: 1073741824, // 1 GB in bytes for GRATIS tier
           updatedAt: getFieldValue().serverTimestamp(),
         },
         { merge: true }
       )
 
-      console.log('✔ Firestore subscription downgraded to FREE')
+      console.log('✔ Firestore subscription downgraded to GRATIS')
       console.log('✅ Firestore write success (customer.subscription.deleted)')
 
       return {
@@ -382,7 +382,7 @@ export async function handler(event) {
           received: true,
           type: stripeEvent.type,
           uid: uid,
-          tier: 'FREE',
+          tier: 'GRATIS',
         }),
       }
     } catch (error) {

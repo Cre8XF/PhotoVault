@@ -22,7 +22,7 @@ import {
 
 const SettingsPage = () => {
   const { t, i18n } = useTranslation()
-  const { user, userProfile, handleLogout } = useAuth()
+  const { user, userProfile, handleLogout, tier } = useAuth()
   const { photos } = usePhotoData()
 
   // ✅ P2 FIX: Use Zustand store for theme instead of local state
@@ -141,7 +141,7 @@ const SettingsPage = () => {
                   {t('settings:tier')}
                 </span>
                 <span className="px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-medium">
-                  {userProfile?.subscriptionTier || user?.plan || 'GRATIS'}
+                  {tier()}
                 </span>
               </div>
             </div>
