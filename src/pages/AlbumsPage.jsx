@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   Folder,
+  FolderPlus,
   Grid as GridIcon,
   List,
   Move,
@@ -391,37 +392,64 @@ const AlbumsPage = ({
                   My Albums
                 </h2>
 
-                {/* View toggle buttons */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setAlbumViewMode('grid')}
-                    className={`p-2 rounded-lg transition ${
-                      albumViewMode === 'grid'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white/5 hover:bg-white/10 border border-white/10'
-                    }`}
-                    title="Grid View"
-                  >
-                    <GridIcon className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setAlbumViewMode('list')}
-                    className={`p-2 rounded-lg transition ${
-                      albumViewMode === 'list'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white/5 hover:bg-white/10 border border-white/10'
-                    }`}
-                    title="List View"
-                  >
-                    <List className="w-4 h-4" />
-                  </button>
-                </div>
+                {/* View toggle buttons - only show if there are albums */}
+                {safeAlbums.length > 0 && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setAlbumViewMode('grid')}
+                      className={`p-2 rounded-lg transition ${
+                        albumViewMode === 'grid'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-white/5 hover:bg-white/10 border border-white/10'
+                      }`}
+                      title="Grid View"
+                    >
+                      <GridIcon className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setAlbumViewMode('list')}
+                      className={`p-2 rounded-lg transition ${
+                        albumViewMode === 'list'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-white/5 hover:bg-white/10 border border-white/10'
+                      }`}
+                      title="List View"
+                    >
+                      <List className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
               </div>
 
-              {/* Grid view */}
-              {albumViewMode === 'grid' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {safeAlbums.map((album, index) => (
+              {/* Empty state */}
+              {safeAlbums.length === 0 ? (
+                <div className="text-center py-16 px-4">
+                  <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-500/10 rounded-full mb-4">
+                    <Folder className="w-10 h-10 text-blue-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">
+                    {t('albums:emptyState.title') || 'Ingen album ennå'}
+                  </h3>
+                  <p className="text-gray-400 mb-6 max-w-md mx-auto">
+                    {t('albums:emptyState.description') || 'Organiser bildene dine ved å opprette ditt første album.'}
+                  </p>
+                  <button
+                    onClick={() => {
+                      console.log('📁 AlbumsPage: Create first album - opening UploadModal in album mode')
+                      openUploadModal('album')
+                    }}
+                    className="ripple-effect px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 flex items-center gap-2 mx-auto transition"
+                  >
+                    <FolderPlus className="w-5 h-5" />
+                    {t('albums:emptyState.createFirst') || 'Opprett album'}
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {/* Grid view */}
+                  {albumViewMode === 'grid' && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {safeAlbums.map((album, index) => (
                   <div
                     key={album.id}
                     className={`relative group animate-fade-in-up stagger-${
@@ -562,6 +590,8 @@ const AlbumsPage = ({
                     )
                   })}
                 </div>
+              )}
+                </>
               )}
             </section>
           )}
