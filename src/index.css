@@ -225,6 +225,56 @@ body.dark-mode {
 }
 
 /* ============================================================================
+   SMOOTH TRANSITIONS - UX Polish Feature #4
+   ============================================================================ */
+
+/* Standard transition for most interactive elements */
+.transition-smooth {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Slower transition for larger movements */
+.transition-smooth-slow {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Fast transition for micro-interactions */
+.transition-smooth-fast {
+  transition: all 0.15s ease-in-out;
+}
+
+/* Color transitions only (for hover states) */
+.transition-colors-smooth {
+  transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+/* Transform transitions (for scale, rotate, etc.) */
+.transition-transform-smooth {
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Opacity transitions */
+.transition-opacity-smooth {
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* Apply smooth transitions to common interactive elements */
+button, a, input, select, textarea {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Preserve reduced motion preferences for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================================
    TAILWIND CLASS OVERRIDES - Automatically apply theme tokens
    ============================================================================ */
 

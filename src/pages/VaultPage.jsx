@@ -344,7 +344,7 @@ const navigate = useNavigate();
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               {t('vault:unlocked.empty.title', { defaultValue: 'No Photos in Vault' })}
             </h3>
-            <p className="text-gray-400 mb-6 max-w-md mx-auto">
+            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
               {t('vault:unlocked.empty.message', { defaultValue: 'Upload your first encrypted photo to get started' })}
             </p>
             <button
