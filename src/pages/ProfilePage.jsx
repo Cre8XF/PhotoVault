@@ -18,6 +18,7 @@ import {
   Calendar,
   Save,
   Camera,
+  HardDrive,
 } from 'lucide-react';
 
 /**
@@ -29,6 +30,8 @@ const ProfilePage = () => {
   const { t } = useTranslation(['profile', 'common']);
   const { user, userProfile, fetchUserProfile, tier } = useAuth();
   const setNotification = useStore((state) => state.setNotification);
+  const storageUsed = useStore((state) => state.storageUsed);
+  const storageLimit = useStore((state) => state.storageLimit);
 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -121,6 +124,22 @@ const ProfilePage = () => {
     }
   };
 
+  /**
+   * Format bytes to human-readable size
+   */
+  const formatBytes = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+  };
+
+  /**
+   * Calculate storage percentage
+   */
+  const storagePercentage = storageLimit === 0 ? 0 : Math.min((storageUsed / storageLimit) * 100, 100);
+
   return (
     <div className="min-h-screen pb-24">
       {/* Header */}
@@ -181,6 +200,54 @@ const ProfilePage = () => {
             >
               <Shield className="w-4 h-4 inline mr-2" />
               {tier()}
+            </div>
+          </div>
+
+          {/* Storage Usage Widget */}
+          <div className="mt-4 p-4 glass rounded-xl">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <HardDrive className="w-5 h-5 text-purple-400" />
+                <span className="text-sm font-medium">Lagring</span>
+              </div>
+              <button
+                onClick={() => navigate('/subscription')}
+                className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+              >
+                Detaljer →
+              </button>
+            </div>
+
+            {/* Mini progress bar */}
+            <div className="mb-2">
+              <div className="flex justify-between text-xs text-gray-400 mb-1">
+                <span>{formatBytes(storageUsed)}</span>
+                <span>{formatBytes(storageLimit)}</span>
+              </div>
+              <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                <div
+                  className={`h-full transition-all duration-500 ${
+                    storagePercentage > 90
+                      ? 'bg-red-500'
+                      : storagePercentage > 80
+                      ? 'bg-yellow-500'
+                      : 'bg-gradient-to-r from-purple-600 to-pink-600'
+                  }`}
+                  style={{ width: `${Math.min(storagePercentage, 100)}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Percentage and warning */}
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-400">
+                {storagePercentage.toFixed(1)}% brukt
+              </span>
+              {storagePercentage > 80 && (
+                <span className="text-xs text-yellow-400 font-medium">
+                  ⚠️ {(100 - storagePercentage).toFixed(0)}% igjen
+                </span>
+              )}
             </div>
           </div>
         </div>

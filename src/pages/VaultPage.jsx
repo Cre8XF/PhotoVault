@@ -337,16 +337,24 @@ const navigate = useNavigate();
 
         {/* Photos Grid */}
         {vaultPhotos.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="w-20 h-20 bg-gray-200 dark:bg-gray-800/60 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ImagePlus className="w-10 h-10 text-gray-500 dark:text-gray-400" />
+          <div className="text-center py-16 px-4">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-purple-500/10 rounded-full mb-4">
+              <ImagePlus className="w-10 h-10 text-purple-400" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               {t('vault:unlocked.empty.title', { defaultValue: 'No Photos in Vault' })}
             </h3>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
               {t('vault:unlocked.empty.message', { defaultValue: 'Upload your first encrypted photo to get started' })}
             </p>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={vaultLoading}
+              className="ripple-effect px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 flex items-center gap-2 mx-auto transition disabled:opacity-50 text-white font-semibold"
+            >
+              <Upload className="w-5 h-5" />
+              {t('vault:unlocked.uploadButton', { defaultValue: 'Upload to Vault' })}
+            </button>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
