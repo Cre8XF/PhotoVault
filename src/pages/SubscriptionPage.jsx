@@ -17,6 +17,8 @@ import {
   Check,
   Sparkles,
   Database,
+  AlertTriangle,
+  AlertCircle,
 } from 'lucide-react'
 
 /**
@@ -253,11 +255,44 @@ const SubscriptionPage = ({ user }) => {
               </div>
             </div>
 
-            {storagePercentage > 80 && (
-              <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                <p className="text-sm text-yellow-400">
-                  Du holder på å gå tom for lagring. Vurder å oppgradere til
-                  {currentTier === 'GRATIS' ? ' LITE eller PRO' : ' PRO'}.
+            {/* CRITICAL WARNING - Over 90% */}
+            {storagePercentage > 90 && (
+              <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="w-5 h-5 text-red-400" />
+                  <p className="text-sm font-semibold text-red-400">
+                    Kritisk lav lagring!
+                  </p>
+                </div>
+                <p className="text-sm text-red-300 mb-3">
+                  Du har kun {formatBytes(storageLimit - storageUsed)} igjen. Oppgrader nå for å fortsette å laste opp bilder.
+                </p>
+                <button
+                  onClick={() => {
+                    // Scroll to plans section
+                    const plansSection = document.getElementById('plans-section')
+                    if (plansSection) {
+                      plansSection.scrollIntoView({ behavior: 'smooth' })
+                    }
+                  }}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white text-sm font-medium transition-colors"
+                >
+                  Oppgrader abonnement
+                </button>
+              </div>
+            )}
+
+            {/* WARNING - 80-90% */}
+            {storagePercentage > 80 && storagePercentage <= 90 && (
+              <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertCircle className="w-5 h-5 text-yellow-400" />
+                  <p className="text-sm font-semibold text-yellow-400">
+                    Lav lagring
+                  </p>
+                </div>
+                <p className="text-sm text-yellow-300">
+                  Du har brukt {storagePercentage.toFixed(0)}% av lagringskvoten din. Vurder å oppgradere snart.
                 </p>
               </div>
             )}
@@ -265,7 +300,7 @@ const SubscriptionPage = ({ user }) => {
 
           {/* Available Plans */}
           <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-6 text-center">
+            <h2 id="plans-section" className="text-2xl font-bold mb-6 text-center">
               Velg Din Plan
             </h2>
 
