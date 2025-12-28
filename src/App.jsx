@@ -90,6 +90,9 @@ import { useToast } from './hooks/useToast'
 // P3-B: Browser Detection
 import { isRestrictedBrowserContext, getContextMessage, logBrowserContext, isLikelyFromEmailLink } from './utils/browserDetect'
 
+// PATCH 5: Development utilities
+import { runEnvDiagnostics } from './utils/envDiagnostics'
+
 // Icons
 import { Home, FolderOpen, Plus, Search, Menu, Bell, User, ExternalLink, FileText } from 'lucide-react'
 
@@ -103,6 +106,9 @@ function App() {
 
   // Initialize browser context detection on mount
   React.useEffect(() => {
+    // PATCH 5: Run environment diagnostics in development
+    runEnvDiagnostics(false) // Set to true for verbose output
+
     // Log browser context for debugging
     logBrowserContext()
 

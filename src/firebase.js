@@ -36,12 +36,6 @@ import {
   deleteFromR2,
 } from './utils/r2Upload'
 
-console.log('🔥 Firebase ENV CHECK', {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-})
-
 // 🔗 Firebase-konfig (fra Vite environment variabler)
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -53,70 +47,31 @@ const firebaseConfig = {
 }
 
 // ============================================================================
-// 🔍 Environment Validation & DEV Diagnostics
+// 🔍 Environment Validation (PATCH 5: Simplified)
 // ============================================================================
+// Full diagnostics now run from App.jsx via envDiagnostics utility
 
 const isDev = import.meta.env.DEV
-const mode = import.meta.env.MODE
 
-// Comprehensive environment validation
+// Validate critical Firebase config
 const missing = Object.entries(firebaseConfig)
   .filter(([key, value]) => !value)
   .map(([key]) => key)
 
-// DEV MODE: Enhanced diagnostics
-if (isDev) {
-  if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
-  if (import.meta.env.DEV) console.log('🔧 FIREBASE DEV MODE DIAGNOSTICS')
-  if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
-  if (import.meta.env.DEV) console.log('Environment:', {
-    DEV: isDev,
-    MODE: mode,
-    timestamp: new Date().toISOString(),
-  })
-  if (import.meta.env.DEV) console.log('Firebase Config:', {
-    apiKey: firebaseConfig.apiKey ? '✅ SET' : '❌ MISSING',
-    authDomain: firebaseConfig.authDomain || '❌ MISSING',
-    projectId: firebaseConfig.projectId || '❌ MISSING',
-    storageBucket: firebaseConfig.storageBucket ? '✅ SET' : '❌ MISSING',
-    messagingSenderId: firebaseConfig.messagingSenderId
-      ? '✅ SET'
-      : '❌ MISSING',
-    appId: firebaseConfig.appId ? '✅ SET' : '❌ MISSING',
-  })
-
-  if (missing.length > 0) {
-    console.error('❌ Missing Firebase environment variables:', missing)
-    console.error('⚠️ Please check your .env.local file!')
-    console.error('⚠️ Make sure all VITE_FIREBASE_* variables are set')
-  } else {
-    if (import.meta.env.DEV) console.log('✅ All Firebase environment variables loaded')
+// Simple error logging for missing variables
+if (missing.length > 0) {
+  console.error('❌ Firebase config missing:', missing)
+  if (isDev) {
+    console.error('⚠️  Check .env.local file')
   }
-
-  if (import.meta.env.DEV) console.log('Current URL:', window.location.href)
-  if (import.meta.env.DEV) console.log('Current Origin:', window.location.origin)
-  if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
-  if (import.meta.env.DEV) console.log('⚠️ App Check: DISABLED in DEV mode')
-  if (import.meta.env.DEV) console.log('⚠️ All Firebase requests will use production endpoints')
-  if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
-}
-
-// PRODUCTION MODE: Simple error logging
-if (!isDev && missing.length > 0) {
-  console.error(
-    '❌ Missing Firebase environment variables in firebaseConfig:',
-    missing
-  )
 }
 
 // 🚀 Initialiser Firebase
 const app = initializeApp(firebaseConfig)
 
-// Log successful initialization in DEV
+// Log successful initialization in DEV (simplified)
 if (isDev) {
-  if (import.meta.env.DEV) console.log('✅ Firebase app initialized successfully')
-  if (import.meta.env.DEV) console.log('📱 App name:', app.name)
-  if (import.meta.env.DEV) console.log('🔑 Project ID:', firebaseConfig.projectId)
+  console.log('✅ Firebase initialized:', firebaseConfig.projectId)
 }
 
 // Eksporter Firebase-tjenestene
@@ -147,12 +102,7 @@ export const auth = getAuth(app)
 // ============================================================================
 
 if (isDev) {
-  if (import.meta.env.DEV) console.log('🔐 Auth Configuration:')
-  if (import.meta.env.DEV) console.log('   Auth Domain:', firebaseConfig.authDomain)
-  if (import.meta.env.DEV) console.log('   Current Origin:', window.location.origin)
-  if (import.meta.env.DEV) console.log(
-    '   ⚠️ If auth fails, check Firebase Console → Authorized domains'
-  )
+  console.log('🔐 Auth domain:', firebaseConfig.authDomain)
 }
 
 // ============================================================================
@@ -216,7 +166,7 @@ export async function addAlbum(data) {
     }
 
     const refDoc = await addDoc(collection(db, 'albums'), cleanAlbum)
-    if (import.meta.env.DEV) console.log(`📂 Album opprettet for bruker ${user.uid}: ${cleanAlbum.name}`)
+    if (isDev) console.log(`📂 Album created: ${cleanAlbum.name}`)
 
     if (window.showToast) {
       window.showToast('Album created successfully 🎉', 'success')
@@ -240,7 +190,7 @@ export async function updateAlbum(albumId, updates) {
       ...updates,
       updatedAt: new Date().toISOString(),
     })
-    if (import.meta.env.DEV) console.log(`📝 Album oppdatert (${albumId})`)
+    if (isDev) console.log(`📝 Album updated: ${albumId}`)
   } catch (err) {
     console.error('🔥 updateAlbum:', err)
   }
@@ -254,7 +204,7 @@ export async function setAlbumCover(albumId, photoUrl) {
       cover: photoUrl,
       updatedAt: new Date().toISOString(),
     })
-    if (import.meta.env.DEV) console.log(`🖼️ Cover oppdatert for album ${albumId}`)
+    if (isDev) console.log(`🖼️ Cover updated: ${albumId}`)
   } catch (err) {
     console.error('🔥 setAlbumCover:', err)
     throw err
@@ -487,156 +437,62 @@ export async function updatePhotoCaption(photoId, caption, userId) {
 
 // ⭐ Toggle favoritt-status
 export async function toggleFavorite(photoId, currentStatus) {
-  if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
-  if (import.meta.env.DEV) console.log('🔍 FAVORITT-TOGGLE DEBUG START')
-  if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
-  if (import.meta.env.DEV) console.log('📥 Input parameters:', {
-    photoId,
-    currentFavoriteStatus: currentStatus,
-    expectedNewStatus: !currentStatus,
-    timestamp: new Date().toISOString(),
-  })
-
   try {
-    // Step 1: Get document reference
     const photoRef = doc(db, 'photos', photoId)
-    if (import.meta.env.DEV) console.log('📄 Document reference created:', photoRef.path)
-
-    // Step 2: Check if document exists
-    if (import.meta.env.DEV) console.log('🔎 Checking if document exists...')
     const photoSnap = await getDoc(photoRef)
 
     if (!photoSnap.exists()) {
-      console.error('❌ FATAL: Document does not exist!')
-      console.error('   PhotoId:', photoId)
-      console.error('   Path:', photoRef.path)
       throw new Error(`Photo document ${photoId} not found`)
     }
-    if (import.meta.env.DEV) console.log('✅ Document exists')
-    if (import.meta.env.DEV) console.log('📊 Current document data:', photoSnap.data())
 
-    // Step 3: Calculate new status
     const newStatus = !currentStatus
-    if (import.meta.env.DEV) console.log('🔄 Status change:', {
-      from: currentStatus,
-      to: newStatus,
-    })
-
-    // Step 4: Update Firestore
-    if (import.meta.env.DEV) console.log('💾 Starting Firestore updateDoc()...')
     await updateDoc(photoRef, {
       favorite: newStatus,
       updatedAt: new Date().toISOString(),
     })
-    if (import.meta.env.DEV) console.log('✅ Firestore updateDoc() completed')
 
-    // Step 5: Verify update
-    if (import.meta.env.DEV) console.log('🔍 Verifying update...')
-    const verifySnap = await getDoc(photoRef)
-    const verifyData = verifySnap.data()
-    if (import.meta.env.DEV) console.log('📊 Post-update document data:', verifyData)
-
-    if (verifyData.favorite === newStatus) {
-      if (import.meta.env.DEV) console.log('✅ Post-update verification: ✅ MATCH')
-    } else {
-      console.error('❌ Post-update verification: ❌ MISMATCH')
-      console.error('   Expected:', newStatus)
-      console.error('   Got:', verifyData.favorite)
-    }
-
-    if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
-    if (import.meta.env.DEV) console.log('🎉 FAVORITT-TOGGLE DEBUG END - SUCCESS')
-    if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
-
+    if (isDev) console.log(`⭐ Favorite toggled: ${photoId} → ${newStatus}`)
     return newStatus
   } catch (error) {
-    console.error('═══════════════════════════════════════════════')
-    console.error('💥 FAVORITT-TOGGLE ERROR')
-    console.error('═══════════════════════════════════════════════')
-    console.error('Error type:', error.constructor.name)
-    console.error('Error message:', error.message)
-    console.error('Error code:', error.code)
-    console.error('Full error:', error)
-    console.error('PhotoId:', photoId)
-    console.error('Current status:', currentStatus)
-    console.error('═══════════════════════════════════════════════')
+    console.error('❌ toggleFavorite error:', error.message, { photoId, currentStatus })
     throw error
   }
 }
 
 // 🔹 Delete photo from Firestore + R2 Storage
 export async function deletePhoto(photoId, photoData) {
-  if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
-  if (import.meta.env.DEV) console.log('🗑️ DELETE PHOTO DEBUG START (R2-aware)')
-  if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
-  if (import.meta.env.DEV) console.log('📥 Input parameters:', {
-    photoId,
-    hasR2Url: !!photoData?.r2Url,
-    hasStoragePath: !!photoData?.storagePath,
-    storageBackend: photoData?.storageBackend,
-    timestamp: new Date().toISOString(),
-  })
-
   try {
-    // Step 1: Delete from R2 (if R2 URL exists)
+    // Delete from storage (R2 or Firebase Storage)
     if (photoData?.r2Url || photoData?.storageBackend === 'r2') {
-      // Extract storagePath from r2Url
       const storagePath = photoData.storagePath || extractStoragePathFromR2Url(photoData.r2Url)
 
       if (storagePath) {
-        if (import.meta.env.DEV) console.log('🗑️ Deleting from R2:', storagePath)
-
-        // Get Firebase token for authentication
         const user = auth.currentUser
         if (!user) {
           throw new Error('User not authenticated - cannot delete from R2')
         }
 
         const firebaseToken = await user.getIdToken()
-
-        // Delete from R2 via Worker
         await deleteFromR2(storagePath, firebaseToken)
-        if (import.meta.env.DEV) console.log('✅ Deleted from R2 successfully')
-      } else {
-        if (import.meta.env.DEV) console.log('⚠️ No storagePath found for R2 photo, skipping R2 deletion')
+        if (isDev) console.log('🗑️ Deleted from R2:', storagePath)
       }
-    }
-    // Legacy: Delete from Firebase Storage (for old photos)
-    else if (photoData?.storagePath) {
-      if (import.meta.env.DEV) console.log('🔥 Deleting from Firebase Storage (legacy):', photoData.storagePath)
+    } else if (photoData?.storagePath) {
       const storageRef = ref(storage, photoData.storagePath)
       await deleteObject(storageRef).catch(err => {
-        // Ignore errors if file doesn't exist (already deleted or orphaned)
-        if (import.meta.env.DEV) console.log('⚠️ Firebase Storage delete warning:', err.message)
+        if (isDev) console.log('⚠️ Storage delete warning:', err.message)
       })
-      if (import.meta.env.DEV) console.log('✅ Deleted from Firebase Storage successfully')
-    } else {
-      if (import.meta.env.DEV) console.log('⚠️ No storage path found, skipping storage deletion')
+      if (isDev) console.log('🗑️ Deleted from Firebase Storage')
     }
 
-    // Step 2: Delete from Firestore (only after successful storage deletion)
-    if (import.meta.env.DEV) console.log('🔥 Deleting from Firestore:', photoId)
+    // Delete from Firestore
     const photoRef = doc(db, 'photos', photoId)
     await deleteDoc(photoRef)
-    if (import.meta.env.DEV) console.log('✅ Deleted from Firestore successfully')
 
-    if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
-    if (import.meta.env.DEV) console.log('🎉 DELETE PHOTO DEBUG END - SUCCESS')
-    if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
-
+    if (isDev) console.log(`🗑️ Photo deleted: ${photoId}`)
     return true
   } catch (err) {
-    console.error('═══════════════════════════════════════════════')
-    console.error('💥 DELETE PHOTO ERROR')
-    console.error('═══════════════════════════════════════════════')
-    console.error('Error type:', err.constructor.name)
-    console.error('Error message:', err.message)
-    console.error('Error code:', err.code)
-    console.error('Full error:', err)
-    console.error('PhotoId:', photoId)
-    console.error('Photo data:', photoData)
-    console.error('═══════════════════════════════════════════════')
-    throw err // ✅ BUGFIX: Properly throw errors so callers can handle them
+    console.error('❌ deletePhoto error:', err.message, { photoId })
+    throw err
   }
 }
 
