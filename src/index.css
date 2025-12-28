@@ -192,6 +192,39 @@ body.dark-mode {
 }
 
 /* ============================================================================
+   ACCESSIBILITY UTILITIES - WCAG AA Compliance
+   ============================================================================ */
+
+/* Touch target utility - WCAG AA compliant (44x44px minimum)
+ * Use this class on interactive elements to ensure they meet
+ * WCAG 2.1 Level AA touch target size requirements.
+ * Reference: https://www.w3.org/WAI/WCAG21/Understanding/target-size.html
+ */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Larger variant for enhanced comfort (iOS recommended size) */
+.touch-target-lg {
+  min-width: 48px;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Touch action manipulation - prevents 300ms delay on mobile
+ * Apply to buttons and interactive elements for better responsiveness
+ */
+.touch-manipulation {
+  touch-action: manipulation;
+}
+
+/* ============================================================================
    TAILWIND CLASS OVERRIDES - Automatically apply theme tokens
    ============================================================================ */
 

@@ -509,68 +509,150 @@ const SearchPage = ({
     }
   }
 
-  // 🔒 SIKRET: Flytting med array-guards
+  // 🔒 SIKRET: Flytting med array-guards og error recovery
   const handleMovePhotos = async (targetAlbumId) => {
-    try {
-      const db = getFirestore()
-      const safeSelected = Array.isArray(selectedPhotos) ? selectedPhotos : []
+    const db = getFirestore()
+    const safeSelected = Array.isArray(selectedPhotos) ? selectedPhotos : []
 
-      if (import.meta.env.DEV) {
-        console.log('🔵 Moving photos:', {
-          count: safeSelected.length,
-          targetAlbumId,
-          selectedIds: safeSelected,
+    if (import.meta.env.DEV) {
+      console.log('🔵 Moving photos with error recovery:', {
+        count: safeSelected.length,
+        targetAlbumId,
+        selectedIds: safeSelected,
+      })
+    }
+
+    // 🐛 FIX: Track success/failure for each photo
+    const moveResults = {
+      success: [],
+      failed: [],
+    }
+
+    // Track source albums to update their counts
+    const sourceAlbums = new Map() // Map<albumId, count of photos moved>
+
+    // Move each photo with individual error handling
+    for (const id of safeSelected) {
+      const photo = safePhotos.find((p) => p.id === id)
+
+      if (!photo) {
+        moveResults.failed.push({
+          photoId: id,
+          name: 'Unknown',
+          reason: 'Photo not found',
         })
+        continue
       }
 
-      // Track source albums to update their counts
-      const sourceAlbums = new Set()
-
-      for (const id of safeSelected) {
-        const photo = safePhotos.find((p) => p.id === id)
-
+      try {
         // Track source album (if photo has one)
         if (photo?.albumId) {
-          sourceAlbums.add(photo.albumId)
+          sourceAlbums.set(
+            photo.albumId,
+            (sourceAlbums.get(photo.albumId) || 0) + 1
+          )
           if (import.meta.env.DEV) {
             console.log(
-              `📦 Photo ${id} moving from album ${photo.albumId} to ${targetAlbumId}`
+              `📦 Moving photo ${id} from album ${photo.albumId} to ${targetAlbumId}`
             )
           }
         } else {
           if (import.meta.env.DEV) {
             console.log(
-              `📦 Photo ${id} moving from "Uten album" to ${targetAlbumId}`
+              `📦 Moving photo ${id} from "Uten album" to ${targetAlbumId}`
             )
           }
         }
 
         const docRef = doc(db, 'photos', id)
         await updateDoc(docRef, { albumId: targetAlbumId })
-      }
+        moveResults.success.push(id)
 
-      // Update target album count
-      if (import.meta.env.DEV) {
-        console.log(`✅ Updating target album ${targetAlbumId} count`)
-      }
-      await updateAlbumPhotoCount(targetAlbumId)
-
-      // Update source album counts (decrement)
-      for (const sourceAlbumId of sourceAlbums) {
         if (import.meta.env.DEV) {
-          console.log(`✅ Updating source album ${sourceAlbumId} count`)
+          console.log(`✅ Successfully moved: ${photo.name}`)
         }
-        await updateAlbumPhotoCount(sourceAlbumId)
+      } catch (error) {
+        console.error(`❌ Failed to move photo ${id}:`, error)
+        moveResults.failed.push({
+          photoId: id,
+          name: photo.name || 'Unknown',
+          reason: error.message,
+        })
       }
+    }
 
-      setSelectedPhotos([])
-      setMoveOpen(false)
-      setEditMode(false)
+    // 🐛 FIX: Update album counts only based on successful moves
+    if (moveResults.success.length > 0) {
+      try {
+        // Update target album count
+        const targetAlbum = safeAlbums.find((a) => a.id === targetAlbumId)
+        if (targetAlbum) {
+          const newTargetCount = (targetAlbum.photoCount || 0) + moveResults.success.length
+          if (import.meta.env.DEV) {
+            console.log(`✅ Updating target album ${targetAlbumId} count: ${targetAlbum.photoCount || 0} → ${newTargetCount}`)
+          }
+          await updateAlbumPhotoCount(targetAlbumId, newTargetCount)
+        }
 
-      if (refreshData) await refreshData()
-    } catch (error) {
-      console.error('Move error:', error)
-      alert(t('search:errors.couldNotMove', 'Kunne ikke flytte bilder.'))
+        // Update source album counts (decrement)
+        for (const [sourceAlbumId, count] of sourceAlbums.entries()) {
+          const sourceAlbum = safeAlbums.find((a) => a.id === sourceAlbumId)
+          if (sourceAlbum) {
+            const newSourceCount = Math.max(0, (sourceAlbum.photoCount || 0) - count)
+            if (import.meta.env.DEV) {
+              console.log(`✅ Updating source album ${sourceAlbumId} count: ${sourceAlbum.photoCount || 0} → ${newSourceCount}`)
+            }
+            await updateAlbumPhotoCount(sourceAlbumId, newSourceCount)
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error updating album counts:', error)
+        // Continue anyway - photos were moved successfully
+      }
+    }
+
+    setSelectedPhotos([])
+    setMoveOpen(false)
+    setEditMode(false)
+
+    if (refreshData) await refreshData()
+
+    // 🐛 FIX: Show detailed results based on success/failure
+    if (moveResults.failed.length === 0) {
+      // All succeeded - no need to alert, move modal closes smoothly
+      if (import.meta.env.DEV) {
+        console.log(`✅ All ${moveResults.success.length} photos moved successfully`)
+      }
+    } else if (moveResults.success.length === 0) {
+      // All failed
+      const failedList = moveResults.failed
+        .slice(0, 5)
+        .map((f) => `- ${f.name}`)
+        .join('\n')
+      const moreCount = moveResults.failed.length - 5
+
+      alert(
+        `❌ ${t('search:errors.couldNotMove')}\n\n` +
+        `Failed to move ${moveResults.failed.length} photo${moveResults.failed.length > 1 ? 's' : ''}:\n` +
+        failedList +
+        (moreCount > 0 ? `\n... and ${moreCount} more` : '')
+      )
+    } else {
+      // Partial success
+      const failedList = moveResults.failed
+        .slice(0, 5)
+        .map((f) => `- ${f.name}`)
+        .join('\n')
+      const moreCount = moveResults.failed.length - 5
+
+      alert(
+        `⚠️ Partial success:\n\n` +
+        `✅ Moved: ${moveResults.success.length}\n` +
+        `❌ Failed: ${moveResults.failed.length}\n\n` +
+        `Failed photos:\n` +
+        failedList +
+        (moreCount > 0 ? `\n... and ${moreCount} more` : '')
+      )
     }
   }
 
@@ -662,19 +744,14 @@ const SearchPage = ({
                   e.stopPropagation()
                   setMoveOpen(true)
                 }}
-                onTouchEnd={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  setMoveOpen(true)
-                }}
-                className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center gap-2 touch-target"
-                style={{ touchAction: 'manipulation' }}
+                className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center gap-2 touch-target touch-manipulation"
+                aria-label={`Move ${selectedPhotos.length} selected photo${selectedPhotos.length > 1 ? 's' : ''}`}
               >
                 <Move size={18} /> {t('search:move')}
               </button>
               <button
                 onClick={async () => {
-                  // FIXED - Issue 5: Support multiple photo deletion
+                  // 🐛 FIX: Improved error recovery with success/failure tracking
                   if (import.meta.env.DEV) {
                     console.log('🗑️ Delete button clicked:', {
                       count: selectedPhotos.length,
@@ -704,52 +781,107 @@ const SearchPage = ({
                     return
                   }
 
-                  try {
-                    if (import.meta.env.DEV) {
-                      console.log('🔥 Starting deletion process...')
+                  if (import.meta.env.DEV) {
+                    console.log('🔥 Starting deletion process with error recovery...')
+                  }
+
+                  // 🐛 FIX: Track success/failure for each photo
+                  const deleteResults = {
+                    success: [],
+                    failed: [],
+                  }
+
+                  // Delete each photo with individual error handling
+                  for (const photoId of selectedPhotos) {
+                    const photo = safePhotos.find((p) => p.id === photoId)
+
+                    if (!photo) {
+                      deleteResults.failed.push({
+                        photoId,
+                        name: 'Unknown',
+                        reason: 'Photo not found',
+                      })
+                      continue
                     }
 
-                    // Delete each selected photo
-                    for (const photoId of selectedPhotos) {
-                      const photo = safePhotos.find((p) => p.id === photoId)
-                      if (photo) {
-                        if (import.meta.env.DEV) {
-                          console.log(
-                            `Deleting photo: ${photo.name} (${photoId})`
-                          )
-                        }
-                        await deletePhoto(photo.id, photo)
+                    try {
+                      if (import.meta.env.DEV) {
+                        console.log(`Deleting photo: ${photo.name} (${photoId})`)
                       }
+
+                      await deletePhoto(photo.id, photo)
+                      deleteResults.success.push(photoId)
+
+                      if (import.meta.env.DEV) {
+                        console.log(`✅ Successfully deleted: ${photo.name}`)
+                      }
+                    } catch (error) {
+                      console.error(`❌ Failed to delete photo ${photoId}:`, error)
+                      deleteResults.failed.push({
+                        photoId,
+                        name: photo.name || 'Unknown',
+                        reason: error.message,
+                      })
                     }
+                  }
+
+                  // Clear selection and exit edit mode
+                  setSelectedPhotos([])
+                  setEditMode(false)
+
+                  // Refresh data to update UI
+                  if (refreshData) {
+                    await refreshData()
+                  }
+
+                  // 🐛 FIX: Show detailed results based on success/failure
+                  if (deleteResults.failed.length === 0) {
+                    // All succeeded
+                    const successMessage =
+                      deleteResults.success.length === 1
+                        ? t('common:notifications.photoDeleted')
+                        : t('search:photosDeleted', {
+                            count: deleteResults.success.length,
+                          })
 
                     if (import.meta.env.DEV) {
                       console.log('✅ All photos deleted successfully')
                     }
-
-                    // Clear selection and exit edit mode
-                    setSelectedPhotos([])
-                    setEditMode(false)
-
-                    // Refresh data
-                    if (refreshData) {
-                      await refreshData()
-                    }
-
-                    // Success message
-                    const successMessage =
-                      selectedPhotos.length === 1
-                        ? t('common:notifications.photoDeleted')
-                        : t('search:photosDeleted', {
-                            count: selectedPhotos.length,
-                          })
-
                     alert(successMessage)
-                  } catch (error) {
-                    console.error('❌ Delete failed:', error)
-                    alert(t('search:errors.couldNotDelete'))
+                  } else if (deleteResults.success.length === 0) {
+                    // All failed
+                    const failedList = deleteResults.failed
+                      .slice(0, 5)
+                      .map((f) => `- ${f.name}`)
+                      .join('\n')
+                    const moreCount = deleteResults.failed.length - 5
+
+                    alert(
+                      `❌ ${t('search:errors.couldNotDelete')}\n\n` +
+                      `Failed to delete ${deleteResults.failed.length} photo${deleteResults.failed.length > 1 ? 's' : ''}:\n` +
+                      failedList +
+                      (moreCount > 0 ? `\n... and ${moreCount} more` : '')
+                    )
+                  } else {
+                    // Partial success
+                    const failedList = deleteResults.failed
+                      .slice(0, 5)
+                      .map((f) => `- ${f.name}`)
+                      .join('\n')
+                    const moreCount = deleteResults.failed.length - 5
+
+                    alert(
+                      `⚠️ Partial success:\n\n` +
+                      `✅ Deleted: ${deleteResults.success.length}\n` +
+                      `❌ Failed: ${deleteResults.failed.length}\n\n` +
+                      `Failed photos:\n` +
+                      failedList +
+                      (moreCount > 0 ? `\n... and ${moreCount} more` : '')
+                    )
                   }
                 }}
-                className="ripple-effect px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 flex items-center gap-2 touch-target"
+                className="ripple-effect px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 flex items-center gap-2 touch-target touch-manipulation"
+                aria-label={`Delete ${selectedPhotos.length} selected photo${selectedPhotos.length > 1 ? 's' : ''}`}
               >
                 <Trash2 size={18} />
                 <span>
@@ -976,25 +1108,36 @@ const SearchPage = ({
                       key={photo.id}
                       className="relative group aspect-[4/5] bg-black/10 rounded-lg flex items-center justify-center overflow-hidden"
                     >
-                      {/* Checkbox overlay in edit mode */}
+                      {/* Checkbox overlay in edit mode - WCAG AA compliant touch targets */}
                       {editMode && (
                         <div
                           className="absolute inset-0 z-10 cursor-pointer"
                           onClick={() => togglePhotoSelection(photo.id)}
                         >
-                          <div
-                            className={`absolute top-2 right-2 w-6 h-6 rounded border-2 flex items-center justify-center transition ${
-                              selectedPhotos.includes(photo.id)
-                                ? 'bg-purple-600 border-purple-600'
-                                : 'bg-black/60 border-white/60'
-                            }`}
+                          <button
+                            type="button"
+                            className="touch-target absolute top-0 right-0 rounded-full touch-manipulation"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              togglePhotoSelection(photo.id)
+                            }}
+                            aria-label={selectedPhotos.includes(photo.id) ? 'Deselect photo' : 'Select photo'}
+                            aria-pressed={selectedPhotos.includes(photo.id)}
                           >
-                            {selectedPhotos.includes(photo.id) && (
-                              <Check className="w-4 h-4 text-white" />
-                            )}
-                          </div>
+                            <div
+                              className={`w-6 h-6 rounded border-2 flex items-center justify-center transition ${
+                                selectedPhotos.includes(photo.id)
+                                  ? 'bg-purple-600 border-purple-600'
+                                  : 'bg-black/60 border-white/60'
+                              }`}
+                            >
+                              {selectedPhotos.includes(photo.id) && (
+                                <Check className="w-4 h-4 text-white" />
+                              )}
+                            </div>
+                          </button>
                           {selectedPhotos.includes(photo.id) && (
-                            <div className="absolute inset-0 bg-purple-600/20 border-2 border-purple-600 rounded-lg" />
+                            <div className="absolute inset-0 bg-purple-600/20 border-2 border-purple-600 rounded-lg pointer-events-none" />
                           )}
                         </div>
                       )}

@@ -242,37 +242,80 @@ const AlbumPage = ({
     }
   }
 
-  // 🔧 FIX 3: handleBulkDelete - Én dialog, deretter slett direkte
+  // 🐛 FIX: handleBulkDelete with error recovery
   const handleBulkDelete = async () => {
-    // ✅ ENDRET: Vis ÉN ConfirmModal for alle bildene
+    // Show confirmation modal
     setConfirmModal({
       title: t('albums:bulkDeleteTitle'),
       message: t('albums:bulkDeleteMessage', { count: selectedPhotos.length }),
       confirmLabel: t('common:delete'),
       cancelLabel: t('common:cancel'),
       onConfirm: async () => {
-        try {
-          for (const photo of selectedPhotos) {
+        if (import.meta.env.DEV) {
+          console.log('🔥 Starting bulk delete with error recovery...')
+        }
+
+        // 🐛 FIX: Track success/failure for each photo
+        const deleteResults = {
+          success: [],
+          failed: [],
+        }
+
+        // Delete each photo with individual error handling
+        for (const photo of selectedPhotos) {
+          if (!photo || !photo.id) {
+            deleteResults.failed.push({
+              photoId: 'unknown',
+              name: 'Unknown',
+              reason: 'Invalid photo object',
+            })
+            continue
+          }
+
+          try {
             await deletePhoto(photo.id, photo)
-          }
+            deleteResults.success.push(photo.id)
 
-          // Refresh for å oppdatere UI
-          if (refreshData) {
-            await refreshData()
+            if (import.meta.env.DEV) {
+              console.log(`✅ Successfully deleted: ${photo.name}`)
+            }
+          } catch (error) {
+            console.error(`❌ Failed to delete photo ${photo.id}:`, error)
+            deleteResults.failed.push({
+              photoId: photo.id,
+              name: photo.name || 'Unknown',
+              reason: error.message,
+            })
           }
+        }
 
-          setSelectedPhotos([])
+        // Refresh to update UI
+        if (refreshData) {
+          await refreshData()
+        }
+
+        setSelectedPhotos([])
+
+        // 🐛 FIX: Show detailed results based on success/failure
+        if (deleteResults.failed.length === 0) {
+          // All succeeded
           setNotification({
             message: t('albums:photosDeleted', {
-              count: selectedPhotos.length,
+              count: deleteResults.success.length,
             }),
             type: 'success',
           })
-        } catch (error) {
-          console.error(t('albums:errors.bulkDeleteError'), error)
+        } else if (deleteResults.success.length === 0) {
+          // All failed
           setNotification({
-            message: t('albums:errors.couldNotDeleteAll'),
+            message: t('albums:errors.couldNotDeleteAll') + `\n${deleteResults.failed.length} photo${deleteResults.failed.length > 1 ? 's' : ''} failed`,
             type: 'error',
+          })
+        } else {
+          // Partial success
+          setNotification({
+            message: `⚠️ Partial success: Deleted ${deleteResults.success.length}, failed ${deleteResults.failed.length}`,
+            type: 'warning',
           })
         }
       },
@@ -292,64 +335,108 @@ const AlbumPage = ({
     // refreshData is called automatically by the upload modal handler
   }
 
-  // 🔧 FIX 4: handleMovePhotos - Legg til toast + refresh (INGEN ekstra dialog!)
+  // 🐛 FIX: handleMovePhotos with error recovery
   const handleMovePhotos = async (targetAlbumId) => {
-    // MoveModal har allerede spurt brukeren - IKKE legg til ny dialog!
-    try {
-      const db = getFirestore()
-      const targetAlbum = albums.find((a) => a.id === targetAlbumId)
-      const targetAlbumName = targetAlbum?.name || 'ukjent album'
+    const db = getFirestore()
+    const targetAlbum = albums.find((a) => a.id === targetAlbumId)
+    const targetAlbumName = targetAlbum?.name || 'ukjent album'
 
-      const safeSelected = Array.isArray(selectedPhotos) ? selectedPhotos : []
+    const safeSelected = Array.isArray(selectedPhotos) ? selectedPhotos : []
 
-      // ✅ FIXED: Filter out invalid photos first to avoid undefined in Promise.all
-      const validPhotos = safeSelected.filter((photo) => {
-        const photoId =
-          typeof photo === 'string' ? photo : photo.id || photo.docId
-        return Boolean(photoId)
+    if (import.meta.env.DEV) {
+      console.log('🔵 Moving photos with error recovery:', {
+        count: safeSelected.length,
+        targetAlbumId,
       })
+    }
 
-      const updates = validPhotos.map(async (photo) => {
-        const photoId =
-          typeof photo === 'string' ? photo : photo.id || photo.docId
+    // 🐛 FIX: Track success/failure for each photo
+    const moveResults = {
+      success: [],
+      failed: [],
+    }
+
+    // Move each photo with individual error handling
+    for (const photo of safeSelected) {
+      const photoId =
+        typeof photo === 'string' ? photo : photo.id || photo.docId
+
+      if (!photoId) {
+        moveResults.failed.push({
+          photoId: 'unknown',
+          name: photo?.name || 'Unknown',
+          reason: 'Invalid photo ID',
+        })
+        continue
+      }
+
+      try {
         const photoRef = doc(db, 'photos', photoId)
         await updateDoc(photoRef, { albumId: targetAlbumId })
-      })
+        moveResults.success.push(photoId)
 
-      await Promise.all(updates)
+        if (import.meta.env.DEV) {
+          console.log(`✅ Successfully moved photo: ${photoId}`)
+        }
+      } catch (error) {
+        console.error(`❌ Failed to move photo ${photoId}:`, error)
+        moveResults.failed.push({
+          photoId,
+          name: photo?.name || 'Unknown',
+          reason: error.message,
+        })
+      }
+    }
 
-      // Oppdater photoCount for begge album
-      const safeAlbumPhotos = Array.isArray(albumPhotos) ? albumPhotos : []
-      const fromCount = safeAlbumPhotos.length - validPhotos.length
-      await onUpdatePhotoCount(album.id, Math.max(0, fromCount))
+    // 🐛 FIX: Update album counts only based on successful moves
+    if (moveResults.success.length > 0) {
+      try {
+        // Update source album count
+        const safeAlbumPhotos = Array.isArray(albumPhotos) ? albumPhotos : []
+        const fromCount = safeAlbumPhotos.length - moveResults.success.length
+        await onUpdatePhotoCount(album.id, Math.max(0, fromCount))
 
-      const safePhotos = Array.isArray(photos) ? photos : []
-      const toCount =
-        safePhotos.filter((p) => p.albumId === targetAlbumId).length +
-        validPhotos.length
-      await onUpdatePhotoCount(targetAlbumId, toCount)
+        // Update target album count
+        const safePhotos = Array.isArray(photos) ? photos : []
+        const toCount =
+          safePhotos.filter((p) => p.albumId === targetAlbumId).length +
+          moveResults.success.length
+        await onUpdatePhotoCount(targetAlbumId, toCount)
+      } catch (error) {
+        console.error('❌ Error updating album counts:', error)
+        // Continue anyway - photos were moved successfully
+      }
+    }
 
-      // ✅ FIXED: Use i18n instead of hardcoded string
+    // Auto-refresh
+    if (refreshData) {
+      await refreshData()
+    }
+
+    setSelectedPhotos([])
+    setMoveOpen(false)
+
+    // 🐛 FIX: Show detailed results based on success/failure
+    if (moveResults.failed.length === 0) {
+      // All succeeded
       setNotification({
         message: t('albums:photosMoved', {
-          count: validPhotos.length,
+          count: moveResults.success.length,
           album: targetAlbumName,
         }),
         type: 'success',
       })
-
-      // ✅ NY: Auto-refresh
-      if (refreshData) {
-        await refreshData()
-      }
-
-      setSelectedPhotos([])
-      setMoveOpen(false)
-    } catch (error) {
-      console.error('Move error:', error)
+    } else if (moveResults.success.length === 0) {
+      // All failed
       setNotification({
-        message: t('albums:errors.couldNotMovePhotos'),
+        message: t('albums:errors.couldNotMovePhotos') + `\n${moveResults.failed.length} photo${moveResults.failed.length > 1 ? 's' : ''} failed`,
         type: 'error',
+      })
+    } else {
+      // Partial success
+      setNotification({
+        message: `⚠️ Partial success: Moved ${moveResults.success.length}, failed ${moveResults.failed.length}`,
+        type: 'warning',
       })
     }
   }
@@ -557,14 +644,16 @@ const AlbumPage = ({
           <div className="flex gap-1.5 md:gap-2">
             <button
               onClick={() => setMoveOpen(true)}
-              className="ripple-effect px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-1.5 md:gap-2 transition text-sm md:text-base"
+              className="ripple-effect px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-1.5 md:gap-2 transition text-sm md:text-base touch-target touch-manipulation"
+              aria-label={`Move ${selectedPhotos.length} selected photo${selectedPhotos.length > 1 ? 's' : ''}`}
             >
               <Move className="w-4 h-4" />
               {t('common:move')}
             </button>
             <button
               onClick={handleBulkDelete}
-              className="ripple-effect px-3 py-1.5 md:px-4 md:py-2 bg-red-600 hover:bg-red-700 rounded-lg flex items-center gap-1.5 md:gap-2 transition text-sm md:text-base"
+              className="ripple-effect px-3 py-1.5 md:px-4 md:py-2 bg-red-600 hover:bg-red-700 rounded-lg flex items-center gap-1.5 md:gap-2 transition text-sm md:text-base touch-target touch-manipulation"
+              aria-label={`Delete ${selectedPhotos.length} selected photo${selectedPhotos.length > 1 ? 's' : ''}`}
             >
               <Trash2 className="w-4 h-4" />
               {t('common:delete')}
