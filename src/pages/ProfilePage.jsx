@@ -27,7 +27,7 @@ import {
 const ProfilePage = () => {
   const navigate = useNavigate()
   const { t } = useTranslation(['profile', 'common']);
-  const { user, userProfile, fetchUserProfile } = useAuth();
+  const { user, userProfile, fetchUserProfile, tier } = useAuth();
   const setNotification = useStore((state) => state.setNotification);
 
   const [loading, setLoading] = useState(false);
@@ -166,19 +166,21 @@ const ProfilePage = () => {
             <p className="text-sm text-gray-400">{formData.email}</p>
           </div>
 
-          {/* Role Badge */}
+          {/* Subscription Tier Badge */}
           <div className="flex justify-center mb-4">
             <div
               className={`px-4 py-2 rounded-full text-sm font-medium ${
-                userProfile?.role === 'admin'
+                tier() === 'ADMIN'
                   ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                  : userProfile?.role === 'pro'
+                  : tier() === 'PRO'
                   ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
-                  : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                  : tier() === 'LITE'
+                  ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                  : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
               }`}
             >
               <Shield className="w-4 h-4 inline mr-2" />
-              {t(`profile:roleBadge.${userProfile?.role || 'free'}`)}
+              {tier()}
             </div>
           </div>
         </div>
