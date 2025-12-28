@@ -67,6 +67,7 @@ import {
 import { reauthenticateUser, deleteAuthUser } from '../utils/authHelpers'
 import { deleteAllUserR2Objects } from '../utils/r2Upload'
 import ComingSoonModal from '../components/ComingSoonModal'
+import SharePixtrModal from '../components/SharePixtrModal'
 import { useStorageCalc } from '../hooks/useStorageCalc'
 import SystemStatus from '../components/admin/SystemStatus'
 import useStore from '../state/store'
@@ -99,6 +100,7 @@ const MorePage = ({
   const [loading, setLoading] = useState(false)
   const [notification, setNotification] = useState(null)
   const [showAIModal, setShowAIModal] = useState(false)
+  const [showShareModal, setShowShareModal] = useState(false)
   const [aiFeatureName, setAIFeatureName] = useState('')
   const [aiFeatureDescription, setAIFeatureDescription] = useState('')
   const [migrating, setMigrating] = useState(false)
@@ -304,20 +306,10 @@ const MorePage = ({
   }
 
   // ============================================================================
-  // === SHARE FUNCTION ===
+  // === SHARE PIXTR APP ===
   // ============================================================================
-  const handleShareProfile = async () => {
-    const shareBaseUrl =
-      import.meta.env.VITE_SHARE_BASE_URL || 'https://photovault.app/u/'
-    const shareLink = `${shareBaseUrl}${user.uid}`
-
-    try {
-      await navigator.clipboard.writeText(shareLink)
-      showNotification(t('notifications.copied'), 'success')
-    } catch (error) {
-      console.error('Error copying to clipboard:', error)
-      showNotification(t('more.share.failed'), 'error')
-    }
+  const handleShareProfile = () => {
+    setShowShareModal(true)
   }
 
   // ============================================================================
@@ -568,13 +560,9 @@ const MorePage = ({
     }
   }
 
-  // === EXTERNAL LINKS & INFO PAGES ===
-  const openInfoPage = (type) => {
-    const lang = i18n.language.startsWith('no') ? 'no' : 'en'
-
-    const file = lang === 'no' ? `/info/${type}.no.html` : `/info/${type}.html`
-
-    window.open(file, '_blank', 'noopener,noreferrer')
+  // === INFO PAGES NAVIGATION ===
+  const navigateToInfoPage = (path) => {
+    navigate(path)
   }
 
   // ============================================================================
@@ -725,6 +713,9 @@ const MorePage = ({
             <Share2 className="w-6 h-6 text-pink-400" />
           </div>
           <span className="text-sm font-medium">{t('buttons.share')}</span>
+          <span className="text-xs text-gray-600 dark:text-gray-500">
+            {t('buttons.sharePixtrApp', { defaultValue: 'Share Pixtr' })}
+          </span>
         </button>
       </div>
 
@@ -1126,30 +1117,30 @@ const MorePage = ({
 
             <div className="space-y-2">
               <button
-                onClick={() => openInfoPage('help')}
+                onClick={() => navigateToInfoPage('/help')}
                 className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-3 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
               >
                 <HelpCircle className="w-5 h-5 text-gray-400" />
                 <p className="font-medium text-sm">{t('info.help')}</p>
-                <ExternalLink className="w-4 h-4 opacity-50 ml-auto" />
+                <ChevronRight className="w-4 h-4 opacity-50 ml-auto" />
               </button>
 
               <button
-                onClick={() => openInfoPage('privacy')}
+                onClick={() => navigateToInfoPage('/privacy')}
                 className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-3 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
               >
                 <FileText className="w-5 h-5 text-gray-400" />
                 <p className="font-medium text-sm">{t('info.privacy')}</p>
-                <ExternalLink className="w-4 h-4 opacity-50 ml-auto" />
+                <ChevronRight className="w-4 h-4 opacity-50 ml-auto" />
               </button>
 
               <button
-                onClick={() => openInfoPage('terms')}
+                onClick={() => navigateToInfoPage('/terms')}
                 className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-3 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
               >
                 <FileText className="w-5 h-5 text-gray-400" />
                 <p className="font-medium text-sm">{t('info.terms')}</p>
-                <ExternalLink className="w-4 h-4 opacity-50 ml-auto" />
+                <ChevronRight className="w-4 h-4 opacity-50 ml-auto" />
               </button>
 
               <button
@@ -1421,6 +1412,12 @@ const MorePage = ({
         onClose={() => setShowAIModal(false)}
         featureName={aiFeatureName}
         description={aiFeatureDescription}
+      />
+
+      {/* === SHARE PIXTR MODAL === */}
+      <SharePixtrModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
       />
     </div>
   )

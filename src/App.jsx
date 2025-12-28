@@ -40,6 +40,9 @@ const BillingPage = lazy(() => import('./pages/BillingPage'))
 const BillingSuccessPage = lazy(() => import('./pages/BillingSuccessPage'))
 const BillingCancelPage = lazy(() => import('./pages/BillingCancelPage'))
 const AboutPage = lazy(() => import('./pages/AboutPage'))
+const HelpPage = lazy(() => import('./pages/HelpPage'))
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
+const TermsPage = lazy(() => import('./pages/TermsPage'))
 const PublicAlbumPage = lazy(() => import('./pages/PublicAlbumPage'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
 
@@ -689,6 +692,12 @@ function AppContent() {
           <Route path="/profile" element={<ProfilePage />} />
 
           <Route path="/about" element={<AboutPage />} />
+
+          <Route path="/help" element={<HelpPage />} />
+
+          <Route path="/privacy" element={<PrivacyPage />} />
+
+          <Route path="/terms" element={<TermsPage />} />
 
           <Route path="/settings" element={<SettingsPage />} />
 

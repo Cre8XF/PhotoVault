@@ -57,16 +57,12 @@ const navigate = useNavigate();
   const [decryptedUrls, setDecryptedUrls] = useState({});
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const isDarkMode = useStore((state) => state.isDarkMode);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
     // Check if biometric is available
     checkBiometricAvailability().then(setBiometricAvailable);
-    // Determine theme from localStorage or system preference
-    const savedTheme = localStorage.getItem('theme');
-    const isDark = savedTheme !== 'light';
-    setIsDarkMode(isDark);
   }, [checkBiometricAvailability]);
 
   useEffect(() => {
@@ -181,10 +177,10 @@ const navigate = useNavigate();
                   className="w-full h-full object-contain"
                 />
               </div>
-              <h1 className="text-3xl font-bold text-white mb-2">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 {t('vault:locked.title', { defaultValue: 'Vault Locked' })}
               </h1>
-              <p className="text-gray-400">
+              <p className="text-gray-600 dark:text-gray-400">
                 {t('vault:locked.subtitle', { defaultValue: 'Enter your password to access encrypted photos' })}
               </p>
             </div>
@@ -196,13 +192,14 @@ const navigate = useNavigate();
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={t('vault:locked.passwordPlaceholder', { defaultValue: 'Enter vault password' })}
-                  className="w-full p-4 pr-12 rounded-xl bg-gray-800/60 border border-gray-600/50
-                             text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full p-4 pr-12 rounded-xl bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-600/50
+                             text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400
+                             focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -222,17 +219,17 @@ const navigate = useNavigate();
             {biometricAvailable && vaultSettings.biometricEnabled && (
               <>
                 <div className="flex items-center gap-3 my-4">
-                  <div className="flex-1 h-px bg-gray-700" />
-                  <span className="text-gray-400 text-sm">
+                  <div className="flex-1 h-px bg-gray-300 dark:bg-gray-700" />
+                  <span className="text-gray-600 dark:text-gray-400 text-sm">
                     {t('vault:locked.or', { defaultValue: 'or' })}
                   </span>
-                  <div className="flex-1 h-px bg-gray-700" />
+                  <div className="flex-1 h-px bg-gray-300 dark:bg-gray-700" />
                 </div>
 
                 <button
                   onClick={handleUnlockWithBiometric}
-                  className="w-full py-3 rounded-xl bg-gray-800/60 border border-gray-600/50
-                             text-white font-semibold hover:bg-gray-800 transition
+                  className="w-full py-3 rounded-xl bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-600/50
+                             text-gray-900 dark:text-white font-semibold hover:bg-gray-200 dark:hover:bg-gray-800 transition
                              flex items-center justify-center gap-2"
                 >
                   <Fingerprint className="w-5 h-5" />
@@ -244,8 +241,8 @@ const navigate = useNavigate();
             {!isVaultSetup && (
               <button
                 onClick={() => setSetupModalOpen(true)}
-                className="w-full mt-4 py-3 rounded-xl bg-gray-800/60 border border-gray-600/50
-                           text-purple-400 font-semibold hover:bg-gray-800 transition"
+                className="w-full mt-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-600/50
+                           text-purple-600 dark:text-purple-400 font-semibold hover:bg-gray-200 dark:hover:bg-gray-800 transition"
               >
                 {t('vault:locked.setupButton', { defaultValue: 'Set Up Vault' })}
               </button>
@@ -269,11 +266,11 @@ const navigate = useNavigate();
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-2">
-              <Shield className="w-7 h-7 text-purple-400" />
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <Shield className="w-7 h-7 text-purple-500 dark:text-purple-400" />
               {t('vault:unlocked.title', { defaultValue: 'Secure Vault' })}
             </h1>
-            <p className="text-gray-400 mt-1">
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
               {vaultPhotos.length} {vaultPhotos.length === 1 ? t('vault:unlocked.photo', { defaultValue: 'photo' }) : t('vault:unlocked.photos', { defaultValue: 'photos' })}
             </p>
           </div>
@@ -290,16 +287,16 @@ const navigate = useNavigate();
 
             <button
               onClick={() => setSettingsModalOpen(true)}
-              className="p-2 rounded-xl bg-gray-800/60 border border-gray-600/50
-                         text-gray-300 hover:text-white hover:bg-gray-800 transition"
+              className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-600/50
+                         text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition"
             >
               <Settings className="w-5 h-5" />
             </button>
 
             <button
               onClick={lockVault}
-              className="p-2 rounded-xl bg-gray-800/60 border border-gray-600/50
-                         text-gray-300 hover:text-white hover:bg-gray-800 transition"
+              className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-600/50
+                         text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition"
             >
               <LockOpen className="w-5 h-5" />
             </button>
@@ -341,13 +338,13 @@ const navigate = useNavigate();
         {/* Photos Grid */}
         {vaultPhotos.length === 0 ? (
           <div className="text-center py-20">
-            <div className="w-20 h-20 bg-gray-800/60 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ImagePlus className="w-10 h-10 text-gray-400" />
+            <div className="w-20 h-20 bg-gray-200 dark:bg-gray-800/60 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ImagePlus className="w-10 h-10 text-gray-500 dark:text-gray-400" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
               {t('vault:unlocked.empty.title', { defaultValue: 'No Photos in Vault' })}
             </h3>
-            <p className="text-gray-400">
+            <p className="text-gray-600 dark:text-gray-400">
               {t('vault:unlocked.empty.message', { defaultValue: 'Upload your first encrypted photo to get started' })}
             </p>
           </div>
