@@ -5,6 +5,7 @@ import { usePhotoData } from '../../../hooks/usePhotoData'
 import useEditorStore from '../store/editorStore'
 import { uploadEditedPhoto, updatePhoto } from '../../../firebase'
 import useStore from '../../../state/store'
+import useAuth from '../../../hooks/useAuth'
 
 export default function EditorPage() {
   const { photoId } = useParams()
@@ -24,6 +25,10 @@ export default function EditorPage() {
   // App store
   const user = useStore((state) => state.user)
   const showNotification = useStore((state) => state.showNotification)
+
+  // 🆕 FREEMIUM: Get user tier
+  const { userProfile } = useAuth()
+  const tier = userProfile?.subscriptionTier || 'GRATIS'
 
   // Get photo from data layer
   const photo = getPhotoById(photoId)
@@ -102,6 +107,21 @@ export default function EditorPage() {
       showNotification('No changes to save', 'info')
       navigate(-1)
       return
+    }
+
+    // 🆕 FREEMIUM: Block save for GRATIS users with filters/adjustments
+    if (tier === 'GRATIS') {
+      const hasFilterOrAdjustments =
+        (transform.filter?.active && transform.filter.active !== 'none') ||
+        Object.values(transform.adjustments).some((v) => v !== 0)
+
+      if (hasFilterOrAdjustments) {
+        showNotification(
+          '💎 Upgrade to LITE to save filters and adjustments',
+          'error'
+        )
+        return
+      }
     }
 
     try {

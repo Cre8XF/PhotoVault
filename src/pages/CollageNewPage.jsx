@@ -16,6 +16,7 @@ import CollageCanvas from '../features/collage/components/CollageCanvas';
 import PhotoPickerPanel from '../features/collage/components/PhotoPickerPanel';
 import CollageToolbar from '../features/collage/components/CollageToolbar';
 import { PageWrapper } from '../components/layout/PageWrapper';
+import useAuth from '../hooks/useAuth';
 
 /**
  * CollageNewPage - New Collage Builder World
@@ -59,6 +60,10 @@ const CollageNewPage = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const [showExitWarning, setShowExitWarning] = useState(false);
+
+  // 🆕 FREEMIUM: Get user tier
+  const { userProfile } = useAuth();
+  const tier = userProfile?.subscriptionTier || 'GRATIS';
 
   // Get template ID from query params
   const templateId = searchParams.get('template');
@@ -162,6 +167,12 @@ const CollageNewPage = () => {
       return;
     }
 
+    // 🆕 FREEMIUM: Block save for GRATIS users
+    if (tier === 'GRATIS') {
+      setSaveError('💎 Upgrade to LITE to save collages');
+      return;
+    }
+
     try {
       setIsSaving(true);
       setSaveError(null);
@@ -224,6 +235,7 @@ const CollageNewPage = () => {
     markAsSaved,
     navigate,
     t,
+    tier,
   ]);
 
   // ============================================================================
@@ -300,6 +312,15 @@ const CollageNewPage = () => {
             <div className="bg-red-500/20 border-t border-red-500/30 px-4 py-2 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-red-400" />
               <span className="text-sm text-red-400">{saveError}</span>
+            </div>
+          )}
+
+          {/* 🆕 FREEMIUM: Preview Banner for GRATIS users */}
+          {tier === 'GRATIS' && !saveError && (
+            <div className="bg-blue-500/20 border-t border-blue-500/30 px-4 py-2">
+              <span className="text-sm text-blue-300">
+                🎨 Build your collage! Upgrade to LITE to save.
+              </span>
             </div>
           )}
         </div>
