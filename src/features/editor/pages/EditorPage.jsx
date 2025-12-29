@@ -31,6 +31,10 @@ export default function EditorPage() {
   const { userProfile } = useAuth()
   const tier = userProfile?.subscriptionTier || 'GRATIS'
 
+  // 🆕 FREEMIUM: Get user tier
+  const { userProfile } = useAuth()
+  const tier = userProfile?.subscriptionTier || 'GRATIS'
+
   // Get photo from data layer
   const photo = getPhotoById(photoId)
 
@@ -117,7 +121,10 @@ export default function EditorPage() {
         Object.values(transform.adjustments).some((v) => v !== 0)
 
       if (hasFilterOrAdjustments) {
-        setUpgradeModal({ type: 'editor-save' })
+        showNotification(
+          '💎 Upgrade to LITE to save filters and adjustments',
+          'error'
+        )
         return
       }
     }

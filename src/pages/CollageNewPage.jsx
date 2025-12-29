@@ -169,7 +169,7 @@ const CollageNewPage = () => {
 
     // 🆕 FREEMIUM: Block save for GRATIS users
     if (tier === 'GRATIS') {
-      setUpgradeModal({ type: 'collage-save' });
+      setSaveError('💎 Upgrade to LITE to save collages');
       return;
     }
 

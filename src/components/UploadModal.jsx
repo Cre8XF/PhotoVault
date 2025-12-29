@@ -396,7 +396,10 @@ const UploadModal = ({
     // 🆕 FREEMIUM: Check album limit BEFORE creating
     const albumLimitCheck = canCreateAlbum()
     if (!albumLimitCheck.allowed) {
-      setUpgradeModal({ type: 'album-limit' })
+      window.showToast?.(
+        `Album limit reached (${albumLimitCheck.current}/${albumLimitCheck.max}). Upgrade to LITE for unlimited albums.`,
+        'error'
+      )
       return
     }
 
