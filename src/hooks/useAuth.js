@@ -266,6 +266,88 @@ export const useAuth = () => {
     return true
   }, [user, emailVerified, setNotification])
 
+  // ==========================================
+  // 🆕 FREEMIUM LIMIT CHECK HOOKS
+  // ==========================================
+
+  /**
+   * Check if user can create album (no query needed!)
+   */
+  const canCreateAlbum = useCallback(() => {
+    if (!userProfile) return { allowed: false }
+
+    const tier = userProfile.subscriptionTier || 'GRATIS'
+
+    // LITE/PRO/ADMIN always allowed
+    if (tier !== 'GRATIS') {
+      return { allowed: true }
+    }
+
+    // GRATIS: Check counter
+    const current = userProfile.currentAlbumCount || 0
+    const max = 5
+
+    return {
+      allowed: current < max,
+      current,
+      max,
+      remaining: max - current,
+    }
+  }, [userProfile])
+
+  /**
+   * Check if user can add photo to album
+   */
+  const canAddPhotoToAlbum = useCallback(
+    (album) => {
+      if (!userProfile || !album) return { allowed: false }
+
+      const tier = userProfile.subscriptionTier || 'GRATIS'
+
+      // LITE/PRO/ADMIN always allowed
+      if (tier !== 'GRATIS') {
+        return { allowed: true }
+      }
+
+      // GRATIS: Check counter
+      const current = album.photoCount || 0
+      const max = 20
+
+      return {
+        allowed: current < max,
+        current,
+        max,
+        remaining: max - current,
+      }
+    },
+    [userProfile]
+  )
+
+  /**
+   * Check storage limit
+   */
+  const checkStorage = useCallback(
+    (newFileSize) => {
+      if (!userProfile) return { allowed: false }
+
+      const tier = userProfile.subscriptionTier || 'GRATIS'
+      const storageUsed = userProfile.storageUsed || 0
+      const storageLimit = userProfile.storageLimit || 786432000 // 750 MB
+
+      const wouldExceed = storageUsed + newFileSize > storageLimit
+
+      return {
+        allowed: !wouldExceed,
+        current: storageUsed,
+        max: storageLimit,
+        needed: newFileSize,
+        available: storageLimit - storageUsed,
+        percentUsed: Math.round((storageUsed / storageLimit) * 100),
+      }
+    },
+    [userProfile]
+  )
+
   return {
     user,
     userProfile,
@@ -291,6 +373,11 @@ export const useAuth = () => {
     storageQuota: getStorageQuota,
     getTierLimit,
     ensureEmailVerified,
+
+    // 🆕 Freemium limit checks
+    canCreateAlbum,
+    canAddPhotoToAlbum,
+    checkStorage,
 
     // Legacy
     isAuthenticated: !!user,
