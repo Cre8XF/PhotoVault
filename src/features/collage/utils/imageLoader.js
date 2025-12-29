@@ -9,7 +9,10 @@ export const loadImage = (url) => {
     if (import.meta.env.DEV) console.log('🖼️ loadImage(): starting...', url)
 
     const img = new Image()
-    // REMOVED: img.crossOrigin = 'anonymous' - causes Firebase Storage images to fail silently
+
+    // ✅ CRITICAL: Set crossOrigin BEFORE src for Cloudflare R2 canvas rendering
+    // Required to draw R2 images to canvas without CORS errors
+    img.crossOrigin = 'anonymous'
 
     img.onload = () => {
       if (import.meta.env.DEV) console.log('✅ loadImage(): image loaded')
