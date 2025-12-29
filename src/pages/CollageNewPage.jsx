@@ -35,7 +35,7 @@ const CollageNewPage = () => {
   const [searchParams] = useSearchParams();
 
   // Global store
-  const { setIsWorldView, photos } = useStore();
+  const { setIsWorldView, photos, setUpgradeModal } = useStore();
 
   // Collage store
   const {
@@ -169,7 +169,7 @@ const CollageNewPage = () => {
 
     // 🆕 FREEMIUM: Block save for GRATIS users
     if (tier === 'GRATIS') {
-      setSaveError('💎 Upgrade to LITE to save collages');
+      setUpgradeModal({ type: 'collage-save' });
       return;
     }
 

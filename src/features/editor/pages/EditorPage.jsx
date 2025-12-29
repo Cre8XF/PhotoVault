@@ -25,6 +25,7 @@ export default function EditorPage() {
   // App store
   const user = useStore((state) => state.user)
   const showNotification = useStore((state) => state.showNotification)
+  const setUpgradeModal = useStore((state) => state.setUpgradeModal) // 🆕 FREEMIUM
 
   // 🆕 FREEMIUM: Get user tier
   const { userProfile } = useAuth()
@@ -116,10 +117,7 @@ export default function EditorPage() {
         Object.values(transform.adjustments).some((v) => v !== 0)
 
       if (hasFilterOrAdjustments) {
-        showNotification(
-          '💎 Upgrade to LITE to save filters and adjustments',
-          'error'
-        )
+        setUpgradeModal({ type: 'editor-save' })
         return
       }
     }

@@ -75,6 +75,7 @@ import UploadModal from './components/UploadModal'
 import AlbumModal from './components/AlbumModal'
 import ConfirmModal from './components/ConfirmModal'
 import Notification from './components/Notification'
+import UpgradeModal from './components/UpgradeModal' // 🆕 FREEMIUM
 import Particles from './components/Particles'
 import PINLockScreen from './components/PINLockScreen'
 import NotificationPanel from './components/NotificationPanel'
@@ -845,6 +846,9 @@ function AppContent() {
           cancelLabel={confirmModal.cancelLabel || t('common:cancel')}
         />
       )}
+
+      {/* 🆕 FREEMIUM: Upgrade Modal */}
+      <UpgradeModal />
 
       {notification && (
         <Notification notification={notification} onClose={clearNotification} />

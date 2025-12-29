@@ -217,6 +217,7 @@ const useStore = create(
         confirmModal: null,
         editingAlbum: null,
         isFullscreen: false,
+        upgradeModal: null, // 🆕 FREEMIUM: { type: 'album-limit' | 'photo-limit' | ... }
 
         setUploadModalOpen: (open) => set({ uploadModalOpen: open }),
         setUploadInitialMode: (mode) => set({ uploadInitialMode: mode }),
@@ -224,6 +225,7 @@ const useStore = create(
         setConfirmModal: (modal) => set({ confirmModal: modal }),
         setEditingAlbum: (album) => set({ editingAlbum: album }),
         setIsFullscreen: (fullscreen) => set({ isFullscreen: fullscreen }),
+        setUpgradeModal: (modal) => set({ upgradeModal: modal }), // 🆕 FREEMIUM
 
         openUploadModal: (mode = 'upload') => set({ uploadModalOpen: true, uploadInitialMode: mode }),
         closeUploadModal: () => set({ uploadModalOpen: false, uploadInitialMode: 'upload' }),
