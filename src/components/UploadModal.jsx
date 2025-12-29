@@ -70,6 +70,7 @@ const UploadModal = ({
   const { t } = useTranslation(['common', 'upload'])
   const { tier, canUploadVideo, canCreateAlbum } = useAuth() // ✅ Added canCreateAlbum for freemium
   const setNotification = useStore((state) => state.setNotification) // ✅ ADD
+  const setUpgradeModal = useStore((state) => state.setUpgradeModal) // 🆕 FREEMIUM
   const userProfile = useStore((state) => state.userProfile)
   const authReady = Boolean(userProfile)
   // ✅ Storage tracking for upload pre-check

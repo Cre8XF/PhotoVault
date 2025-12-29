@@ -35,7 +35,7 @@ const CollageNewPage = () => {
   const [searchParams] = useSearchParams();
 
   // Global store
-  const { setIsWorldView, photos } = useStore();
+  const { setIsWorldView, photos, setUpgradeModal } = useStore();
 
   // Collage store
   const {
