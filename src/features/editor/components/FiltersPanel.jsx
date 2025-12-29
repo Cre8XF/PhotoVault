@@ -1,5 +1,6 @@
 import useEditorStore from '../store/editorStore'
 import { FILTER_PRESETS, getFilterMetadata } from '../utils/adjustments'
+import useAuth from '../../../hooks/useAuth'
 
 /**
  * Filters Panel - Filter presets with intensity control
@@ -8,7 +9,9 @@ export default function FiltersPanel() {
   const transform = useEditorStore((state) => state.transform)
   const applyTransform = useEditorStore((state) => state.applyTransform)
   const resetTransform = useEditorStore((state) => state.resetTransform)
+  const { userProfile } = useAuth()
 
+  const tier = userProfile?.subscriptionTier || 'GRATIS'
   const filter = transform.filter || { active: null, intensity: 100 }
 
   /**
@@ -54,6 +57,15 @@ export default function FiltersPanel() {
           </button>
         )}
       </div>
+
+      {/* 🆕 FREEMIUM: Preview Banner for GRATIS users */}
+      {tier === 'GRATIS' && (
+        <div className="mb-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+          <p className="text-xs text-blue-300">
+            🎨 Try all filters! Upgrade to LITE to save.
+          </p>
+        </div>
+      )}
 
       {/* Filter Grid */}
       <div className="grid grid-cols-4 gap-2 mb-3">
