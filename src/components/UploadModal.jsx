@@ -68,7 +68,7 @@ const UploadModal = ({
   }, [])
 
   const { t } = useTranslation(['common', 'upload'])
-  const { tier, canUploadVideo } = useAuth() // ✅ Removed shouldCompress
+  const { tier, canUploadVideo, canCreateAlbum } = useAuth() // ✅ Added canCreateAlbum for freemium
   const setNotification = useStore((state) => state.setNotification) // ✅ ADD
   const userProfile = useStore((state) => state.userProfile)
   const authReady = Boolean(userProfile)
@@ -389,6 +389,16 @@ const UploadModal = ({
   const handleAlbumSave = async (albumData) => {
     // Reentrancy guard - prevent double creation in StrictMode
     if (isCreatingAlbum) {
+      return
+    }
+
+    // 🆕 FREEMIUM: Check album limit BEFORE creating
+    const albumLimitCheck = canCreateAlbum()
+    if (!albumLimitCheck.allowed) {
+      window.showToast?.(
+        `Album limit reached (${albumLimitCheck.current}/${albumLimitCheck.max}). Upgrade to LITE for unlimited albums.`,
+        'error'
+      )
       return
     }
 

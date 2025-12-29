@@ -20,6 +20,7 @@ import {
   limit,
   startAfter,
   onSnapshot,
+  increment,
 } from 'firebase/firestore'
 import {
   getStorage,
@@ -126,6 +127,54 @@ if (isDev) {
 // ============================================================================
 
 // ============================================================================
+// 🔢 COUNTER INTEGRITY HELPERS (Phase 1: Freemium)
+// ============================================================================
+/**
+ * Ensures counters stay in sync even during errors
+ * CRITICAL: Use counters, NOT getDocs() for limit checks
+ */
+
+/**
+ * Adjust user album count (atomic with rollback)
+ */
+export async function adjustUserAlbumCount(userId, delta) {
+  const userRef = doc(db, 'users', userId)
+
+  try {
+    await updateDoc(userRef, {
+      currentAlbumCount: increment(delta),
+    })
+
+    if (import.meta.env.DEV) {
+      console.log(`✅ Album count adjusted by ${delta} for user ${userId}`)
+    }
+  } catch (error) {
+    console.error('❌ Failed to adjust album count:', error)
+    throw error
+  }
+}
+
+/**
+ * Adjust album photo count (atomic with rollback)
+ */
+export async function adjustAlbumPhotoCount(albumId, delta) {
+  const albumRef = doc(db, 'albums', albumId)
+
+  try {
+    await updateDoc(albumRef, {
+      photoCount: increment(delta),
+    })
+
+    if (import.meta.env.DEV) {
+      console.log(`✅ Photo count adjusted by ${delta} for album ${albumId}`)
+    }
+  } catch (error) {
+    console.error('❌ Failed to adjust photo count:', error)
+    throw error
+  }
+}
+
+// ============================================================================
 // 📁 Firestore-funksjoner
 // ============================================================================
 
@@ -147,14 +196,42 @@ export async function getAlbumsByUser(userId) {
   }
 }
 
-// 🔹 Legg til nytt album (oppdatert og sikret)
+// 🔹 Legg til nytt album (oppdatert og sikret) - WITH FREEMIUM LIMITS
+/**
+ * Create album with automatic rollback on error
+ * Enforces GRATIS tier limit: 5 albums max
+ */
 export async function addAlbum(data) {
   const user = auth.currentUser
   if (!user) throw new Error('Ingen bruker logget inn')
 
-  try {
-    const now = new Date().toISOString()
+  const userId = data.userId || user.uid
+  let albumId = null
 
+  try {
+    // 1. Check limit using counter (NOT getDocs!)
+    const userRef = doc(db, 'users', userId)
+    const userSnap = await getDoc(userRef)
+
+    if (!userSnap.exists()) {
+      throw new Error('User not found')
+    }
+
+    const userData = userSnap.data()
+    const tier = userData.subscriptionTier || 'GRATIS'
+    const currentCount = userData.currentAlbumCount || 0
+
+    // ENFORCE LIMIT for GRATIS tier
+    if (tier === 'GRATIS' && currentCount >= 5) {
+      const error = new Error('Album limit reached')
+      error.code = 'ALBUM_LIMIT_REACHED'
+      error.current = currentCount
+      error.max = 5
+      throw error
+    }
+
+    // 2. Create album FIRST
+    const now = new Date().toISOString()
     const cleanAlbum = {
       name: data.name?.toString().trim() || 'Uten navn',
       description: data.description?.toString().trim() || '',
@@ -162,23 +239,64 @@ export async function addAlbum(data) {
       createdAt: data.createdAt || now,
       updatedAt: now,
       photoCount: 0,
-      userId: user.uid,
+      userId: userId,
     }
 
-    const refDoc = await addDoc(collection(db, 'albums'), cleanAlbum)
+    const albumRef = await addDoc(collection(db, 'albums'), cleanAlbum)
+    albumId = albumRef.id
+
+    // 3. Increment counter (with automatic rollback on error)
+    try {
+      await adjustUserAlbumCount(userId, 1)
+    } catch (counterError) {
+      // ROLLBACK: Delete the album we just created
+      console.error('Counter increment failed, rolling back album creation')
+      await deleteDoc(albumRef)
+      throw counterError
+    }
+
     if (isDev) console.log(`📂 Album created: ${cleanAlbum.name}`)
 
     if (window.showToast) {
       window.showToast('Album created successfully 🎉', 'success')
     }
 
-    return refDoc.id
+    return albumId
   } catch (err) {
     console.error('🔥 addAlbum:', err)
-    if (window.showToast) {
-      window.showToast('Failed to create album', 'error')
+
+    // Show appropriate error message
+    if (err.code === 'ALBUM_LIMIT_REACHED') {
+      if (window.showToast) {
+        window.showToast(`Album limit reached (${err.current}/${err.max}). Upgrade to LITE for unlimited albums.`, 'error')
+      }
+    } else {
+      if (window.showToast) {
+        window.showToast('Failed to create album', 'error')
+      }
     }
+
     throw err
+  }
+}
+
+/**
+ * Delete album with counter decrement
+ */
+export async function deleteAlbum(albumId, userId) {
+  try {
+    // 1. Delete album
+    await deleteDoc(doc(db, 'albums', albumId))
+
+    // 2. Decrement counter
+    await adjustUserAlbumCount(userId, -1)
+
+    if (import.meta.env.DEV) {
+      console.log(`✅ Album ${albumId} deleted`)
+    }
+  } catch (error) {
+    console.error('deleteAlbum failed:', error)
+    throw error
   }
 }
 
@@ -568,6 +686,31 @@ export async function uploadPhoto(
     const currentUser = auth.currentUser
     const firebaseToken = currentUser ? await currentUser.getIdToken() : null
 
+    // 🆕 FREEMIUM: Check album photo limit BEFORE uploading
+    if (albumId) {
+      const albumRef = doc(db, 'albums', albumId)
+      const albumSnap = await getDoc(albumRef)
+
+      if (!albumSnap.exists()) {
+        throw new Error('Album not found')
+      }
+
+      const albumData = albumSnap.data()
+      const userRef = doc(db, 'users', userId)
+      const userSnap = await getDoc(userRef)
+      const tier = userSnap.data()?.subscriptionTier || 'GRATIS'
+      const currentPhotoCount = albumData.photoCount || 0
+
+      // ENFORCE LIMIT for GRATIS tier
+      if (tier === 'GRATIS' && currentPhotoCount >= 20) {
+        const error = new Error('Photo limit reached for this album')
+        error.code = 'PHOTO_LIMIT_REACHED'
+        error.current = currentPhotoCount
+        error.max = 20
+        throw error
+      }
+    }
+
     // 1. Upload thumbnail to R2/Firebase Storage (if provided for video)
     let thumbnailUrl = null
     if (isVideo && thumbnailBlob) {
@@ -920,20 +1063,39 @@ export async function uploadPhoto(
     const photoId = await addPhoto(photoData)
     if (import.meta.env.DEV) console.log(`✅ Bilde lagret i Firestore: ${photoId}`)
 
-    // 5. Oppdater album photoCount (hvis albumId finnes)
+    // 5. 🆕 FREEMIUM: Oppdater album photoCount med rollback (hvis albumId finnes)
     if (albumId) {
       try {
-        const albumRef = doc(db, 'albums', albumId)
-        const albumSnap = await getDoc(albumRef)
-        if (albumSnap.exists()) {
-          const currentCount = albumSnap.data().photoCount || 0
-          await updateAlbumPhotoCount(albumId, currentCount + 1)
-          if (import.meta.env.DEV) console.log(`📂 Album photoCount oppdatert: ${albumId}`)
+        await adjustAlbumPhotoCount(albumId, 1)
+        if (import.meta.env.DEV) console.log(`📂 Album photoCount incremented: ${albumId}`)
+      } catch (counterError) {
+        // ROLLBACK: Delete photo document and storage file
+        console.error('Counter increment failed, rolling back photo upload')
+
+        // Delete Firestore document
+        await deleteDoc(doc(db, 'photos', photoId))
+
+        // Delete from storage
+        if (storagePath) {
+          try {
+            if (isR2Enabled()) {
+              await deleteFromR2(storagePath, firebaseToken)
+            } else {
+              await deleteObject(ref(storage, storagePath))
+            }
+          } catch (storageErr) {
+            console.error('Failed to delete storage file during rollback:', storageErr)
+          }
         }
-      } catch (err) {
-        if (import.meta.env.DEV) console.warn('⚠️ Kunne ikke oppdatere album count:', err)
+
+        throw counterError
       }
     }
+
+    // 6. Update user storage (always, even without album)
+    await updateDoc(doc(db, 'users', userId), {
+      storageUsed: increment(file.size),
+    })
 
     return photoId
   } catch (error) {
