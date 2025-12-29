@@ -16,6 +16,33 @@
 // - Methods: GET (serve images), HEAD (metadata), OPTIONS (CORS preflight)
 // ============================================================================
 
+/**
+ * Add CORS headers to any Response object
+ * MUST be called on ALL responses (GET, HEAD, OPTIONS, errors)
+ */
+function addCorsHeaders(response) {
+  const headers = new Headers(response.headers);
+
+  // Critical CORS headers for canvas/editor
+  headers.set("Access-Control-Allow-Origin", "*");
+  headers.set("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+  headers.set("Access-Control-Allow-Headers", "*");
+  headers.set("Cross-Origin-Resource-Policy", "cross-origin");
+  headers.set("Cross-Origin-Embedder-Policy", "unsafe-none");
+
+  // Expose headers to JavaScript
+  headers.set(
+    "Access-Control-Expose-Headers",
+    "Content-Type, Content-Length, ETag, Last-Modified, Cache-Control"
+  );
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url)
@@ -71,10 +98,11 @@ export default {
     // ========================================================================
     if (request.method === 'OPTIONS') {
       console.log('✅ [Image Worker] CORS preflight - responding with 204')
-      return new Response(null, {
+      const response = new Response(null, {
         status: 204,
         headers: corsHeaders,
       })
+      return addCorsHeaders(response)
     }
 
     // ========================================================================
@@ -96,10 +124,11 @@ export default {
         // Handle 404 - Image not found
         if (!object) {
           console.error('❌ [Image Worker] Object not found:', storageKey)
-          return new Response('Image not found', {
+          const response = new Response('Image not found', {
             status: 404,
             headers: corsHeaders,
           })
+          return addCorsHeaders(response)
         }
 
         // Prepare response headers
@@ -135,23 +164,26 @@ export default {
 
         // For HEAD requests, return headers only (no body)
         if (request.method === 'HEAD') {
-          return new Response(null, {
+          const response = new Response(null, {
             status: 200,
             headers,
           })
+          return addCorsHeaders(response)
         }
 
         // For GET requests, return the image with CORS headers
-        return new Response(object.body, {
+        const response = new Response(object.body, {
           status: 200,
           headers,
         })
+        return addCorsHeaders(response)
       } catch (error) {
         console.error('🔥 [Image Worker] Error fetching image:', error)
-        return new Response('Internal server error', {
+        const response = new Response('Internal server error', {
           status: 500,
           headers: corsHeaders,
         })
+        return addCorsHeaders(response)
       }
     }
 
@@ -159,7 +191,7 @@ export default {
     // Health Check Endpoint
     // ========================================================================
     if (path === '/health') {
-      return new Response(
+      const response = new Response(
         JSON.stringify({
           status: 'ok',
           service: 'pixtr-image-worker',
@@ -173,15 +205,17 @@ export default {
           },
         }
       )
+      return addCorsHeaders(response)
     }
 
     // ========================================================================
     // Unknown Methods / Routes
     // ========================================================================
     console.warn('⚠️ [Image Worker] Unsupported method:', request.method)
-    return new Response('Method not allowed', {
+    const response = new Response('Method not allowed', {
       status: 405,
       headers: corsHeaders,
     })
+    return addCorsHeaders(response)
   },
 }
