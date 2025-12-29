@@ -31,10 +31,6 @@ export default function EditorPage() {
   const { userProfile } = useAuth()
   const tier = userProfile?.subscriptionTier || 'GRATIS'
 
-  // 🆕 FREEMIUM: Get user tier
-  const { userProfile } = useAuth()
-  const tier = userProfile?.subscriptionTier || 'GRATIS'
-
   // Get photo from data layer
   const photo = getPhotoById(photoId)
 
