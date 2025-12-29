@@ -13,7 +13,7 @@ import { canShowModal, markModalShown } from '../utils/modalTracking'
 const MODAL_CONTENT = {
   'album-limit': {
     icon: '📁',
-    title: 'You've hit the album limit!',
+    title: "You've hit the album limit!",
     subtitle: "But you're clearly loving Pixtr 🎉",
     painPoint: 'GRATIS = 5 albums max',
     solution: 'LITE = Unlimited albums',
@@ -180,10 +180,14 @@ export default function UpgradeModal() {
         {/* Content */}
         <div className="p-8 text-center">
           {/* Icon */}
-          <div className="text-6xl mb-4 animate-bounce-subtle">{content.icon}</div>
+          <div className="text-6xl mb-4 animate-bounce-subtle">
+            {content.icon}
+          </div>
 
           {/* Title */}
-          <h2 className="text-2xl font-bold mb-2 text-white">{content.title}</h2>
+          <h2 className="text-2xl font-bold mb-2 text-white">
+            {content.title}
+          </h2>
 
           {/* Subtitle */}
           <p className="text-gray-400 mb-6">{content.subtitle}</p>
@@ -212,7 +216,9 @@ export default function UpgradeModal() {
 
           {/* Price */}
           <div className="mb-6">
-            <p className="text-3xl font-bold text-white mb-1">{content.price}</p>
+            <p className="text-3xl font-bold text-white mb-1">
+              {content.price}
+            </p>
             <p className="text-xs text-gray-400">Cancel anytime</p>
           </div>
 
