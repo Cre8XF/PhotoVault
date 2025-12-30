@@ -185,9 +185,23 @@ const CollageView = () => {
     loadCollage()
   }, [id, getCollage, navigate])
 
+  // Helper: Detect legacy collages
+  const isLegacyCollage = (collageData) => {
+    return !Array.isArray(collageData?.photoIds) || collageData.photoIds.length === 0
+  }
+
   // Photo resolution ONLY for valid collages
   useEffect(() => {
     if (!collage || !allPhotos) return
+
+    // CRITICAL: Guard against legacy collages - skip photo resolution
+    if (isLegacyCollage(collage)) {
+      if (import.meta.env.DEV) {
+        console.warn('📦 Legacy collage detected - skipping photo resolution:', collage.id)
+      }
+      setCollagePhotos([])
+      return
+    }
 
     // CRITICAL: Guard against missing photoIds
     if (!Array.isArray(collage.photoIds)) {
@@ -251,8 +265,33 @@ const CollageView = () => {
     navigate(`/collage/edit/${id}`)
   }
 
+  // Handle download for legacy collages (static image)
+  const handleLegacyDownload = async () => {
+    if (!collage?.staticImageUrl) {
+      console.warn('Cannot download: missing staticImageUrl')
+      return
+    }
+
+    try {
+      setIsDownloading(true)
+
+      const response = await fetch(collage.staticImageUrl)
+      const blob = await response.blob()
+      downloadCollageBlob(blob, `${collage.title || 'legacy-collage'}.jpg`)
+    } catch (error) {
+      console.error('Error downloading legacy collage:', error)
+    } finally {
+      setIsDownloading(false)
+    }
+  }
+
   // Handle download
   const handleDownload = async () => {
+    // Legacy collage: download static image
+    if (isLegacyCollage(collage)) {
+      return handleLegacyDownload()
+    }
+
     if (!collage || !layout || collagePhotos.length === 0) {
       console.warn('Cannot download: missing collage, layout, or photos')
       return
@@ -341,25 +380,117 @@ const CollageView = () => {
     )
   }
 
-  // Error state: Missing photoIds (CRITICAL - prevents crash)
-  if (!Array.isArray(collage?.photoIds)) {
+  // Legacy collage view: Read-only static image display
+  if (isLegacyCollage(collage)) {
+    // Dev logging
+    if (import.meta.env.DEV) {
+      console.warn('📦 Legacy collage rendered as static image', collage.id)
+    }
+
+    // Legacy collage WITH staticImageUrl: Display as read-only
+    if (collage.staticImageUrl) {
+      return (
+        <div className="min-h-screen">
+          {/* Header */}
+          <header className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-white/10">
+            <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={handleBack}
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  aria-label={t('common:back')}
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <div>
+                  <h1 className="text-lg font-semibold">
+                    {collage.title || t('collage:untitled')}
+                  </h1>
+                  <p className="text-xs opacity-50">Legacy Collage</p>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* Main content */}
+          <main className="p-4 max-w-6xl mx-auto">
+            {/* Info banner */}
+            <div className="mb-6 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-amber-500/20 rounded-lg shrink-0">
+                  <ImageIcon className="w-5 h-5 text-amber-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold mb-1">Read-Only Legacy Collage</h3>
+                  <p className="text-xs opacity-70">
+                    This collage was created with an older version of Pixtr and is displayed as a static image. Editing is disabled.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Static image display */}
+            <div className="mb-6">
+              <img
+                src={collage.staticImageUrl}
+                alt={collage.title || 'Legacy collage'}
+                className="w-full rounded-xl shadow-2xl"
+              />
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <button
+                onClick={handleDownload}
+                disabled={isDownloading}
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg transition-colors disabled:opacity-50"
+              >
+                <Download className="w-5 h-5" />
+                <span className="font-medium">
+                  {isDownloading ? 'Downloading...' : 'Download'}
+                </span>
+              </button>
+
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors disabled:opacity-50"
+              >
+                <Trash2 className="w-5 h-5" />
+                <span className="font-medium">Delete</span>
+              </button>
+            </div>
+          </main>
+        </div>
+      )
+    }
+
+    // Legacy collage WITHOUT staticImageUrl: Cannot be displayed
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-red-500/10 border border-red-500/20 rounded-xl p-8 text-center">
           <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <ImageIcon className="w-8 h-8 text-red-400" />
           </div>
-          <h2 className="text-xl font-bold mb-2">Invalid Collage Data</h2>
+          <h2 className="text-xl font-bold mb-2">Invalid Legacy Collage</h2>
           <p className="text-sm opacity-70 mb-6">
-            This collage is missing photo references and cannot be displayed.
-            The collage may have been created with an older version or is corrupted.
+            This collage was created with an older version of Pixtr but is missing its static image. It cannot be displayed or recovered.
           </p>
-          <button
-            onClick={handleBack}
-            className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
-          >
-            {t('common:back', 'Go Back')}
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={handleBack}
+              className="flex-1 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+            >
+              {t('common:back', 'Go Back')}
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="flex-1 px-6 py-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors disabled:opacity-50"
+            >
+              Delete
+            </button>
+          </div>
         </div>
       </div>
     )
