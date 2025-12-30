@@ -311,27 +311,36 @@ const CollageNewPage = () => {
           }
         })
 
-        // Validate layout structure before rendering
-        if (!layoutSnapshot?.layout?.canvas) {
-          console.error('❌ Invalid layout structure:', {
-            hasLayout: !!layoutSnapshot,
+        // Smart layout resolution - handle both nested and flat structures
+        const layoutForRender = layoutSnapshot?.layout?.canvas
+          ? layoutSnapshot.layout   // Template has nested .layout property
+          : layoutSnapshot?.canvas
+            ? layoutSnapshot         // Template IS the layout (flat structure)
+            : null
+
+        // Validate resolved layout has required canvas dimensions
+        if (!layoutForRender?.canvas?.width || !layoutForRender?.canvas?.height) {
+          console.error('❌ Cannot resolve valid layout with canvas dimensions:', {
+            layoutSnapshot: layoutSnapshot,
             hasNestedLayout: !!layoutSnapshot?.layout,
-            hasCanvas: !!layoutSnapshot?.layout?.canvas,
+            hasDirectCanvas: !!layoutSnapshot?.canvas,
+            resolvedLayout: layoutForRender,
             layoutKeys: layoutSnapshot ? Object.keys(layoutSnapshot) : [],
           })
           throw new Error('Template layout missing canvas dimensions')
         }
 
         console.log('🖼️ Generating static collage image...', {
-          canvasWidth: layoutSnapshot.layout.canvas.width,
-          canvasHeight: layoutSnapshot.layout.canvas.height,
-          slots: layoutSnapshot.layout.slots?.length,
+          layoutResolution: layoutSnapshot?.layout?.canvas ? 'nested' : 'flat',
+          canvasWidth: layoutForRender.canvas.width,
+          canvasHeight: layoutForRender.canvas.height,
+          slots: layoutForRender.slots?.length,
           photos: photosForRender.length,
         })
 
-        // Render collage to canvas (use nested layout object, not template root)
+        // Render collage to canvas with resolved layout
         const collageBlob = await renderCollageToCanvas({
-          layout: layoutSnapshot.layout,  // ✅ FIX: Use nested .layout, not template
+          layout: layoutForRender,
           photos: photosForRender,
           transforms,
           options: {
