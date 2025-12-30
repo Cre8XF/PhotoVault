@@ -230,6 +230,23 @@ const CollageNewPage = () => {
         const slotsSnapshot = structuredClone(serialized.slots || [])
         const layoutSnapshot = template
 
+        // 🔍 DEBUG TEMPLATE STRUCTURE
+        console.log('🔍 TEMPLATE STRUCTURE DEBUG:', {
+          template,
+          templateKeys: template ? Object.keys(template) : [],
+          templateType: typeof template,
+          hasId: !!template?.id,
+          hasLayout: !!template?.layout,
+          hasCanvas: !!template?.canvas,
+          hasSlots: !!template?.slots,
+          // Check nested
+          nestedLayoutKeys: template?.layout ? Object.keys(template.layout) : [],
+          nestedCanvas: template?.layout?.canvas,
+          // Check flat
+          directCanvas: template?.canvas,
+          directSlots: template?.slots,
+        })
+
         // Guard: layout/template must exist
         if (!layoutSnapshot) {
           throw new Error(
@@ -311,12 +328,18 @@ const CollageNewPage = () => {
           }
         })
 
-        // Smart layout resolution - handle both nested and flat structures
-        const layoutForRender = layoutSnapshot?.layout?.canvas
-          ? layoutSnapshot.layout   // Template has nested .layout property
-          : layoutSnapshot?.canvas
-            ? layoutSnapshot         // Template IS the layout (flat structure)
-            : null
+        // Smart layout resolution with ultimate fallback
+        const layoutForRender = layoutSnapshot?.layout?.canvas 
+          ? layoutSnapshot.layout  // Has nested .layout property
+          : layoutSnapshot?.canvas 
+            ? layoutSnapshot        // IS the layout (flat structure)
+            : layoutSnapshot?.slots  // Fallback: has slots but no explicit canvas
+              ? {
+                  canvas: { width: 1600, height: 1600 },  // Default canvas
+                  slots: layoutSnapshot.slots,
+                  gap: layoutSnapshot.gap || 16
+                }
+              : null
 
         // Validate resolved layout has required canvas dimensions
         if (!layoutForRender?.canvas?.width || !layoutForRender?.canvas?.height) {
@@ -324,6 +347,7 @@ const CollageNewPage = () => {
             layoutSnapshot: layoutSnapshot,
             hasNestedLayout: !!layoutSnapshot?.layout,
             hasDirectCanvas: !!layoutSnapshot?.canvas,
+            hasSlots: !!layoutSnapshot?.slots,
             resolvedLayout: layoutForRender,
             layoutKeys: layoutSnapshot ? Object.keys(layoutSnapshot) : [],
           })
@@ -331,7 +355,7 @@ const CollageNewPage = () => {
         }
 
         console.log('🖼️ Generating static collage image...', {
-          layoutResolution: layoutSnapshot?.layout?.canvas ? 'nested' : 'flat',
+          layoutResolution: layoutSnapshot?.layout?.canvas ? 'nested' : layoutSnapshot?.canvas ? 'flat' : 'fallback',
           canvasWidth: layoutForRender.canvas.width,
           canvasHeight: layoutForRender.canvas.height,
           slots: layoutForRender.slots?.length,
@@ -407,7 +431,7 @@ const CollageNewPage = () => {
     } finally {
       setIsSaving(false)
     }
-  }, [isReadyToSave, getCollageData, markAsSaved, navigate, t, tier])
+  }, [isReadyToSave, getCollageData, markAsSaved, navigate, t, tier, template, templateId, photos])
 
   // ============================================================================
   // RENDER
