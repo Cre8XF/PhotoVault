@@ -6,12 +6,14 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Save, AlertCircle } from 'lucide-react';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import useStore from '../state/store';
 import useCollageStore from '../features/collage/collageStore';
 import { getTemplateById, expandTemplate } from '../features/collage/templateEngine';
 import { serializeCollage, validateCollageData } from '../features/collage/collageUtils';
+import { renderCollageToCanvas } from '../utils/renderCollageToCanvas';
+import { uploadWithFallback } from '../utils/r2Upload';
 import CollageCanvas from '../features/collage/components/CollageCanvas';
 import PhotoPickerPanel from '../features/collage/components/PhotoPickerPanel';
 import CollageToolbar from '../features/collage/components/CollageToolbar';
@@ -209,8 +211,76 @@ const CollageNewPage = () => {
 
       markAsSaved(docRef.id);
 
-      // Show success message
       console.log('✅ Collage saved successfully:', docRef.id);
+
+      // Generate and upload static collage image to R2
+      try {
+        console.log('🖼️ Generating static collage image...');
+
+        // Convert slots to photos array for rendering
+        const photosForRender = slots
+          .filter(slot => slot.photo !== null)
+          .map(slot => slot.photo);
+
+        // Convert slots to transforms object for rendering
+        const transformsForRender = slots.reduce((acc, slot) => {
+          if (slot.photo && slot.transform) {
+            acc[slot.photo.id] = slot.transform;
+          }
+          return acc;
+        }, {});
+
+        // Render full-size collage
+        const collageBlob = await renderCollageToCanvas({
+          layout: template,
+          photos: photosForRender,
+          transforms: transformsForRender,
+          options: {
+            quality: 0.9,
+            useHighRes: true
+          }
+        });
+
+        // Get Firebase token for R2 authentication
+        const firebaseToken = await user.getIdToken();
+
+        // Construct storage path for static collage
+        const timestamp = Date.now();
+        const staticStoragePath = `users/${user.uid}/collages/${timestamp}_${docRef.id}.jpg`;
+
+        // Upload to R2
+        const { url: staticImageUrl } = await uploadWithFallback(
+          collageBlob,
+          staticStoragePath,
+          'image/jpeg',
+          {
+            userId: user.uid,
+            type: 'collage',
+            collageId: docRef.id,
+            uploadedAt: new Date().toISOString()
+          },
+          null, // No Firebase fallback for static collages
+          user.uid,
+          firebaseToken
+        );
+
+        // Update Firestore document with static image fields
+        const collageDocRef = doc(db, 'users', user.uid, 'collages', docRef.id);
+        await updateDoc(collageDocRef, {
+          staticImageUrl: staticImageUrl,
+          staticStoragePath: staticStoragePath,
+          staticStorageBackend: 'r2',
+          staticGeneratedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+
+        console.log('✅ Static collage uploaded to R2:', staticImageUrl);
+      } catch (staticError) {
+        console.error('⚠️ Static collage generation failed:', staticError);
+        // Continue - virtual collage is already saved
+      }
+
+      // Show success message
       console.log('🏠 Navigating to Home with replace: true');
       console.log('═══════════════════════════════════════');
 
