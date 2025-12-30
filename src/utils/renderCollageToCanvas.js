@@ -58,8 +58,15 @@ export async function renderCollageToCanvas({
     }
 
     try {
-      // Load high-res image
-      const imageUrl = useHighRes ? photo.url : (photo.thumbnailUrl || photo.url)
+      // Load high-res image with fallbacks
+      const hiResUrl = photo.url || photo.downloadURL || photo.imageUrl || photo.src
+      const thumbnailUrl = photo.thumbnailUrl || photo.thumbnailURL || photo.thumbnail || hiResUrl
+      const imageUrl = useHighRes ? hiResUrl : thumbnailUrl
+
+      if (!imageUrl) {
+        throw new Error(`Photo ${photo.id || i} has no valid URL`)
+      }
+
       const img = await loadImage(imageUrl)
 
       // Get slot bounds
