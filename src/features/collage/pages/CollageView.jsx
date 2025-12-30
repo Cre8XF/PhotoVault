@@ -28,10 +28,6 @@ import { getTemplateById, expandTemplate } from '../templateEngine'
 import CollagePreview from '../components/CollagePreview'
 import useStore from '../../../state/store'
 
-/**
- * CollageView Component
- * Displays a single collage in full resolution with metadata and action buttons
- */
 const CollageView = () => {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -80,46 +76,62 @@ const CollageView = () => {
           const template = getTemplateById(collageData.templateId)
 
           if (template) {
-            // Expand template to get slots
-            const expanded = expandTemplate(template)
+            try {
+              // Expand template to get slots
+              const expanded = expandTemplate(template)
 
-            console.log('Expanded template:', expanded) // DEBUG
-            console.log('Expanded slots:', expanded.slots) // DEBUG
+              console.log('Expanded template:', expanded)
+              console.log('Expanded slots:', expanded.slots)
 
-            // Calculate grid dimensions from slots
-            if (expanded.slots && expanded.slots.length > 0) {
-              const maxRow = Math.max(
-                ...expanded.slots.map((s) => s.row + s.rowSpan - 1)
-              )
-              const maxCol = Math.max(
-                ...expanded.slots.map((s) => s.col + s.colSpan - 1)
-              )
+              // Defensive check: ensure slots exist and are an array
+              const safeSlots = Array.isArray(expanded.slots)
+                ? expanded.slots
+                : []
 
-              // Convert template format to layout format expected by CollagePreview
-              resolvedLayout = {
-                id: expanded.id,
-                name: expanded.name,
-                nameKey: expanded.nameKey,
-                aspectRatio: expanded.aspectRatio,
-                minPhotos: expanded.minPhotos || 2,
-                maxPhotos: expanded.maxPhotos || 2,
-                slots: expanded.slots, // USE THE ACTUAL SLOTS - DONT DEFAULT TO []
-                grid: {
-                  desktop: `repeat(${maxRow}, 1fr) / repeat(${maxCol}, 1fr)`,
-                  mobile: `repeat(${maxRow}, 1fr) / repeat(${maxCol}, 1fr)`,
-                },
-                gap: expanded.gap || 8,
-                padding: expanded.padding || 0,
-              }
-
-              if (import.meta.env.DEV) {
-                console.log(
-                  'Resolved layout with slots:',
-                  resolvedLayout.slots.length
+              if (safeSlots.length > 0) {
+                // Calculate grid dimensions from slots
+                const maxRow = Math.max(
+                  ...safeSlots.map((s) => s.row + s.rowSpan - 1)
                 )
+                const maxCol = Math.max(
+                  ...safeSlots.map((s) => s.col + s.colSpan - 1)
+                )
+
+                // Convert template format to layout format expected by CollagePreview
+                resolvedLayout = {
+                  id: expanded.id,
+                  name: expanded.name,
+                  nameKey: expanded.nameKey,
+                  aspectRatio: expanded.aspectRatio,
+                  minPhotos: expanded.minPhotos || 2,
+                  maxPhotos: expanded.maxPhotos || 2,
+                  slots: safeSlots,
+                  grid: {
+                    desktop: `repeat(${maxRow}, 1fr) / repeat(${maxCol}, 1fr)`,
+                    mobile: `repeat(${maxRow}, 1fr) / repeat(${maxCol}, 1fr)`,
+                  },
+                  gap: expanded.gap || 8,
+                  padding: expanded.padding || 0,
+                }
+
+                if (import.meta.env.DEV) {
+                  console.log('Resolved layout with', safeSlots.length, 'slots')
+                }
+              } else {
+                console.warn('Expanded template has no slots:', expanded)
+                // Create minimal layout as fallback
+                resolvedLayout = {
+                  id: expanded.id,
+                  name: expanded.name,
+                  aspectRatio: expanded.aspectRatio || 1,
+                  slots: [],
+                  grid: { desktop: 'repeat(2, 1fr)', mobile: 'repeat(2, 1fr)' },
+                  gap: 8,
+                  padding: 0,
+                }
               }
-            } else {
-              console.error('Expanded template has no slots:', expanded)
+            } catch (error) {
+              console.error('Error expanding template:', error)
             }
           } else {
             console.error(
@@ -149,15 +161,21 @@ const CollageView = () => {
           }
         }
 
-        if (resolvedLayout) {
-          setLayout(resolvedLayout)
-        } else {
-          console.error('Could not resolve layout for collage:', {
-            templateId: collageData.templateId,
-            layoutId: collageData.layoutId,
-            hasLayoutField: !!collageData.layout,
-          })
+        // Final fallback: Create minimal layout
+        if (!resolvedLayout) {
+          console.warn('Could not resolve layout, using fallback')
+          resolvedLayout = {
+            id: 'fallback',
+            name: 'Grid Layout',
+            aspectRatio: 1,
+            slots: [],
+            grid: { desktop: 'repeat(2, 1fr)', mobile: 'repeat(2, 1fr)' },
+            gap: 8,
+            padding: 0,
+          }
         }
+
+        setLayout(resolvedLayout)
       } catch (error) {
         console.error('Error loading collage:', error)
         navigate('/albums')
@@ -171,11 +189,18 @@ const CollageView = () => {
   useEffect(() => {
     if (!collage || !allPhotos) return
 
-    const photos = collage.photoIds
+    // Defensive: ensure photoIds exists and is an array
+    const photoIds = Array.isArray(collage.photoIds) ? collage.photoIds : []
+
+    const photos = photoIds
       .map((photoId) => allPhotos.find((p) => p.id === photoId))
       .filter(Boolean)
 
     setCollagePhotos(photos)
+
+    if (import.meta.env.DEV) {
+      console.log('Loaded', photos.length, 'photos for collage')
+    }
   }, [collage, allPhotos])
 
   // Set current page
@@ -198,7 +223,7 @@ const CollageView = () => {
   // Handle download
   const handleDownload = async () => {
     if (!collage || !layout || collagePhotos.length === 0) {
-      console.warn('⚠️ Cannot download: missing collage, layout, or photos')
+      console.warn('Cannot download: missing collage, layout, or photos')
       return
     }
 
@@ -223,7 +248,7 @@ const CollageView = () => {
   // Handle share
   const handleShare = async () => {
     if (!collage || !layout || collagePhotos.length === 0) {
-      console.warn('⚠️ Cannot share: missing collage, layout, or photos')
+      console.warn('Cannot share: missing collage, layout, or photos')
       return
     }
 
@@ -293,12 +318,10 @@ const CollageView = () => {
           <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <Grid3x3 className="w-8 h-8 text-red-400" />
           </div>
-          <h2 className="text-xl font-bold mb-2">
-            {t('collage:error.layoutMissing')}
-          </h2>
+          <h2 className="text-xl font-bold mb-2">Layout Missing</h2>
           <p className="text-sm opacity-70 mb-6">
             This collage's layout could not be loaded. The template may have
-            been removed or the collage data is corrupted.
+            been removed.
           </p>
           <button
             onClick={handleBack}
@@ -310,6 +333,9 @@ const CollageView = () => {
       </div>
     )
   }
+
+  // Defensive: Ensure slots is always an array
+  const safeSlots = Array.isArray(layout.slots) ? layout.slots : []
 
   // Error state: No photos loaded
   if (collagePhotos.length === 0) {
@@ -473,7 +499,7 @@ const CollageView = () => {
               </div>
             </div>
 
-            {/* Resolution */}
+            {/* Resolution - only show if canvas data exists */}
             {layout.canvas?.width && layout.canvas?.height && (
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-green-500/20 rounded-lg">
