@@ -3,7 +3,9 @@
 // ============================================================================
 
 export const ROUTES = {
-  HOME: '/',
+  HOME: '/',              // Photo Library (SearchPage)
+  LANDING: '/landing',    // Public LandingPage
+  DISCOVER: '/discover',  // HomeDashboard (optional, not in nav)
   TOOLS: '/tools',
   COLLAGE_TEMPLATES: '/tools/collage/templates',
   COLLAGE_NEW: '/tools/collage/new',
