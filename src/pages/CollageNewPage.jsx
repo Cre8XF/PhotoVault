@@ -240,7 +240,9 @@ const CollageNewPage = () => {
           hasCanvas: !!template?.canvas,
           hasSlots: !!template?.slots,
           // Check nested
-          nestedLayoutKeys: template?.layout ? Object.keys(template.layout) : [],
+          nestedLayoutKeys: template?.layout
+            ? Object.keys(template.layout)
+            : [],
           nestedCanvas: template?.layout?.canvas,
           // Check flat
           directCanvas: template?.canvas,
@@ -290,10 +292,15 @@ const CollageNewPage = () => {
             // Ensure all required fields exist with fallbacks
             return {
               id: photo.id,
-              url: photo.url || photo.r2Url || photo.downloadURL || photo.imageUrl,
-              thumbnailUrl: photo.thumbnailUrl || photo.thumbnailURL || photo.thumbnail || photo.url,
+              url:
+                photo.url || photo.r2Url || photo.downloadURL || photo.imageUrl,
+              thumbnailUrl:
+                photo.thumbnailUrl ||
+                photo.thumbnailURL ||
+                photo.thumbnail ||
+                photo.url,
               name: photo.name || 'Untitled',
-              width: photo.width || 1920,   // Fallback if metadata missing
+              width: photo.width || 1920, // Fallback if metadata missing
               height: photo.height || 1080, // Fallback if metadata missing
               type: photo.type || 'image',
             }
@@ -301,7 +308,9 @@ const CollageNewPage = () => {
 
         // Validate we have photos to render
         if (photosForRender.length === 0) {
-          console.error('❌ No photos with usable URL found in slots (cannot generate static collage).')
+          console.error(
+            '❌ No photos with usable URL found in slots (cannot generate static collage).'
+          )
           throw new Error('No photos with usable URL found in slots')
         }
 
@@ -328,36 +337,74 @@ const CollageNewPage = () => {
           }
         })
 
-        // Smart layout resolution with ultimate fallback
-        const layoutForRender = layoutSnapshot?.layout?.canvas 
-          ? layoutSnapshot.layout  // Has nested .layout property
-          : layoutSnapshot?.canvas 
-            ? layoutSnapshot        // IS the layout (flat structure)
-            : layoutSnapshot?.slots  // Fallback: has slots but no explicit canvas
-              ? {
-                  canvas: { width: 1600, height: 1600 },  // Default canvas
-                  slots: layoutSnapshot.slots,
-                  gap: layoutSnapshot.gap || 16
-                }
-              : null
+        // Reconstruct complete layout from template (template missing canvas/grid)
+        const layoutForRender = (() => {
+          // If template has nested layout with canvas and grid, use it
+          if (layoutSnapshot?.layout?.canvas && layoutSnapshot?.layout?.grid) {
+            return layoutSnapshot.layout
+          }
 
-        // Validate resolved layout has required canvas dimensions
-        if (!layoutForRender?.canvas?.width || !layoutForRender?.canvas?.height) {
-          console.error('❌ Cannot resolve valid layout with canvas dimensions:', {
-            layoutSnapshot: layoutSnapshot,
-            hasNestedLayout: !!layoutSnapshot?.layout,
-            hasDirectCanvas: !!layoutSnapshot?.canvas,
-            hasSlots: !!layoutSnapshot?.slots,
+          // If template already has canvas and grid at root, use it
+          if (layoutSnapshot?.canvas && layoutSnapshot?.grid) {
+            return layoutSnapshot
+          }
+
+          // Reconstruct from template (has slots but missing canvas/grid/area)
+          if (layoutSnapshot?.slots) {
+            const slotCount = layoutSnapshot.slots.length
+            const gridCols = Math.ceil(Math.sqrt(slotCount))
+
+            return {
+              canvas: { width: 1600, height: 1600 },
+              grid: {
+                desktop: '1fr '.repeat(gridCols).trim(),
+                mobile: '1fr',
+              },
+              slots: layoutSnapshot.slots.map((slot) => ({
+                ...slot,
+                // Generate CSS Grid area string if missing (format: row-start / col-start / row-end / col-end)
+                area:
+                  slot.area ||
+                  `${slot.row} / ${slot.col} / ${
+                    slot.row + (slot.rowSpan || 1)
+                  } / ${slot.col + (slot.colSpan || 1)}`,
+              })),
+              gap: 16,
+              aspectRatio: layoutSnapshot.aspectRatio || '1/1',
+            }
+          }
+
+          return null
+        })()
+
+        // Validate resolved layout has required fields
+        if (
+          !layoutForRender?.canvas ||
+          !layoutForRender?.grid ||
+          !layoutForRender?.slots
+        ) {
+          console.error('❌ Cannot resolve valid layout:', {
+            layoutSnapshot,
             resolvedLayout: layoutForRender,
+            hasCanvas: !!layoutForRender?.canvas,
+            hasGrid: !!layoutForRender?.grid,
+            hasSlots: !!layoutForRender?.slots,
             layoutKeys: layoutSnapshot ? Object.keys(layoutSnapshot) : [],
           })
-          throw new Error('Template layout missing canvas dimensions')
+          throw new Error(
+            'Template layout missing required fields (canvas/grid/slots)'
+          )
         }
 
         console.log('🖼️ Generating static collage image...', {
-          layoutResolution: layoutSnapshot?.layout?.canvas ? 'nested' : layoutSnapshot?.canvas ? 'flat' : 'fallback',
+          layoutResolution: layoutSnapshot?.layout?.canvas
+            ? 'nested'
+            : layoutSnapshot?.canvas
+            ? 'flat'
+            : 'reconstructed',
           canvasWidth: layoutForRender.canvas.width,
           canvasHeight: layoutForRender.canvas.height,
+          gridDesktop: layoutForRender.grid.desktop,
           slots: layoutForRender.slots?.length,
           photos: photosForRender.length,
         })
@@ -415,7 +462,6 @@ const CollageNewPage = () => {
       // Show success message
       console.log('🏠 Navigating to Home with replace: true')
       console.log('═══════════════════════════════════════')
-
       // FIX: Navigate directly to Home (not back!)
       // Using replace: true removes collage builder from history
       navigate('/', {
@@ -431,7 +477,17 @@ const CollageNewPage = () => {
     } finally {
       setIsSaving(false)
     }
-  }, [isReadyToSave, getCollageData, markAsSaved, navigate, t, tier, template, templateId, photos])
+  }, [
+    isReadyToSave,
+    getCollageData,
+    markAsSaved,
+    navigate,
+    t,
+    tier,
+    template,
+    templateId,
+    photos,
+  ])
 
   // ============================================================================
   // RENDER
