@@ -90,6 +90,7 @@ const SearchPage = ({
     category: null,
   })
   const [showFilters, setShowFilters] = useState(false)
+  const [searchExpanded, setSearchExpanded] = useState(false)
 
   // Redigeringsmodus og flytting
   const [editMode, setEditMode] = useState(false)
@@ -479,6 +480,7 @@ const SearchPage = ({
       category: null,
     })
     setSearchQuery('')
+    setSearchExpanded(false) // Also collapse search when resetting
   }
 
   // --- Sletting ---
@@ -666,13 +668,33 @@ const SearchPage = ({
       >
         {/* Top row - always visible */}
         <div className="flex items-center justify-between gap-3">
-          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold flex items-center gap-2">
-            <SearchIcon className="w-6 h-6 md:w-7 md:h-7" />
-            <span className="hidden sm:inline">{t('search:title')}</span>
-            <span className="sm:hidden">Søk</span>
-          </h1>
+          {!searchExpanded ? (
+            // Collapsed state - clean header with Photos title
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold">
+              {t('search:title', 'Photos')}
+            </h1>
+          ) : (
+            // Expanded state - show search icon
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold flex items-center gap-2">
+              <SearchIcon className="w-6 h-6 md:w-7 md:h-7" />
+              <span className="hidden sm:inline">{t('search:title')}</span>
+              <span className="sm:hidden">Søk</span>
+            </h1>
+          )}
 
           <div className="flex gap-2">
+            {/* Search icon button - only show when collapsed */}
+            {!searchExpanded && (
+              <button
+                onClick={() => setSearchExpanded(true)}
+                className="ripple-effect p-2 md:p-3 rounded-xl bg-white/10 hover:bg-white/20"
+                title="Open search"
+                aria-label="Open search"
+              >
+                <SearchIcon className="w-5 h-5" />
+              </button>
+            )}
+
             {/* Filter button - always show */}
             <button
               onClick={() => setShowFilters((v) => !v)}
@@ -893,27 +915,36 @@ const SearchPage = ({
         </div>
       )}
 
-      {/* Søkefelt */}
-      <div className="glass rounded-2xl p-4 mb-4">
-        <div className="flex items-center gap-3">
-          <SearchIcon className="w-5 h-5 opacity-60" />
-          <input
-            type="text"
-            placeholder={t('search:searchIn')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 bg-transparent outline-none text-lg"
-          />
-          {searchQuery && (
+      {/* Search Section - Collapsed by Default */}
+      {!searchExpanded ? (
+        // Collapsed state - show search icon in header (no separate search box)
+        null
+      ) : (
+        // Expanded state - full search input
+        <div className="glass rounded-2xl p-4 mb-4">
+          <div className="flex items-center gap-3">
+            <SearchIcon className="w-5 h-5 opacity-60" />
+            <input
+              type="text"
+              placeholder={t('search:searchIn')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1 bg-transparent outline-none text-lg"
+              autoFocus
+            />
             <button
-              onClick={() => setSearchQuery('')}
-              className="ripple-effect p-1 hover:bg-white/10 rounded-lg transition"
+              onClick={() => {
+                setSearchExpanded(false)
+                setSearchQuery('') // Clear search when closing
+              }}
+              className="ripple-effect p-2 hover:bg-white/10 rounded-lg transition"
+              aria-label="Close search"
             >
               <X className="w-5 h-5" />
             </button>
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Filterpanel */}
       {showFilters && (
@@ -1072,18 +1103,68 @@ const SearchPage = ({
         </div>
       )}
 
-      {/* Handling */}
-      <div className="flex justify-between mb-4">
-        <div className="text-sm opacity-60">
-          {t('search:activeFilters')}: <b>{activeFilterCount}</b>
+      {/* Active filters banner - Only show when filters are active */}
+      {(activeFilterCount > 0 || searchQuery.trim()) && (
+        <div className="glass rounded-2xl p-4 mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm opacity-70">{t('search:activeFilters')}:</span>
+            <div className="flex flex-wrap gap-2">
+              {searchQuery.trim() && (
+                <span className="px-2 py-1 rounded-lg bg-blue-600/30 text-sm border border-blue-500/50">
+                  Search: "{searchQuery}"
+                </span>
+              )}
+              {activeFilters.favorites && (
+                <span className="px-2 py-1 rounded-lg bg-yellow-600/30 text-sm border border-yellow-500/50">
+                  Favorites
+                </span>
+              )}
+              {activeFilters.withFaces && (
+                <span className="px-2 py-1 rounded-lg bg-blue-600/30 text-sm border border-blue-500/50">
+                  With faces
+                </span>
+              )}
+              {activeFilters.withTags && (
+                <span className="px-2 py-1 rounded-lg bg-emerald-600/30 text-sm border border-emerald-500/50">
+                  With tags
+                </span>
+              )}
+              {activeFilters.aiAnalyzed && (
+                <span className="px-2 py-1 rounded-lg bg-purple-600/30 text-sm border border-purple-500/50">
+                  AI analyzed
+                </span>
+              )}
+              {activeFilters.albumId && (
+                <span className="px-2 py-1 rounded-lg bg-indigo-600/30 text-sm border border-indigo-500/50">
+                  Album: {activeFilters.albumId === 'noAlbum'
+                    ? t('search:filterOptions.noAlbum')
+                    : safeAlbums.find(a => a.id === activeFilters.albumId)?.name || 'Unknown'}
+                </span>
+              )}
+              {activeFilters.category && (
+                <span className="px-2 py-1 rounded-lg bg-teal-600/30 text-sm border border-teal-500/50">
+                  Category: {activeFilters.category}
+                </span>
+              )}
+              {activeFilters.dateRange && (
+                <span className="px-2 py-1 rounded-lg bg-orange-600/30 text-sm border border-orange-500/50">
+                  {activeFilters.dateRange === 'today' && 'Today'}
+                  {activeFilters.dateRange === 'week' && 'This week'}
+                  {activeFilters.dateRange === 'month' && 'This month'}
+                  {activeFilters.dateRange === 'year' && 'This year'}
+                  {activeFilters.dateRange.startsWith('date:') && `Date: ${activeFilters.dateRange.replace('date:', '')}`}
+                </span>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={clearFilters}
+            className="ripple-effect px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm whitespace-nowrap transition"
+          >
+            {t('search:resetFilters')}
+          </button>
         </div>
-        <button
-          onClick={clearFilters}
-          className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20"
-        >
-          {t('search:resetFilters')}
-        </button>
-      </div>
+      )}
 
       {/* 📅 DATE GROUPED RESULTS */}
       {photoGroups.length > 0 ? (
