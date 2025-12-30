@@ -14,6 +14,7 @@
  */
 
 import { create } from 'zustand';
+import { normalizePhotoFields } from '../../utils/photoHelpers';
 
 const useCollageStore = create((set, get) => ({
   // ============================================================================
@@ -133,7 +134,7 @@ const useCollageStore = create((set, get) => ({
     if (slots[slotIndex]) {
       slots[slotIndex] = {
         ...slots[slotIndex],
-        photo,
+        photo: normalizePhotoFields(photo),
         transform: {
           rotation: 0,
           scale: 1,

@@ -6,6 +6,7 @@ import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Star, Image as ImageIcon, Search } from 'lucide-react';
 import LazyImage from '../../../components/LazyImage';
+import { normalizePhotoFields } from '../../../utils/photoHelpers';
 
 /**
  * PhotoPickerPanel Component
@@ -47,7 +48,7 @@ const PhotoPickerPanel = ({ isOpen, onClose, photos, onSelectPhoto, selectedSlot
 
   const handlePhotoClick = (photo) => {
     if (onSelectPhoto) {
-      onSelectPhoto(photo);
+      onSelectPhoto(normalizePhotoFields(photo));
     }
     // Keep panel open for multiple selections
   };
