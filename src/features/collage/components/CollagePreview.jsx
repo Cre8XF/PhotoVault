@@ -95,7 +95,9 @@ const CollagePreview = ({
       {/* Layout info (optional) */}
       <div className="mt-4 flex items-center justify-between text-xs opacity-60">
         <div>
-          <span className="font-medium">{t(layout.nameKey)}</span>
+          <span className="font-medium">
+            {layout.nameKey ? t(layout.nameKey, layout.name) : layout.name}
+          </span>
           <span className="mx-2">•</span>
           <span>{layout.aspectRatio}</span>
           <span className="mx-2">•</span>
@@ -103,9 +105,11 @@ const CollagePreview = ({
             {photoCount}/{layout.maxPhotos} {t('collage:layout.photos')}
           </span>
         </div>
-        <div>
-          {layout.canvas.width} × {layout.canvas.height}px
-        </div>
+        {layout.canvas && (
+          <div>
+            {layout.canvas.width} × {layout.canvas.height}px
+          </div>
+        )}
       </div>
     </div>
   )
@@ -125,10 +129,10 @@ CollagePreview.propTypes = {
   layout: PropTypes.shape({
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
-    nameKey: PropTypes.string.isRequired,
+    nameKey: PropTypes.string, // Optional - fallback to name
     minPhotos: PropTypes.number.isRequired,
     maxPhotos: PropTypes.number.isRequired,
-    aspectRatio: PropTypes.string.isRequired,
+    aspectRatio: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     canvas: PropTypes.shape({
       width: PropTypes.number.isRequired,
       height: PropTypes.number.isRequired,

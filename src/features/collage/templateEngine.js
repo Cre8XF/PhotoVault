@@ -23,15 +23,51 @@ export const getTemplateById = (templateId) => {
 
 /**
  * Expand template into full slot structure
- * Converts previewSlots into detailed slot objects
+ * Converts previewSlots into detailed slot objects and generates missing layout properties
  */
 export const expandTemplate = (template) => {
   if (!template || !template.previewSlots) {
     throw new Error('Invalid template: missing previewSlots');
   }
 
+  // Calculate grid dimensions
+  const gridDims = calculateGridDimensions(template);
+
+  // Generate CSS grid template strings
+  const gridTemplate = `repeat(${gridDims.rows}, 1fr) / repeat(${gridDims.cols}, 1fr)`;
+
+  // Calculate canvas size based on aspect ratio
+  const aspectRatio = template.aspectRatio || 1;
+  const baseSize = 1200; // Standard base size
+  const canvasWidth = aspectRatio >= 1
+    ? baseSize
+    : Math.round(baseSize * aspectRatio);
+  const canvasHeight = aspectRatio >= 1
+    ? Math.round(baseSize / aspectRatio)
+    : baseSize;
+
+  // Convert aspectRatio to string format if it's a number
+  const aspectRatioString = typeof template.aspectRatio === 'number'
+    ? `${Math.round(template.aspectRatio * 100) / 100}:1`
+    : template.aspectRatio;
+
   return {
     ...template,
+    // Generate nameKey for i18n (fallback to name if not present)
+    nameKey: template.nameKey || `collage:templates.${template.id}`,
+    // Ensure aspectRatio is string format
+    aspectRatio: aspectRatioString,
+    // Generate canvas dimensions
+    canvas: {
+      width: canvasWidth,
+      height: canvasHeight,
+    },
+    // Generate grid CSS templates
+    grid: {
+      desktop: gridTemplate,
+      mobile: gridTemplate, // Use same grid for mobile (templates are simple)
+    },
+    // Expand preview slots into full slot structure
     slots: template.previewSlots.map((slot, index) => ({
       id: slot.id,
       slotIndex: index,
@@ -39,7 +75,13 @@ export const expandTemplate = (template) => {
       col: slot.col,
       rowSpan: slot.rowSpan,
       colSpan: slot.colSpan,
+      area: `${slot.row} / ${slot.col} / ${slot.row + slot.rowSpan} / ${slot.col + slot.colSpan}`,
+      crop: 'center',
+      objectFit: 'cover',
     })),
+    // Add default gap and padding
+    gap: template.gap || 8,
+    padding: template.padding || 0,
   };
 };
 
