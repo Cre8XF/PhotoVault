@@ -1,9 +1,5 @@
-// ============================================================================
-// CollageView.jsx - Full collage display page
-// View saved collage with options to edit, share, download, and delete
-// ============================================================================
 import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   ArrowLeft,
@@ -15,13 +11,16 @@ import {
   Grid3x3,
   Image as ImageIcon,
   Maximize2,
-  Calendar
+  Calendar,
 } from 'lucide-react'
 
 // Hooks and utilities
 import useCollageData from '../../../hooks/useCollageData'
 import usePhotoData from '../../../hooks/usePhotoData'
-import { renderCollageToCanvas, downloadCollageBlob } from '../../../utils/renderCollageToCanvas'
+import {
+  renderCollageToCanvas,
+  downloadCollageBlob,
+} from '../../../utils/renderCollageToCanvas'
 import { LAYOUTS_V3 } from '../layouts/layouts_v3'
 import { getTemplateById, expandTemplate } from '../templateEngine'
 
@@ -56,20 +55,14 @@ const CollageView = () => {
   // Fetch collage data
   useEffect(() => {
     const loadCollage = async () => {
-      // Validate ID exists and is not invalid
-      if (!id || id === 'null' || id === 'undefined') {
-        console.error('❌ Invalid collage ID:', id)
-        navigate('/search')  // Navigate back to photos
-        return
-      }
+      if (!id) return
 
       try {
-        console.log('📂 Loading collage:', id)
         const collageData = await getCollage(id)
 
         if (!collageData) {
-          console.error('❌ Collage not found:', id)
-          navigate('/search')
+          console.error('Collage not found:', id)
+          navigate('/albums')
           return
         }
 
@@ -80,50 +73,94 @@ const CollageView = () => {
 
         // V2 (template-based): Use templateId to get template, then extract layout
         if (collageData.templateId) {
+          console.log(
+            'Loading collage with templateId:',
+            collageData.templateId
+          )
           const template = getTemplateById(collageData.templateId)
+
           if (template) {
-            // Templates are the layout - expand to get full structure
-            resolvedLayout = expandTemplate(template)
-            console.log('✅ Resolved layout from templateId:', collageData.templateId)
+            // Expand template to get slots
+            const expanded = expandTemplate(template)
+
+            console.log('Expanded template:', expanded) // DEBUG
+            console.log('Expanded slots:', expanded.slots) // DEBUG
+
+            // Calculate grid dimensions from slots
+            if (expanded.slots && expanded.slots.length > 0) {
+              const maxRow = Math.max(
+                ...expanded.slots.map((s) => s.row + s.rowSpan - 1)
+              )
+              const maxCol = Math.max(
+                ...expanded.slots.map((s) => s.col + s.colSpan - 1)
+              )
+
+              // Convert template format to layout format expected by CollagePreview
+              resolvedLayout = {
+                id: expanded.id,
+                name: expanded.name,
+                nameKey: expanded.nameKey,
+                aspectRatio: expanded.aspectRatio,
+                minPhotos: expanded.minPhotos || 2,
+                maxPhotos: expanded.maxPhotos || 2,
+                slots: expanded.slots, // USE THE ACTUAL SLOTS - DONT DEFAULT TO []
+                grid: {
+                  desktop: `repeat(${maxRow}, 1fr) / repeat(${maxCol}, 1fr)`,
+                  mobile: `repeat(${maxRow}, 1fr) / repeat(${maxCol}, 1fr)`,
+                },
+                gap: expanded.gap || 8,
+                padding: expanded.padding || 0,
+              }
+
+              if (import.meta.env.DEV) {
+                console.log(
+                  'Resolved layout with slots:',
+                  resolvedLayout.slots.length
+                )
+              }
+            } else {
+              console.error('Expanded template has no slots:', expanded)
+            }
           } else {
-            console.warn('⚠️ Template not found:', collageData.templateId)
+            console.error(
+              'Template not found for templateId:',
+              collageData.templateId
+            )
           }
         }
 
-        // V1 (legacy): Use layoutId to lookup in LAYOUTS_V3
-        else if (collageData.layoutId) {
+        // V1 (legacy): Use layoutId to find layout in LAYOUTS_V3
+        if (!resolvedLayout && collageData.layoutId) {
           resolvedLayout = Object.values(LAYOUTS_V3).find(
             (l) => l.id === collageData.layoutId
           )
-          if (resolvedLayout) {
-            console.log('✅ Resolved layout from layoutId:', collageData.layoutId)
-          } else {
-            console.warn('⚠️ Layout not found:', collageData.layoutId)
+
+          if (import.meta.env.DEV && resolvedLayout) {
+            console.log('Resolved layout from layoutId:', collageData.layoutId)
           }
         }
 
-        // Fallback: Try to extract from collage.layout field
-        else if (collageData.layout) {
+        // Fallback: Use collage.layout field if present
+        if (!resolvedLayout && collageData.layout) {
           resolvedLayout = collageData.layout
-          console.log('✅ Using layout from collage.layout field')
+
+          if (import.meta.env.DEV) {
+            console.log('Using layout from collage.layout field')
+          }
         }
 
-        // Guard: If still no layout, log error and navigate away
-        if (!resolvedLayout) {
-          console.error('❌ Could not resolve layout for collage:', {
-            id: collageData.id,
+        if (resolvedLayout) {
+          setLayout(resolvedLayout)
+        } else {
+          console.error('Could not resolve layout for collage:', {
             templateId: collageData.templateId,
             layoutId: collageData.layoutId,
-            hasLayout: !!collageData.layout
+            hasLayoutField: !!collageData.layout,
           })
-          // Don't navigate away - show error state instead
         }
-
-        setLayout(resolvedLayout)
-
       } catch (error) {
-        console.error('❌ Error loading collage:', error)
-        navigate('/search')
+        console.error('Error loading collage:', error)
+        navigate('/albums')
       }
     }
 
@@ -141,23 +178,46 @@ const CollageView = () => {
     setCollagePhotos(photos)
   }, [collage, allPhotos])
 
+  // Set current page
+  useEffect(() => {
+    setCurrentPage('collage-view')
+    return () => setCurrentPage(null)
+  }, [setCurrentPage])
+
   // Handle back navigation
-  const location = useLocation()
   const handleBack = () => {
-    // Use context-aware navigation if available, fallback to albums
-    if (location.state?.from) {
-      navigate(-1)
-    } else {
-      navigate('/albums')
-    }
+    navigate('/albums')
   }
 
   // Handle edit collage
   const handleEdit = () => {
-    // Navigate to collage builder with edit mode
     setCurrentPage('collage')
-    // TODO: Pass collage data to builder for editing
     navigate(`/collage/edit/${id}`)
+  }
+
+  // Handle download
+  const handleDownload = async () => {
+    if (!collage || !layout || collagePhotos.length === 0) {
+      console.warn('⚠️ Cannot download: missing collage, layout, or photos')
+      return
+    }
+
+    try {
+      setIsDownloading(true)
+
+      const blob = await renderCollageToCanvas({
+        layout,
+        photos: collagePhotos,
+        transforms: collage.transforms || {},
+        options: { quality: 0.95, useHighRes: true },
+      })
+
+      downloadCollageBlob(blob, `${collage.title || 'collage'}.jpg`)
+    } catch (error) {
+      console.error('Error downloading collage:', error)
+    } finally {
+      setIsDownloading(false)
+    }
   }
 
   // Handle share
@@ -168,28 +228,24 @@ const CollageView = () => {
     }
 
     try {
-      // Generate collage image
       const blob = await renderCollageToCanvas({
         layout,
         photos: collagePhotos,
         transforms: collage.transforms || {},
-        options: { quality: 0.9, useHighRes: true }
+        options: { quality: 0.9, useHighRes: true },
       })
 
-      // Create File object for sharing
       const file = new File([blob], `${collage.title || 'collage'}.jpg`, {
-        type: 'image/jpeg'
+        type: 'image/jpeg',
       })
 
-      // Check if Web Share API is available
       if (navigator.share && navigator.canShare({ files: [file] })) {
         await navigator.share({
           title: collage.title || 'My Collage',
           text: `Check out my collage: ${collage.title}`,
-          files: [file]
+          files: [file],
         })
       } else {
-        // Fallback: Download the file
         downloadCollageBlob(blob, `${collage.title || 'collage'}.jpg`)
       }
     } catch (error) {
@@ -197,44 +253,23 @@ const CollageView = () => {
     }
   }
 
-  // Handle download
-  const handleDownload = async () => {
-    if (!collage || !layout || collagePhotos.length === 0) return
-
-    setIsDownloading(true)
-
-    try {
-      // Generate high-res collage
-      const blob = await renderCollageToCanvas({
-        layout,
-        photos: collagePhotos,
-        transforms: collage.transforms || {},
-        options: { quality: 0.95, useHighRes: true }
-      })
-
-      // Download
-      downloadCollageBlob(blob, `${collage.title || 'collage'}.jpg`)
-    } catch (error) {
-      console.error('Error downloading collage:', error)
-    } finally {
-      setIsDownloading(false)
-    }
-  }
-
   // Handle delete
   const handleDelete = () => {
     setConfirmModal({
       isOpen: true,
-      title: t('collage:delete.confirmTitle'),
-      message: t('collage:delete.confirmMessage'),
-      confirmText: t('collage:delete.confirmButton'),
+      title: t('collage:delete.title'),
+      message: t('collage:delete.message'),
+      confirmText: t('common:delete'),
       cancelText: t('common:cancel'),
+      variant: 'danger',
       onConfirm: async () => {
-        const success = await deleteCollage(id)
-        if (success) {
+        try {
+          await deleteCollage(id)
           navigate('/albums')
+        } catch (error) {
+          console.error('Error deleting collage:', error)
         }
-      }
+      },
     })
   }
 
@@ -254,21 +289,22 @@ const CollageView = () => {
   if (!layout) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="text-center max-w-md">
+        <div className="max-w-md w-full bg-red-500/10 border border-red-500/20 rounded-xl p-8 text-center">
           <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="w-8 h-8 text-red-400" />
+            <Grid3x3 className="w-8 h-8 text-red-400" />
           </div>
-          <h2 className="text-xl font-semibold mb-2">
-            {t('collage:errors.layoutNotFound', 'Layout Not Found')}
+          <h2 className="text-xl font-bold mb-2">
+            {t('collage:error.layoutMissing')}
           </h2>
-          <p className="text-sm opacity-60 mb-6">
-            {t('collage:errors.layoutNotFoundMessage', 'This collage uses a layout that is no longer available. The collage may have been created with an older version of the app.')}
+          <p className="text-sm opacity-70 mb-6">
+            This collage's layout could not be loaded. The template may have
+            been removed or the collage data is corrupted.
           </p>
           <button
-            onClick={() => navigate('/albums')}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl transition"
+            onClick={handleBack}
+            className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
           >
-            {t('common:backToAlbums', 'Back to Albums')}
+            {t('common:back')}
           </button>
         </div>
       </div>
@@ -276,7 +312,7 @@ const CollageView = () => {
   }
 
   // Error state: No photos loaded
-  if (collagePhotos.length === 0 && collage.photoIds?.length > 0) {
+  if (collagePhotos.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -288,60 +324,44 @@ const CollageView = () => {
   }
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen">
       {/* Header */}
-      <header
-        className="sticky top-0 z-20 backdrop-blur-xl"
-        style={{
-          backgroundColor: 'var(--glass-bg)',
-          borderBottom: '1px solid var(--border-color)',
-          color: 'var(--text-primary)'
-        }}
-      >
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-3">
+      <header className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-white/10">
+        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+          {/* Left: Back button + Title */}
+          <div className="flex items-center gap-4">
             <button
               onClick={handleBack}
-              className="ripple-effect p-2 rounded-lg transition"
-              style={{ color: 'var(--text-primary)' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--interactive-hover)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              aria-label={t('common:back')}
             >
-              <ArrowLeft className="w-6 h-6" />
+              <ArrowLeft className="w-5 h-5" />
             </button>
-
             <div>
               <h1 className="text-lg font-semibold">
                 {collage.title || t('collage:untitled')}
               </h1>
-              <p className="text-xs" style={{ color: 'var(--text-secondary)', opacity: 0.8 }}>
-                {collagePhotos.length} {t('collage:photos')}
-              </p>
             </div>
           </div>
 
+          {/* Right: Actions menu */}
           <div className="relative">
             <button
               onClick={() => setShowActions(!showActions)}
-              className="ripple-effect p-2 rounded-lg transition"
-              style={{ color: 'var(--text-primary)' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--interactive-hover)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              aria-label="Actions"
             >
-              <MoreVertical className="w-6 h-6" />
+              <MoreVertical className="w-5 h-5" />
             </button>
 
-            {/* Actions menu */}
+            {/* Actions dropdown */}
             {showActions && (
               <>
-                {/* Backdrop */}
                 <div
-                  className="fixed inset-0 z-10"
+                  className="fixed inset-0 z-30"
                   onClick={() => setShowActions(false)}
                 />
-
-                {/* Menu */}
-                <div className="absolute right-0 top-12 z-20 w-48 bg-black/90 backdrop-blur-xl rounded-xl border border-white/20 shadow-2xl overflow-hidden text-on-glass">
+                <div className="absolute right-0 top-full mt-2 w-56 bg-black/95 backdrop-blur-xl border border-white/20 rounded-xl overflow-hidden shadow-2xl z-40">
                   <button
                     onClick={() => {
                       handleEdit()
@@ -433,7 +453,7 @@ const CollageView = () => {
                   {t('collage:metadata.layout')}
                 </p>
                 <p className="text-sm font-medium">
-                  {layout.nameKey ? t(layout.nameKey, layout.name) : (layout.name || 'Custom')}
+                  {layout.nameKey ? t(layout.nameKey) : layout.name || 'Custom'}
                 </p>
               </div>
             </div>
@@ -454,7 +474,7 @@ const CollageView = () => {
             </div>
 
             {/* Resolution */}
-            {layout.canvas && (
+            {layout.canvas?.width && layout.canvas?.height && (
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-green-500/20 rounded-lg">
                   <Maximize2 className="w-5 h-5 text-green-400" />

@@ -7,7 +7,7 @@ import PhotoCell from './PhotoCell'
  * CollagePreview Component
  *
  * Displays a preview of a collage with photos placed in layout slots.
- * Supports custom transforms, loading states, and click handlers.
+ * Supports both template-based (row/col) and legacy (area) slot formats.
  */
 function CollagePreview({
   photos = [],
@@ -24,11 +24,13 @@ function CollagePreview({
   useEffect(() => {
     if (!photos || photos.length === 0) return
 
-  // Memoize grid style to prevent recalculation on every render
-  const gridStyle = useMemo(() => ({
-    grid: layout.grid.desktop, // Use CSS 'grid' shorthand (supports "rows / columns" format)
-    gap: `${layout.gap || 8}px`,
-  }), [layout.grid.desktop, layout.gap])
+    const prepared = photos.map((photo) => ({
+      id: photo.id || photo.photoId,
+      url: photo.url || photo.downloadURL || '',
+      thumbnailUrl:
+        photo.thumbnailUrl || photo.thumbnail || photo.url || photo.downloadURL,
+      name: photo.name || photo.filename || 'Untitled',
+    }))
 
     setPreviewPhotos(prepared)
   }, [photos])
@@ -41,6 +43,14 @@ function CollagePreview({
     )
   }
 
+  if (!layout.slots || layout.slots.length === 0) {
+    return (
+      <div className="collage-preview-error bg-red-500/10 border border-red-500/20 rounded-lg p-8 text-center">
+        <p className="text-red-400">Layout has no slots defined</p>
+      </div>
+    )
+  }
+
   const photoCount = previewPhotos.length
 
   // Normalize aspectRatio to CSS-compatible value
@@ -48,6 +58,24 @@ function CollagePreview({
     typeof layout.aspectRatio === 'number'
       ? layout.aspectRatio
       : layout.aspectRatio || '1'
+
+  // Convert slot to CSS Grid area format
+  const getSlotGridArea = (slot) => {
+    // Legacy format: area string (e.g., "1 / 1 / 2 / 2")
+    if (slot.area) {
+      return slot.area
+    }
+    // Template format: row/col/rowSpan/colSpan
+    if (typeof slot.row === 'number' && typeof slot.col === 'number') {
+      const rowStart = slot.row
+      const colStart = slot.col
+      const rowEnd = rowStart + (slot.rowSpan || 1)
+      const colEnd = colStart + (slot.colSpan || 1)
+      return `${rowStart} / ${colStart} / ${rowEnd} / ${colEnd}`
+    }
+    // Fallback
+    return 'auto'
+  }
 
   return (
     <div className={`collage-preview relative ${className}`}>
@@ -70,22 +98,25 @@ function CollagePreview({
             gap: `${layout.gap || 8}px`,
           }}
         >
-          {layout.slots?.map((slot, index) => {
+          {layout.slots.map((slot, index) => {
             const photo = previewPhotos[index]
             if (!photo) return null
 
             const transform =
               transforms && transforms[photo.id] ? transforms[photo.id] : null
 
+            const gridArea = getSlotGridArea(slot)
+
             return (
-              <PhotoCell
-                key={slot.id}
-                photo={photo}
-                slot={slot}
-                transform={transform}
-                onClick={onImageClick}
-                isLoading={isLoading}
-              />
+              <div key={slot.id || `slot-${index}`} style={{ gridArea }}>
+                <PhotoCell
+                  photo={photo}
+                  slot={slot}
+                  transform={transform}
+                  onClick={onImageClick}
+                  isLoading={isLoading}
+                />
+              </div>
             )
           })}
         </div>
@@ -104,24 +135,40 @@ function CollagePreview({
       </div>
 
       {/* Layout info (optional) */}
-      <div className="mt-4 flex items-center justify-between text-xs opacity-60">
-        <div>
-          <span className="font-medium">
-            {layout.nameKey ? t(layout.nameKey, layout.name) : layout.name}
-          </span>
-          <span className="mx-2">•</span>
-          <span>{layout.aspectRatio}</span>
-          <span className="mx-2">•</span>
-          <span>
-            {photoCount}/{layout.maxPhotos} {t('collage:layout.photos')}
-          </span>
-        </div>
-        {layout.canvas && (
+      {(layout.nameKey ||
+        layout.name ||
+        layout.aspectRatio ||
+        layout.maxPhotos ||
+        layout.canvas) && (
+        <div className="mt-4 flex items-center justify-between text-xs opacity-60">
           <div>
-            {layout.canvas.width} × {layout.canvas.height}px
+            {(layout.nameKey || layout.name) && (
+              <>
+                <span className="font-medium">
+                  {layout.nameKey ? t(layout.nameKey) : layout.name || 'Custom'}
+                </span>
+                <span className="mx-2">•</span>
+              </>
+            )}
+            {layout.aspectRatio && (
+              <>
+                <span>{layout.aspectRatio}</span>
+                <span className="mx-2">•</span>
+              </>
+            )}
+            {layout.maxPhotos && (
+              <span>
+                {photoCount}/{layout.maxPhotos} {t('collage:layout.photos')}
+              </span>
+            )}
           </div>
-        )}
-      </div>
+          {layout.canvas?.width && layout.canvas?.height && (
+            <div>
+              {layout.canvas.width} × {layout.canvas.height}px
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -137,28 +184,32 @@ CollagePreview.propTypes = {
     })
   ),
   layout: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    nameKey: PropTypes.string, // Optional - fallback to name
-    minPhotos: PropTypes.number.isRequired,
-    maxPhotos: PropTypes.number.isRequired,
-    aspectRatio: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    id: PropTypes.string,
+    name: PropTypes.string,
+    nameKey: PropTypes.string,
+    minPhotos: PropTypes.number,
+    maxPhotos: PropTypes.number,
+    aspectRatio: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     canvas: PropTypes.shape({
-      width: PropTypes.number.isRequired,
-      height: PropTypes.number.isRequired,
-    }).isRequired,
+      width: PropTypes.number,
+      height: PropTypes.number,
+    }),
     grid: PropTypes.shape({
-      desktop: PropTypes.string.isRequired,
-      mobile: PropTypes.string.isRequired,
-    }).isRequired,
+      desktop: PropTypes.string,
+      mobile: PropTypes.string,
+    }),
     slots: PropTypes.arrayOf(
       PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        area: PropTypes.string.isRequired,
+        id: PropTypes.string,
+        area: PropTypes.string, // Legacy format
+        row: PropTypes.number, // Template format
+        col: PropTypes.number, // Template format
+        rowSpan: PropTypes.number, // Template format
+        colSpan: PropTypes.number, // Template format
         crop: PropTypes.string,
         objectFit: PropTypes.string,
       })
-    ).isRequired,
+    ),
     gap: PropTypes.number,
     padding: PropTypes.number,
   }).isRequired,
