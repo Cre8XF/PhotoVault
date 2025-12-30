@@ -185,53 +185,34 @@ const CollageView = () => {
     loadCollage()
   }, [id, getCollage, navigate])
 
-  // Fetch photos for the collage
+  // Photo resolution ONLY for valid collages
   useEffect(() => {
     if (!collage || !allPhotos) return
 
-    // CRITICAL: Guard against missing photoIds
-    if (!Array.isArray(collage.photoIds)) {
-      if (import.meta.env.DEV) {
-        console.error('❌ COLLAGE MISSING PHOTO IDS:', {
-          collageId: collage.id,
-          hasPhotoIds: !!collage.photoIds,
-          photoIdsType: typeof collage.photoIds,
-          collageKeys: Object.keys(collage)
-        })
-      }
+    // Strict validity check
+    const hasValidPhotoIds =
+      Array.isArray(collage.photoIds) && collage.photoIds.length > 0
+
+    if (!hasValidPhotoIds) {
       setCollagePhotos([])
       return
     }
 
-    // Diagnostic logging to identify ID format
-    if (import.meta.env.DEV) {
-      console.log('📦 collage.photoIds:', collage.photoIds)
-      console.log('🖼️ Available photo IDs (sample):', allPhotos.slice(0, 5).map(p => ({
-        id: p.id,
-        name: p.name,
-        storagePath: p.storagePath
-      })))
-    }
-
-    // Resolve photos ONLY from photoIds (strict Firestore ID match)
+    // Resolve photos using strict Firestore ID matching only
     const photos = collage.photoIds
-      .map((photoId) => {
-        return allPhotos.find((p) => p.id === photoId)
-      })
+      .map((id) => allPhotos.find((p) => p.id === id))
       .filter(Boolean)
 
-    if (import.meta.env.DEV) {
-      console.log('✅ Resolved', photos.length, '/', collage.photoIds.length, 'photos for collage')
-
-      // Log any unresolved photoIds
-      if (photos.length < collage.photoIds.length) {
-        const resolvedIds = new Set(photos.map(p => p.id))
-        const unresolvedIds = collage.photoIds.filter(id => !resolvedIds.has(id))
-        console.warn('⚠️ Could not resolve', unresolvedIds.length, 'photo IDs:', unresolvedIds)
-      }
-    }
-
     setCollagePhotos(photos)
+
+    if (import.meta.env.DEV) {
+      console.log(
+        '🧩 Collage photos resolved:',
+        photos.length,
+        '/',
+        collage.photoIds.length
+      )
+    }
   }, [collage, allPhotos])
 
   // Set current page
@@ -341,24 +322,40 @@ const CollageView = () => {
     )
   }
 
-  // Error state: Missing photoIds (CRITICAL - prevents crash)
-  if (!Array.isArray(collage?.photoIds)) {
+  // Strict collage validity rule: must have non-empty photoIds array
+  const hasValidPhotoIds =
+    Array.isArray(collage?.photoIds) && collage.photoIds.length > 0
+
+  // Hard-stop legacy collages (NO fallbacks, NO guessing)
+  if (!hasValidPhotoIds) {
+    if (import.meta.env.DEV) {
+      console.warn('❌ LEGACY COLLAGE – missing photoIds', {
+        collageId: collage.id,
+        collageKeys: Object.keys(collage),
+      })
+    }
+
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-red-500/10 border border-red-500/20 rounded-xl p-8 text-center">
-          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <ImageIcon className="w-8 h-8 text-red-400" />
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 text-center">
+          <div className="w-16 h-16 bg-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <ImageIcon className="w-8 h-8 text-pink-400" />
           </div>
-          <h2 className="text-xl font-bold mb-2">Invalid Collage Data</h2>
+
+          <h2 className="text-xl font-semibold mb-2">
+            Invalid Collage Data
+          </h2>
+
           <p className="text-sm opacity-70 mb-6">
-            This collage is missing photo references and cannot be displayed.
-            The collage may have been created with an older version or is corrupted.
+            This collage was created with an older Pixtr version and does not
+            contain photo references. It can only be kept as a static image.
           </p>
+
           <button
-            onClick={handleBack}
+            onClick={() => navigate('/albums')}
             className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
           >
-            {t('common:back', 'Go Back')}
+            Go Back
           </button>
         </div>
       </div>
@@ -383,31 +380,6 @@ const CollageView = () => {
             className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
           >
             {t('common:back')}
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  // Error state: Photos not found (prevents eternal spinner)
-  if (collagePhotos.length === 0 && collage.photoIds?.length > 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-8 text-center">
-          <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <ImageIcon className="w-8 h-8 text-yellow-400" />
-          </div>
-          <h2 className="text-xl font-bold mb-2">
-            {t('collage:errors.photosNotFound', 'Photos Not Found')}
-          </h2>
-          <p className="text-sm opacity-70 mb-6">
-            {t('collage:errors.photosNotFoundMessage', `This collage references ${collage.photoIds.length} photos, but they could not be loaded. The photos may have been deleted or moved.`)}
-          </p>
-          <button
-            onClick={handleBack}
-            className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
-          >
-            {t('common:back', 'Back')}
           </button>
         </div>
       </div>
