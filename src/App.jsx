@@ -8,6 +8,7 @@ import {
   Route,
   useNavigate,
   useLocation,
+  Navigate,
 } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import i18n from './i18n'
@@ -95,7 +96,7 @@ import { isRestrictedBrowserContext, getContextMessage, logBrowserContext, isLik
 import { runEnvDiagnostics } from './utils/envDiagnostics'
 
 // Icons
-import { Home, FolderOpen, Plus, Search, Menu, Bell, User, ExternalLink, FileText } from 'lucide-react'
+import { Home, FolderOpen, Plus, Search, Menu, Bell, User, ExternalLink, FileText, Image } from 'lucide-react'
 
 /**
  * Main App Component with new architecture
@@ -161,7 +162,7 @@ function App() {
               >
               <Routes>
                 {/* Public landing page */}
-                <Route path="/" element={<PublicRoute />} />
+                <Route path="/landing" element={<PublicRoute />} />
 
                 {/* Login page */}
                 <Route path="/login" element={<LoginPage />} />
@@ -296,7 +297,7 @@ function PublicRoute() {
   // Redirect authenticated users to home
   React.useEffect(() => {
     if (!loading && user) {
-      navigate('/home', { replace: true })
+      navigate('/', { replace: true })
     }
   }, [user, loading, navigate])
 
@@ -323,10 +324,10 @@ function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
   const navigate = useNavigate()
 
-  // Redirect unauthenticated users to login
+  // Redirect unauthenticated users to landing
   React.useEffect(() => {
     if (!loading && !user) {
-      navigate('/login', { replace: true })
+      navigate('/landing', { replace: true })
     }
   }, [user, loading, navigate])
 
@@ -434,8 +435,6 @@ function AppContent() {
       selectedAlbum
     ) {
       context = 'album'
-    } else if (currentPath === '/search') {
-      context = 'search'
     } else if (currentPath === '/') {
       // Check if it's favorites by seeing if sourceList is favoritePhotos
       const isFavorites = list.every((p) => p.favorite)
@@ -608,8 +607,27 @@ function AppContent() {
       {/* Main content - React Router based rendering */}
       <main className="relative z-10">
         <Routes>
+          {/* Photo Library is now the home page */}
           <Route
-            path="/home"
+            path="/"
+            element={
+              <SearchPage
+                photos={photos}
+                albums={albums}
+                onPhotoClick={handlePhotoClick}
+                toggleFavorite={toggleFavorite}
+                refreshData={refreshData}
+              />
+            }
+          />
+
+          {/* Silent redirects for backward compatibility */}
+          <Route path="/home" element={<Navigate to="/" replace />} />
+          <Route path="/search" element={<Navigate to="/" replace />} />
+
+          {/* HomeDashboard moved to /discover (accessible but not in nav) */}
+          <Route
+            path="/discover"
             element={
               <HomeDashboard
                 albums={albums}
@@ -630,19 +648,6 @@ function AppContent() {
                 albums={albums}
                 photos={photos}
                 onAlbumClick={handleAlbumClick}
-                onPhotoClick={handlePhotoClick}
-                toggleFavorite={toggleFavorite}
-                refreshData={refreshData}
-              />
-            }
-          />
-
-          <Route
-            path="/search"
-            element={
-              <SearchPage
-                photos={photos}
-                albums={albums}
                 onPhotoClick={handlePhotoClick}
                 toggleFavorite={toggleFavorite}
                 refreshData={refreshData}
@@ -752,15 +757,16 @@ function AppContent() {
       {showBottomNav && !isKeyboardOpen && (
         <nav className="bottom-nav-float">
           <div className="flex justify-around items-center gap-1">
-            {/* Home */}
+            {/* Photos */}
             <button
-              onClick={() => navigate('/home')}
+              onClick={() => navigate('/')}
               className={`ripple-effect nav-item-premium ${
-                location.pathname === '/home' ? 'active' : ''
+                location.pathname === '/' ? 'active' : ''
               }`}
+              aria-label={t('nav:photos')}
             >
-              <Home className="w-6 h-6" />
-              <span className="text-xs font-medium">{t('nav:home')}</span>
+              <Image className="w-6 h-6" />
+              <span className="text-xs font-medium">{t('nav:photos')}</span>
             </button>
 
             {/* Albums */}
@@ -784,23 +790,16 @@ function AppContent() {
               <Plus className="w-7 h-7 text-white" />
             </button>
 
-            {/* Search */}
+            {/* Account */}
             <button
-              onClick={() => navigate('/search')}
+              onClick={() => navigate('/more')}
               className={`ripple-effect nav-item-premium ${
-                location.pathname === '/search' ? 'active' : ''
+                location.pathname.startsWith('/more') ||
+                location.pathname.startsWith('/profile') ||
+                location.pathname.startsWith('/settings') ||
+                location.pathname.startsWith('/account') ? 'active' : ''
               }`}
-            >
-              <Search className="w-6 h-6" />
-              <span className="text-xs font-medium">{t('nav:search')}</span>
-            </button>
-
-            {/* Account (always visible) */}
-            <button
-              onClick={() => navigate('/account')}
-              className={`ripple-effect nav-item-premium ${
-                location.pathname === '/account' || location.pathname === '/more' ? 'active' : ''
-              }`}
+              aria-label={t('nav:account')}
             >
               <User className="w-6 h-6" />
               <span className="text-xs font-medium">{t('nav:account')}</span>
