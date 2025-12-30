@@ -30,7 +30,11 @@ import MoveModal from '../components/MoveModal'
 import ConfirmModal from '../components/ConfirmModal'
 import CollageCard from '../components/CollageCard'
 import useStore from '../state/store'
-import { resolvePhotoDate, sortPhotosByDate, groupPhotosByMonth } from '../utils/photoDateUtils'
+import {
+  resolvePhotoDate,
+  sortPhotosByDate,
+  groupPhotosByMonth,
+} from '../utils/photoDateUtils'
 import useCollageData from '../hooks/useCollageData'
 
 const SearchPage = ({
@@ -108,7 +112,11 @@ const SearchPage = ({
   const [specialFilter, setSpecialFilter] = useState(null)
 
   // Collage fetching
-  const { getCollagesByUser, deleteCollage, isLoading: collagesLoading } = useCollageData()
+  const {
+    getCollagesByUser,
+    deleteCollage,
+    isLoading: collagesLoading,
+  } = useCollageData()
   const [collages, setCollages] = useState([])
 
   // Debounce search query for performance
@@ -135,7 +143,10 @@ const SearchPage = ({
         const userCollages = await getCollagesByUser()
         setCollages(Array.isArray(userCollages) ? userCollages : [])
         if (import.meta.env.DEV) {
-          console.log('✅ Loaded collages for search page:', userCollages.length)
+          console.log(
+            '✅ Loaded collages for search page:',
+            userCollages.length
+          )
         }
       } catch (error) {
         console.error('Failed to load collages:', error)
@@ -431,59 +442,65 @@ const SearchPage = ({
     safeAlbums,
   ])
 
-  // 🎨 MERGE PHOTOS AND COLLAGES: Combine content chronologically
-  const allContent = useMemo(() => {
-    // Tag photos with contentType
-    const photosWithType = filteredPhotos.map(p => ({
-      ...p,
-      contentType: 'photo',
-      sortDate: new Date(p.createdAt || p.uploadedAt || Date.now())
-    }))
+// 🎨 MERGE PHOTOS AND COLLAGES: Combine content chronologically
+const allContent = useMemo(() => {
+  // Tag photos with contentType
+  const photosWithType = filteredPhotos.map((p) => ({
+    ...p,
+    contentType: 'photo',
+    sortDate: new Date(p.createdAt || p.uploadedAt || Date.now()),
+  }))
 
-    // Tag collages with contentType
-    const collagesWithType = collages.map(c => ({
+  // Tag collages with contentType
+  const collagesWithType = collages
+    .map((c) => ({
       ...c,
+      id: c.id || c.docId, // 🔥 DETTE ER NØKKELEN
       contentType: 'collage',
-      sortDate: new Date(c.createdAt || Date.now())
+      sortDate: new Date(c.createdAt || Date.now()),
     }))
+    .filter((c) => !!c.id)
 
-    // Merge and sort by date (newest first)
-    const merged = [...photosWithType, ...collagesWithType]
-      .sort((a, b) => b.sortDate - a.sortDate)
+  // 🔀 MERGE: Photos + Collages → unified content list
+  const merged = [...photosWithType, ...collagesWithType].sort(
+    (a, b) => b.sortDate - a.sortDate
+  )
 
-    if (import.meta.env.DEV) {
-      console.log('🎨 Merged content:', {
-        photos: photosWithType.length,
-        collages: collagesWithType.length,
-        total: merged.length
-      })
-    }
+  if (import.meta.env.DEV) {
+    console.log('🎨 Merged content:', {
+      photos: photosWithType.length,
+      collages: collagesWithType.length,
+      total: merged.length,
+    })
+  }
 
-    return merged
-  }, [filteredPhotos, collages])
+  return merged
+}, [filteredPhotos, collages])
 
-  // 📅 DATE GROUPING: Group merged content by Month + Year
-  const photoGroups = useMemo(() => {
-    if (allContent.length === 0) {
-      return []
-    }
+// 📅 DATE GROUPING: Group merged content by Month + Year
+const photoGroups = useMemo(() => {
+  if (!Array.isArray(allContent) || allContent.length === 0) {
+    return []
+  }
 
-    if (import.meta.env.DEV) {
-      console.log('📅 Grouping content by Month + Year (unified utility)...')
-    }
+  if (import.meta.env.DEV) {
+    console.log('📅 Grouping content by Month + Year (unified utility)...')
+  }
 
-    // Use canonical date resolution utility (works with both photos and collages)
-    const groups = groupPhotosByMonth(allContent, 'nb')
+  // Works for BOTH photos and collages
+  const groups = groupPhotosByMonth(allContent, 'nb')
 
-    if (import.meta.env.DEV) {
-      console.log(
-        `✅ Created ${groups.length} month groups:`,
-        groups.map((g) => `${g.label} (${g.photos.length})`)
-      )
-    }
+  if (import.meta.env.DEV) {
+    console.log(
+      `✅ Created ${groups.length} month groups:`,
+      groups.map((g) => `${g.label} (${g.photos.length})`)
+    )
+  }
 
-    return groups
-  }, [allContent])
+  return groups
+}, [allContent])
+  // --- Count of active filters ---
+
 
   const activeFilterCount = useMemo(() => {
     return Object.values(activeFilters).filter(Boolean).length
@@ -644,9 +661,14 @@ const SearchPage = ({
         // Update target album count
         const targetAlbum = safeAlbums.find((a) => a.id === targetAlbumId)
         if (targetAlbum) {
-          const newTargetCount = (targetAlbum.photoCount || 0) + moveResults.success.length
+          const newTargetCount =
+            (targetAlbum.photoCount || 0) + moveResults.success.length
           if (import.meta.env.DEV) {
-            console.log(`✅ Updating target album ${targetAlbumId} count: ${targetAlbum.photoCount || 0} → ${newTargetCount}`)
+            console.log(
+              `✅ Updating target album ${targetAlbumId} count: ${
+                targetAlbum.photoCount || 0
+              } → ${newTargetCount}`
+            )
           }
           await updateAlbumPhotoCount(targetAlbumId, newTargetCount)
         }
@@ -655,9 +677,16 @@ const SearchPage = ({
         for (const [sourceAlbumId, count] of sourceAlbums.entries()) {
           const sourceAlbum = safeAlbums.find((a) => a.id === sourceAlbumId)
           if (sourceAlbum) {
-            const newSourceCount = Math.max(0, (sourceAlbum.photoCount || 0) - count)
+            const newSourceCount = Math.max(
+              0,
+              (sourceAlbum.photoCount || 0) - count
+            )
             if (import.meta.env.DEV) {
-              console.log(`✅ Updating source album ${sourceAlbumId} count: ${sourceAlbum.photoCount || 0} → ${newSourceCount}`)
+              console.log(
+                `✅ Updating source album ${sourceAlbumId} count: ${
+                  sourceAlbum.photoCount || 0
+                } → ${newSourceCount}`
+              )
             }
             await updateAlbumPhotoCount(sourceAlbumId, newSourceCount)
           }
@@ -678,7 +707,9 @@ const SearchPage = ({
     if (moveResults.failed.length === 0) {
       // All succeeded - no need to alert, move modal closes smoothly
       if (import.meta.env.DEV) {
-        console.log(`✅ All ${moveResults.success.length} photos moved successfully`)
+        console.log(
+          `✅ All ${moveResults.success.length} photos moved successfully`
+        )
       }
     } else if (moveResults.success.length === 0) {
       // All failed
@@ -690,9 +721,11 @@ const SearchPage = ({
 
       alert(
         `❌ ${t('search:errors.couldNotMove')}\n\n` +
-        `Failed to move ${moveResults.failed.length} photo${moveResults.failed.length > 1 ? 's' : ''}:\n` +
-        failedList +
-        (moreCount > 0 ? `\n... and ${moreCount} more` : '')
+          `Failed to move ${moveResults.failed.length} photo${
+            moveResults.failed.length > 1 ? 's' : ''
+          }:\n` +
+          failedList +
+          (moreCount > 0 ? `\n... and ${moreCount} more` : '')
       )
     } else {
       // Partial success
@@ -704,11 +737,11 @@ const SearchPage = ({
 
       alert(
         `⚠️ Partial success:\n\n` +
-        `✅ Moved: ${moveResults.success.length}\n` +
-        `❌ Failed: ${moveResults.failed.length}\n\n` +
-        `Failed photos:\n` +
-        failedList +
-        (moreCount > 0 ? `\n... and ${moreCount} more` : '')
+          `✅ Moved: ${moveResults.success.length}\n` +
+          `❌ Failed: ${moveResults.failed.length}\n\n` +
+          `Failed photos:\n` +
+          failedList +
+          (moreCount > 0 ? `\n... and ${moreCount} more` : '')
       )
     }
   }
@@ -822,7 +855,9 @@ const SearchPage = ({
                   setMoveOpen(true)
                 }}
                 className="ripple-effect px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center gap-2 touch-target touch-manipulation"
-                aria-label={`Move ${selectedPhotos.length} selected photo${selectedPhotos.length > 1 ? 's' : ''}`}
+                aria-label={`Move ${selectedPhotos.length} selected photo${
+                  selectedPhotos.length > 1 ? 's' : ''
+                }`}
               >
                 <Move size={18} /> {t('search:move')}
               </button>
@@ -859,7 +894,9 @@ const SearchPage = ({
                   }
 
                   if (import.meta.env.DEV) {
-                    console.log('🔥 Starting deletion process with error recovery...')
+                    console.log(
+                      '🔥 Starting deletion process with error recovery...'
+                    )
                   }
 
                   // 🐛 FIX: Track success/failure for each photo/collage
@@ -873,7 +910,7 @@ const SearchPage = ({
                   const collageIds = []
 
                   for (const itemId of selectedPhotos) {
-                    const item = allContent.find(i => i.id === itemId)
+                    const item = allContent.find((i) => i.id === itemId)
                     if (item?.contentType === 'collage') {
                       collageIds.push(itemId)
                     } else {
@@ -896,7 +933,9 @@ const SearchPage = ({
 
                     try {
                       if (import.meta.env.DEV) {
-                        console.log(`Deleting photo: ${photo.name} (${photoId})`)
+                        console.log(
+                          `Deleting photo: ${photo.name} (${photoId})`
+                        )
                       }
 
                       await deletePhoto(photo.id, photo)
@@ -906,7 +945,10 @@ const SearchPage = ({
                         console.log(`✅ Successfully deleted: ${photo.name}`)
                       }
                     } catch (error) {
-                      console.error(`❌ Failed to delete photo ${photoId}:`, error)
+                      console.error(
+                        `❌ Failed to delete photo ${photoId}:`,
+                        error
+                      )
                       deleteResults.failed.push({
                         photoId,
                         name: photo.name || 'Unknown',
@@ -930,17 +972,26 @@ const SearchPage = ({
 
                     try {
                       if (import.meta.env.DEV) {
-                        console.log(`Deleting collage: ${collage.title || collage.id}`)
+                        console.log(
+                          `Deleting collage: ${collage.title || collage.id}`
+                        )
                       }
 
                       await deleteCollage(collageId)
                       deleteResults.success.push(collageId)
 
                       if (import.meta.env.DEV) {
-                        console.log(`✅ Successfully deleted collage: ${collage.title || collage.id}`)
+                        console.log(
+                          `✅ Successfully deleted collage: ${
+                            collage.title || collage.id
+                          }`
+                        )
                       }
                     } catch (error) {
-                      console.error(`❌ Failed to delete collage ${collageId}:`, error)
+                      console.error(
+                        `❌ Failed to delete collage ${collageId}:`,
+                        error
+                      )
                       deleteResults.failed.push({
                         photoId: collageId,
                         name: collage.title || 'Unknown Collage',
@@ -982,9 +1033,11 @@ const SearchPage = ({
 
                     alert(
                       `❌ ${t('search:errors.couldNotDelete')}\n\n` +
-                      `Failed to delete ${deleteResults.failed.length} photo${deleteResults.failed.length > 1 ? 's' : ''}:\n` +
-                      failedList +
-                      (moreCount > 0 ? `\n... and ${moreCount} more` : '')
+                        `Failed to delete ${deleteResults.failed.length} photo${
+                          deleteResults.failed.length > 1 ? 's' : ''
+                        }:\n` +
+                        failedList +
+                        (moreCount > 0 ? `\n... and ${moreCount} more` : '')
                     )
                   } else {
                     // Partial success
@@ -996,16 +1049,18 @@ const SearchPage = ({
 
                     alert(
                       `⚠️ Partial success:\n\n` +
-                      `✅ Deleted: ${deleteResults.success.length}\n` +
-                      `❌ Failed: ${deleteResults.failed.length}\n\n` +
-                      `Failed photos:\n` +
-                      failedList +
-                      (moreCount > 0 ? `\n... and ${moreCount} more` : '')
+                        `✅ Deleted: ${deleteResults.success.length}\n` +
+                        `❌ Failed: ${deleteResults.failed.length}\n\n` +
+                        `Failed photos:\n` +
+                        failedList +
+                        (moreCount > 0 ? `\n... and ${moreCount} more` : '')
                     )
                   }
                 }}
                 className="ripple-effect px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 flex items-center gap-2 touch-target touch-manipulation"
-                aria-label={`Delete ${selectedPhotos.length} selected photo${selectedPhotos.length > 1 ? 's' : ''}`}
+                aria-label={`Delete ${selectedPhotos.length} selected photo${
+                  selectedPhotos.length > 1 ? 's' : ''
+                }`}
               >
                 <Trash2 size={18} />
                 <span>
@@ -1018,10 +1073,7 @@ const SearchPage = ({
       )}
 
       {/* Search Section - Collapsed by Default */}
-      {!searchExpanded ? (
-        // Collapsed state - show search icon in header (no separate search box)
-        null
-      ) : (
+      {!searchExpanded ? null : ( // Collapsed state - show search icon in header (no separate search box)
         // Expanded state - full search input
         <div className="glass rounded-2xl p-4 mb-4">
           <div className="flex items-center gap-3">
@@ -1209,7 +1261,9 @@ const SearchPage = ({
       {(activeFilterCount > 0 || searchQuery.trim()) && (
         <div className="glass rounded-2xl p-4 mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm opacity-70">{t('search:activeFilters')}:</span>
+            <span className="text-sm opacity-70">
+              {t('search:activeFilters')}:
+            </span>
             <div className="flex flex-wrap gap-2">
               {searchQuery.trim() && (
                 <span className="px-2 py-1 rounded-lg bg-blue-600/30 text-sm border border-blue-500/50">
@@ -1238,9 +1292,11 @@ const SearchPage = ({
               )}
               {activeFilters.albumId && (
                 <span className="px-2 py-1 rounded-lg bg-indigo-600/30 text-sm border border-indigo-500/50">
-                  Album: {activeFilters.albumId === 'noAlbum'
+                  Album:{' '}
+                  {activeFilters.albumId === 'noAlbum'
                     ? t('search:filterOptions.noAlbum')
-                    : safeAlbums.find(a => a.id === activeFilters.albumId)?.name || 'Unknown'}
+                    : safeAlbums.find((a) => a.id === activeFilters.albumId)
+                        ?.name || 'Unknown'}
                 </span>
               )}
               {activeFilters.category && (
@@ -1254,7 +1310,8 @@ const SearchPage = ({
                   {activeFilters.dateRange === 'week' && 'This week'}
                   {activeFilters.dateRange === 'month' && 'This month'}
                   {activeFilters.dateRange === 'year' && 'This year'}
-                  {activeFilters.dateRange.startsWith('date:') && `Date: ${activeFilters.dateRange.replace('date:', '')}`}
+                  {activeFilters.dateRange.startsWith('date:') &&
+                    `Date: ${activeFilters.dateRange.replace('date:', '')}`}
                 </span>
               )}
             </div>
@@ -1298,9 +1355,9 @@ const SearchPage = ({
                           editMode={editMode}
                           isSelected={selectedPhotos.includes(item.id)}
                           onSelect={(collageId) => {
-                            setSelectedPhotos(prev =>
+                            setSelectedPhotos((prev) =>
                               prev.includes(collageId)
-                                ? prev.filter(id => id !== collageId)
+                                ? prev.filter((id) => id !== collageId)
                                 : [...prev, collageId]
                             )
                           }}
@@ -1334,7 +1391,11 @@ const SearchPage = ({
                               e.stopPropagation()
                               togglePhotoSelection(photo.id)
                             }}
-                            aria-label={selectedPhotos.includes(photo.id) ? 'Deselect photo' : 'Select photo'}
+                            aria-label={
+                              selectedPhotos.includes(photo.id)
+                                ? 'Deselect photo'
+                                : 'Select photo'
+                            }
                             aria-pressed={selectedPhotos.includes(photo.id)}
                           >
                             <div
