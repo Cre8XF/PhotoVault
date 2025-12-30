@@ -23,6 +23,7 @@ import useCollageData from '../../../hooks/useCollageData'
 import usePhotoData from '../../../hooks/usePhotoData'
 import { renderCollageToCanvas, downloadCollageBlob } from '../../../utils/renderCollageToCanvas'
 import { LAYOUTS_V3 } from '../layouts/layouts_v3'
+import { getTemplateById, expandTemplate } from '../templateEngine'
 
 // Components
 import CollagePreview from '../components/CollagePreview'
@@ -74,16 +75,51 @@ const CollageView = () => {
 
         setCollage(collageData)
 
-        // Find layout
-        const foundLayout = Object.values(LAYOUTS_V3).find(
-          (l) => l.id === collageData.layoutId
-        )
+        // Resolve layout from collage data (supports both v1 and v2)
+        let resolvedLayout = null
 
-        if (foundLayout) {
-          setLayout(foundLayout)
-        } else {
-          console.error('Layout not found:', collageData.layoutId)
+        // V2 (template-based): Use templateId to get template, then extract layout
+        if (collageData.templateId) {
+          const template = getTemplateById(collageData.templateId)
+          if (template) {
+            // Templates are the layout - expand to get full structure
+            resolvedLayout = expandTemplate(template)
+            console.log('✅ Resolved layout from templateId:', collageData.templateId)
+          } else {
+            console.warn('⚠️ Template not found:', collageData.templateId)
+          }
         }
+
+        // V1 (legacy): Use layoutId to lookup in LAYOUTS_V3
+        else if (collageData.layoutId) {
+          resolvedLayout = Object.values(LAYOUTS_V3).find(
+            (l) => l.id === collageData.layoutId
+          )
+          if (resolvedLayout) {
+            console.log('✅ Resolved layout from layoutId:', collageData.layoutId)
+          } else {
+            console.warn('⚠️ Layout not found:', collageData.layoutId)
+          }
+        }
+
+        // Fallback: Try to extract from collage.layout field
+        else if (collageData.layout) {
+          resolvedLayout = collageData.layout
+          console.log('✅ Using layout from collage.layout field')
+        }
+
+        // Guard: If still no layout, log error and navigate away
+        if (!resolvedLayout) {
+          console.error('❌ Could not resolve layout for collage:', {
+            id: collageData.id,
+            templateId: collageData.templateId,
+            layoutId: collageData.layoutId,
+            hasLayout: !!collageData.layout
+          })
+          // Don't navigate away - show error state instead
+        }
+
+        setLayout(resolvedLayout)
 
       } catch (error) {
         console.error('❌ Error loading collage:', error)
@@ -126,7 +162,10 @@ const CollageView = () => {
 
   // Handle share
   const handleShare = async () => {
-    if (!collage || !layout || collagePhotos.length === 0) return
+    if (!collage || !layout || collagePhotos.length === 0) {
+      console.warn('⚠️ Cannot share: missing collage, layout, or photos')
+      return
+    }
 
     try {
       // Generate collage image
@@ -200,12 +239,49 @@ const CollageView = () => {
   }
 
   // Loading state
-  if (isLoading || !collage || !layout || collagePhotos.length === 0) {
+  if (isLoading || !collage) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-white/20 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
           <p className="text-sm opacity-60">{t('collage:loading.collage')}</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state: Layout could not be resolved
+  if (!layout) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-8 h-8 text-red-400" />
+          </div>
+          <h2 className="text-xl font-semibold mb-2">
+            {t('collage:errors.layoutNotFound', 'Layout Not Found')}
+          </h2>
+          <p className="text-sm opacity-60 mb-6">
+            {t('collage:errors.layoutNotFoundMessage', 'This collage uses a layout that is no longer available. The collage may have been created with an older version of the app.')}
+          </p>
+          <button
+            onClick={() => navigate('/albums')}
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl transition"
+          >
+            {t('common:backToAlbums', 'Back to Albums')}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state: No photos loaded
+  if (collagePhotos.length === 0 && collage.photoIds?.length > 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-white/20 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm opacity-60">{t('collage:loading.photos')}</p>
         </div>
       </div>
     )
@@ -357,7 +433,7 @@ const CollageView = () => {
                   {t('collage:metadata.layout')}
                 </p>
                 <p className="text-sm font-medium">
-                  {t(layout.nameKey) || layout.name}
+                  {layout.nameKey ? t(layout.nameKey) : (layout.name || 'Custom')}
                 </p>
               </div>
             </div>
@@ -378,19 +454,21 @@ const CollageView = () => {
             </div>
 
             {/* Resolution */}
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-500/20 rounded-lg">
-                <Maximize2 className="w-5 h-5 text-green-400" />
+            {layout.canvas && (
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-500/20 rounded-lg">
+                  <Maximize2 className="w-5 h-5 text-green-400" />
+                </div>
+                <div>
+                  <p className="text-xs opacity-60">
+                    {t('collage:metadata.resolution')}
+                  </p>
+                  <p className="text-sm font-medium">
+                    {layout.canvas.width} × {layout.canvas.height}px
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs opacity-60">
-                  {t('collage:metadata.resolution')}
-                </p>
-                <p className="text-sm font-medium">
-                  {layout.canvas.width} × {layout.canvas.height}px
-                </p>
-              </div>
-            </div>
+            )}
 
             {/* Created date */}
             <div className="flex items-center gap-3">
