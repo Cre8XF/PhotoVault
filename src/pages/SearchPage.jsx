@@ -21,6 +21,8 @@ import {
   CheckSquare,
   Square,
   LayoutGrid,
+  Image,
+  Video,
 } from 'lucide-react'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
 import { format } from 'date-fns'
@@ -95,6 +97,7 @@ const SearchPage = ({
     dateRange: null,
     albumId: null,
     category: null,
+    contentTypes: ['photo', 'video'], // Default: hide collages
   })
   const [showFilters, setShowFilters] = useState(false)
   const [searchExpanded, setSearchExpanded] = useState(false)
@@ -459,10 +462,10 @@ const SearchPage = ({
 
   // 🎨 MERGE PHOTOS AND COLLAGES: Combine content chronologically
   const allContent = useMemo(() => {
-    // Tag photos with contentType
+    // Tag photos with contentType - differentiate between photos and videos
     const photosWithType = filteredPhotos.map(p => ({
       ...p,
-      contentType: 'photo',
+      contentType: p.type === 'video' ? 'video' : 'photo',
       sortDate: new Date(p.createdAt || p.uploadedAt || Date.now())
     }))
 
@@ -485,16 +488,25 @@ const SearchPage = ({
     (a, b) => b.sortDate - a.sortDate
   )
 
+  // 🎯 FILTER BY CONTENT TYPE: Apply contentTypes filter
+  const selectedContentTypes = activeFilters.contentTypes || ['photo', 'video']
+  const filtered = merged.filter(item =>
+    selectedContentTypes.includes(item.contentType)
+  )
+
   if (import.meta.env.DEV) {
     console.log('🎨 Merged content:', {
-      photos: photosWithType.length,
+      photos: photosWithType.filter(p => p.contentType === 'photo').length,
+      videos: photosWithType.filter(p => p.contentType === 'video').length,
       collages: collagesWithType.length,
       total: merged.length,
+      filtered: filtered.length,
+      activeContentTypes: selectedContentTypes,
     })
   }
 
-  return merged
-}, [filteredPhotos, collages])
+  return filtered
+}, [filteredPhotos, collages, activeFilters.contentTypes])
 
 // 📅 DATE GROUPING: Group merged content by Month + Year
 const photoGroups = useMemo(() => {
@@ -519,10 +531,29 @@ const photoGroups = useMemo(() => {
   return groups
 }, [allContent])
   // --- Count of active filters ---
-
-
   const activeFilterCount = useMemo(() => {
-    return Object.values(activeFilters).filter(Boolean).length
+    let count = 0
+
+    // Count boolean filters
+    if (activeFilters.favorites) count++
+    if (activeFilters.withFaces) count++
+    if (activeFilters.withTags) count++
+    if (activeFilters.aiAnalyzed) count++
+
+    // Count selection filters
+    if (activeFilters.dateRange) count++
+    if (activeFilters.albumId) count++
+    if (activeFilters.category) count++
+
+    // Count contentTypes only if different from default
+    const defaultContentTypes = ['photo', 'video']
+    const currentContentTypes = activeFilters.contentTypes || defaultContentTypes
+    const isDefaultContentTypes =
+      currentContentTypes.length === defaultContentTypes.length &&
+      defaultContentTypes.every(type => currentContentTypes.includes(type))
+    if (!isDefaultContentTypes) count++
+
+    return count
   }, [activeFilters])
 
   // --- Toggle photo selection ---
@@ -570,6 +601,7 @@ const photoGroups = useMemo(() => {
       dateRange: null,
       albumId: null,
       category: null,
+      contentTypes: ['photo', 'video'], // Reset to default: hide collages
     })
     setSearchQuery('')
     setSearchExpanded(false) // Also collapse search when resetting
@@ -1128,6 +1160,88 @@ const photoGroups = useMemo(() => {
       {/* Filterpanel */}
       {showFilters && (
         <div className="glass rounded-2xl p-4 mb-6 space-y-4">
+          {/* Content Type Filters */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-sm opacity-70">Content Type:</p>
+              <button
+                onClick={() => {
+                  const allTypes = ['photo', 'video', 'collage']
+                  const currentTypes = activeFilters.contentTypes || []
+                  const allSelected = allTypes.every(type => currentTypes.includes(type))
+                  setActiveFilters(f => ({
+                    ...f,
+                    contentTypes: allSelected ? ['photo', 'video'] : allTypes
+                  }))
+                }}
+                className="text-xs px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10"
+              >
+                {(activeFilters.contentTypes || []).length === 3 ? 'Reset' : 'All'}
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => {
+                  const current = activeFilters.contentTypes || []
+                  const hasPhoto = current.includes('photo')
+                  setActiveFilters(f => ({
+                    ...f,
+                    contentTypes: hasPhoto
+                      ? current.filter(t => t !== 'photo')
+                      : [...current, 'photo']
+                  }))
+                }}
+                className={`px-3 py-2 rounded-lg border ${
+                  (activeFilters.contentTypes || []).includes('photo')
+                    ? 'bg-blue-600 border-blue-500'
+                    : 'border-white/10 opacity-50'
+                } flex items-center gap-2`}
+              >
+                <Image size={16} /> Photos
+              </button>
+
+              <button
+                onClick={() => {
+                  const current = activeFilters.contentTypes || []
+                  const hasVideo = current.includes('video')
+                  setActiveFilters(f => ({
+                    ...f,
+                    contentTypes: hasVideo
+                      ? current.filter(t => t !== 'video')
+                      : [...current, 'video']
+                  }))
+                }}
+                className={`px-3 py-2 rounded-lg border ${
+                  (activeFilters.contentTypes || []).includes('video')
+                    ? 'bg-purple-600 border-purple-500'
+                    : 'border-white/10 opacity-50'
+                } flex items-center gap-2`}
+              >
+                <Video size={16} /> Videos
+              </button>
+
+              <button
+                onClick={() => {
+                  const current = activeFilters.contentTypes || []
+                  const hasCollage = current.includes('collage')
+                  setActiveFilters(f => ({
+                    ...f,
+                    contentTypes: hasCollage
+                      ? current.filter(t => t !== 'collage')
+                      : [...current, 'collage']
+                  }))
+                }}
+                className={`px-3 py-2 rounded-lg border ${
+                  (activeFilters.contentTypes || []).includes('collage')
+                    ? 'bg-emerald-600 border-emerald-500'
+                    : 'border-white/10 opacity-50'
+                } flex items-center gap-2`}
+              >
+                <LayoutGrid size={16} /> Collages
+              </button>
+            </div>
+          </div>
+
           {/* Primærfiltre */}
           <div className="flex flex-wrap gap-2">
             <button
@@ -1509,6 +1623,7 @@ const photoGroups = useMemo(() => {
                   dateRange: null,
                   albumId: null,
                   category: null,
+                  contentTypes: ['photo', 'video'], // Reset to default: hide collages
                 })
               }}
               className="ripple-effect px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 flex items-center gap-2 mx-auto transition"
