@@ -1,15 +1,27 @@
 import React from 'react'
-import { LayoutGrid } from 'lucide-react'
+import { LayoutGrid, Check } from 'lucide-react'
 
 /**
  * CollageCard Component
  * Displays a collage thumbnail in the photo grid (2x1 size)
+ * Supports edit mode for selection alongside photos
  *
  * @param {Object} collage - Collage object from Firestore
  * @param {Function} onClick - Click handler
  * @param {String} className - Additional CSS classes
+ * @param {Boolean} editMode - Whether edit mode is active
+ * @param {Boolean} isSelected - Whether this collage is selected
+ * @param {Function} onSelect - Selection handler (receives collage.id)
  */
-const CollageCard = ({ collage, onClick, className = '' }) => {
+const CollageCard = ({
+  collage,
+  onClick,
+  className = '',
+  // Edit mode props
+  editMode = false,
+  isSelected = false,
+  onSelect = null
+}) => {
   // Use staticImageUrl (rendered JPEG) or fallback to imageUrl/url/thumbnailUrl
   const thumbnailUrl = collage.staticImageUrl || collage.imageUrl || collage.url || collage.thumbnailUrl
 
@@ -18,10 +30,23 @@ const CollageCard = ({ collage, onClick, className = '' }) => {
                      collage.photoIds?.length ||
                      0
 
+  const handleClick = (e) => {
+    if (editMode && onSelect) {
+      e.stopPropagation()
+      onSelect(collage.id)
+    } else if (onClick) {
+      onClick(collage)
+    }
+  }
+
   return (
     <div
-      onClick={onClick}
-      className={`relative cursor-pointer group rounded-lg overflow-hidden border-2 border-purple-500/30 hover:border-purple-500 transition ${className}`}
+      onClick={handleClick}
+      className={`relative cursor-pointer group rounded-lg overflow-hidden border-2 transition ${
+        isSelected
+          ? 'border-purple-500 ring-2 ring-purple-500/50'
+          : 'border-purple-500/30 hover:border-purple-500'
+      } ${className}`}
     >
       {/* Collage Image */}
       <div className="aspect-[4/5] bg-gray-900">
@@ -38,24 +63,46 @@ const CollageCard = ({ collage, onClick, className = '' }) => {
         )}
       </div>
 
-      {/* Collage Badge */}
-      <div className="absolute top-2 left-2 px-2 py-1 bg-purple-600 rounded-md flex items-center gap-1 shadow-lg">
-        <LayoutGrid className="w-3 h-3" />
-        <span className="text-xs font-semibold">Collage</span>
-      </div>
+      {/* Selection Checkbox (Edit Mode) */}
+      {editMode && (
+        <div className="absolute top-2 right-2 z-10">
+          <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition ${
+            isSelected
+              ? 'bg-purple-600 border-purple-600'
+              : 'bg-black/60 border-white/60'
+          }`}>
+            {isSelected && (
+              <Check className="w-4 h-4 text-white" />
+            )}
+          </div>
+        </div>
+      )}
 
-      {/* Title (optional, on hover) */}
-      {collage.title && (
+      {/* Collage Badge */}
+      {!editMode && (
+        <div className="absolute top-2 left-2 px-2 py-1 bg-purple-600 rounded-md flex items-center gap-1 shadow-lg">
+          <LayoutGrid className="w-3 h-3" />
+          <span className="text-xs font-semibold">Collage</span>
+        </div>
+      )}
+
+      {/* Title (hover) */}
+      {!editMode && collage.title && (
         <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition">
           <p className="text-sm font-medium truncate">{collage.title}</p>
         </div>
       )}
 
       {/* Photo count indicator */}
-      {photoCount > 0 && (
+      {!editMode && photoCount > 0 && (
         <div className="absolute top-2 right-2 px-2 py-1 bg-black/60 rounded-md text-xs shadow-lg">
           {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
         </div>
+      )}
+
+      {/* Selected overlay */}
+      {isSelected && (
+        <div className="absolute inset-0 bg-purple-600/20 border-2 border-purple-600 rounded-lg pointer-events-none" />
       )}
     </div>
   )
