@@ -257,8 +257,9 @@ export const useCollageData = () => {
         const data = docSnap.data()
 
         return {
-          id: docSnap.id,
           ...data,
+          id: docSnap.id, // Document ID always takes precedence
+          collageId: docSnap.id, // Also set collageId for compatibility
           createdAt: data.createdAt?.toDate?.() || new Date(),
           updatedAt: data.updatedAt?.toDate?.() || new Date()
         }
@@ -298,12 +299,16 @@ export const useCollageData = () => {
 
         const snapshot = await getDocs(q)
 
-        const collages = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate?.() || new Date(),
-          updatedAt: doc.data().updatedAt?.toDate?.() || new Date()
-        }))
+        const collages = snapshot.docs.map(doc => {
+          const data = doc.data()
+          return {
+            ...data,
+            id: doc.id, // Document ID always takes precedence
+            collageId: doc.id, // Also set collageId for compatibility
+            createdAt: data.createdAt?.toDate?.() || new Date(),
+            updatedAt: data.updatedAt?.toDate?.() || new Date()
+          }
+        })
 
         console.log('✅ Loaded', collages.length, 'collages')
 

@@ -442,24 +442,28 @@ const SearchPage = ({
     safeAlbums,
   ])
 
-// 🎨 MERGE PHOTOS AND COLLAGES: Combine content chronologically
-const allContent = useMemo(() => {
-  // Tag photos with contentType
-  const photosWithType = filteredPhotos.map((p) => ({
-    ...p,
-    contentType: 'photo',
-    sortDate: new Date(p.createdAt || p.uploadedAt || Date.now()),
-  }))
-
-  // Tag collages with contentType
-  const collagesWithType = collages
-    .map((c) => ({
-      ...c,
-      id: c.id || c.docId, // 🔥 DETTE ER NØKKELEN
-      contentType: 'collage',
-      sortDate: new Date(c.createdAt || Date.now()),
+  // 🎨 MERGE PHOTOS AND COLLAGES: Combine content chronologically
+  const allContent = useMemo(() => {
+    // Tag photos with contentType
+    const photosWithType = filteredPhotos.map(p => ({
+      ...p,
+      contentType: 'photo',
+      sortDate: new Date(p.createdAt || p.uploadedAt || Date.now())
     }))
-    .filter((c) => !!c.id)
+
+    // Tag collages with contentType - ensure valid ID
+    const collagesWithType = collages
+      .map(c => ({
+        ...c,
+        id: c.id || c.collageId, // Normalize ID: prefer id, fallback to collageId
+        contentType: 'collage',
+        sortDate: new Date(c.createdAt || Date.now())
+      }))
+      .filter(c => c.id) // Filter out collages without valid ID
+
+    if (import.meta.env.DEV && collagesWithType.length < collages.length) {
+      console.warn('⚠️ Filtered out', collages.length - collagesWithType.length, 'collages without valid ID')
+    }
 
   // 🔀 MERGE: Photos + Collages → unified content list
   const merged = [...photosWithType, ...collagesWithType].sort(
@@ -519,7 +523,8 @@ const photoGroups = useMemo(() => {
 
   // --- Select all / deselect all ---
   const selectAllPhotos = () => {
-    const allIds = filteredPhotos.map((p) => p.id)
+    // Include both photos and collages
+    const allIds = allContent.map((item) => item.id).filter(Boolean)
     setSelectedPhotos(allIds)
   }
 
