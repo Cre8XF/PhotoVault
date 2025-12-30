@@ -1,36 +1,28 @@
-// ============================================================================
-// COMPONENT: CollagePreview.jsx - Collage preview with layout grid
-// Main preview component for displaying photos in selected layout
-// ============================================================================
-import React, { useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import PhotoCell from './PhotoCell'
-import { normalizePhotosArray } from '../../../utils/photoHelpers'
 
 /**
  * CollagePreview Component
- * Displays photos in a grid layout with transform support
  *
- * @param {Array} photos - Array of photo objects from Firestore
- * @param {Object} layout - Layout configuration (from layouts_v3.js)
- * @param {Object} transforms - Transform data { [photoId]: { scale, translateX, translateY } }
- * @param {Function} onImageClick - Click handler (photoId) => void
- * @param {boolean} isLoading - Loading state overlay
- * @param {string} className - Additional CSS classes
+ * Displays a preview of a collage with photos placed in layout slots.
+ * Supports custom transforms, loading states, and click handlers.
  */
-const CollagePreview = ({
+function CollagePreview({
   photos = [],
   layout,
   transforms = {},
   onImageClick,
   isLoading = false,
   className = '',
-}) => {
-  const { t } = useTranslation(['collage'])
+}) {
+  const { t } = useTranslation('collage')
+  const [previewPhotos, setPreviewPhotos] = useState([])
 
-  // Normalize photo field names for consistent access (memoized)
-  const normalizedPhotos = useMemo(() => normalizePhotosArray(photos), [photos])
+  // Prepare photos for preview
+  useEffect(() => {
+    if (!photos || photos.length === 0) return
 
   // Memoize grid style to prevent recalculation on every render
   const gridStyle = useMemo(() => ({
@@ -38,32 +30,52 @@ const CollagePreview = ({
     gap: `${layout.gap || 8}px`,
   }), [layout.grid.desktop, layout.gap])
 
-  // Validate photo count matches layout requirements
-  const photoCount = normalizedPhotos.length
-  const minPhotos = layout.minPhotos
-  const maxPhotos = layout.maxPhotos
+    setPreviewPhotos(prepared)
+  }, [photos])
 
-  if (photoCount < minPhotos) {
-    if (import.meta.env.DEV) console.warn(
-      `CollagePreview: Expected at least ${minPhotos} photos, got ${photoCount}`
+  if (!layout) {
+    return (
+      <div className="collage-preview-error bg-red-500/10 border border-red-500/20 rounded-lg p-8 text-center">
+        <p className="text-red-400">{t('collage:error.layoutMissing')}</p>
+      </div>
     )
   }
 
+  const photoCount = previewPhotos.length
+
+  // Normalize aspectRatio to CSS-compatible value
+  const aspectRatioValue =
+    typeof layout.aspectRatio === 'number'
+      ? layout.aspectRatio
+      : layout.aspectRatio || '1'
+
   return (
-    <div className={`collage-preview ${className}`}>
+    <div className={`collage-preview relative ${className}`}>
+      {/* Canvas wrapper with aspect ratio */}
       <div
-        className="relative w-full overflow-hidden rounded-xl border border-white/20 bg-black/5"
-        style={{ aspectRatio: layout.aspectRatio }}
+        className="relative w-full bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg overflow-hidden shadow-2xl"
+        style={{
+          aspectRatio: aspectRatioValue,
+          paddingTop: layout.padding || 0,
+          paddingBottom: layout.padding || 0,
+          paddingLeft: layout.padding || 0,
+          paddingRight: layout.padding || 0,
+        }}
       >
-        {/* Grid layout */}
+        {/* Grid container */}
         <div
-          className="grid w-full h-full p-2"
-          style={gridStyle}
+          className="absolute inset-0 grid"
+          style={{
+            gridTemplateColumns: layout.grid?.desktop || 'repeat(2, 1fr)',
+            gap: `${layout.gap || 8}px`,
+          }}
         >
-          {layout.slots.map((slot, index) => {
-            const photo = normalizedPhotos[index] || null
+          {layout.slots?.map((slot, index) => {
+            const photo = previewPhotos[index]
+            if (!photo) return null
+
             const transform =
-              photo && transforms[photo.id] ? transforms[photo.id] : null
+              transforms && transforms[photo.id] ? transforms[photo.id] : null
 
             return (
               <PhotoCell
@@ -114,13 +126,12 @@ const CollagePreview = ({
   )
 }
 
-// ✅ FIKSET: Bruker korrekte Firestore feltnavn
 CollagePreview.propTypes = {
   photos: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
-      url: PropTypes.string.isRequired, // ← Fikset fra downloadURL
-      thumbnailUrl: PropTypes.string, // ← Fikset fra thumbnail
+      url: PropTypes.string.isRequired,
+      thumbnailUrl: PropTypes.string,
       name: PropTypes.string,
       filename: PropTypes.string,
     })
