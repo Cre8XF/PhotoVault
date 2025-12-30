@@ -34,8 +34,7 @@ const CollagePreview = ({
 
   // Memoize grid style to prevent recalculation on every render
   const gridStyle = useMemo(() => ({
-    gridTemplateColumns: layout.grid.desktop,
-    gridTemplateRows: layout.grid.desktop,
+    grid: layout.grid.desktop, // Use CSS 'grid' shorthand (supports "rows / columns" format)
     gap: `${layout.gap || 8}px`,
   }), [layout.grid.desktop, layout.gap])
 
