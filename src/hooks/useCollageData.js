@@ -425,6 +425,7 @@ export const useCollageData = () => {
           }
 
           // Also delete old-style collage from R2 if it exists (v1 compatibility)
+          // Delete full collage from R2 if it exists
           if (collageData.storageBackend === 'r2' && collageData.storagePath) {
             try {
               const currentUser = auth.currentUser
