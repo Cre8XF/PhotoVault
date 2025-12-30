@@ -18,9 +18,10 @@ import {
   serverTimestamp
 } from 'firebase/firestore'
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
-import { db, storage } from '../firebase'
+import { db, storage, auth } from '../firebase'
 import useStore from '../state/store'
-import { renderCollageThumbnail } from '../utils/renderCollageToCanvas'
+import { renderCollageThumbnail, renderCollageToCanvas } from '../utils/renderCollageToCanvas'
+import { uploadWithFallback, deleteFromR2, extractStoragePathFromR2Url } from '../utils/r2Upload'
 import { LAYOUTS_V3 } from '../features/collage/layouts/layouts_v3'
 import useAuth from './useAuth' // ✅ P0: For email verification check
 
@@ -126,6 +127,59 @@ export const useCollageData = () => {
           }
         }
 
+        // Generate and upload full-size collage to R2
+        let collageImageUrl = null
+        let collageStoragePath = null
+        if (photos && photos.length > 0 && collageLayout) {
+          try {
+            console.log('🖼️ Generating full-size collage image...')
+
+            // Render full-size collage
+            const collageBlob = await renderCollageToCanvas({
+              layout: collageLayout,
+              photos: photos,
+              transforms: transforms,
+              options: {
+                quality: 0.9,
+                useHighRes: true
+              }
+            })
+
+            // Get Firebase token for R2 authentication
+            const currentUser = auth.currentUser
+            if (!currentUser) {
+              throw new Error('User not authenticated')
+            }
+            const firebaseToken = await currentUser.getIdToken()
+
+            // Construct storage path for collage
+            const timestamp = Date.now()
+            collageStoragePath = `users/${user.uid}/collages/${timestamp}_collage.jpg`
+
+            // Upload to R2
+            const { url: r2Url } = await uploadWithFallback(
+              collageBlob,
+              collageStoragePath,
+              'image/jpeg',
+              {
+                userId: user.uid,
+                type: 'collage',
+                uploadedAt: new Date().toISOString()
+              },
+              null, // No Firebase fallback for collages
+              user.uid,
+              firebaseToken
+            )
+
+            collageImageUrl = r2Url
+
+            console.log('✅ Full collage uploaded to R2:', collageImageUrl)
+          } catch (collageError) {
+            console.error('⚠️ Full collage upload failed:', collageError)
+            // Continue without full collage - not critical for MVP
+          }
+        }
+
         // Prepare collage document
         const collageDoc = {
           userId: user.uid,
@@ -133,7 +187,14 @@ export const useCollageData = () => {
           photoIds: photoIds,
           layoutId: layoutId,
           transforms: transforms,
+          type: 'collage',
           ...(thumbnailUrl && { thumbnailUrl }),
+          ...(collageImageUrl && {
+            imageUrl: collageImageUrl,
+            url: collageImageUrl, // Alias for compatibility with photo listing
+            storagePath: collageStoragePath,
+            storageBackend: 'r2'
+          }),
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         }
@@ -336,10 +397,27 @@ export const useCollageData = () => {
 
         console.log('🗑️ Deleting collage:', collageId)
 
-        // Get collage data to find thumbnail URL
+        // Get collage data to find thumbnail URL and R2 storage
         const collageSnap = await getDoc(docRef)
         if (collageSnap.exists()) {
           const collageData = collageSnap.data()
+
+          // Delete full collage from R2 if it exists
+          if (collageData.storageBackend === 'r2' && collageData.storagePath) {
+            try {
+              const currentUser = auth.currentUser
+              if (!currentUser) {
+                throw new Error('User not authenticated')
+              }
+              const firebaseToken = await currentUser.getIdToken()
+
+              await deleteFromR2(collageData.storagePath, firebaseToken)
+              console.log('🗑️ Collage deleted from R2:', collageData.storagePath)
+            } catch (r2Error) {
+              console.warn('⚠️ Could not delete collage from R2:', r2Error)
+              // Continue with collage deletion even if R2 deletion fails
+            }
+          }
 
           // Delete thumbnail from Storage if it exists
           if (collageData.thumbnailUrl) {
