@@ -201,8 +201,8 @@ export const useCollageData = () => {
 
         console.log('💾 Creating collage:', collageDoc)
 
-        // Add to Firestore
-        const docRef = await addDoc(collection(db, 'collages'), collageDoc)
+        // Add to Firestore (user's collages subcollection)
+        const docRef = await addDoc(collection(db, 'users', user.uid, 'collages'), collageDoc)
 
         console.log('✅ Collage created with ID:', docRef.id)
 
@@ -238,10 +238,15 @@ export const useCollageData = () => {
         return null
       }
 
+      if (!user?.uid) {
+        console.warn('⚠️ getCollage called without user')
+        return null
+      }
+
       setIsLoading(true)
 
       try {
-        const docRef = doc(db, 'collages', collageId)
+        const docRef = doc(db, 'users', user.uid, 'collages', collageId)
         const docSnap = await getDoc(docRef)
 
         if (!docSnap.exists()) {
@@ -268,7 +273,7 @@ export const useCollageData = () => {
         setIsLoading(false)
       }
     },
-    [setNotification, t]
+    [user, setNotification, t]
   )
 
   /**
@@ -285,9 +290,9 @@ export const useCollageData = () => {
       setIsLoading(true)
 
       try {
+        // Query user's collages subcollection (no where clause needed)
         const q = query(
-          collection(db, 'collages'),
-          where('userId', '==', user.uid),
+          collection(db, 'users', user.uid, 'collages'),
           orderBy('createdAt', 'desc')
         )
 
@@ -329,6 +334,10 @@ export const useCollageData = () => {
         throw new Error('No collage ID provided')
       }
 
+      if (!user?.uid) {
+        throw new Error('No user logged in')
+      }
+
       if (isSaving) {
         console.warn('⚠️ Update already in progress')
         return false
@@ -337,7 +346,7 @@ export const useCollageData = () => {
       setIsSaving(true)
 
       try {
-        const docRef = doc(db, 'collages', collageId)
+        const docRef = doc(db, 'users', user.uid, 'collages', collageId)
 
         const updateData = {
           ...updates,
@@ -371,7 +380,7 @@ export const useCollageData = () => {
         setIsSaving(false)
       }
     },
-    [isSaving, setNotification, t]
+    [user, isSaving, setNotification, t]
   )
 
   /**
