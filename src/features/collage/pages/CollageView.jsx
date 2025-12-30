@@ -433,7 +433,7 @@ const CollageView = () => {
                   {t('collage:metadata.layout')}
                 </p>
                 <p className="text-sm font-medium">
-                  {layout.nameKey ? t(layout.nameKey) : (layout.name || 'Custom')}
+                  {layout.nameKey ? t(layout.nameKey, layout.name) : (layout.name || 'Custom')}
                 </p>
               </div>
             </div>
