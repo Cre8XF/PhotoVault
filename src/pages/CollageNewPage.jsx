@@ -217,14 +217,27 @@ const CollageNewPage = () => {
       try {
         console.log('🖼️ Generating static collage image...');
 
-        // Convert slots to photos array for rendering
-        const photosForRender = slots
-          .filter(slot => slot.photo !== null)
+        // Create snapshots from serialized data to avoid race conditions with state cleanup
+        const slotsSnapshot = structuredClone(serialized.slots || []);
+        const layoutSnapshot = template; // Use current template as layout
+
+        // Validate we have data to render
+        if (!layoutSnapshot) {
+          throw new Error('Layout is required for static rendering');
+        }
+
+        // Build photos array from serialized slots
+        const photosForRender = slotsSnapshot
+          .filter(slot => slot.photo !== null && slot.photo?.url)
           .map(slot => slot.photo);
 
-        // Convert slots to transforms object for rendering
-        const transformsForRender = slots.reduce((acc, slot) => {
-          if (slot.photo && slot.transform) {
+        if (photosForRender.length === 0) {
+          throw new Error('No photos with usable URL found in slots');
+        }
+
+        // Build transforms object from serialized slots
+        const transformsForRender = slotsSnapshot.reduce((acc, slot) => {
+          if (slot.photo?.id && slot.transform) {
             acc[slot.photo.id] = slot.transform;
           }
           return acc;
@@ -232,7 +245,7 @@ const CollageNewPage = () => {
 
         // Render full-size collage
         const collageBlob = await renderCollageToCanvas({
-          layout: template,
+          layout: layoutSnapshot,
           photos: photosForRender,
           transforms: transformsForRender,
           options: {
