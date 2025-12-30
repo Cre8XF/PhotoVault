@@ -247,6 +247,17 @@ const CollageNewPage = () => {
           directSlots: template?.slots,
         })
 
+        // 🔍 FULL TEMPLATE DUMP
+        console.log('🔍 FULL TEMPLATE OBJECT:')
+        console.log(JSON.stringify(template, null, 2))
+
+        // 🔍 Check grid property specifically
+        console.log('🔍 GRID PROPERTY:', {
+          hasGrid: !!template?.grid,
+          gridValue: template?.grid,
+          gridKeys: template?.grid ? Object.keys(template.grid) : [],
+        })
+
         // Guard: layout/template must exist
         if (!layoutSnapshot) {
           throw new Error(
