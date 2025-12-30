@@ -440,12 +440,19 @@ const SearchPage = ({
       sortDate: new Date(p.createdAt || p.uploadedAt || Date.now())
     }))
 
-    // Tag collages with contentType
-    const collagesWithType = collages.map(c => ({
-      ...c,
-      contentType: 'collage',
-      sortDate: new Date(c.createdAt || Date.now())
-    }))
+    // Tag collages with contentType - ensure valid ID
+    const collagesWithType = collages
+      .map(c => ({
+        ...c,
+        id: c.id || c.collageId, // Normalize ID: prefer id, fallback to collageId
+        contentType: 'collage',
+        sortDate: new Date(c.createdAt || Date.now())
+      }))
+      .filter(c => c.id) // Filter out collages without valid ID
+
+    if (import.meta.env.DEV && collagesWithType.length < collages.length) {
+      console.warn('⚠️ Filtered out', collages.length - collagesWithType.length, 'collages without valid ID')
+    }
 
     // Merge and sort by date (newest first)
     const merged = [...photosWithType, ...collagesWithType]
@@ -502,7 +509,8 @@ const SearchPage = ({
 
   // --- Select all / deselect all ---
   const selectAllPhotos = () => {
-    const allIds = filteredPhotos.map((p) => p.id)
+    // Include both photos and collages
+    const allIds = allContent.map((item) => item.id).filter(Boolean)
     setSelectedPhotos(allIds)
   }
 
