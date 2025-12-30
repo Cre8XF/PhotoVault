@@ -24,13 +24,11 @@ function CollagePreview({
   useEffect(() => {
     if (!photos || photos.length === 0) return
 
-    const prepared = photos.map((photo) => ({
-      id: photo.id || photo.photoId,
-      url: photo.url || photo.downloadURL || '',
-      thumbnailUrl:
-        photo.thumbnailUrl || photo.thumbnail || photo.url || photo.downloadURL,
-      name: photo.name || photo.filename || 'Untitled',
-    }))
+  // Memoize grid style to prevent recalculation on every render
+  const gridStyle = useMemo(() => ({
+    grid: layout.grid.desktop, // Use CSS 'grid' shorthand (supports "rows / columns" format)
+    gap: `${layout.gap || 8}px`,
+  }), [layout.grid.desktop, layout.gap])
 
     setPreviewPhotos(prepared)
   }, [photos])
@@ -144,8 +142,7 @@ CollagePreview.propTypes = {
     nameKey: PropTypes.string, // Optional - fallback to name
     minPhotos: PropTypes.number.isRequired,
     maxPhotos: PropTypes.number.isRequired,
-    aspectRatio: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-      .isRequired,
+    aspectRatio: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     canvas: PropTypes.shape({
       width: PropTypes.number.isRequired,
       height: PropTypes.number.isRequired,
