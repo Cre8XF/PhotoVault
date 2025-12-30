@@ -134,9 +134,27 @@ const CollageView = () => {
   useEffect(() => {
     if (!collage || !allPhotos) return
 
+    // Diagnostic logging to identify ID format mismatch
+    console.log('📦 collage.photoIds:', collage.photoIds)
+    console.log('🖼️ Available photo IDs (sample):', allPhotos.slice(0, 5).map(p => ({
+      id: p.id,
+      name: p.name,
+      storagePath: p.storagePath
+    })))
+
+    // Try multiple ID formats for backwards compatibility
     const photos = collage.photoIds
-      .map((photoId) => allPhotos.find((p) => p.id === photoId))
+      .map((photoId) => {
+        return allPhotos.find((p) =>
+          p.id === photoId ||                    // Firestore ID (correct format)
+          p.storagePath?.includes(photoId) ||    // Storage path (legacy)
+          p.name === photoId ||                  // Filename
+          p.filename === photoId                 // Alt filename field
+        )
+      })
       .filter(Boolean)
+
+    console.log('✅ Matched', photos.length, '/', collage.photoIds.length, 'photos for collage')
 
     setCollagePhotos(photos)
   }, [collage, allPhotos])
@@ -275,13 +293,26 @@ const CollageView = () => {
     )
   }
 
-  // Error state: No photos loaded
+  // Error state: Photos not found (prevents eternal spinner)
   if (collagePhotos.length === 0 && collage.photoIds?.length > 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-white/20 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-sm opacity-60">{t('collage:loading.photos')}</p>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-8 text-center">
+          <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <ImageIcon className="w-8 h-8 text-yellow-400" />
+          </div>
+          <h2 className="text-xl font-bold mb-2">
+            {t('collage:errors.photosNotFound', 'Photos Not Found')}
+          </h2>
+          <p className="text-sm opacity-70 mb-6">
+            {t('collage:errors.photosNotFoundMessage', `This collage references ${collage.photoIds.length} photos, but they could not be loaded. The photos may have been deleted or moved.`)}
+          </p>
+          <button
+            onClick={handleBack}
+            className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+          >
+            {t('common:back', 'Back')}
+          </button>
         </div>
       </div>
     )
