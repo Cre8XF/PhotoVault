@@ -20,6 +20,7 @@ import {
   Check,
   CheckSquare,
   Square,
+  LayoutGrid,
 } from 'lucide-react'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
 import { format } from 'date-fns'
@@ -27,8 +28,10 @@ import { nb } from 'date-fns/locale'
 import { deletePhoto, setAlbumCover, updateAlbumPhotoCount } from '../firebase'
 import MoveModal from '../components/MoveModal'
 import ConfirmModal from '../components/ConfirmModal'
+import CollageCard from '../components/CollageCard'
 import useStore from '../state/store'
 import { resolvePhotoDate, sortPhotosByDate, groupPhotosByMonth } from '../utils/photoDateUtils'
+import useCollageData from '../hooks/useCollageData'
 
 const SearchPage = ({
   photos = [],
@@ -104,6 +107,10 @@ const SearchPage = ({
   // Track special filters that bypass normal filtering
   const [specialFilter, setSpecialFilter] = useState(null)
 
+  // Collage fetching
+  const { getCollagesByUser, isLoading: collagesLoading } = useCollageData()
+  const [collages, setCollages] = useState([])
+
   // Debounce search query for performance
   useEffect(() => {
     if (debounceTimerRef.current) {
@@ -120,6 +127,23 @@ const SearchPage = ({
       }
     }
   }, [searchQuery])
+
+  // Fetch collages on mount
+  useEffect(() => {
+    const loadCollages = async () => {
+      try {
+        const userCollages = await getCollagesByUser()
+        setCollages(Array.isArray(userCollages) ? userCollages : [])
+        if (import.meta.env.DEV) {
+          console.log('✅ Loaded collages for search page:', userCollages.length)
+        }
+      } catch (error) {
+        console.error('Failed to load collages:', error)
+        setCollages([])
+      }
+    }
+    loadCollages()
+  }, [getCollagesByUser])
 
   // Read filters from URL query params
   useEffect(() => {
@@ -407,18 +431,49 @@ const SearchPage = ({
     safeAlbums,
   ])
 
-  // 📅 DATE GROUPING: Group filtered photos by Month + Year (using unified utility)
+  // 🎨 MERGE PHOTOS AND COLLAGES: Combine content chronologically
+  const allContent = useMemo(() => {
+    // Tag photos with contentType
+    const photosWithType = filteredPhotos.map(p => ({
+      ...p,
+      contentType: 'photo',
+      sortDate: new Date(p.createdAt || p.uploadedAt || Date.now())
+    }))
+
+    // Tag collages with contentType
+    const collagesWithType = collages.map(c => ({
+      ...c,
+      contentType: 'collage',
+      sortDate: new Date(c.createdAt || Date.now())
+    }))
+
+    // Merge and sort by date (newest first)
+    const merged = [...photosWithType, ...collagesWithType]
+      .sort((a, b) => b.sortDate - a.sortDate)
+
+    if (import.meta.env.DEV) {
+      console.log('🎨 Merged content:', {
+        photos: photosWithType.length,
+        collages: collagesWithType.length,
+        total: merged.length
+      })
+    }
+
+    return merged
+  }, [filteredPhotos, collages])
+
+  // 📅 DATE GROUPING: Group merged content by Month + Year
   const photoGroups = useMemo(() => {
-    if (filteredPhotos.length === 0) {
+    if (allContent.length === 0) {
       return []
     }
 
     if (import.meta.env.DEV) {
-      console.log('📅 Grouping photos by Month + Year (unified utility)...')
+      console.log('📅 Grouping content by Month + Year (unified utility)...')
     }
 
-    // Use canonical date resolution utility
-    const groups = groupPhotosByMonth(filteredPhotos, 'nb')
+    // Use canonical date resolution utility (works with both photos and collages)
+    const groups = groupPhotosByMonth(allContent, 'nb')
 
     if (import.meta.env.DEV) {
       console.log(
@@ -428,7 +483,7 @@ const SearchPage = ({
     }
 
     return groups
-  }, [filteredPhotos])
+  }, [allContent])
 
   const activeFilterCount = useMemo(() => {
     return Object.values(activeFilters).filter(Boolean).length
@@ -1176,9 +1231,23 @@ const SearchPage = ({
                 {group.label}
               </h2>
 
-              {/* Photo grid for this month */}
+              {/* Photo grid for this month - with collages */}
               <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-                {group.photos.map((photo) => {
+                {group.photos.map((item) => {
+                  // Check if this is a collage or photo
+                  if (item.contentType === 'collage') {
+                    return (
+                      <div key={`collage-${item.id}`} className="col-span-2">
+                        <CollageCard
+                          collage={item}
+                          onClick={() => navigate(`/collage/${item.id}`)}
+                        />
+                      </div>
+                    )
+                  }
+
+                  // It's a photo - render as before
+                  const photo = item
                   // Get the original index from filteredPhotos for navigation
                   const photoIndex = filteredPhotos.findIndex(
                     (p) => p.id === photo.id
