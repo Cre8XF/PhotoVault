@@ -385,6 +385,10 @@ export const useCollageData = () => {
         throw new Error('No collage ID provided')
       }
 
+      if (!user?.uid) {
+        throw new Error('No user logged in')
+      }
+
       if (isDeleting) {
         console.warn('⚠️ Delete already in progress')
         return false
@@ -393,7 +397,8 @@ export const useCollageData = () => {
       setIsDeleting(true)
 
       try {
-        const docRef = doc(db, 'collages', collageId)
+        // V2 collages are in users/{uid}/collages subcollection
+        const docRef = doc(db, 'users', user.uid, 'collages', collageId)
 
         console.log('🗑️ Deleting collage:', collageId)
 
@@ -402,6 +407,24 @@ export const useCollageData = () => {
         if (collageSnap.exists()) {
           const collageData = collageSnap.data()
 
+          // Delete static collage image from R2 if it exists
+          if (collageData.staticStorageBackend === 'r2' && collageData.staticStoragePath) {
+            try {
+              const currentUser = auth.currentUser
+              if (!currentUser) {
+                throw new Error('User not authenticated')
+              }
+              const firebaseToken = await currentUser.getIdToken()
+
+              await deleteFromR2(collageData.staticStoragePath, firebaseToken)
+              console.log('🗑️ Static collage deleted from R2:', collageData.staticStoragePath)
+            } catch (r2Error) {
+              console.warn('⚠️ Could not delete static collage from R2:', r2Error)
+              // Continue with collage deletion even if R2 deletion fails
+            }
+          }
+
+          // Also delete old-style collage from R2 if it exists (v1 compatibility)
           // Delete full collage from R2 if it exists
           if (collageData.storageBackend === 'r2' && collageData.storagePath) {
             try {
