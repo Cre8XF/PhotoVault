@@ -108,7 +108,7 @@ const SearchPage = ({
   const [specialFilter, setSpecialFilter] = useState(null)
 
   // Collage fetching
-  const { getCollagesByUser, isLoading: collagesLoading } = useCollageData()
+  const { getCollagesByUser, deleteCollage, isLoading: collagesLoading } = useCollageData()
   const [collages, setCollages] = useState([])
 
   // Debounce search query for performance
@@ -862,14 +862,27 @@ const SearchPage = ({
                     console.log('🔥 Starting deletion process with error recovery...')
                   }
 
-                  // 🐛 FIX: Track success/failure for each photo
+                  // 🐛 FIX: Track success/failure for each photo/collage
                   const deleteResults = {
                     success: [],
                     failed: [],
                   }
 
+                  // Separate photos and collages
+                  const photoIds = []
+                  const collageIds = []
+
+                  for (const itemId of selectedPhotos) {
+                    const item = allContent.find(i => i.id === itemId)
+                    if (item?.contentType === 'collage') {
+                      collageIds.push(itemId)
+                    } else {
+                      photoIds.push(itemId)
+                    }
+                  }
+
                   // Delete each photo with individual error handling
-                  for (const photoId of selectedPhotos) {
+                  for (const photoId of photoIds) {
                     const photo = safePhotos.find((p) => p.id === photoId)
 
                     if (!photo) {
@@ -897,6 +910,40 @@ const SearchPage = ({
                       deleteResults.failed.push({
                         photoId,
                         name: photo.name || 'Unknown',
+                        reason: error.message,
+                      })
+                    }
+                  }
+
+                  // Delete each collage with individual error handling
+                  for (const collageId of collageIds) {
+                    const collage = collages.find((c) => c.id === collageId)
+
+                    if (!collage) {
+                      deleteResults.failed.push({
+                        photoId: collageId,
+                        name: 'Unknown Collage',
+                        reason: 'Collage not found',
+                      })
+                      continue
+                    }
+
+                    try {
+                      if (import.meta.env.DEV) {
+                        console.log(`Deleting collage: ${collage.title || collage.id}`)
+                      }
+
+                      await deleteCollage(collageId)
+                      deleteResults.success.push(collageId)
+
+                      if (import.meta.env.DEV) {
+                        console.log(`✅ Successfully deleted collage: ${collage.title || collage.id}`)
+                      }
+                    } catch (error) {
+                      console.error(`❌ Failed to delete collage ${collageId}:`, error)
+                      deleteResults.failed.push({
+                        photoId: collageId,
+                        name: collage.title || 'Unknown Collage',
                         reason: error.message,
                       })
                     }
@@ -1240,7 +1287,23 @@ const SearchPage = ({
                       <div key={`collage-${item.id}`} className="col-span-2">
                         <CollageCard
                           collage={item}
-                          onClick={() => navigate(`/collage/${item.id}`)}
+                          onClick={(collage) => {
+                            if (!editMode) {
+                              console.log('🎨 Collage clicked:', collage.id)
+                              navigate(`/collage/${collage.id}`)
+                            }
+                          }}
+                          className=""
+                          // Edit mode support
+                          editMode={editMode}
+                          isSelected={selectedPhotos.includes(item.id)}
+                          onSelect={(collageId) => {
+                            setSelectedPhotos(prev =>
+                              prev.includes(collageId)
+                                ? prev.filter(id => id !== collageId)
+                                : [...prev, collageId]
+                            )
+                          }}
                         />
                       </div>
                     )

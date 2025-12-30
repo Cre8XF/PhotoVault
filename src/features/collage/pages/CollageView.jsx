@@ -55,14 +55,20 @@ const CollageView = () => {
   // Fetch collage data
   useEffect(() => {
     const loadCollage = async () => {
-      if (!id) return
+      // Validate ID exists and is not invalid
+      if (!id || id === 'null' || id === 'undefined') {
+        console.error('❌ Invalid collage ID:', id)
+        navigate('/search')  // Navigate back to photos
+        return
+      }
 
       try {
+        console.log('📂 Loading collage:', id)
         const collageData = await getCollage(id)
 
         if (!collageData) {
-          console.error('Collage not found:', id)
-          navigate('/albums')
+          console.error('❌ Collage not found:', id)
+          navigate('/search')
           return
         }
 
@@ -80,8 +86,8 @@ const CollageView = () => {
         }
 
       } catch (error) {
-        console.error('Error loading collage:', error)
-        navigate('/albums')
+        console.error('❌ Error loading collage:', error)
+        navigate('/search')
       }
     }
 
