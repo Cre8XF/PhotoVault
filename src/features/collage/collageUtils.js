@@ -96,12 +96,23 @@ const safe = (value) => {
 
 /**
  * Serialize collage data for Firestore
+ * CRITICAL: Extracts photoIds from slots to ensure CollageView can load photos
  */
 export const serializeCollage = (collageData) => {
+  // Extract photoIds from slots (REQUIRED for CollageView)
+  const photoIds = collageData.slots
+    .filter((slot) => slot.photo && slot.photo.id)
+    .map((slot) => slot.photo.id);
+
+  if (import.meta.env.DEV) {
+    console.log('📦 serializeCollage: Extracted', photoIds.length, 'photoIds from', collageData.slots.length, 'slots');
+  }
+
   return {
     id: safe(collageData.id),
     templateId: safe(collageData.templateId),
     title: safe(collageData.title) || '',
+    photoIds: photoIds, // CRITICAL: Always include photoIds array
     slots: collageData.slots.map((slot) => ({
       id: safe(slot.id),
       slotIndex: safe(slot.slotIndex),
