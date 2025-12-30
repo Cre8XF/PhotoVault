@@ -261,45 +261,81 @@ const CollageNewPage = () => {
           }
         })
 
-        // Build photos array from normalized slots (include photos with any usable URL)
+        // Build photos array for renderCollageToCanvas (must have URLs + dimensions)
         const photosForRender = normalizedSlots
           .filter((slot) => {
             const p = slot.photo
             return p && (p.url || p.r2Url || p.downloadURL || p.imageUrl)
           })
-          .map((slot) => slot.photo)
+          .map((slot) => {
+            const photo = slot.photo
 
-        // Debug log to confirm URL resolution
+            // Ensure all required fields exist with fallbacks
+            return {
+              id: photo.id,
+              url: photo.url || photo.r2Url || photo.downloadURL || photo.imageUrl,
+              thumbnailUrl: photo.thumbnailUrl || photo.thumbnailURL || photo.thumbnail || photo.url,
+              name: photo.name || 'Untitled',
+              width: photo.width || 1920,   // Fallback if metadata missing
+              height: photo.height || 1080, // Fallback if metadata missing
+              type: photo.type || 'image',
+            }
+          })
+
+        // Validate we have photos to render
+        if (photosForRender.length === 0) {
+          console.error('❌ No photos with usable URL found in slots (cannot generate static collage).')
+          throw new Error('No photos with usable URL found in slots')
+        }
+
         console.log('📸 Static render photo resolution:', {
           totalSlots: slotsSnapshot.length,
           resolvedPhotos: photosForRender.length,
           photoIds: photosForRender.map((p) => ({
             id: p.id,
             url: p.url?.substring(0, 50) + '...',
+            hasWidth: !!p.width,
+            hasDimensions: `${p.width}x${p.height}`,
           })),
         })
 
-        if (photosForRender.length === 0) {
-          throw new Error(
-            'No photos with usable URL found in slots (cannot generate static collage).'
-          )
+        // Generate transforms object from slots
+        const transforms = {}
+        normalizedSlots.forEach((slot) => {
+          if (slot.photo?.id && slot.transform) {
+            transforms[slot.photo.id] = {
+              scale: slot.transform.scale || 1,
+              translateX: slot.transform.offsetX || 0,
+              translateY: slot.transform.offsetY || 0,
+            }
+          }
+        })
+
+        // Validate layout structure before rendering
+        if (!layoutSnapshot?.layout?.canvas) {
+          console.error('❌ Invalid layout structure:', {
+            hasLayout: !!layoutSnapshot,
+            hasNestedLayout: !!layoutSnapshot?.layout,
+            hasCanvas: !!layoutSnapshot?.layout?.canvas,
+            layoutKeys: layoutSnapshot ? Object.keys(layoutSnapshot) : [],
+          })
+          throw new Error('Template layout missing canvas dimensions')
         }
 
-        // Build transforms object from normalized slots
-        const transformsForRender = normalizedSlots.reduce((acc, slot) => {
-          if (slot.photo?.id && slot.transform) {
-            acc[slot.photo.id] = slot.transform
-          }
-          return acc
-        }, {})
+        console.log('🖼️ Generating static collage image...', {
+          canvasWidth: layoutSnapshot.layout.canvas.width,
+          canvasHeight: layoutSnapshot.layout.canvas.height,
+          slots: layoutSnapshot.layout.slots?.length,
+          photos: photosForRender.length,
+        })
 
-        // Render full-size collage (matches current renderCollageToCanvas contract)
+        // Render collage to canvas (use nested layout object, not template root)
         const collageBlob = await renderCollageToCanvas({
-          layout: layoutSnapshot, // required
-          photos: photosForRender, // required (non-empty)
-          transforms: transformsForRender, // expected by current function
+          layout: layoutSnapshot.layout,  // ✅ FIX: Use nested .layout, not template
+          photos: photosForRender,
+          transforms,
           options: {
-            quality: 0.9,
+            quality: 0.85,
             useHighRes: true,
           },
         })
