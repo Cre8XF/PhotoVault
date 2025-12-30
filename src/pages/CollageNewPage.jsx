@@ -20,6 +20,7 @@ import {
 } from '../features/collage/collageUtils'
 import { renderCollageToCanvas } from '../utils/renderCollageToCanvas'
 import { uploadWithFallback } from '../utils/r2Upload'
+import { normalizePhotoFields } from '../utils/photoHelpers'
 import CollageCanvas from '../features/collage/components/CollageCanvas'
 import PhotoPickerPanel from '../features/collage/components/PhotoPickerPanel'
 import CollageToolbar from '../features/collage/components/CollageToolbar'
@@ -225,53 +226,76 @@ const CollageNewPage = () => {
       try {
         console.log('🖼️ Generating static collage image...')
 
-        // Render full-size collage (slot-based)
-        // DEBUG: se hva som faktisk ligger i slots i runtime
-        console.log('[STATIC] slots snapshot:', slots)
-
-        // Build photos array from slots (robust)
-        const photosForRender = slots
-          .map((s) => s?.photo)
-          .filter((p) => p && (p.url || p.imageUrl || p.downloadURL || p.src))
-          .map((p) => ({
-            id: p.id || p.photoId || p.name || crypto.randomUUID(),
-            url: p.url || p.imageUrl || p.downloadURL || p.src,
-            name: p.name || '',
-            width: p.width ?? null,
-            height: p.height ?? null,
-            thumbnailUrl: p.thumbnailUrl ?? null,
-          }))
-
-        if (!photosForRender.length) {
-          throw new Error(
-            'No photos with usable URL found in slots (cannot generate static collage).'
-          )
-        }
-
-        // Build transforms keyed by the same id we use in photosForRender
-        const transformsForRender = {}
-        slots.forEach((s) => {
-          const p = s?.photo
-          const pid = p?.id || p?.photoId || p?.name // must match something stable
-          if (!pid) return
-          transformsForRender[pid] = s.transform || {
-            scale: 1,
-            rotation: 0,
-            offsetX: 0,
-            offsetY: 0,
-          }
-        })
+        // Create snapshots from serialized data to avoid race conditions
+        const slotsSnapshot = structuredClone(serialized.slots || [])
+        const layoutSnapshot = template
 
         // Guard: layout/template must exist
-        if (!template) {
+        if (!layoutSnapshot) {
           throw new Error(
             `Missing layout/template for templateId=${templateId}`
           )
         }
 
+        // Build lookup map from global photos (resolve slot photo IDs to full photo objects)
+        const photosById = new Map(
+          (photos || [])
+            .map((p) => normalizePhotoFields(p))
+            .filter((p) => p?.id)
+            .map((p) => [p.id, p])
+        )
+
+        // Normalize slots by merging slot.photo with full photo from store
+        const normalizedSlots = slotsSnapshot.map((slot) => {
+          if (!slot.photo?.id) return slot
+
+          const fullPhoto = photosById.get(slot.photo.id)
+          const mergedPhoto = normalizePhotoFields({
+            ...(fullPhoto || {}),
+            ...(slot.photo || {}),
+          })
+
+          return {
+            ...slot,
+            photo: mergedPhoto,
+          }
+        })
+
+        // Build photos array from normalized slots (include photos with any usable URL)
+        const photosForRender = normalizedSlots
+          .filter((slot) => {
+            const p = slot.photo
+            return p && (p.url || p.r2Url || p.downloadURL || p.imageUrl)
+          })
+          .map((slot) => slot.photo)
+
+        // Debug log to confirm URL resolution
+        console.log('📸 Static render photo resolution:', {
+          totalSlots: slotsSnapshot.length,
+          resolvedPhotos: photosForRender.length,
+          photoIds: photosForRender.map((p) => ({
+            id: p.id,
+            url: p.url?.substring(0, 50) + '...',
+          })),
+        })
+
+        if (photosForRender.length === 0) {
+          throw new Error(
+            'No photos with usable URL found in slots (cannot generate static collage).'
+          )
+        }
+
+        // Build transforms object from normalized slots
+        const transformsForRender = normalizedSlots.reduce((acc, slot) => {
+          if (slot.photo?.id && slot.transform) {
+            acc[slot.photo.id] = slot.transform
+          }
+          return acc
+        }, {})
+
         // Render full-size collage (matches current renderCollageToCanvas contract)
         const collageBlob = await renderCollageToCanvas({
-          layout: template, // required
+          layout: layoutSnapshot, // required
           photos: photosForRender, // required (non-empty)
           transforms: transformsForRender, // expected by current function
           options: {
