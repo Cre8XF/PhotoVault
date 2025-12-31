@@ -1364,6 +1364,72 @@ export async function getAlbumsByUserPaginated(
   }
 }
 
+/**
+ * Get photos in a specific album with pagination
+ * @param {string} albumId - Album ID
+ * @param {number} pageSize - Number of photos per page (default 50)
+ * @param {object} lastDoc - Last document from previous page
+ * @returns {object} { photos, lastDoc, hasMore }
+ */
+export async function getPhotosInAlbumPaginated(
+  albumId,
+  pageSize = 50,
+  lastDoc = null
+) {
+  try {
+    let q = query(
+      collection(db, 'photos'),
+      where('albumId', '==', albumId),
+      orderBy('uploadedAt', 'desc'),
+      limit(pageSize)
+    )
+
+    if (lastDoc) {
+      q = query(
+        collection(db, 'photos'),
+        where('albumId', '==', albumId),
+        orderBy('uploadedAt', 'desc'),
+        startAfter(lastDoc),
+        limit(pageSize)
+      )
+    }
+
+    const snap = await getDocs(q)
+    const photos = snap.docs.map((d) => {
+      const data = d.data()
+
+      // Convert Firestore Timestamp to ISO string
+      if (data.createdAt?.toDate)
+        data.createdAt = data.createdAt.toDate().toISOString()
+      if (data.updatedAt?.toDate)
+        data.updatedAt = data.updatedAt.toDate().toISOString()
+      if (data.uploadedAt?.toDate)
+        data.uploadedAt = data.uploadedAt.toDate().toISOString()
+
+      if (!data.createdAt) data.createdAt = new Date().toISOString()
+      if (!data.updatedAt) data.updatedAt = data.createdAt
+      if (!data.uploadedAt) data.uploadedAt = data.createdAt
+      if (!('favorite' in data)) data.favorite = false
+
+      // AI field defaults
+      if (!data.aiTags) data.aiTags = []
+      if (!('faces' in data)) data.faces = 0
+      if (!('aiAnalyzed' in data)) data.aiAnalyzed = false
+
+      return { id: d.id, ...data }
+    })
+
+    const newLastDoc =
+      snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null
+    const hasMore = snap.docs.length === pageSize
+
+    return { photos, lastDoc: newLastDoc, hasMore }
+  } catch (err) {
+    console.error('🔥 getPhotosInAlbumPaginated:', err)
+    return { photos: [], lastDoc: null, hasMore: false }
+  }
+}
+
 // ============================================================================
 // 🔧 Migration Functions
 // ============================================================================

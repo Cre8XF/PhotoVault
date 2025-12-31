@@ -31,6 +31,7 @@ import {
   Video,
   Presentation,
   Settings,
+  Loader2,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
@@ -113,6 +114,10 @@ const AlbumPage = ({
   const [filterAI, setFilterAI] = useState('all')
   const [isInitialLoading, setIsInitialLoading] = useState(true)
 
+  // 🆕 PHASE 3A: Virtual pagination state
+  const [displayLimit, setDisplayLimit] = useState(50)
+  const ITEMS_PER_PAGE = 50
+
   // Track initial data loading
   useEffect(() => {
     if (photos && photos.length > 0) {
@@ -179,6 +184,17 @@ const AlbumPage = ({
 
     return result
   }, [albumPhotos, searchQuery, filterCategory, filterAI, sortBy])
+
+  // 🆕 PHASE 3A: Virtual pagination - limit displayed items
+  const { displayedPhotos, hasMore } = useMemo(() => {
+    const total = filteredPhotos.length
+    const displayed = filteredPhotos.slice(0, displayLimit)
+
+    return {
+      displayedPhotos: displayed,
+      hasMore: displayLimit < total,
+    }
+  }, [filteredPhotos, displayLimit])
 
   // Statistics
   const stats = useMemo(() => {
@@ -782,9 +798,9 @@ const AlbumPage = ({
       {/* Photos Grid - Using PhotoGrid component for video thumbnail support */}
       {!isInitialLoading &&
         viewMode === 'grid' &&
-        filteredPhotos.length > 0 && (
+        displayedPhotos.length > 0 && (
           <PhotoGrid
-            photos={filteredPhotos}
+            photos={displayedPhotos}
             compact={gridSize === 2}
             editMode={editMode}
             currentAlbum={album}
@@ -797,17 +813,39 @@ const AlbumPage = ({
               editMode
                 ? null // In edit mode, don't open modal (use PhotoGrid's built-in edit buttons)
                 : (url) => {
-                    const index = filteredPhotos.findIndex(
+                    const index = displayedPhotos.findIndex(
                       (p) => p.url === url || p.thumbnailUrl === url
                     )
                     if (index !== -1) {
-                      const photo = filteredPhotos[index]
+                      const photo = displayedPhotos[index]
                       handlePhotoClick(photo, index)
                     }
                   }
             }
           />
         )}
+
+      {/* 🆕 PHASE 3A: Load More button */}
+      {viewMode === 'grid' && hasMore && displayedPhotos.length > 0 && (
+        <div className="flex flex-col items-center gap-4 py-8">
+          <button
+            onClick={() => setDisplayLimit((prev) => prev + ITEMS_PER_PAGE)}
+            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:opacity-90 transition-opacity font-medium flex items-center gap-2"
+          >
+            Load More Photos
+          </button>
+          <p className="text-sm text-gray-400">
+            Showing {displayedPhotos.length} of {filteredPhotos.length} photos
+          </p>
+        </div>
+      )}
+
+      {/* All loaded indicator */}
+      {viewMode === 'grid' && !hasMore && filteredPhotos.length > 0 && filteredPhotos.length > 50 && (
+        <p className="text-center text-gray-500 py-8 text-sm">
+          All {filteredPhotos.length} photos loaded
+        </p>
+      )}
 
       {/* Photos List View - Compact Redesign */}
       {!isInitialLoading &&

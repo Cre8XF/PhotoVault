@@ -23,6 +23,7 @@ import {
   LayoutGrid,
   Image,
   Video,
+  Loader2,
 } from 'lucide-react'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
 import { format } from 'date-fns'
@@ -38,6 +39,7 @@ import {
   groupPhotosByMonth,
 } from '../utils/photoDateUtils'
 import useCollageData from '../hooks/useCollageData'
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 
 const SearchPage = ({
   photos = [],
@@ -49,6 +51,10 @@ const SearchPage = ({
   const { t } = useTranslation(['search', 'common'])
   const navigate = useNavigate()
   const location = useLocation()
+
+  // 🆕 PHASE 3A: Virtual pagination state
+  const [displayLimit, setDisplayLimit] = useState(50)
+  const ITEMS_PER_PAGE = 50
 
   // Photo context setters - Phase 2A
   const setCurrentPhotoId = useStore((state) => state.setCurrentPhotoId)
@@ -89,6 +95,7 @@ const SearchPage = ({
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('')
   const debounceTimerRef = useRef(null)
+  const searchInputRef = useRef(null) // 🆕 PHASE 3B: For keyboard shortcut
   const [activeFilters, setActiveFilters] = useState({
     favorites: false,
     withFaces: false,
@@ -121,6 +128,38 @@ const SearchPage = ({
     isLoading: collagesLoading,
   } = useCollageData()
   const [collages, setCollages] = useState([])
+
+  // 🆕 PHASE 3B: Keyboard shortcuts for desktop
+  useKeyboardShortcuts([
+    {
+      key: 'Ctrl+a',
+      action: () => {
+        if (editMode && filteredPhotos.length > 0) {
+          // Select all visible photos
+          const allPhotoIds = filteredPhotos.map((p) => p.id)
+          setSelectedPhotos(allPhotoIds)
+        }
+      },
+    },
+    {
+      key: 'Ctrl+f',
+      action: () => {
+        searchInputRef.current?.focus()
+      },
+    },
+    {
+      key: 'Escape',
+      action: () => {
+        // Clear selection if in edit mode
+        if (editMode && selectedPhotos.length > 0) {
+          setSelectedPhotos([])
+        } else if (searchQuery) {
+          // Clear search if there's a query
+          setSearchQuery('')
+        }
+      },
+    },
+  ])
 
   // Debounce search query for performance
   useEffect(() => {
@@ -530,6 +569,45 @@ const photoGroups = useMemo(() => {
 
   return groups
 }, [allContent])
+
+  // 🆕 PHASE 3A: Virtual pagination - limit displayed items
+  const { displayedGroups, totalItems, hasMore } = useMemo(() => {
+    if (photoGroups.length === 0) {
+      return { displayedGroups: [], totalItems: 0, hasMore: false }
+    }
+
+    let itemCount = 0
+    const limited = []
+
+    for (const group of photoGroups) {
+      if (itemCount >= displayLimit) {
+        break
+      }
+
+      const remainingSlots = displayLimit - itemCount
+      if (group.photos.length <= remainingSlots) {
+        // Include entire group
+        limited.push(group)
+        itemCount += group.photos.length
+      } else {
+        // Include partial group
+        limited.push({
+          ...group,
+          photos: group.photos.slice(0, remainingSlots),
+        })
+        itemCount += remainingSlots
+      }
+    }
+
+    const total = photoGroups.reduce((sum, g) => sum + g.photos.length, 0)
+
+    return {
+      displayedGroups: limited,
+      totalItems: total,
+      hasMore: itemCount < total,
+    }
+  }, [photoGroups, displayLimit])
+
   // --- Count of active filters ---
   const activeFilterCount = useMemo(() => {
     let count = 0
@@ -1136,6 +1214,7 @@ const photoGroups = useMemo(() => {
           <div className="flex items-center gap-3">
             <SearchIcon className="w-5 h-5 opacity-60" />
             <input
+              ref={searchInputRef}
               type="text"
               placeholder={t('search:searchIn')}
               value={searchQuery}
@@ -1465,9 +1544,9 @@ const photoGroups = useMemo(() => {
       )}
 
       {/* 📅 DATE GROUPED RESULTS */}
-      {photoGroups.length > 0 ? (
+      {displayedGroups.length > 0 ? (
         <div className="space-y-8">
-          {photoGroups.map((group) => (
+          {displayedGroups.map((group) => (
             <section key={group.key}>
               {/* Date header - sticky on mobile */}
               <h2 className="search-date-header search-date-header-sticky">
@@ -1598,6 +1677,28 @@ const photoGroups = useMemo(() => {
               </div>
             </section>
           ))}
+
+          {/* 🆕 PHASE 3A: Load More button */}
+          {hasMore && (
+            <div className="flex flex-col items-center gap-4 py-8">
+              <button
+                onClick={() => setDisplayLimit((prev) => prev + ITEMS_PER_PAGE)}
+                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:opacity-90 transition-opacity font-medium flex items-center gap-2"
+              >
+                Load More Photos
+              </button>
+              <p className="text-sm text-gray-400">
+                Showing {displayLimit} of {totalItems} items
+              </p>
+            </div>
+          )}
+
+          {/* All loaded indicator */}
+          {!hasMore && totalItems > 0 && (
+            <p className="text-center text-gray-500 py-8 text-sm">
+              All {totalItems} items loaded
+            </p>
+          )}
         </div>
       ) : (
         /* No results - Enhanced empty state */

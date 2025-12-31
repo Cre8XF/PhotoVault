@@ -23,6 +23,7 @@ import useStore from '../state/store'
 import { usePhotoById } from '../hooks/usePhotoById'
 import { usePhotoContext } from '../hooks/usePhotoContext'
 import { usePrefetchAdjacentPhotos } from '../hooks/usePrefetchAdjacentPhotos'
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { deletePhoto as firebaseDeletePhoto } from '../firebase'
 import ConfirmModal from '../components/ConfirmModal'
 import { sanitizeImageUrl, PLACEHOLDER_IMAGE } from '../utils/security'
@@ -310,27 +311,33 @@ export default function PhotoPage() {
     return album?.name || t('common:unknown')
   }, [photo, albums, t])
 
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      switch (e.key) {
-        case 'ArrowRight':
-          handleNext()
-          break
-        case 'ArrowLeft':
-          handlePrev()
-          break
-        case 'Escape':
-          handleBack()
-          break
-        default:
-          break
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [handleNext, handlePrev, handleBack])
+  // 🆕 PHASE 3B: Keyboard shortcuts (replaces old keyboard navigation)
+  useKeyboardShortcuts([
+    {
+      key: 'ArrowRight',
+      action: handleNext,
+    },
+    {
+      key: 'ArrowLeft',
+      action: handlePrev,
+    },
+    {
+      key: 'Escape',
+      action: handleBack,
+    },
+    {
+      key: 'Delete',
+      action: () => setShowDeleteConfirm(true),
+    },
+    {
+      key: 'Backspace',
+      action: () => setShowDeleteConfirm(true),
+    },
+    {
+      key: 'f',
+      action: handleToggleFavorite,
+    },
+  ])
 
   // Touch/swipe navigation
   useEffect(() => {
