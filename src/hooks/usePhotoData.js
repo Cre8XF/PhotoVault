@@ -21,6 +21,7 @@ import {
 } from '../firebase'
 import { db } from '../firebase'
 import useStore from '../state/store'
+import { devLog, devWarn } from '../utils/log'
 
 /**
  * Custom hook for photo and album data management
@@ -58,7 +59,7 @@ export const usePhotoData = () => {
   const refreshAllData = useCallback(
     async (uid) => {
       if (!uid) {
-        if (import.meta.env.DEV) console.warn('⚠️ refreshAllData called without uid')
+        if (import.meta.env.DEV) devWarn('⚠️ refreshAllData called without uid')
         return { albums: [], photos: [] }
       }
 
@@ -72,7 +73,7 @@ export const usePhotoData = () => {
         const safeAlbums = Array.isArray(fetchedAlbums) ? fetchedAlbums : []
         const safePhotos = Array.isArray(fetchedPhotos) ? fetchedPhotos : []
 
-        if (import.meta.env.DEV) console.log('✅ Refresh complete from Firestore:', {
+        if (import.meta.env.DEV) devLog('✅ Refresh complete from Firestore:', {
           albums: safeAlbums.length,
           photos: safePhotos.length,
         })
@@ -107,18 +108,18 @@ export const usePhotoData = () => {
    */
   useEffect(() => {
     if (!user?.uid) {
-      if (import.meta.env.DEV) console.log('⏸ [usePhotoData] No user - skipping listeners')
+      if (import.meta.env.DEV) devLog('⏸ [usePhotoData] No user - skipping listeners')
       return
     }
 
-    if (import.meta.env.DEV) console.log(
+    if (import.meta.env.DEV) devLog(
       '✅ [usePhotoData] Setting up Firestore listeners for user:',
       user.uid
     )
 
     // Listen to albums
     const unsubscribeAlbums = listenToAlbumsByUser(user.uid, (albums) => {
-      if (import.meta.env.DEV) console.log(
+      if (import.meta.env.DEV) devLog(
         '📥 [usePhotoData] Albums updated from Firestore:',
         albums.length
       )
@@ -127,7 +128,7 @@ export const usePhotoData = () => {
 
     // Listen to photos
     const unsubscribePhotos = listenToPhotosByUser(user.uid, (photos) => {
-      if (import.meta.env.DEV) console.log(
+      if (import.meta.env.DEV) devLog(
         '📥 [usePhotoData] Photos updated from Firestore:',
         photos.length
       )
@@ -137,7 +138,7 @@ export const usePhotoData = () => {
 
     // Cleanup listeners on unmount
     return () => {
-      if (import.meta.env.DEV) console.log('🧹 [usePhotoData] Cleaning up Firestore listeners')
+      if (import.meta.env.DEV) devLog('🧹 [usePhotoData] Cleaning up Firestore listeners')
       unsubscribeAlbums()
       unsubscribePhotos()
     }
@@ -195,7 +196,7 @@ export const usePhotoData = () => {
     async (selectedFiles, albumId, aiTagging = false) => {
       // GUARD: Prevent duplicate uploads
       if (isUploading) {
-        if (import.meta.env.DEV) console.warn('⚠️ Upload already in progress, ignoring duplicate call')
+        if (import.meta.env.DEV) devWarn('⚠️ Upload already in progress, ignoring duplicate call')
         return
       }
 
@@ -279,7 +280,7 @@ export const usePhotoData = () => {
     async (albumData, editingAlbum = null) => {
       // GUARD: Prevent duplicate calls
       if (isSaving) {
-        if (import.meta.env.DEV) console.warn(
+        if (import.meta.env.DEV) devWarn(
           '⚠️ Album save already in progress, ignoring duplicate call'
         )
         return
@@ -375,7 +376,7 @@ export const usePhotoData = () => {
         }),
         onConfirm: async () => {
           if (isDeleting) {
-            if (import.meta.env.DEV) console.warn(
+            if (import.meta.env.DEV) devWarn(
               '⚠️ Delete already in progress, ignoring duplicate call'
             )
             return
@@ -471,7 +472,7 @@ export const usePhotoData = () => {
           }
 
           if (isDeleting) {
-            if (import.meta.env.DEV) console.warn(
+            if (import.meta.env.DEV) devWarn(
               '⚠️ Delete already in progress, ignoring duplicate call'
             )
             return
@@ -533,14 +534,14 @@ export const usePhotoData = () => {
    */
   const toggleFavorite = useCallback(
     async (photo) => {
-      if (import.meta.env.DEV) console.log('🎯 usePhotoData.toggleFavorite called:', {
+      if (import.meta.env.DEV) devLog('🎯 usePhotoData.toggleFavorite called:', {
         photoId: photo.id,
         currentFavorite: photo.favorite,
         timestamp: new Date().toISOString(),
       })
 
       if (isTogglingFavorite) {
-        if (import.meta.env.DEV) console.warn(
+        if (import.meta.env.DEV) devWarn(
           '⚠️ Toggle favorite already in progress, ignoring duplicate call'
         )
         return
@@ -550,7 +551,7 @@ export const usePhotoData = () => {
 
       try {
         const newFavoriteState = !photo.favorite
-        if (import.meta.env.DEV) console.log('⚡ Applying optimistic update to Zustand...')
+        if (import.meta.env.DEV) devLog('⚡ Applying optimistic update to Zustand...')
 
         // OPTIMISTIC UPDATE
         setPhotos((prev) => {
@@ -559,16 +560,16 @@ export const usePhotoData = () => {
             p.id === photo.id ? { ...p, favorite: newFavoriteState } : p
           )
         })
-        if (import.meta.env.DEV) console.log('✅ Zustand optimistically updated')
+        if (import.meta.env.DEV) devLog('✅ Zustand optimistically updated')
 
         // Sync to backend using toggleFavorite (NOT updatePhoto)
-        if (import.meta.env.DEV) console.log('🔥 Calling firebase.toggleFavorite()...')
+        if (import.meta.env.DEV) devLog('🔥 Calling firebase.toggleFavorite()...')
         const result = await firebaseToggleFavorite(photo.id, photo.favorite)
-        if (import.meta.env.DEV) console.log('✅ firebase.toggleFavorite() returned:', result)
+        if (import.meta.env.DEV) devLog('✅ firebase.toggleFavorite() returned:', result)
 
         // Verify Zustand state after Firestore update
         const updatedPhoto = photos.find((p) => p.id === photo.id)
-        if (import.meta.env.DEV) console.log('🔍 Zustand state after Firestore update:', {
+        if (import.meta.env.DEV) devLog('🔍 Zustand state after Firestore update:', {
           photoId: photo.id,
           zustandFavorite: updatedPhoto?.favorite,
           firestoreResult: result,
@@ -581,14 +582,14 @@ export const usePhotoData = () => {
             : t('common:notifications.removedFromFavorites'),
           type: 'success',
         })
-        if (import.meta.env.DEV) console.log('📢 Notification shown')
+        if (import.meta.env.DEV) devLog('📢 Notification shown')
 
         return result
       } catch (err) {
         console.error('❌ usePhotoData.toggleFavorite failed:', err)
 
         // ROLLBACK
-        if (import.meta.env.DEV) console.log('↩️ Reverting optimistic update...')
+        if (import.meta.env.DEV) devLog('↩️ Reverting optimistic update...')
         if (user?.uid) {
           await refreshAllData(user.uid)
         }
@@ -691,7 +692,7 @@ export const usePhotoData = () => {
   const handleSetAlbumCover = useCallback(
     async (albumId, coverUrl) => {
       if (isSaving) {
-        if (import.meta.env.DEV) console.warn(
+        if (import.meta.env.DEV) devWarn(
           '⚠️ Save operation already in progress, ignoring duplicate call'
         )
         return
@@ -742,7 +743,7 @@ export const usePhotoData = () => {
   const handleUpdatePhotoCount = useCallback(
     async (albumId, count) => {
       if (isSaving) {
-        if (import.meta.env.DEV) console.warn(
+        if (import.meta.env.DEV) devWarn(
           '⚠️ Save operation already in progress, ignoring duplicate call'
         )
         return

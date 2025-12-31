@@ -1,4 +1,5 @@
 // ============================================================================
+import { devLog, devWarn } from './log'
 // R2 Upload Utility - Cloudflare R2 Storage
 // ============================================================================
 //
@@ -67,7 +68,7 @@ export async function uploadToR2(
       formData.append('albumId', metadata.albumId)
     }
 
-    console.log('🟣 [R2] Sending upload to Worker', {
+    devLog('🟣 [R2] Sending upload to Worker', {
       url: `${R2_UPLOAD_ENDPOINT}/upload`,
       storagePath,
       contentType,
@@ -97,7 +98,7 @@ export async function uploadToR2(
     }
 
     if (import.meta.env.DEV) {
-      console.log('✅ [R2] File uploaded successfully via Worker:', {
+      devLog('✅ [R2] File uploaded successfully via Worker:', {
         path: storagePath,
         url: result.r2Url,
         size: result.size,
@@ -140,7 +141,7 @@ export async function uploadWithFallback(
     throw new Error('R2 storage is not enabled. Please configure R2 environment variables.')
   }
 
-  console.log('🟣 [R2] R2-only upload (no fallback)', {
+  devLog('🟣 [R2] R2-only upload (no fallback)', {
     endpoint: import.meta.env.VITE_R2_UPLOAD_ENDPOINT,
     userId,
     hasToken: !!firebaseToken,
@@ -231,7 +232,7 @@ export async function deleteFromR2(storagePath, firebaseToken) {
     }
 
     if (import.meta.env.DEV) {
-      console.log('🗑️ [R2] Sending delete request to Worker', {
+      devLog('🗑️ [R2] Sending delete request to Worker', {
         url: `${R2_UPLOAD_ENDPOINT}/delete`,
         storagePath,
       })
@@ -261,7 +262,7 @@ export async function deleteFromR2(storagePath, firebaseToken) {
     }
 
     if (import.meta.env.DEV) {
-      console.log('✅ [R2] File deleted successfully via Worker:', {
+      devLog('✅ [R2] File deleted successfully via Worker:', {
         storagePath,
         message: result.message,
       })
@@ -284,11 +285,11 @@ export async function deleteFromR2(storagePath, firebaseToken) {
  */
 export async function deleteAllUserR2Objects(photos, firebaseToken) {
   if (!photos || photos.length === 0) {
-    console.log('⚠️ [R2] No photos to delete')
+    devLog('⚠️ [R2] No photos to delete')
     return { success: 0, failed: 0, errors: [] }
   }
 
-  console.log(`🗑️ [R2] Starting bulk deletion of ${photos.length} objects...`)
+  devLog(`🗑️ [R2] Starting bulk deletion of ${photos.length} objects...`)
 
   let successCount = 0
   let failedCount = 0
@@ -302,7 +303,7 @@ export async function deleteAllUserR2Objects(photos, firebaseToken) {
       try {
         // Only delete if photo is stored in R2
         if (!photo.r2Url && photo.storageBackend !== 'r2') {
-          console.log(`⚠️ [R2] Skipping non-R2 photo: ${photo.id}`)
+          devLog(`⚠️ [R2] Skipping non-R2 photo: ${photo.id}`)
           return
         }
 
@@ -311,7 +312,7 @@ export async function deleteAllUserR2Objects(photos, firebaseToken) {
           photo.storagePath || extractStoragePathFromR2Url(photo.r2Url)
 
         if (!storagePath) {
-          console.warn(`⚠️ [R2] No storagePath for photo ${photo.id}, skipping`)
+          devWarn(`⚠️ [R2] No storagePath for photo ${photo.id}, skipping`)
           return
         }
 
@@ -332,12 +333,12 @@ export async function deleteAllUserR2Objects(photos, firebaseToken) {
     await Promise.allSettled(batchPromises)
 
     // Log progress
-    console.log(
+    devLog(
       `🗑️ [R2] Batch ${Math.floor(i / BATCH_SIZE) + 1} complete. Progress: ${successCount + failedCount}/${photos.length}`
     )
   }
 
-  console.log(`✅ [R2] Bulk deletion complete. Success: ${successCount}, Failed: ${failedCount}`)
+  devLog(`✅ [R2] Bulk deletion complete. Success: ${successCount}, Failed: ${failedCount}`)
 
   return { success: successCount, failed: failedCount, errors }
 }

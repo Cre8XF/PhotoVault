@@ -16,6 +16,7 @@ import {
 import useAuth from './useAuth' // ✅ ADD
 import useStore from '../state/store' // ✅ P0: For storageUsed
 import * as exifr from 'exifr' // ✅ ADD: For EXIF extraction BEFORE compression
+import { devLog, devWarn } from '../utils/log'
 
 export function useUpload() {
   const { t } = useTranslation(['upload'])
@@ -80,7 +81,7 @@ export function useUpload() {
       const isDocument = ALLOWED_DOCUMENT_TYPES.includes(fileType) ||
         /\.(pdf|docx?|xlsx?|txt)$/i.test(file.name)
 
-      if (import.meta.env.DEV) console.log(`🔍 Validating: ${file.name}, MIME: ${file.type}, isVideo: ${isVideo}, isDocument: ${isDocument}, canUploadVideo: ${canUploadVideo}, canUploadDocument: ${canUploadDocument}`)
+      devLog(`🔍 Validating: ${file.name}, MIME: ${file.type}, isVideo: ${isVideo}, isDocument: ${isDocument}, canUploadVideo: ${canUploadVideo}, canUploadDocument: ${canUploadDocument}`)
 
       // ✅ VIDEO TIER CHECK
       if (isVideo) {
@@ -90,10 +91,10 @@ export function useUpload() {
               ? t('errors.videoNotAllowedGratis')
               : t('errors.videoNotAllowedLite')
           )
-          if (import.meta.env.DEV) console.log(`❌ Video blocked: ${file.name} (tier: ${tier()})`)
+          devLog(`❌ Video blocked: ${file.name} (tier: ${tier()})`)
         } else if (!ALLOWED_VIDEO_TYPES.includes(fileType) && !hasVideoExtension) {
           fileErrors.push(t('errors.unsupportedVideoType'))
-          if (import.meta.env.DEV) console.log(`❌ Unsupported video type: ${file.name} (${file.type})`)
+          devLog(`❌ Unsupported video type: ${file.name} (${file.type})`)
         }
       }
 
@@ -101,10 +102,10 @@ export function useUpload() {
       if (isDocument) {
         if (!canUploadDocument) {
           fileErrors.push(t('errors.documentNotAllowedGratis'))
-          if (import.meta.env.DEV) console.log(`❌ Document blocked: ${file.name} (tier: ${tier()})`)
+          devLog(`❌ Document blocked: ${file.name} (tier: ${tier()})`)
         } else if (!ALLOWED_DOCUMENT_TYPES.includes(fileType) && !/\.(pdf|docx?|xlsx?|txt)$/i.test(file.name)) {
           fileErrors.push(t('errors.unsupportedDocumentType'))
-          if (import.meta.env.DEV) console.log(`❌ Unsupported document type: ${file.name} (${file.type})`)
+          devLog(`❌ Unsupported document type: ${file.name} (${file.type})`)
         }
       }
 
@@ -121,7 +122,7 @@ export function useUpload() {
       // Add to results
       if (fileErrors.length > 0) {
         errors.push({ file: file.name, errors: fileErrors })
-        if (import.meta.env.DEV) console.log(`❌ File validation failed: ${file.name}`, fileErrors)
+        devLog(`❌ File validation failed: ${file.name}`, fileErrors)
       } else {
         // ✅ Set file type
         if (isDocument) {
@@ -133,7 +134,7 @@ export function useUpload() {
         }
 
         validFiles.push(file)
-        if (import.meta.env.DEV) console.log(`✅ File validated: ${file.name} (${file.fileType})`)
+        devLog(`✅ File validated: ${file.name} (${file.fileType})`)
 
         // Warn about large files
         if (file.size > 10 * 1024 * 1024) {
@@ -145,7 +146,7 @@ export function useUpload() {
       }
     }
 
-    if (import.meta.env.DEV) console.log(`📊 Validation complete: ${validFiles.length} valid, ${errors.length} errors`)
+    devLog(`📊 Validation complete: ${validFiles.length} valid, ${errors.length} errors`)
     return { validFiles, errors, warnings }
   }
 
@@ -193,7 +194,7 @@ export function useUpload() {
           type: 'error',
         })
 
-        if (import.meta.env.DEV) console.warn('❌ Storage limit exceeded:', {
+        if (import.meta.env.DEV) devWarn('❌ Storage limit exceeded:', {
           currentUsage: storageUsed,
           newFiles: newFileBytes,
           limit: tierLimit,
@@ -203,7 +204,7 @@ export function useUpload() {
         return { success: false, error: 'Storage limit exceeded' }
       }
 
-      if (import.meta.env.DEV) console.log('✅ Storage check passed:', {
+      devLog('✅ Storage check passed:', {
         currentUsage: storageUsed,
         newFiles: newFileBytes,
         afterUpload: storageUsed + newFileBytes,
@@ -211,7 +212,7 @@ export function useUpload() {
         tier: currentTier,
       })
     } else {
-      if (import.meta.env.DEV) console.log('✅ Admin bypass - no storage limit')
+      devLog('✅ Admin bypass - no storage limit')
     }
 
     setUploading(true)
@@ -231,7 +232,7 @@ export function useUpload() {
       for (let i = 0; i < selectedFiles.length; i++) {
         // ✅ PHASE 2: Check if upload was cancelled
         if (uploadCancelled) {
-          if (import.meta.env.DEV) console.log(`🚫 Upload cancelled at file ${i + 1}/${selectedFiles.length}`)
+          devLog(`🚫 Upload cancelled at file ${i + 1}/${selectedFiles.length}`)
           break
         }
 
@@ -244,7 +245,7 @@ export function useUpload() {
         if (fileObj.type === 'document') {
           // Double-check document permission (should be caught in validation)
           if (!canUploadDocument) {
-            if (import.meta.env.DEV) console.warn('Document upload blocked for tier:', tier())
+            if (import.meta.env.DEV) devWarn('Document upload blocked for tier:', tier())
             continue
           }
 
@@ -266,7 +267,7 @@ export function useUpload() {
         else if (fileObj.type === 'video') {
           // Double-check video permission (should be caught in validation)
           if (!canUploadVideo) {
-            if (import.meta.env.DEV) console.warn('Video upload blocked for tier:', tier())
+            if (import.meta.env.DEV) devWarn('Video upload blocked for tier:', tier())
             continue
           }
 
@@ -286,7 +287,7 @@ export function useUpload() {
                   type: file.type,
                   lastModified: Date.now(),
                 })
-                if (import.meta.env.DEV) console.log(
+                devLog(
                   `📹 Video compressed: ${(file.size / 1024 / 1024).toFixed(1)}MB → ${(videoToUpload.size / 1024 / 1024).toFixed(1)}MB`
                 )
                 totalCompressedSize += videoToUpload.size
@@ -326,7 +327,7 @@ export function useUpload() {
           let exifData = null
           let hasExifError = false
           try {
-            if (import.meta.env.DEV) console.log(`📊 [PRE-COMPRESSION] Extracting EXIF from: ${file.name}`)
+            devLog(`📊 [PRE-COMPRESSION] Extracting EXIF from: ${file.name}`)
             exifData = await exifr.parse(file, {
               tiff: true,
               exif: true,
@@ -339,13 +340,13 @@ export function useUpload() {
               ihdr: true,
             })
             if (exifData) {
-              if (import.meta.env.DEV) console.log(`✅ [PRE-COMPRESSION] EXIF extracted successfully:`, {
+              devLog(`✅ [PRE-COMPRESSION] EXIF extracted successfully:`, {
                 hasDate: !!(exifData.DateTimeOriginal || exifData.DateTime),
                 hasGPS: !!(exifData.latitude && exifData.longitude),
                 hasCamera: !!(exifData.Make || exifData.Model)
               })
             } else {
-              if (import.meta.env.DEV) console.log(`⚠️ [PRE-COMPRESSION] No EXIF data in original file`)
+              devLog(`⚠️ [PRE-COMPRESSION] No EXIF data in original file`)
               hasExifError = true
               // ✅ PHASE 2: Track EXIF warning
               exifWarnings.push({
@@ -354,7 +355,7 @@ export function useUpload() {
               })
             }
           } catch (exifError) {
-            if (import.meta.env.DEV) console.warn(`⚠️ [PRE-COMPRESSION] EXIF extraction failed:`, exifError.message)
+            if (import.meta.env.DEV) devWarn(`⚠️ [PRE-COMPRESSION] EXIF extraction failed:`, exifError.message)
             hasExifError = true
             // ✅ PHASE 2: Track EXIF warning
             exifWarnings.push({
@@ -388,7 +389,7 @@ export function useUpload() {
               exifData: exifData, // ✅ Pass pre-extracted EXIF
             })
 
-            if (import.meta.env.DEV) console.log(
+            devLog(
               `🖼️ Image compressed: ${(file.size / 1024 / 1024).toFixed(1)}MB → ${(compressedFile.size / 1024 / 1024).toFixed(1)}MB`
             )
           } else {
@@ -403,7 +404,7 @@ export function useUpload() {
               exifData: exifData, // ✅ Pass pre-extracted EXIF
             })
 
-            if (import.meta.env.DEV) console.log(
+            devLog(
               `🖼️ Image uploaded (original): ${(file.size / 1024 / 1024).toFixed(1)}MB`
             )
           }
