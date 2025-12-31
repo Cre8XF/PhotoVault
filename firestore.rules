@@ -3,7 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ============================================================
-    // HELPER FUNCTIONS
+    // HELPER FUNCTIONS (NO `let`)
     // ============================================================
 
     function isAuthenticated() {
@@ -11,52 +11,74 @@ service cloud.firestore {
     }
 
     function isOwner(userId) {
-      return request.auth.uid == userId;
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function userDocPath() {
+      return /databases/$(database)/documents/users/$(request.auth.uid);
+    }
+
+    function userDocExists() {
+      return isAuthenticated() && exists(userDocPath());
     }
 
     function isAdmin() {
-      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
-      return userDoc.data.role == 'admin';
-    }
-
-    function getUserData() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      return userDocExists() && get(userDocPath()).data.role == 'admin';
     }
 
     function getUserTier() {
-      let userData = getUserData();
-      return userData.subscriptionTier != null ? userData.subscriptionTier : 'GRATIS';
-    }
-
-    // 🟡 ANBEFALING 1: Sikker getUserData med exists() sjekk
-    function getUserData() {
-      let snap = get(/databases/$(database)/documents/users/$(request.auth.uid));
-      return snap.exists ? snap.data : {};
-    }
-
-    function getUserTier() {
-      let userData = getUserData();
-      return userData.subscriptionTier != null ? userData.subscriptionTier : 'GRATIS';
+      return (userDocExists() && get(userDocPath()).data.subscriptionTier != null)
+        ? get(userDocPath()).data.subscriptionTier
+        : 'GRATIS';
     }
 
     function canUploadVideo() {
-      let tier = getUserTier();
-      return isAdmin() || tier == 'PRO';
+      return isAdmin() || getUserTier() == 'PRO';
     }
 
     function canUploadDocument() {
-      let tier = getUserTier();
-      return isAdmin() || tier == 'LITE' || tier == 'PRO';
+      return isAdmin() || getUserTier() == 'LITE' || getUserTier() == 'PRO';
     }
 
     function isEmailVerified() {
-      return request.auth.token.email_verified == true;
+      return isAuthenticated() && request.auth.token.email_verified == true;
     }
 
-    // Validate subscriptionTier field
-    function isValidTier() {
-      return !('subscriptionTier' in request.resource.data) ||
-             request.resource.data.subscriptionTier in ['GRATIS', 'LITE', 'PRO'];
+    // Validate subscriptionTier field on user create
+    function isValidTierOnCreate() {
+      return !('subscriptionTier' in request.resource.data)
+        || request.resource.data.subscriptionTier in ['GRATIS', 'LITE', 'PRO'];
+    }
+
+    function isOwnerOnCreate() {
+      return isAuthenticated()
+        && ('userId' in request.resource.data)
+        && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Helpers for content type detection
+    function getMimeOrType() {
+      return ('mimeType' in request.resource.data) ? request.resource.data.mimeType : request.resource.data.type;
+    }
+
+    function isVideoUpload() {
+      return getMimeOrType() != null && getMimeOrType().matches('video/.*');
+    }
+
+    function isDocumentUpload() {
+      return getMimeOrType() != null && (
+        getMimeOrType().matches('application/pdf.*') ||
+        getMimeOrType().matches('application/vnd\\.openxmlformats-officedocument.*') ||
+        getMimeOrType().matches('application/msword.*') ||
+        getMimeOrType().matches('application/vnd\\.ms-.*') ||
+        getMimeOrType() == 'text/plain'
+      );
+    }
+
+    function albumExistsAndIsPublic(albumId) {
+      return albumId != null
+        && exists(/databases/$(database)/documents/albums/$(albumId))
+        && get(/databases/$(database)/documents/albums/$(albumId)).data.isPublic == true;
     }
 
     // ============================================================
@@ -66,9 +88,9 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
 
-      allow create: if isAuthenticated() && isOwner(userId) && isValidTier();
+      allow create: if isAuthenticated() && isOwner(userId) && isValidTierOnCreate();
 
-      // 🔴 PROBLEM 1 FIX: Korrekt parenteser for operator-prioritet
+      // Prevent privilege escalation on role
       allow update: if (
         isAuthenticated()
         && isOwner(userId)
@@ -77,39 +99,33 @@ service cloud.firestore {
 
       allow delete: if isAdmin();
 
-      // ============================================================
-      // SUBCOLLECTIONS UNDER /users/{userId}
-      // ============================================================
+      // ----------------------------
+      // SUBCOLLECTIONS
+      // ----------------------------
 
-      // Vault (sikret til kun eier)
       match /vault/{vaultId} {
         allow read, write: if isOwner(userId) || isAdmin();
       }
 
-      // Collages
       match /collages/{collageId} {
         allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
 
+        // LITE/PRO only (admin override)
         allow create: if isAuthenticated() && isOwner(userId)
-          // CRITICAL: Enforce tier restrictions (LITE or PRO can save)
           && (getUserTier() != 'GRATIS' || isAdmin());
 
         allow update, delete: if isAuthenticated() && (isOwner(userId) || isAdmin());
       }
 
-      // Photos under /users/{userId}/photos
+      // If you really have /users/{uid}/photos docs, keep this.
+      // NOTE: This does NOT enforce tier/email; your app should write photos to top-level /photos for enforcement.
       match /photos/{photoId} {
-        // PUBLIC ACCESS for photos in public albums
-        allow read: if
-          resource.data.albumId != null &&
-          exists(/databases/$(database)/documents/albums/$(resource.data.albumId)) &&
-          get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.isPublic == true;
+        // Public access for photos in public albums
+        allow read: if albumExistsAndIsPublic(resource.data.albumId);
 
-        // Authenticated owner/admin access
         allow read, write, update, delete: if isOwner(userId) || isAdmin();
       }
 
-      // Default for other subcollections
       match /{document=**} {
         allow read: if isAuthenticated();
         allow write: if isOwner(userId) || isAdmin();
@@ -121,23 +137,20 @@ service cloud.firestore {
     // ============================================================
 
     match /albums/{albumId} {
-      // 🔴 PROBLEM 2 FIX: Slå sammen doble allow read regler
       allow read: if
         (isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin()))
         || resource.data.isPublic == true;
 
       allow create: if isAuthenticated()
         && request.resource.data.userId == request.auth.uid
-        // CRITICAL: Enforce 5-album limit for GRATIS tier
-        && (getUserTier() != 'GRATIS'
-            || getUserData().currentAlbumCount < 5
-            || isAdmin());
+        // 5-album limit for GRATIS based on user's currentAlbumCount
+        && (
+          getUserTier() != 'GRATIS'
+          || (userDocExists() && get(userDocPath()).data.currentAlbumCount < 5)
+          || isAdmin()
+        );
 
-      allow update: if isAuthenticated() && (
-        resource.data.userId == request.auth.uid || isAdmin()
-      );
-
-      allow delete: if isAuthenticated() && (
+      allow update, delete: if isAuthenticated() && (
         resource.data.userId == request.auth.uid || isAdmin()
       );
     }
@@ -147,46 +160,16 @@ service cloud.firestore {
     // ============================================================
 
     match /photos/{photoId} {
-      // 🔴 PROBLEM 2 FIX: Slå sammen doble allow read regler
       allow read: if
         (isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin()))
-        || (
-          resource.data.albumId != null &&
-          exists(/databases/$(database)/documents/albums/$(resource.data.albumId)) &&
-          get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.isPublic == true
-        );
+        || albumExistsAndIsPublic(resource.data.albumId);
 
       allow create: if isAuthenticated()
         && request.resource.data.userId == request.auth.uid
         && isEmailVerified()
-        && (
-          // CRITICAL FIX: Check mimeType OR type field
-          // Use mimeType if available (more reliable), fallback to type
-          let mimeType = 'mimeType' in request.resource.data
-            ? request.resource.data.mimeType
-            : request.resource.data.type;
-
-          // Detect videos by MIME type
-          let isVideo = mimeType != null && (
-            mimeType.matches('video/.*')
-          );
-
-          // Detect documents by MIME type
-          let isDocument = mimeType != null && (
-            mimeType.matches('application/pdf.*') ||
-            mimeType.matches('application/vnd\\.openxmlformats-officedocument.*') ||
-            mimeType.matches('application/msword.*') ||
-            mimeType.matches('application/vnd\\.ms-.*') ||
-            mimeType == 'text/plain'
-          );
-
-          // Enforce tier restrictions
-          // Videos: PRO only
-          (!isVideo || canUploadVideo())
-          &&
-          // Documents: LITE or PRO
-          (!isDocument || canUploadDocument())
-        );
+        // Tier restrictions by mime/type
+        && (!isVideoUpload() || canUploadVideo())
+        && (!isDocumentUpload() || canUploadDocument());
 
       allow update: if isAuthenticated() && (
         resource.data.userId == request.auth.uid || isAdmin()
@@ -194,12 +177,11 @@ service cloud.firestore {
 
       allow delete: if isAuthenticated()
         && (resource.data.userId == request.auth.uid || isAdmin())
-        // CRITICAL: Email verification required for delete
         && isEmailVerified();
     }
 
     // ============================================================
-    // GENERELL FALLBACK-REGEL
+    // GENERELL FALLBACK-REGEL (tight)
     // ============================================================
 
     match /{collection}/{docId} {
@@ -207,15 +189,12 @@ service cloud.firestore {
 
       allow create: if isOwnerOnCreate() || isAdmin();
 
-      // 🟡 ANBEFALING 2: Strammere fallback-regel
-      // Fjernet: || !('userId' in resource.data)
-      // Dette forhindrer at documents uten userId kan endres av hvem som helst
       allow update, delete: if isAdmin()
         || (resource.data.userId != null && isOwner(resource.data.userId));
     }
 
     // ============================================================
-    // DEFAULT DENY (viktig!)
+    // DEFAULT DENY
     // ============================================================
 
     match /{document=**} {
