@@ -28,6 +28,7 @@ import { useUpload } from '../hooks/useUpload'
 import useAuth from '../hooks/useAuth'
 import useStore from '../state/store' // ✅ ADD
 import { auth, addAlbum } from '../firebase'
+import { sendEmailVerification } from 'firebase/auth'
 
 const formatFileSize = (bytes) => {
   if (bytes === 0) return '0 Bytes'
@@ -360,6 +361,38 @@ const UploadModal = ({
 
   // Handle upload
   const handleUploadClick = async () => {
+    // ============================================================
+    // CRITICAL: Check email verification BEFORE any processing
+    // ============================================================
+    const user = auth.currentUser
+
+    if (!user?.emailVerified) {
+      setNotification({
+        type: 'error',
+        message: 'Please verify your email before uploading files.',
+        action: {
+          label: 'Resend verification',
+          onClick: async () => {
+            try {
+              await sendEmailVerification(user)
+              setNotification({
+                type: 'success',
+                message: 'Verification email sent! Check your inbox.'
+              })
+            } catch (error) {
+              console.error('Failed to send verification email:', error)
+              setNotification({
+                type: 'error',
+                message: 'Failed to send verification email. Please try again.'
+              })
+            }
+          }
+        }
+      })
+
+      return // STOP here - don't process files
+    }
+
     // ✅ Derive explicit compression permission
     const canUseCompression = tier() !== 'GRATIS' && autoCompress === true
 
