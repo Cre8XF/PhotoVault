@@ -1,12 +1,14 @@
 // ============================================================================
-// CollageTemplatesPage - Phase 3A: Template Selection
+// CollageTemplatesPage - Phase 3A: Template Selection + Freemium Gate
 // ============================================================================
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import useStore from '../state/store';
+import useAuth from '../hooks/useAuth';
 import { ROUTES } from '../routes';
 import { collageTemplates } from '../features/collage/collageTemplates';
+import CollageUpgradeModal from '../components/CollageUpgradeModal';
 
 /**
  * TemplatePreview - Visual representation of template layout
@@ -41,6 +43,11 @@ function TemplatePreview({ template }) {
 export default function CollageTemplatesPage() {
   const setIsWorldView = useStore((state) => state.setIsWorldView);
   const navigate = useNavigate();
+  const { tier, isAdmin } = useAuth();
+
+  // Upgrade modal state
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
 
   useEffect(() => {
     console.log('═══════════════════════════════════════');
@@ -68,15 +75,38 @@ export default function CollageTemplatesPage() {
     navigate('/', { replace: true });
   };
 
+  /**
+   * Check if user can create collage (tier-based)
+   */
+  const canCreateCollage = () => {
+    if (isAdmin()) return true;
+    const userTier = tier();
+    return userTier === 'LITE' || userTier === 'PRO';
+  };
+
+  /**
+   * Handle template selection with freemium gate
+   */
   const handleSelectTemplate = (template) => {
     console.log('═══════════════════════════════════════');
     console.log('📐 TEMPLATE SELECTED');
     console.log('═══════════════════════════════════════');
     console.log('Template:', template.name, `(${template.id})`);
-    console.log('Current path:', window.location.pathname);
+    console.log('User tier:', tier());
+    console.log('Can create collage:', canCreateCollage());
+
+    // FREEMIUM GATE: Check tier before allowing access
+    if (!canCreateCollage()) {
+      console.log('🚫 GRATIS user - showing upgrade modal');
+      setSelectedTemplate(template);
+      setShowUpgradeModal(true);
+      return;
+    }
+
+    // LITE/PRO/ADMIN: Allow access
+    console.log('✅ Tier allows collage creation - navigating to builder');
     console.log('Navigating to:', `${ROUTES.COLLAGE_NEW}?template=${template.id}`);
     console.log('═══════════════════════════════════════');
-    // Navigate to CollageNewPage with template ID
     navigate(`${ROUTES.COLLAGE_NEW}?template=${template.id}`);
   };
 
@@ -146,6 +176,16 @@ export default function CollageTemplatesPage() {
           <p>More layouts coming soon. Each template helps you create beautiful collages in seconds.</p>
         </div>
       </main>
+
+      {/* Upgrade Modal */}
+      <CollageUpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => {
+          setShowUpgradeModal(false);
+          setSelectedTemplate(null);
+        }}
+        template={selectedTemplate}
+      />
     </div>
   );
 }

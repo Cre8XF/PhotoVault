@@ -84,6 +84,8 @@ const UploadModal = ({
     totalFiles,
     validateFiles,
     uploadFiles,
+    cancelUpload, // ✅ PHASE 2: Cancel function
+    uploadCancelled, // ✅ PHASE 2: Cancel state
   } = useUpload()
 
   // ✅ THEN: Initialize state that depends on those values
@@ -378,6 +380,21 @@ const UploadModal = ({
     )
 
     if (result.success) {
+      // ✅ PHASE 2: Show EXIF warnings if any
+      if (result.exifWarnings && result.exifWarnings.length > 0) {
+        const uploadedCount = result.processedCount || selectedFiles.length
+        setNotification({
+          message: `${uploadedCount} photos uploaded. ${result.exifWarnings.length} without original date (using upload time instead).`,
+          type: 'warning'
+        })
+      } else if (result.cancelled) {
+        // ✅ PHASE 2: Show partial success message if cancelled
+        setNotification({
+          message: `Upload cancelled. ${result.processedCount}/${result.totalCount} photos saved.`,
+          type: 'info'
+        })
+      }
+
       // Cleanup and close
       selectedFiles.forEach((f) => URL.revokeObjectURL(f.preview))
       setSelectedFiles([])
@@ -809,7 +826,7 @@ const UploadModal = ({
           {uploading && (
             <div className="mt-6">
               <div className="flex justify-between text-sm mb-2">
-                <span>{t('upload:processing')}</span>
+                <span>{uploadCancelled ? 'Cancelling...' : t('upload:processing')}</span>
                 {/* ✅ OPPDATERT: Vis både antall og prosent */}
                 <span>
                   {totalFiles > 0 && uploadCount > 0
@@ -828,8 +845,20 @@ const UploadModal = ({
                 <p className="text-xs text-gray-400 mt-2 text-center">
                   {uploadCount === totalFiles
                     ? t('upload:uploadComplete', 'Opplasting fullført! ✓')
+                    : uploadCancelled
+                    ? 'Finishing current file...'
                     : t('upload:uploadingFiles', 'Laster opp bilder...')}
                 </p>
+              )}
+
+              {/* ✅ PHASE 2: Cancel button */}
+              {!uploadCancelled && uploadCount < totalFiles && (
+                <button
+                  onClick={cancelUpload}
+                  className="w-full mt-4 py-2 px-4 border border-red-500 text-red-500 rounded-lg hover:bg-red-500/10 transition-colors text-sm font-medium"
+                >
+                  Cancel Upload
+                </button>
               )}
             </div>
           )}

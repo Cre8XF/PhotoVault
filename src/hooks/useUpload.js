@@ -30,6 +30,9 @@ export function useUpload() {
   const [uploadCount, setUploadCount] = useState(0)
   const [totalFiles, setTotalFiles] = useState(0)
 
+  // ✅ PHASE 2: Upload cancellation support
+  const [uploadCancelled, setUploadCancelled] = useState(false)
+
   /**
    * Validate files before upload
    */
@@ -213,17 +216,25 @@ export function useUpload() {
 
     setUploading(true)
     setProcessingProgress(0)
+    setUploadCancelled(false) // ✅ PHASE 2: Reset cancel flag
     // ✅ NY: Sett totalFiles
     setTotalFiles(selectedFiles.length)
     setUploadCount(0)
 
     try {
       const processedFiles = []
+      const exifWarnings = [] // ✅ PHASE 2: Track EXIF failures
       let totalOriginalSize = 0
       let totalCompressedSize = 0
 
       // Process each file
       for (let i = 0; i < selectedFiles.length; i++) {
+        // ✅ PHASE 2: Check if upload was cancelled
+        if (uploadCancelled) {
+          if (import.meta.env.DEV) console.log(`🚫 Upload cancelled at file ${i + 1}/${selectedFiles.length}`)
+          break
+        }
+
         const fileObj = selectedFiles[i]
         const file = fileObj.file
 
@@ -313,6 +324,7 @@ export function useUpload() {
           // ✅ CRITICAL FIX: Extract EXIF from ORIGINAL file BEFORE compression
           // Compression strips all EXIF metadata, so we must extract it first!
           let exifData = null
+          let hasExifError = false
           try {
             if (import.meta.env.DEV) console.log(`📊 [PRE-COMPRESSION] Extracting EXIF from: ${file.name}`)
             exifData = await exifr.parse(file, {
@@ -334,9 +346,21 @@ export function useUpload() {
               })
             } else {
               if (import.meta.env.DEV) console.log(`⚠️ [PRE-COMPRESSION] No EXIF data in original file`)
+              hasExifError = true
+              // ✅ PHASE 2: Track EXIF warning
+              exifWarnings.push({
+                name: file.name,
+                reason: 'No metadata found'
+              })
             }
           } catch (exifError) {
             if (import.meta.env.DEV) console.warn(`⚠️ [PRE-COMPRESSION] EXIF extraction failed:`, exifError.message)
+            hasExifError = true
+            // ✅ PHASE 2: Track EXIF warning
+            exifWarnings.push({
+              name: file.name,
+              reason: exifError.message
+            })
           }
 
           // ✅ Use explicit compression flag from caller
@@ -420,7 +444,21 @@ export function useUpload() {
       setUploadCount(processedFiles.length)
       setProcessingProgress(100)
 
-      return { success: true }
+      // ✅ PHASE 2: Return partial success if cancelled
+      if (uploadCancelled) {
+        return {
+          success: true,
+          cancelled: true,
+          processedCount: processedFiles.length,
+          totalCount: selectedFiles.length,
+          exifWarnings // ✅ PHASE 2: Include EXIF warnings
+        }
+      }
+
+      return {
+        success: true,
+        exifWarnings // ✅ PHASE 2: Include EXIF warnings
+      }
     } catch (error) {
       console.error('Upload error:', error)
       await showToast(error.message || t('errors.uploadFailed'), 'error')
@@ -430,10 +468,25 @@ export function useUpload() {
         setUploading(false)
         setProcessingProgress(0)
         setCompressionStats(null)
+        setUploadCancelled(false) // ✅ PHASE 2: Reset cancel flag
         // ✅ NY: Reset counts
         setUploadCount(0)
         setTotalFiles(0)
       }, 1000)
+    }
+  }
+
+  /**
+   * ✅ PHASE 2: Cancel ongoing upload
+   * Stops processing remaining files (already processed files will complete)
+   */
+  const cancelUpload = () => {
+    if (uploading) {
+      setUploadCancelled(true)
+      setNotification({
+        message: 'Cancelling upload... Files already processed will be saved.',
+        type: 'info'
+      })
     }
   }
 
@@ -445,5 +498,7 @@ export function useUpload() {
     totalFiles, // ✅ NY
     validateFiles,
     uploadFiles,
+    cancelUpload, // ✅ PHASE 2: Cancel function
+    uploadCancelled, // ✅ PHASE 2: Cancel state
   }
 }
