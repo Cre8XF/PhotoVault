@@ -2,7 +2,7 @@
 // useCollageData Hook - Collage CRUD operations with Firestore
 // Pattern follows usePhotoData.js for consistency
 // ============================================================================
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   collection,
@@ -15,8 +15,10 @@ import {
   query,
   where,
   orderBy,
+  onSnapshot,
   serverTimestamp
 } from 'firebase/firestore'
+import { devLog } from '../utils/log'
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 import { db, storage, auth } from '../firebase'
 import useStore from '../state/store'
@@ -24,6 +26,40 @@ import { renderCollageThumbnail, renderCollageToCanvas } from '../utils/renderCo
 import { uploadWithFallback, deleteFromR2, extractStoragePathFromR2Url } from '../utils/r2Upload'
 import { LAYOUTS_V3 } from '../features/collage/layouts/layouts_v3'
 import useAuth from './useAuth' // ✅ P0: For email verification check
+
+/**
+ * Listen to user's collages in real-time
+ * @param {string} userId - User ID
+ * @param {function} callback - Called with updated collages array
+ * @returns {function} Unsubscribe function
+ */
+function listenToCollagesByUser(userId, callback) {
+  const colRef = collection(db, 'users', userId, 'collages')
+  const q = query(colRef, orderBy('createdAt', 'desc'))
+
+  const unsubscribe = onSnapshot(
+    q,
+    (snapshot) => {
+      const collages = snapshot.docs.map(doc => {
+        const data = doc.data()
+        return {
+          ...data,
+          id: doc.id,
+          collageId: doc.id,
+          createdAt: data.createdAt?.toDate?.() || new Date(),
+          updatedAt: data.updatedAt?.toDate?.() || new Date()
+        }
+      })
+      devLog('📥 [useCollageData] Collages updated from Firestore:', collages.length)
+      callback(collages)
+    },
+    (error) => {
+      console.error('❌ Collages listener error:', error)
+    }
+  )
+
+  return unsubscribe
+}
 
 /**
  * Custom hook for collage data management
@@ -51,9 +87,38 @@ export const useCollageData = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
+  // Real-time collages state
+  const [collages, setCollages] = useState([])
+  const [collagesLoading, setCollagesLoading] = useState(true)
+
   // Zustand store selectors
   const user = useStore((state) => state.user)
   const setNotification = useStore((state) => state.setNotification)
+
+  // ============================================================
+  // Real-time listener for collages
+  // ============================================================
+  useEffect(() => {
+    if (!user?.uid) {
+      setCollages([])
+      setCollagesLoading(false)
+      return
+    }
+
+    devLog('✅ [useCollageData] Setting up Firestore listener for collages')
+    setCollagesLoading(true)
+
+    const unsubscribe = listenToCollagesByUser(user.uid, (updatedCollages) => {
+      setCollages(updatedCollages)
+      setCollagesLoading(false)
+    })
+
+    // Cleanup on unmount or user change
+    return () => {
+      devLog('🧹 [useCollageData] Cleaning up Firestore listener')
+      unsubscribe()
+    }
+  }, [user?.uid])
 
   /**
    * Create a new collage
@@ -500,6 +565,10 @@ export const useCollageData = () => {
   )
 
   return {
+    // Real-time data
+    collages,
+    collagesLoading,
+
     // CRUD operations
     createCollage,
     getCollage,

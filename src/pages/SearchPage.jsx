@@ -1,7 +1,7 @@
 // ============================================================================
 // PAGE: SearchPage.jsx – v5.8 WITH DATE GROUPING (Month + Year)
 // ============================================================================
-import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -122,13 +122,12 @@ const SearchPage = ({
   // Track special filters that bypass normal filtering
   const [specialFilter, setSpecialFilter] = useState(null)
 
-  // Collage fetching
+  // Collage data - real-time from Firestore
   const {
-    getCollagesByUser,
+    collages,
+    collagesLoading,
     deleteCollage,
-    isLoading: collagesLoading,
   } = useCollageData()
-  const [collages, setCollages] = useState([])
 
   // 🆕 PHASE 3B: Keyboard shortcuts for desktop
   useKeyboardShortcuts([
@@ -179,40 +178,8 @@ const SearchPage = ({
     }
   }, [searchQuery])
 
-  // Fetch collages on mount and when photos change (indicates refresh)
-  // Re-fetch when safePhotos.length changes to catch post-deletion refreshes
-  useEffect(() => {
-    const loadCollages = async () => {
-      try {
-        const userCollages = await getCollagesByUser()
-        setCollages(Array.isArray(userCollages) ? userCollages : [])
-        if (import.meta.env.DEV) {
-          devLog(
-            '✅ Loaded collages for search page:',
-            userCollages.length
-          )
-        }
-      } catch (error) {
-        console.error('Failed to load collages:', error)
-        setCollages([])
-      }
-    }
-    loadCollages()
-  }, [getCollagesByUser])
-
-  // Refresh collages when a collage is deleted
-  // This ensures UI updates immediately after deletion
-  const refreshCollages = useCallback(async () => {
-    try {
-      const userCollages = await getCollagesByUser()
-      setCollages(Array.isArray(userCollages) ? userCollages : [])
-      if (import.meta.env.DEV) {
-        devLog('🔄 Refreshed collages after deletion:', userCollages.length)
-      }
-    } catch (error) {
-      console.error('Failed to refresh collages:', error)
-    }
-  }, [getCollagesByUser])
+  // Real-time collages are now handled by useCollageData hook
+  // No manual fetching needed - listener auto-updates on changes
 
   // Read filters from URL query params
   useEffect(() => {
@@ -1140,10 +1107,7 @@ const photoGroups = useMemo(() => {
                     await refreshData()
                   }
 
-                  // Refresh collages if any were deleted (immediate UI update)
-                  if (collageIds.length > 0) {
-                    await refreshCollages()
-                  }
+                  // Real-time listener will auto-update collages on deletion
 
                   // 🐛 FIX: Show detailed results based on success/failure
                   if (deleteResults.failed.length === 0) {
