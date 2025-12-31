@@ -10,16 +10,22 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isAdmin() {
-      return request.auth.token.email == "rogsor80@gmail.com";
-    }
-
     function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+      return request.auth.uid == userId;
     }
 
-    function isOwnerOnCreate() {
-      return isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    function isAdmin() {
+      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
+      return userDoc.data.role == 'admin';
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function getUserTier() {
+      let userData = getUserData();
+      return userData.subscriptionTier != null ? userData.subscriptionTier : 'GRATIS';
     }
 
     // 🟡 ANBEFALING 1: Sikker getUserData med exists() sjekk
