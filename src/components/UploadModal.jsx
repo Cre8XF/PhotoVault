@@ -31,6 +31,7 @@ import useStore from '../state/store' // ✅ ADD
 import { auth, addAlbum } from '../firebase'
 import { sendEmailVerification } from 'firebase/auth'
 import { isVideoFile, isDocumentFile } from '../utils/fileTypeDetection'
+import { devLog, devWarn } from '../utils/log'
 
 const formatFileSize = (bytes) => {
   if (bytes === 0) return '0 Bytes'
@@ -167,7 +168,7 @@ const UploadModal = ({
   // Auto-open AlbumModal if initialMode is 'album'
   useEffect(() => {
     if (isOpen && initialMode === 'album' && !showAlbumModal) {
-      console.log('📁 UploadModal opened in ALBUM mode - opening AlbumModal')
+      devLog('📁 UploadModal opened in ALBUM mode - opening AlbumModal')
       // Delay to ensure modal is fully rendered
       setTimeout(() => {
         setShowAlbumModal(true)
@@ -230,7 +231,7 @@ const UploadModal = ({
       files.forEach((file) => {
         // ✅ FIXED: Use robust video detection
         const isVideo = detectVideo(file)
-        console.log(
+        devLog(
           `🔍 Video check: ${file.name}, MIME: ${file.type}, isVideo: ${isVideo}`
         )
         if (isVideo) {
@@ -277,7 +278,7 @@ const UploadModal = ({
     // Show warnings
     if (warnings.length > 0) {
       warnings.forEach((warn) => {
-        console.warn(`File ${warn.file}:`, warn.message)
+        devWarn(`File ${warn.file}:`, warn.message)
       })
     }
 
@@ -436,7 +437,7 @@ const UploadModal = ({
     // ✅ Derive explicit compression permission
     const canUseCompression = tier() !== 'GRATIS' && autoCompress === true
 
-    console.log('🔒 Compression check:', {
+    devLog('🔒 Compression check:', {
       tier: tier(),
       autoCompress,
       canUseCompression,
@@ -514,12 +515,12 @@ const UploadModal = ({
     try {
       setIsCreatingAlbum(true)
 
-      console.log('📁 Creating album:', cleanAlbum.name)
+      devLog('📁 Creating album:', cleanAlbum.name)
 
       // Single Firestore write - creates album document
       const newAlbumRef = await addAlbum(cleanAlbum)
 
-      console.log('✅ Album created:', {
+      devLog('✅ Album created:', {
         id: newAlbumRef.id,
         name: cleanAlbum.name,
       })
@@ -535,7 +536,7 @@ const UploadModal = ({
       // CRITICAL: Pre-select the new album for photo upload
       setSelectedAlbumId(newAlbumRef.id)
 
-      console.log('📸 Album pre-selected for upload:', newAlbumRef.id)
+      devLog('📸 Album pre-selected for upload:', newAlbumRef.id)
 
       // Notify parent to refresh UI - does NOT create another document
       if (onCreateAlbum) onCreateAlbum({ id: newAlbumRef.id, ...cleanAlbum })

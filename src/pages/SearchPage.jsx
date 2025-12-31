@@ -40,6 +40,7 @@ import {
 } from '../utils/photoDateUtils'
 import useCollageData from '../hooks/useCollageData'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
+import { devLog, devWarn } from '../utils/log'
 
 const SearchPage = ({
   photos = [],
@@ -66,7 +67,7 @@ const SearchPage = ({
   const safePhotos = useMemo(() => {
     if (!Array.isArray(photos)) {
       if (import.meta.env.DEV) {
-        console.warn(
+        devWarn(
           '⚠️ SearchPage received non-array photos:',
           typeof photos,
           photos
@@ -80,7 +81,7 @@ const SearchPage = ({
   const safeAlbums = useMemo(() => {
     if (!Array.isArray(albums)) {
       if (import.meta.env.DEV) {
-        console.warn(
+        devWarn(
           '⚠️ SearchPage received non-array albums:',
           typeof albums,
           albums
@@ -186,7 +187,7 @@ const SearchPage = ({
         const userCollages = await getCollagesByUser()
         setCollages(Array.isArray(userCollages) ? userCollages : [])
         if (import.meta.env.DEV) {
-          console.log(
+          devLog(
             '✅ Loaded collages for search page:',
             userCollages.length
           )
@@ -206,7 +207,7 @@ const SearchPage = ({
       const userCollages = await getCollagesByUser()
       setCollages(Array.isArray(userCollages) ? userCollages : [])
       if (import.meta.env.DEV) {
-        console.log('🔄 Refreshed collages after deletion:', userCollages.length)
+        devLog('🔄 Refreshed collages after deletion:', userCollages.length)
       }
     } catch (error) {
       console.error('Failed to refresh collages:', error)
@@ -245,7 +246,7 @@ const SearchPage = ({
     if (params.has('recent') && params.get('recent') === 'true') {
       const limit = parseInt(params.get('limit')) || 50
       if (import.meta.env.DEV) {
-        console.log('🔵 RECENT FILTER ACTIVATED:', {
+        devLog('🔵 RECENT FILTER ACTIVATED:', {
           limit,
           totalPhotos: safePhotos.length,
           explanation:
@@ -261,7 +262,7 @@ const SearchPage = ({
     if (params.has('day')) {
       const dayValue = params.get('day')
       if (import.meta.env.DEV) {
-        console.log('🔵 DAY FILTER ACTIVATED:', dayValue)
+        devLog('🔵 DAY FILTER ACTIVATED:', dayValue)
       }
 
       if (dayValue === 'today') {
@@ -280,7 +281,7 @@ const SearchPage = ({
     // Check for week filter (FIXED - Issue 2)
     if (params.has('week') && params.get('week') === 'true') {
       if (import.meta.env.DEV) {
-        console.log('🔵 WEEK FILTER ACTIVATED')
+        devLog('🔵 WEEK FILTER ACTIVATED')
       }
       newFilters.dateRange = 'week'
       hasChanges = true
@@ -308,7 +309,7 @@ const SearchPage = ({
     if (hasChanges) {
       setActiveFilters(newFilters)
       if (import.meta.env.DEV) {
-        console.log('✅ Applied filters from URL params:', newFilters)
+        devLog('✅ Applied filters from URL params:', newFilters)
       }
     }
   }, [location.search, safePhotos.length]) // Re-run when URL query params change
@@ -342,7 +343,7 @@ const SearchPage = ({
     // SPECIAL FILTER: Recent photos (Issue 1 fix)
     if (specialFilter?.type === 'recent') {
       if (import.meta.env.DEV) {
-        console.log('🔍 Applying RECENT filter...')
+        devLog('🔍 Applying RECENT filter...')
       }
       // Sort by most recent first (createdAt or uploadedAt)
       const sorted = [...res].sort((a, b) => {
@@ -353,7 +354,7 @@ const SearchPage = ({
       // Limit to specified number
       res = sorted.slice(0, specialFilter.limit)
       if (import.meta.env.DEV) {
-        console.log(`✅ Recent filter applied: showing ${res.length} photos`)
+        devLog(`✅ Recent filter applied: showing ${res.length} photos`)
       }
       return res // Skip other filters when showing recent
     }
@@ -361,7 +362,7 @@ const SearchPage = ({
     if (debouncedSearchQuery.trim()) {
       const q = debouncedSearchQuery.toLowerCase()
       if (import.meta.env.DEV) {
-        console.log('🔍 Searching for:', q)
+        devLog('🔍 Searching for:', q)
       }
 
       res = res.filter((p) => {
@@ -384,7 +385,7 @@ const SearchPage = ({
       })
 
       if (import.meta.env.DEV) {
-        console.log(`✅ Search complete: ${res.length} results for "${q}"`)
+        devLog(`✅ Search complete: ${res.length} results for "${q}"`)
       }
     }
 
@@ -415,7 +416,7 @@ const SearchPage = ({
         todayEnd.setHours(23, 59, 59, 999)
 
         if (import.meta.env.DEV) {
-          console.log('🔍 Filtering photos from TODAY:', {
+          devLog('🔍 Filtering photos from TODAY:', {
             start: todayStart.toISOString(),
             end: todayEnd.toISOString(),
           })
@@ -428,7 +429,7 @@ const SearchPage = ({
           )
         })
         if (import.meta.env.DEV) {
-          console.log(`✅ Today filter applied: ${res.length} photos`)
+          devLog(`✅ Today filter applied: ${res.length} photos`)
         }
       } else if (activeFilters.dateRange === 'yesterday') {
         const yesterdayStart = new Date()
@@ -439,7 +440,7 @@ const SearchPage = ({
         yesterdayEnd.setHours(23, 59, 59, 999)
 
         if (import.meta.env.DEV) {
-          console.log('🔍 Filtering photos from YESTERDAY:', {
+          devLog('🔍 Filtering photos from YESTERDAY:', {
             start: yesterdayStart.toISOString(),
             end: yesterdayEnd.toISOString(),
           })
@@ -453,7 +454,7 @@ const SearchPage = ({
           )
         })
         if (import.meta.env.DEV) {
-          console.log(`✅ Yesterday filter applied: ${res.length} photos`)
+          devLog(`✅ Yesterday filter applied: ${res.length} photos`)
         }
       } else if (activeFilters.dateRange.startsWith('date:')) {
         // Specific date (YYYY-MM-DD)
@@ -464,7 +465,7 @@ const SearchPage = ({
         nextDay.setDate(nextDay.getDate() + 1)
 
         if (import.meta.env.DEV) {
-          console.log('🔍 Filtering photos from specific date:', dateStr)
+          devLog('🔍 Filtering photos from specific date:', dateStr)
         }
 
         res = res.filter((p) => {
@@ -474,7 +475,7 @@ const SearchPage = ({
           )
         })
         if (import.meta.env.DEV) {
-          console.log(`✅ Date filter applied: ${res.length} photos`)
+          devLog(`✅ Date filter applied: ${res.length} photos`)
         }
       } else {
         // Original range-based filtering (week, month, year)
@@ -519,7 +520,7 @@ const SearchPage = ({
       .filter(c => c.id) // Filter out collages without valid ID
 
     if (import.meta.env.DEV && collagesWithType.length < collages.length) {
-      console.warn('⚠️ Filtered out', collages.length - collagesWithType.length, 'collages without valid ID')
+      devWarn('⚠️ Filtered out', collages.length - collagesWithType.length, 'collages without valid ID')
     }
 
   // 🔀 MERGE: Photos + Collages → unified content list
@@ -534,7 +535,7 @@ const SearchPage = ({
   )
 
   if (import.meta.env.DEV) {
-    console.log('🎨 Merged content:', {
+    devLog('🎨 Merged content:', {
       photos: photosWithType.filter(p => p.contentType === 'photo').length,
       videos: photosWithType.filter(p => p.contentType === 'video').length,
       collages: collagesWithType.length,
@@ -554,14 +555,14 @@ const photoGroups = useMemo(() => {
   }
 
   if (import.meta.env.DEV) {
-    console.log('📅 Grouping content by Month + Year (unified utility)...')
+    devLog('📅 Grouping content by Month + Year (unified utility)...')
   }
 
   // Works for BOTH photos and collages
   const groups = groupPhotosByMonth(allContent, 'nb')
 
   if (import.meta.env.DEV) {
-    console.log(
+    devLog(
       `✅ Created ${groups.length} month groups:`,
       groups.map((g) => `${g.label} (${g.photos.length})`)
     )
@@ -719,7 +720,7 @@ const photoGroups = useMemo(() => {
     const safeSelected = Array.isArray(selectedPhotos) ? selectedPhotos : []
 
     if (import.meta.env.DEV) {
-      console.log('🔵 Moving photos with error recovery:', {
+      devLog('🔵 Moving photos with error recovery:', {
         count: safeSelected.length,
         targetAlbumId,
         selectedIds: safeSelected,
@@ -756,13 +757,13 @@ const photoGroups = useMemo(() => {
             (sourceAlbums.get(photo.albumId) || 0) + 1
           )
           if (import.meta.env.DEV) {
-            console.log(
+            devLog(
               `📦 Moving photo ${id} from album ${photo.albumId} to ${targetAlbumId}`
             )
           }
         } else {
           if (import.meta.env.DEV) {
-            console.log(
+            devLog(
               `📦 Moving photo ${id} from "Uten album" to ${targetAlbumId}`
             )
           }
@@ -773,7 +774,7 @@ const photoGroups = useMemo(() => {
         moveResults.success.push(id)
 
         if (import.meta.env.DEV) {
-          console.log(`✅ Successfully moved: ${photo.name}`)
+          devLog(`✅ Successfully moved: ${photo.name}`)
         }
       } catch (error) {
         console.error(`❌ Failed to move photo ${id}:`, error)
@@ -794,7 +795,7 @@ const photoGroups = useMemo(() => {
           const newTargetCount =
             (targetAlbum.photoCount || 0) + moveResults.success.length
           if (import.meta.env.DEV) {
-            console.log(
+            devLog(
               `✅ Updating target album ${targetAlbumId} count: ${
                 targetAlbum.photoCount || 0
               } → ${newTargetCount}`
@@ -812,7 +813,7 @@ const photoGroups = useMemo(() => {
               (sourceAlbum.photoCount || 0) - count
             )
             if (import.meta.env.DEV) {
-              console.log(
+              devLog(
                 `✅ Updating source album ${sourceAlbumId} count: ${
                   sourceAlbum.photoCount || 0
                 } → ${newSourceCount}`
@@ -837,7 +838,7 @@ const photoGroups = useMemo(() => {
     if (moveResults.failed.length === 0) {
       // All succeeded - no need to alert, move modal closes smoothly
       if (import.meta.env.DEV) {
-        console.log(
+        devLog(
           `✅ All ${moveResults.success.length} photos moved successfully`
         )
       }
@@ -995,7 +996,7 @@ const photoGroups = useMemo(() => {
                 onClick={async () => {
                   // 🐛 FIX: Improved error recovery with success/failure tracking
                   if (import.meta.env.DEV) {
-                    console.log('🗑️ Delete button clicked:', {
+                    devLog('🗑️ Delete button clicked:', {
                       count: selectedPhotos.length,
                       photoIds: selectedPhotos,
                     })
@@ -1003,7 +1004,7 @@ const photoGroups = useMemo(() => {
 
                   if (selectedPhotos.length === 0) {
                     if (import.meta.env.DEV) {
-                      console.warn('No photos selected')
+                      devWarn('No photos selected')
                     }
                     return
                   }
@@ -1018,13 +1019,13 @@ const photoGroups = useMemo(() => {
 
                   if (!window.confirm(confirmMessage)) {
                     if (import.meta.env.DEV) {
-                      console.log('Delete cancelled by user')
+                      devLog('Delete cancelled by user')
                     }
                     return
                   }
 
                   if (import.meta.env.DEV) {
-                    console.log(
+                    devLog(
                       '🔥 Starting deletion process with error recovery...'
                     )
                   }
@@ -1063,7 +1064,7 @@ const photoGroups = useMemo(() => {
 
                     try {
                       if (import.meta.env.DEV) {
-                        console.log(
+                        devLog(
                           `Deleting photo: ${photo.name} (${photoId})`
                         )
                       }
@@ -1072,7 +1073,7 @@ const photoGroups = useMemo(() => {
                       deleteResults.success.push(photoId)
 
                       if (import.meta.env.DEV) {
-                        console.log(`✅ Successfully deleted: ${photo.name}`)
+                        devLog(`✅ Successfully deleted: ${photo.name}`)
                       }
                     } catch (error) {
                       console.error(
@@ -1102,7 +1103,7 @@ const photoGroups = useMemo(() => {
 
                     try {
                       if (import.meta.env.DEV) {
-                        console.log(
+                        devLog(
                           `Deleting collage: ${collage.title || collage.id}`
                         )
                       }
@@ -1111,7 +1112,7 @@ const photoGroups = useMemo(() => {
                       deleteResults.success.push(collageId)
 
                       if (import.meta.env.DEV) {
-                        console.log(
+                        devLog(
                           `✅ Successfully deleted collage: ${
                             collage.title || collage.id
                           }`
@@ -1155,7 +1156,7 @@ const photoGroups = useMemo(() => {
                           })
 
                     if (import.meta.env.DEV) {
-                      console.log('✅ All photos deleted successfully')
+                      devLog('✅ All photos deleted successfully')
                     }
                     alert(successMessage)
                   } else if (deleteResults.success.length === 0) {
@@ -1564,7 +1565,7 @@ const photoGroups = useMemo(() => {
                           collage={item}
                           onClick={(collage) => {
                             if (!editMode) {
-                              console.log('🎨 Collage clicked:', collage.id)
+                              devLog('🎨 Collage clicked:', collage.id)
                               navigate(`/collage/${collage.id}`)
                             }
                           }}

@@ -9,6 +9,7 @@ import { useCallback } from 'react'
 import { getAuth, signOut } from 'firebase/auth'
 import useStore from '../state/store'
 import { useTranslation } from 'react-i18next'
+import { devLog } from '../utils/log'
 
 /**
  * Custom hook for authentication management
@@ -101,7 +102,7 @@ export const useAuth = () => {
       await auth.currentUser.reload()
       const refreshedUser = auth.currentUser
 
-      console.log('[AUTH] Manual refresh via refreshUser(), emailVerified:', refreshedUser.emailVerified)
+      devLog('[AUTH] Manual refresh via refreshUser(), emailVerified:', refreshedUser.emailVerified)
 
       // Update Zustand with new reference to force re-renders
       setUser({ ...refreshedUser })
@@ -128,7 +129,7 @@ export const useAuth = () => {
       // Fetch updated profile from Firestore
       await fetchUserProfile(auth.currentUser.uid)
 
-      console.log('[AUTH] User profile refreshed successfully')
+      devLog('[AUTH] User profile refreshed successfully')
       return true
     } catch (err) {
       console.error('[AUTH] Failed to refresh user profile:', err)
