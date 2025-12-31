@@ -10,17 +10,22 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return request.auth.uid == userId;
-    }
-
     function isAdmin() {
-      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
-      return userDoc.data.role == 'admin';
+      return request.auth.token.email == "rogsor80@gmail.com";
     }
 
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isOwnerOnCreate() {
+      return isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // 🟡 ANBEFALING 1: Sikker getUserData med exists() sjekk
     function getUserData() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      let snap = get(/databases/$(database)/documents/users/$(request.auth.uid));
+      return snap.exists ? snap.data : {};
     }
 
     function getUserTier() {
@@ -42,6 +47,12 @@ service cloud.firestore {
       return request.auth.token.email_verified == true;
     }
 
+    // Validate subscriptionTier field
+    function isValidTier() {
+      return !('subscriptionTier' in request.resource.data) ||
+             request.resource.data.subscriptionTier in ['GRATIS', 'LITE', 'PRO'];
+    }
+
     // ============================================================
     // USERS COLLECTION
     // ============================================================
@@ -49,19 +60,27 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
 
-      allow create: if isAuthenticated() && isOwner(userId);
+      allow create: if isAuthenticated() && isOwner(userId) && isValidTier();
 
-      allow update: if isAuthenticated() && isOwner(userId)
-        // Prevent privilege escalation
-        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']))
-        || isAdmin();
+      // 🔴 PROBLEM 1 FIX: Korrekt parenteser for operator-prioritet
+      allow update: if (
+        isAuthenticated()
+        && isOwner(userId)
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])
+      ) || isAdmin();
 
       allow delete: if isAdmin();
 
       // ============================================================
-      // COLLAGES SUBCOLLECTION
+      // SUBCOLLECTIONS UNDER /users/{userId}
       // ============================================================
 
+      // Vault (sikret til kun eier)
+      match /vault/{vaultId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+
+      // Collages
       match /collages/{collageId} {
         allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
 
@@ -72,9 +91,16 @@ service cloud.firestore {
         allow update, delete: if isAuthenticated() && (isOwner(userId) || isAdmin());
       }
 
-      // Vault and other subcollections
-      match /vault/{vaultId} {
-        allow read, write: if isOwner(userId) || isAdmin();
+      // Photos under /users/{userId}/photos
+      match /photos/{photoId} {
+        // PUBLIC ACCESS for photos in public albums
+        allow read: if
+          resource.data.albumId != null &&
+          exists(/databases/$(database)/documents/albums/$(resource.data.albumId)) &&
+          get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.isPublic == true;
+
+        // Authenticated owner/admin access
+        allow read, write, update, delete: if isOwner(userId) || isAdmin();
       }
 
       // Default for other subcollections
@@ -85,16 +111,14 @@ service cloud.firestore {
     }
 
     // ============================================================
-    // ALBUMS COLLECTION
+    // ALBUMS COLLECTION (top-level)
     // ============================================================
 
     match /albums/{albumId} {
-      allow read: if isAuthenticated() && (
-        resource.data.userId == request.auth.uid || isAdmin()
-      );
-
-      // Public override
-      allow read: if resource.data.isPublic == true;
+      // 🔴 PROBLEM 2 FIX: Slå sammen doble allow read regler
+      allow read: if
+        (isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin()))
+        || resource.data.isPublic == true;
 
       allow create: if isAuthenticated()
         && request.resource.data.userId == request.auth.uid
@@ -113,19 +137,18 @@ service cloud.firestore {
     }
 
     // ============================================================
-    // PHOTOS COLLECTION
+    // PHOTOS COLLECTION (top-level)
     // ============================================================
 
     match /photos/{photoId} {
-      allow read: if isAuthenticated() && (
-        resource.data.userId == request.auth.uid || isAdmin()
-      );
-
-      // Public fallback: Allow reading photos in public albums
+      // 🔴 PROBLEM 2 FIX: Slå sammen doble allow read regler
       allow read: if
-        resource.data.albumId != null &&
-        exists(/databases/$(database)/documents/albums/$(resource.data.albumId)) &&
-        get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.isPublic == true;
+        (isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin()))
+        || (
+          resource.data.albumId != null &&
+          exists(/databases/$(database)/documents/albums/$(resource.data.albumId)) &&
+          get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.isPublic == true
+        );
 
       allow create: if isAuthenticated()
         && request.resource.data.userId == request.auth.uid
@@ -151,20 +174,23 @@ service cloud.firestore {
     }
 
     // ============================================================
-    // GENERELL TILGANG (FALLBACK)
+    // GENERELL FALLBACK-REGEL
     // ============================================================
 
     match /{collection}/{docId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated()
-        && (request.resource.data.userId == request.auth.uid || isAdmin());
+
+      allow create: if isOwnerOnCreate() || isAdmin();
+
+      // 🟡 ANBEFALING 2: Strammere fallback-regel
+      // Fjernet: || !('userId' in resource.data)
+      // Dette forhindrer at documents uten userId kan endres av hvem som helst
       allow update, delete: if isAdmin()
-        || (resource.data.userId != null && isOwner(resource.data.userId))
-        || !('userId' in resource.data);
+        || (resource.data.userId != null && isOwner(resource.data.userId));
     }
 
     // ============================================================
-    // DEFAULT DENY
+    // DEFAULT DENY (viktig!)
     // ============================================================
 
     match /{document=**} {
