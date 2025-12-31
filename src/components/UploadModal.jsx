@@ -24,11 +24,13 @@ import {
 } from '../utils/nativeCamera'
 import { triggerHaptic, showToast } from '../utils/nativeUtils'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { useUpload } from '../hooks/useUpload'
 import useAuth from '../hooks/useAuth'
 import useStore from '../state/store' // ✅ ADD
 import { auth, addAlbum } from '../firebase'
 import { sendEmailVerification } from 'firebase/auth'
+import { isVideoFile, isDocumentFile } from '../utils/fileTypeDetection'
 
 const formatFileSize = (bytes) => {
   if (bytes === 0) return '0 Bytes'
@@ -69,7 +71,8 @@ const UploadModal = ({
   }, [])
 
   const { t } = useTranslation(['common', 'upload'])
-  const { tier, canUploadVideo, canCreateAlbum } = useAuth() // ✅ Added canCreateAlbum for freemium
+  const navigate = useNavigate()
+  const { tier, canUploadVideo, canCreateAlbum, canUploadDocument } = useAuth() // ✅ Added canUploadDocument
   const setNotification = useStore((state) => state.setNotification) // ✅ ADD
   const setUpgradeModal = useStore((state) => state.setUpgradeModal) // 🆕 FREEMIUM
   const userProfile = useStore((state) => state.userProfile)
@@ -391,6 +394,43 @@ const UploadModal = ({
       })
 
       return // STOP here - don't process files
+    }
+
+    // ============================================================
+    // CRITICAL: Check tier restrictions BEFORE upload processing
+    // ============================================================
+    const userTier = tier()
+    const canVideo = canUploadVideo()
+    const canDoc = canUploadDocument()
+
+    for (const fileData of selectedFiles) {
+      const file = fileData.file
+
+      // Check if video
+      if (isVideoFile(file) && !canVideo) {
+        setNotification({
+          type: 'error',
+          message: `Video upload requires PRO tier. You're currently on ${userTier}.`,
+          action: {
+            label: 'Upgrade to PRO',
+            onClick: () => navigate('/subscription'),
+          },
+        })
+        return // STOP - don't upload anything
+      }
+
+      // Check if document
+      if (isDocumentFile(file) && !canDoc) {
+        setNotification({
+          type: 'error',
+          message: `Document upload requires LITE or PRO tier. You're currently on ${userTier}.`,
+          action: {
+            label: 'Upgrade to LITE',
+            onClick: () => navigate('/subscription'),
+          },
+        })
+        return // STOP - don't upload anything
+      }
     }
 
     // ✅ Derive explicit compression permission
