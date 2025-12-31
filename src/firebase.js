@@ -143,13 +143,23 @@ export async function adjustUserAlbumCount(userId, delta) {
   try {
     await updateDoc(userRef, {
       currentAlbumCount: increment(delta),
+      updatedAt: new Date().toISOString(),
     })
 
-    if (import.meta.env.DEV) {
-      console.log(`✅ Album count adjusted by ${delta} for user ${userId}`)
-    }
+    console.log(`✅ Counter adjusted: userId=${userId}, delta=${delta}`)
   } catch (error) {
-    console.error('❌ Failed to adjust album count:', error)
+    console.error(`❌ Counter adjustment FAILED:`, {
+      userId,
+      delta,
+      error: error.message,
+      stack: error.stack,
+      timestamp: new Date().toISOString(),
+    })
+
+    // CRITICAL: Log to external service (optional)
+    // TODO: Integrate with Sentry or similar logging service
+    // logToSentry({ userId, delta, error })
+
     throw error
   }
 }

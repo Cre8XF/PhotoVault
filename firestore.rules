@@ -2,99 +2,171 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ===== HELPER FUNCTIONS =====
+    // ============================================================
+    // HELPER FUNCTIONS
+    // ============================================================
+
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    function isAdmin() {
-      return request.auth.token.email == "rogsor80@gmail.com";
-    }
-
     function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+      return request.auth.uid == userId;
     }
 
-    function isOwnerOnCreate() {
-      return isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    function isAdmin() {
+      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
+      return userDoc.data.role == 'admin';
     }
 
-    // ✅ NEW: Validate subscriptionTier field
-    function isValidTier() {
-      return !('subscriptionTier' in request.resource.data) ||
-             request.resource.data.subscriptionTier in ['GRATIS', 'LITE', 'PRO'];
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
 
-    // ===== ALBUMS =====
-   match /albums/{albumId} {
-  // Owner or admin can read/write
-  allow read, write, update, delete:
-    if isOwner(resource.data.userId) || isAdmin();
+    function getUserTier() {
+      let userData = getUserData();
+      return userData.subscriptionTier != null ? userData.subscriptionTier : 'GRATIS';
+    }
 
-  // Public override
-  allow read: if resource.data.isPublic == true;
-}
+    function canUploadVideo() {
+      let tier = getUserTier();
+      return isAdmin() || tier == 'PRO';
+    }
 
+    function canUploadDocument() {
+      let tier = getUserTier();
+      return isAdmin() || tier == 'LITE' || tier == 'PRO';
+    }
 
-    // ===== PHOTOS (TOPP NIVÅ) =====
-  match /photos/{photoId} {
-  // Owner or admin first
-  allow read, write, update, delete:
-    if isOwner(resource.data.userId) || isAdmin();
+    function isEmailVerified() {
+      return request.auth.token.email_verified == true;
+    }
 
-  // Public fallback
-  allow read: if
-    resource.data.albumId != null &&
-    exists(/databases/$(database)/documents/albums/$(resource.data.albumId)) &&
-    get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.isPublic == true;
-}
+    // ============================================================
+    // USERS COLLECTION
+    // ============================================================
 
-
-    // ===== BRUKER-BASERT STRUKTUR =====
     match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow create: if isOwner(userId) && isValidTier();
-      allow update: if (isOwner(userId) || isAdmin()) && isValidTier();
-      allow delete: if isOwner(userId) || isAdmin();
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
 
-      // 🔹 Bilder under users/{userId}/photos
-      match /photos/{photoId} {
-        // Offentlig lesing for bilder i offentlige album
-        allow read: if
-          resource.data.albumId != null &&
-          exists(/databases/$(database)/documents/albums/$(resource.data.albumId)) &&
-          get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.isPublic == true;
+      allow create: if isAuthenticated() && isOwner(userId);
 
-        // Eier eller admin har full tilgang
-        allow read, write, update, delete:
-          if isOwner(userId)
-             || isOwner(get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.userId)
-             || isAdmin();
+      allow update: if isAuthenticated() && isOwner(userId)
+        // Prevent privilege escalation
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']))
+        || isAdmin();
+
+      allow delete: if isAdmin();
+
+      // ============================================================
+      // COLLAGES SUBCOLLECTION
+      // ============================================================
+
+      match /collages/{collageId} {
+        allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+
+        allow create: if isAuthenticated() && isOwner(userId)
+          // CRITICAL: Enforce tier restrictions (LITE or PRO can save)
+          && (getUserTier() != 'GRATIS' || isAdmin());
+
+        allow update, delete: if isAuthenticated() && (isOwner(userId) || isAdmin());
       }
 
-      // Vault og andre undersamlinger
+      // Vault and other subcollections
       match /vault/{vaultId} {
         allow read, write: if isOwner(userId) || isAdmin();
       }
 
-      // Default for øvrige undersamlinger
+      // Default for other subcollections
       match /{document=**} {
         allow read: if isAuthenticated();
         allow write: if isOwner(userId) || isAdmin();
       }
     }
 
-    // ===== GENERELL TILGANG =====
+    // ============================================================
+    // ALBUMS COLLECTION
+    // ============================================================
+
+    match /albums/{albumId} {
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+
+      // Public override
+      allow read: if resource.data.isPublic == true;
+
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid
+        // CRITICAL: Enforce 5-album limit for GRATIS tier
+        && (getUserTier() != 'GRATIS'
+            || getUserData().currentAlbumCount < 5
+            || isAdmin());
+
+      allow update: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+
+      allow delete: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+    }
+
+    // ============================================================
+    // PHOTOS COLLECTION
+    // ============================================================
+
+    match /photos/{photoId} {
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+
+      // Public fallback: Allow reading photos in public albums
+      allow read: if
+        resource.data.albumId != null &&
+        exists(/databases/$(database)/documents/albums/$(resource.data.albumId)) &&
+        get(/databases/$(database)/documents/albums/$(resource.data.albumId)).data.isPublic == true;
+
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid
+        // CRITICAL: Enforce tier restrictions
+        && (
+          // Videos: PRO only
+          (request.resource.data.type != 'video' || canUploadVideo())
+          &&
+          // Documents: LITE or PRO
+          (request.resource.data.type != 'document' || canUploadDocument())
+        )
+        // CRITICAL: Email verification required
+        && isEmailVerified();
+
+      allow update: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+
+      allow delete: if isAuthenticated()
+        && (resource.data.userId == request.auth.uid || isAdmin())
+        // CRITICAL: Email verification required for delete
+        && isEmailVerified();
+    }
+
+    // ============================================================
+    // GENERELL TILGANG (FALLBACK)
+    // ============================================================
+
     match /{collection}/{docId} {
       allow read: if isAuthenticated();
-      allow create: if isOwnerOnCreate() || isAdmin();
-      allow update, delete:
-        if isAdmin()
+      allow create: if isAuthenticated()
+        && (request.resource.data.userId == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin()
         || (resource.data.userId != null && isOwner(resource.data.userId))
         || !('userId' in resource.data);
     }
 
-    // ===== DEFAULT DENY =====
+    // ============================================================
+    // DEFAULT DENY
+    // ============================================================
+
     match /{document=**} {
       allow read, write: if false;
     }
