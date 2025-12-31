@@ -57,7 +57,9 @@
     "cap:open:android": "cap open android",
     "build:mobile": "npm run build && cap sync",
     "ios:build": "npm run build && cap sync ios && cap open ios",
-    "android:build": "npm run build && cap sync android && cap open android"
+    "android:build": "npm run build && cap sync android && cap open android",
+    "reconcile": "node scripts/reconcile-counters.mjs --report",
+    "reconcile:fix": "node scripts/reconcile-counters.mjs --fix"
   },
   "devDependencies": {
     "@capacitor/cli": "^7.4.3",
