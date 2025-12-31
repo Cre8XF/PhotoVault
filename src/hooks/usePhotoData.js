@@ -207,6 +207,13 @@ export const usePhotoData = () => {
         return
       }
 
+      // CRITICAL: Check email verification BEFORE upload
+      if (!user.emailVerified) {
+        const error = new Error('EMAIL_NOT_VERIFIED')
+        error.code = 'EMAIL_NOT_VERIFIED'
+        throw error
+      }
+
       setIsUploading(true)
 
       try {
@@ -452,6 +459,17 @@ export const usePhotoData = () => {
         title: t('common:notifications.deletePhotoTitle'),
         message: t('common:notifications.deletePhotoMessage'),
         onConfirm: async () => {
+          // CRITICAL: Check email verification BEFORE delete
+          if (!user?.emailVerified) {
+            const error = new Error('EMAIL_NOT_VERIFIED')
+            error.code = 'EMAIL_NOT_VERIFIED'
+            setNotification({
+              message: t('common:notifications.emailNotVerified') || 'Please verify your email to delete photos',
+              type: 'error',
+            })
+            return
+          }
+
           if (isDeleting) {
             if (import.meta.env.DEV) console.warn(
               '⚠️ Delete already in progress, ignoring duplicate call'
