@@ -48,9 +48,8 @@ const AlbumsPage = ({
   const [loading, setLoading] = useState(false)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
 
-  // Collage state
-  const [collages, setCollages] = useState([])
-  const { getCollagesByUser, deleteCollage } = useCollageData()
+  // Collage data - real-time from Firestore
+  const { collages, collagesLoading, deleteCollage } = useCollageData()
 
   // Store actions
   const setConfirmModal = useStore((s) => s.setConfirmModal)
@@ -59,24 +58,6 @@ const AlbumsPage = ({
   const setEditingAlbum = useStore((s) => s.setEditingAlbum)
   const setCurrentPage = useStore((s) => s.setCurrentPage)
   const openUploadModal = useStore((s) => s.openUploadModal)
-
-  // Load collages once
-  useEffect(() => {
-    let mounted = true
-    const load = async () => {
-      try {
-        const userCollages = await getCollagesByUser()
-        if (mounted)
-          setCollages(Array.isArray(userCollages) ? userCollages : [])
-      } catch (err) {
-        console.error('Failed to load collages', err)
-      }
-    }
-    load()
-    return () => {
-      mounted = false
-    }
-  }, [getCollagesByUser])
 
   // initial loading guard
   useEffect(() => {
@@ -345,8 +326,7 @@ const AlbumsPage = ({
                             message: `Are you sure you want to delete "${collage.title}"?`,
                             onConfirm: async () => {
                               await deleteCollage(collage.id)
-                              const userCollages = await getCollagesByUser()
-                              setCollages(userCollages)
+                              // Real-time listener will auto-update collages
                             },
                           })
                         }}

@@ -1,7 +1,7 @@
 // ============================================================================
 // PAGE: SearchPage.jsx – v5.8 WITH DATE GROUPING (Month + Year)
 // ============================================================================
-import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -122,13 +122,12 @@ const SearchPage = ({
   // Track special filters that bypass normal filtering
   const [specialFilter, setSpecialFilter] = useState(null)
 
-  // Collage fetching
+  // Collage data - real-time from Firestore
   const {
-    getCollagesByUser,
+    collages,
+    collagesLoading,
     deleteCollage,
-    isLoading: collagesLoading,
   } = useCollageData()
-  const [collages, setCollages] = useState([])
 
   // 🆕 PHASE 3B: Keyboard shortcuts for desktop
   useKeyboardShortcuts([
@@ -1140,10 +1139,7 @@ const photoGroups = useMemo(() => {
                     await refreshData()
                   }
 
-                  // Refresh collages if any were deleted (immediate UI update)
-                  if (collageIds.length > 0) {
-                    await refreshCollages()
-                  }
+                  // Real-time listener will auto-update collages on deletion
 
                   // 🐛 FIX: Show detailed results based on success/failure
                   if (deleteResults.failed.length === 0) {
