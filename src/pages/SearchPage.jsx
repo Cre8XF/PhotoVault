@@ -28,7 +28,7 @@ import {
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
 import { format } from 'date-fns'
 import { nb } from 'date-fns/locale'
-import { deletePhoto, setAlbumCover, updateAlbumPhotoCount } from '../firebase'
+import { softDeletePhoto, setAlbumCover, updateAlbumPhotoCount } from '../firebase'
 import MoveModal from '../components/MoveModal'
 import ConfirmModal from '../components/ConfirmModal'
 import CollageCard from '../components/CollageCard'
@@ -659,7 +659,7 @@ const photoGroups = useMemo(() => {
   const handleConfirmDelete = async () => {
     if (!photoToDelete) return
     try {
-      await deletePhoto(photoToDelete.id, photoToDelete)
+      await softDeletePhoto(photoToDelete.id)
       setPhotoToDelete(null)
       if (refreshData) await refreshData()
     } catch (error) {
@@ -1029,15 +1029,15 @@ const photoGroups = useMemo(() => {
                     try {
                       if (import.meta.env.DEV) {
                         devLog(
-                          `Deleting photo: ${photo.name} (${photoId})`
+                          `Soft deleting photo: ${photo.name} (${photoId})`
                         )
                       }
 
-                      await deletePhoto(photo.id, photo)
+                      await softDeletePhoto(photo.id)
                       deleteResults.success.push(photoId)
 
                       if (import.meta.env.DEV) {
-                        devLog(`✅ Successfully deleted: ${photo.name}`)
+                        devLog(`✅ Successfully moved to trash: ${photo.name}`)
                       }
                     } catch (error) {
                       console.error(

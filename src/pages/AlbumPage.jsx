@@ -8,7 +8,7 @@
 // 4. Forbedret handleMovePhotos med bekreftelsesdialog og auto-refresh
 
 import React, { useState, useMemo, useEffect } from 'react'
-import { deletePhoto } from '../firebase'
+import { softDeletePhoto } from '../firebase'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -289,11 +289,11 @@ const AlbumPage = ({
           }
 
           try {
-            await deletePhoto(photo.id, photo)
+            await softDeletePhoto(photo.id)
             deleteResults.success.push(photo.id)
 
             if (import.meta.env.DEV) {
-              console.log(`✅ Successfully deleted: ${photo.name}`)
+              console.log(`✅ Successfully moved to trash: ${photo.name}`)
             }
           } catch (error) {
             console.error(`❌ Failed to delete photo ${photo.id}:`, error)
