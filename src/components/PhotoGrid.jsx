@@ -3,7 +3,7 @@
 // ============================================================================
 import React, { useState } from "react";
 import { ImageOff, Trash2, Star, Image as ImageIcon, Play, Video } from "lucide-react";
-import { deletePhoto, toggleFavorite, setAlbumCover } from "../firebase";
+import { softDeletePhoto, toggleFavorite, setAlbumCover } from "../firebase";
 import { formatDuration } from "../utils/videoTools";
 import { useTranslation } from "react-i18next";
 
@@ -24,18 +24,18 @@ const PhotoGrid = ({
   const [photoModal, setPhotoModal] = useState({ open: false, index: 0 });
   const [loading, setLoading] = useState(false);
 
-  // 🔹 Håndter sletting
+  // 🔹 Håndter sletting (soft delete - moved to trash)
   const handleDelete = async (photo) => {
-    const confirmed = window.confirm(t('common:grid.confirmDelete'));
+    const confirmed = window.confirm('Photo will be moved to trash. You can restore it within 7 days.');
     if (!confirmed) return;
 
     setLoading(true);
     try {
-      await deletePhoto(photo.id, photo);
+      await softDeletePhoto(photo.id);
       if (refreshPhotos) await refreshPhotos();
-      console.log("🗑️ Bilde slettet:", photo.id);
+      console.log("🗑️ Photo moved to trash:", photo.id);
     } catch (err) {
-      console.error("Feil ved sletting:", err);
+      console.error("Error moving to trash:", err);
     } finally {
       setLoading(false);
     }
