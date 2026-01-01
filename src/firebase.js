@@ -21,6 +21,7 @@ import {
   startAfter,
   onSnapshot,
   increment,
+  writeBatch,
 } from 'firebase/firestore'
 import {
   getStorage,
@@ -338,10 +339,14 @@ export async function setAlbumCover(albumId, photoUrl) {
   }
 }
 
-// 🔹 Hent alle bilder for bruker
+// 🔹 Hent alle bilder for bruker (excludes deleted photos)
 export async function getPhotosByUser(userId) {
   try {
-    const q = query(collection(db, 'photos'), where('userId', '==', userId))
+    const q = query(
+      collection(db, 'photos'),
+      where('userId', '==', userId),
+      where('deleted', '==', false)
+    )
     const snap = await getDocs(q)
 
     return snap.docs.map((d) => {
@@ -381,9 +386,13 @@ export function listenToAlbumsByUser(userId, callback) {
   })
 }
 
-// 🔹 Live listener for photos
+// 🔹 Live listener for photos (excludes deleted photos)
 export function listenToPhotosByUser(userId, callback) {
-  const q = query(collection(db, 'photos'), where('userId', '==', userId))
+  const q = query(
+    collection(db, 'photos'),
+    where('userId', '==', userId),
+    where('deleted', '==', false)
+  )
   return onSnapshot(q, (snapshot) => {
     devLog('🔄 Firestore listener triggered:', {
       size: snapshot.size,
@@ -586,7 +595,7 @@ export async function toggleFavorite(photoId, currentStatus) {
   }
 }
 
-// 🔹 Delete photo from Firestore + R2 Storage
+// 🔹 Delete photo from Firestore + R2 Storage (DEPRECATED - Use softDeletePhoto for Phase 4B)
 export async function deletePhoto(photoId, photoData) {
   try {
     // Delete from storage (R2 or Firebase Storage)
@@ -620,6 +629,254 @@ export async function deletePhoto(photoId, photoData) {
   } catch (err) {
     console.error('❌ deletePhoto error:', err.message, { photoId })
     throw err
+  }
+}
+
+// ============================================================================
+// 🗑️ PHASE 4B: Soft Delete / Trash / Restore Functions
+// ============================================================================
+
+/**
+ * Soft delete a photo (move to trash)
+ * @param {string} photoId - Photo ID to soft delete
+ * @returns {Promise<void>}
+ */
+export async function softDeletePhoto(photoId) {
+  try {
+    const user = auth.currentUser
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
+    const photoRef = doc(db, 'photos', photoId)
+    await updateDoc(photoRef, {
+      deleted: true,
+      deletedAt: new Date().toISOString(),
+      deletedBy: user.uid,
+      updatedAt: new Date().toISOString(),
+    })
+
+    devLog(`🗑️ Photo soft deleted: ${photoId}`)
+  } catch (err) {
+    console.error('❌ softDeletePhoto error:', err.message, { photoId })
+    throw err
+  }
+}
+
+/**
+ * Soft delete multiple photos (bulk operation)
+ * @param {string[]} photoIds - Array of photo IDs to soft delete
+ * @returns {Promise<void>}
+ */
+export async function softDeletePhotos(photoIds) {
+  try {
+    const user = auth.currentUser
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
+    const batch = writeBatch(db)
+    const timestamp = new Date().toISOString()
+
+    photoIds.forEach((id) => {
+      const ref = doc(db, 'photos', id)
+      batch.update(ref, {
+        deleted: true,
+        deletedAt: timestamp,
+        deletedBy: user.uid,
+        updatedAt: timestamp,
+      })
+    })
+
+    await batch.commit()
+    devLog(`🗑️ ${photoIds.length} photos soft deleted`)
+  } catch (err) {
+    console.error('❌ softDeletePhotos error:', err.message)
+    throw err
+  }
+}
+
+/**
+ * Restore a photo from trash
+ * @param {string} photoId - Photo ID to restore
+ * @returns {Promise<void>}
+ */
+export async function restorePhoto(photoId) {
+  try {
+    const photoRef = doc(db, 'photos', photoId)
+    await updateDoc(photoRef, {
+      deleted: false,
+      deletedAt: null,
+      deletedBy: null,
+      updatedAt: new Date().toISOString(),
+    })
+
+    devLog(`♻️ Photo restored: ${photoId}`)
+  } catch (err) {
+    console.error('❌ restorePhoto error:', err.message, { photoId })
+    throw err
+  }
+}
+
+/**
+ * Restore multiple photos from trash (bulk operation)
+ * @param {string[]} photoIds - Array of photo IDs to restore
+ * @returns {Promise<void>}
+ */
+export async function restorePhotos(photoIds) {
+  try {
+    const batch = writeBatch(db)
+    const timestamp = new Date().toISOString()
+
+    photoIds.forEach((id) => {
+      const ref = doc(db, 'photos', id)
+      batch.update(ref, {
+        deleted: false,
+        deletedAt: null,
+        deletedBy: null,
+        updatedAt: timestamp,
+      })
+    })
+
+    await batch.commit()
+    devLog(`♻️ ${photoIds.length} photos restored`)
+  } catch (err) {
+    console.error('❌ restorePhotos error:', err.message)
+    throw err
+  }
+}
+
+/**
+ * Permanently delete a photo (from trash)
+ * Deletes from storage, Firestore, and updates album photoCount
+ * @param {string} photoId - Photo ID to permanently delete
+ * @returns {Promise<void>}
+ */
+export async function permanentlyDeletePhoto(photoId) {
+  try {
+    const photoRef = doc(db, 'photos', photoId)
+    const photoSnap = await getDoc(photoRef)
+
+    if (!photoSnap.exists()) {
+      throw new Error('Photo not found')
+    }
+
+    const photoData = photoSnap.data()
+
+    // 1. Delete from storage (R2 or Firebase)
+    if (photoData.storageBackend === 'r2' && photoData.storagePath) {
+      const user = auth.currentUser
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+      const token = await user.getIdToken()
+      await deleteFromR2(photoData.storagePath, token)
+      devLog('🗑️ Deleted from R2:', photoData.storagePath)
+    } else if (photoData.storagePath) {
+      const storageRef = ref(storage, photoData.storagePath)
+      await deleteObject(storageRef).catch((err) => {
+        devLog('⚠️ Storage delete warning:', err.message)
+      })
+      devLog('🗑️ Deleted from Firebase Storage')
+    }
+
+    // 2. Delete thumbnail if video
+    if (photoData.thumbnailUrl && photoData.type === 'video') {
+      try {
+        // Extract path from URL or use thumbnailPath if available
+        const thumbnailPath = photoData.thumbnailPath || extractStoragePathFromR2Url(photoData.thumbnailUrl)
+        if (thumbnailPath) {
+          if (photoData.storageBackend === 'r2') {
+            const user = auth.currentUser
+            const token = await user.getIdToken()
+            await deleteFromR2(thumbnailPath, token)
+          } else {
+            const thumbRef = ref(storage, thumbnailPath)
+            await deleteObject(thumbRef).catch((err) => {
+              devLog('⚠️ Thumbnail delete warning:', err.message)
+            })
+          }
+          devLog('🗑️ Deleted thumbnail:', thumbnailPath)
+        }
+      } catch (thumbErr) {
+        devLog('⚠️ Failed to delete thumbnail:', thumbErr.message)
+      }
+    }
+
+    // 3. Decrement album photoCount (if in album)
+    if (photoData.albumId) {
+      await adjustAlbumPhotoCount(photoData.albumId, -1)
+    }
+
+    // 4. Delete Firestore document
+    await deleteDoc(photoRef)
+
+    // 5. Update user storage
+    if (photoData.userId && photoData.size) {
+      await updateDoc(doc(db, 'users', photoData.userId), {
+        storageUsed: increment(-photoData.size),
+      })
+    }
+
+    devLog(`💀 Photo permanently deleted: ${photoId}`)
+  } catch (err) {
+    console.error('❌ permanentlyDeletePhoto error:', err.message, { photoId })
+    throw err
+  }
+}
+
+/**
+ * Permanently delete multiple photos (bulk operation)
+ * @param {string[]} photoIds - Array of photo IDs to permanently delete
+ * @returns {Promise<void>}
+ */
+export async function permanentlyDeletePhotos(photoIds) {
+  try {
+    // Use sequential deletion for proper storage cleanup
+    for (const photoId of photoIds) {
+      await permanentlyDeletePhoto(photoId)
+    }
+    devLog(`💀 ${photoIds.length} photos permanently deleted`)
+  } catch (err) {
+    console.error('❌ permanentlyDeletePhotos error:', err.message)
+    throw err
+  }
+}
+
+/**
+ * Get all deleted photos for current user (for trash page)
+ * @param {string} userId - User ID
+ * @returns {Promise<Array>} Array of deleted photos
+ */
+export async function getDeletedPhotos(userId) {
+  try {
+    const q = query(
+      collection(db, 'photos'),
+      where('userId', '==', userId),
+      where('deleted', '==', true),
+      orderBy('deletedAt', 'desc')
+    )
+    const snap = await getDocs(q)
+
+    return snap.docs.map((d) => {
+      const data = d.data()
+
+      // Convert Firestore Timestamp to ISO string
+      if (data.createdAt?.toDate)
+        data.createdAt = data.createdAt.toDate().toISOString()
+      if (data.updatedAt?.toDate)
+        data.updatedAt = data.updatedAt.toDate().toISOString()
+      if (data.deletedAt?.toDate)
+        data.deletedAt = data.deletedAt.toDate().toISOString()
+
+      if (!data.createdAt) data.createdAt = new Date().toISOString()
+      if (!data.updatedAt) data.updatedAt = data.createdAt
+
+      return { id: d.id, ...data }
+    })
+  } catch (err) {
+    console.error('🔥 getDeletedPhotos:', err)
+    return []
   }
 }
 
@@ -1264,6 +1521,7 @@ export async function getPhotosByUserPaginated(
     let q = query(
       collection(db, 'photos'),
       where('userId', '==', userId),
+      where('deleted', '==', false),
       orderBy('createdAt', 'desc'),
       limit(pageSize)
     )
@@ -1273,6 +1531,7 @@ export async function getPhotosByUserPaginated(
       q = query(
         collection(db, 'photos'),
         where('userId', '==', userId),
+        where('deleted', '==', false),
         orderBy('createdAt', 'desc'),
         startAfter(lastDoc),
         limit(pageSize)
@@ -1379,6 +1638,7 @@ export async function getPhotosInAlbumPaginated(
     let q = query(
       collection(db, 'photos'),
       where('albumId', '==', albumId),
+      where('deleted', '==', false),
       orderBy('uploadedAt', 'desc'),
       limit(pageSize)
     )
@@ -1387,6 +1647,7 @@ export async function getPhotosInAlbumPaginated(
       q = query(
         collection(db, 'photos'),
         where('albumId', '==', albumId),
+        where('deleted', '==', false),
         orderBy('uploadedAt', 'desc'),
         startAfter(lastDoc),
         limit(pageSize)

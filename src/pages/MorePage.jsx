@@ -64,6 +64,7 @@ import {
   migratePhotosAddUserId,
   getPhotosByUser,
 } from '../firebase'
+import { migratePhotosAddDeletedField } from '../utils/photoMigrations'
 import { reauthenticateUser, deleteAuthUser } from '../utils/authHelpers'
 import { deleteAllUserR2Objects } from '../utils/r2Upload'
 import ComingSoonModal from '../components/ComingSoonModal'
@@ -545,6 +546,41 @@ const MorePage = ({
 
       showNotification(
         `Migration complete! Fixed: ${result.fixed} photos, Skipped: ${result.skipped} photos`,
+        'success'
+      )
+
+      // Refresh page after 2 seconds to show updated data
+      setTimeout(() => {
+        window.location.reload()
+      }, 2000)
+    } catch (error) {
+      console.error('❌ Migration failed:', error)
+      showNotification('Migration failed: ' + error.message, 'error')
+    } finally {
+      setMigrating(false)
+    }
+  }
+
+  const handleMigrateDeletedField = async () => {
+    if (!window.confirm('Run migration to add deleted:false to all photos? This is required for Phase 4B trash feature.')) {
+      return
+    }
+
+    try {
+      setMigrating(true)
+      setMigrationResult(null)
+      console.log('🔧 Starting deleted field migration...')
+
+      const result = await migratePhotosAddDeletedField()
+
+      console.log('✅ Migration complete:', result)
+      setMigrationResult({
+        type: 'deleted-field',
+        ...result,
+      })
+
+      showNotification(
+        `Migration complete! Updated: ${result.updated} photos, Skipped: ${result.skipped} photos`,
         'success'
       )
 
@@ -1078,6 +1114,20 @@ const MorePage = ({
               </button>
 
               <button
+                onClick={() => navigate('/trash')}
+                className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
+              >
+                <Trash2 className="w-5 h-5 text-gray-400" />
+                <div className="flex-1">
+                  <p className="font-medium">Trash</p>
+                  <p className="text-xs opacity-70">
+                    Deleted photos (auto-delete after 7 days)
+                  </p>
+                </div>
+                <ChevronRight className="w-5 h-5 opacity-50" />
+              </button>
+
+              <button
                 onClick={onLogout}
                 className="ripple-effect w-full bg-red-500/10 hover:bg-red-500/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-red-500/30 text-red-400"
               >
@@ -1260,6 +1310,26 @@ const MorePage = ({
                   </p>
                   <p className="text-xs opacity-70">
                     {t('admin.migration.fixPhotosDesc')}
+                  </p>
+                </div>
+              </button>
+
+              <button
+                onClick={handleMigrateDeletedField}
+                disabled={migrating || loading}
+                className="ripple-effect bg-purple-600/10 hover:bg-purple-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-purple-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <div className="p-2 bg-purple-600/30 rounded-lg">
+                  <Trash2 className="w-5 h-5 text-purple-300" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-sm">
+                    {migrating
+                      ? 'Running Migration...'
+                      : 'Phase 4B: Add Deleted Field'}
+                  </p>
+                  <p className="text-xs opacity-70">
+                    Add deleted:false to all photos (required for trash feature)
                   </p>
                 </div>
               </button>
