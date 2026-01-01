@@ -14,6 +14,7 @@ import {
   uploadPhoto,
   updatePhoto,
   deletePhoto,
+  softDeletePhoto,
   setAlbumCover,
   updateAlbumPhotoCount,
   updatePhotoCaption,
@@ -451,14 +452,14 @@ export const usePhotoData = () => {
   )
 
   /**
-   * Delete photo with confirmation
+   * Delete photo with confirmation (PHASE 4B: Soft delete to trash)
    * PHASE 4: Optimistic update
    */
   const handleDeletePhoto = useCallback(
     (photo) => {
       setConfirmModal({
         title: t('common:notifications.deletePhotoTitle'),
-        message: t('common:notifications.deletePhotoMessage'),
+        message: 'Photo will be moved to trash. You can restore it within 7 days.',
         onConfirm: async () => {
           // CRITICAL: Check email verification BEFORE delete
           if (!user?.emailVerified) {
@@ -481,7 +482,7 @@ export const usePhotoData = () => {
           setIsDeleting(true)
 
           try {
-            // OPTIMISTIC UPDATE
+            // OPTIMISTIC UPDATE - Remove from UI immediately
             setPhotos((prev) => {
               const safePrev = Array.isArray(prev) ? prev : []
               return safePrev.filter((p) => p.id !== photo.id)
@@ -489,11 +490,11 @@ export const usePhotoData = () => {
 
             closePhotoModal()
 
-            // Sync to backend
-            await deletePhoto(photo.id, photo)
+            // Sync to backend - SOFT DELETE (move to trash)
+            await softDeletePhoto(photo.id)
 
             setNotification({
-              message: t('common:notifications.photoDeleted'),
+              message: 'Photo moved to trash',
               type: 'success',
             })
           } catch (err) {

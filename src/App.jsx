@@ -46,6 +46,7 @@ const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
 const TermsPage = lazy(() => import('./pages/TermsPage'))
 const PublicAlbumPage = lazy(() => import('./pages/PublicAlbumPage'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
+const TrashPage = lazy(() => import('./pages/TrashPage'))
 
 // Function Worlds - Phase 1 - Lazy loaded
 const ToolsPage = lazy(() => import('./pages/ToolsPage'))
@@ -712,6 +713,8 @@ function AppContent() {
           <Route path="/terms" element={<TermsPage />} />
 
           <Route path="/settings" element={<SettingsPage />} />
+
+          <Route path="/trash" element={<TrashPage />} />
 
           <Route
             path="/subscription"
