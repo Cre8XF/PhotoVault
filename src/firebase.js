@@ -907,6 +907,32 @@ export async function updatePhotoAlbum(photoId, targetAlbumId) {
   }
 }
 
+/**
+ * Update photo order in batch
+ * @param {string[]} photoIds - Array of photo IDs in new order
+ * @returns {Promise<void>}
+ */
+export async function updatePhotoOrder(photoIds) {
+  if (!photoIds || photoIds.length === 0) {
+    throw new Error('photoIds array is required')
+  }
+
+  const batch = writeBatch(db)
+  const now = new Date().toISOString()
+
+  // Assign order values with gaps (index * 1000) to allow future insertions
+  photoIds.forEach((photoId, index) => {
+    const photoRef = doc(db, 'photos', photoId)
+    batch.update(photoRef, {
+      order: index * 1000,
+      updatedAt: now
+    })
+  })
+
+  await batch.commit()
+  console.log(`✅ Updated order for ${photoIds.length} photos`)
+}
+
 // ============================================================================
 // ☁️ Storage-funksjoner (R2 + Firebase Storage Hybrid)
 // ============================================================================
@@ -1279,6 +1305,7 @@ export async function uploadPhoto(
       type: isDocument ? 'document' : (isVideo ? 'video' : fileType),
       ...(isDocument && { mimeType: fileType }), // Store MIME type for documents
       favorite: false,
+      order: Date.now(), // Phase 4B-2: Manual ordering support
 
       // Storage backend tracking - R2 only
       storageBackend: 'r2', // Always R2 for new uploads
