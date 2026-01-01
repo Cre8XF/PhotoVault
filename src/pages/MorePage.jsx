@@ -41,6 +41,7 @@ import {
   Folder,
   Image,
   Mail,
+  GripVertical,
 } from 'lucide-react'
 import { ROUTES } from '../routes'
 import { useSecurityContext } from '../contexts/SecurityContext'
@@ -64,7 +65,7 @@ import {
   migratePhotosAddUserId,
   getPhotosByUser,
 } from '../firebase'
-import { migratePhotosAddDeletedField } from '../utils/photoMigrations'
+import { migratePhotosAddDeletedField, migratePhotosAddOrderField } from '../utils/photoMigrations'
 import { reauthenticateUser, deleteAuthUser } from '../utils/authHelpers'
 import { deleteAllUserR2Objects } from '../utils/r2Upload'
 import ComingSoonModal from '../components/ComingSoonModal'
@@ -581,6 +582,41 @@ const MorePage = ({
 
       showNotification(
         `Migration complete! Updated: ${result.updated} photos, Skipped: ${result.skipped} photos`,
+        'success'
+      )
+
+      // Refresh page after 2 seconds to show updated data
+      setTimeout(() => {
+        window.location.reload()
+      }, 2000)
+    } catch (error) {
+      console.error('❌ Migration failed:', error)
+      showNotification('Migration failed: ' + error.message, 'error')
+    } finally {
+      setMigrating(false)
+    }
+  }
+
+  const handleMigrateOrderField = async () => {
+    if (!window.confirm('Add order field to all photos for drag-drop sorting?')) {
+      return
+    }
+
+    try {
+      setMigrating(true)
+      setMigrationResult(null)
+      console.log('🔧 Starting order field migration...')
+
+      const result = await migratePhotosAddOrderField()
+
+      console.log('✅ Migration complete:', result)
+      setMigrationResult({
+        type: 'order-field',
+        ...result,
+      })
+
+      showNotification(
+        `Migration complete! Processed: ${result.processed}, Updated: ${result.updated}, Time: ${result.duration}s`,
         'success'
       )
 
@@ -1330,6 +1366,26 @@ const MorePage = ({
                   </p>
                   <p className="text-xs opacity-70">
                     Add deleted:false to all photos (required for trash feature)
+                  </p>
+                </div>
+              </button>
+
+              <button
+                onClick={handleMigrateOrderField}
+                disabled={migrating || loading}
+                className="ripple-effect bg-purple-600/10 hover:bg-purple-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-purple-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <div className="p-2 bg-purple-600/30 rounded-lg">
+                  <GripVertical className="w-5 h-5 text-purple-300" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-sm">
+                    {migrating
+                      ? 'Running Migration...'
+                      : 'Phase 4B-2: Add Order Field'}
+                  </p>
+                  <p className="text-xs opacity-70">
+                    Add order field to photos for manual sorting
                   </p>
                 </div>
               </button>

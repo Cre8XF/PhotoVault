@@ -8,7 +8,7 @@
 // 4. Forbedret handleMovePhotos med bekreftelsesdialog og auto-refresh
 
 import React, { useState, useMemo, useEffect } from 'react'
-import { softDeletePhoto } from '../firebase'
+import { softDeletePhoto, updatePhotoOrder } from '../firebase'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -39,6 +39,7 @@ import { formatDuration } from '../utils/videoTools'
 import UploadModal from '../components/UploadModal'
 import MoveModal from '../components/MoveModal'
 import PhotoGrid from '../components/PhotoGrid'
+import DraggablePhotoGrid from '../components/DraggablePhotoGrid'
 import AlbumModal from '../components/AlbumModal'
 import QRShareModal from '../features/qr-sharing/components/QRShareModal'
 import VerificationModal from '../components/VerificationModal'
@@ -166,6 +167,14 @@ const AlbumPage = ({
 
     // Sorting (using unified date resolution)
     switch (sortBy) {
+      case 'manual':
+        // Manual order - sort by order field
+        result.sort((a, b) => {
+          const orderA = a.order || 0
+          const orderB = b.order || 0
+          return orderA - orderB
+        })
+        break
       case 'date-desc':
         result = sortPhotosByDate(result, 'desc')
         break
@@ -241,6 +250,29 @@ const AlbumPage = ({
         message: t('albums:errors.couldNotSetCover'),
         type: 'error',
       })
+    }
+  }
+
+  // Phase 4B-2: Handle photo reordering for manual sort
+  const handleReorder = async (oldIndex, newIndex) => {
+    // Optimistic update - reorder locally first
+    const reorderedPhotos = [...filteredPhotos]
+    const [movedPhoto] = reorderedPhotos.splice(oldIndex, 1)
+    reorderedPhotos.splice(newIndex, 0, movedPhoto)
+
+    // Update UI immediately (optimistic)
+    // Note: Zustand will update via Firestore listener after batch completes
+
+    try {
+      // Extract photo IDs in new order
+      const photoIds = reorderedPhotos.map(p => p.id)
+
+      // Batch update in Firestore
+      await updatePhotoOrder(photoIds)
+      console.log('✅ Photo order updated')
+    } catch (error) {
+      console.error('❌ Failed to update photo order:', error)
+      // Firestore listener will revert to correct order automatically
     }
   }
 
@@ -736,6 +768,7 @@ const AlbumPage = ({
                 onChange={(e) => setSortBy(e.target.value)}
                 className="input-premium !py-1.5 md:!py-2 text-sm"
               >
+                <option value="manual">Manual Order</option>
                 <option value="date-desc">{t('albums:sortDateDesc')}</option>
                 <option value="date-asc">{t('albums:sortDateAsc')}</option>
                 <option value="name-asc">{t('albums:sortNameAsc')}</option>
@@ -799,30 +832,43 @@ const AlbumPage = ({
       {!isInitialLoading &&
         viewMode === 'grid' &&
         displayedPhotos.length > 0 && (
-          <PhotoGrid
-            photos={displayedPhotos}
-            compact={gridSize === 2}
-            editMode={editMode}
-            currentAlbum={album}
-            refreshPhotos={async () => {
-              if (refreshData) {
-                await refreshData()
-              }
-            }}
-            onPhotoClick={
-              editMode
-                ? null // In edit mode, don't open modal (use PhotoGrid's built-in edit buttons)
-                : (url) => {
-                    const index = displayedPhotos.findIndex(
-                      (p) => p.url === url || p.thumbnailUrl === url
-                    )
-                    if (index !== -1) {
-                      const photo = displayedPhotos[index]
-                      handlePhotoClick(photo, index)
+          sortBy === 'manual' ? (
+            <DraggablePhotoGrid
+              photos={displayedPhotos}
+              onReorder={handleReorder}
+              onPhotoClick={(photo) => {
+                const index = displayedPhotos.findIndex(p => p.id === photo.id)
+                if (index !== -1) {
+                  handlePhotoClick(photo, index)
+                }
+              }}
+            />
+          ) : (
+            <PhotoGrid
+              photos={displayedPhotos}
+              compact={gridSize === 2}
+              editMode={editMode}
+              currentAlbum={album}
+              refreshPhotos={async () => {
+                if (refreshData) {
+                  await refreshData()
+                }
+              }}
+              onPhotoClick={
+                editMode
+                  ? null // In edit mode, don't open modal (use PhotoGrid's built-in edit buttons)
+                  : (url) => {
+                      const index = displayedPhotos.findIndex(
+                        (p) => p.url === url || p.thumbnailUrl === url
+                      )
+                      if (index !== -1) {
+                        const photo = displayedPhotos[index]
+                        handlePhotoClick(photo, index)
+                      }
                     }
-                  }
-            }
-          />
+              }
+            />
+          )
         )}
 
       {/* 🆕 PHASE 3A: Load More button */}
