@@ -90,6 +90,7 @@
   "shareAlbum": "Share album",
   "size": "Size",
   "sortBy": "Sort by",
+  "sortManual": "Manual Order",
   "sortDateAsc": "Date (oldest first)",
   "sortDateDesc": "Date (newest first)",
   "sortNameAsc": "Name (A-Z)",
