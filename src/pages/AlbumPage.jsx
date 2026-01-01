@@ -26,6 +26,8 @@ import {
   X,
   Filter,
   ChevronDown,
+  ChevronUp,
+  SlidersHorizontal,
   Share2,
   Layout,
   Video,
@@ -710,28 +712,51 @@ const AlbumPage = ({
         </div>
       )}
 
-      {/* Grid/List Toggle - Positioned below stats */}
-      <div className="flex items-center justify-end gap-2 mb-2 md:mb-2.5">
+      {/* Grid/List Toggle + Filters Toggle - Positioned below stats */}
+      <div className="flex items-center justify-between gap-2 mb-2 md:mb-2.5">
+        {/* Left: Filters Toggle */}
         <button
-          onClick={() => setViewMode('grid')}
-          className={`ripple-effect p-2 md:p-2.5 rounded-lg transition ${
-            viewMode === 'grid'
+          onClick={() => setShowFilters(!showFilters)}
+          className={`ripple-effect px-3 py-2 md:px-4 md:py-2.5 rounded-lg transition flex items-center gap-2 ${
+            showFilters
               ? 'bg-purple-600'
               : 'bg-white/5 hover:bg-white/10'
           }`}
         >
-          <Grid3x3 className="w-[18px] h-[18px] md:w-5 md:h-5" />
+          <SlidersHorizontal className="w-4 h-4 md:w-5 md:h-5" />
+          <span className="text-sm md:text-base font-medium">
+            {t('albums:filters')}
+          </span>
+          {showFilters ? (
+            <ChevronUp className="w-4 h-4" />
+          ) : (
+            <ChevronDown className="w-4 h-4" />
+          )}
         </button>
-        <button
-          onClick={() => setViewMode('list')}
-          className={`ripple-effect p-2 md:p-2.5 rounded-lg transition ${
-            viewMode === 'list'
-              ? 'bg-purple-600'
-              : 'bg-white/5 hover:bg-white/10'
-          }`}
-        >
-          <List className="w-[18px] h-[18px] md:w-5 md:h-5" />
-        </button>
+
+        {/* Right: Grid/List Toggle */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`ripple-effect p-2 md:p-2.5 rounded-lg transition ${
+              viewMode === 'grid'
+                ? 'bg-purple-600'
+                : 'bg-white/5 hover:bg-white/10'
+            }`}
+          >
+            <Grid3x3 className="w-[18px] h-[18px] md:w-5 md:h-5" />
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            className={`ripple-effect p-2 md:p-2.5 rounded-lg transition ${
+              viewMode === 'list'
+                ? 'bg-purple-600'
+                : 'bg-white/5 hover:bg-white/10'
+            }`}
+          >
+            <List className="w-[18px] h-[18px] md:w-5 md:h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Search Bar */}
@@ -768,11 +793,11 @@ const AlbumPage = ({
                 onChange={(e) => setSortBy(e.target.value)}
                 className="input-premium !py-1.5 md:!py-2 text-sm"
               >
-                <option value="manual">Manual Order</option>
-                <option value="date-desc">{t('albums:sortDateDesc')}</option>
-                <option value="date-asc">{t('albums:sortDateAsc')}</option>
-                <option value="name-asc">{t('albums:sortNameAsc')}</option>
-                <option value="name-desc">{t('albums:sortNameDesc')}</option>
+                <option value="manual">✋ {t('albums:sortManual')}</option>
+                <option value="date-desc">📅 {t('albums:sortDateDesc')}</option>
+                <option value="date-asc">📅 {t('albums:sortDateAsc')}</option>
+                <option value="name-asc">🔤 {t('albums:sortNameAsc')}</option>
+                <option value="name-desc">🔤 {t('albums:sortNameDesc')}</option>
               </select>
             </div>
 
