@@ -178,41 +178,6 @@ const SearchPage = ({
     }
   }, [searchQuery])
 
-  // Fetch collages on mount and when photos change (indicates refresh)
-  // Re-fetch when safePhotos.length changes to catch post-deletion refreshes
-  useEffect(() => {
-    const loadCollages = async () => {
-      try {
-        const userCollages = await getCollagesByUser()
-        setCollages(Array.isArray(userCollages) ? userCollages : [])
-        if (import.meta.env.DEV) {
-          devLog(
-            '✅ Loaded collages for search page:',
-            userCollages.length
-          )
-        }
-      } catch (error) {
-        console.error('Failed to load collages:', error)
-        setCollages([])
-      }
-    }
-    loadCollages()
-  }, [getCollagesByUser])
-
-  // Refresh collages when a collage is deleted
-  // This ensures UI updates immediately after deletion
-  const refreshCollages = useCallback(async () => {
-    try {
-      const userCollages = await getCollagesByUser()
-      setCollages(Array.isArray(userCollages) ? userCollages : [])
-      if (import.meta.env.DEV) {
-        devLog('🔄 Refreshed collages after deletion:', userCollages.length)
-      }
-    } catch (error) {
-      console.error('Failed to refresh collages:', error)
-    }
-  }, [getCollagesByUser])
-
   // Read filters from URL query params
   useEffect(() => {
     const params = new URLSearchParams(location.search)
