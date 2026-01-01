@@ -782,7 +782,7 @@ const AlbumPage = ({
       {/* Filters Panel - Compact */}
       {showFilters && (
         <div className="bg-white/5 border border-white/10 rounded-lg p-2.5 md:p-4 mb-3 space-y-3 md:space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+          <div className="grid grid-cols-1 gap-3 md:gap-4">
             {/* Sort */}
             <div>
               <label className="block text-xs md:text-sm font-medium mb-1.5 md:mb-2">
@@ -801,44 +801,65 @@ const AlbumPage = ({
               </select>
             </div>
 
-            {/* Category Filter */}
-            <div>
-              <label className="block text-xs md:text-sm font-medium mb-1.5 md:mb-2">
-                {t('albums:category')}
-              </label>
-              <select
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-                className="input-premium !py-1.5 md:!py-2 text-sm"
-              >
-                <option value="all">{t('albums:allCategories')}</option>
-                <option value="people">👥 {t('albums:categoryPeople')}</option>
-                <option value="nature">🌳 {t('albums:categoryNature')}</option>
-                <option value="food">🍽️ {t('albums:categoryFood')}</option>
-                <option value="animals">
-                  🐾 {t('albums:categoryAnimals')}
-                </option>
-                <option value="indoor">🏠 {t('albums:categoryIndoor')}</option>
-                <option value="travel">✈️ {t('albums:categoryTravel')}</option>
-              </select>
-            </div>
+            {/* Category Filter - HIDDEN until AI Phase 5 active */}
+            {false && (
+              <div>
+                <label className="block text-xs md:text-sm font-medium mb-1.5 md:mb-2">
+                  {t('albums:category')}
+                </label>
+                <select
+                  value={filterCategory}
+                  onChange={(e) => setFilterCategory(e.target.value)}
+                  className="input-premium !py-1.5 md:!py-2 text-sm"
+                >
+                  <option value="all">{t('albums:allCategories')}</option>
+                  <option value="people">👥 {t('albums:categoryPeople')}</option>
+                  <option value="nature">🌳 {t('albums:categoryNature')}</option>
+                  <option value="food">🍽️ {t('albums:categoryFood')}</option>
+                  <option value="animals">
+                    🐾 {t('albums:categoryAnimals')}
+                  </option>
+                  <option value="indoor">🏠 {t('albums:categoryIndoor')}</option>
+                  <option value="travel">✈️ {t('albums:categoryTravel')}</option>
+                </select>
+              </div>
+            )}
 
-            {/* AI Filter */}
-            <div>
-              <label className="block text-xs md:text-sm font-medium mb-1.5 md:mb-2">
-                {t('albums:aiStatus')}
-              </label>
-              <select
-                value={filterAI}
-                onChange={(e) => setFilterAI(e.target.value)}
-                className="input-premium !py-1.5 md:!py-2 text-sm"
-              >
-                <option value="all">{t('albums:allPhotos')}</option>
-                <option value="analyzed">{t('albums:aiAnalyzedOnly')}</option>
-                <option value="not-analyzed">{t('albums:notAnalyzed')}</option>
-              </select>
-            </div>
+            {/* AI Filter - HIDDEN until AI Phase 5 active */}
+            {false && (
+              <div>
+                <label className="block text-xs md:text-sm font-medium mb-1.5 md:mb-2">
+                  {t('albums:aiStatus')}
+                </label>
+                <select
+                  value={filterAI}
+                  onChange={(e) => setFilterAI(e.target.value)}
+                  className="input-premium !py-1.5 md:!py-2 text-sm"
+                >
+                  <option value="all">{t('albums:allPhotos')}</option>
+                  <option value="analyzed">{t('albums:aiAnalyzedOnly')}</option>
+                  <option value="not-analyzed">{t('albums:notAnalyzed')}</option>
+                </select>
+              </div>
+            )}
           </div>
+
+          {/* Manual Order Helper Text */}
+          {sortBy === 'manual' && viewMode === 'grid' && (
+            <div className="mt-3 p-3 bg-purple-600/10 border border-purple-500/30 rounded-lg flex items-start gap-2">
+              <div className="flex-shrink-0 mt-0.5">
+                ✋
+              </div>
+              <div className="text-xs md:text-sm">
+                <p className="font-medium text-purple-400 mb-1">
+                  Manual Order Active
+                </p>
+                <p className="text-gray-400">
+                  Drag photos to reorder. Changes save automatically.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
