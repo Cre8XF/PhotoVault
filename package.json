@@ -26,6 +26,7 @@
     "@stripe/stripe-js": "^2.4.0",
     "browser-image-compression": "^2.0.2",
     "capacitor-native-biometric": "^4.2.2",
+    "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
     "exifr": "^7.1.3",
