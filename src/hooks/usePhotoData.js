@@ -50,6 +50,7 @@ export const usePhotoData = () => {
   const setPhotos = useStore((state) => state.setPhotos)
   const setNotification = useStore((state) => state.setNotification)
   const setConfirmModal = useStore((state) => state.setConfirmModal)
+  const setUpgradeModal = useStore((state) => state.setUpgradeModal)
   const updateStorageUsed = useStore((state) => state.updateStorageUsed)
   const currentPage = useStore((state) => state.currentPage)
   const selectedAlbum = useStore((state) => state.selectedAlbum)
@@ -258,21 +259,70 @@ export const usePhotoData = () => {
             imageCount++
           }
 
-          // Pass thumbnail and metadata for videos, exifData for photos
-          const result = await uploadPhoto(
-            user.uid,
-            fileObj.file,
-            albumId,
-            aiTagging,
-            fileObj.thumbnail || null,
-            fileObj.metadata || null,
-            fileObj.exifData || null, // ✅ Pass pre-extracted EXIF (from useUpload.js)
-            controller.signal // ✅ Pass abort signal
-          )
+          try {
+            // Pass thumbnail and metadata for videos, exifData for photos
+            const result = await uploadPhoto(
+              user.uid,
+              fileObj.file,
+              albumId,
+              aiTagging,
+              fileObj.thumbnail || null,
+              fileObj.metadata || null,
+              fileObj.exifData || null, // ✅ Pass pre-extracted EXIF (from useUpload.js)
+              controller.signal // ✅ Pass abort signal
+            )
 
-          // ✅ Track EXIF warnings
-          if (result?.exifWarning) {
-            exifWarningCount++
+            // ✅ Track EXIF warnings
+            if (result?.exifWarning) {
+              exifWarningCount++
+            }
+          } catch (uploadError) {
+            // Handle tier upgrade requirement
+            if (uploadError.errorCode === 'TIER_UPGRADE_REQUIRED') {
+              setNotification({
+                message: t('subscription:videoRequiresPro') || 'Video upload requires PRO subscription',
+                type: 'error'
+              })
+              setUpgradeModal({
+                type: 'tier-upgrade',
+                requiredTier: uploadError.details?.requiredTier || 'PRO',
+                currentTier: uploadError.details?.currentTier || 'GRATIS',
+                message: t('subscription:videoUpgradeMessage') || 'Upgrade to PRO to upload videos'
+              })
+              return // Stop processing remaining files
+            }
+
+            // Handle quota exceeded
+            if (uploadError.errorCode === 'QUOTA_EXCEEDED') {
+              const details = uploadError.details || {}
+              const formatBytes = (bytes) => {
+                if (!bytes) return '0 B'
+                const k = 1024
+                const sizes = ['B', 'KB', 'MB', 'GB']
+                const i = Math.floor(Math.log(bytes) / Math.log(k))
+                return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
+              }
+
+              setNotification({
+                message: t('subscription:quotaExceeded') || 'Storage quota exceeded',
+                type: 'error'
+              })
+              setUpgradeModal({
+                type: 'quota-exceeded',
+                storageUsed: details.storageUsed,
+                storageLimit: details.storageLimit,
+                available: details.available,
+                message: t('subscription:storageFullMessage', {
+                  used: formatBytes(details.storageUsed),
+                  limit: formatBytes(details.storageLimit),
+                  available: formatBytes(details.available)
+                }) || `Storage full: ${formatBytes(details.storageUsed)} of ${formatBytes(details.storageLimit)} used`
+              })
+              return // Stop processing remaining files
+            }
+
+            // Re-throw other errors to be caught by outer catch
+            throw uploadError
           }
         }
 
@@ -323,7 +373,7 @@ export const usePhotoData = () => {
         setActiveUploads(prev => prev.filter(u => u.id !== uploadId))
       }
     },
-    [isUploading, user, refreshAllData, setNotification, t]
+    [isUploading, user, refreshAllData, setNotification, setUpgradeModal, t]
   )
 
   /**

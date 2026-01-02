@@ -1,0 +1,8 @@
+{
+  "videoRequiresPro": "Video upload requires PRO subscription",
+  "quotaExceeded": "Storage quota exceeded",
+  "upgradeRequired": "Upgrade Required",
+  "videoUpgradeMessage": "To upload videos, upgrade to PRO subscription (50 GB for 79 kr/month)",
+  "storageFullTitle": "Storage Full",
+  "storageFullMessage": "You have used {{used}} of {{limit}}. Only {{available}} available. Upgrade to LITE (5 GB for 29 kr/month) or delete some photos."
+}

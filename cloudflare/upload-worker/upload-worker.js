@@ -156,6 +156,65 @@ async function handleUpload(request, env, corsHeaders) {
     }
 
     // ------------------------------------------------------------------------
+    // TIER & QUOTA VALIDATION
+    // ------------------------------------------------------------------------
+    const fileSize = file.size || 0
+
+    // 🔒 Fetch user data from Firestore REST API
+    let userData
+    try {
+      userData = await getUserData(authenticatedUserId, token, env)
+    } catch (error) {
+      console.error('[Worker] Failed to fetch user data:', error)
+      return new Response(
+        JSON.stringify({ error: 'Failed to verify user subscription' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const { subscriptionTier, storageUsed, storageLimit } = userData
+
+    console.log('[Worker] User validation:', {
+      userId: authenticatedUserId,
+      tier: subscriptionTier,
+      storageUsed,
+      storageLimit,
+      fileSize
+    })
+
+    // ❌ TIER CHECK: Video requires PRO
+    if (contentType?.startsWith('video/') && subscriptionTier !== 'PRO') {
+      console.log('[Worker] Video upload blocked - tier upgrade required')
+      return new Response(
+        JSON.stringify({
+          error: 'Video upload requires PRO subscription',
+          errorCode: 'TIER_UPGRADE_REQUIRED',
+          requiredTier: 'PRO',
+          currentTier: subscriptionTier
+        }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // ❌ QUOTA CHECK: Storage limit exceeded
+    if (storageUsed + fileSize > storageLimit) {
+      console.log('[Worker] Upload blocked - quota exceeded')
+      return new Response(
+        JSON.stringify({
+          error: 'Storage quota exceeded',
+          errorCode: 'QUOTA_EXCEEDED',
+          storageUsed,
+          storageLimit,
+          fileSize,
+          available: Math.max(0, storageLimit - storageUsed)
+        }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    console.log('✅ [Worker] Tier and quota validation passed')
+
+    // ------------------------------------------------------------------------
     // R2 UPLOAD
     // ------------------------------------------------------------------------
     console.log('🟣 [UPLOAD] Uploading to R2 bucket:', {
@@ -326,5 +385,55 @@ async function verifyFirebaseToken(token) {
   } catch (error) {
     console.error('❌ [AUTH] Token verification failed:', error.message)
     throw error
+  }
+}
+
+// ============================================================================
+// FIRESTORE REST API - User Data Fetching
+// ============================================================================
+
+/**
+ * Fetch user data from Firestore via REST API
+ * Worker-compatible (no Admin SDK)
+ */
+async function getUserData(userId, idToken, env) {
+  const projectId = env.FIREBASE_PROJECT_ID
+  if (!projectId) {
+    throw new Error('FIREBASE_PROJECT_ID not configured in wrangler.toml')
+  }
+
+  const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${userId}`
+
+  console.log('🔍 [Firestore] Fetching user data:', { userId, projectId })
+
+  const response = await fetch(url, {
+    headers: {
+      'Authorization': `Bearer ${idToken}`,
+      'Content-Type': 'application/json'
+    }
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    console.error('❌ [Firestore] Failed to fetch user data:', {
+      status: response.status,
+      error: errorText
+    })
+    throw new Error(`Failed to fetch user data: ${response.status}`)
+  }
+
+  const data = await response.json()
+
+  console.log('✅ [Firestore] User data fetched:', {
+    tier: data.fields?.subscriptionTier?.stringValue,
+    storageUsed: data.fields?.storageUsed?.integerValue,
+    storageLimit: data.fields?.storageLimit?.integerValue
+  })
+
+  // Firestore REST format: { fields: { fieldName: { stringValue: "..." } } }
+  return {
+    subscriptionTier: data.fields?.subscriptionTier?.stringValue || 'GRATIS',
+    storageUsed: parseInt(data.fields?.storageUsed?.integerValue || '0'),
+    storageLimit: parseInt(data.fields?.storageLimit?.integerValue || '1073741824') // 1GB default
   }
 }

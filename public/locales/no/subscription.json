@@ -1,0 +1,8 @@
+{
+  "videoRequiresPro": "Videoopplasting krever PRO-abonnement",
+  "quotaExceeded": "Lagringskvoten din er full",
+  "upgradeRequired": "Oppgradering kreves",
+  "videoUpgradeMessage": "For å laste opp video, oppgrader til PRO-abonnementet (50 GB for 79 kr/måned)",
+  "storageFullTitle": "Lagringen er full",
+  "storageFullMessage": "Du har brukt {{used}} av {{limit}}. Kun {{available}} ledig. Oppgrader til LITE (5 GB for 29 kr/måned) eller slett noen bilder."
+}
