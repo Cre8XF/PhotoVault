@@ -163,7 +163,13 @@
     "removedFromFavorites": "Fjernet fra favoritter",
     "unread": "Uleste",
     "updateError": "Feil ved oppdatering",
-    "uploadError": "Feil ved opplasting: {{message}}"
+    "uploadError": "Feil ved opplasting: {{message}}",
+    "emailVerificationRequired": "Vennligst verifiser e-posten din før du kan laste opp eller slette bilder"
+  },
+  "verificationBanner": {
+    "title": "Verifiser e-posten din",
+    "description": "Du må verifisere e-posten din for å få tilgang til alle funksjoner",
+    "verifyButton": "Verifiser nå"
   },
   "othersReacted": "{{count}} person reagerte",
   "othersReacted_plural": "{{count}} personer reagerte",

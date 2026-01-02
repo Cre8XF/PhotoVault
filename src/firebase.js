@@ -215,6 +215,13 @@ export async function addAlbum(data) {
   const user = auth.currentUser
   if (!user) throw new Error('Ingen bruker logget inn')
 
+  // ✅ Email verification check
+  if (!user.emailVerified) {
+    const error = new Error('Email verification required')
+    error.code = 'EMAIL_NOT_VERIFIED'
+    throw error
+  }
+
   const userId = data.userId || user.uid
   let albumId = null
 
@@ -648,6 +655,13 @@ export async function softDeletePhoto(photoId) {
       throw new Error('User not authenticated')
     }
 
+    // ✅ Email verification check
+    if (!user.emailVerified) {
+      const error = new Error('Email verification required')
+      error.code = 'EMAIL_NOT_VERIFIED'
+      throw error
+    }
+
     const photoRef = doc(db, 'photos', photoId)
     await updateDoc(photoRef, {
       deleted: true,
@@ -673,6 +687,13 @@ export async function softDeletePhotos(photoIds) {
     const user = auth.currentUser
     if (!user) {
       throw new Error('User not authenticated')
+    }
+
+    // ✅ Email verification check
+    if (!user.emailVerified) {
+      const error = new Error('Email verification required')
+      error.code = 'EMAIL_NOT_VERIFIED'
+      throw error
     }
 
     const batch = writeBatch(db)
