@@ -3,7 +3,7 @@
   "version": "1.0.0-mvp",
   "private": true,
   "engines": {
-    "node": "18.20.3"
+    "node": "20"
   },
   "dependencies": {
     "@capacitor/android": "^6.1.0",
