@@ -29,13 +29,14 @@ function SortablePhotoCard({ photo, onClick }) {
       style={style}
       className="relative group"
     >
-      {/* Drag Handle */}
+      {/* Drag Handle - Touch-friendly 44x44px minimum */}
       <div
         {...attributes}
         {...listeners}
-        className="absolute top-2 right-2 z-10 bg-black/50 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+        className="absolute top-2 right-2 z-10 bg-black/50 p-2.5 rounded opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing touch-target"
+        style={{ minWidth: '44px', minHeight: '44px' }}
       >
-        <GripVertical className="w-5 h-5 text-white" />
+        <GripVertical className="w-6 h-6 text-white" />
       </div>
 
       {/* Photo Card */}
