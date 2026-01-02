@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { LayoutGrid, Check } from 'lucide-react'
+import { getTemplateById, expandTemplate } from '../features/collage/templateEngine'
 
 /**
  * CollageCard Component
@@ -39,6 +40,46 @@ const CollageCard = ({
     }
   }
 
+  // Get layout and photos for dynamic rendering
+  const { layout, photos } = useMemo(() => {
+    // Only compute if we have slots with photos
+    if (!collage.slots || collage.slots.length === 0) {
+      return { layout: null, photos: [] }
+    }
+
+    // Get layout from template
+    let resolvedLayout = null
+    if (collage.templateId) {
+      const template = getTemplateById(collage.templateId)
+      if (template) {
+        const expanded = expandTemplate(template)
+        const gridTemplate = expanded.grid?.desktop || 'repeat(2, 1fr) / repeat(2, 1fr)'
+        const gridParts = gridTemplate.split(' / ')
+
+        resolvedLayout = {
+          slots: expanded.slots,
+          grid: {
+            desktop: gridTemplate,
+            rows: gridParts[0] || 'repeat(2, 1fr)',
+            cols: gridParts[1] || gridParts[0] || 'repeat(2, 1fr)',
+          },
+          gap: expanded.gap || 2,
+        }
+      }
+    }
+
+    // Extract photos from slots
+    const slotPhotos = collage.slots
+      .filter(slot => slot.photo)
+      .map(slot => slot.photo)
+
+    return { layout: resolvedLayout, photos: slotPhotos }
+  }, [collage.slots, collage.templateId])
+
+  // Should we render dynamically?
+  // Always prefer dynamic rendering if we have layout and photos (staticImageUrl might be buggy)
+  const shouldRenderDynamic = layout && photos.length > 0
+
   return (
     <div
       onClick={handleClick}
@@ -50,7 +91,39 @@ const CollageCard = ({
     >
       {/* Collage Image */}
       <div className="aspect-[4/5] bg-gray-900">
-        {thumbnailUrl ? (
+        {shouldRenderDynamic ? (
+          // Dynamic grid rendering (preferred - always use when we have layout/photos)
+          <div
+            className="w-full h-full"
+            style={{
+              display: 'grid',
+              gridTemplateRows: layout.grid.rows,
+              gridTemplateColumns: layout.grid.cols,
+              gap: `${layout.gap}px`,
+            }}
+          >
+            {photos.map((photo, index) => {
+              const slot = layout.slots?.[index]
+              return (
+                <div
+                  key={photo.id || index}
+                  style={{
+                    gridColumn: slot ? `${slot.col} / span ${slot.colSpan}` : 'auto',
+                    gridRow: slot ? `${slot.row} / span ${slot.rowSpan}` : 'auto',
+                    overflow: 'hidden',
+                    background: '#000',
+                  }}
+                >
+                  <img
+                    src={photo.thumbnailUrl || photo.url}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )
+            })}
+          </div>
+        ) : thumbnailUrl ? (
           <img
             src={thumbnailUrl}
             alt={collage.title || 'Collage'}
