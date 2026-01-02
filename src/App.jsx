@@ -78,6 +78,7 @@ import AlbumModal from './components/AlbumModal'
 import ConfirmModal from './components/ConfirmModal'
 import Notification from './components/Notification'
 import UpgradeModal from './components/UpgradeModal' // 🆕 FREEMIUM
+import VerificationBanner from './components/VerificationBanner' // ✅ P0-2: Email verification
 import Particles from './components/Particles'
 import PINLockScreen from './components/PINLockScreen'
 import NotificationPanel from './components/NotificationPanel'
@@ -420,6 +421,9 @@ function AppContent() {
     typeof window !== 'undefined' ? window.innerHeight : 0
   )
 
+  // ✅ P0-2: Email verification banner state
+  const [bannerDismissed, setBannerDismissed] = React.useState(false)
+
   // Phase 2A: Handle photo click - Navigate to PhotoPage
   const handlePhotoClick = (photo, sourceList) => {
     const list = Array.isArray(sourceList) ? sourceList : photos
@@ -604,6 +608,14 @@ function AppContent() {
   return (
     <div className="min-h-screen relative">
       <Particles />
+
+      {/* ✅ P0-2: Email verification banner */}
+      {!bannerDismissed && (
+        <VerificationBanner
+          user={user}
+          onDismiss={() => setBannerDismissed(true)}
+        />
+      )}
 
       {/* Main content - React Router based rendering */}
       <main className="relative z-10">

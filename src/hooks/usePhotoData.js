@@ -3,6 +3,7 @@
 // ============================================================================
 import { useCallback, useEffect, useState, startTransition } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { doc, deleteDoc } from 'firebase/firestore'
 import {
   getAlbumsByUser,
@@ -32,6 +33,7 @@ import { devLog, devWarn } from '../utils/log'
  */
 export const usePhotoData = () => {
   const { t } = useTranslation(['common'])
+  const navigate = useNavigate()
 
   // Reentrancy guards (Phase 3)
   const [isSaving, setIsSaving] = useState(false)
@@ -215,9 +217,12 @@ export const usePhotoData = () => {
 
       // CRITICAL: Check email verification BEFORE upload
       if (!user.emailVerified) {
-        const error = new Error('EMAIL_NOT_VERIFIED')
-        error.code = 'EMAIL_NOT_VERIFIED'
-        throw error
+        setNotification({
+          message: t('common:notifications.emailVerificationRequired') || 'Please verify your email before uploading photos',
+          type: 'error',
+        })
+        navigate('/verify-email')
+        return
       }
 
       // ✅ Create AbortController for cancellable uploads
@@ -566,12 +571,11 @@ export const usePhotoData = () => {
         onConfirm: async () => {
           // CRITICAL: Check email verification BEFORE delete
           if (!user?.emailVerified) {
-            const error = new Error('EMAIL_NOT_VERIFIED')
-            error.code = 'EMAIL_NOT_VERIFIED'
             setNotification({
-              message: t('common:notifications.emailNotVerified') || 'Please verify your email to delete photos',
+              message: t('common:notifications.emailVerificationRequired') || 'Please verify your email to delete photos',
               type: 'error',
             })
+            navigate('/verify-email')
             return
           }
 

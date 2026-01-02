@@ -550,6 +550,14 @@ const UploadModal = ({
       if (onCreateAlbum) onCreateAlbum({ id: newAlbumRef.id, ...cleanAlbum })
     } catch (error) {
       console.error('❌ Error creating album:', error)
+
+      // Handle email verification error
+      if (error.code === 'EMAIL_NOT_VERIFIED') {
+        window.showToast?.('Please verify your email before creating albums', 'error')
+        navigate('/verify-email')
+        return
+      }
+
       window.showToast?.('Failed to create album', 'error')
     } finally {
       // Reset guard after a delay to allow modal close animations
