@@ -29,9 +29,16 @@ export default function CollagePreview({
    * Memoized grid style (MUST be top-level)
    */
   const gridStyle = useMemo(() => {
+    // Parse grid template (format: "repeat(N, 1fr) / repeat(M, 1fr)")
+    const gridTemplate = layout?.grid?.desktop || 'repeat(2, 1fr) / repeat(2, 1fr)'
+    const gridParts = gridTemplate.split(' / ')
+    const rows = gridParts[0] || 'repeat(2, 1fr)'
+    const cols = gridParts[1] || gridParts[0] || 'repeat(2, 1fr)'
+
     return {
       display: 'grid',
-      gridTemplateColumns: layout?.grid?.desktop || 'repeat(2, 1fr)',
+      gridTemplateRows: rows,
+      gridTemplateColumns: cols,
       gap: `${layout?.gap ?? 8}px`,
       aspectRatio,
       width: '100%',
@@ -45,33 +52,41 @@ export default function CollagePreview({
 
   return (
     <div className="collage-preview" style={gridStyle}>
-      {previewPhotos.map((photo, index) => (
-        <div
-          key={photo.id || index}
-          className="collage-preview-slot"
-          style={{
-            position: 'relative',
-            width: '100%',
-            height: '100%',
-            overflow: 'hidden',
-            borderRadius: '12px',
-            background: '#000',
-          }}
-        >
-          <img
-            src={photo.url || photo.previewUrl}
-            alt=""
-            draggable={false}
+      {previewPhotos.map((photo, index) => {
+        // Get slot data for grid positioning (slots use 1-based indexing, same as CSS Grid)
+        const slot = layout?.slots?.[index]
+
+        return (
+          <div
+            key={photo.id || index}
+            className="collage-preview-slot"
             style={{
+              // Grid positioning - slots use 1-based indexing matching CSS Grid
+              gridColumn: slot ? `${slot.col} / span ${slot.colSpan}` : 'auto',
+              gridRow: slot ? `${slot.row} / span ${slot.rowSpan}` : 'auto',
+              position: 'relative',
               width: '100%',
               height: '100%',
-              objectFit: 'cover', // ← trygg default
-              objectPosition: 'center',
-              display: 'block',
+              overflow: 'hidden',
+              borderRadius: '12px',
+              background: '#000',
             }}
-          />
-        </div>
-      ))}
+          >
+            <img
+              src={photo.url || photo.previewUrl}
+              alt=""
+              draggable={false}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover', // ← trygg default
+                objectPosition: 'center',
+                display: 'block',
+              }}
+            />
+          </div>
+        )
+      })}
     </div>
   )
 }
