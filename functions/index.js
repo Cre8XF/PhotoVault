@@ -314,7 +314,16 @@ exports.manualReconcile = functions
     }
 
     // Check admin role
-    const userDoc = await db.collection('users').doc(context.auth.uid).get()
+    let userDoc
+    try {
+      userDoc = await db.collection('users').doc(context.auth.uid).get()
+    } catch (error) {
+      console.error('❌ Failed to fetch user document:', error)
+      throw new functions.https.HttpsError(
+        'internal',
+        'Failed to verify user permissions'
+      )
+    }
 
     if (!userDoc.exists || userDoc.data().role !== 'admin') {
       throw new functions.https.HttpsError(
