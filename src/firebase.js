@@ -1321,6 +1321,11 @@ export async function uploadPhoto(
       favorite: false,
       order: Date.now(), // Phase 4B-2: Manual ordering support
 
+      // ✅ TRASH FIELDS (Phase 4B-1) - CRITICAL: Required for query compatibility
+      deleted: false,        // Never deleted on upload
+      deletedAt: null,       // No deletion timestamp
+      deletedBy: null,       // No deleter user ID
+
       // Storage backend tracking - R2 only
       storageBackend: 'r2', // Always R2 for new uploads
       r2Url: downloadURL, // R2 public URL

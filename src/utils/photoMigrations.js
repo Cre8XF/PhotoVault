@@ -6,36 +6,42 @@ import { db } from '../firebase'
 import { devLog } from './log'
 
 /**
- * Migration: Add deleted field to all existing photos
- * Sets deleted: false for all photos that don't have this field
+ * Migration: Add deleted fields to all existing photos
+ * Sets deleted: false, deletedAt: null, deletedBy: null for all photos
  * Run this ONCE before deploying trash/restore feature
+ *
+ * ✅ UPDATED: Now adds ALL three deleted fields for consistency
  */
 export async function migratePhotosAddDeletedField() {
   try {
-    console.log('🔧 Starting migration: Adding deleted field to photos...')
+    console.log('🔧 Starting migration: Adding deleted fields to photos...')
 
     const photosSnapshot = await getDocs(collection(db, 'photos'))
     const batch = writeBatch(db)
 
     let count = 0
-    let alreadyHasField = 0
+    let alreadyHasFields = 0
 
     photosSnapshot.forEach((docSnapshot) => {
       const data = docSnapshot.data()
 
-      // Only update if deleted field is missing
-      if (data.deleted === undefined) {
+      // ✅ CRITICAL: Only update if ANY deleted field is missing
+      if (data.deleted === undefined ||
+          data.deletedAt === undefined ||
+          data.deletedBy === undefined) {
         batch.update(docSnapshot.ref, {
-          deleted: false,
+          deleted: false,      // Never deleted initially
+          deletedAt: null,     // No deletion timestamp
+          deletedBy: null,     // No deleter user ID
           updatedAt: new Date().toISOString()
         })
         count++
 
         if (import.meta.env.DEV) {
-          devLog(`  ✅ Adding deleted:false to photo: ${docSnapshot.id}`)
+          devLog(`  ✅ Adding deleted fields to photo: ${docSnapshot.id}`)
         }
       } else {
-        alreadyHasField++
+        alreadyHasFields++
       }
     })
 
@@ -44,18 +50,18 @@ export async function migratePhotosAddDeletedField() {
       await batch.commit()
       console.log(`✅ Migration complete: ${count} photos updated`)
     } else {
-      console.log(`✅ No migration needed - all photos already have deleted field`)
+      console.log(`✅ No migration needed - all photos already have deleted fields`)
     }
 
     console.log(`📊 Migration summary:`)
     console.log(`   - Total photos: ${photosSnapshot.size}`)
     console.log(`   - Updated: ${count}`)
-    console.log(`   - Already had field: ${alreadyHasField}`)
+    console.log(`   - Already had fields: ${alreadyHasFields}`)
 
     return {
       total: photosSnapshot.size,
       updated: count,
-      skipped: alreadyHasField
+      skipped: alreadyHasFields
     }
   } catch (error) {
     console.error('❌ Migration failed:', error)
