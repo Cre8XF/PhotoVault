@@ -39,6 +39,9 @@ export const usePhotoData = () => {
   const [isUploading, setIsUploading] = useState(false)
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false)
 
+  // ✅ Upload cancellation support (Phase 3-3)
+  const [activeUploads, setActiveUploads] = useState([])
+
   // Zustand store selectors
   const user = useStore((state) => state.user)
   const albums = useStore((state) => state.albums)
@@ -216,14 +219,36 @@ export const usePhotoData = () => {
         throw error
       }
 
+      // ✅ Create AbortController for cancellable uploads
+      const uploadId = Date.now()
+      const controller = new AbortController()
+
+      // Track this upload
+      setActiveUploads(prev => [...prev, {
+        id: uploadId,
+        controller,
+        fileCount: selectedFiles.length
+      }])
+
       setIsUploading(true)
 
       try {
         let imageCount = 0
         let videoCount = 0
         let documentCount = 0
+        let exifWarningCount = 0 // ✅ Track EXIF failures for user feedback
 
         for (const fileObj of selectedFiles) {
+          // ✅ Check if upload was cancelled
+          if (controller.signal.aborted) {
+            console.log('Upload cancelled by user')
+            setNotification({
+              type: 'info',
+              message: 'Upload cancelled'
+            })
+            return
+          }
+
           // Count file types
           if (fileObj.type === 'video') {
             videoCount++
@@ -234,15 +259,21 @@ export const usePhotoData = () => {
           }
 
           // Pass thumbnail and metadata for videos, exifData for photos
-          await uploadPhoto(
+          const result = await uploadPhoto(
             user.uid,
             fileObj.file,
             albumId,
             aiTagging,
             fileObj.thumbnail || null,
             fileObj.metadata || null,
-            fileObj.exifData || null // ✅ Pass pre-extracted EXIF (from useUpload.js)
+            fileObj.exifData || null, // ✅ Pass pre-extracted EXIF (from useUpload.js)
+            controller.signal // ✅ Pass abort signal
           )
+
+          // ✅ Track EXIF warnings
+          if (result?.exifWarning) {
+            exifWarningCount++
+          }
         }
 
         // Refresh to get newly uploaded photos with their IDs
@@ -257,17 +288,39 @@ export const usePhotoData = () => {
         })
 
         setNotification({ message, type: 'success' })
+
+        // ✅ Show EXIF warning toast 2 seconds after success (if any failed)
+        if (exifWarningCount > 0) {
+          setTimeout(() => {
+            setNotification({
+              message: `${exifWarningCount} photo(s) uploaded without date/location (no EXIF data)`,
+              type: 'warning'
+            })
+          }, 2000)
+        }
       } catch (error) {
         console.error('❌ Upload error:', error)
-        setNotification({
-          message: t('common:notifications.uploadError', {
-            message: error.message,
-          }),
-          type: 'error',
-        })
-        throw error
+
+        // ✅ Handle abort errors separately
+        if (error.name === 'AbortError') {
+          console.log('Upload aborted')
+          setNotification({
+            type: 'info',
+            message: 'Upload cancelled'
+          })
+        } else {
+          setNotification({
+            message: t('common:notifications.uploadError', {
+              message: error.message,
+            }),
+            type: 'error',
+          })
+          throw error
+        }
       } finally {
         setIsUploading(false)
+        // ✅ Remove from active uploads
+        setActiveUploads(prev => prev.filter(u => u.id !== uploadId))
       }
     },
     [isUploading, user, refreshAllData, setNotification, t]
@@ -783,6 +836,18 @@ export const usePhotoData = () => {
     [isSaving, user?.uid, setAlbums, refreshAllData, setNotification, t]
   )
 
+  /**
+   * Cancel an active upload
+   * ✅ Phase 3-3: Upload cancellation support
+   */
+  const cancelUpload = useCallback((uploadId) => {
+    const upload = activeUploads.find(u => u.id === uploadId)
+    if (upload) {
+      upload.controller.abort()
+      console.log('Cancelling upload:', uploadId)
+    }
+  }, [activeUploads])
+
   return {
     // Data - Always return safe arrays
     albums: Array.isArray(albums) ? albums : [],
@@ -811,6 +876,10 @@ export const usePhotoData = () => {
     isDeleting,
     isUploading,
     isTogglingFavorite,
+
+    // ✅ Upload cancellation (Phase 3-3)
+    activeUploads,
+    cancelUpload,
   }
 }
 

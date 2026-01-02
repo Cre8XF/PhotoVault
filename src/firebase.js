@@ -945,7 +945,8 @@ export async function uploadPhoto(
   aiTagging = false,
   thumbnailBlob = null,
   videoMetadata = null,
-  preExtractedExif = null // ✅ Pre-extracted EXIF data (before compression)
+  preExtractedExif = null, // ✅ Pre-extracted EXIF data (before compression)
+  signal = null // ✅ AbortSignal for cancellable uploads (Phase 3-3)
 ) {
   try {
     // Validate inputs
@@ -1049,11 +1050,17 @@ export async function uploadPhoto(
       }
     }
 
+    // ✅ Check if upload was cancelled before EXIF extraction
+    if (signal?.aborted) {
+      throw new DOMException('Upload cancelled', 'AbortError')
+    }
+
     // 2. Extract comprehensive EXIF data with extensive debugging (for photos only)
     let takenAt = null
     let location = null
     let camera = null
     let technicalDetails = null
+    let exifFailed = false // ✅ Track EXIF extraction failure for user feedback
 
     if (!isVideo && !isDocument) {
       if (import.meta.env.DEV) {
@@ -1113,6 +1120,7 @@ export async function uploadPhoto(
             devWarn(
               'This is normal for screenshots or heavily edited photos'
             )
+            exifFailed = true // ✅ Mark as failed for user notification
           }
         } catch (exifError) {
           console.error('═══════════════════════════════════════')
@@ -1122,6 +1130,7 @@ export async function uploadPhoto(
           console.error('Error message:', exifError.message)
           console.error('Error stack:', exifError.stack)
           console.error('═══════════════════════════════════════')
+          exifFailed = true // ✅ Mark as failed for user notification
         }
       }
 
@@ -1264,6 +1273,11 @@ export async function uploadPhoto(
       devLog(`⚠️ No EXIF date found - takenAt will be undefined`)
     }
 
+    // ✅ Check if upload was cancelled before storage upload
+    if (signal?.aborted) {
+      throw new DOMException('Upload cancelled', 'AbortError')
+    }
+
     // 3. Upload main file to R2/Firebase Storage (with intelligent fallback)
     const timestamp = Date.now()
     const safeName = file.name.replace(/\s+/g, '_')
@@ -1390,7 +1404,11 @@ export async function uploadPhoto(
       storageUsed: increment(file.size),
     })
 
-    return photoId
+    // ✅ Return photo ID with EXIF warning flag (for user feedback)
+    return {
+      photoId,
+      exifWarning: exifFailed && !isVideo && !isDocument // Only warn for photos
+    }
   } catch (error) {
     console.error('🔥 uploadPhoto error:', error)
     throw new Error(`Upload feilet: ${error.message}`)

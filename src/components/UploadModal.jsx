@@ -26,6 +26,7 @@ import { triggerHaptic, showToast } from '../utils/nativeUtils'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useUpload } from '../hooks/useUpload'
+import { usePhotoData } from '../hooks/usePhotoData' // ✅ Phase 3-3: Upload cancellation
 import useAuth from '../hooks/useAuth'
 import useStore from '../state/store' // ✅ ADD
 import { auth, addAlbum } from '../firebase'
@@ -81,6 +82,13 @@ const UploadModal = ({
   // ✅ Storage tracking for upload pre-check
   const storageUsed = useStore((state) => state.storageUsed)
   const storageLimit = useStore((state) => state.storageLimit)
+
+  // ✅ Phase 3-3: Get AbortController-based cancellation
+  const {
+    activeUploads,
+    cancelUpload: cancelPhotoDataUpload
+  } = usePhotoData()
+
   const {
     uploading,
     processingProgress,
@@ -89,7 +97,7 @@ const UploadModal = ({
     totalFiles,
     validateFiles,
     uploadFiles,
-    cancelUpload, // ✅ PHASE 2: Cancel function
+    cancelUpload: cancelUploadLocal, // ✅ PHASE 2: Cancel function (useUpload)
     uploadCancelled, // ✅ PHASE 2: Cancel state
   } = useUpload()
 
@@ -925,10 +933,19 @@ const UploadModal = ({
                 </p>
               )}
 
-              {/* ✅ PHASE 2: Cancel button */}
+              {/* ✅ PHASE 3-3: Cancel button with AbortController support */}
               {!uploadCancelled && uploadCount < totalFiles && (
                 <button
-                  onClick={cancelUpload}
+                  onClick={() => {
+                    // Cancel UI state (useUpload)
+                    cancelUploadLocal()
+                    // Cancel active uploads via AbortController (usePhotoData)
+                    if (activeUploads.length > 0) {
+                      activeUploads.forEach(upload => {
+                        cancelPhotoDataUpload(upload.id)
+                      })
+                    }
+                  }}
                   className="w-full mt-4 py-2 px-4 border border-red-500 text-red-500 rounded-lg hover:bg-red-500/10 transition-colors text-sm font-medium"
                 >
                   Cancel Upload
