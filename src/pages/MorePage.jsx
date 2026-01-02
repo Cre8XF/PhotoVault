@@ -675,13 +675,18 @@ const MorePage = ({
 
       console.log('✅ Manual reconciliation result:', result.data)
 
+      const { success, message, usersProcessed, issuesFound, issuesFixed } = result.data
+
       setReconcileResult({
-        success: true,
-        message: result.data.message
+        success,
+        message,
+        usersProcessed,
+        issuesFound,
+        issuesFixed
       })
 
       showNotification(
-        'Counter reconciliation startet. Sjekk console for detaljer.',
+        `Reconciliation fullført! Brukere: ${usersProcessed}, Issues: ${issuesFound}, Fikset: ${issuesFixed}`,
         'success'
       )
 
