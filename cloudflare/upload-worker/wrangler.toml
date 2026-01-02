@@ -32,6 +32,7 @@ bucket_name = "pixtr-users"
 # ============================================================================
 [vars]
 R2_PUBLIC_URL = "https://images.pixtr.cloud"
+FIREBASE_PROJECT_ID = "photovault-app-a0946"
 
 # ============================================================================
 # 🚫 INTENTIONALLY REMOVED (FOR NOW)

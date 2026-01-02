@@ -86,6 +86,16 @@ export async function uploadToR2(
 
     if (!uploadResponse.ok) {
       const errorData = await uploadResponse.json().catch(() => ({}))
+
+      // Handle specific error codes from worker
+      if (errorData.errorCode) {
+        const error = new Error(errorData.error || 'Upload failed')
+        error.code = errorData.errorCode
+        error.errorCode = errorData.errorCode
+        error.details = errorData // Include all error details
+        throw error
+      }
+
       throw new Error(
         errorData.error || `R2 upload failed: ${uploadResponse.statusText}`
       )
