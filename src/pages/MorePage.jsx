@@ -42,12 +42,14 @@ import {
   Image,
   Mail,
   GripVertical,
+  Database,
 } from 'lucide-react'
 import { ROUTES } from '../routes'
 import { useSecurityContext } from '../contexts/SecurityContext'
 import {
   getFirestore,
   doc,
+  getDoc,
   deleteDoc,
   updateDoc,
   collection,
@@ -55,12 +57,14 @@ import {
 } from 'firebase/firestore'
 
 import { getAuth } from 'firebase/auth'
+import { httpsCallable } from 'firebase/functions'
 
 // Firebase Storage imports removed - scanning causes 403 errors
 // Storage operations handled by firebase.js CRUD functions
 
 import {
   db,
+  functions,
   migrateAlbumsAddUserId,
   migratePhotosAddUserId,
   getPhotosByUser,
@@ -108,6 +112,9 @@ const MorePage = ({
   const [migrating, setMigrating] = useState(false)
   const [migrationResult, setMigrationResult] = useState(null)
   const [sendingVerification, setSendingVerification] = useState(false)
+  const [reconciling, setReconciling] = useState(false)
+  const [reconcileResult, setReconcileResult] = useState(null)
+  const [lastReconciliation, setLastReconciliation] = useState(null)
 
   const { pinEnabled, biometricEnabled } = useSecurityContext()
 
@@ -629,6 +636,72 @@ const MorePage = ({
       showNotification('Migration failed: ' + error.message, 'error')
     } finally {
       setMigrating(false)
+    }
+  }
+
+  // ============================================================================
+  // === COUNTER RECONCILIATION ===
+  // ============================================================================
+
+  // Fetch last reconciliation report (admin only)
+  React.useEffect(() => {
+    if (!isAdmin) return
+
+    const fetchReconciliationReport = async () => {
+      try {
+        const reportDoc = await getDoc(doc(db, 'system', 'lastReconciliation'))
+        if (reportDoc.exists()) {
+          setLastReconciliation(reportDoc.data())
+        }
+      } catch (error) {
+        console.error('Error fetching reconciliation report:', error)
+      }
+    }
+
+    fetchReconciliationReport()
+  }, [isAdmin])
+
+  const handleManualReconcile = async () => {
+    if (!window.confirm('Kjør manuell counter reconciliation? Dette kan ta noen minutter.')) {
+      return
+    }
+
+    setReconciling(true)
+    setReconcileResult(null)
+
+    try {
+      const manualReconcile = httpsCallable(functions, 'manualReconcile')
+      const result = await manualReconcile()
+
+      console.log('✅ Manual reconciliation result:', result.data)
+
+      setReconcileResult({
+        success: true,
+        message: result.data.message
+      })
+
+      showNotification(
+        'Counter reconciliation startet. Sjekk console for detaljer.',
+        'success'
+      )
+
+      // Refresh the last reconciliation data
+      const reportDoc = await getDoc(doc(db, 'system', 'lastReconciliation'))
+      if (reportDoc.exists()) {
+        setLastReconciliation(reportDoc.data())
+      }
+
+    } catch (error) {
+      console.error('❌ Manual reconciliation error:', error)
+
+      setReconcileResult({
+        success: false,
+        message: error.message
+      })
+
+      showNotification('Reconciliation feilet: ' + error.message, 'error')
+    } finally {
+      setReconciling(false)
     }
   }
 
@@ -1413,6 +1486,66 @@ const MorePage = ({
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Counter Reconciliation - P0-3 */}
+          <div className="mt-4 pt-4 border-t border-yellow-500/20">
+            <div className="flex items-center gap-2 mb-3">
+              <Database className="w-4 h-4 text-blue-400" />
+              <h4 className="font-semibold text-sm text-blue-400">
+                Counter Reconciliation
+              </h4>
+            </div>
+
+            <p className="text-xs opacity-70 mb-3">
+              Sjekk og fiks album count, photo count og storage used for alle brukere.
+            </p>
+
+            <button
+              onClick={handleManualReconcile}
+              disabled={reconciling}
+              className="ripple-effect bg-blue-600/10 hover:bg-blue-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed w-full"
+            >
+              <div className="p-2 bg-blue-600/30 rounded-lg">
+                <Database className="w-5 h-5 text-blue-300" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-sm">
+                  {reconciling ? 'Kjører...' : 'Kjør Reconciliation'}
+                </p>
+                <p className="text-xs opacity-70">
+                  Verifiser og korrigere tellere for alle brukere
+                </p>
+              </div>
+            </button>
+
+            {reconcileResult && (
+              <div className={`mt-3 p-3 rounded-lg ${
+                reconcileResult.success
+                  ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200'
+                  : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200'
+              }`}>
+                <p className="text-sm">{reconcileResult.message}</p>
+              </div>
+            )}
+
+            {lastReconciliation && (
+              <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  <strong>Siste kjøring:</strong>{' '}
+                  {lastReconciliation.timestamp?.toDate?.()?.toLocaleString('nb-NO') || 'N/A'}
+                </p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  Brukere prosessert: {lastReconciliation.usersProcessed || 0}
+                </p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  Issues funnet: {lastReconciliation.issuesFound || 0}
+                </p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  Issues fikset: {lastReconciliation.issuesFixed || 0}
+                </p>
+              </div>
+            )}
           </div>
         </section>
       )}

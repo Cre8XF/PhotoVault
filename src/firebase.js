@@ -4,6 +4,7 @@
 
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
+import { getFunctions } from 'firebase/functions'
 import {
   getFirestore,
   collection,
@@ -79,6 +80,7 @@ devLog('✅ Firebase initialized:', firebaseConfig.projectId)
 export const db = getFirestore(app)
 export const storage = getStorage(app)
 export const auth = getAuth(app)
+export const functions = getFunctions(app, 'europe-west1') // Use european region for functions
 
 // ============================================================================
 // 🛠️ Firebase Auth Configuration for Local Development

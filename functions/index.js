@@ -129,3 +129,350 @@ exports.cleanupDeletedPhotos = functions
       throw error
     }
   })
+
+/**
+ * Scheduled function: Reconcile user counters
+ * Runs every Sunday at 03:00 Oslo time
+ *
+ * Checks:
+ * 1. currentAlbumCount matches actual album count
+ * 2. photoCount in each album matches actual photo count
+ * 3. storageUsed matches sum of photo sizes
+ */
+exports.reconcileCounters = functions
+  .region('europe-west1') // Oslo region
+  .pubsub
+  .schedule('0 3 * * 0') // Every Sunday at 03:00
+  .timeZone('Europe/Oslo')
+  .onRun(async (context) => {
+    console.log('🔄 Starting counter reconciliation...')
+    const startTime = Date.now()
+
+    let usersProcessed = 0
+    let issuesFound = 0
+    let issuesFixed = 0
+
+    try {
+      // Get all users
+      const usersSnapshot = await db.collection('users').get()
+
+      for (const userDoc of usersSnapshot.docs) {
+        const userId = userDoc.id
+        const userData = userDoc.data()
+        usersProcessed++
+
+        // Skip admins
+        if (userData.role === 'admin') {
+          console.log(`⏭️ Skipping admin user: ${userId}`)
+          continue
+        }
+
+        // ===== 1. RECONCILE ALBUM COUNT =====
+        const albumsSnapshot = await db
+          .collection('albums')
+          .where('userId', '==', userId)
+          .get()
+
+        const actualAlbumCount = albumsSnapshot.size
+        const storedAlbumCount = userData.currentAlbumCount || 0
+
+        if (actualAlbumCount !== storedAlbumCount) {
+          console.warn(`⚠️ User ${userId} album count mismatch:`, {
+            stored: storedAlbumCount,
+            actual: actualAlbumCount,
+            email: userData.email
+          })
+
+          issuesFound++
+
+          // Fix the count
+          await userDoc.ref.update({
+            currentAlbumCount: actualAlbumCount,
+            lastReconciled: admin.firestore.FieldValue.serverTimestamp()
+          })
+
+          issuesFixed++
+        }
+
+        // ===== 2. RECONCILE PHOTO COUNTS IN ALBUMS =====
+        for (const albumDoc of albumsSnapshot.docs) {
+          const albumId = albumDoc.id
+          const albumData = albumDoc.data()
+
+          // Count photos in this album (from top-level photos collection)
+          const photosSnapshot = await db
+            .collection('photos')
+            .where('userId', '==', userId)
+            .where('albumId', '==', albumId)
+            .where('deleted', '==', false) // Only count non-deleted
+            .get()
+
+          const actualPhotoCount = photosSnapshot.size
+          const storedPhotoCount = albumData.photoCount || 0
+
+          if (actualPhotoCount !== storedPhotoCount) {
+            console.warn(`⚠️ Album ${albumId} photo count mismatch:`, {
+              stored: storedPhotoCount,
+              actual: actualPhotoCount,
+              albumName: albumData.name
+            })
+
+            issuesFound++
+
+            // Fix the count
+            await albumDoc.ref.update({
+              photoCount: actualPhotoCount,
+              lastReconciled: admin.firestore.FieldValue.serverTimestamp()
+            })
+
+            issuesFixed++
+          }
+        }
+
+        // ===== 3. RECONCILE STORAGE USED =====
+        const allPhotosSnapshot = await db
+          .collection('photos')
+          .where('userId', '==', userId)
+          .where('deleted', '==', false)
+          .get()
+
+        let calculatedStorageUsed = 0
+        allPhotosSnapshot.docs.forEach(photoDoc => {
+          const photoData = photoDoc.data()
+          calculatedStorageUsed += photoData.size || 0
+        })
+
+        const storedStorageUsed = userData.storageUsed || 0
+        const difference = Math.abs(calculatedStorageUsed - storedStorageUsed)
+
+        // Allow 1MB margin of error (compression, metadata, etc.)
+        if (difference > 1048576) {
+          console.warn(`⚠️ User ${userId} storage mismatch:`, {
+            stored: storedStorageUsed,
+            calculated: calculatedStorageUsed,
+            difference: difference
+          })
+
+          issuesFound++
+
+          // Fix storage
+          await userDoc.ref.update({
+            storageUsed: calculatedStorageUsed,
+            lastReconciled: admin.firestore.FieldValue.serverTimestamp()
+          })
+
+          issuesFixed++
+        }
+      }
+
+      // Log summary
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2)
+      console.log('✅ Reconciliation complete:', {
+        usersProcessed,
+        issuesFound,
+        issuesFixed,
+        duration: `${duration}s`
+      })
+
+      // Store reconciliation report
+      await db.collection('system').doc('lastReconciliation').set({
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        usersProcessed,
+        issuesFound,
+        issuesFixed,
+        duration: parseFloat(duration)
+      })
+
+      return {
+        success: true,
+        usersProcessed,
+        issuesFound,
+        issuesFixed,
+        duration
+      }
+
+    } catch (error) {
+      console.error('❌ Reconciliation error:', error)
+      throw error
+    }
+  })
+
+/**
+ * Callable function: Manual reconciliation
+ * Triggered by admin from frontend
+ */
+exports.manualReconcile = functions
+  .region('europe-west1')
+  .https
+  .onCall(async (data, context) => {
+    // Check authentication
+    if (!context.auth) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'Must be authenticated'
+      )
+    }
+
+    // Check admin role
+    const userDoc = await db.collection('users').doc(context.auth.uid).get()
+
+    if (!userDoc.exists || userDoc.data().role !== 'admin') {
+      throw new functions.https.HttpsError(
+        'permission-denied',
+        'Must be admin'
+      )
+    }
+
+    console.log(`🔄 Manual reconciliation triggered by admin: ${context.auth.uid}`)
+    const startTime = Date.now()
+
+    let usersProcessed = 0
+    let issuesFound = 0
+    let issuesFixed = 0
+
+    try {
+      // Get all users
+      const usersSnapshot = await db.collection('users').get()
+
+      for (const userDoc of usersSnapshot.docs) {
+        const userId = userDoc.id
+        const userData = userDoc.data()
+        usersProcessed++
+
+        // Skip admins
+        if (userData.role === 'admin') {
+          console.log(`⏭️ Skipping admin user: ${userId}`)
+          continue
+        }
+
+        // ===== 1. RECONCILE ALBUM COUNT =====
+        const albumsSnapshot = await db
+          .collection('albums')
+          .where('userId', '==', userId)
+          .get()
+
+        const actualAlbumCount = albumsSnapshot.size
+        const storedAlbumCount = userData.currentAlbumCount || 0
+
+        if (actualAlbumCount !== storedAlbumCount) {
+          console.warn(`⚠️ User ${userId} album count mismatch:`, {
+            stored: storedAlbumCount,
+            actual: actualAlbumCount,
+            email: userData.email
+          })
+
+          issuesFound++
+
+          // Fix the count
+          await userDoc.ref.update({
+            currentAlbumCount: actualAlbumCount,
+            lastReconciled: admin.firestore.FieldValue.serverTimestamp()
+          })
+
+          issuesFixed++
+        }
+
+        // ===== 2. RECONCILE PHOTO COUNTS IN ALBUMS =====
+        for (const albumDoc of albumsSnapshot.docs) {
+          const albumId = albumDoc.id
+          const albumData = albumDoc.data()
+
+          // Count photos in this album
+          const photosSnapshot = await db
+            .collection('photos')
+            .where('userId', '==', userId)
+            .where('albumId', '==', albumId)
+            .where('deleted', '==', false)
+            .get()
+
+          const actualPhotoCount = photosSnapshot.size
+          const storedPhotoCount = albumData.photoCount || 0
+
+          if (actualPhotoCount !== storedPhotoCount) {
+            console.warn(`⚠️ Album ${albumId} photo count mismatch:`, {
+              stored: storedPhotoCount,
+              actual: actualPhotoCount,
+              albumName: albumData.name
+            })
+
+            issuesFound++
+
+            // Fix the count
+            await albumDoc.ref.update({
+              photoCount: actualPhotoCount,
+              lastReconciled: admin.firestore.FieldValue.serverTimestamp()
+            })
+
+            issuesFixed++
+          }
+        }
+
+        // ===== 3. RECONCILE STORAGE USED =====
+        const allPhotosSnapshot = await db
+          .collection('photos')
+          .where('userId', '==', userId)
+          .where('deleted', '==', false)
+          .get()
+
+        let calculatedStorageUsed = 0
+        allPhotosSnapshot.docs.forEach(photoDoc => {
+          const photoData = photoDoc.data()
+          calculatedStorageUsed += photoData.size || 0
+        })
+
+        const storedStorageUsed = userData.storageUsed || 0
+        const difference = Math.abs(calculatedStorageUsed - storedStorageUsed)
+
+        // Allow 1MB margin of error
+        if (difference > 1048576) {
+          console.warn(`⚠️ User ${userId} storage mismatch:`, {
+            stored: storedStorageUsed,
+            calculated: calculatedStorageUsed,
+            difference: difference
+          })
+
+          issuesFound++
+
+          // Fix storage
+          await userDoc.ref.update({
+            storageUsed: calculatedStorageUsed,
+            lastReconciled: admin.firestore.FieldValue.serverTimestamp()
+          })
+
+          issuesFixed++
+        }
+      }
+
+      // Log summary
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2)
+      console.log('✅ Manual reconciliation complete:', {
+        usersProcessed,
+        issuesFound,
+        issuesFixed,
+        duration: `${duration}s`
+      })
+
+      // Store reconciliation report
+      await db.collection('system').doc('lastReconciliation').set({
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        usersProcessed,
+        issuesFound,
+        issuesFixed,
+        duration: parseFloat(duration),
+        triggeredBy: context.auth.uid
+      })
+
+      return {
+        success: true,
+        message: `Reconciliation complete! Processed ${usersProcessed} users, found ${issuesFound} issues, fixed ${issuesFixed}.`,
+        usersProcessed,
+        issuesFound,
+        issuesFixed,
+        duration
+      }
+
+    } catch (error) {
+      console.error('❌ Manual reconciliation error:', error)
+      throw new functions.https.HttpsError('internal', error.message)
+    }
+  })
