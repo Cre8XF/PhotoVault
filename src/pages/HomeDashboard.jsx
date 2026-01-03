@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { addAlbum } from "../firebase";
 import { auth } from "../firebase";
 import UploadModal from "../components/UploadModal";
+import Button from "../components/Button";
 import { SkeletonCard, SkeletonPhoto } from "../components/SkeletonCard";
 import {
   Star,
@@ -481,17 +482,21 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
       </section>
 
       {/* Upload Button - Moved here for FREE users (primary action) */}
-      <button
+      <Button
         onClick={() => {
           console.log('📤 LARGE UPLOAD BUTTON CLICKED');
           setUploadMode('upload');
           setUploadOpen(true);
         }}
-        className="ripple-effect glass p-4 md:p-5 rounded-xl hover:bg-white/15 transition flex items-center justify-center gap-3 mb-6 md:mb-10 w-full bg-purple-600/20 border-2 border-purple-500/30 hover:border-purple-400/50 free-upload-btn"
+        variant="primary"
+        size="lg"
+        fullWidth
+        icon={ImagePlus}
+        iconPosition="left"
+        className="mb-6 md:mb-10 free-upload-btn"
       >
-        <ImagePlus className="w-5 h-5 md:w-6 md:h-6 text-purple-400" />
         <span className="font-semibold text-base md:text-lg">{t("home:uploadPhotos")}</span>
-      </button>
+      </Button>
 
       {/* Smart Albums - Minimized (Phase 5) */}
       <section className="mb-6 md:mb-10">

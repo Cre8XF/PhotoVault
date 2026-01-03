@@ -4,6 +4,7 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, FolderPlus } from 'lucide-react'
+import Button from './Button'
 import './AlbumModal.css'
 
 const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
@@ -116,20 +117,22 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
 
           {/* Buttons */}
           <div className="album-modal-actions">
-            <button
+            <Button
               type="button"
               onClick={onClose}
-              className="album-modal-btn-cancel"
+              variant="secondary"
+              size="md"
             >
               {t('albums:cancel')}
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               disabled={!name.trim()}
-              className={`album-modal-btn-submit ${!name.trim() ? 'disabled' : ''}`}
+              variant="primary"
+              size="md"
             >
               {editingAlbum ? t('albums:saveChanges') : t('albums:createAlbum')}
-            </button>
+            </Button>
           </div>
         </form>
       </div>
