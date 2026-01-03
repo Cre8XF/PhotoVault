@@ -7,7 +7,7 @@ import { addAlbum } from "../firebase";
 import { auth } from "../firebase";
 import UploadModal from "../components/UploadModal";
 import Button from "../components/Button";
-import { SkeletonCard, SkeletonPhoto } from "../components/SkeletonCard";
+import Loading from "../components/Loading";
 import {
   Star,
   Clock,
@@ -312,18 +312,18 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
       {isInitialLoading ? (
         <>
           <section className="mb-10">
-            <div className="h-8 w-48 bg-white/10 rounded mb-4 skeleton-premium" />
+            <Loading variant="skeleton" className="h-8 w-48 rounded mb-4" />
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {Array(8).fill(0).map((_, i) => (
-                <SkeletonPhoto key={i} />
+                <Loading key={i} variant="skeleton" className="aspect-square" />
               ))}
             </div>
           </section>
           <section className="mb-10">
-            <div className="h-8 w-56 bg-white/10 rounded mb-4 skeleton-premium" />
+            <Loading variant="skeleton" className="h-8 w-56 rounded mb-4" />
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {Array(8).fill(0).map((_, i) => (
-                <SkeletonPhoto key={i} />
+                <Loading key={i} variant="skeleton" className="aspect-square" />
               ))}
             </div>
           </section>

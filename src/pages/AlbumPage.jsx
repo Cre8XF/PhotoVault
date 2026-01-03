@@ -45,7 +45,7 @@ import DraggablePhotoGrid from '../components/DraggablePhotoGrid'
 import AlbumModal from '../components/AlbumModal'
 import QRShareModal from '../features/qr-sharing/components/QRShareModal'
 import VerificationModal from '../components/VerificationModal'
-import { SkeletonPhoto } from '../components/SkeletonCard'
+import Loading from '../components/Loading'
 import useStore from '../state/store'
 import { ROUTES } from '../routes'
 import { resolvePhotoDate, sortPhotosByDate } from '../utils/photoDateUtils'
@@ -869,7 +869,7 @@ const AlbumPage = ({
           {Array(12)
             .fill(0)
             .map((_, i) => (
-              <SkeletonPhoto key={i} />
+              <Loading key={i} variant="skeleton" className="aspect-square" />
             ))}
         </div>
       )}
