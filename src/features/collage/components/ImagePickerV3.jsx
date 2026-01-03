@@ -9,7 +9,7 @@ import { ArrowLeft } from 'lucide-react'
 import FilterTabs from './FilterTabs'
 import SearchBar from './SearchBar'
 import SelectionCounter from './SelectionCounter'
-import PhotoGridGrouped from './PhotoGridGrouped'
+import PhotoGridUnified from '../../../components/PhotoGridUnified'
 import { normalizePhotosArray } from '../../../utils/photoHelpers'
 
 /**
@@ -104,21 +104,6 @@ const ImagePickerV3 = ({
     })
   }, [filteredByCategory, searchQuery])
 
-  // Handle photo toggle
-  const handleToggle = (photo) => {
-    const isSelected = selectedPhotos.some(p => p.id === photo.id)
-
-    if (isSelected) {
-      // Deselect
-      setSelectedPhotos(selectedPhotos.filter(p => p.id !== photo.id))
-    } else {
-      // Select (if not at max)
-      if (selectedPhotos.length < maxPhotos) {
-        setSelectedPhotos([...selectedPhotos, photo])
-      }
-    }
-  }
-
   // Handle continue
   const handleContinue = () => {
     if (selectedPhotos.length > 0) {
@@ -176,12 +161,13 @@ const ImagePickerV3 = ({
 
       {/* Photo grid */}
       <div className="flex-1 overflow-y-auto px-3 pb-4 pt-2">
-        <PhotoGridGrouped
+        <PhotoGridUnified
           photos={filteredPhotos}
+          selectionMode="toggle"
           selectedPhotos={selectedPhotos}
-          onToggle={handleToggle}
-          maxReached={maxReached}
-          showGrouping={activeFilter === 'all' || activeFilter === 'recent'}
+          onSelectionChange={setSelectedPhotos}
+          maxSelection={maxPhotos}
+          groupBy={(activeFilter === 'all' || activeFilter === 'recent') ? 'uploadDate' : null}
         />
       </div>
 

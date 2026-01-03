@@ -40,8 +40,7 @@ import { getFirestore, doc, updateDoc } from 'firebase/firestore'
 import { formatDuration } from '../utils/videoTools'
 import UploadModal from '../components/UploadModal'
 import MoveModal from '../components/MoveModal'
-import PhotoGrid from '../components/PhotoGrid'
-import DraggablePhotoGrid from '../components/DraggablePhotoGrid'
+import PhotoGridUnified from '../components/PhotoGridUnified'
 import AlbumModal from '../components/AlbumModal'
 import QRShareModal from '../features/qr-sharing/components/QRShareModal'
 import VerificationModal from '../components/VerificationModal'
@@ -874,47 +873,34 @@ const AlbumPage = ({
         </div>
       )}
 
-      {/* Photos Grid - Using PhotoGrid component for video thumbnail support */}
+      {/* Photos Grid - Using PhotoGridUnified component */}
       {!isInitialLoading &&
         viewMode === 'grid' &&
         displayedPhotos.length > 0 && (
-          sortBy === 'manual' ? (
-            <DraggablePhotoGrid
-              photos={displayedPhotos}
-              onReorder={handleReorder}
-              onPhotoClick={(photo) => {
-                const index = displayedPhotos.findIndex(p => p.id === photo.id)
-                if (index !== -1) {
-                  handlePhotoClick(photo, index)
-                }
-              }}
-            />
-          ) : (
-            <PhotoGrid
-              photos={displayedPhotos}
-              compact={gridSize === 2}
-              editMode={editMode}
-              currentAlbum={album}
-              refreshPhotos={async () => {
-                if (refreshData) {
-                  await refreshData()
-                }
-              }}
-              onPhotoClick={
-                editMode
-                  ? null // In edit mode, don't open modal (use PhotoGrid's built-in edit buttons)
-                  : (url) => {
-                      const index = displayedPhotos.findIndex(
-                        (p) => p.url === url || p.thumbnailUrl === url
-                      )
-                      if (index !== -1) {
-                        const photo = displayedPhotos[index]
-                        handlePhotoClick(photo, index)
-                      }
+          <PhotoGridUnified
+            photos={displayedPhotos}
+            layout={gridSize === 2 ? 'compact' : 'default'}
+            editMode={editMode}
+            currentAlbum={album}
+            refreshPhotos={refreshData}
+            onPhotoClick={
+              editMode
+                ? undefined
+                : (url) => {
+                    const index = displayedPhotos.findIndex(
+                      (p) => p.url === url || p.thumbnailUrl === url || p.displayUrl === url
+                    )
+                    if (index !== -1) {
+                      handlePhotoClick(displayedPhotos[index], index)
                     }
-              }
-            />
-          )
+                  }
+            }
+            enableDragDrop={sortBy === 'manual'}
+            onReorder={sortBy === 'manual' ? handleReorder : undefined}
+            onToggleFavorite={() => {}}
+            onDelete={() => {}}
+            onSetCover={() => {}}
+          />
         )}
 
       {/* 🆕 PHASE 3A: Load More button */}

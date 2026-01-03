@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 import AlbumCard from '../components/AlbumCard'
 import Loading from '../components/Loading'
-import PhotoGridOptimized from '../components/PhotoGridOptimized'
+import PhotoGridUnified from '../components/PhotoGridUnified'
 import MoveModal from '../components/MoveModal'
 import { updatePhotoAlbum, updatePhoto } from '../firebase'
 import { doc, deleteDoc } from 'firebase/firestore'
@@ -579,11 +579,12 @@ const AlbumsPage = ({
           {/* Photos view (unassigned photos) */}
           {viewMode === 'photos' && (
             <section>
-              <PhotoGridOptimized
+              <PhotoGridUnified
                 photos={albumPhotos}
                 onPhotoClick={onPhotoClick}
+                selectionMode="modifier"
                 selectedPhotos={selectedPhotos}
-                setSelectedPhotos={setSelectedPhotos}
+                onSelectionChange={setSelectedPhotos}
               />
             </section>
           )}
