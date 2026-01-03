@@ -4,6 +4,7 @@
 import React, { useState } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import Button from './Button'
 
 const ConfirmModal = ({
   isOpen,
@@ -63,42 +64,23 @@ const ConfirmModal = ({
 
         {/* Buttons */}
         <div className="flex justify-end gap-3">
-          <button
+          <Button
             onClick={onClose}
             disabled={loading}
-            className="ripple-effect px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-150
-                       disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              backgroundColor: 'var(--bg-surface)',
-              color: 'var(--text-secondary)'
-            }}
-            onMouseEnter={(e) => {
-              if (!loading) e.currentTarget.style.backgroundColor = 'var(--interactive-hover)'
-            }}
-            onMouseLeave={(e) => {
-              if (!loading) e.currentTarget.style.backgroundColor = 'var(--bg-surface)'
-            }}
+            variant="secondary"
+            size="sm"
           >
             {finalCancelLabel}
-          </button>
+          </Button>
 
-          <button
+          <Button
             onClick={handleConfirm}
-            disabled={loading}
-            className="ripple-effect px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700
-                       text-white text-sm font-semibold shadow-sm transition-all duration-150
-                       flex items-center justify-center gap-2
-                       disabled:opacity-50 disabled:cursor-not-allowed"
+            loading={loading}
+            variant="danger"
+            size="sm"
           >
-            {loading ? (
-              <>
-                <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-                {t('deleting')}
-              </>
-            ) : (
-              finalConfirmLabel
-            )}
-          </button>
+            {loading ? t('deleting') : finalConfirmLabel}
+          </Button>
         </div>
       </div>
     </div>

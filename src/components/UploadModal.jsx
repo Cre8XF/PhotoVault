@@ -3,6 +3,7 @@
 // Refactored to use useUpload hook for better separation of concerns
 // ============================================================================
 import AlbumModal from './AlbumModal'
+import Button from './Button'
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import {
@@ -943,7 +944,7 @@ const UploadModal = ({
 
               {/* ✅ PHASE 3-3: Cancel button with AbortController support */}
               {!uploadCancelled && uploadCount < totalFiles && (
-                <button
+                <Button
                   onClick={() => {
                     // Cancel UI state (useUpload)
                     cancelUploadLocal()
@@ -954,10 +955,13 @@ const UploadModal = ({
                       })
                     }
                   }}
-                  className="w-full mt-4 py-2 px-4 border border-red-500 text-red-500 rounded-lg hover:bg-red-500/10 transition-colors text-sm font-medium"
+                  variant="danger"
+                  size="md"
+                  fullWidth
+                  className="mt-4"
                 >
                   Cancel Upload
-                </button>
+                </Button>
               )}
             </div>
           )}
@@ -965,15 +969,17 @@ const UploadModal = ({
 
         {/* Footer Actions */}
         <div className="px-6 pt-4 pb-24 space-y-3 border-t border-white/10">
-          <button
+          <Button
             onClick={handleCreateAlbumClick}
             disabled={uploading}
-            className="ripple-effect w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium py-3 rounded-lg transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            variant="primary"
+            size="lg"
+            fullWidth
           >
             {t('upload:newAlbum')}
-          </button>
+          </Button>
 
-          <button
+          <Button
             onClick={handleUploadClick}
             disabled={(() => {
               if (selectedFiles.length === 0 || uploading) return true
@@ -982,7 +988,10 @@ const UploadModal = ({
               const storageAfterUpload = storageUsed + totalSelectedSize
               return storageAfterUpload > storageLimit
             })()}
-            className="ripple-effect w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-3 rounded-lg transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            loading={uploading}
+            variant="primary-gradient"
+            size="lg"
+            fullWidth
           >
             {uploading
               ? t('upload:uploading', { count: selectedFiles.length })
@@ -994,7 +1003,7 @@ const UploadModal = ({
                   }
                   return t('upload:uploadButton', { count: selectedFiles.length })
                 })()}
-          </button>
+          </Button>
 
           {showAlbumModal &&
             createPortal(
