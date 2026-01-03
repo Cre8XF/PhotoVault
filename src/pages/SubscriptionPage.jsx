@@ -191,7 +191,7 @@ const SubscriptionPage = ({ user }) => {
               {/* Storage */}
               <div className="p-4 bg-white/5 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
-                  <HardDrive className="w-5 h-5 text-purple-400" />
+                  <HardDrive className="w-5 h-5 text-purple" />
                   <span className="text-sm text-gray-400">Lagring</span>
                 </div>
                 <p className="text-2xl font-bold">{currentPlan.storage}</p>

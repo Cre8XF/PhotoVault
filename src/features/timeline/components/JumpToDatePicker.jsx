@@ -47,7 +47,7 @@ const JumpToDatePicker = ({ onDateSelect, availableYears = [] }) => {
   return (
     <div className="jump-to-date-picker bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 mb-6">
       <div className="flex items-center gap-3 mb-3">
-        <Calendar className="w-5 h-5 text-purple-400" />
+        <Calendar className="w-5 h-5 text-purple" />
         <h3 className="font-bold text-sm">{t('timeline:jumpToDate.title')}</h3>
       </div>
 

@@ -80,7 +80,7 @@ export default function AIEnhancePage() {
           {!selectedPhoto && (
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-6">
-                <Sparkles className="w-12 h-12 text-purple-400 mx-auto mb-3" />
+                <Sparkles className="w-12 h-12 text-purple mx-auto mb-3" />
                 <h2 className="text-xl font-bold text-white mb-2">
                   {t('ai:selectPhoto')}
                 </h2>

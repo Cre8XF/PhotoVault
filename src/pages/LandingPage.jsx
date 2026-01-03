@@ -316,7 +316,7 @@ function LandingPage() {
                     {plan.storage} {t('landing:pricing.storage')}
                   </p>
                   {plan.trustLine && (
-                    <p className="text-sm font-semibold text-purple-400 pt-1">
+                    <p className="text-sm font-semibold text-purple pt-1">
                       {plan.trustLine}
                     </p>
                   )}
@@ -330,13 +330,13 @@ function LandingPage() {
                 {/* Unlocks section for Lite */}
                 {plan.unlocks && (
                   <div className="border-t border-white/10 pt-4">
-                    <p className="text-xs font-semibold text-purple-400 mb-2">
+                    <p className="text-xs font-semibold text-purple mb-2">
                       {t('landing:pricing.lite.unlocksTitle')}
                     </p>
                     <ul className="space-y-2">
                       {plan.unlocks.map((unlock, idx) => (
                         <li key={idx} className="flex items-start gap-2">
-                          <Sparkles className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
+                          <Sparkles className="w-4 h-4 text-purple flex-shrink-0 mt-0.5" />
                           <span className="text-xs text-gray-300">{unlock}</span>
                         </li>
                       ))}

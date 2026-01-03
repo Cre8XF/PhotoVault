@@ -80,7 +80,7 @@ useEffect(() => {
       case 'reaction':
         return <Heart className="w-4 h-4 text-pink-400" />;
       case 'mention':
-        return <AtSign className="w-4 h-4 text-purple-400" />;
+        return <AtSign className="w-4 h-4 text-purple" />;
       case 'share':
         return <Share2 className="w-4 h-4 text-green-400" />;
       default:
@@ -237,7 +237,7 @@ useEffect(() => {
           <div className="p-4 border-b border-gray-700">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                <Bell className="w-5 h-5 text-purple-400" />
+                <Bell className="w-5 h-5 text-purple" />
                 {t('common:notifications')}
               </h3>
 

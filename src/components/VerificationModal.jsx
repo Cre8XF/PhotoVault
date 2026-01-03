@@ -51,7 +51,7 @@ const VerificationModal = ({ isOpen, onClose, feature }) => {
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
           <div className="flex items-center justify-center w-12 h-12 rounded-full bg-purple-500/20">
-            <ShieldAlert className="w-7 h-7 text-purple-400" />
+            <ShieldAlert className="w-7 h-7 text-purple" />
           </div>
           <h2 className="text-xl font-semibold">
             {t('auth:verificationRequired') || 'Email Verification Required'}
@@ -67,7 +67,7 @@ const VerificationModal = ({ isOpen, onClose, feature }) => {
 
           <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4">
             <div className="flex items-start gap-3">
-              <Mail className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+              <Mail className="w-5 h-5 text-purple flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="text-sm text-gray-300 mb-1">
                   {t('auth:verificationEmailSentTo') || 'Verification email sent to:'}

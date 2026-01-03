@@ -54,7 +54,7 @@ function getDocumentIcon(mimeType) {
   }
 
   // Default
-  return { icon: File, color: 'text-purple-400' }
+  return { icon: File, color: 'text-purple' }
 }
 
 /**

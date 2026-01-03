@@ -49,7 +49,7 @@ const StorageIndicator = () => {
           </h3>
         </div>
 
-        <span className="text-sm font-medium px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+        <span className="text-sm font-medium px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple">
           {userTier}
         </span>
       </div>

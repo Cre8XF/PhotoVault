@@ -920,7 +920,7 @@ const photoGroups = useMemo(() => {
       {editMode && (
         <div className="glass rounded-2xl p-3 mb-4 flex flex-wrap gap-2 items-center justify-between">
           <div className="flex gap-2 items-center">
-            <span className="text-sm opacity-70">
+            <span className="text-sm text-muted">
               {selectedPhotos.length} {t('search:selected')}
             </span>
             <button
@@ -1204,7 +1204,7 @@ const photoGroups = useMemo(() => {
           {/* Content Type Filters */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-sm opacity-70">Content Type:</p>
+              <p className="text-sm text-muted">Content Type:</p>
               <button
                 onClick={() => {
                   const allTypes = ['photo', 'video', 'collage']
@@ -1418,7 +1418,7 @@ const photoGroups = useMemo(() => {
           {/* Populære AI-tagger */}
           {popularTags.length > 0 && (
             <div>
-              <p className="text-sm opacity-70 mb-2">
+              <p className="text-sm text-muted mb-2">
                 {t('search:popularAITags')}:
               </p>
               <div className="flex flex-wrap gap-2">
@@ -1441,7 +1441,7 @@ const photoGroups = useMemo(() => {
       {(activeFilterCount > 0 || searchQuery.trim()) && (
         <div className="glass rounded-2xl p-4 mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm opacity-70">
+            <span className="text-sm text-muted">
               {t('search:activeFilters')}:
             </span>
             <div className="flex flex-wrap gap-2">

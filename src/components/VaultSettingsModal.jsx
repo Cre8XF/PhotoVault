@@ -211,7 +211,7 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Settings className="w-5 h-5 text-purple-400" />
+            <Settings className="w-5 h-5 text-purple" />
             {t('vault:settings.title', { defaultValue: 'Vault Settings' })}
           </h2>
           <button
@@ -225,7 +225,7 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
         {/* Auto-lock timeout */}
         <div className="mb-6">
           <label className="flex items-center gap-2 text-sm text-gray-300 mb-2">
-            <Clock className="w-4 h-4 text-purple-400" />
+            <Clock className="w-4 h-4 text-purple" />
             {t('vault:settings.autoLock.label', {
               defaultValue: 'Auto-Lock Timeout',
             })}
@@ -275,7 +275,7 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
           <div className="mb-6">
             <div className="flex items-center justify-between p-4 bg-gray-800/60 border border-gray-600/50 rounded-xl">
               <div className="flex items-center gap-3">
-                <Fingerprint className="w-5 h-5 text-purple-400" />
+                <Fingerprint className="w-5 h-5 text-purple" />
                 <div>
                   <p className="text-white font-semibold">
                     {t('vault:settings.biometric.label', {
@@ -309,7 +309,7 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
         <div className="mb-6">
           <button
             onClick={() => setShowChangePassword(!showChangePassword)}
-            className="flex items-center gap-2 text-purple-400 hover:text-purple-300 transition mb-3"
+            className="flex items-center gap-2 text-purple hover:text-purple transition mb-3"
           >
             <Lock className="w-4 h-4" />
             {t('vault:settings.changePassword.button', {

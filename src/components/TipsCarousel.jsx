@@ -64,7 +64,7 @@ const TipsCarousel = () => {
     <div className="tips-carousel glass card-premium p-6 rounded-2xl mb-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Lightbulb className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          <Lightbulb className="w-5 h-5 text-purple-600 dark:text-purple" />
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             {t('tips:title')}
           </h3>

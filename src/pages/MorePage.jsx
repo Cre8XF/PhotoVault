@@ -839,7 +839,7 @@ const MorePage = ({
           className="ripple-effect glass rounded-xl p-4 hover:bg-white/10 transition flex flex-col items-center gap-2 text-center"
         >
           <div className="p-3 bg-purple-600/20 rounded-xl">
-            <Shield className="w-6 h-6 text-purple-400" />
+            <Shield className="w-6 h-6 text-purple" />
           </div>
           <span className="text-sm font-medium">{t('settings.security')}</span>
         </button>
@@ -874,13 +874,13 @@ const MorePage = ({
         <section className="glass rounded-2xl p-6 mb-6">
           <div className="flex items-center gap-2 mb-4">
             <div className="p-2 bg-purple-600/20 rounded-lg">
-              <Folder className="w-5 h-5 text-purple-400" />
+              <Folder className="w-5 h-5 text-purple" />
             </div>
             <div>
               <h3 className="font-semibold text-lg">
                 {t('content.title', 'Content')}
               </h3>
-              <p className="text-xs opacity-70">
+              <p className="text-xs text-muted">
                 {t('content.subtitle', 'Your uploaded files and protected content')}
               </p>
             </div>
@@ -891,10 +891,10 @@ const MorePage = ({
               onClick={() => navigate('/documents')}
               className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
             >
-              <FileText className="w-5 h-5 text-purple-400" />
+              <FileText className="w-5 h-5 text-purple" />
               <div className="flex-1">
                 <p className="font-medium">{t('nav:documents', 'Documents')}</p>
-                <p className="text-xs opacity-70">
+                <p className="text-xs text-muted">
                   {t('documents:subtitle', 'PDFs, Word files and other documents')}
                 </p>
               </div>
@@ -905,12 +905,12 @@ const MorePage = ({
               onClick={() => navigate('/vault')}
               className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
             >
-              <Lock className="w-5 h-5 text-purple-400" />
+              <Lock className="w-5 h-5 text-purple" />
               <div className="flex-1">
                 <p className="font-medium">
                   {t('vault.title', { defaultValue: 'Secure Vault' })}
                 </p>
-                <p className="text-xs opacity-70">
+                <p className="text-xs text-muted">
                   {t('vault.description', {
                     defaultValue: 'Encrypted private photos and files',
                   })}
@@ -931,7 +931,7 @@ const MorePage = ({
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className="p-2 bg-purple-600/20 rounded-lg">
-                  <HardDrive className="w-5 h-5 text-purple-400" />
+                  <HardDrive className="w-5 h-5 text-purple" />
                 </div>
                 <h3 className="font-semibold text-lg">
                   {t('account.storage')}
@@ -951,7 +951,7 @@ const MorePage = ({
                   <p className="text-3xl font-bold">
                     {formatBytes(storageUsed)}
                   </p>
-                  <p className="text-sm opacity-70 mt-1">
+                  <p className="text-sm text-muted mt-1">
                     {t('more.storage.of')} {formatBytes(storageLimit)}
                   </p>
                 </div>
@@ -962,12 +962,12 @@ const MorePage = ({
                         ? 'text-red-400'
                         : storagePercent > 70
                         ? 'text-orange-400'
-                        : 'text-purple-400'
+                        : 'text-purple'
                     }`}
                   >
                     {storagePercent}%
                   </p>
-                  <p className="text-xs opacity-70">{t('storage.used')}</p>
+                  <p className="text-xs text-muted">{t('storage.used')}</p>
                 </div>
               </div>
 
@@ -989,12 +989,12 @@ const MorePage = ({
               {!isPro && storagePercent > 70 && (
                 <div className="bg-purple-600/10 border border-purple-500/30 rounded-xl p-4">
                   <div className="flex items-start gap-3">
-                    <TrendingUp className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                    <TrendingUp className="w-5 h-5 text-purple flex-shrink-0 mt-0.5" />
                     <div className="flex-1">
                       <p className="font-semibold text-sm mb-1">
                         {t('storage.needMoreSpace')}
                       </p>
-                      <p className="text-xs opacity-70 mb-3">
+                      <p className="text-xs text-muted mb-3">
                         {t('storage.upgradeHint')}
                       </p>
                       <button
@@ -1025,7 +1025,7 @@ const MorePage = ({
 
             <div className="space-y-4">
               <div>
-                <label className="text-sm opacity-70 mb-2 block flex items-center gap-2">
+                <label className="text-sm text-muted mb-2 block flex items-center gap-2">
                   <Languages className="w-4 h-4" />
                   {t('language.title')}
                 </label>
@@ -1042,13 +1042,13 @@ const MorePage = ({
               <div className="flex items-center justify-between bg-white/5 rounded-xl p-4 border border-white/10">
                 <div className="flex items-center gap-3">
                   {isDarkMode ? (
-                    <Moon className="w-5 h-5 text-purple-400" />
+                    <Moon className="w-5 h-5 text-purple" />
                   ) : (
                     <Sun className="w-5 h-5 text-orange-400" />
                   )}
                   <div>
                     <p className="font-medium">{t('theme.title')}</p>
-                    <p className="text-xs opacity-70">
+                    <p className="text-xs text-muted">
                       {isDarkMode
                         ? t('customization.themeDark')
                         : t('customization.themeLight')}
@@ -1115,10 +1115,10 @@ const MorePage = ({
                   onClick={() => navigate('/documents')}
                   className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
                 >
-                  <FileText className="w-5 h-5 text-purple-400" />
+                  <FileText className="w-5 h-5 text-purple" />
                   <div className="flex-1">
                     <p className="font-medium">{t('nav:documents', 'Documents')}</p>
-                    <p className="text-xs opacity-70">
+                    <p className="text-xs text-muted">
                       {t('documents:subtitle', 'Manage your uploaded documents')}
                     </p>
                   </div>
@@ -1129,7 +1129,7 @@ const MorePage = ({
                   onClick={() => navigate('/security')}
                   className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
                 >
-                  <Shield className="w-5 h-5 text-purple-400" />
+                  <Shield className="w-5 h-5 text-purple" />
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <p className="font-medium">{t('settings.security')}</p>
@@ -1137,7 +1137,7 @@ const MorePage = ({
                         <CheckCircle className="w-4 h-4 text-green-400" />
                       )}
                     </div>
-                    <p className="text-xs opacity-70">
+                    <p className="text-xs text-muted">
                       {t('more.settings.securityDesc')}
                     </p>
                   </div>
@@ -1148,7 +1148,7 @@ const MorePage = ({
                   <Bell className="w-5 h-5 text-blue-400" />
                   <div className="flex-1">
                     <p className="font-medium">{t('settings.notifications')}</p>
-                    <p className="text-xs opacity-70">
+                    <p className="text-xs text-muted">
                       {t('more.settings.notificationsDesc')}
                     </p>
                   </div>
@@ -1159,7 +1159,7 @@ const MorePage = ({
                   <Upload className="w-5 h-5 text-green-400" />
                   <div className="flex-1">
                     <p className="font-medium">{t('more.import.title')}</p>
-                    <p className="text-xs opacity-70">
+                    <p className="text-xs text-muted">
                       {t('more.import.description')}
                     </p>
                   </div>
@@ -1195,7 +1195,7 @@ const MorePage = ({
                 <User className="w-5 h-5 text-gray-400" />
                 <div className="flex-1">
                   <p className="font-medium">{t('account.profile')}</p>
-                  <p className="text-xs opacity-70">
+                  <p className="text-xs text-muted">
                     {t('more.account.profileDesc')}
                   </p>
                 </div>
@@ -1220,7 +1220,7 @@ const MorePage = ({
                       {isPro ? t('subscription.pro') : t('subscription.free')}
                     </span>
                   </div>
-                  <p className="text-xs opacity-70">
+                  <p className="text-xs text-muted">
                     {t('more.account.subscriptionDesc')}
                   </p>
                 </div>
@@ -1234,7 +1234,7 @@ const MorePage = ({
                 <Trash2 className="w-5 h-5 text-gray-400" />
                 <div className="flex-1">
                   <p className="font-medium">Trash</p>
-                  <p className="text-xs opacity-70">
+                  <p className="text-xs text-muted">
                     Deleted photos (auto-delete after 7 days)
                   </p>
                 </div>
@@ -1248,7 +1248,7 @@ const MorePage = ({
                 <LogOut className="w-5 h-5" />
                 <div className="flex-1">
                   <p className="font-medium">{t('account.logout')}</p>
-                  <p className="text-xs opacity-70">
+                  <p className="text-xs text-muted">
                     {t('more.account.logoutDesc')}
                   </p>
                 </div>
@@ -1262,7 +1262,7 @@ const MorePage = ({
                 <Trash2 className="w-5 h-5" />
                 <div className="flex-1">
                   <p className="font-medium">{t('account.deleteAccount')}</p>
-                  <p className="text-xs opacity-70">
+                  <p className="text-xs text-muted">
                     {t('more.account.deleteDesc')}
                   </p>
                 </div>
@@ -1346,7 +1346,7 @@ const MorePage = ({
               <Users className="w-5 h-5 text-yellow-400" />
               <div className="flex-1">
                 <p className="font-medium">{t('admin.userManagement')}</p>
-                <p className="text-xs opacity-70">{t('more.admin.userDesc')}</p>
+                <p className="text-xs text-muted">{t('more.admin.userDesc')}</p>
               </div>
               <ChevronRight className="w-5 h-5 opacity-50" />
             </button>
@@ -1361,7 +1361,7 @@ const MorePage = ({
               <HardDrive className="w-5 h-5 text-yellow-400" />
               <div className="flex-1">
                 <p className="font-medium">{t('admin.databaseTools')}</p>
-                <p className="text-xs opacity-70">
+                <p className="text-xs text-muted">
                   {t('more.admin.databaseDesc')}
                 </p>
               </div>
@@ -1383,7 +1383,7 @@ const MorePage = ({
               </h4>
             </div>
 
-            <p className="text-xs opacity-70 mb-3">
+            <p className="text-xs text-muted mb-3">
               {t('admin.migration.description')}
             </p>
 
@@ -1402,7 +1402,7 @@ const MorePage = ({
                       ? t('admin.migration.runningAlbums')
                       : t('admin.migration.fixAlbums')}
                   </p>
-                  <p className="text-xs opacity-70">
+                  <p className="text-xs text-muted">
                     {t('admin.migration.fixAlbumsDesc')}
                   </p>
                 </div>
@@ -1422,7 +1422,7 @@ const MorePage = ({
                       ? t('admin.migration.runningPhotos')
                       : t('admin.migration.fixPhotos')}
                   </p>
-                  <p className="text-xs opacity-70">
+                  <p className="text-xs text-muted">
                     {t('admin.migration.fixPhotosDesc')}
                   </p>
                 </div>
@@ -1434,7 +1434,7 @@ const MorePage = ({
                 className="ripple-effect bg-purple-600/10 hover:bg-purple-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-purple-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="p-2 bg-purple-600/30 rounded-lg">
-                  <Trash2 className="w-5 h-5 text-purple-300" />
+                  <Trash2 className="w-5 h-5 text-purple" />
                 </div>
                 <div className="flex-1">
                   <p className="font-medium text-sm">
@@ -1442,7 +1442,7 @@ const MorePage = ({
                       ? 'Running Migration...'
                       : 'Phase 4B: Add Deleted Field'}
                   </p>
-                  <p className="text-xs opacity-70">
+                  <p className="text-xs text-muted">
                     Add deleted:false to all photos (required for trash feature)
                   </p>
                 </div>
@@ -1454,7 +1454,7 @@ const MorePage = ({
                 className="ripple-effect bg-purple-600/10 hover:bg-purple-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-purple-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="p-2 bg-purple-600/30 rounded-lg">
-                  <GripVertical className="w-5 h-5 text-purple-300" />
+                  <GripVertical className="w-5 h-5 text-purple" />
                 </div>
                 <div className="flex-1">
                   <p className="font-medium text-sm">
@@ -1462,7 +1462,7 @@ const MorePage = ({
                       ? 'Running Migration...'
                       : 'Phase 4B-2: Add Order Field'}
                   </p>
-                  <p className="text-xs opacity-70">
+                  <p className="text-xs text-muted">
                     Add order field to photos for manual sorting
                   </p>
                 </div>
@@ -1477,7 +1477,7 @@ const MorePage = ({
                       {t('admin.migration.complete')}
                     </p>
                   </div>
-                  <p className="text-xs opacity-70">
+                  <p className="text-xs text-muted">
                     {t('admin.migration.summary', {
                       type: migrationResult.type,
                       fixed: migrationResult.fixed,
@@ -1485,7 +1485,7 @@ const MorePage = ({
                       total: migrationResult.total,
                     })}
                   </p>
-                  <p className="text-xs opacity-70 mt-1">
+                  <p className="text-xs text-muted mt-1">
                     {t('admin.migration.refresh')}
                   </p>
                 </div>
@@ -1502,7 +1502,7 @@ const MorePage = ({
               </h4>
             </div>
 
-            <p className="text-xs opacity-70 mb-3">
+            <p className="text-xs text-muted mb-3">
               Sjekk og fiks album count, photo count og storage used for alle brukere.
             </p>
 
@@ -1518,7 +1518,7 @@ const MorePage = ({
                 <p className="font-medium text-sm">
                   {reconciling ? 'Kjører...' : 'Kjør Reconciliation'}
                 </p>
-                <p className="text-xs opacity-70">
+                <p className="text-xs text-muted">
                   Verifiser og korrigere tellere for alle brukere
                 </p>
               </div>
@@ -1584,7 +1584,7 @@ const MorePage = ({
               </ul>
             </div>
 
-            <p className="opacity-70 mb-6 text-sm">
+            <p className="text-muted mb-6 text-sm">
               {t('modals.deleteAccountMessage')}
             </p>
 
@@ -1620,7 +1620,7 @@ const MorePage = ({
               <h3 className="text-xl font-bold">Confirm Your Password</h3>
             </div>
 
-            <p className="opacity-70 mb-4 text-sm">
+            <p className="text-muted mb-4 text-sm">
               For security, please enter your password to confirm account
               deletion.
             </p>

@@ -103,7 +103,7 @@ const SettingsPage = () => {
                 />
               ) : (
                 <div className="w-20 h-20 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                  <UserCircle className="w-12 h-12 text-purple-600 dark:text-purple-400" />
+                  <UserCircle className="w-12 h-12 text-purple-600 dark:text-purple" />
                 </div>
               )}
 
@@ -140,7 +140,7 @@ const SettingsPage = () => {
                 <span className="text-gray-600 dark:text-gray-400">
                   {t('settings:tier')}
                 </span>
-                <span className="px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-medium">
+                <span className="px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple text-xs font-medium">
                   {tier()}
                 </span>
               </div>

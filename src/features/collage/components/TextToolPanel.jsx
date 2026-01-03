@@ -45,7 +45,7 @@ const TextToolPanel = ({ textLayers, onAddText, onUpdateText, onDeleteText }) =>
   return (
     <div className="text-tool-panel">
       <div className="flex items-center gap-2 mb-4">
-        <Type className="w-5 h-5 text-purple-400" />
+        <Type className="w-5 h-5 text-purple" />
         <h3 className="text-lg font-bold">{t('collage:text.title')}</h3>
       </div>
 

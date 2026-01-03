@@ -49,7 +49,7 @@ const PrivacyPage = () => {
         <section className="glass-card p-6 mb-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-purple-600/20 rounded-lg">
-              <Database className="w-5 h-5 text-purple-400" />
+              <Database className="w-5 h-5 text-purple" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
               {t('privacy:dataCollection.title', {
@@ -127,7 +127,7 @@ const PrivacyPage = () => {
         <section className="glass-card p-6 mb-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-purple-600/20 rounded-lg">
-              <Shield className="w-5 h-5 text-purple-400" />
+              <Shield className="w-5 h-5 text-purple" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
               {t('privacy:rights.title', { defaultValue: 'Your Rights' })}
@@ -153,7 +153,7 @@ const PrivacyPage = () => {
           </p>
           <a
             href="mailto:privacy@pixtr.cloud"
-            className="text-purple-600 dark:text-purple-400 hover:underline text-sm font-medium"
+            className="text-purple-600 dark:text-purple hover:underline text-sm font-medium"
           >
             privacy@pixtr.cloud
           </a>
