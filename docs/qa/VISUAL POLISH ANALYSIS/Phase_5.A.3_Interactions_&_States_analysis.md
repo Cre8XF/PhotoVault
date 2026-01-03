@@ -29,8 +29,9 @@ Key Findings:
 🟡 Empty states duplicated - Two components doing same thing
 🟢 Strong animation foundation - Premium keyframes, reduced motion support
 🟢 Excellent glassmorphism - Consistent, performant backdrop-filter usage
+
 1. LOADING STATES
-Current State: ⚠️ Multiple patterns - Inconsistent user feedback
+   Current State: ⚠️ Multiple patterns - Inconsistent user feedback
 
 Loading Scenarios Audited:
 1.1 Initial Page Load
@@ -38,11 +39,11 @@ Current Implementation:
 
 // App.jsx:306-310
 if (loading) {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <LoadingSpinner size="xl" />
-    </div>
-  )
+return (
+<div className="min-h-screen flex items-center justify-center">
+<LoadingSpinner size="xl" />
+</div>
+)
 }
 
 Assessment:
@@ -61,11 +62,11 @@ Current Implementation:
 Pattern 1: Skeleton Cards (HomeDashboard.jsx:387)
 
 {isInitialLoading ? (
-  <SkeletonGrid count={12} />
+<SkeletonGrid count={12} />
 ) : photos.length === 0 ? (
-  <EmptyState ... />
+<EmptyState ... />
 ) : (
-  <PhotoGrid photos={photos} />
+<PhotoGrid photos={photos} />
 )}
 
 Pattern 2: Simple Skeleton (SkeletonLoader.jsx:1-9)
@@ -102,20 +103,21 @@ Issue 1: Multiple Skeleton Implementations - Severity: 🔴 Medium-High
 
 // ❌ BEFORE (SkeletonLoader.jsx:1-9)
 const SkeletonLoader = ({ type = 'photo', count = 1 }) => {
-  if (type === 'photo') {
-    return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {Array.from({ length: count }).map((_, idx) => (
-          <div className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse" />
-        ))}
-      </div>
-    )
-  }
-  // ...
+if (type === 'photo') {
+return (
+<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+{Array.from({ length: count }).map((\_, idx) => (
+<div className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse" />
+))}
+</div>
+)
+}
+// ...
 }
 
 // ❌ BEFORE (SkeletonCard.jsx:22-29)
 export const SkeletonPhoto = ({ compact = false }) => (
+
   <div className="skeleton-premium" style={{ height: compact ? '160px' : '224px' }}>
     <div className="w-full h-full bg-gradient-to-br from-purple-500/10 to-transparent rounded-xl" />
   </div>
@@ -137,72 +139,71 @@ Unified Skeleton Component:
 
 // src/components/Skeleton.jsx
 const Skeleton = ({
-  type = 'grid',
-  count = 1,
-  columns = { xs: 2, sm: 3, md: 4 },
-  className = ''
+type = 'grid',
+count = 1,
+columns = { xs: 2, sm: 3, md: 4 },
+className = ''
 }) => {
-  const items = Array.from({ length: count })
+const items = Array.from({ length: count })
 
-  const columnClasses = `
-    grid-cols-${columns.xs || 2}
-    ${columns.sm ? `sm:grid-cols-${columns.sm}` : ''}
-    ${columns.md ? `md:grid-cols-${columns.md}` : ''}
-    ${columns.lg ? `lg:grid-cols-${columns.lg}` : ''}
-  `
+const columnClasses = `    grid-cols-${columns.xs || 2}
+    ${columns.sm ?`sm:grid-cols-${columns.sm}` : ''}
+    ${columns.md ? `md:grid-cols-${columns.md}`: ''}
+    ${columns.lg ?`lg:grid-cols-${columns.lg}`: ''}
+ `
 
-  // Photo grid skeleton
-  if (type === 'grid') {
-    return (
-      <div className={`grid gap-4 ${columnClasses} ${className}`}>
-        {items.map((_, idx) => (
-          <div
+// Photo grid skeleton
+if (type === 'grid') {
+return (
+<div className={`grid gap-4 ${columnClasses} ${className}`}>
+{items.map((\_, idx) => (
+<div
             key={idx}
             className="skeleton-premium aspect-square rounded-xl"
           />
-        ))}
-      </div>
-    )
-  }
+))}
+</div>
+)
+}
 
-  // Card skeleton (albums, collages)
-  if (type === 'card') {
-    return (
-      <div className={`grid gap-4 ${columnClasses} ${className}`}>
-        {items.map((_, idx) => (
-          <div key={idx} className="skeleton-premium rounded-xl" style={{ height: '280px' }}>
-            <div className="h-48 bg-gradient-to-br from-purple-500/10 to-transparent rounded-t-xl" />
-            <div className="p-4 space-y-2">
-              <div className="h-4 bg-white/10 rounded w-3/4" />
-              <div className="h-3 bg-white/10 rounded w-1/2" />
-            </div>
-          </div>
-        ))}
-      </div>
-    )
-  }
+// Card skeleton (albums, collages)
+if (type === 'card') {
+return (
+<div className={`grid gap-4 ${columnClasses} ${className}`}>
+{items.map((\_, idx) => (
+<div key={idx} className="skeleton-premium rounded-xl" style={{ height: '280px' }}>
+<div className="h-48 bg-gradient-to-br from-purple-500/10 to-transparent rounded-t-xl" />
+<div className="p-4 space-y-2">
+<div className="h-4 bg-white/10 rounded w-3/4" />
+<div className="h-3 bg-white/10 rounded w-1/2" />
+</div>
+</div>
+))}
+</div>
+)
+}
 
-  // List skeleton
-  if (type === 'list') {
-    return (
-      <div className={`space-y-3 ${className}`}>
-        {items.map((_, idx) => (
-          <div key={idx} className="skeleton-premium flex items-center gap-4 p-4 rounded-xl" style={{ height: '80px' }}>
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-500/10 to-transparent rounded-lg flex-shrink-0" />
-            <div className="flex-1 space-y-2">
-              <div className="h-4 bg-white/10 rounded w-2/3" />
-              <div className="h-3 bg-white/10 rounded w-1/3" />
-            </div>
-          </div>
-        ))}
-      </div>
-    )
-  }
+// List skeleton
+if (type === 'list') {
+return (
+<div className={`space-y-3 ${className}`}>
+{items.map((\_, idx) => (
+<div key={idx} className="skeleton-premium flex items-center gap-4 p-4 rounded-xl" style={{ height: '80px' }}>
+<div className="w-16 h-16 bg-gradient-to-br from-purple-500/10 to-transparent rounded-lg flex-shrink-0" />
+<div className="flex-1 space-y-2">
+<div className="h-4 bg-white/10 rounded w-2/3" />
+<div className="h-3 bg-white/10 rounded w-1/3" />
+</div>
+</div>
+))}
+</div>
+)
+}
 
-  // Single skeleton box
-  return (
-    <div className={`skeleton-premium rounded-xl ${className}`} style={{ height: '200px' }} />
-  )
+// Single skeleton box
+return (
+<div className={`skeleton-premium rounded-xl ${className}`} style={{ height: '200px' }} />
+)
 }
 
 export default Skeleton
@@ -222,6 +223,7 @@ Current Implementation:
 
 // UploadModal - shows progress inline
 {uploading && (
+
   <div className="text-sm text-purple-400">
     Uploading {uploadedCount}/{totalCount}...
   </div>
@@ -288,10 +290,10 @@ Issue 3: No Background Operation Feedback - Severity: 🟡 Medium
 
 // ✅ AFTER - Subtle notification
 <Toast
-  type="info"
-  message="Syncing 12 photos..."
-  duration={0}  // Persistent until complete
-  dismissible={false}
+type="info"
+message="Syncing 12 photos..."
+duration={0} // Persistent until complete
+dismissible={false}
 />
 
 Priority: 🟡 Medium
@@ -299,13 +301,13 @@ Effort: S (2-3 hours)
 Impact: Low-Medium - Better transparency
 
 Loading State Summary
-Scenario	Current Pattern	User Perception	Issues
-Page load	Spinner	Fast	No branding/context
-Photo gallery	Skeleton (3 variants)	Good	🔴 3 implementations
-Upload	Text counter	Slow	🟡 No progress bar
-Album load	Skeleton	Good	-
-Collage save	Overlay + spinner	Clear	⚠️ Blocks UI
-Background ops	Silent	Unknown	🟡 No feedback
+Scenario Current Pattern User Perception Issues
+Page load Spinner Fast No branding/context
+Photo gallery Skeleton (3 variants) Good 🔴 3 implementations
+Upload Text counter Slow 🟡 No progress bar
+Album load Skeleton Good -
+Collage save Overlay + spinner Clear ⚠️ Blocks UI
+Background ops Silent Unknown 🟡 No feedback
 Strengths:
 
 ✅ Premium skeleton animations (skeleton-premium CSS)
@@ -315,8 +317,7 @@ Weaknesses:
 
 ❌ 3-4 duplicate loading components
 ❌ Inconsistent patterns (spinner vs skeleton vs nothing)
-❌ Missing progress bars for long operations
-2. EMPTY STATES
+❌ Missing progress bars for long operations 2. EMPTY STATES
 Current State: ⚠️ Two implementations - EmptyState.jsx vs EmptyStateNew.jsx
 
 Empty State Scenarios Audited:
@@ -324,11 +325,11 @@ Empty State Scenarios Audited:
 Current Implementation: (HomeDashboard.jsx:428)
 
 <EmptyState
-  icon={<Upload size={48} />}
-  title={t("home:emptyStates.noRecent.title")}
-  description={t("home:emptyStates.noRecent.description")}
-  actionLabel={t("home:emptyStates.noRecent.action")}
-  onAction={() => setUploadOpen(true)}
+icon={<Upload size={48} />}
+title={t("home:emptyStates.noRecent.title")}
+description={t("home:emptyStates.noRecent.description")}
+actionLabel={t("home:emptyStates.noRecent.action")}
+onAction={() => setUploadOpen(true)}
 />
 
 Assessment:
@@ -349,6 +350,7 @@ Issue 4: Two EmptyState Components - Severity: 🟡 Medium
 
 // EmptyState.jsx (src/components/EmptyState.jsx:1-35)
 const EmptyState = ({ icon, title, description, actionLabel, onAction }) => (
+
   <div className="empty-state animate-scale-in">
     <div className="empty-state-content">
       <div className="empty-state-icon">{icon}</div>
@@ -365,28 +367,28 @@ const EmptyState = ({ icon, title, description, actionLabel, onAction }) => (
 
 // EmptyStateNew.jsx (src/components/EmptyStateNew.jsx:1-60)
 const EmptyStateNew = ({ type, action }) => {
-  const config = {
-    photos: { icon: Image, title: 'No photos', ... },
-    albums: { icon: Folder, title: 'No albums', ... },
-    // ...
-  }
-  const { icon: Icon, title, message, actionLabel } = config[type]
-  // ... similar JSX structure
+const config = {
+photos: { icon: Image, title: 'No photos', ... },
+albums: { icon: Folder, title: 'No albums', ... },
+// ...
+}
+const { icon: Icon, title, message, actionLabel } = config[type]
+// ... similar JSX structure
 }
 
 // ✅ AFTER - Consolidate to single EmptyState
 <EmptyState
-  type="photos"  // Predefined types
-  action={handleUpload}
+type="photos" // Predefined types
+action={handleUpload}
 />
 
 // OR custom
 <EmptyState
-  icon={<Upload />}
-  title="Custom title"
-  description="Custom message"
-  actionLabel="Upload"
-  onAction={handleUpload}
+icon={<Upload />}
+title="Custom title"
+description="Custom message"
+actionLabel="Upload"
+onAction={handleUpload}
 />
 
 Unified EmptyState:
@@ -395,66 +397,66 @@ Unified EmptyState:
 import { Image, Folder, Search, Heart, Trash2 } from 'lucide-react'
 
 const EMPTY_STATE_PRESETS = {
-  photos: {
-    icon: Image,
-    title: 'No photos yet',
-    description: 'Upload your first photo to get started',
-    actionLabel: 'Upload Photos'
-  },
-  albums: {
-    icon: Folder,
-    title: 'No albums yet',
-    description: 'Create an album to organize your photos',
-    actionLabel: 'Create Album'
-  },
-  search: {
-    icon: Search,
-    title: 'No results found',
-    description: 'Try adjusting your search terms',
-    actionLabel: null
-  },
-  favorites: {
-    icon: Heart,
-    title: 'No favorites yet',
-    description: 'Mark photos as favorites to see them here',
-    actionLabel: null
-  },
-  trash: {
-    icon: Trash2,
-    title: 'Trash is empty',
-    description: 'Deleted photos will appear here for 30 days',
-    actionLabel: null
-  }
+photos: {
+icon: Image,
+title: 'No photos yet',
+description: 'Upload your first photo to get started',
+actionLabel: 'Upload Photos'
+},
+albums: {
+icon: Folder,
+title: 'No albums yet',
+description: 'Create an album to organize your photos',
+actionLabel: 'Create Album'
+},
+search: {
+icon: Search,
+title: 'No results found',
+description: 'Try adjusting your search terms',
+actionLabel: null
+},
+favorites: {
+icon: Heart,
+title: 'No favorites yet',
+description: 'Mark photos as favorites to see them here',
+actionLabel: null
+},
+trash: {
+icon: Trash2,
+title: 'Trash is empty',
+description: 'Deleted photos will appear here for 30 days',
+actionLabel: null
+}
 }
 
 const EmptyState = ({
-  type,
-  icon,
-  title,
-  description,
-  actionLabel,
-  onAction,
-  illustration,
-  className = ''
+type,
+icon,
+title,
+description,
+actionLabel,
+onAction,
+illustration,
+className = ''
 }) => {
-  // Use preset if type provided, otherwise use custom props
-  const preset = type ? EMPTY_STATE_PRESETS[type] : null
-  const Icon = icon || (preset?.icon)
-  const finalTitle = title || (preset?.title)
-  const finalDescription = description || (preset?.description)
-  const finalActionLabel = actionLabel !== undefined ? actionLabel : (preset?.actionLabel)
+// Use preset if type provided, otherwise use custom props
+const preset = type ? EMPTY_STATE_PRESETS[type] : null
+const Icon = icon || (preset?.icon)
+const finalTitle = title || (preset?.title)
+const finalDescription = description || (preset?.description)
+const finalActionLabel = actionLabel !== undefined ? actionLabel : (preset?.actionLabel)
 
-  return (
-    <div className={`empty-state animate-scale-in ${className}`}>
-      <div className="empty-state-content">
-        {/* Icon or Illustration */}
-        {illustration ? (
-          <div className="mb-6">{illustration}</div>
-        ) : Icon && (
-          <div className="empty-state-icon">
-            <Icon size={40} />
-          </div>
-        )}
+return (
+<div className={`empty-state animate-scale-in ${className}`}>
+<div className="empty-state-content">
+{/_ Icon or Illustration _/}
+{illustration ? (
+<div className="mb-6">{illustration}</div>
+) : Icon && (
+<div className="empty-state-icon">
+<Icon size={40} />
+</div>
+)}
 
         {/* Title */}
         <h3 className="empty-state-title">{finalTitle}</h3>
@@ -473,7 +475,8 @@ const EmptyState = ({
         )}
       </div>
     </div>
-  )
+
+)
 }
 
 export default EmptyState
@@ -485,18 +488,18 @@ Usage:
 
 // Custom
 <EmptyState
-  icon={<Camera />}
-  title="No camera access"
-  description="Grant permission to take photos"
-  actionLabel="Grant Access"
-  onAction={requestPermission}
+icon={<Camera />}
+title="No camera access"
+description="Grant permission to take photos"
+actionLabel="Grant Access"
+onAction={requestPermission}
 />
 
 // With illustration
 <EmptyState
-  illustration={<img src="/empty-state.svg" alt="" />}
-  title="Feature coming soon"
-  description="We're working on this"
+illustration={<img src="/empty-state.svg" alt="" />}
+title="Feature coming soon"
+description="We're working on this"
 />
 
 💡 RATIONALE:
@@ -519,7 +522,7 @@ Assessment:
 2.3 No Search Results
 Current Implementation: (SearchPage.jsx:1666+)
 
-/* Enhanced empty state for no search results */
+/_ Enhanced empty state for no search results _/
 
 Assessment:
 
@@ -539,13 +542,13 @@ Assessment:
 ✅ Shows examples
 ✅ Strong CTA
 Empty State Summary
-Scenario	Implementation	Visual Quality	CTA	Issues
-Empty gallery	EmptyState	Good	Clear	-
-Empty album	EmptyState	Good	Clear	-
-No search results	Inline	Medium	None	Inconsistent
-Empty favorites	EmptyState	Good	None	-
-Empty trash	Inline	Medium	None	Inconsistent
-No collages	CollageTeaser	Excellent	Strong	-
+Scenario Implementation Visual Quality CTA Issues
+Empty gallery EmptyState Good Clear -
+Empty album EmptyState Good Clear -
+No search results Inline Medium None Inconsistent
+Empty favorites EmptyState Good None -
+Empty trash Inline Medium None Inconsistent
+No collages CollageTeaser Excellent Strong -
 Strengths:
 
 ✅ EmptyState component is well-designed
@@ -556,8 +559,7 @@ Weaknesses:
 
 ❌ Two EmptyState components (duplication)
 ❌ Some pages use inline instead of component
-⚠️ No illustrations (just icons)
-3. ERROR STATES
+⚠️ No illustrations (just icons) 3. ERROR STATES
 Current State: 🟡 Mixed patterns - ErrorBoundary + Toast + inline
 
 Error Scenarios Audited:
@@ -565,11 +567,11 @@ Error Scenarios Audited:
 Current Implementation: (TrashPage.jsx:164-170)
 
 catch (error) {
-  console.error('❌ Delete error:', error)
-  window.showToast?.({
-    message: 'Failed to delete photo',
-    type: 'error',
-  })
+console.error('❌ Delete error:', error)
+window.showToast?.({
+message: 'Failed to delete photo',
+type: 'error',
+})
 }
 
 Assessment:
@@ -586,35 +588,35 @@ Issue 5: Generic Error Messages - Severity: 🟡 Medium
 
 // ❌ BEFORE - Generic message
 catch (error) {
-  window.showToast?.({ message: 'Failed to delete photo', type: 'error' })
+window.showToast?.({ message: 'Failed to delete photo', type: 'error' })
 }
 
 // ✅ AFTER - Specific error with recovery
 catch (error) {
-  const errorMessage = getErrorMessage(error) // Parse Firebase error codes
+const errorMessage = getErrorMessage(error) // Parse Firebase error codes
 
-  window.showToast?.({
-    message: errorMessage,
-    type: 'error',
-    action: {
-      label: 'Retry',
-      onClick: () => handleDelete(photoId)
-    }
-  })
+window.showToast?.({
+message: errorMessage,
+type: 'error',
+action: {
+label: 'Retry',
+onClick: () => handleDelete(photoId)
+}
+})
 }
 
 // Error message helper
 function getErrorMessage(error) {
-  if (error.code === 'permission-denied') {
-    return 'You don\'t have permission to delete this photo'
-  }
-  if (error.code === 'network-error') {
-    return 'Network error. Check your connection and try again'
-  }
-  if (error.message?.includes('storage')) {
-    return 'Failed to delete photo file. Please try again'
-  }
-  return 'Failed to delete photo. Please try again'
+if (error.code === 'permission-denied') {
+return 'You don\'t have permission to delete this photo'
+}
+if (error.code === 'network-error') {
+return 'Network error. Check your connection and try again'
+}
+if (error.message?.includes('storage')) {
+return 'Failed to delete photo file. Please try again'
+}
+return 'Failed to delete photo. Please try again'
 }
 
 Priority: 🟡 Medium
@@ -626,8 +628,8 @@ Current Implementation:
 
 // Silent failures in many places
 catch (error) {
-  console.error('Error:', error)
-  // No user feedback
+console.error('Error:', error)
+// No user feedback
 }
 
 Assessment:
@@ -641,19 +643,19 @@ Issue 6: Silent Network Failures - Severity: 🔴 Medium-High
 import { useNetworkStatus } from '../hooks/useNetworkStatus'
 
 function PhotoGallery() {
-  const { isOnline } = useNetworkStatus()
+const { isOnline } = useNetworkStatus()
 
-  useEffect(() => {
-    if (!isOnline) {
-      window.showToast?.({
-        message: 'You\'re offline. Some features may not work',
-        type: 'warning',
-        duration: 0 // Persistent
-      })
-    }
-  }, [isOnline])
+useEffect(() => {
+if (!isOnline) {
+window.showToast?.({
+message: 'You\'re offline. Some features may not work',
+type: 'warning',
+duration: 0 // Persistent
+})
+}
+}, [isOnline])
 
-  // ...
+// ...
 }
 
 Priority: 🔴 Medium-High
@@ -701,10 +703,10 @@ Issue 7: No Validation Error Messages - Severity: 🟡 Medium
 
 // ✅ AFTER
 <Input
-  value={name}
-  onChange={setName}
-  error={!name.trim() && touched ? 'Name is required' : undefined}
-  required
+value={name}
+onChange={setName}
+error={!name.trim() && touched ? 'Name is required' : undefined}
+required
 />
 <Button disabled={!name.trim()}>Save</Button>
 
@@ -733,13 +735,13 @@ Assessment:
 This is a STRENGTH - ErrorBoundary is very well done
 
 Error State Summary
-Error Type	Current Handling	Clarity	Recovery	Issues
-Upload errors	Toast	Low	None	🟡 Generic messages
-Network errors	Silent/Console	None	None	🔴 No feedback
-Auth errors	Redirect	High	Auto	✅ Good
-Tier limits	UpgradeModal	High	Clear	✅ Excellent
-Validation	Disabled button	Low	N/A	🟡 No messages
-Runtime errors	ErrorBoundary	High	Clear	✅ Excellent
+Error Type Current Handling Clarity Recovery Issues
+Upload errors Toast Low None 🟡 Generic messages
+Network errors Silent/Console None None 🔴 No feedback
+Auth errors Redirect High Auto ✅ Good
+Tier limits UpgradeModal High Clear ✅ Excellent
+Validation Disabled button Low N/A 🟡 No messages
+Runtime errors ErrorBoundary High Clear ✅ Excellent
 Strengths:
 
 ✅ ErrorBoundary component is excellent
@@ -750,28 +752,27 @@ Weaknesses:
 ❌ Many silent network failures
 ❌ Generic error messages
 ❌ No retry actions
-❌ Validation errors not shown
-4. ANIMATIONS & TRANSITIONS
+❌ Validation errors not shown 4. ANIMATIONS & TRANSITIONS
 Current State: ✅ Strong foundation - 15+ named animations, reduced motion support
 
 Animations Reviewed:
 4.1 Page Transitions
 Current Implementation:
 
-/* index.css:540-571 */
+/_ index.css:540-571 _/
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+from { opacity: 0; transform: translateY(30px); }
+to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
+from { opacity: 0; transform: scale(0.9); }
+to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes slideInRight {
-  from { opacity: 0; transform: translateX(40px); }
-  to { opacity: 1; transform: translateX(0); }
+from { opacity: 0; transform: translateX(40px); }
+to { opacity: 1; transform: translateX(0); }
 }
 
 .animate-fade-in-up { animation: fadeInUp 0.5s ease-out; }
@@ -791,15 +792,15 @@ Assessment:
 4.2 Modal Open/Close
 Current Implementation:
 
-/* index.css:684-710 */
+/_ index.css:684-710 _/
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+from { opacity: 0; }
+to { opacity: 1; }
 }
 
 @keyframes scale-in {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+from { opacity: 0; transform: scale(0.95); }
+to { opacity: 1; transform: scale(1); }
 }
 
 .animate-fade-in { animation: fade-in 0.2s ease-out forwards; }
@@ -817,15 +818,15 @@ Assessment:
 ❌ No exit animation (closes instantly)
 Issue 8: No Modal Exit Animation - Severity: 🟢 Low
 
-/* ✅ ADD exit animation */
+/_ ✅ ADD exit animation _/
 @keyframes fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
+from { opacity: 1; }
+to { opacity: 0; }
 }
 
 @keyframes scale-out {
-  from { opacity: 1; transform: scale(1); }
-  to { opacity: 0; transform: scale(0.95); }
+from { opacity: 1; transform: scale(1); }
+to { opacity: 0; transform: scale(0.95); }
 }
 
 .animate-fade-out { animation: fade-out 0.15s ease-in forwards; }
@@ -838,17 +839,17 @@ Impact: Low - Polish detail
 4.3 Button Interactions
 Current Implementation:
 
-/* styles-enhanced.css:39-60 */
+/_ styles-enhanced.css:39-60 _/
 button {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 button:hover:not(:disabled) {
-  transform: translateY(-2px);
+transform: translateY(-2px);
 }
 
 button:active:not(:disabled) {
-  transform: translateY(0);
+transform: translateY(0);
 }
 
 Timing: 0.3s - Slightly slow for button hover
@@ -862,14 +863,14 @@ Assessment:
 ✅ Respects disabled state
 Issue 9: Button Hover Too Slow - Severity: 🟢 Low
 
-/* ❌ BEFORE */
+/_ ❌ BEFORE _/
 button {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ✅ AFTER */
+/_ ✅ AFTER _/
 button {
-  transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 💡 RATIONALE:
@@ -884,19 +885,19 @@ Impact: Low - Slightly snappier feel
 4.4 Image Loading Transitions
 Current Implementation:
 
-/* index.css:87-89 + styles-enhanced.css:100-103 */
+/_ index.css:87-89 + styles-enhanced.css:100-103 _/
 img {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 img:hover {
-  transform: scale(1.05);
-  filter: brightness(1.1);
+transform: scale(1.05);
+filter: brightness(1.1);
 }
 
 img[loading='lazy'] {
-  opacity: 0;
-  animation: fadeInUp 0.6s ease-out forwards;
+opacity: 0;
+animation: fadeInUp 0.6s ease-out forwards;
 }
 
 Assessment:
@@ -906,27 +907,27 @@ Assessment:
 ⚠️ ISSUE: transition: all on ALL images (performance risk)
 Issue 10: Image Hover on ALL Images - Severity: 🔴 Medium
 
-/* ❌ BEFORE - ALL images scale on hover (even in grids, galleries)
+/\* ❌ BEFORE - ALL images scale on hover (even in grids, galleries)
 img:hover {
-  transform: scale(1.05);
-  filter: brightness(1.1);
+transform: scale(1.05);
+filter: brightness(1.1);
 }
 
-/* ✅ AFTER - Only in specific contexts */
+/_ ✅ AFTER - Only in specific contexts _/
 .photo-card img:hover,
 .album-card img:hover {
-  transform: scale(1.05);
-  filter: brightness(1.1);
+transform: scale(1.05);
+filter: brightness(1.1);
 }
 
-/* Remove global transition on all images */
+/_ Remove global transition on all images _/
 img {
-  /* Don't transition all images by default */
+/_ Don't transition all images by default _/
 }
 
 .photo-card img,
 .album-card img {
-  transition: transform 0.3s ease, filter 0.3s ease;
+transition: transform 0.3s ease, filter 0.3s ease;
 }
 
 💡 RATIONALE:
@@ -950,17 +951,17 @@ Assessment:
 ❌ No custom visual feedback (shadow, opacity change)
 Issue 11: No Drag Visual Feedback - Severity: 🟡 Medium
 
-/* ✅ ADD drag feedback */
+/_ ✅ ADD drag feedback _/
 .dragging {
-  opacity: 0.5;
-  transform: scale(1.05);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  cursor: grabbing !important;
+opacity: 0.5;
+transform: scale(1.05);
+box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+cursor: grabbing !important;
 }
 
 .drag-ghost {
-  opacity: 0.8;
-  transform: rotate(3deg);
+opacity: 0.8;
+transform: rotate(3deg);
 }
 
 Priority: 🟡 Medium
@@ -970,16 +971,16 @@ Impact: Medium - Clearer drag interaction
 4.6 Toast/Notification Animations
 Current Implementation:
 
-/* index.css:759-772 + styles-enhanced.css:654-674 */
+/_ index.css:759-772 + styles-enhanced.css:654-674 _/
 @keyframes slide-in {
-  from { transform: translateX(400px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+from { transform: translateX(400px); opacity: 0; }
+to { transform: translateX(0); opacity: 1; }
 }
 
 .animate-slide-in { animation: slide-in 0.3s ease-out; }
 
 @keyframes toastSlideOut {
-  to { transform: translateX(calc(100% + 40px)); opacity: 0; }
+to { transform: translateX(calc(100% + 40px)); opacity: 0; }
 }
 
 .toast-exit { animation: toastSlideOut 0.3s ease forwards; }
@@ -996,11 +997,11 @@ Assessment:
 4.7 Staggered Animations
 Current Implementation:
 
-/* index.css:614-651 */
+/_ index.css:614-651 _/
 .stagger-1 { animation-delay: 0.05s; }
 .stagger-2 { animation-delay: 0.1s; }
 .stagger-3 { animation-delay: 0.15s; }
-/* ... up to .stagger-12 */
+/_ ... up to .stagger-12 _/
 
 Assessment:
 
@@ -1009,17 +1010,17 @@ Assessment:
 4.8 Background Gradient Animation
 Current Implementation:
 
-/* index.css:313-343 */
+/_ index.css:313-343 _/
 body {
-  background: linear-gradient(135deg, #ffffff 0%, #fdf4ff 20%, ...);
-  background-size: 400% 400%;
-  animation: twilightGradient 20s ease infinite;
+background: linear-gradient(135deg, #ffffff 0%, #fdf4ff 20%, ...);
+background-size: 400% 400%;
+animation: twilightGradient 20s ease infinite;
 }
 
 @keyframes twilightGradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+0% { background-position: 0% 50%; }
+50% { background-position: 100% 50%; }
+100% { background-position: 0% 50%; }
 }
 
 Timing: 20s - Perfect (subtle, slow movement)
@@ -1031,14 +1032,14 @@ Assessment:
 ✅ Slow enough to be subtle
 ⚠️ Performance cost on low-end devices
 Animation & Transition Summary
-Animation	Timing	Easing	Performance	Issues
-Page transitions	0.5s	cubic-bezier	✅ GPU	-
-Modal open	0.25s	ease-out	✅ GPU	🟢 No exit animation
-Button hover	0.3s	cubic-bezier	✅	🟢 Slightly slow
-Image hover	0.4s	cubic-bezier	⚠️	🔴 Applied to ALL images
-Toast slide	0.3s	ease-out	✅ GPU	-
-Skeleton shimmer	2s	ease-in-out	✅ GPU	-
-Background gradient	20s	ease	⚠️	Minor performance cost
+Animation Timing Easing Performance Issues
+Page transitions 0.5s cubic-bezier ✅ GPU -
+Modal open 0.25s ease-out ✅ GPU 🟢 No exit animation
+Button hover 0.3s cubic-bezier ✅ 🟢 Slightly slow
+Image hover 0.4s cubic-bezier ⚠️ 🔴 Applied to ALL images
+Toast slide 0.3s ease-out ✅ GPU -
+Skeleton shimmer 2s ease-in-out ✅ GPU -
+Background gradient 20s ease ⚠️ Minor performance cost
 Strengths:
 
 ✅ Excellent animation library (15+ keyframes)
@@ -1051,8 +1052,7 @@ Weaknesses:
 🔴 Image hover transform applied globally (performance)
 🟡 Some transitions use all (inefficient)
 🟢 Button hover slightly slow (0.3s → 0.15s)
-🟢 No modal exit animations
-5. MICRO-INTERACTIONS
+🟢 No modal exit animations 5. MICRO-INTERACTIONS
 Current State: ✅ Good foundation - Ripple effects, hover states, feedback
 
 Micro-interactions Mapped:
@@ -1067,17 +1067,17 @@ Assessment:
 5.2 Card Hover Effects
 Current Implementation:
 
-/* index.css:451-460 + styles-enhanced.css:132-136 */
+/_ index.css:451-460 + styles-enhanced.css:132-136 _/
 .glass:hover {
-  background: var(--glass-bg-hover);
-  border-color: var(--glass-border-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(139, 92, 246, 0.25);
+background: var(--glass-bg-hover);
+border-color: var(--glass-border-hover);
+transform: translateY(-2px);
+box-shadow: 0 12px 40px rgba(139, 92, 246, 0.25);
 }
 
 .card-premium:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 20px 60px rgba(139, 92, 246, 0.3);
+transform: translateY(-4px) scale(1.02);
+box-shadow: 0 20px 60px rgba(139, 92, 246, 0.3);
 }
 
 Assessment:
@@ -1099,29 +1099,29 @@ Issue: Already covered in Issue 11 (Animations section)
 5.5 Ripple Effects
 Current Implementation:
 
-/* styles-enhanced.css:268-301 */
+/_ styles-enhanced.css:268-301 _/
 .ripple-effect {
-  overflow: hidden;
-  position: relative;
+overflow: hidden;
+position: relative;
 }
 
 .ripple-effect::after {
-  content: '';
-  position: absolute;
-  top: 50%; left: 50%;
-  width: 0; height: 0;
-  border-radius: 50%;
-  background: var(--interactive-active);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s, opacity 0.6s;
-  opacity: 0;
-  pointer-events: none;
+content: '';
+position: absolute;
+top: 50%; left: 50%;
+width: 0; height: 0;
+border-radius: 50%;
+background: var(--interactive-active);
+transform: translate(-50%, -50%);
+transition: width 0.6s, height 0.6s, opacity 0.6s;
+opacity: 0;
+pointer-events: none;
 }
 
 .ripple-effect:active::after {
-  width: 300px; height: 300px;
-  opacity: 1;
-  transition: width 0s, height 0s, opacity 0s;
+width: 300px; height: 300px;
+opacity: 1;
+transition: width 0s, height 0s, opacity 0s;
 }
 
 Assessment:
@@ -1134,14 +1134,14 @@ Assessment:
 5.6 Focus Indicators
 Current Implementation:
 
-/* index.css:175-182 + styles-enhanced.css:175-182 */
-*:focus-visible {
-  outline: 2px solid #a78bfa;
-  outline-offset: 3px;
+/_ index.css:175-182 + styles-enhanced.css:175-182 _/
+\*:focus-visible {
+outline: 2px solid #a78bfa;
+outline-offset: 3px;
 }
 
-body.light-mode *:focus-visible {
-  outline-color: #8b5cf6;
+body.light-mode \*:focus-visible {
+outline-color: #8b5cf6;
 }
 
 Assessment:
@@ -1160,9 +1160,9 @@ Issue 12: No Tooltip Component - Severity: 🟡 Medium
 
 // ✅ ADD tooltip support
 <Tooltip content="Delete photo">
-  <Button variant="ghost" size="icon">
-    <Trash2 />
-  </Button>
+<Button variant="ghost" size="icon">
+<Trash2 />
+</Button>
 </Tooltip>
 
 Priority: 🟡 Medium
@@ -1213,15 +1213,15 @@ Assessment:
 ⚠️ Uses buttons instead of toggles
 Could improve settings UI
 Micro-interaction Summary
-Interaction	Implementation	Quality	Issues
-Button hover/active	Lift + press	✅ Excellent	🟢 Slightly slow
-Card hover	Lift + scale + shadow	✅ Excellent	-
-Ripple effect	CSS ::after	✅ Excellent	🟢 Fixed size
-Focus indicators	:focus-visible + outline	✅ Excellent	-
-Drag feedback	None	❌ Missing	🟡 Add visual feedback
-Tooltips	None	❌ Missing	🟡 Add component
-3D tilt	AlbumCard	✅ Premium	⚠️ Performance
-Checkboxes	Browser default	⚠️ Basic	🟢 Could polish
+Interaction Implementation Quality Issues
+Button hover/active Lift + press ✅ Excellent 🟢 Slightly slow
+Card hover Lift + scale + shadow ✅ Excellent -
+Ripple effect CSS ::after ✅ Excellent 🟢 Fixed size
+Focus indicators :focus-visible + outline ✅ Excellent -
+Drag feedback None ❌ Missing 🟡 Add visual feedback
+Tooltips None ❌ Missing 🟡 Add component
+3D tilt AlbumCard ✅ Premium ⚠️ Performance
+Checkboxes Browser default ⚠️ Basic 🟢 Could polish
 Strengths:
 
 ✅ Ripple effects (Material Design)
@@ -1237,57 +1237,57 @@ Top Priorities from Phase 5A.3
 Ranked by impact:
 
 1. 🔴 Fix Image Hover on ALL Images (Performance Issue)
-Priority: HIGH
-Effort: S (2-3 hours)
-Impact: High - Performance, clearer affordances
-Reason: img:hover scales ALL images (expensive, unclear UX)
+   Priority: HIGH
+   Effort: S (2-3 hours)
+   Impact: High - Performance, clearer affordances
+   Reason: img:hover scales ALL images (expensive, unclear UX)
 2. 🔴 Add Network Error Detection (Silent Failures)
-Priority: HIGH
-Effort: S (3-4 hours)
-Impact: High - Users know why things fail
-Reason: Many silent network errors, no offline detection
+   Priority: HIGH
+   Effort: S (3-4 hours)
+   Impact: High - Users know why things fail
+   Reason: Many silent network errors, no offline detection
 3. 🟡 Consolidate Skeleton Loaders (3 → 1)
-Priority: MEDIUM
-Effort: S (4-6 hours)
-Impact: Medium - Code cleanup, consistency
-Reason: 3 different skeleton implementations
+   Priority: MEDIUM
+   Effort: S (4-6 hours)
+   Impact: Medium - Code cleanup, consistency
+   Reason: 3 different skeleton implementations
 4. 🟡 Consolidate Empty States (2 → 1)
-Priority: MEDIUM
-Effort: S (2-3 hours)
-Impact: Medium - Code cleanup
-Reason: EmptyState.jsx vs EmptyStateNew.jsx
+   Priority: MEDIUM
+   Effort: S (2-3 hours)
+   Impact: Medium - Code cleanup
+   Reason: EmptyState.jsx vs EmptyStateNew.jsx
 5. 🟡 Add Upload Progress Bar
-Priority: MEDIUM
-Effort: S (3-4 hours)
-Impact: Medium - Better upload UX
-Reason: Text counter not as clear as progress bar
+   Priority: MEDIUM
+   Effort: S (3-4 hours)
+   Impact: Medium - Better upload UX
+   Reason: Text counter not as clear as progress bar
 6. 🟡 Improve Error Messages (Specific vs Generic)
-Priority: MEDIUM
-Effort: M (4-6 hours)
-Impact: Medium - Clearer error UX
-Reason: Generic "Failed" messages don't help users
+   Priority: MEDIUM
+   Effort: M (4-6 hours)
+   Impact: Medium - Clearer error UX
+   Reason: Generic "Failed" messages don't help users
 7. 🟡 Add Tooltip Component
-Priority: MEDIUM
-Effort: S (3-4 hours)
-Impact: Medium - Icon button clarity
-Reason: No tooltips for icon-only buttons
+   Priority: MEDIUM
+   Effort: S (3-4 hours)
+   Impact: Medium - Icon button clarity
+   Reason: No tooltips for icon-only buttons
 8. 🟡 Add Drag Visual Feedback
-Priority: MEDIUM
-Effort: S (2-3 hours)
-Impact: Medium - Clearer drag UX
-Reason: No shadow/opacity change when dragging
+   Priority: MEDIUM
+   Effort: S (2-3 hours)
+   Impact: Medium - Clearer drag UX
+   Reason: No shadow/opacity change when dragging
 9. 🟢 Add Modal Exit Animation
-Priority: LOW
-Effort: S (1-2 hours)
-Impact: Low - Polish detail
-Reason: Modals close instantly (no transition)
+   Priority: LOW
+   Effort: S (1-2 hours)
+   Impact: Low - Polish detail
+   Reason: Modals close instantly (no transition)
 10. 🟢 Speed Up Button Hover (0.3s → 0.15s)
-Priority: LOW
-Effort: XS (< 1 hour)
-Impact: Low - Snappier feel
-Reason: 0.3s feels slightly sluggish
-Interactions & States in GOOD Shape
-Celebrate these wins! 🎉
+    Priority: LOW
+    Effort: XS (< 1 hour)
+    Impact: Low - Snappier feel
+    Reason: 0.3s feels slightly sluggish
+    Interactions & States in GOOD Shape
+    Celebrate these wins! 🎉
 
 ✅ ErrorBoundary Component (ErrorBoundary.jsx)
 
@@ -1330,7 +1330,7 @@ Consistent backdrop-filter
 Performant
 Premium aesthetic
 Update Todos
- Compile Phase 5A.3 findings and recommendations
+Compile Phase 5A.3 findings and recommendations
 Phase 5A.3 Complete ✅
 Deliverables:
 
