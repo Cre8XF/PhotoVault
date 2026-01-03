@@ -177,9 +177,10 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
 
   return (
     <div className="container-premium max-w-7xl mx-auto p-4 pb-20 md:pb-10">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
+      {/* Page Header Section */}
+      <section className="page-header mb-6 space-y-4">
+        {/* Title and Back Button */}
+        <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/account')}
             className="ripple-effect p-2 hover:bg-white/10 rounded-xl transition"
@@ -187,50 +188,54 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
           >
             <ArrowLeft className="w-6 h-6" />
           </button>
-          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
-            <FileText className="w-7 h-7" />
-            {t('documents:title', 'Documents')}
-          </h1>
-        </div>
-        <p className="text-sm opacity-70 ml-14">
-          {t('documents:subtitle', 'Manage your uploaded documents')}
-        </p>
-      </div>
-
-      {/* Search bar */}
-      {documents.length > 0 && (
-        <div className="glass rounded-2xl p-4 mb-6">
-          <div className="flex items-center gap-3">
-            <Search className="w-5 h-5 opacity-60" />
-            <input
-              type="text"
-              placeholder={t('documents:searchPlaceholder', 'Search documents...')}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 bg-transparent outline-none text-lg"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="ripple-effect p-1 hover:bg-white/10 rounded-lg transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            )}
+          <div className="flex-1">
+            <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+              <FileText className="w-7 h-7" />
+              {t('documents:title', 'Documents')}
+            </h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              {t('documents:subtitle', 'Manage your uploaded documents')}
+            </p>
           </div>
         </div>
-      )}
 
-      {/* Document count */}
-      {documents.length > 0 && (
-        <div className="mb-4 text-sm opacity-70">
-          {t('documents:documentCount', {
-            count: sortedDocuments.length,
-            total: documents.length,
-            defaultValue: `Showing ${sortedDocuments.length} of ${documents.length} documents`,
-          })}
-        </div>
-      )}
+        {/* Search and Meta Info */}
+        {documents.length > 0 && (
+          <div className="space-y-3">
+            {/* Search Bar */}
+            <div className="glass rounded-2xl p-4">
+              <div className="flex items-center gap-3">
+                <Search className="w-5 h-5 opacity-60" />
+                <input
+                  type="text"
+                  placeholder={t('documents:searchPlaceholder', 'Search documents...')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 bg-transparent outline-none text-lg"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="ripple-effect p-1 hover:bg-white/10 rounded-lg transition"
+                    aria-label="Clear search"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Document Count - Secondary Meta */}
+            <p className="text-sm text-gray-500 dark:text-gray-500 pl-1">
+              {t('documents:documentCount', {
+                count: sortedDocuments.length,
+                total: documents.length,
+                defaultValue: `Showing ${sortedDocuments.length} of ${documents.length} documents`,
+              })}
+            </p>
+          </div>
+        )}
+      </section>
 
       {/* Documents list */}
       {sortedDocuments.length > 0 ? (
@@ -244,7 +249,7 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
             return (
               <div
                 key={doc.id}
-                className="glass rounded-xl p-4 flex items-center gap-4 hover:bg-white/10 transition group"
+                className="glass rounded-xl p-4 flex items-center gap-4 hover:bg-white/10 hover:shadow-lg transition-all duration-200 ease-out group cursor-pointer hover:scale-[0.99] active:scale-[0.98]"
               >
                 {/* Icon */}
                 <div className={`flex-shrink-0 ${color}`}>
@@ -253,10 +258,10 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
 
                 {/* File info */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold truncate text-base mb-1">
+                  <h3 className="font-semibold truncate text-base mb-1 leading-snug">
                     {doc.name || t('documents:untitledDocument', 'Untitled')}
                   </h3>
-                  <div className="flex items-center gap-3 text-xs opacity-70">
+                  <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                     <span>{formatFileSize(doc.size)}</span>
                     {uploadDate && (
                       <>
@@ -281,12 +286,13 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   {/* Preview (PDF) or Open */}
                   <button
                     onClick={() => handlePreviewDocument(doc)}
-                    className="ripple-effect p-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition"
+                    className="ripple-effect p-2 rounded-lg bg-blue-600 hover:bg-blue-700 hover:shadow-md active:scale-95 transition-all duration-150 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
                     title={isPdf ? t('documents:previewDocument', 'Preview') : t('documents:openDocument', 'Open')}
+                    aria-label={isPdf ? t('documents:previewDocument', 'Preview') : t('documents:openDocument', 'Open')}
                   >
                     <Eye className="w-4 h-4" />
                   </button>
@@ -294,8 +300,9 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
                   {/* Download */}
                   <button
                     onClick={() => handleDownloadDocument(doc)}
-                    className="ripple-effect p-2 rounded-lg bg-green-600 hover:bg-green-700 transition"
+                    className="ripple-effect p-2 rounded-lg bg-green-600 hover:bg-green-700 hover:shadow-md active:scale-95 transition-all duration-150 focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
                     title={t('documents:downloadDocument', 'Download')}
+                    aria-label={t('documents:downloadDocument', 'Download')}
                   >
                     <Download className="w-4 h-4" />
                   </button>
@@ -303,8 +310,9 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
                   {/* Delete */}
                   <button
                     onClick={() => handleDeleteDocument(doc)}
-                    className="ripple-effect p-2 rounded-lg bg-red-600 hover:bg-red-700 transition"
+                    className="ripple-effect p-2 rounded-lg bg-red-600 hover:bg-red-700 hover:shadow-md active:scale-95 transition-all duration-150 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
                     title={t('documents:deleteDocument', 'Delete')}
+                    aria-label={t('documents:deleteDocument', 'Delete')}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
