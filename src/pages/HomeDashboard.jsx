@@ -386,10 +386,10 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
                 </h2>
               </div>
               <EmptyState
-                icon={<Heart className="w-10 h-10" />}
+                variant="no-favorites"
                 title={t("home:emptyStates.noFavorites.title")}
                 description={t("home:emptyStates.noFavorites.description")}
-                actionLabel={t("home:emptyStates.noFavorites.action")}
+                action={t("home:emptyStates.noFavorites.action")}
                 onAction={() => navigate('/search')}
               />
             </section>
@@ -427,10 +427,10 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
 
         {timeGroups.length === 0 ? (
           <EmptyState
-            icon={<Upload className="w-10 h-10" />}
+            variant="no-photos"
             title={t("home:emptyStates.noRecent.title")}
             description={t("home:emptyStates.noRecent.description")}
-            actionLabel={t("home:emptyStates.noRecent.action")}
+            action={t("home:emptyStates.noRecent.action")}
             onAction={() => setUploadOpen(true)}
           />
         ) : (

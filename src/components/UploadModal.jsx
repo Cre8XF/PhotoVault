@@ -34,6 +34,7 @@ import { auth, addAlbum } from '../firebase'
 import { sendEmailVerification } from 'firebase/auth'
 import { isVideoFile, isDocumentFile } from '../utils/fileTypeDetection'
 import { devLog, devWarn } from '../utils/log'
+import { getErrorMessage } from '../utils/errorMessages'
 
 const formatFileSize = (bytes) => {
   if (bytes === 0) return '0 Bytes'
@@ -559,7 +560,7 @@ const UploadModal = ({
         return
       }
 
-      window.showToast?.('Failed to create album', 'error')
+      window.showToast?.(getErrorMessage(error, 'Create album'), 'error')
     } finally {
       // Reset guard after a delay to allow modal close animations
       setTimeout(() => setIsCreatingAlbum(false), 1000)

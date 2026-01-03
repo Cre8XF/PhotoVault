@@ -24,6 +24,7 @@ import {
 import { db } from '../firebase'
 import useStore from '../state/store'
 import { devLog, devWarn } from '../utils/log'
+import { getErrorMessage } from '../utils/errorMessages'
 
 /**
  * Custom hook for photo and album data management
@@ -366,7 +367,7 @@ export const usePhotoData = () => {
         } else {
           setNotification({
             message: t('common:notifications.uploadError', {
-              message: error.message,
+              message: getErrorMessage(error, 'Upload'),
             }),
             type: 'error',
           })
@@ -747,7 +748,7 @@ export const usePhotoData = () => {
       } catch (error) {
         console.error('Error updating caption:', error)
         setNotification({
-          message: t('common:errorOccurred'),
+          message: getErrorMessage(error, 'Update caption'),
           type: 'error',
         })
       }

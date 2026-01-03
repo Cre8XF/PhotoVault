@@ -13,6 +13,12 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
   const [name, setName] = useState(editingAlbum?.name || '')
   const [description, setDescription] = useState(editingAlbum?.description || '')
   const [cover, setCover] = useState(editingAlbum?.cover || '')
+  const [touched, setTouched] = useState({ name: false, description: false, cover: false })
+
+  // Validation errors
+  const nameError = touched.name ? getValidationError('name', name, { required: true, maxLength: 50 }) : null
+  const descriptionError = touched.description ? getValidationError('description', description, { maxLength: 200 }) : null
+  const coverError = touched.cover && cover.trim() ? getValidationError('url', cover) : null
 
   const handleSubmit = (e) => {
     e.preventDefault()
