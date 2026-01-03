@@ -649,8 +649,8 @@ const AlbumPage = ({
         </div>
       </div>
 
-      {/* Stats Row - Compressed */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 md:gap-3 mb-2.5 md:mb-3">
+      {/* Stats Row - Simplified */}
+      <div className="grid grid-cols-2 gap-2.5 md:gap-3 mb-2.5 md:mb-3">
         <div className="bg-white/5 rounded-lg p-2.5 md:p-3 border border-white/10">
           <p className="text-[10px] md:text-xs text-gray-400 mb-0.5 md:mb-1">
             {t('albums:photos')}
@@ -665,22 +665,6 @@ const AlbumPage = ({
           </p>
           <p className="text-xl md:text-2xl font-bold leading-none">
             {stats.totalSize} MB
-          </p>
-        </div>
-        <div className="bg-white/5 rounded-lg p-2.5 md:p-3 border border-white/10">
-          <p className="text-[10px] md:text-xs text-gray-400 mb-0.5 md:mb-1">
-            {t('albums:aiAnalyzed')}
-          </p>
-          <p className="text-xl md:text-2xl font-bold leading-none">
-            {stats.aiAnalyzed}
-          </p>
-        </div>
-        <div className="bg-white/5 rounded-lg p-2.5 md:p-3 border border-white/10">
-          <p className="text-[10px] md:text-xs text-gray-400 mb-0.5 md:mb-1">
-            {t('albums:categories')}
-          </p>
-          <p className="text-xl md:text-2xl font-bold leading-none">
-            {stats.categories}
           </p>
         </div>
       </div>
@@ -712,27 +696,20 @@ const AlbumPage = ({
         </div>
       )}
 
-      {/* Grid/List Toggle + Filters Toggle - Positioned below stats */}
+      {/* Controls Row - Sort + View Toggle */}
       <div className="flex items-center justify-between gap-2 mb-2 md:mb-2.5">
-        {/* Left: Filters Toggle */}
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className={`ripple-effect px-3 py-2 md:px-4 md:py-2.5 rounded-lg transition flex items-center gap-2 ${
-            showFilters
-              ? 'bg-purple-600'
-              : 'bg-white/5 hover:bg-white/10'
-          }`}
+        {/* Left: Sort Dropdown - Now visible, not hidden */}
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="ripple-effect px-3 py-2 md:px-4 md:py-2.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition text-sm md:text-base font-medium cursor-pointer outline-none"
         >
-          <SlidersHorizontal className="w-4 h-4 md:w-5 md:h-5" />
-          <span className="text-sm md:text-base font-medium">
-            {t('albums:filters')}
-          </span>
-          {showFilters ? (
-            <ChevronUp className="w-4 h-4" />
-          ) : (
-            <ChevronDown className="w-4 h-4" />
-          )}
-        </button>
+          <option value="manual">✋ {t('albums:sortManual')}</option>
+          <option value="date-desc">📅 {t('albums:sortDateDesc')}</option>
+          <option value="date-asc">📅 {t('albums:sortDateAsc')}</option>
+          <option value="name-asc">🔤 {t('albums:sortNameAsc')}</option>
+          <option value="name-desc">🔤 {t('albums:sortNameDesc')}</option>
+        </select>
 
         {/* Right: Grid/List Toggle */}
         <div className="flex gap-2">
@@ -779,87 +756,20 @@ const AlbumPage = ({
         )}
       </div>
 
-      {/* Filters Panel - Compact */}
-      {showFilters && (
-        <div className="bg-white/5 border border-white/10 rounded-lg p-2.5 md:p-4 mb-3 space-y-3 md:space-y-4">
-          <div className="grid grid-cols-1 gap-3 md:gap-4">
-            {/* Sort */}
-            <div>
-              <label className="block text-xs md:text-sm font-medium mb-1.5 md:mb-2">
-                {t('albums:sortBy')}
-              </label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="input-premium !py-1.5 md:!py-2 text-sm"
-              >
-                <option value="manual">✋ {t('albums:sortManual')}</option>
-                <option value="date-desc">📅 {t('albums:sortDateDesc')}</option>
-                <option value="date-asc">📅 {t('albums:sortDateAsc')}</option>
-                <option value="name-asc">🔤 {t('albums:sortNameAsc')}</option>
-                <option value="name-desc">🔤 {t('albums:sortNameDesc')}</option>
-              </select>
-            </div>
-
-            {/* Category Filter - HIDDEN until AI Phase 5 active */}
-            {false && (
-              <div>
-                <label className="block text-xs md:text-sm font-medium mb-1.5 md:mb-2">
-                  {t('albums:category')}
-                </label>
-                <select
-                  value={filterCategory}
-                  onChange={(e) => setFilterCategory(e.target.value)}
-                  className="input-premium !py-1.5 md:!py-2 text-sm"
-                >
-                  <option value="all">{t('albums:allCategories')}</option>
-                  <option value="people">👥 {t('albums:categoryPeople')}</option>
-                  <option value="nature">🌳 {t('albums:categoryNature')}</option>
-                  <option value="food">🍽️ {t('albums:categoryFood')}</option>
-                  <option value="animals">
-                    🐾 {t('albums:categoryAnimals')}
-                  </option>
-                  <option value="indoor">🏠 {t('albums:categoryIndoor')}</option>
-                  <option value="travel">✈️ {t('albums:categoryTravel')}</option>
-                </select>
-              </div>
-            )}
-
-            {/* AI Filter - HIDDEN until AI Phase 5 active */}
-            {false && (
-              <div>
-                <label className="block text-xs md:text-sm font-medium mb-1.5 md:mb-2">
-                  {t('albums:aiStatus')}
-                </label>
-                <select
-                  value={filterAI}
-                  onChange={(e) => setFilterAI(e.target.value)}
-                  className="input-premium !py-1.5 md:!py-2 text-sm"
-                >
-                  <option value="all">{t('albums:allPhotos')}</option>
-                  <option value="analyzed">{t('albums:aiAnalyzedOnly')}</option>
-                  <option value="not-analyzed">{t('albums:notAnalyzed')}</option>
-                </select>
-              </div>
-            )}
+      {/* Manual Order Helper Text */}
+      {sortBy === 'manual' && viewMode === 'grid' && (
+        <div className="mb-3 p-3 bg-purple-600/10 border border-purple-500/30 rounded-lg flex items-start gap-2">
+          <div className="flex-shrink-0 mt-0.5">
+            ✋
           </div>
-
-          {/* Manual Order Helper Text */}
-          {sortBy === 'manual' && viewMode === 'grid' && (
-            <div className="mt-3 p-3 bg-purple-600/10 border border-purple-500/30 rounded-lg flex items-start gap-2">
-              <div className="flex-shrink-0 mt-0.5">
-                ✋
-              </div>
-              <div className="text-xs md:text-sm">
-                <p className="font-medium text-purple mb-1">
-                  Manual Order Active
-                </p>
-                <p className="text-gray-400">
-                  Drag photos to reorder. Changes save automatically.
-                </p>
-              </div>
-            </div>
-          )}
+          <div className="text-xs md:text-sm">
+            <p className="font-medium text-purple mb-1">
+              Manual Order Active
+            </p>
+            <p className="text-gray-400">
+              Drag photos to reorder. Changes save automatically.
+            </p>
+          </div>
         </div>
       )}
 
@@ -1039,24 +949,11 @@ const AlbumPage = ({
         />
       )}
 
-      {/* Action Buttons - Filters & Upload */}
+      {/* Action Button - Upload */}
       <div className="flex items-center gap-2 md:gap-3 mt-3 md:mt-4">
         <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="ripple-effect px-3 py-2 md:px-4 md:py-2.5 bg-white/5 hover:bg-white/10 rounded-lg flex items-center gap-1.5 md:gap-2 transition text-sm md:text-base"
-        >
-          <Filter className="w-[14px] md:w-4 h-[14px] md:h-4" />
-          {t('albums:filters')}
-          <ChevronDown
-            className={`w-[14px] md:w-4 h-[14px] md:h-4 transition-transform ${
-              showFilters ? 'rotate-180' : ''
-            }`}
-          />
-        </button>
-
-        <button
           onClick={() => setUploadOpen(true)}
-          className="ripple-effect flex-1 px-3 py-3 md:px-4 md:py-4 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center gap-1.5 md:gap-2 transition font-medium text-sm md:text-base"
+          className="ripple-effect w-full px-3 py-3 md:px-4 md:py-4 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center gap-1.5 md:gap-2 transition font-medium text-sm md:text-base"
         >
           <ImageIcon className="w-[14px] md:w-4 h-[14px] md:h-4" />
           {t('albums:uploadPhotos')}
