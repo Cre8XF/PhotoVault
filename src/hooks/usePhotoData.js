@@ -795,6 +795,205 @@ export const usePhotoData = () => {
   }, [photos])
 
   /**
+   * Add tag to photo
+   * CRITICAL: Prevents duplicates using Set
+   */
+  const addTag = useCallback(
+    async (photoId, tag) => {
+      console.log('🏷️ Adding tag:', { photoId, tag })
+
+      // Normalize tag (lowercase, trim)
+      const normalizedTag = tag.toLowerCase().trim()
+
+      if (!normalizedTag) {
+        console.warn('⚠️ Empty tag, ignoring')
+        return
+      }
+
+      try {
+        // Get current photo
+        const photo = photos.find((p) => p.id === photoId)
+        if (!photo) {
+          console.error('❌ Photo not found:', photoId)
+          return
+        }
+
+        // Optimistic update with duplicate prevention
+        const currentTags = photo.tags || []
+        const newTags = Array.from(new Set([...currentTags, normalizedTag]))
+
+        // Only update if tag was actually added (not a duplicate)
+        if (newTags.length === currentTags.length) {
+          console.log('ℹ️ Tag already exists, skipping:', normalizedTag)
+          return
+        }
+
+        setPhotos((prev) => {
+          const safePrev = Array.isArray(prev) ? prev : []
+          return safePrev.map((p) =>
+            p.id === photoId
+              ? {
+                  ...p,
+                  tags: newTags,
+                  updatedAt: new Date().toISOString(),
+                }
+              : p
+          )
+        })
+
+        // Persist to Firestore
+        await updatePhoto(photoId, {
+          tags: newTags,
+          updatedAt: new Date().toISOString()
+        })
+
+        console.log('✅ Tag added to Firestore')
+      } catch (err) {
+        console.error('❌ Error adding tag:', err)
+
+        // Rollback on error
+        if (user?.uid) {
+          await refreshAllData(user.uid)
+        }
+
+        setNotification({
+          message: t('common:notifications.updateError'),
+          type: 'error',
+        })
+        throw err
+      }
+    },
+    [photos, setPhotos, user?.uid, refreshAllData, setNotification, t]
+  )
+
+  /**
+   * Remove tag from photo
+   */
+  const removeTag = useCallback(
+    async (photoId, tag) => {
+      console.log('🗑️ Removing tag:', { photoId, tag })
+
+      try {
+        // Get current photo
+        const photo = photos.find((p) => p.id === photoId)
+        if (!photo) {
+          console.error('❌ Photo not found:', photoId)
+          return
+        }
+
+        // Optimistic update
+        const newTags = (photo.tags || []).filter((t) => t !== tag)
+
+        setPhotos((prev) => {
+          const safePrev = Array.isArray(prev) ? prev : []
+          return safePrev.map((p) =>
+            p.id === photoId
+              ? {
+                  ...p,
+                  tags: newTags,
+                  updatedAt: new Date().toISOString(),
+                }
+              : p
+          )
+        })
+
+        // Persist to Firestore
+        await updatePhoto(photoId, {
+          tags: newTags,
+          updatedAt: new Date().toISOString()
+        })
+
+        console.log('✅ Tag removed from Firestore')
+      } catch (err) {
+        console.error('❌ Error removing tag:', err)
+
+        // Rollback on error
+        if (user?.uid) {
+          await refreshAllData(user.uid)
+        }
+
+        setNotification({
+          message: t('common:notifications.updateError'),
+          type: 'error',
+        })
+        throw err
+      }
+    },
+    [photos, setPhotos, user?.uid, refreshAllData, setNotification, t]
+  )
+
+  /**
+   * Bulk-add tag to multiple photos
+   * @param {string[]} photoIds - Array of photo IDs (NOT photo objects)
+   * @param {string} tag - Tag to add
+   */
+  const bulkAddTag = useCallback(
+    async (photoIds, tag) => {
+      console.log('🏷️ Bulk adding tag:', { photoIds, tag })
+
+      const normalizedTag = tag.toLowerCase().trim()
+
+      if (!normalizedTag) {
+        console.warn('⚠️ Empty tag, ignoring')
+        return
+      }
+
+      try {
+        // Optimistic update with duplicate prevention
+        setPhotos((prev) => {
+          const safePrev = Array.isArray(prev) ? prev : []
+          return safePrev.map((p) =>
+            photoIds.includes(p.id)
+              ? {
+                  ...p,
+                  tags: Array.from(new Set([...(p.tags || []), normalizedTag])),
+                  updatedAt: new Date().toISOString(),
+                }
+              : p
+          )
+        })
+
+        // Persist to Firestore (batch update)
+        await Promise.all(
+          photoIds.map((photoId) => {
+            const photo = photos.find((p) => p.id === photoId)
+            if (!photo) return Promise.resolve()
+
+            const currentTags = photo.tags || []
+            const newTags = Array.from(new Set([...currentTags, normalizedTag]))
+
+            return updatePhoto(photoId, {
+              tags: newTags,
+              updatedAt: new Date().toISOString()
+            })
+          })
+        )
+
+        console.log(`✅ Tag added to ${photoIds.length} photos in Firestore`)
+
+        setNotification({
+          message: `Tag "${normalizedTag}" added to ${photoIds.length} photo${photoIds.length > 1 ? 's' : ''}`,
+          type: 'success',
+        })
+      } catch (err) {
+        console.error('❌ Error bulk adding tag:', err)
+
+        // Rollback on error
+        if (user?.uid) {
+          await refreshAllData(user.uid)
+        }
+
+        setNotification({
+          message: t('common:notifications.updateError'),
+          type: 'error',
+        })
+        throw err
+      }
+    },
+    [photos, setPhotos, user?.uid, refreshAllData, setNotification, t]
+  )
+
+  /**
    * Set album cover image
    * PHASE 4: Optimistic update
    */
@@ -919,6 +1118,11 @@ export const usePhotoData = () => {
     handleUpdatePhotoCount,
     toggleFavorite,
     updateCaption,
+
+    // Tag management
+    addTag,
+    removeTag,
+    bulkAddTag,
 
     // Utilities
     getPhotoById,

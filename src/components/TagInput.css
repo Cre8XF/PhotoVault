@@ -1,0 +1,127 @@
+.tag-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--primary);
+  color: white;
+  border-radius: 16px;
+  font-size: 0.875rem;
+  animation: scaleIn 0.2s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.tag-remove-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: opacity 0.2s;
+}
+
+.tag-remove-btn:hover {
+  opacity: 0.7;
+}
+
+.tag-input-field {
+  display: flex;
+  gap: 8px;
+}
+
+.tag-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: border-color 0.2s;
+}
+
+.tag-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.tag-input::placeholder {
+  color: var(--text-muted);
+}
+
+.tag-add-btn {
+  padding: 8px 16px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.tag-add-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.tag-add-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tag-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.suggestions-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.tag-suggestion-chip {
+  padding: 4px 10px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: var(--text-primary);
+}
+
+.tag-suggestion-chip:hover {
+  background: var(--interactive-hover);
+}

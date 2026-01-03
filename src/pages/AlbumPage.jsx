@@ -34,6 +34,7 @@ import {
   Presentation,
   Settings,
   Loader2,
+  Tag,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
@@ -49,6 +50,7 @@ import EmptyState from '../components/EmptyState'
 import useStore from '../state/store'
 import { ROUTES } from '../routes'
 import { resolvePhotoDate, sortPhotosByDate } from '../utils/photoDateUtils'
+import { usePhotoData } from '../hooks/usePhotoData'
 
 function getCategoryIcon(category) {
   const icons = {
@@ -94,11 +96,15 @@ const AlbumPage = ({
   const [editingAlbum, setEditingAlbum] = useState(null)
   const [isShareModalOpen, setShareModalOpen] = useState(false)
   const [isVerificationModalOpen, setVerificationModalOpen] = useState(false)
+  const [bulkTagInput, setBulkTagInput] = useState('')
 
   // Zustand store
   const emailVerified = useStore((state) => state.emailVerified)
   const setNotification = useStore((state) => state.setNotification)
   const setConfirmModal = useStore((state) => state.setConfirmModal)
+
+  // Tag management
+  const { bulkAddTag } = usePhotoData()
 
   // Photo context setters - Phase 2A
   const setCurrentPhotoId = useStore((state) => state.setCurrentPhotoId)
@@ -671,26 +677,64 @@ const AlbumPage = ({
 
       {/* Action Bar */}
       {editMode && selectedPhotos.length > 0 && (
-        <div className="bg-purple-600/20 border border-purple-500/30 rounded-lg p-3 md:p-4 mb-2.5 md:mb-3 flex items-center justify-between">
-          <span className="font-medium text-sm md:text-base">
-            {t('albums:selectedCount', { count: selectedPhotos.length })}
-          </span>
-          <div className="flex gap-1.5 md:gap-2">
+        <div className="bg-purple-600/20 border border-purple-500/30 rounded-lg p-3 md:p-4 mb-2.5 md:mb-3">
+          <div className="flex items-center justify-between mb-3">
+            <span className="font-medium text-sm md:text-base">
+              {t('albums:selectedCount', { count: selectedPhotos.length })}
+            </span>
+            <div className="flex gap-1.5 md:gap-2">
+              <button
+                onClick={() => setMoveOpen(true)}
+                className="ripple-effect px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-1.5 md:gap-2 transition text-sm md:text-base touch-target touch-manipulation"
+                aria-label={`Move ${selectedPhotos.length} selected photo${selectedPhotos.length > 1 ? 's' : ''}`}
+              >
+                <Move className="w-4 h-4" />
+                {t('common:move')}
+              </button>
+              <button
+                onClick={handleBulkDelete}
+                className="ripple-effect px-3 py-1.5 md:px-4 md:py-2 bg-red-600 hover:bg-red-700 rounded-lg flex items-center gap-1.5 md:gap-2 transition text-sm md:text-base touch-target touch-manipulation"
+                aria-label={`Delete ${selectedPhotos.length} selected photo${selectedPhotos.length > 1 ? 's' : ''}`}
+              >
+                <Trash2 className="w-4 h-4" />
+                {t('common:delete')}
+              </button>
+            </div>
+          </div>
+
+          {/* Bulk Tag Input */}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={bulkTagInput}
+              onChange={(e) => setBulkTagInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && bulkTagInput.trim()) {
+                  const selectedPhotoIds = selectedPhotos.map(p => p.id)
+                  bulkAddTag(selectedPhotoIds, bulkTagInput)
+                  setBulkTagInput('')
+                  setSelectedPhotos([])
+                  setEditMode(false)
+                }
+              }}
+              placeholder="Legg til tag på valgte bilder..."
+              className="flex-1 px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:border-purple-400"
+            />
             <button
-              onClick={() => setMoveOpen(true)}
-              className="ripple-effect px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-1.5 md:gap-2 transition text-sm md:text-base touch-target touch-manipulation"
-              aria-label={`Move ${selectedPhotos.length} selected photo${selectedPhotos.length > 1 ? 's' : ''}`}
+              onClick={() => {
+                if (bulkTagInput.trim()) {
+                  const selectedPhotoIds = selectedPhotos.map(p => p.id)
+                  bulkAddTag(selectedPhotoIds, bulkTagInput)
+                  setBulkTagInput('')
+                  setSelectedPhotos([])
+                  setEditMode(false)
+                }
+              }}
+              disabled={!bulkTagInput.trim()}
+              className="ripple-effect px-3 py-1.5 md:px-4 md:py-2 bg-purple-600 hover:bg-purple-700 rounded-lg flex items-center gap-1.5 md:gap-2 transition text-sm md:text-base touch-target touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Move className="w-4 h-4" />
-              {t('common:move')}
-            </button>
-            <button
-              onClick={handleBulkDelete}
-              className="ripple-effect px-3 py-1.5 md:px-4 md:py-2 bg-red-600 hover:bg-red-700 rounded-lg flex items-center gap-1.5 md:gap-2 transition text-sm md:text-base touch-target touch-manipulation"
-              aria-label={`Delete ${selectedPhotos.length} selected photo${selectedPhotos.length > 1 ? 's' : ''}`}
-            >
-              <Trash2 className="w-4 h-4" />
-              {t('common:delete')}
+              <Tag className="w-4 h-4" />
+              <span className="hidden md:inline">Legg til tag</span>
             </button>
           </div>
         </div>

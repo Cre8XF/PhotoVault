@@ -51,6 +51,7 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
   const [isUploadOpen, setUploadOpen] = useState(false);
   const [uploadMode, setUploadMode] = useState('upload'); // 'upload' or 'album'
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [selectedTags, setSelectedTags] = useState([]);
 
   // ✅ DEFENSIVE GUARD: Prevent render before user is ready (mobile resume stability)
   if (!user) {
@@ -85,9 +86,32 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
     }
   }, [albums, photos]);
 
+  // Get all unique tags
+  const allTags = useMemo(() => {
+    const safePhotos = Array.isArray(photos) ? photos : []
+    const tagSet = new Set()
+    safePhotos.forEach((photo) => {
+      if (photo.tags && Array.isArray(photo.tags)) {
+        photo.tags.forEach((tag) => tagSet.add(tag))
+      }
+    })
+    return Array.from(tagSet).sort()
+  }, [photos])
+
+  // Filter photos by tags (AND logic - all selected tags must match)
+  const filteredPhotosByTags = useMemo(() => {
+    const safePhotos = Array.isArray(photos) ? photos : []
+    if (selectedTags.length === 0) return safePhotos
+
+    return safePhotos.filter((photo) => {
+      if (!photo.tags || !Array.isArray(photo.tags)) return false
+      return selectedTags.every((tag) => photo.tags.includes(tag))
+    })
+  }, [photos, selectedTags])
+
   const stats = useMemo(
     () => {
-      const safePhotos = Array.isArray(photos) ? photos : [];
+      const safePhotos = Array.isArray(filteredPhotosByTags) ? filteredPhotosByTags : [];
       // ✅ EXCLUDE DOCUMENTS: Only count images and videos
       const mediaOnly = safePhotos.filter((p) => p.type !== 'document');
       return {
@@ -102,29 +126,29 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
         withFaces: mediaOnly.filter((p) => p.faces > 0).length
       };
     },
-    [photos]
+    [filteredPhotosByTags]
   );
 
   const favoritePhotos = useMemo(
     () => {
-      const safePhotos = Array.isArray(photos) ? photos : [];
+      const safePhotos = Array.isArray(filteredPhotosByTags) ? filteredPhotosByTags : [];
       // ✅ EXCLUDE DOCUMENTS: Only show image/video favorites
       const mediaOnly = safePhotos.filter((p) => p.type !== 'document');
       // Limit favorites to 6 for compact view
       const limit = 6;
       return mediaOnly.filter((p) => p.favorite).slice(0, limit);
     },
-    [photos]
+    [filteredPhotosByTags]
   );
 
   // Group recent photos by time periods
   const timeGroups = useMemo(() => {
-    if (!photos || photos.length === 0) {
+    if (!filteredPhotosByTags || filteredPhotosByTags.length === 0) {
       return []
     }
 
     // ✅ EXCLUDE DOCUMENTS: Only show images and videos in recent uploads
-    const mediaOnly = photos.filter(p => p.type !== 'document');
+    const mediaOnly = filteredPhotosByTags.filter(p => p.type !== 'document');
 
     // Get recent photos (last 50, sorted by date)
     const recent = mediaOnly
@@ -137,7 +161,7 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
       .slice(0, 50) // Max 50 recent photos
 
     return groupPhotosByTime(recent)
-  }, [photos]);
+  }, [filteredPhotosByTags]);
 
   const safePhotosForSmartAlbums = Array.isArray(photos) ? photos : [];
 
@@ -260,10 +284,59 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
       {/* Activity Feed */}
       {!isInitialLoading && <ActivityFeed />}
 
+      {/* Tag Filter Section */}
+      {!isInitialLoading && allTags.length > 0 && (
+        <section className="mb-5 md:mb-8">
+          <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+            <span className="text-purple">🏷️</span>
+            Filtrer på tags
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {allTags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => {
+                  setSelectedTags((prev) =>
+                    prev.includes(tag)
+                      ? prev.filter((t) => t !== tag)
+                      : [...prev, tag]
+                  )
+                }}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition ripple-effect ${
+                  selectedTags.includes(tag)
+                    ? 'bg-purple text-white'
+                    : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+          {selectedTags.length > 0 && (
+            <div className="mt-3 flex items-center gap-2 text-sm text-gray-400">
+              <span>Viser {stats.total} bilder med {selectedTags.length === 1 ? 'tag' : 'alle tags'}:</span>
+              <div className="flex flex-wrap gap-1">
+                {selectedTags.map((tag) => (
+                  <span key={tag} className="px-2 py-0.5 bg-purple/20 rounded text-purple">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <button
+                onClick={() => setSelectedTags([])}
+                className="ml-auto text-xs text-purple hover:underline"
+              >
+                Nullstill filter
+              </button>
+            </div>
+          )}
+        </section>
+      )}
+
       {/* Memories Widget - "On This Day" */}
       {!isInitialLoading && (
         <HomeMemoriesWidget
-          photos={photos}
+          photos={filteredPhotosByTags}
           onPhotoClick={onPhotoClick}
           onViewAll={() => navigate('/timeline')}
         />
