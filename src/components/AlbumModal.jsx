@@ -5,6 +5,7 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, FolderPlus } from 'lucide-react'
 import Button from './Button'
+import Input from './Input'
 import './AlbumModal.css'
 
 const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
@@ -54,66 +55,40 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="album-modal-form">
           {/* Name Input */}
-          <div className="album-modal-field">
-            <label
-              htmlFor="album-name-input"
-              className="album-modal-label"
-            >
-              {t('albums:name')} <span className="album-modal-required">*</span>
-            </label>
-            <input
-              id="album-name-input"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t('albums:namePlaceholder') || 'Album name...'}
-              maxLength={50}
-              className="album-modal-input"
-            />
-            <p className="album-modal-hint">
-              {name.length}/50 {t('albums:characters')}
-            </p>
-          </div>
+          <Input
+            id="album-name-input"
+            label={t('albums:name')}
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={t('albums:namePlaceholder') || 'Album name...'}
+            maxLength={50}
+            showCharacterCount
+            required
+          />
 
           {/* Description Input */}
-          <div className="album-modal-field">
-            <label
-              htmlFor="album-description-input"
-              className="album-modal-label"
-            >
-              {t('albums:description')}
-            </label>
-            <textarea
-              id="album-description-input"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={t('albums:descriptionPlaceholder') || 'Description...'}
-              maxLength={200}
-              rows={3}
-              className="album-modal-textarea"
-            />
-            <p className="album-modal-hint">
-              {description.length}/200 {t('albums:characters')}
-            </p>
-          </div>
+          <Input
+            id="album-description-input"
+            label={t('albums:description')}
+            as="textarea"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder={t('albums:descriptionPlaceholder') || 'Description...'}
+            maxLength={200}
+            rows={3}
+            showCharacterCount
+          />
 
           {/* Cover URL Input */}
-          <div className="album-modal-field">
-            <label
-              htmlFor="album-cover-input"
-              className="album-modal-label"
-            >
-              {t('albums:coverImage')} (optional)
-            </label>
-            <input
-              id="album-cover-input"
-              type="url"
-              value={cover}
-              onChange={(e) => setCover(e.target.value)}
-              placeholder="https://..."
-              className="album-modal-input"
-            />
-          </div>
+          <Input
+            id="album-cover-input"
+            label={`${t('albums:coverImage')} (optional)`}
+            type="url"
+            value={cover}
+            onChange={(e) => setCover(e.target.value)}
+            placeholder="https://..."
+          />
 
           {/* Buttons */}
           <div className="album-modal-actions">
