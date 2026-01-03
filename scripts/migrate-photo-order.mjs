@@ -11,14 +11,13 @@
  * - Batches updates to respect Firestore limits (500 writes per batch)
  *
  * USAGE:
- * 1. Ensure .env file exists with Firebase config
+ * 1. Ensure GOOGLE_APPLICATION_CREDENTIALS is set
  * 2. Run: node scripts/migrate-photo-order.mjs
  *
  * ============================================================================
  */
 
-import { initializeApp } from 'firebase/app'
-import { getFirestore, collection, getDocs, writeBatch, doc, query, where } from 'firebase/firestore'
+import admin from 'firebase-admin'
 import * as dotenv from 'dotenv'
 import { fileURLToPath } from 'url'
 import { dirname, resolve } from 'path'
@@ -31,35 +30,28 @@ const __dirname = dirname(__filename)
 dotenv.config({ path: resolve(__dirname, '../.env.local') })
 dotenv.config({ path: resolve(__dirname, '../.env') })
 
-// Firebase configuration from environment variables (using VITE_ prefix)
-const firebaseConfig = {
-  apiKey: process.env.VITE_FIREBASE_API_KEY,
-  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.VITE_FIREBASE_APP_ID,
-}
+// Initialize Firebase Admin SDK
+// This uses GOOGLE_APPLICATION_CREDENTIALS environment variable automatically
+console.log('🔧 Initializing Firebase Admin SDK...')
 
-// Validate configuration
-const missingVars = []
-if (!firebaseConfig.apiKey) missingVars.push('VITE_FIREBASE_API_KEY')
-if (!firebaseConfig.authDomain) missingVars.push('VITE_FIREBASE_AUTH_DOMAIN')
-if (!firebaseConfig.projectId) missingVars.push('VITE_FIREBASE_PROJECT_ID')
-if (!firebaseConfig.storageBucket) missingVars.push('VITE_FIREBASE_STORAGE_BUCKET')
-
-if (missingVars.length > 0) {
-  console.error('❌ Missing required environment variables:')
-  missingVars.forEach(varName => console.error(`   - ${varName}`))
-  console.error('\n💡 Please create a .env file with your Firebase configuration.')
-  console.error('   See .env.example for reference.')
+try {
+  admin.initializeApp({
+    credential: admin.credential.applicationDefault(),
+  })
+  console.log('✅ Firebase Admin SDK initialized successfully')
+} catch (error) {
+  console.error('❌ Failed to initialize Firebase Admin SDK:', error.message)
+  console.error('\n💡 Make sure GOOGLE_APPLICATION_CREDENTIALS is set:')
+  console.error(
+    '   Windows: $env:GOOGLE_APPLICATION_CREDENTIALS="path\\to\\service-account.json"'
+  )
+  console.error(
+    '   Mac/Linux: export GOOGLE_APPLICATION_CREDENTIALS="path/to/service-account.json"'
+  )
   process.exit(1)
 }
 
-// Initialize Firebase
-console.log('🔧 Initializing Firebase...')
-const app = initializeApp(firebaseConfig)
-const db = getFirestore(app)
+const db = admin.firestore()
 
 /**
  * Resolve photo date using priority order
@@ -72,7 +64,9 @@ function resolvePhotoDate(photo) {
   const createdAt = photo.createdAt ? new Date(photo.createdAt) : null
 
   // Priority order: dateTaken > displayDate > takenAt > uploadedAt > createdAt
-  return dateTaken || displayDate || takenAt || uploadedAt || createdAt || new Date()
+  return (
+    dateTaken || displayDate || takenAt || uploadedAt || createdAt || new Date()
+  )
 }
 
 /**
@@ -89,9 +83,8 @@ async function migratePhotoOrder() {
 
   try {
     // Get all non-deleted photos without order field
-    const photosRef = collection(db, 'photos')
-    const q = query(photosRef, where('deleted', '==', false))
-    const snapshot = await getDocs(q)
+    const photosRef = db.collection('photos')
+    const snapshot = await photosRef.where('deleted', '==', false).get()
 
     if (snapshot.empty) {
       console.log('⚠️  No photos found in database.')
@@ -101,7 +94,7 @@ async function migratePhotoOrder() {
     console.log(`📊 Found ${snapshot.docs.length} total photos\n`)
 
     // Filter photos that need migration (no order field or order is null)
-    const photosToMigrate = snapshot.docs.filter(photoDoc => {
+    const photosToMigrate = snapshot.docs.filter((photoDoc) => {
       const data = photoDoc.data()
       return data.order === undefined || data.order === null
     })
@@ -114,14 +107,16 @@ async function migratePhotoOrder() {
     console.log(`📝 Need to migrate ${photosToMigrate.length} photos\n`)
 
     // Sort photos by date first (to ensure consistent order assignment)
-    const sortedPhotos = photosToMigrate.map(photoDoc => ({
-      id: photoDoc.id,
-      data: photoDoc.data()
-    })).sort((a, b) => {
-      const dateA = resolvePhotoDate(a.data)
-      const dateB = resolvePhotoDate(b.data)
-      return dateA - dateB
-    })
+    const sortedPhotos = photosToMigrate
+      .map((photoDoc) => ({
+        id: photoDoc.id,
+        data: photoDoc.data(),
+      }))
+      .sort((a, b) => {
+        const dateA = resolvePhotoDate(a.data)
+        const dateB = resolvePhotoDate(b.data)
+        return dateA - dateB
+      })
 
     let updated = 0
     let errors = 0
@@ -129,25 +124,31 @@ async function migratePhotoOrder() {
 
     // Process in batches of 500
     for (let i = 0; i < sortedPhotos.length; i += BATCH_SIZE) {
-      const batch = writeBatch(db)
+      const batch = db.batch()
       const chunk = sortedPhotos.slice(i, i + BATCH_SIZE)
 
-      console.log(`\n📦 Processing batch ${Math.floor(i / BATCH_SIZE) + 1} (${chunk.length} photos)`)
+      console.log(
+        `\n📦 Processing batch ${Math.floor(i / BATCH_SIZE) + 1} (${
+          chunk.length
+        } photos)`
+      )
 
       for (const photo of chunk) {
         try {
-          const photoRef = doc(db, 'photos', photo.id)
+          const photoRef = db.collection('photos').doc(photo.id)
           const photoDate = resolvePhotoDate(photo.data)
           const orderValue = photoDate.getTime()
 
           batch.update(photoRef, {
             order: orderValue,
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
           })
 
           updated++
           const photoName = photo.data.name || 'Unknown'
-          console.log(`   ✅ ${photoName}: order=${orderValue} (${photoDate.toISOString()})`)
+          console.log(
+            `   ✅ ${photoName}: order=${orderValue} (${photoDate.toISOString()})`
+          )
         } catch (error) {
           errors++
           console.error(`   ❌ ${photo.id}: ${error.message}`)
@@ -181,7 +182,6 @@ async function migratePhotoOrder() {
       console.log('   2. Verify photos can be dragged and reordered')
       console.log('   3. Check that order persists after page refresh')
     }
-
   } catch (error) {
     console.error('\n❌ Migration failed:', error)
     process.exit(1)
@@ -194,7 +194,7 @@ migratePhotoOrder()
     console.log('\n👋 Migration script finished')
     process.exit(0)
   })
-  .catch(error => {
+  .catch((error) => {
     console.error('\n💥 Fatal error:', error)
     process.exit(1)
   })
