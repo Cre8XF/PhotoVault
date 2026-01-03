@@ -167,7 +167,16 @@ const navigate = useNavigate();
   if (!isVaultUnlocked) {
     return (
       <>
-        <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="min-h-screen flex items-center justify-center p-6 relative">
+          {/* Close button - top right */}
+          <button
+            onClick={() => navigate('/account')}
+            className="absolute top-4 right-4 p-2 hover:bg-white/10 dark:hover:bg-white/10 hover:bg-gray-200 rounded-lg transition-colors ripple-effect"
+            aria-label="Back to account"
+          >
+            <X className="w-6 h-6 text-gray-900 dark:text-white" />
+          </button>
+
           <div className="w-full max-w-md">
             <div className="text-center mb-8">
               <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
@@ -212,7 +221,10 @@ const navigate = useNavigate();
                            text-white font-semibold hover:from-purple-700 hover:to-blue-700 transition
                            disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {t('vault:locked.unlockButton', { defaultValue: 'Unlock Vault' })}
+                {!password.trim()
+                  ? t('vault:locked.enterPasswordPrompt', { defaultValue: 'Enter password to unlock' })
+                  : t('vault:locked.unlockButton', { defaultValue: 'Unlock Vault' })
+                }
               </button>
             </form>
 
