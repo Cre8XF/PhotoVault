@@ -83,7 +83,7 @@ import Particles from './components/Particles'
 import PINLockScreen from './components/PINLockScreen'
 import NotificationPanel from './components/NotificationPanel'
 import ToastContainer from './components/ToastContainer'
-import LoadingSpinner from './components/LoadingSpinner'
+import Loading from './components/Loading'
 
 // Hooks
 import useAuth from './hooks/useAuth'
@@ -158,7 +158,7 @@ function App() {
               <Suspense
                 fallback={
                   <div className="fixed inset-0 flex items-center justify-center">
-                    <LoadingSpinner size="xl" />
+                    <Loading size="xl" />
                   </div>
                 }
               >
@@ -221,7 +221,7 @@ function App() {
                     <ProtectedRoute>
                       <Suspense fallback={
                         <div className="fixed inset-0 flex items-center justify-center editor-bg-primary">
-                          <LoadingSpinner size="xl" />
+                          <Loading size="xl" />
                         </div>
                       }>
                         <EditorPage />
@@ -306,7 +306,7 @@ function PublicRoute() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="xl" />
+        <Loading size="xl" />
       </div>
     )
   }
@@ -336,7 +336,7 @@ function ProtectedRoute({ children }) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="xl" />
+        <Loading size="xl" />
       </div>
     )
   }
