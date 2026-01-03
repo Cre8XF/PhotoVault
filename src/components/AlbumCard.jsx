@@ -59,11 +59,19 @@ const AlbumCard = memo(
 
     return (
       <div
-        className="relative ripple-effect card-press album-card glass cursor-pointer group"
+        className="relative ripple-effect card-press album-card glass cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 rounded-xl"
         onClick={() => onOpen && onOpen(album)}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onOpen && onOpen(album)
+          }
+        }}
         role="button"
+        tabIndex={0}
+        aria-label={`Open ${album.name || 'album'} - ${count} ${count === 1 ? 'photo' : 'photos'}`}
         style={{
           transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
           transition:
@@ -91,8 +99,9 @@ const AlbumCard = memo(
                 e.stopPropagation()
                 if (onEdit) onEdit(album)
               }}
-              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition ripple-effect"
+              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-2 bg-blue-600 hover:bg-blue-700 hover:shadow-md active:scale-95 rounded-lg transition-all duration-150 ripple-effect focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
               title={t('common:albumCard.editAlbum')}
+              aria-label={`Edit ${album.name || 'album'}`}
             >
               <Edit3 size={16} />
             </button>
