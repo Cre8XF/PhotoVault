@@ -47,7 +47,7 @@ const FilterTabs = ({ activeFilter, onChange, photoCounts = {} }) => {
       id: 'ai',
       label: t('collage:picker.filters.ai'),
       icon: Sparkles,
-      color: 'text-purple-400'
+      color: 'text-purple'
     }
   ]
 

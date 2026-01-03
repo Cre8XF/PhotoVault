@@ -348,7 +348,7 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
                     console.log('═══════════════════════════════════════');
                     navigate('/search?favorites=true');
                   }}
-                  className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition whitespace-nowrap flex items-center"
+                  className="ripple-effect text-sm text-purple hover:text-purple transition whitespace-nowrap flex items-center"
                 >
                   {t("common:seeAll", { count: stats.favorites })} →
                 </button>
@@ -418,7 +418,7 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
                 console.log('═══════════════════════════════════════');
                 navigate('/search?recent=true&limit=50');
               }}
-              className="ripple-effect text-sm text-purple-400 hover:text-purple-300 transition whitespace-nowrap flex items-center"
+              className="ripple-effect text-sm text-purple hover:text-purple transition whitespace-nowrap flex items-center"
             >
               {t("common:seeAll", { count: timeGroups.reduce((sum, g) => sum + g.photos.length, 0) })} →
             </button>
@@ -501,7 +501,7 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
       {/* Smart Albums - Minimized (Phase 5) */}
       <section className="mb-6 md:mb-10">
         <h2 className="text-xl md:text-2xl font-bold mb-3 flex items-center gap-2">
-          <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-purple-400" />
+          <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-purple" />
           {t("home:smartAlbums")}
         </h2>
         <div className="minimized-smart-grid">
@@ -530,7 +530,7 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
       {!isFreeUser && (
         <section className="mb-10">
           <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-            <Wand2 className="w-6 h-6 text-purple-400" />
+            <Wand2 className="w-6 h-6 text-purple" />
             {t("home:aiTools")}
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -540,7 +540,7 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
               </div>
               <div className="text-left">
                 <p className="font-semibold text-sm">{t("home:autoSortTitle")}</p>
-                <p className="text-xs opacity-70">{t("home:autoSortDesc")}</p>
+                <p className="text-xs text-muted">{t("home:autoSortDesc")}</p>
               </div>
             </button>
 
@@ -550,7 +550,7 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
               </div>
               <div className="text-left">
                 <p className="font-semibold text-sm">{t("home:enhanceTitle")}</p>
-                <p className="text-xs opacity-70">{t("home:enhanceDesc")}</p>
+                <p className="text-xs text-muted">{t("home:enhanceDesc")}</p>
               </div>
             </button>
 
@@ -562,7 +562,7 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
               </div>
               <div className="text-left">
                 <p className="font-semibold text-sm">{t("home:moreAI")}</p>
-                <p className="text-xs opacity-70">{t("home:viewAllTools")}</p>
+                <p className="text-xs text-muted">{t("home:viewAllTools")}</p>
               </div>
             </button>
           </div>

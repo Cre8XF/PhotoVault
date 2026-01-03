@@ -851,7 +851,7 @@ const AlbumPage = ({
                 ✋
               </div>
               <div className="text-xs md:text-sm">
-                <p className="font-medium text-purple-400 mb-1">
+                <p className="font-medium text-purple mb-1">
                   Manual Order Active
                 </p>
                 <p className="text-gray-400">
@@ -975,7 +975,7 @@ const AlbumPage = ({
                   <div className="album-meta text-xs text-gray-400 flex items-center gap-1 md:gap-1.5 mt-0.5">
                     {photo.type === 'video' && (
                       <>
-                        <span className="flex items-center gap-0.5 text-purple-400">
+                        <span className="flex items-center gap-0.5 text-purple">
                           <Video className="w-3 h-3" />
                           {photo.metadata?.duration && (
                             <span>

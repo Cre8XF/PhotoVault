@@ -37,7 +37,7 @@ const OnThisDayWidget = ({ photos, onPhotoClick, referenceDate = new Date() }) =
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
         <div className="p-3 bg-purple-600/20 rounded-xl">
-          <Cake className="w-6 h-6 text-purple-400" />
+          <Cake className="w-6 h-6 text-purple" />
         </div>
         <div>
           <h3 className="text-xl font-bold flex items-center gap-2">
@@ -79,7 +79,7 @@ const OnThisDayWidget = ({ photos, onPhotoClick, referenceDate = new Date() }) =
                     {new Date(photo.createdAt?.toDate ? photo.createdAt.toDate() : photo.createdAt).getFullYear()}
                   </p>
                 </div>
-                <Calendar className="w-4 h-4 text-purple-400" />
+                <Calendar className="w-4 h-4 text-purple" />
               </div>
             </div>
 

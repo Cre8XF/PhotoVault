@@ -215,7 +215,7 @@ const QRShareModal = ({ isOpen, onClose, album }) => {
         <div className="flex items-center justify-between p-4 md:p-6 border-b border-white/10">
           <div className="flex items-center gap-2 md:gap-3">
             <div className="p-1.5 md:p-2 bg-purple-600/20 rounded-lg">
-              <Share2 className="w-4 h-4 md:w-5 md:h-5 text-purple-400" />
+              <Share2 className="w-4 h-4 md:w-5 md:h-5 text-purple" />
             </div>
             <h2 className="text-lg md:text-xl font-bold">{t('qrshare:modal.title')}</h2>
           </div>

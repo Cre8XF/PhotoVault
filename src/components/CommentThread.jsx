@@ -318,7 +318,7 @@ useEffect(() => {
             {!isReply && user && (
               <button
                 onClick={() => startReplying(comment)}
-                className="mt-1 text-xs text-gray-500 hover:text-purple-400 transition flex items-center gap-1"
+                className="mt-1 text-xs text-gray-500 hover:text-purple transition flex items-center gap-1"
               >
                 <Reply className="w-3 h-3" />
                 {t('common:reply')}
@@ -353,7 +353,7 @@ useEffect(() => {
     <div className="w-full">
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
-        <MessageCircle className="w-5 h-5 text-purple-400" />
+        <MessageCircle className="w-5 h-5 text-purple" />
         <h3 className="text-lg font-semibold text-white">
           {t('common:comments')} ({comments.length})
         </h3>
@@ -379,13 +379,13 @@ useEffect(() => {
       {/* Reply indicator */}
       {replyToId && (
         <div className="mb-2 flex items-center justify-between bg-purple-900/20 border border-purple-500/30 rounded-lg p-2">
-          <span className="text-xs text-purple-300 flex items-center gap-1">
+          <span className="text-xs text-purple flex items-center gap-1">
             <Reply className="w-3 h-3" />
             {t('common:replyingToComment')}
           </span>
           <button
             onClick={() => setReplyToId(null)}
-            className="text-purple-400 hover:text-purple-300"
+            className="text-purple hover:text-purple"
           >
             <X className="w-4 h-4" />
           </button>

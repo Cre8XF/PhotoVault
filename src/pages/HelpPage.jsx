@@ -87,7 +87,7 @@ const HelpPage = () => {
         <section className="glass-card p-6 mb-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-purple-600/20 rounded-lg">
-              <HelpCircle className="w-5 h-5 text-purple-400" />
+              <HelpCircle className="w-5 h-5 text-purple" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
               {t('help:gettingStarted.title', {

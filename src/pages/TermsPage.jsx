@@ -49,7 +49,7 @@ const TermsPage = () => {
         <section className="glass-card p-6 mb-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-purple-600/20 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-purple-400" />
+              <CheckCircle className="w-5 h-5 text-purple" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
               {t('terms:acceptance.title', { defaultValue: 'Acceptance of Terms' })}
@@ -161,7 +161,7 @@ const TermsPage = () => {
           </p>
           <a
             href="mailto:legal@pixtr.cloud"
-            className="text-purple-600 dark:text-purple-400 hover:underline text-sm font-medium"
+            className="text-purple-600 dark:text-purple hover:underline text-sm font-medium"
           >
             legal@pixtr.cloud
           </a>

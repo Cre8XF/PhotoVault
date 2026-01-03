@@ -107,7 +107,7 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Shield className="w-5 h-5 text-purple-400" />
+            <Shield className="w-5 h-5 text-purple" />
             {t('vault:setupModal.title', { defaultValue: 'Set Up Secure Vault' })}
           </h2>
           {step !== 4 && (
@@ -138,7 +138,7 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
           <div className="space-y-4">
             <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4">
               <div className="flex gap-3">
-                <Lock className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                <Lock className="w-5 h-5 text-purple flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-gray-300 space-y-2">
                   <p className="font-semibold text-white">
                     {t('vault:setupModal.intro.title', { defaultValue: 'Secure Your Private Photos' })}

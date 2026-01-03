@@ -311,7 +311,7 @@ const LoginPage = ({ onLogin = () => {} }) => {
               <button
                 type="button"
                 onClick={handleForgotPassword}
-                className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
+                className="text-sm text-purple hover:text-purple transition-colors"
               >
                 {t('forgotPassword') || "Glemt passord?"}
               </button>
