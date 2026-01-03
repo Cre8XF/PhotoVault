@@ -189,12 +189,16 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
             <ArrowLeft className="w-6 h-6" />
           </button>
           <div className="flex-1">
-            <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
-              <FileText className="w-7 h-7" />
-              {t('documents:title', 'Documents')}
-            </h1>
+            <div className="flex items-baseline gap-3">
+              <h1 className="text-2xl md:text-3xl font-bold">
+                {t('documents:title', 'Documents')}
+              </h1>
+              <p className="text-sm text-gray-500 dark:text-gray-500">
+                {documents.length} {documents.length === 1 ? 'file' : 'files'}
+              </p>
+            </div>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              {t('documents:subtitle', 'Manage your uploaded documents')}
+              {t('documents:subtitle', 'Your uploaded files')}
             </p>
           </div>
         </div>
@@ -226,13 +230,11 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
             </div>
 
             {/* Document Count - Secondary Meta */}
-            <p className="text-sm text-gray-500 dark:text-gray-500 pl-1">
-              {t('documents:documentCount', {
-                count: sortedDocuments.length,
-                total: documents.length,
-                defaultValue: `Showing ${sortedDocuments.length} of ${documents.length} documents`,
-              })}
-            </p>
+            {searchQuery && (
+              <p className="text-sm text-gray-500 dark:text-gray-500 pl-1">
+                {sortedDocuments.length} of {documents.length} files
+              </p>
+            )}
           </div>
         )}
       </section>
