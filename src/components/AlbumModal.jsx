@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next'
 import { X, FolderPlus } from 'lucide-react'
 import Button from './Button'
 import Input from './Input'
-import { getValidationError, ERROR_MESSAGES } from '../utils/errorMessages'
 import './AlbumModal.css'
 
 const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
@@ -68,12 +67,10 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            onBlur={() => setTouched({ ...touched, name: true })}
             placeholder={t('albums:namePlaceholder') || 'Album name...'}
             maxLength={50}
             showCharacterCount
             required
-            error={nameError}
           />
 
           {/* Description Input */}
@@ -83,12 +80,10 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
             as="textarea"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            onBlur={() => setTouched({ ...touched, description: true })}
             placeholder={t('albums:descriptionPlaceholder') || 'Description...'}
             maxLength={200}
             rows={3}
             showCharacterCount
-            error={descriptionError}
           />
 
           {/* Cover URL Input */}
@@ -98,9 +93,7 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
             type="url"
             value={cover}
             onChange={(e) => setCover(e.target.value)}
-            onBlur={() => setTouched({ ...touched, cover: true })}
             placeholder="https://..."
-            error={coverError}
           />
 
           {/* Buttons */}

@@ -16,7 +16,6 @@ import {
 } from 'lucide-react'
 import AlbumCard from '../components/AlbumCard'
 import Loading from '../components/Loading'
-import EmptyState from '../components/EmptyState'
 import PhotoGridUnified from '../components/PhotoGridUnified'
 import MoveModal from '../components/MoveModal'
 import { updatePhotoAlbum, updatePhoto } from '../firebase'
