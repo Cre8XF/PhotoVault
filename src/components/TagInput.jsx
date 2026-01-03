@@ -16,8 +16,18 @@ export function TagInput({
 }) {
   const [input, setInput] = useState('')
 
+  // 🐛 DEBUG: Log what TagInput receives
+  console.log('🎨 TagInput render:', {
+    tags,
+    tagsLength: tags.length,
+    tagsType: typeof tags,
+    isArray: Array.isArray(tags),
+    tagsContent: tags
+  })
+
   const handleAddTag = () => {
     if (input.trim()) {
+      console.log('➕ TagInput calling onAddTag:', input.trim())
       onAddTag(input.trim())
       setInput('')
     }

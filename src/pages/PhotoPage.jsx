@@ -91,6 +91,19 @@ export default function PhotoPage() {
   // Prefetch adjacent photos
   usePrefetchAdjacentPhotos(photoOrder, photoIndex, photos)
 
+  // 🐛 DEBUG: Log when photo changes (especially tags)
+  useEffect(() => {
+    if (photo) {
+      console.log('📸 PhotoPage - photo updated:', {
+        id: photo.id,
+        tags: photo.tags,
+        tagsLength: photo.tags?.length,
+        isArray: Array.isArray(photo.tags),
+        fullPhoto: photo
+      })
+    }
+  }, [photo])
+
   // Set world view on mount
   useEffect(() => {
     setIsWorldView(true)

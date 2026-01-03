@@ -800,7 +800,7 @@ export const usePhotoData = () => {
    */
   const addTag = useCallback(
     async (photoId, tag) => {
-      console.log('🏷️ Adding tag:', { photoId, tag })
+      console.log('🏷️ [1/5] addTag called:', { photoId, tag })
 
       // Normalize tag (lowercase, trim)
       const normalizedTag = tag.toLowerCase().trim()
@@ -818,6 +818,12 @@ export const usePhotoData = () => {
           return
         }
 
+        console.log('🏷️ [2/5] Current photo state:', {
+          id: photo.id,
+          currentTags: photo.tags,
+          tagToAdd: normalizedTag
+        })
+
         // Optimistic update with duplicate prevention
         const currentTags = photo.tags || []
         const newTags = Array.from(new Set([...currentTags, normalizedTag]))
@@ -828,9 +834,11 @@ export const usePhotoData = () => {
           return
         }
 
+        console.log('🏷️ [3/5] Updating Zustand store with new tags:', newTags)
+
         setPhotos((prev) => {
           const safePrev = Array.isArray(prev) ? prev : []
-          return safePrev.map((p) =>
+          const updated = safePrev.map((p) =>
             p.id === photoId
               ? {
                   ...p,
@@ -839,15 +847,19 @@ export const usePhotoData = () => {
                 }
               : p
           )
+          console.log('🏷️ [4/5] Zustand state updated. Updated photo:',
+            updated.find(p => p.id === photoId))
+          return updated
         })
 
         // Persist to Firestore
+        console.log('🏷️ [5/5] Persisting to Firestore...')
         await updatePhoto(photoId, {
           tags: newTags,
           updatedAt: new Date().toISOString()
         })
 
-        console.log('✅ Tag added to Firestore')
+        console.log('✅ Tag added successfully to Firestore and Zustand')
       } catch (err) {
         console.error('❌ Error adding tag:', err)
 
