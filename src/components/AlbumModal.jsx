@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { X, FolderPlus } from 'lucide-react'
 import Button from './Button'
 import Input from './Input'
+import { getValidationError, ERROR_MESSAGES } from '../utils/errorMessages'
 import './AlbumModal.css'
 
 const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
@@ -13,6 +14,12 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
   const [name, setName] = useState(editingAlbum?.name || '')
   const [description, setDescription] = useState(editingAlbum?.description || '')
   const [cover, setCover] = useState(editingAlbum?.cover || '')
+  const [touched, setTouched] = useState({ name: false, description: false, cover: false })
+
+  // Validation errors
+  const nameError = touched.name ? getValidationError('name', name, { required: true, maxLength: 50 }) : null
+  const descriptionError = touched.description ? getValidationError('description', description, { maxLength: 200 }) : null
+  const coverError = touched.cover && cover.trim() ? getValidationError('url', cover) : null
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -61,10 +68,12 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            onBlur={() => setTouched({ ...touched, name: true })}
             placeholder={t('albums:namePlaceholder') || 'Album name...'}
             maxLength={50}
             showCharacterCount
             required
+            error={nameError}
           />
 
           {/* Description Input */}
@@ -74,10 +83,12 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
             as="textarea"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            onBlur={() => setTouched({ ...touched, description: true })}
             placeholder={t('albums:descriptionPlaceholder') || 'Description...'}
             maxLength={200}
             rows={3}
             showCharacterCount
+            error={descriptionError}
           />
 
           {/* Cover URL Input */}
@@ -87,7 +98,9 @@ const AlbumModal = ({ onClose, onSave, editingAlbum }) => {
             type="url"
             value={cover}
             onChange={(e) => setCover(e.target.value)}
+            onBlur={() => setTouched({ ...touched, cover: true })}
             placeholder="https://..."
+            error={coverError}
           />
 
           {/* Buttons */}

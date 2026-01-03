@@ -17,6 +17,7 @@ import useAuth from './useAuth' // ✅ ADD
 import useStore from '../state/store' // ✅ P0: For storageUsed
 import * as exifr from 'exifr' // ✅ ADD: For EXIF extraction BEFORE compression
 import { devLog, devWarn } from '../utils/log'
+import { getErrorMessage, ERROR_MESSAGES } from '../utils/errorMessages'
 
 export function useUpload() {
   const { t } = useTranslation(['upload'])
@@ -299,6 +300,7 @@ export function useUpload() {
             }
           } catch (error) {
             console.error(`Failed to process video ${file.name}:`, error)
+            devWarn(`⚠️ Video processing failed: ${getErrorMessage(error)}`)
             totalCompressedSize += file.size
           }
 
@@ -462,8 +464,9 @@ export function useUpload() {
       }
     } catch (error) {
       console.error('Upload error:', error)
-      await showToast(error.message || t('errors.uploadFailed'), 'error')
-      return { success: false, error: error.message }
+      const errorMessage = getErrorMessage(error, 'Upload')
+      await showToast(errorMessage, 'error')
+      return { success: false, error: errorMessage }
     } finally {
       setTimeout(() => {
         setUploading(false)
