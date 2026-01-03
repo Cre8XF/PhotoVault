@@ -1,9 +1,10 @@
 // ============================================================================
-// COMPONENT: ConfirmModal.jsx – med "Deleting..." animasjon og auto-close
+// COMPONENT: ConfirmModal.jsx - Confirmation dialog using unified Modal
 // ============================================================================
 import React, { useState } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import Modal from './Modal'
 import Button from './Button'
 
 const ConfirmModal = ({
@@ -23,8 +24,6 @@ const ConfirmModal = ({
   const finalConfirmLabel = confirmLabel || t('confirm')
   const finalCancelLabel = cancelLabel || t('cancel')
 
-  if (!isOpen) return null
-
   const handleConfirm = async () => {
     try {
       setLoading(true)
@@ -39,51 +38,50 @@ const ConfirmModal = ({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm animate-fade-in"
-      style={{ backgroundColor: 'var(--overlay-bg)' }}
-      onClick={onClose}
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="sm"
+      closeOnEscape={true}
+      closeOnOutsideClick={false} // Prevent accidental close on delete
+      showCloseButton={false} // No X button for critical actions
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="glass card-premium relative w-full max-w-sm p-6 rounded-2xl shadow-2xl animate-scale-in"
-        style={{ color: 'var(--text-primary)' }}
-      >
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-yellow-500/20">
-            <AlertTriangle className="w-6 h-6 text-yellow-400" />
-          </div>
-          <h2 className="text-lg font-semibold">{finalTitle}</h2>
+      {/* Header with Icon */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-yellow-500/20">
+          <AlertTriangle className="w-6 h-6 text-yellow-400" />
         </div>
-
-        {/* Body */}
-        <p className="text-sm leading-relaxed mb-6" style={{ color: 'var(--text-secondary)' }}>
-          {finalMessage}
-        </p>
-
-        {/* Buttons */}
-        <div className="flex justify-end gap-3">
-          <Button
-            onClick={onClose}
-            disabled={loading}
-            variant="secondary"
-            size="sm"
-          >
-            {finalCancelLabel}
-          </Button>
-
-          <Button
-            onClick={handleConfirm}
-            loading={loading}
-            variant="danger"
-            size="sm"
-          >
-            {loading ? t('deleting') : finalConfirmLabel}
-          </Button>
-        </div>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          {finalTitle}
+        </h2>
       </div>
-    </div>
+
+      {/* Message */}
+      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
+        {finalMessage}
+      </p>
+
+      {/* Action Buttons */}
+      <div className="flex justify-end gap-3">
+        <Button
+          onClick={onClose}
+          disabled={loading}
+          variant="secondary"
+          size="sm"
+        >
+          {finalCancelLabel}
+        </Button>
+
+        <Button
+          onClick={handleConfirm}
+          loading={loading}
+          variant="danger"
+          size="sm"
+        >
+          {loading ? t('deleting') : finalConfirmLabel}
+        </Button>
+      </div>
+    </Modal>
   )
 }
 
