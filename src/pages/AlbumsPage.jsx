@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import AlbumCard from '../components/AlbumCard'
 import Loading from '../components/Loading'
+import EmptyState from '../components/EmptyState'
 import PhotoGridUnified from '../components/PhotoGridUnified'
 import MoveModal from '../components/MoveModal'
 import { updatePhotoAlbum, updatePhoto } from '../firebase'
@@ -346,21 +347,14 @@ const AlbumsPage = ({
           {!isFreeUser &&
             viewMode === 'albums' &&
             (!collages || collages.length === 0) && (
-              <div className="mb-8 p-8 bg-white/5 rounded-xl border border-white/10 text-center">
-              <GridIcon className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <h3 className="text-lg font-semibold mb-2">
-                {t('collage:emptyState.title')}
-              </h3>
-              <p className="text-sm opacity-60 mb-4">
-                {t('collage:emptyState.description')}
-              </p>
-              <button
-                onClick={() => setCurrentPage('collage')}
-                className="ripple-effect px-6 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 transition"
-              >
-                {t('collage:emptyState.createFirst')}
-              </button>
-            </div>
+              <EmptyState
+                variant="no-collages"
+                title={t('collage:emptyState.title')}
+                description={t('collage:emptyState.description')}
+                action={t('collage:emptyState.createFirst')}
+                onAction={() => setCurrentPage('collage')}
+                className="mb-8"
+              />
           )}
 
           {/* Albums list */}
@@ -403,27 +397,16 @@ const AlbumsPage = ({
 
               {/* Empty state */}
               {safeAlbums.length === 0 ? (
-                <div className="text-center py-16 px-4">
-                  <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-500/10 rounded-full mb-4">
-                    <Folder className="w-10 h-10 text-blue-400" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">
-                    {t('albums:emptyState.title') || 'Ingen album ennå'}
-                  </h3>
-                  <p className="text-gray-400 mb-6 max-w-md mx-auto">
-                    {t('albums:emptyState.description') || 'Organiser bildene dine ved å opprette ditt første album.'}
-                  </p>
-                  <button
-                    onClick={() => {
-                      console.log('📁 AlbumsPage: Create first album - opening UploadModal in album mode')
-                      openUploadModal('album')
-                    }}
-                    className="ripple-effect px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 flex items-center gap-2 mx-auto transition"
-                  >
-                    <FolderPlus className="w-5 h-5" />
-                    {t('albums:emptyState.createFirst') || 'Opprett album'}
-                  </button>
-                </div>
+                <EmptyState
+                  variant="no-albums"
+                  title={t('albums:emptyState.title')}
+                  description={t('albums:emptyState.description')}
+                  action={t('albums:emptyState.createFirst')}
+                  onAction={() => {
+                    console.log('📁 AlbumsPage: Create first album - opening UploadModal in album mode')
+                    openUploadModal('album')
+                  }}
+                />
               ) : (
                 <>
                   {/* Grid view */}
