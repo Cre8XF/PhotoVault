@@ -75,6 +75,33 @@ function formatFileSize(bytes) {
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
 }
 
+/**
+ * Get friendly file type name instead of raw MIME type
+ */
+function getFriendlyFileType(mimeType) {
+  if (!mimeType) return 'Document'
+
+  const types = {
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'Word Document',
+    'application/msword': 'Word Document',
+    'application/pdf': 'PDF',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'Excel Spreadsheet',
+    'application/vnd.ms-excel': 'Excel Spreadsheet',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'PowerPoint',
+    'application/vnd.ms-powerpoint': 'PowerPoint',
+    'text/plain': 'Text File',
+    'text/csv': 'CSV File',
+    'image/jpeg': 'JPEG Image',
+    'image/jpg': 'JPEG Image',
+    'image/png': 'PNG Image',
+    'image/gif': 'GIF Image',
+    'image/webp': 'WebP Image',
+    'image/svg+xml': 'SVG Image',
+  }
+
+  return types[mimeType] || 'Document'
+}
+
 const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
   const navigate = useNavigate()
   const { t, i18n } = useTranslation(['common', 'documents'])
@@ -279,8 +306,8 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
                     {doc.mimeType && (
                       <>
                         <span>•</span>
-                        <span className="uppercase">
-                          {doc.mimeType.split('/').pop()}
+                        <span>
+                          {getFriendlyFileType(doc.mimeType)}
                         </span>
                       </>
                     )}
