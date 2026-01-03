@@ -1173,7 +1173,7 @@ const photoGroups = useMemo(() => {
       {/* Search Section - Collapsed by Default */}
       {!searchExpanded ? null : ( // Collapsed state - show search icon in header (no separate search box)
         // Expanded state - full search input
-        <div className="glass rounded-2xl p-4 mb-4">
+        <div className="glass rounded-2xl p-4 mb-4 focus-within:ring-2 focus-within:ring-purple-400 focus-within:ring-offset-2 focus-within:ring-offset-gray-900 transition-all duration-200">
           <div className="flex items-center gap-3">
             <SearchIcon className="w-5 h-5 opacity-60" />
             <input
@@ -1182,7 +1182,8 @@ const photoGroups = useMemo(() => {
               placeholder={t('search:searchIn')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 bg-transparent outline-none text-lg"
+              className="flex-1 bg-transparent focus:outline-none text-lg"
+              aria-label="Search photos, albums, and collages"
               autoFocus
             />
             <button
@@ -1190,7 +1191,7 @@ const photoGroups = useMemo(() => {
                 setSearchExpanded(false)
                 setSearchQuery('') // Clear search when closing
               }}
-              className="ripple-effect p-2 hover:bg-white/10 rounded-lg transition"
+              className="ripple-effect p-2 hover:bg-white/10 rounded-lg transition-all duration-150 hover:shadow-md active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
               aria-label="Close search"
             >
               <X className="w-5 h-5" />
