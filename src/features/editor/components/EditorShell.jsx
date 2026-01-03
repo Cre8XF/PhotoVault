@@ -42,62 +42,69 @@ export default function EditorShell({
   }
   return (
     <div className="fixed inset-0 editor-bg-primary flex flex-col">
-      {/* Top bar - with Reset button */}
-      <div className="flex items-center justify-between px-4 py-3 border-b editor-border">
+      {/* Top bar - Clean left/center/right layout */}
+      <div className="flex items-center justify-between px-4 py-3 border-b editor-border gap-4">
+        {/* Left: Close button */}
         <button
           onClick={onClose}
           disabled={isSaving}
-          className="flex items-center gap-2 editor-text-primary hover:opacity-80 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 hover:bg-white/10 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+          aria-label="Close editor"
         >
-          <span className="text-xl">✕</span>
-          <span className="text-sm font-medium">Close</span>
+          <span className="text-xl editor-text-primary">✕</span>
         </button>
 
-        <div className="flex items-center gap-4">
-          <h1 className="editor-text-primary font-semibold text-lg truncate max-w-[200px]">
-            {photoName}
-          </h1>
+        {/* Center: Filename (truncated with tooltip) */}
+        <h1
+          className="editor-text-primary font-semibold text-lg truncate flex-1 mx-4 text-center"
+          title={photoName}
+        >
+          {photoName}
+        </h1>
 
+        {/* Right: Action buttons */}
+        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Revert to Original button - only show if photo was previously edited (hidden on mobile to save space) */}
           {isEdited && onRevert && (
             <button
               onClick={onRevert}
               disabled={isSaving}
-              className="hidden md:inline-flex text-red-400 hover:text-red-300 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="hidden md:inline-flex px-3 py-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Revert to Original
             </button>
           )}
 
-          {/* Reset button - resets current editing session */}
+          {/* Reset button - secondary/ghost style */}
           {onReset && (
             <button
               onClick={onReset}
               disabled={isSaving}
-              className="editor-text-muted hover:editor-text-secondary transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1.5 editor-text-muted hover:bg-white/10 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Reset
             </button>
           )}
-        </div>
 
-        <button
-          onClick={onSave}
-          disabled={isSaving}
-          className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isSaving ? (
-            <>
-              <span className="text-sm font-medium">Saving...</span>
-              <span className="animate-spin">⟳</span>
-            </>
-          ) : (
-            <>
-              <span className="text-sm font-medium">Save</span>
-              <span className="text-xl">✓</span>
-            </>
-          )}
-        </button>
+          {/* Save button - primary style */}
+          <button
+            onClick={onSave}
+            disabled={isSaving}
+            className="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm"
+          >
+            {isSaving ? (
+              <>
+                <span>Saving...</span>
+                <span className="animate-spin">⟳</span>
+              </>
+            ) : (
+              <>
+                <span>Save</span>
+                <span className="text-lg">✓</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Canvas area - optimized for mobile */}
