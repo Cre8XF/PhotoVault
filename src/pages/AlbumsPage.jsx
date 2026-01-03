@@ -15,8 +15,8 @@ import {
   Trash2,
 } from 'lucide-react'
 import AlbumCard from '../components/AlbumCard'
-import { SkeletonCard } from '../components/SkeletonCard'
-import PhotoGridOptimized from '../components/PhotoGridOptimized'
+import Loading from '../components/Loading'
+import PhotoGridUnified from '../components/PhotoGridUnified'
 import MoveModal from '../components/MoveModal'
 import { updatePhotoAlbum, updatePhoto } from '../firebase'
 import { doc, deleteDoc } from 'firebase/firestore'
@@ -245,7 +245,7 @@ const AlbumsPage = ({
       {isInitialLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
-            <SkeletonCard key={i} />
+            <Loading key={i} variant="skeleton" className="h-64" />
           ))}
         </div>
       ) : (
@@ -257,7 +257,7 @@ const AlbumsPage = ({
             collages.length > 0 && (
               <section className="mb-8">
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <GridIcon className="w-5 h-5 text-purple-400" />
+                <GridIcon className="w-5 h-5 text-purple" />
                 {t('collage:myCollages')}
               </h2>
 
@@ -579,11 +579,12 @@ const AlbumsPage = ({
           {/* Photos view (unassigned photos) */}
           {viewMode === 'photos' && (
             <section>
-              <PhotoGridOptimized
+              <PhotoGridUnified
                 photos={albumPhotos}
                 onPhotoClick={onPhotoClick}
+                selectionMode="modifier"
                 selectedPhotos={selectedPhotos}
-                setSelectedPhotos={setSelectedPhotos}
+                onSelectionChange={setSelectedPhotos}
               />
             </section>
           )}

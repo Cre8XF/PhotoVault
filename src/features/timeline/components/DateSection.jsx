@@ -18,7 +18,7 @@ const DateSection = ({ date, photos, onPhotoClick }) => {
     <div className="date-section mb-8">
       {/* Date Header */}
       <div className="flex items-center gap-3 mb-4 sticky top-0 bg-gradient-to-b from-gray-900 via-gray-900 to-transparent pb-2 z-10">
-        <Calendar className="w-5 h-5 text-purple-400" />
+        <Calendar className="w-5 h-5 text-purple" />
         <div>
           <h2 className="text-xl font-bold">{date}</h2>
           <p className="text-sm text-gray-400">{photos.length} {photos.length === 1 ? t('timeline:stats.photo') : t('timeline:stats.photo_plural')}</p>

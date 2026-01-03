@@ -28,7 +28,7 @@ const ComingSoonModal = ({
     {
       key: 'autoTagging',
       icon: Sparkles,
-      color: 'text-purple-400'
+      color: 'text-purple'
     },
     {
       key: 'faceRecognition',
@@ -86,7 +86,7 @@ const ComingSoonModal = ({
           </div>
 
           {featureName && (
-            <p className="text-purple-300 font-medium mt-2">
+            <p className="text-purple font-medium mt-2">
               {featureName}
             </p>
           )}
@@ -111,7 +111,7 @@ const ComingSoonModal = ({
 
             <div className="bg-gradient-to-br from-purple-600/10 to-pink-600/10 border border-purple-500/20 rounded-xl p-5">
               <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-purple-400" />
+                <Sparkles className="w-5 h-5 text-purple" />
                 {t('comingSoon.aiFeatures.title')}
               </h3>
               <p className="text-sm text-gray-300 mb-4">

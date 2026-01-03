@@ -242,7 +242,7 @@ const navigate = useNavigate();
               <button
                 onClick={() => setSetupModalOpen(true)}
                 className="w-full mt-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-600/50
-                           text-purple-600 dark:text-purple-400 font-semibold hover:bg-gray-200 dark:hover:bg-gray-800 transition"
+                           text-purple-600 dark:text-purple font-semibold hover:bg-gray-200 dark:hover:bg-gray-800 transition"
               >
                 {t('vault:locked.setupButton', { defaultValue: 'Set Up Vault' })}
               </button>
@@ -267,7 +267,7 @@ const navigate = useNavigate();
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Shield className="w-7 h-7 text-purple-500 dark:text-purple-400" />
+              <Shield className="w-7 h-7 text-purple-500 dark:text-purple" />
               {t('vault:unlocked.title', { defaultValue: 'Secure Vault' })}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
@@ -339,7 +339,7 @@ const navigate = useNavigate();
         {vaultPhotos.length === 0 ? (
           <div className="text-center py-16 px-4">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-purple-500/10 rounded-full mb-4">
-              <ImagePlus className="w-10 h-10 text-purple-400" />
+              <ImagePlus className="w-10 h-10 text-purple" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               {t('vault:unlocked.empty.title', { defaultValue: 'No Photos in Vault' })}

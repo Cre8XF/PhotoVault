@@ -2,6 +2,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { usePhotoData } from '../hooks/usePhotoData'
 import { useTranslation } from 'react-i18next'
 import { Server, ArrowUp } from 'lucide-react'
+import Badge from './Badge'
 
 const StorageIndicator = () => {
   const { t } = useTranslation()
@@ -49,9 +50,7 @@ const StorageIndicator = () => {
           </h3>
         </div>
 
-        <span className="text-sm font-medium px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
-          {userTier}
-        </span>
+        <Badge variant="purple">{userTier}</Badge>
       </div>
 
       {/* Progress bar */}

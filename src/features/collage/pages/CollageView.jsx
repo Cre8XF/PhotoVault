@@ -624,7 +624,7 @@ const CollageView = () => {
                     }}
                     className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 transition-colors border-t border-white/10"
                   >
-                    <Share2 className="w-5 h-5 text-purple-400" />
+                    <Share2 className="w-5 h-5 text-purple" />
                     <span className="text-sm font-medium">
                       {t('collage:actions.share')}
                     </span>
@@ -687,7 +687,7 @@ const CollageView = () => {
             {/* Photos */}
             <div className="flex items-center gap-3">
               <div className="p-2 bg-purple-500/20 rounded-lg">
-                <ImageIcon className="w-5 h-5 text-purple-400" />
+                <ImageIcon className="w-5 h-5 text-purple" />
               </div>
               <div>
                 <p className="text-xs opacity-60">

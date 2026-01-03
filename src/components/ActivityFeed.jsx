@@ -116,7 +116,7 @@ const ActivityFeed = () => {
       },
       album: {
         icon: Folder,
-        color: 'text-purple-600 dark:text-purple-400',
+        color: 'text-purple-600 dark:text-purple',
         bgColor: 'bg-purple-100 dark:bg-purple-900/30',
         label: (data) => t('activity:albumCreated', { name: data.name }),
       },

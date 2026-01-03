@@ -633,7 +633,7 @@ const UploadModal = ({
                 disabled={uploading}
                 className="ripple-effect flex flex-col items-center gap-2 p-4 bg-white/5 hover:bg-white/10 rounded-xl transition border border-white/10 disabled:opacity-50"
               >
-                <ImageIcon className="w-8 h-8 text-purple-400" />
+                <ImageIcon className="w-8 h-8 text-purple" />
                 <span className="text-sm font-medium">
                   {t('upload:gallery')}
                 </span>

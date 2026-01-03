@@ -187,7 +187,7 @@ export default function AIToolsPage() {
                   {/* Coming Soon Badge */}
                   {!tool.active && (
                     <div className="absolute top-4 right-4 px-2 py-1 bg-purple-500/20 border border-purple-500/30 rounded-full">
-                      <span className="text-xs text-purple-300 font-medium">
+                      <span className="text-xs text-purple font-medium">
                         {t('ai:comingSoon')}
                       </span>
                     </div>

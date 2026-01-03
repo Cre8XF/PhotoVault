@@ -102,7 +102,7 @@ function FeatureItem({ text }) {
   return (
     <div className="flex items-center gap-3">
       <div className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-        <Check className="w-3 h-3 text-purple-400" />
+        <Check className="w-3 h-3 text-purple" />
       </div>
       <span className="text-sm">{text}</span>
     </div>

@@ -192,7 +192,7 @@ const ProfilePage = () => {
                 tier() === 'ADMIN'
                   ? 'bg-red-500/20 text-red-400 border border-red-500/30'
                   : tier() === 'PRO'
-                  ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                  ? 'bg-purple-500/20 text-purple border border-purple-500/30'
                   : tier() === 'LITE'
                   ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
                   : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
@@ -207,12 +207,12 @@ const ProfilePage = () => {
           <div className="mt-4 p-4 glass rounded-xl">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <HardDrive className="w-5 h-5 text-purple-400" />
+                <HardDrive className="w-5 h-5 text-purple" />
                 <span className="text-sm font-medium">Lagring</span>
               </div>
               <button
                 onClick={() => navigate('/subscription')}
-                className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+                className="text-xs text-purple hover:text-purple transition-colors"
               >
                 Detaljer →
               </button>

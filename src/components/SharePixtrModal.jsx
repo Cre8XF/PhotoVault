@@ -108,7 +108,7 @@ const SharePixtrModal = ({ isOpen, onClose }) => {
             <p className="text-xs text-gray-600 dark:text-gray-500 mb-1">
               {t('share.pixtrUrl', { defaultValue: 'Pixtr URL' })}
             </p>
-            <p className="text-lg font-semibold text-purple-600 dark:text-purple-400">
+            <p className="text-lg font-semibold text-purple-600 dark:text-purple">
               {PIXTR_URL}
             </p>
           </div>
