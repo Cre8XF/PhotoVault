@@ -32,6 +32,7 @@ import { softDeletePhoto, setAlbumCover, updateAlbumPhotoCount } from '../fireba
 import MoveModal from '../components/MoveModal'
 import ConfirmModal from '../components/ConfirmModal'
 import CollageCard from '../components/CollageCard'
+import EmptyState from '../components/EmptyState'
 import useStore from '../state/store'
 import {
   resolvePhotoDate,
@@ -1663,39 +1664,30 @@ const photoGroups = useMemo(() => {
           )}
         </div>
       ) : (
-        /* No results - Enhanced empty state */
-        <div className="text-center py-16 px-4">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-500/10 rounded-full mb-4">
-            <SearchIcon className="w-10 h-10 text-blue-400" />
-          </div>
-          <h3 className="text-xl font-semibold mb-2">
-            {t('search:noResults') || 'Ingen resultater'}
-          </h3>
-          <p className="text-gray-400 mb-6 max-w-md mx-auto">
-            Prøv å endre søkekriteriene eller filteret for å finne bilder.
-          </p>
-          {(searchQuery || Object.values(activeFilters).some((v) => v)) && (
-            <button
-              onClick={() => {
-                setSearchQuery('')
-                setActiveFilters({
-                  favorites: false,
-                  withFaces: false,
-                  withTags: false,
-                  aiAnalyzed: false,
-                  dateRange: null,
-                  albumId: null,
-                  category: null,
-                  contentTypes: ['photo', 'video'], // Reset to default: hide collages
-                })
-              }}
-              className="ripple-effect px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 flex items-center gap-2 mx-auto transition"
-            >
-              <X className="w-5 h-5" />
-              {t('search:resetFilters') || 'Nullstill filtre'}
-            </button>
-          )}
-        </div>
+        /* No results - EmptyState component */
+        <EmptyState
+          variant="no-results"
+          title={t('search:noResults') || 'Ingen resultater'}
+          description="Prøv å endre søkekriteriene eller filteret for å finne bilder."
+          action={t('search:resetFilters') || 'Nullstill filtre'}
+          onAction={
+            (searchQuery || Object.values(activeFilters).some((v) => v))
+              ? () => {
+                  setSearchQuery('')
+                  setActiveFilters({
+                    favorites: false,
+                    withFaces: false,
+                    withTags: false,
+                    aiAnalyzed: false,
+                    dateRange: null,
+                    albumId: null,
+                    category: null,
+                    contentTypes: ['photo', 'video'], // Reset to default: hide collages
+                  })
+                }
+              : null
+          }
+        />
       )}
 
       {/* Modals */}

@@ -45,6 +45,7 @@ import AlbumModal from '../components/AlbumModal'
 import QRShareModal from '../features/qr-sharing/components/QRShareModal'
 import VerificationModal from '../components/VerificationModal'
 import Loading from '../components/Loading'
+import EmptyState from '../components/EmptyState'
 import useStore from '../state/store'
 import { ROUTES } from '../routes'
 import { resolvePhotoDate, sortPhotosByDate } from '../utils/photoDateUtils'
@@ -1029,19 +1030,13 @@ const AlbumPage = ({
 
       {/* Empty State */}
       {!isInitialLoading && filteredPhotos.length === 0 && (
-        <div className="text-center py-16">
-          <ImageIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-          <p className="text-xl font-medium mb-2">{t('albums:noPhotos')}</p>
-          <p className="text-gray-400 mb-6">
-            {t('albums:noPhotosDescription')}
-          </p>
-          <button
-            onClick={() => setUploadOpen(true)}
-            className="ripple-effect px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl transition"
-          >
-            {t('albums:uploadFirstPhotos')}
-          </button>
-        </div>
+        <EmptyState
+          variant="no-photos"
+          title={t('albums:noPhotos')}
+          description={t('albums:noPhotosDescription')}
+          action={t('albums:uploadFirstPhotos')}
+          onAction={() => setUploadOpen(true)}
+        />
       )}
 
       {/* Action Buttons - Filters & Upload */}
