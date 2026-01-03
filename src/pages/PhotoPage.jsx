@@ -1,7 +1,7 @@
 // ============================================================================
 // PhotoPage - Phase 2A: Fullscreen Photo Viewer + XSS Protection
 // ============================================================================
-import React, { useEffect, useState, useRef, useCallback } from 'react'
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import { toggleFavorite as firebaseToggleFavorite } from '../firebase'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import {
@@ -16,6 +16,7 @@ import {
   FolderInput,
   X,
   Edit2,
+  Tag as TagIcon,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { useTranslation } from 'react-i18next'
@@ -25,9 +26,11 @@ import { usePhotoContext } from '../hooks/usePhotoContext'
 import { usePrefetchAdjacentPhotos } from '../hooks/usePrefetchAdjacentPhotos'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { deletePhoto as firebaseDeletePhoto } from '../firebase'
+import { usePhotoData } from '../hooks/usePhotoData'
 import ConfirmModal from '../components/ConfirmModal'
 import { sanitizeImageUrl, PLACEHOLDER_IMAGE } from '../utils/security'
 import DocumentCard from '../components/DocumentCard'
+import TagInput from '../components/TagInput'
 
 export default function PhotoPage() {
   const { id } = useParams()
@@ -62,6 +65,28 @@ export default function PhotoPage() {
     setPhotoIndex,
     setCurrentPhotoId,
   } = usePhotoContext()
+
+  // Tag management
+  const { addTag, removeTag } = usePhotoData()
+
+  // Get all unique tags from all photos for suggestions
+  const allTags = useMemo(() => {
+    const tagSet = new Set()
+    photos.forEach((p) => {
+      if (p.tags && Array.isArray(p.tags)) {
+        p.tags.forEach((tag) => tagSet.add(tag))
+      }
+    })
+    return Array.from(tagSet).sort()
+  }, [photos])
+
+  // Get suggestions (exclude already-added tags)
+  const tagSuggestions = useMemo(() => {
+    if (!photo || !photo.tags) return allTags.slice(0, 5)
+    return allTags
+      .filter((tag) => !photo.tags.includes(tag))
+      .slice(0, 5)
+  }, [allTags, photo])
 
   // Prefetch adjacent photos
   usePrefetchAdjacentPhotos(photoOrder, photoIndex, photos)
@@ -893,6 +918,21 @@ export default function PhotoPage() {
                   <div className="text-white break-words">{photo.caption}</div>
                 </div>
               )}
+
+              {/* Tags Section */}
+              <div>
+                <div className="mb-2 flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
+                  <TagIcon className="w-4 h-4" />
+                  <span>Tags</span>
+                </div>
+                <TagInput
+                  tags={photo.tags || []}
+                  onAddTag={(tag) => addTag(photo.id, tag)}
+                  onRemoveTag={(tag) => removeTag(photo.id, tag)}
+                  suggestions={tagSuggestions}
+                  placeholder="Legg til tag (f.eks. familie, sommer, hytta)"
+                />
+              </div>
             </div>
           </div>
         </div>
