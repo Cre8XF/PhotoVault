@@ -1,59 +1,105 @@
-import { useEffect, useCallback } from 'react'
+// ============================================================================
+// HOOK: useKeyboardShortcuts.js - Keyboard shortcut registration
+// ============================================================================
+import { useEffect } from 'react'
 
 /**
- * Keyboard shortcuts hook for desktop users
- * Automatically disables when user is typing in input/textarea
+ * Hook for registering keyboard shortcuts
  *
- * @param {Array} shortcuts - Array of { key: string, action: function }
+ * Features:
+ * - Supports modifier keys (Ctrl, Shift, Alt, Cmd)
+ * - Ignores shortcuts when typing in inputs/textareas (except Escape)
+ * - Prevents default browser behavior for registered shortcuts
+ * - Cleans up event listeners on unmount
+ *
+ * @param {Object} shortcuts - Map of key combinations to handlers
+ * @param {Array} dependencies - Hook dependencies (handlers should be memoized)
+ *
  * @example
- * useKeyboardShortcuts([
- *   { key: 'ArrowLeft', action: () => navigateToPrev() },
- *   { key: 'ArrowRight', action: () => navigateToNext() },
- *   { key: 'Ctrl+a', action: () => selectAll() },
- *   { key: 'Escape', action: () => close() }
- * ])
+ * useKeyboardShortcuts({
+ *   'ctrl+u': () => openUpload(),
+ *   'ctrl+n': () => createAlbum(),
+ *   'Delete': () => handleDelete(),
+ *   '/': () => focusSearch(),
+ *   '?': () => showHelp()
+ * }, [openUpload, createAlbum, handleDelete, focusSearch, showHelp])
  */
-export function useKeyboardShortcuts(shortcuts) {
-  const handleKeyDown = useCallback(
-    (event) => {
-      // Ignore if user is typing in input/textarea/contenteditable
-      if (
-        event.target.tagName === 'INPUT' ||
-        event.target.tagName === 'TEXTAREA' ||
-        event.target.isContentEditable
-      ) {
+export function useKeyboardShortcuts(shortcuts, dependencies = []) {
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ignore if user is typing in input/textarea (except Escape)
+      const isTyping = ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)
+      const isContentEditable = e.target.isContentEditable
+
+      if ((isTyping || isContentEditable) && e.key !== 'Escape') {
         return
       }
 
-      const key = event.key
-      const ctrl = event.ctrlKey || event.metaKey // Support both Ctrl and Cmd (Mac)
-      const shift = event.shiftKey
-      const alt = event.altKey
+      // Check each registered shortcut
+      Object.entries(shortcuts).forEach(([key, handler]) => {
+        if (matchesShortcut(e, key)) {
+          e.preventDefault()
+          handler(e)
+        }
+      })
+    }
 
-      // Build key combo string
-      let combo = ''
-      if (ctrl) combo += 'Ctrl+'
-      if (shift) combo += 'Shift+'
-      if (alt) combo += 'Alt+'
-      combo += key
-
-      // Find matching shortcut
-      const shortcut = shortcuts.find(
-        (s) =>
-          s.key.toLowerCase() === combo.toLowerCase() ||
-          s.key.toLowerCase() === key.toLowerCase()
-      )
-
-      if (shortcut) {
-        event.preventDefault()
-        shortcut.action(event)
-      }
-    },
-    [shortcuts]
-  )
-
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [handleKeyDown])
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, dependencies) // eslint-disable-line react-hooks/exhaustive-deps
 }
+
+/**
+ * Check if keyboard event matches shortcut key combination
+ *
+ * Supported formats:
+ * - Single key: 'a', 'ArrowLeft', 'Delete'
+ * - With Ctrl: 'ctrl+a', 'ctrl+shift+a'
+ * - With Cmd (Mac): 'cmd+a' (same as ctrl+a, handled automatically)
+ * - With Shift: 'shift+a'
+ * - With Alt: 'alt+a'
+ * - Combinations: 'ctrl+shift+alt+a'
+ *
+ * @param {KeyboardEvent} e - The keyboard event
+ * @param {string} shortcut - The shortcut combination (case-insensitive)
+ * @returns {boolean} True if event matches shortcut
+ */
+function matchesShortcut(e, shortcut) {
+  const keys = shortcut.toLowerCase().split('+').map(k => k.trim())
+
+  // Extract modifiers and main key
+  const hasCtrl = keys.includes('ctrl') || keys.includes('cmd')
+  const hasShift = keys.includes('shift')
+  const hasAlt = keys.includes('alt')
+  const mainKey = keys[keys.length - 1]
+
+  // Check if modifiers are pressed
+  const ctrlPressed = hasCtrl && (e.ctrlKey || e.metaKey) // metaKey = Cmd on Mac
+  const shiftPressed = hasShift && e.shiftKey
+  const altPressed = hasAlt && e.altKey
+
+  // Check if main key is pressed
+  const keyPressed = e.key.toLowerCase() === mainKey.toLowerCase()
+
+  // All required modifiers must match
+  const ctrlMatch = !hasCtrl || ctrlPressed
+  const shiftMatch = !hasShift || shiftPressed
+  const altMatch = !hasAlt || altPressed
+
+  // Also check that extra modifiers aren't pressed
+  const noExtraCtrl = hasCtrl || !(e.ctrlKey || e.metaKey)
+  const noExtraShift = hasShift || !e.shiftKey
+  const noExtraAlt = hasAlt || !e.altKey
+
+  return (
+    keyPressed &&
+    ctrlMatch &&
+    shiftMatch &&
+    altMatch &&
+    noExtraCtrl &&
+    noExtraShift &&
+    noExtraAlt
+  )
+}
+
+export default useKeyboardShortcuts
