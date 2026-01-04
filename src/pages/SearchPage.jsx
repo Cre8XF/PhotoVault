@@ -33,6 +33,8 @@ import MoveModal from '../components/MoveModal'
 import ConfirmModal from '../components/ConfirmModal'
 import CollageCard from '../components/CollageCard'
 import EmptyState from '../components/EmptyState'
+import MemoriesSection from '../components/MemoriesSection'
+import SmartViews from '../components/SmartViews'
 import useStore from '../state/store'
 import {
   resolvePhotoDate,
@@ -354,8 +356,29 @@ const SearchPage = ({
     if (activeFilters.dateRange) {
       const now = Date.now()
 
-      // Handle special day filters (today, yesterday) - Issue 2 fix
-      if (activeFilters.dateRange === 'today') {
+      // Handle "last year" filter - SMART ORGANIZATION
+      if (activeFilters.dateRange === 'lastyear') {
+        const currentYear = new Date().getFullYear()
+        const lastYear = currentYear - 1
+        const yearStart = new Date(lastYear, 0, 1).getTime()
+        const yearEnd = new Date(lastYear, 11, 31, 23, 59, 59, 999).getTime()
+
+        if (import.meta.env.DEV) {
+          devLog('🔍 Filtering photos from LAST YEAR:', {
+            year: lastYear,
+            start: new Date(yearStart).toISOString(),
+            end: new Date(yearEnd).toISOString(),
+          })
+        }
+
+        res = res.filter((p) => {
+          const photoDate = new Date(p.createdAt || p.uploadedAt || 0).getTime()
+          return photoDate >= yearStart && photoDate <= yearEnd
+        })
+        if (import.meta.env.DEV) {
+          devLog(`✅ Last year filter applied: ${res.length} photos`)
+        }
+      } else if (activeFilters.dateRange === 'today') {
         const todayStart = new Date()
         todayStart.setHours(0, 0, 0, 0)
         const todayEnd = new Date()
@@ -817,6 +840,35 @@ const photoGroups = useMemo(() => {
     }
   }
 
+  // Smart Views filter handler
+  const handleSmartViewFilter = (filter) => {
+    // If clicking the same filter, toggle it off
+    const isSameFilter = Object.keys(filter).every(
+      key => activeFilters[key] === filter[key]
+    )
+
+    if (isSameFilter) {
+      // Clear the filter
+      setActiveFilters({
+        ...activeFilters,
+        ...Object.keys(filter).reduce((acc, key) => {
+          if (key === 'contentTypes') {
+            acc[key] = ['photo', 'video'] // Reset to default
+          } else {
+            acc[key] = null
+          }
+          return acc
+        }, {})
+      })
+    } else {
+      // Apply the filter
+      setActiveFilters({
+        ...activeFilters,
+        ...filter
+      })
+    }
+  }
+
   return (
     <div className="container-premium max-w-7xl mx-auto p-4">
       {/* Header - FIXED LAYOUT (Issue 4) */}
@@ -1173,6 +1225,23 @@ const photoGroups = useMemo(() => {
             </button>
           </div>
         </div>
+      )}
+
+      {/* SMART ORGANIZATION: Memories Section */}
+      {!editMode && !searchQuery && !showFilters && (
+        <MemoriesSection
+          photos={safePhotos}
+          onPhotoClick={handlePhotoClick}
+        />
+      )}
+
+      {/* SMART ORGANIZATION: Smart Views (Quick Filters) */}
+      {!editMode && (
+        <SmartViews
+          photos={safePhotos}
+          activeFilters={activeFilters}
+          onFilterChange={handleSmartViewFilter}
+        />
       )}
 
       {/* Content Type Filters - Top Level Chips */}

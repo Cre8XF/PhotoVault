@@ -336,3 +336,164 @@ export const getAvailableMonthsForYear = (photos, year) => {
       monthKey: `${yearStr}-${String(monthNum + 1).padStart(2, '0')}`
     }))
 }
+
+/**
+ * SMART ORGANIZATION: Find photos from same month in previous years
+ * @param {Array} photos - Array of photo objects
+ * @param {Date} referenceDate - The date to compare against (default: today)
+ * @returns {Array} - Photos from same month in previous years
+ */
+export const getPhotosFromSameMonth = (photos, referenceDate = new Date()) => {
+  if (!photos || photos.length === 0) {
+    return []
+  }
+
+  const refMonth = referenceDate.getMonth()
+  const refYear = referenceDate.getFullYear()
+
+  const memories = photos
+    .map(photo => ({
+      ...photo,
+      _date: getPhotoDate(photo)
+    }))
+    .filter(photo => {
+      if (photo._date === null) return false
+
+      const photoMonth = photo._date.getMonth()
+      const photoYear = photo._date.getFullYear()
+
+      // Same month, but different year (previous years only)
+      return photoMonth === refMonth && photoYear < refYear
+    })
+    .sort((a, b) => b._date - a._date) // Newest first
+    .map(photo => {
+      const { _date, ...cleanPhoto } = photo
+      return {
+        ...cleanPhoto,
+        yearsAgo: refYear - _date.getFullYear()
+      }
+    })
+
+  if (import.meta.env.DEV) console.log(`📅 Found ${memories.length} photos from this month in previous years`)
+  return memories
+}
+
+/**
+ * SMART ORGANIZATION: Get highlights from last year (favorites or most recent)
+ * @param {Array} photos - Array of photo objects
+ * @param {Date} referenceDate - The date to compare against (default: today)
+ * @returns {Array} - Highlights from last year
+ */
+export const getLastYearHighlights = (photos, referenceDate = new Date()) => {
+  if (!photos || photos.length === 0) {
+    return []
+  }
+
+  const refYear = referenceDate.getFullYear()
+  const lastYear = refYear - 1
+
+  // Get photos from last year
+  const lastYearPhotos = photos
+    .map(photo => ({
+      ...photo,
+      _date: getPhotoDate(photo)
+    }))
+    .filter(photo => {
+      if (photo._date === null) return false
+      return photo._date.getFullYear() === lastYear
+    })
+
+  if (lastYearPhotos.length === 0) {
+    return []
+  }
+
+  // Prioritize favorites from last year
+  const favorites = lastYearPhotos
+    .filter(photo => photo.favorite)
+    .sort((a, b) => b._date - a._date)
+
+  if (favorites.length > 0) {
+    if (import.meta.env.DEV) console.log(`⭐ Found ${favorites.length} favorite photos from last year`)
+    return favorites.slice(0, 10).map(photo => {
+      const { _date, ...cleanPhoto } = photo
+      return cleanPhoto
+    })
+  }
+
+  // If no favorites, return most recent photos from last year
+  const mostRecent = lastYearPhotos
+    .sort((a, b) => b._date - a._date)
+    .slice(0, 10)
+    .map(photo => {
+      const { _date, ...cleanPhoto } = photo
+      return cleanPhoto
+    })
+
+  if (import.meta.env.DEV) console.log(`📸 Found ${mostRecent.length} recent photos from last year`)
+  return mostRecent
+}
+
+/**
+ * SMART ORGANIZATION: Get memories using priority-based logic
+ * Returns ONLY ONE memory group based on priority:
+ * 1. On this day (same date, previous years)
+ * 2. Same month, previous years
+ * 3. Last year highlights (favorites or most recent)
+ *
+ * @param {Array} photos - Array of photo objects
+ * @param {Date} referenceDate - The date to compare against (default: today)
+ * @returns {Object|null} - Memory object with type and photos, or null if no memories
+ */
+export const getMemories = (photos, referenceDate = new Date()) => {
+  if (!photos || photos.length === 0) {
+    return null
+  }
+
+  // Priority 1: On this day (same date, previous years)
+  const onThisDay = getPhotosOnThisDay(photos, referenceDate)
+  if (onThisDay.length > 0) {
+    const monthName = format(referenceDate, 'MMMM', { locale: nb })
+    const day = referenceDate.getDate()
+    return {
+      type: 'on-this-day',
+      title: `${day}. ${monthName}`,
+      subtitle: onThisDay.length === 1
+        ? `${onThisDay[0].yearsAgo} år siden`
+        : `${onThisDay.length} minner fra tidligere år`,
+      photos: onThisDay.slice(0, 10), // Limit to 10
+      count: onThisDay.length
+    }
+  }
+
+  // Priority 2: Same month, previous years
+  const sameMonth = getPhotosFromSameMonth(photos, referenceDate)
+  if (sameMonth.length > 0) {
+    const monthName = format(referenceDate, 'MMMM', { locale: nb })
+    return {
+      type: 'same-month',
+      title: `${monthName} i tidligere år`,
+      subtitle: `${sameMonth.length} ${sameMonth.length === 1 ? 'bilde' : 'bilder'} fra denne måneden`,
+      photos: sameMonth.slice(0, 10), // Limit to 10
+      count: sameMonth.length
+    }
+  }
+
+  // Priority 3: Last year highlights
+  const lastYearHighlights = getLastYearHighlights(photos, referenceDate)
+  if (lastYearHighlights.length > 0) {
+    const lastYear = referenceDate.getFullYear() - 1
+    const hasFavorites = lastYearHighlights.some(p => p.favorite)
+    return {
+      type: 'last-year',
+      title: `Minner fra ${lastYear}`,
+      subtitle: hasFavorites
+        ? `Favoritter fra i fjor`
+        : `Bilder fra i fjor`,
+      photos: lastYearHighlights,
+      count: lastYearHighlights.length
+    }
+  }
+
+  // No memories found
+  return null
+}
