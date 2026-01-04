@@ -230,7 +230,9 @@ function App() {
                   }
                 />
 
-                {/* AI Tools - Protected Routes */}
+                {/* ⚠️ PHASE 2: AI Tools - HIDDEN FOR LAUNCH (code kept latent) */}
+                {/* AI routes disabled - no navigation, deep links return 404 */}
+                {/*
                 <Route path={ROUTES.AI_TOOLS} element={
                   <ProtectedRoute>
                     <AIToolsPage />
@@ -264,6 +266,7 @@ function App() {
                     <AIUpscalePage />
                   </ProtectedRoute>
                 } />
+                */}
 
                 {/* Collage view - Protected Route */}
                 <Route path="/collage/:id" element={
