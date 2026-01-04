@@ -74,7 +74,7 @@ const SubscriptionPage = ({ user }) => {
       case 'LITE':
         return {
           name: 'LITE',
-          storage: '5 GB',
+          storage: '10 GB',
           compression: 'Ja',
           video: 'Nei',
           color: 'from-blue-600 to-cyan-600',
@@ -122,40 +122,42 @@ const SubscriptionPage = ({ user }) => {
       name: 'LITE',
       price: '29 kr',
       period: 'per måned',
-      storage: '5 GB',
+      storage: '10 GB',
       compression: 'Ja',
       video: 'Nei',
       features: [
         'Alt i GRATIS',
-        '5 GB lagring',
+        '10 GB lagring',
         'Bildekomprimering',
         'Prioritert support',
       ],
       color: 'from-blue-600 to-cyan-600',
       current: currentTier === 'LITE',
-      recommended: false,
-    },
-    {
-      id: 'PRO',
-      name: 'PRO',
-      price: '79 kr',
-      period: 'per måned',
-      storage: '50 GB',
-      compression: 'Ja',
-      video: 'Ja',
-      features: [
-        'Alt i LITE',
-        '50 GB lagring',
-        'Video upload og playback',
-        'Bildekomprimering',
-        'AI-funksjoner (fremtidig)',
-        'Prioritert support',
-        'Early access til nye features',
-      ],
-      color: 'from-purple-600 to-pink-600',
-      current: currentTier === 'PRO',
       recommended: true,
     },
+    // ⚠️ PHASE 3: PRO tier hidden for launch (backend logic kept intact)
+    // Existing PRO users will still see their tier in currentPlan above
+    // {
+    //   id: 'PRO',
+    //   name: 'PRO',
+    //   price: '79 kr',
+    //   period: 'per måned',
+    //   storage: '50 GB',
+    //   compression: 'Ja',
+    //   video: 'Ja',
+    //   features: [
+    //     'Alt i LITE',
+    //     '50 GB lagring',
+    //     'Video upload og playback',
+    //     'Bildekomprimering',
+    //     'AI-funksjoner (fremtidig)',
+    //     'Prioritert support',
+    //     'Early access til nye features',
+    //   ],
+    //   color: 'from-purple-600 to-pink-600',
+    //   current: currentTier === 'PRO',
+    //   recommended: true,
+    // },
   ]
   const setCurrentPage = useStore((state) => state.setCurrentPage)
   return (
@@ -304,7 +306,7 @@ const SubscriptionPage = ({ user }) => {
               Velg Din Plan
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {plans.map((plan) => (
                 <div
                   key={plan.name}
@@ -383,10 +385,7 @@ const SubscriptionPage = ({ user }) => {
                 • <strong>LITE:</strong> For deg som trenger mer plass med
                 bildekomprimering for optimal lagring.
               </p>
-              <p>
-                • <strong>PRO:</strong> Full pakke med video support, mye
-                lagring og tilgang til alle fremtidige AI-funksjoner.
-              </p>
+              {/* PHASE 3: PRO info hidden but tier logic remains */}
               <p className="pt-2 border-t border-white/10">
                 Alle planer inkluderer QR-kode deling, Collage Builder, Timeline
                 og søkefunksjonalitet.
