@@ -996,7 +996,8 @@ export async function uploadPhoto(
   thumbnailBlob = null,
   videoMetadata = null,
   preExtractedExif = null, // ✅ Pre-extracted EXIF data (before compression)
-  signal = null // ✅ AbortSignal for cancellable uploads (Phase 3-3)
+  signal = null, // ✅ AbortSignal for cancellable uploads (Phase 3-3)
+  uploadTags = [] // ✅ Manual tags to apply on upload
 ) {
   try {
     // Validate inputs
@@ -1406,6 +1407,7 @@ export async function uploadPhoto(
       // AI fields (defaults - not for documents)
       ...(!isDocument && {
         aiTags: [],
+        tags: uploadTags || [], // ✅ Manual tags from upload
         faces: 0,
         category: null,
         aiAnalyzed: false,
