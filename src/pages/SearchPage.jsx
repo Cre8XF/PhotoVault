@@ -334,8 +334,13 @@ const SearchPage = ({
         // Search in filename
         const inName = p.name?.toLowerCase().includes(q)
 
+        // Search in manual tags
+        const inManualTags = Array.isArray(p.tags)
+          ? p.tags.some((t) => t.toLowerCase().includes(q))
+          : false
+
         // Search in AI tags
-        const inTags = Array.isArray(p.aiTags)
+        const inAiTags = Array.isArray(p.aiTags)
           ? p.aiTags.some((t) => t.toLowerCase().includes(q))
           : false
 
@@ -346,7 +351,7 @@ const SearchPage = ({
         const album = safeAlbums.find((a) => a.id === p.albumId)
         const inAlbum = album?.name?.toLowerCase().includes(q)
 
-        return inName || inTags || inCat || inAlbum
+        return inName || inManualTags || inAiTags || inCat || inAlbum
       })
 
       if (import.meta.env.DEV) {
