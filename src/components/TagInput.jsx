@@ -16,23 +16,13 @@ export function TagInput({
 }) {
   const [input, setInput] = useState('')
 
-  // 🔧 CRITICAL: Convert Firestore arrays to plain JavaScript arrays
-  // This is a defensive layer in case arrays slip through from Firestore
-  const plainTags = useMemo(() => {
-    return Array.isArray(tags) ? [...tags] : []
-  }, [tags])
-
-  const plainSuggestions = useMemo(() => {
-    return Array.isArray(suggestions) ? [...suggestions] : []
-  }, [suggestions])
-
-  // 🐛 DEBUG: Log what TagInput receives and converts
+  // 🐛 DEBUG: Log what TagInput receives
   console.log('🎨 TagInput render:', {
-    originalTags: tags,
-    plainTags,
-    plainTagsLength: plainTags.length,
-    plainTagsType: typeof plainTags,
-    isPlainArray: Array.isArray(plainTags)
+    tags,
+    tagsLength: tags.length,
+    tagsType: typeof tags,
+    isArray: Array.isArray(tags),
+    tagsContent: tags
   })
 
   const handleAddTag = () => {
