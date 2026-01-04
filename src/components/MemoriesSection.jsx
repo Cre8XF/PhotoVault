@@ -3,6 +3,7 @@
  *
  * Displays rule-based memories at the top of Photos page
  * NO AI - purely deterministic memory detection
+ * Uses dateTaken (not upload date) - excludes Documents
  */
 
 import React, { useMemo } from 'react'
@@ -12,13 +13,21 @@ import LazyImage from './LazyImage'
 
 const MemoriesSection = ({ photos, onPhotoClick }) => {
   // Calculate memories using priority-based logic
+  // EXCLUDE DOCUMENTS - only photos and videos
   const memory = useMemo(() => {
     if (!photos || photos.length === 0) {
       return null
     }
 
+    // Filter out documents before passing to getMemories
+    const mediaPhotos = photos.filter(p => p.type !== 'document')
+
+    if (mediaPhotos.length === 0) {
+      return null
+    }
+
     const today = new Date()
-    return getMemories(photos, today)
+    return getMemories(mediaPhotos, today)
   }, [photos])
 
   // Don't render if no memories

@@ -105,7 +105,7 @@ const SearchPage = ({
     dateRange: null,
     albumId: null,
     selectedTag: null,
-    contentTypes: ['photo', 'video'], // Default: hide collages
+    contentTypes: ['photo'], // Default: Photos only
   })
   const [showFilters, setShowFilters] = useState(false)
   const [searchExpanded, setSearchExpanded] = useState(false)
@@ -643,7 +643,7 @@ const photoGroups = useMemo(() => {
       dateRange: null,
       albumId: null,
       selectedTag: null,
-      contentTypes: ['photo', 'video'], // Reset to default: hide collages
+      contentTypes: ['photo'], // Reset to default: Photos only
     })
     setSearchQuery('')
     setSearchExpanded(false) // Also collapse search when resetting
@@ -840,33 +840,15 @@ const photoGroups = useMemo(() => {
     }
   }
 
-  // Smart Views filter handler
-  const handleSmartViewFilter = (filter) => {
-    // If clicking the same filter, toggle it off
-    const isSameFilter = Object.keys(filter).every(
-      key => activeFilters[key] === filter[key]
-    )
-
-    if (isSameFilter) {
-      // Clear the filter
-      setActiveFilters({
-        ...activeFilters,
-        ...Object.keys(filter).reduce((acc, key) => {
-          if (key === 'contentTypes') {
-            acc[key] = ['photo', 'video'] // Reset to default
-          } else {
-            acc[key] = null
-          }
-          return acc
-        }, {})
-      })
-    } else {
-      // Apply the filter
-      setActiveFilters({
-        ...activeFilters,
-        ...filter
-      })
-    }
+  // Smart Views filter handler - simplified for single-field updates
+  const handleSmartViewFilter = (filterUpdate) => {
+    // filterUpdate is an object with a single key-value pair
+    // If value is null, we're clearing that filter
+    // Otherwise, we're setting it
+    setActiveFilters((prev) => ({
+      ...prev,
+      ...filterUpdate
+    }))
   }
 
   return (
@@ -1244,71 +1226,6 @@ const photoGroups = useMemo(() => {
         />
       )}
 
-      {/* Content Type Filters - Top Level Chips */}
-      <div className="glass rounded-2xl p-3 mb-4">
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => {
-              const current = activeFilters.contentTypes || []
-              const hasPhoto = current.includes('photo')
-              setActiveFilters(f => ({
-                ...f,
-                contentTypes: hasPhoto
-                  ? current.filter(t => t !== 'photo')
-                  : [...current, 'photo']
-              }))
-            }}
-            className={`px-4 py-2 rounded-xl border-2 transition-all ${
-              (activeFilters.contentTypes || []).includes('photo')
-                ? 'bg-blue-600 border-blue-500 scale-105'
-                : 'border-white/20 opacity-60 hover:opacity-100'
-            } flex items-center gap-2 font-medium`}
-          >
-            <Image size={18} /> Photos
-          </button>
-
-          <button
-            onClick={() => {
-              const current = activeFilters.contentTypes || []
-              const hasVideo = current.includes('video')
-              setActiveFilters(f => ({
-                ...f,
-                contentTypes: hasVideo
-                  ? current.filter(t => t !== 'video')
-                  : [...current, 'video']
-              }))
-            }}
-            className={`px-4 py-2 rounded-xl border-2 transition-all ${
-              (activeFilters.contentTypes || []).includes('video')
-                ? 'bg-purple-600 border-purple-500 scale-105'
-                : 'border-white/20 opacity-60 hover:opacity-100'
-            } flex items-center gap-2 font-medium`}
-          >
-            <Video size={18} /> Videos
-          </button>
-
-          <button
-            onClick={() => {
-              const current = activeFilters.contentTypes || []
-              const hasCollage = current.includes('collage')
-              setActiveFilters(f => ({
-                ...f,
-                contentTypes: hasCollage
-                  ? current.filter(t => t !== 'collage')
-                  : [...current, 'collage']
-              }))
-            }}
-            className={`px-4 py-2 rounded-xl border-2 transition-all ${
-              (activeFilters.contentTypes || []).includes('collage')
-                ? 'bg-emerald-600 border-emerald-500 scale-105'
-                : 'border-white/20 opacity-60 hover:opacity-100'
-            } flex items-center gap-2 font-medium`}
-          >
-            <LayoutGrid size={18} /> Collages
-          </button>
-        </div>
-      </div>
-
       {/* Filterpanel */}
       {showFilters && (
         <div className="glass rounded-2xl p-4 mb-6 space-y-4">
@@ -1402,59 +1319,6 @@ const photoGroups = useMemo(() => {
               </select>
             </label>
           </div>
-        </div>
-      )}
-
-      {/* Active filters banner - Only show when filters are active */}
-      {(activeFilterCount > 0 || searchQuery.trim()) && (
-        <div className="glass rounded-2xl p-4 mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-muted">
-              {t('search:activeFilters')}:
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {searchQuery.trim() && (
-                <span className="px-2 py-1 rounded-lg bg-blue-600/30 text-sm border border-blue-500/50">
-                  Search: "{searchQuery}"
-                </span>
-              )}
-              {activeFilters.favorites && (
-                <span className="px-2 py-1 rounded-lg bg-yellow-600/30 text-sm border border-yellow-500/50">
-                  Favorites
-                </span>
-              )}
-              {activeFilters.albumId && (
-                <span className="px-2 py-1 rounded-lg bg-indigo-600/30 text-sm border border-indigo-500/50">
-                  Album:{' '}
-                  {activeFilters.albumId === 'noAlbum'
-                    ? t('search:filterOptions.noAlbum')
-                    : safeAlbums.find((a) => a.id === activeFilters.albumId)
-                        ?.name || 'Unknown'}
-                </span>
-              )}
-              {activeFilters.selectedTag && (
-                <span className="px-2 py-1 rounded-lg bg-teal-600/30 text-sm border border-teal-500/50">
-                  Tag: {activeFilters.selectedTag}
-                </span>
-              )}
-              {activeFilters.dateRange && (
-                <span className="px-2 py-1 rounded-lg bg-orange-600/30 text-sm border border-orange-500/50">
-                  {activeFilters.dateRange === 'today' && 'Today'}
-                  {activeFilters.dateRange === 'week' && 'This week'}
-                  {activeFilters.dateRange === 'month' && 'This month'}
-                  {activeFilters.dateRange === 'year' && 'This year'}
-                  {activeFilters.dateRange.startsWith('date:') &&
-                    `Date: ${activeFilters.dateRange.replace('date:', '')}`}
-                </span>
-              )}
-            </div>
-          </div>
-          <button
-            onClick={clearFilters}
-            className="ripple-effect px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm whitespace-nowrap transition"
-          >
-            {t('search:resetFilters')}
-          </button>
         </div>
       )}
 

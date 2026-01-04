@@ -7,6 +7,7 @@
 
 import { format, startOfDay, startOfMonth, startOfYear, isValid, parseISO } from 'date-fns'
 import { nb } from 'date-fns/locale'
+import { resolvePhotoDate } from '../../../utils/photoDateUtils'
 
 /**
  * Validates and normalizes a photo date
@@ -236,6 +237,7 @@ export const getDateStatistics = (photos) => {
 
 /**
  * Find photos taken "on this day" in previous years
+ * Uses dateTaken (not upload date) via resolvePhotoDate
  * @param {Array} photos - Array of photo objects
  * @param {Date} referenceDate - The date to compare against (default: today)
  * @returns {Array} - Photos from same day/month in previous years
@@ -249,10 +251,13 @@ export const getPhotosOnThisDay = (photos, referenceDate = new Date()) => {
   const refMonth = referenceDate.getMonth()
   const refYear = referenceDate.getFullYear()
 
-  const memories = photos
+  // EXCLUDE DOCUMENTS - only photos and videos
+  const mediaPhotos = photos.filter(p => p.type !== 'document')
+
+  const memories = mediaPhotos
     .map(photo => ({
       ...photo,
-      _date: getPhotoDate(photo)
+      _date: resolvePhotoDate(photo) // Use canonical date resolution (dateTaken priority)
     }))
     .filter(photo => {
       if (photo._date === null) return false
@@ -339,6 +344,7 @@ export const getAvailableMonthsForYear = (photos, year) => {
 
 /**
  * SMART ORGANIZATION: Find photos from same month in previous years
+ * Uses dateTaken (not upload date) via resolvePhotoDate
  * @param {Array} photos - Array of photo objects
  * @param {Date} referenceDate - The date to compare against (default: today)
  * @returns {Array} - Photos from same month in previous years
@@ -351,10 +357,13 @@ export const getPhotosFromSameMonth = (photos, referenceDate = new Date()) => {
   const refMonth = referenceDate.getMonth()
   const refYear = referenceDate.getFullYear()
 
-  const memories = photos
+  // EXCLUDE DOCUMENTS - only photos and videos
+  const mediaPhotos = photos.filter(p => p.type !== 'document')
+
+  const memories = mediaPhotos
     .map(photo => ({
       ...photo,
-      _date: getPhotoDate(photo)
+      _date: resolvePhotoDate(photo) // Use canonical date resolution (dateTaken priority)
     }))
     .filter(photo => {
       if (photo._date === null) return false
@@ -380,6 +389,7 @@ export const getPhotosFromSameMonth = (photos, referenceDate = new Date()) => {
 
 /**
  * SMART ORGANIZATION: Get highlights from last year (favorites or most recent)
+ * Uses dateTaken (not upload date) via resolvePhotoDate
  * @param {Array} photos - Array of photo objects
  * @param {Date} referenceDate - The date to compare against (default: today)
  * @returns {Array} - Highlights from last year
@@ -392,11 +402,14 @@ export const getLastYearHighlights = (photos, referenceDate = new Date()) => {
   const refYear = referenceDate.getFullYear()
   const lastYear = refYear - 1
 
+  // EXCLUDE DOCUMENTS - only photos and videos
+  const mediaPhotos = photos.filter(p => p.type !== 'document')
+
   // Get photos from last year
-  const lastYearPhotos = photos
+  const lastYearPhotos = mediaPhotos
     .map(photo => ({
       ...photo,
-      _date: getPhotoDate(photo)
+      _date: resolvePhotoDate(photo) // Use canonical date resolution (dateTaken priority)
     }))
     .filter(photo => {
       if (photo._date === null) return false
