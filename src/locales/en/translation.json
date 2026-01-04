@@ -117,7 +117,7 @@
   "storage": {
     "almostFull": "Almost full",
     "needMoreSpace": "Need more space?",
-    "upgradeHint": "Upgrade to Pro for 100 GB storage and AI features",
+    "upgradeHint": "Upgrade to Pro for 100 GB storage",
     "used": "used"
   },
   "buttons": {

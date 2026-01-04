@@ -44,15 +44,16 @@ export default function ToolsPage() {
       available: false,
       onClick: null,
     },
-    {
-      id: 'ai-tools',
-      name: 'AI Tools',
-      description: 'Enhance and transform photos with AI',
-      icon: Sparkles,
-      gradient: 'from-orange-500 to-red-500',
-      available: true, // Phase 5: AI Tools now available
-      onClick: () => navigate(ROUTES.AI_TOOLS),
-    },
+    // ⚠️ PHASE 2: AI Tools hidden for launch (code kept latent)
+    // {
+    //   id: 'ai-tools',
+    //   name: 'AI Tools',
+    //   description: 'Enhance and transform photos with AI',
+    //   icon: Sparkles,
+    //   gradient: 'from-orange-500 to-red-500',
+    //   available: true,
+    //   onClick: () => navigate(ROUTES.AI_TOOLS),
+    // },
   ];
 
   const handleBack = () => {
