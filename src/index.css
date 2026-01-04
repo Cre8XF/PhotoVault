@@ -51,6 +51,13 @@ body.light-mode {
 
   /* Overlays */
   --overlay-bg: rgba(139, 92, 246, 0.15);
+
+  /* ============================================ */
+  /* Component Tokens - Tag / Chip              */
+  /* ============================================ */
+  --tag-bg: rgba(109, 40, 217, 0.12);      /* Subtle purple background */
+  --tag-border: rgba(109, 40, 217, 0.35);  /* Defined border */
+  --tag-text: var(--color-purple-text);    /* WCAG AA compliant purple text */
 }
 
 /* Dark Mode */
@@ -101,6 +108,13 @@ body.dark-mode {
 
   /* Overlays */
   --overlay-bg: rgba(0, 0, 0, 0.6);
+
+  /* ============================================ */
+  /* Component Tokens - Tag / Chip              */
+  /* ============================================ */
+  --tag-bg: rgba(139, 92, 246, 0.25);      /* Brighter purple background for dark mode */
+  --tag-border: rgba(139, 92, 246, 0.55);  /* Stronger border for definition */
+  --tag-text: #ede9fe;                     /* Light purple text for dark backgrounds */
 }
 
 /* ============================================================================

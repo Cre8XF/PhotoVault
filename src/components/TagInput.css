@@ -15,16 +15,27 @@
 }
 
 .tag-chip {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  background: var(--primary);
-  color: var(--bg-primary);
-  border-radius: 16px;
-  font-size: 0.875rem;
+
+  /* Use component-specific tokens */
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  border: 1px solid var(--tag-border);
+
+  border-radius: 14px;
+  font-size: 0.85rem;
   font-weight: 500;
+
+  transition: background 0.15s ease, border-color 0.15s ease;
   animation: scaleIn 0.2s ease-out;
+}
+
+/* Hover: Strengthen border for better definition */
+.tag-chip:hover {
+  border-color: var(--tag-text);
 }
 
 @keyframes scaleIn {
@@ -41,15 +52,16 @@
 .tag-remove-btn {
   background: none;
   border: none;
-  color: var(--bg-primary);
+  color: inherit;  /* Inherits from .tag-chip */
   cursor: pointer;
   padding: 0;
   display: flex;
   align-items: center;
-  opacity: 0.8;
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
 }
 
-.tag-remove-btn:hover {
+.tag-chip:hover .tag-remove-btn {
   opacity: 1;
 }
 
