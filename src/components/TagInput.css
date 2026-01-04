@@ -19,6 +19,57 @@
   gap: 8px;
 }
 
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+
+  /* Use component-specific tokens */
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  border: 1px solid var(--tag-border);
+
+  border-radius: 14px;
+  font-size: 0.85rem;
+  font-weight: 500;
+
+  transition: background 0.15s ease, border-color 0.15s ease;
+  animation: scaleIn 0.2s ease-out;
+}
+
+/* Hover: Strengthen border for better definition */
+.tag-chip:hover {
+  border-color: var(--tag-text);
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.tag-remove-btn {
+  background: none;
+  border: none;
+  color: inherit;  /* Inherits from .tag-chip */
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
+}
+
+.tag-chip:hover .tag-remove-btn {
+  opacity: 1;
+}
+
 .tag-input-field {
   display: flex;
   gap: 8px;
