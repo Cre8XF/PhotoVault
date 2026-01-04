@@ -497,10 +497,10 @@ export default function PhotoPage() {
   // Error state
   if (error || !photo) {
     return (
-      <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center text-white">
+      <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center text-primary">
         <div className="text-center max-w-sm px-4">
           <p className="text-lg font-semibold mb-2">Error</p>
-          <p className="text-white/60 mb-4">{error || 'Photo not found'}</p>
+          <p className="text-muted mb-4">{error || 'Photo not found'}</p>
           <button
             onClick={handleBack}
             className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-full transition"
@@ -539,11 +539,11 @@ export default function PhotoPage() {
 
           {/* Center: Title */}
           <div className="flex-1 text-center px-4">
-            <h1 className="text-white text-sm font-medium truncate">
+            <h1 className="text-primary text-sm font-medium truncate">
               {getPhotoTitle()}
             </h1>
             {photoContext && photoOrder && photoOrder.length > 0 && (
-              <p className="text-white/60 text-xs">
+              <p className="text-muted text-xs">
                 {photoIndex + 1} / {photoOrder.length}
               </p>
             )}
@@ -862,7 +862,7 @@ export default function PhotoPage() {
               {photo.technicalDetails && (photo.technicalDetails.iso || photo.technicalDetails.shutterSpeed || photo.technicalDetails.aperture || photo.technicalDetails.focalLength) && (
                 <div>
                   <div className="mb-1" style={{ color: 'var(--text-muted)' }}>{t('common:technicalDetails') || 'Technical Details'}</div>
-                  <div className="text-white space-y-1 text-xs">
+                  <div className="text-primary space-y-1 text-xs">
                     {photo.technicalDetails.iso && (
                       <div>ISO {photo.technicalDetails.iso}</div>
                     )}
@@ -892,17 +892,17 @@ export default function PhotoPage() {
 
               {/* Album */}
               <div>
-                <div className="text-white/60 mb-1">{t('common:album')}</div>
-                <div className="text-white">{getAlbumName()}</div>
+                <div className="text-muted mb-1">{t('common:album')}</div>
+                <div className="text-primary">{getAlbumName()}</div>
               </div>
 
               {/* Resolution */}
               {(photo.width || photo.height) && (
                 <div>
-                  <div className="text-white/60 mb-1">
+                  <div className="text-muted mb-1">
                     {t('common:video.resolution') || 'Resolution'}
                   </div>
-                  <div className="text-white">
+                  <div className="text-primary">
                     {photo.width} × {photo.height}
                   </div>
                 </div>
@@ -911,15 +911,15 @@ export default function PhotoPage() {
               {/* File type */}
               {photo.type && (
                 <div>
-                  <div className="text-white/60 mb-1">Type</div>
-                  <div className="text-white">{photo.type}</div>
+                  <div className="text-muted mb-1">Type</div>
+                  <div className="text-primary">{photo.type}</div>
                 </div>
               )}
 
               {/* Favorite status */}
               <div>
-                <div className="text-white/60 mb-1">{t('common:favorite')}</div>
-                <div className="text-white">
+                <div className="text-muted mb-1">{t('common:favorite')}</div>
+                <div className="text-primary">
                   {photo.favorite ? '⭐ Yes' : 'No'}
                 </div>
               </div>
@@ -927,8 +927,8 @@ export default function PhotoPage() {
               {/* Caption (if exists) */}
               {photo.caption && (
                 <div>
-                  <div className="text-white/60 mb-1">{t('common:caption')}</div>
-                  <div className="text-white break-words">{photo.caption}</div>
+                  <div className="text-muted mb-1">{t('common:caption')}</div>
+                  <div className="text-primary break-words">{photo.caption}</div>
                 </div>
               )}
 
