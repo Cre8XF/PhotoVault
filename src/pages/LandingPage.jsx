@@ -86,7 +86,7 @@ function LandingPage() {
       name: 'LITE',
       price: '39 kr',
       period: t('landing:pricing.lite.period'),
-      storage: '5 GB',
+      storage: '10 GB',
       recommended: true,
       trustLine: t('landing:pricing.lite.trustLine'),
       cta: t('landing:cta.startLite'),
@@ -102,20 +102,21 @@ function LandingPage() {
         t('landing:pricing.lite.feature3'),
       ],
     },
-    {
-      name: 'PRO',
-      price: '79 kr',
-      period: t('landing:pricing.pro.period'),
-      storage: '50 GB',
-      trustLine: t('landing:pricing.pro.trustLine'),
-      cta: t('landing:cta.startPro'),
-      features: [
-        t('landing:pricing.pro.feature1'),
-        t('landing:pricing.pro.feature2'),
-        t('landing:pricing.pro.feature3'),
-        t('landing:pricing.pro.feature4'),
-      ],
-    },
+    // ⚠️ PHASE 3: PRO tier hidden for launch (backend logic kept intact)
+    // {
+    //   name: 'PRO',
+    //   price: '79 kr',
+    //   period: t('landing:pricing.pro.period'),
+    //   storage: '50 GB',
+    //   trustLine: t('landing:pricing.pro.trustLine'),
+    //   cta: t('landing:cta.startPro'),
+    //   features: [
+    //     t('landing:pricing.pro.feature1'),
+    //     t('landing:pricing.pro.feature2'),
+    //     t('landing:pricing.pro.feature3'),
+    //     t('landing:pricing.pro.feature4'),
+    //   ],
+    // },
   ]
 
   return (
