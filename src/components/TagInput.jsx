@@ -12,18 +12,29 @@ export function TagInput({
   onAddTag,
   onRemoveTag,
   suggestions = [],
-  placeholder = 'Legg til tag...'
+  placeholder = 'Legg til tag...',
 }) {
   const [input, setInput] = useState('')
 
   // 🐛 DEBUG: Log what TagInput receives
   console.log('🎨 TagInput render:', {
     tags,
-    tagsLength: tags.length,
+    tagsLength: Array.isArray(tags) ? tags.length : 'not-array',
     tagsType: typeof tags,
     isArray: Array.isArray(tags),
-    tagsContent: tags
+    tagsContent: tags,
   })
+
+  // ✅ SAFE, DEFENSIVE ARRAYS (FIX FOR ReferenceError)
+  const plainTags = useMemo(
+    () => (Array.isArray(tags) ? [...tags] : []),
+    [tags]
+  )
+
+  const plainSuggestions = useMemo(
+    () => (Array.isArray(suggestions) ? [...suggestions] : []),
+    [suggestions]
+  )
 
   const handleAddTag = () => {
     if (input.trim()) {
@@ -42,7 +53,7 @@ export function TagInput({
 
   return (
     <div className="tag-input-container">
-      {/* Existing tags - USE plainTags */}
+      {/* Existing tags */}
       {plainTags.length > 0 && (
         <div className="tag-list">
           {plainTags.map((tag) => (
@@ -79,16 +90,14 @@ export function TagInput({
         </button>
       </div>
 
-      {/* Suggestions - USE plainSuggestions */}
+      {/* Suggestions */}
       {plainSuggestions.length > 0 && (
         <div className="tag-suggestions">
           <span className="suggestions-label">Foreslått:</span>
           {plainSuggestions.map((sug) => (
             <button
               key={sug}
-              onClick={() => {
-                onAddTag(sug)
-              }}
+              onClick={() => onAddTag(sug)}
               className="tag-suggestion-chip"
             >
               {sug}
@@ -105,7 +114,7 @@ TagInput.propTypes = {
   onAddTag: PropTypes.func.isRequired,
   onRemoveTag: PropTypes.func.isRequired,
   suggestions: PropTypes.arrayOf(PropTypes.string),
-  placeholder: PropTypes.string
+  placeholder: PropTypes.string,
 }
 
 export default TagInput
