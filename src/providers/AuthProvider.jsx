@@ -97,7 +97,7 @@ export const AuthProvider = ({ children }) => {
           userId: uid,
           role: 'user',
           subscriptionTier: 'GRATIS',
-          storageLimit: 786432000, // 750 MB (updated for freemium)
+          storageLimit: 1073741824, // 1 GB
           storageUsed: 0,
           currentAlbumCount: 0, // 🆕 Counter for freemium limits
           currentPhotoCount: 0, // 🆕 Optional: total photos

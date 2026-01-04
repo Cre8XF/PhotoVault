@@ -241,6 +241,16 @@ const UploadModal = ({
       return
     }
 
+    // ✅ PHASE 1: Max files per bulk upload safety (50 files)
+    const MAX_BULK_UPLOAD = 50
+    if (files.length > MAX_BULK_UPLOAD) {
+      setNotification({
+        message: `Too many files selected. Maximum ${MAX_BULK_UPLOAD} files per upload. You selected ${files.length} files.`,
+        type: 'error',
+      })
+      return
+    }
+
     // ✅ Filter video files first if user cannot upload videos
     let filesToValidate = files
     let blockedVideos = []

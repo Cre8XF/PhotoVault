@@ -204,7 +204,7 @@ export const useAuth = () => {
     const tier = userProfile?.subscriptionTier || 'GRATIS'
     const limits = {
       GRATIS: 1073741824, // 1GB
-      LITE: 5368709120, // 5GB
+      LITE: 10737418240, // 10GB
       PRO: 53687091200, // 50GB
     }
 
@@ -236,8 +236,8 @@ export const useAuth = () => {
    */
   const getTierLimit = useCallback((tier) => {
     const limits = {
-      GRATIS: 500 * 1024 * 1024, // 500 MB
-      LITE: 5 * 1024 * 1024 * 1024, // 5 GB
+      GRATIS: 1 * 1024 * 1024 * 1024, // 1 GB
+      LITE: 10 * 1024 * 1024 * 1024, // 10 GB
       PRO: 50 * 1024 * 1024 * 1024, // 50 GB
     }
     return limits[tier] || limits.GRATIS
@@ -333,7 +333,7 @@ export const useAuth = () => {
 
       const tier = userProfile.subscriptionTier || 'GRATIS'
       const storageUsed = userProfile.storageUsed || 0
-      const storageLimit = userProfile.storageLimit || 786432000 // 750 MB
+      const storageLimit = userProfile.storageLimit || 1073741824 // 1 GB
 
       const wouldExceed = storageUsed + newFileSize > storageLimit
 
