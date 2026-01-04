@@ -100,12 +100,9 @@ const SearchPage = ({
   const searchInputRef = useRef(null) // 🆕 PHASE 3B: For keyboard shortcut
   const [activeFilters, setActiveFilters] = useState({
     favorites: false,
-    withFaces: false,
-    withTags: false,
-    aiAnalyzed: false,
     dateRange: null,
     albumId: null,
-    category: null,
+    selectedTag: null,
     contentTypes: ['photo', 'video'], // Default: hide collages
   })
   const [showFilters, setShowFilters] = useState(false)
@@ -252,21 +249,9 @@ const SearchPage = ({
       hasChanges = true
     }
 
-    // Check for faces filter
-    if (params.has('faces') && params.get('faces') === 'true') {
-      newFilters.withFaces = true
-      hasChanges = true
-    }
-
     // Check for unassigned filter
     if (params.has('unassigned') && params.get('unassigned') === 'true') {
       newFilters.albumId = 'noAlbum'
-      hasChanges = true
-    }
-
-    // Check for AI analyzed filter
-    if (params.has('aiAnalyzed') && params.get('aiAnalyzed') === 'true') {
-      newFilters.aiAnalyzed = true
       hasChanges = true
     }
 
@@ -279,25 +264,15 @@ const SearchPage = ({
     }
   }, [location.search, safePhotos.length]) // Re-run when URL query params change
 
-  // 🔒 SIKRET: Kategorier med array-guard
-  const categories = useMemo(() => {
+  // 🔒 SIKRET: Manual tags med array-guard
+  const manualTags = useMemo(() => {
     const set = new Set()
-    safePhotos.forEach((p) => p.category && set.add(p.category))
+    safePhotos.forEach((p) => {
+      if (Array.isArray(p.tags)) {
+        p.tags.forEach(tag => set.add(tag))
+      }
+    })
     return Array.from(set).sort()
-  }, [safePhotos])
-
-  // 🔒 SIKRET: PopularTags med array-guard
-  const popularTags = useMemo(() => {
-    const counts = {}
-    safePhotos.forEach((p) =>
-      (Array.isArray(p.aiTags) ? p.aiTags : []).forEach((t) => {
-        counts[t] = (counts[t] || 0) + 1
-      })
-    )
-    return Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 12)
-      .map(([tag, count]) => ({ tag, count }))
   }, [safePhotos])
 
   // 🔒 SIKRET: Filtrering med array-guards
@@ -360,12 +335,13 @@ const SearchPage = ({
     }
 
     if (activeFilters.favorites) res = res.filter((p) => p.favorite)
-    if (activeFilters.withFaces) res = res.filter((p) => (p.faces || 0) > 0)
-    if (activeFilters.withTags)
-      res = res.filter((p) => Array.isArray(p.aiTags) && p.aiTags.length > 0)
-    if (activeFilters.aiAnalyzed) res = res.filter((p) => !!p.aiAnalyzed)
-    if (activeFilters.category)
-      res = res.filter((p) => p.category === activeFilters.category)
+
+    // Filter by manual tag
+    if (activeFilters.selectedTag) {
+      res = res.filter((p) =>
+        Array.isArray(p.tags) && p.tags.includes(activeFilters.selectedTag)
+      )
+    }
 
     if (activeFilters.albumId) {
       if (activeFilters.albumId === 'noAlbum') {
@@ -585,14 +561,11 @@ const photoGroups = useMemo(() => {
 
     // Count boolean filters
     if (activeFilters.favorites) count++
-    if (activeFilters.withFaces) count++
-    if (activeFilters.withTags) count++
-    if (activeFilters.aiAnalyzed) count++
 
     // Count selection filters
     if (activeFilters.dateRange) count++
     if (activeFilters.albumId) count++
-    if (activeFilters.category) count++
+    if (activeFilters.selectedTag) count++
 
     // Count contentTypes only if different from default
     const defaultContentTypes = ['photo', 'video']
@@ -644,12 +617,9 @@ const photoGroups = useMemo(() => {
   const clearFilters = () => {
     setActiveFilters({
       favorites: false,
-      withFaces: false,
-      withTags: false,
-      aiAnalyzed: false,
       dateRange: null,
       albumId: null,
-      category: null,
+      selectedTag: null,
       contentTypes: ['photo', 'video'], // Reset to default: hide collages
     })
     setSearchQuery('')
@@ -1205,92 +1175,75 @@ const photoGroups = useMemo(() => {
         </div>
       )}
 
+      {/* Content Type Filters - Top Level Chips */}
+      <div className="glass rounded-2xl p-3 mb-4">
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => {
+              const current = activeFilters.contentTypes || []
+              const hasPhoto = current.includes('photo')
+              setActiveFilters(f => ({
+                ...f,
+                contentTypes: hasPhoto
+                  ? current.filter(t => t !== 'photo')
+                  : [...current, 'photo']
+              }))
+            }}
+            className={`px-4 py-2 rounded-xl border-2 transition-all ${
+              (activeFilters.contentTypes || []).includes('photo')
+                ? 'bg-blue-600 border-blue-500 scale-105'
+                : 'border-white/20 opacity-60 hover:opacity-100'
+            } flex items-center gap-2 font-medium`}
+          >
+            <Image size={18} /> Photos
+          </button>
+
+          <button
+            onClick={() => {
+              const current = activeFilters.contentTypes || []
+              const hasVideo = current.includes('video')
+              setActiveFilters(f => ({
+                ...f,
+                contentTypes: hasVideo
+                  ? current.filter(t => t !== 'video')
+                  : [...current, 'video']
+              }))
+            }}
+            className={`px-4 py-2 rounded-xl border-2 transition-all ${
+              (activeFilters.contentTypes || []).includes('video')
+                ? 'bg-purple-600 border-purple-500 scale-105'
+                : 'border-white/20 opacity-60 hover:opacity-100'
+            } flex items-center gap-2 font-medium`}
+          >
+            <Video size={18} /> Videos
+          </button>
+
+          <button
+            onClick={() => {
+              const current = activeFilters.contentTypes || []
+              const hasCollage = current.includes('collage')
+              setActiveFilters(f => ({
+                ...f,
+                contentTypes: hasCollage
+                  ? current.filter(t => t !== 'collage')
+                  : [...current, 'collage']
+              }))
+            }}
+            className={`px-4 py-2 rounded-xl border-2 transition-all ${
+              (activeFilters.contentTypes || []).includes('collage')
+                ? 'bg-emerald-600 border-emerald-500 scale-105'
+                : 'border-white/20 opacity-60 hover:opacity-100'
+            } flex items-center gap-2 font-medium`}
+          >
+            <LayoutGrid size={18} /> Collages
+          </button>
+        </div>
+      </div>
+
       {/* Filterpanel */}
       {showFilters && (
         <div className="glass rounded-2xl p-4 mb-6 space-y-4">
-          {/* Content Type Filters */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted">Content Type:</p>
-              <button
-                onClick={() => {
-                  const allTypes = ['photo', 'video', 'collage']
-                  const currentTypes = activeFilters.contentTypes || []
-                  const allSelected = allTypes.every(type => currentTypes.includes(type))
-                  setActiveFilters(f => ({
-                    ...f,
-                    contentTypes: allSelected ? ['photo', 'video'] : allTypes
-                  }))
-                }}
-                className="text-xs px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10"
-              >
-                {(activeFilters.contentTypes || []).length === 3 ? 'Reset' : 'All'}
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => {
-                  const current = activeFilters.contentTypes || []
-                  const hasPhoto = current.includes('photo')
-                  setActiveFilters(f => ({
-                    ...f,
-                    contentTypes: hasPhoto
-                      ? current.filter(t => t !== 'photo')
-                      : [...current, 'photo']
-                  }))
-                }}
-                className={`px-3 py-2 rounded-lg border ${
-                  (activeFilters.contentTypes || []).includes('photo')
-                    ? 'bg-blue-600 border-blue-500'
-                    : 'border-white/10 opacity-50'
-                } flex items-center gap-2`}
-              >
-                <Image size={16} /> Photos
-              </button>
-
-              <button
-                onClick={() => {
-                  const current = activeFilters.contentTypes || []
-                  const hasVideo = current.includes('video')
-                  setActiveFilters(f => ({
-                    ...f,
-                    contentTypes: hasVideo
-                      ? current.filter(t => t !== 'video')
-                      : [...current, 'video']
-                  }))
-                }}
-                className={`px-3 py-2 rounded-lg border ${
-                  (activeFilters.contentTypes || []).includes('video')
-                    ? 'bg-purple-600 border-purple-500'
-                    : 'border-white/10 opacity-50'
-                } flex items-center gap-2`}
-              >
-                <Video size={16} /> Videos
-              </button>
-
-              <button
-                onClick={() => {
-                  const current = activeFilters.contentTypes || []
-                  const hasCollage = current.includes('collage')
-                  setActiveFilters(f => ({
-                    ...f,
-                    contentTypes: hasCollage
-                      ? current.filter(t => t !== 'collage')
-                      : [...current, 'collage']
-                  }))
-                }}
-                className={`px-3 py-2 rounded-lg border ${
-                  (activeFilters.contentTypes || []).includes('collage')
-                    ? 'bg-emerald-600 border-emerald-500'
-                    : 'border-white/10 opacity-50'
-                } flex items-center gap-2`}
-              >
-                <LayoutGrid size={16} /> Collages
-              </button>
-            </div>
-          </div>
-
-          {/* Primærfiltre */}
+          {/* Quick Filters */}
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() =>
@@ -1303,45 +1256,6 @@ const photoGroups = useMemo(() => {
               } flex items-center gap-2`}
             >
               <Star size={16} /> {t('search:filterOptions.favorites')}
-            </button>
-
-            <button
-              onClick={() =>
-                setActiveFilters((f) => ({ ...f, withFaces: !f.withFaces }))
-              }
-              className={`px-3 py-2 rounded-lg border ${
-                activeFilters.withFaces
-                  ? 'bg-blue-600 border-blue-500'
-                  : 'border-white/10'
-              } flex items-center gap-2`}
-            >
-              <Users size={16} /> {t('search:filterOptions.withFaces')}
-            </button>
-
-            <button
-              onClick={() =>
-                setActiveFilters((f) => ({ ...f, withTags: !f.withTags }))
-              }
-              className={`px-3 py-2 rounded-lg border ${
-                activeFilters.withTags
-                  ? 'bg-emerald-600 border-emerald-500'
-                  : 'border-white/10'
-              } flex items-center gap-2`}
-            >
-              <Tag size={16} /> {t('search:filterOptions.withTags')}
-            </button>
-
-            <button
-              onClick={() =>
-                setActiveFilters((f) => ({ ...f, aiAnalyzed: !f.aiAnalyzed }))
-              }
-              className={`px-3 py-2 rounded-lg border ${
-                activeFilters.aiAnalyzed
-                  ? 'bg-purple-600 border-purple-500'
-                  : 'border-white/10'
-              } flex items-center gap-2`}
-            >
-              <Sparkles size={16} /> {t('search:filterOptions.aiAnalyzed')}
             </button>
           </div>
 
@@ -1376,25 +1290,23 @@ const photoGroups = useMemo(() => {
               </select>
             </label>
 
-            {/* Kategori */}
+            {/* Tags (Manual) */}
             <label className="flex items-center gap-2">
               <Tag size={16} />
               <select
-                value={activeFilters.category || ''}
+                value={activeFilters.selectedTag || ''}
                 onChange={(e) =>
                   setActiveFilters((f) => ({
                     ...f,
-                    category: e.target.value || null,
+                    selectedTag: e.target.value || null,
                   }))
                 }
                 className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 outline-none"
               >
-                <option value="">
-                  {t('search:filterOptions.allCategories')}
-                </option>
-                {categories.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
+                <option value="">All tags</option>
+                {manualTags.map((tag) => (
+                  <option key={tag} value={tag}>
+                    {tag}
                   </option>
                 ))}
               </select>
@@ -1421,26 +1333,6 @@ const photoGroups = useMemo(() => {
               </select>
             </label>
           </div>
-
-          {/* Populære AI-tagger */}
-          {popularTags.length > 0 && (
-            <div>
-              <p className="text-sm text-muted mb-2">
-                {t('search:popularAITags')}:
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {popularTags.map(({ tag, count }) => (
-                  <button
-                    key={tag}
-                    onClick={() => setSearchQuery(tag)}
-                    className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-sm"
-                  >
-                    #{tag}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       )}
 
@@ -1462,21 +1354,6 @@ const photoGroups = useMemo(() => {
                   Favorites
                 </span>
               )}
-              {activeFilters.withFaces && (
-                <span className="px-2 py-1 rounded-lg bg-blue-600/30 text-sm border border-blue-500/50">
-                  With faces
-                </span>
-              )}
-              {activeFilters.withTags && (
-                <span className="px-2 py-1 rounded-lg bg-emerald-600/30 text-sm border border-emerald-500/50">
-                  With tags
-                </span>
-              )}
-              {activeFilters.aiAnalyzed && (
-                <span className="px-2 py-1 rounded-lg bg-purple-600/30 text-sm border border-purple-500/50">
-                  AI analyzed
-                </span>
-              )}
               {activeFilters.albumId && (
                 <span className="px-2 py-1 rounded-lg bg-indigo-600/30 text-sm border border-indigo-500/50">
                   Album:{' '}
@@ -1486,9 +1363,9 @@ const photoGroups = useMemo(() => {
                         ?.name || 'Unknown'}
                 </span>
               )}
-              {activeFilters.category && (
+              {activeFilters.selectedTag && (
                 <span className="px-2 py-1 rounded-lg bg-teal-600/30 text-sm border border-teal-500/50">
-                  Category: {activeFilters.category}
+                  Tag: {activeFilters.selectedTag}
                 </span>
               )}
               {activeFilters.dateRange && (
@@ -1528,7 +1405,7 @@ const photoGroups = useMemo(() => {
                   // Check if this is a collage or photo
                   if (item.contentType === 'collage') {
                     return (
-                      <div key={`collage-${item.id}`} className="col-span-2">
+                      <div key={`collage-${item.id}`}>
                         <CollageCard
                           collage={item}
                           onClick={(collage) => {
@@ -1682,12 +1559,9 @@ const photoGroups = useMemo(() => {
                   setSearchQuery('')
                   setActiveFilters({
                     favorites: false,
-                    withFaces: false,
-                    withTags: false,
-                    aiAnalyzed: false,
                     dateRange: null,
                     albumId: null,
-                    category: null,
+                    selectedTag: null,
                     contentTypes: ['photo', 'video'], // Reset to default: hide collages
                   })
                 }
