@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Lock, Mail, Eye, EyeOff, Fingerprint } from "lucide-react";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification } from "firebase/auth";
 import { auth } from "../firebase";
+import { checkKillSwitches } from '../hooks/useKillSwitches';
 import { sendVerificationEmail } from '../utils/emailVerification';
 import {
   isBiometricAvailable,
@@ -131,6 +132,14 @@ const LoginPage = ({ onLogin = () => {} }) => {
       if (!isLogin) {
         if (password !== confirmPassword) {
           setError(t('errors.passwordMismatch'));
+          setLoading(false);
+          return;
+        }
+
+        // ✅ KILL-SWITCH: Check if signups are disabled
+        const killSwitches = await checkKillSwitches();
+        if (killSwitches.disableSignups) {
+          setError('New account creation is temporarily disabled. Please try again later.');
           setLoading(false);
           return;
         }
