@@ -1,3 +1,8 @@
+/* ============================================================================
+   COMPONENT: TagInput.css - Tag input field with suggestions
+   Uses Chip component for tag display (chip styles in Chip.css)
+   ============================================================================ */
+
 .tag-input-container {
   display: flex;
   flex-direction: column;
@@ -83,7 +88,8 @@
 
 .tag-input:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: var(--color-purple-text);
+  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.1);
 }
 
 .tag-input::placeholder {
@@ -92,12 +98,13 @@
 
 .tag-add-btn {
   padding: 8px 16px;
-  background: var(--primary);
+  background: var(--color-purple-text);
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.9rem;
+  font-weight: 500;
   transition: opacity 0.2s;
   white-space: nowrap;
 }
@@ -116,25 +123,12 @@
   flex-wrap: wrap;
   gap: 6px;
   align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .suggestions-label {
   font-size: 0.875rem;
   color: var(--text-secondary);
   margin-right: 4px;
-}
-
-.tag-suggestion-chip {
-  padding: 4px 10px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: background 0.2s;
-  color: var(--text-primary);
-}
-
-.tag-suggestion-chip:hover {
-  background: var(--interactive-hover);
 }

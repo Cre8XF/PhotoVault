@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react'
-import { X } from 'lucide-react'
 import PropTypes from 'prop-types'
+import { Chip } from './Chip'
 import './TagInput.css'
 
 /**
  * Tag Input Component
  * Allows adding/removing tags with suggestions
+ * Uses Chip component for consistent styling
  */
 export function TagInput({
   tags = [],
@@ -16,16 +17,7 @@ export function TagInput({
 }) {
   const [input, setInput] = useState('')
 
-  // 🐛 DEBUG: Log what TagInput receives
-  console.log('🎨 TagInput render:', {
-    tags,
-    tagsLength: Array.isArray(tags) ? tags.length : 'not-array',
-    tagsType: typeof tags,
-    isArray: Array.isArray(tags),
-    tagsContent: tags,
-  })
-
-  // ✅ SAFE, DEFENSIVE ARRAYS (FIX FOR ReferenceError)
+  // 🔒 DEFENSIVE: Convert Firestore arrays to plain JavaScript arrays
   const plainTags = useMemo(
     () => (Array.isArray(tags) ? [...tags] : []),
     [tags]
@@ -38,7 +30,6 @@ export function TagInput({
 
   const handleAddTag = () => {
     if (input.trim()) {
-      console.log('➕ TagInput calling onAddTag:', input.trim())
       onAddTag(input.trim())
       setInput('')
     }
@@ -53,20 +44,18 @@ export function TagInput({
 
   return (
     <div className="tag-input-container">
-      {/* Existing tags */}
+      {/* Existing tags using Chip component */}
       {plainTags.length > 0 && (
         <div className="tag-list">
           {plainTags.map((tag) => (
-            <div key={tag} className="tag-chip">
-              <span>{tag}</span>
-              <button
-                onClick={() => onRemoveTag(tag)}
-                className="tag-remove-btn"
-                aria-label={`Fjern ${tag}`}
-              >
-                <X size={14} />
-              </button>
-            </div>
+            <Chip
+              key={tag}
+              variant="tag"
+              removable
+              onRemove={() => onRemoveTag(tag)}
+            >
+              {tag}
+            </Chip>
           ))}
         </div>
       )}
@@ -90,18 +79,21 @@ export function TagInput({
         </button>
       </div>
 
-      {/* Suggestions */}
+      {/* Suggestions using Chip component */}
       {plainSuggestions.length > 0 && (
         <div className="tag-suggestions">
           <span className="suggestions-label">Foreslått:</span>
           {plainSuggestions.map((sug) => (
-            <button
+            <Chip
               key={sug}
-              onClick={() => onAddTag(sug)}
-              className="tag-suggestion-chip"
+              variant="tag"
+              onClick={() => {
+                onAddTag(sug)
+                setInput('')
+              }}
             >
               {sug}
-            </button>
+            </Chip>
           ))}
         </div>
       )}

@@ -1,0 +1,166 @@
+/* ============================================================================
+   COMPONENT: Chip.css - Reusable chip/pill component
+   Used for: tags, filters, categories, status badges
+   ============================================================================ */
+
+/* Base chip styles */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 14px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  user-select: none;
+  animation: chipFadeIn 0.2s ease-out;
+}
+
+@keyframes chipFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.chip-clickable {
+  cursor: pointer;
+}
+
+.chip-clickable:active {
+  transform: scale(0.95);
+}
+
+.chip-content {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chip-remove {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
+}
+
+.chip:hover .chip-remove {
+  opacity: 1;
+}
+
+/* ============================================================================
+   Tag variant (default) - For photo tags, keywords
+   ============================================================================ */
+.chip-tag {
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  border: 1px solid var(--tag-border);
+}
+
+.chip-tag:hover {
+  border-color: var(--tag-text);
+}
+
+.chip-tag.chip-active {
+  background: var(--tag-text);
+  color: var(--bg-primary);
+  border-color: var(--tag-text);
+  font-weight: 600;
+}
+
+/* ============================================================================
+   Filter variant - For search filters, tag selection
+   ============================================================================ */
+.chip-filter {
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  border: 1px solid var(--tag-border);
+  padding: 8px 14px;
+  border-radius: 16px;
+}
+
+.chip-filter:hover {
+  border-color: var(--tag-text);
+}
+
+.chip-filter.chip-active {
+  background: var(--tag-text);
+  color: var(--bg-primary);
+  border-color: var(--tag-text);
+  font-weight: 600;
+}
+
+/* ============================================================================
+   Category variant - For album categories, groups
+   ============================================================================ */
+.chip-category {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 6px 12px;
+}
+
+.chip-category:hover {
+  background: var(--interactive-hover);
+  border-color: var(--border-hover);
+}
+
+.chip-category.chip-active {
+  background: var(--color-purple-text);
+  color: white;
+  border-color: var(--color-purple-text);
+}
+
+/* ============================================================================
+   Status variant - For upload status, processing indicators
+   ============================================================================ */
+.chip-status {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: none;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  letter-spacing: 0.5px;
+}
+
+.chip-status.chip-success {
+  background: var(--color-success);
+  color: white;
+}
+
+.chip-status.chip-error {
+  background: var(--color-error);
+  color: white;
+}
+
+.chip-status.chip-warning {
+  background: var(--color-warning);
+  color: white;
+}
+
+.chip-status.chip-info {
+  background: var(--color-info);
+  color: white;
+}
+
+/* ============================================================================
+   Responsive adjustments
+   ============================================================================ */
+@media (max-width: 768px) {
+  .chip-filter {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+}
