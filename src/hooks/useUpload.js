@@ -18,6 +18,7 @@ import useStore from '../state/store' // ✅ P0: For storageUsed
 import * as exifr from 'exifr' // ✅ ADD: For EXIF extraction BEFORE compression
 import { devLog, devWarn } from '../utils/log'
 import { getErrorMessage, ERROR_MESSAGES } from '../utils/errorMessages'
+import { checkKillSwitches } from './useKillSwitches' // ✅ ADD: Kill-switch check
 
 export function useUpload() {
   const { t } = useTranslation(['upload'])
@@ -165,6 +166,24 @@ export function useUpload() {
   ) => {
     if (uploading || !selectedFiles || selectedFiles.length === 0) {
       return { success: false, error: 'No files selected' }
+    }
+
+    // ✅ KILL-SWITCH: Check if uploads are disabled (unless admin)
+    if (!isAdmin()) {
+      const killSwitches = await checkKillSwitches()
+      if (killSwitches.pauseUploads || killSwitches.maintenanceMode) {
+        const errorMessage = killSwitches.maintenanceMode
+          ? 'Uploads are temporarily disabled due to system maintenance. Please try again later.'
+          : 'Uploads are currently paused. Please try again later.'
+
+        setNotification({
+          message: errorMessage,
+          type: 'error',
+        })
+
+        devLog('❌ Upload blocked by kill-switch:', killSwitches)
+        return { success: false, error: errorMessage }
+      }
     }
 
     // ✅ P0: HARD STORAGE LIMIT ENFORCEMENT

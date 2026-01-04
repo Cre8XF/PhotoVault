@@ -133,6 +133,18 @@ service cloud.firestore {
     }
 
     // ============================================================
+    // SYSTEM CONFIG (Admin kill-switches)
+    // ============================================================
+
+    match /systemConfig/{configId} {
+      // Anyone can read (to check if uploads/signups are disabled)
+      allow read: if true;
+
+      // Only admins can modify
+      allow write: if isAdmin();
+    }
+
+    // ============================================================
     // ALBUMS COLLECTION (top-level)
     // ============================================================
 
