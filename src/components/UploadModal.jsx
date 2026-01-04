@@ -4,7 +4,7 @@
 // ============================================================================
 import AlbumModal from './AlbumModal'
 import Button from './Button'
-import React, { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import {
   X,
@@ -107,6 +107,7 @@ const UploadModal = ({
   const [showAlbumModal, setShowAlbumModal] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState([])
   const [selectedAlbumId, setSelectedAlbumId] = useState(selectedAlbum || '')
+  const [uploadTags, setUploadTags] = useState('')
   const [dragActive, setDragActive] = useState(false)
   const [permissions, setPermissions] = useState({
     camera: 'prompt',
@@ -131,6 +132,14 @@ const UploadModal = ({
 
   const [aiTagging] = useState(false) // Always false for MVP
   const [isCreatingAlbum, setIsCreatingAlbum] = useState(false) // Reentrancy guard
+
+  // Parse comma-separated tags from input
+  const parsedTags = useMemo(() => {
+    return uploadTags
+      .split(',')
+      .map(t => t.trim().toLowerCase())
+      .filter(t => t.length > 0)
+  }, [uploadTags])
 
   // Refs
   const fileInputRef = useRef(null)
@@ -459,6 +468,7 @@ const UploadModal = ({
       selectedAlbumId,
       aiTagging,
       canUseCompression, // ✅ Pass explicit boolean
+      parsedTags, // ✅ Pass upload tags
       onUpload,
       t
     )
@@ -483,6 +493,7 @@ const UploadModal = ({
       selectedFiles.forEach((f) => URL.revokeObjectURL(f.preview))
       setSelectedFiles([])
       setSelectedAlbumId(selectedAlbum || '')
+      setUploadTags('') // ✅ Clear tags after upload
       onClose()
     }
   }
@@ -821,6 +832,45 @@ const UploadModal = ({
               </div>
             )}
           </div>
+
+          {/* Tag Input */}
+          {selectedFiles.length > 0 && (
+            <div className="mt-6">
+              <label
+                htmlFor="upload-tags"
+                className="block text-sm font-medium mb-2"
+              >
+                Tags (valgfritt)
+              </label>
+              <input
+                id="upload-tags"
+                type="text"
+                value={uploadTags}
+                onChange={(e) => setUploadTags(e.target.value)}
+                disabled={uploading}
+                placeholder="Separer med komma: familie, sommer, hytta"
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 disabled:opacity-50"
+              />
+
+              {parsedTags.length > 0 && (
+                <div className="mt-3 p-3 bg-white/5 rounded-lg border border-white/10">
+                  <p className="text-xs text-gray-400 mb-2">
+                    Tags som legges til:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {parsedTags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2 py-1 bg-purple-500/20 border border-purple-500/30 text-purple-300 rounded-lg text-xs font-medium"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Options */}
           <div className="mt-6 space-y-3">

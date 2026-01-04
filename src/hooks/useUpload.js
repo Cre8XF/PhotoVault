@@ -159,6 +159,7 @@ export function useUpload() {
     albumId,
     aiTagging,
     shouldCompressFiles, // ✅ Explicit compression flag from caller
+    uploadTags = [], // ✅ Tags to apply to uploaded photos
     onUpload,
     t
   ) => {
@@ -441,7 +442,7 @@ export function useUpload() {
       // ✅ P2-A FIX: Call onUpload ONCE with all processed files
       // This prevents multiple success notifications (one per file)
       // onUpload callback (handleUpload) will show a single success message with correct count
-      await onUpload(processedFiles, albumId, aiTagging)
+      await onUpload(processedFiles, albumId, aiTagging, uploadTags)
 
       // Update progress to 100%
       setUploadCount(processedFiles.length)

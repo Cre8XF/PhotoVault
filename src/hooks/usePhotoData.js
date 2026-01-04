@@ -201,7 +201,7 @@ export const usePhotoData = () => {
    * PHASE 4: Refresh only after upload - photos appear immediately
    */
   const handleUpload = useCallback(
-    async (selectedFiles, albumId, aiTagging = false) => {
+    async (selectedFiles, albumId, aiTagging = false, uploadTags = []) => {
       // GUARD: Prevent duplicate uploads
       if (isUploading) {
         if (import.meta.env.DEV) devWarn('⚠️ Upload already in progress, ignoring duplicate call')
@@ -275,7 +275,8 @@ export const usePhotoData = () => {
               fileObj.thumbnail || null,
               fileObj.metadata || null,
               fileObj.exifData || null, // ✅ Pass pre-extracted EXIF (from useUpload.js)
-              controller.signal // ✅ Pass abort signal
+              controller.signal, // ✅ Pass abort signal
+              uploadTags // ✅ Pass upload tags
             )
 
             // ✅ Track EXIF warnings
