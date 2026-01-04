@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { X } from 'lucide-react'
 import PropTypes from 'prop-types'
 import './TagInput.css'
@@ -16,13 +16,23 @@ export function TagInput({
 }) {
   const [input, setInput] = useState('')
 
-  // 🐛 DEBUG: Log what TagInput receives
+  // 🔧 CRITICAL: Convert Firestore arrays to plain JavaScript arrays
+  // This is a defensive layer in case arrays slip through from Firestore
+  const plainTags = useMemo(() => {
+    return Array.isArray(tags) ? [...tags] : []
+  }, [tags])
+
+  const plainSuggestions = useMemo(() => {
+    return Array.isArray(suggestions) ? [...suggestions] : []
+  }, [suggestions])
+
+  // 🐛 DEBUG: Log what TagInput receives and converts
   console.log('🎨 TagInput render:', {
-    tags,
-    tagsLength: tags.length,
-    tagsType: typeof tags,
-    isArray: Array.isArray(tags),
-    tagsContent: tags
+    originalTags: tags,
+    plainTags,
+    plainTagsLength: plainTags.length,
+    plainTagsType: typeof plainTags,
+    isPlainArray: Array.isArray(plainTags)
   })
 
   const handleAddTag = () => {
@@ -42,10 +52,10 @@ export function TagInput({
 
   return (
     <div className="tag-input-container">
-      {/* Existing tags */}
-      {tags.length > 0 && (
+      {/* Existing tags - USE plainTags */}
+      {plainTags.length > 0 && (
         <div className="tag-list">
-          {tags.map((tag) => (
+          {plainTags.map((tag) => (
             <div key={tag} className="tag-chip">
               <span>{tag}</span>
               <button
@@ -79,11 +89,11 @@ export function TagInput({
         </button>
       </div>
 
-      {/* Suggestions (optional) */}
-      {suggestions.length > 0 && (
+      {/* Suggestions - USE plainSuggestions */}
+      {plainSuggestions.length > 0 && (
         <div className="tag-suggestions">
           <span className="suggestions-label">Foreslått:</span>
-          {suggestions.map((sug) => (
+          {plainSuggestions.map((sug) => (
             <button
               key={sug}
               onClick={() => {

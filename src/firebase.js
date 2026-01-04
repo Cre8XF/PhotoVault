@@ -371,12 +371,15 @@ export async function getPhotosByUser(userId) {
       if (!data.updatedAt) data.updatedAt = data.createdAt
       if (!('favorite' in data)) data.favorite = false
 
+      // 🔧 CRITICAL: Convert Firestore arrays to plain JavaScript arrays
+      const tags = Array.isArray(data.tags) ? [...data.tags] : []
+      const aiTags = Array.isArray(data.aiTags) ? [...data.aiTags] : []
+
       // AI-felt defaults
-      if (!data.aiTags) data.aiTags = []
       if (!('faces' in data)) data.faces = 0
       if (!('aiAnalyzed' in data)) data.aiAnalyzed = false
 
-      return { id: d.id, ...data }
+      return { id: d.id, ...data, tags, aiTags }
     })
   } catch (err) {
     console.error('🔥 getPhotosByUser:', err)
@@ -430,7 +433,18 @@ export function listenToPhotosByUser(userId, callback) {
       }
     })
 
-    const photos = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
+    // 🔧 CRITICAL: Convert Firestore arrays to plain JavaScript arrays
+    const photos = snapshot.docs.map((d) => {
+      const data = d.data()
+      return {
+        id: d.id,
+        ...data,
+        // Convert Firestore arrays to plain arrays for React rendering
+        tags: Array.isArray(data.tags) ? [...data.tags] : [],
+        aiTags: Array.isArray(data.aiTags) ? [...data.aiTags] : [],
+      }
+    })
+
     callback(photos)
   })
 }
@@ -489,12 +503,15 @@ export async function getPhoto(photoId) {
     if (!data.updatedAt) data.updatedAt = data.createdAt
     if (!('favorite' in data)) data.favorite = false
 
+    // 🔧 CRITICAL: Convert Firestore arrays to plain JavaScript arrays
+    const tags = Array.isArray(data.tags) ? [...data.tags] : []
+    const aiTags = Array.isArray(data.aiTags) ? [...data.aiTags] : []
+
     // AI-felt defaults
-    if (!data.aiTags) data.aiTags = []
     if (!('faces' in data)) data.faces = 0
     if (!('aiAnalyzed' in data)) data.aiAnalyzed = false
 
-    return { id: docSnap.id, ...data }
+    return { id: docSnap.id, ...data, tags, aiTags }
   } catch (error) {
     console.error('🔥 getPhoto:', error)
     throw error
@@ -533,8 +550,18 @@ export async function addPhoto(data) {
 export async function updatePhoto(photoId, updates) {
   try {
     const refDoc = doc(db, 'photos', photoId)
+
+    // 🔧 CRITICAL: Convert arrays to plain arrays before saving
+    const cleanUpdates = { ...updates }
+    if (cleanUpdates.tags && Array.isArray(cleanUpdates.tags)) {
+      cleanUpdates.tags = [...cleanUpdates.tags]
+    }
+    if (cleanUpdates.aiTags && Array.isArray(cleanUpdates.aiTags)) {
+      cleanUpdates.aiTags = [...cleanUpdates.aiTags]
+    }
+
     await updateDoc(refDoc, {
-      ...updates,
+      ...cleanUpdates,
       updatedAt: new Date().toISOString(),
     })
   } catch (err) {
