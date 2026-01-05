@@ -179,7 +179,7 @@ const SmartViews = ({ allContent, activeFilters, onFilterChange }) => {
                 : 'border-white/20 bg-white/5 hover:bg-white/10 hover:border-white/30'
             }`}
             disabled={view.count === 0}
-            style={{ opacity: view.count === 0 ? 0.5 : 1 }}
+            style={{ opacity: view.count === 0 ? 'var(--opacity-disabled)' : 1 }}
           >
             <view.icon size={16} />
             <span className="whitespace-nowrap">{view.label}</span>

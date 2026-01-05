@@ -1,0 +1,111 @@
+{
+  "albumLimit": {
+    "icon": "📁",
+    "title": "Du har nådd albumgrensen!",
+    "subtitle": "Men du elsker tydeligvis Pixtr 🎉",
+    "painPoint": "GRATIS = maks 5 album",
+    "solution": "LITE = Ubegrensede album",
+    "features": [
+      "✅ Ubegrensede album",
+      "✅ 20 bilder per album → Ubegrenset",
+      "✅ 750 MB → 5 GB lagring",
+      "✅ Lagre filtre & collager"
+    ],
+    "cta": "Oppgrader til LITE",
+    "price": "39 kr/måned"
+  },
+  "photoLimit": {
+    "icon": "📸",
+    "title": "Albumet er fullt!",
+    "subtitle": "Tid å oppgradere eller lage et nytt album",
+    "painPoint": "GRATIS = 20 bilder per album",
+    "solution": "LITE = Ubegrensede bilder per album",
+    "features": [
+      "✅ Ubegrensede bilder per album",
+      "✅ Ubegrensede album",
+      "✅ 5 GB lagring (6.5x mer)",
+      "✅ Lagre filtre & collager"
+    ],
+    "cta": "Oppgrader til LITE",
+    "price": "39 kr/måned"
+  },
+  "editorSave": {
+    "icon": "🎨",
+    "title": "Liker du denne redigeringen?",
+    "subtitle": "Oppgrader for å lagre den!",
+    "painPoint": "GRATIS = Kun forhåndsvisning",
+    "solution": "LITE = Lagre alle redigeringer",
+    "features": [
+      "✅ Lagre filtre & justeringer",
+      "✅ Ubegrensede album & bilder",
+      "✅ 5 GB lagring",
+      "✅ Lagre collager"
+    ],
+    "cta": "Oppgrader til LITE",
+    "price": "39 kr/måned"
+  },
+  "collageSave": {
+    "icon": "🖼️",
+    "title": "Flott collage!",
+    "subtitle": "Oppgrader for å lagre den",
+    "painPoint": "GRATIS = Kun bygging",
+    "solution": "LITE = Lagre collager",
+    "features": [
+      "✅ Lagre ubegrensede collager",
+      "✅ Lagre filtre & redigeringer",
+      "✅ Ubegrensede album & bilder",
+      "✅ 5 GB lagring"
+    ],
+    "cta": "Oppgrader til LITE",
+    "price": "39 kr/måned"
+  },
+  "storageWarning": {
+    "icon": "⚠️",
+    "title": "Lagring nesten full",
+    "subtitle": "Du har brukt 90% av lagringsplassen din",
+    "painPoint": "GRATIS = 1 GB",
+    "solution": "LITE = 10 GB (10x mer)",
+    "features": [
+      "✅ 10 GB lagring (10x mer)",
+      "✅ Ubegrensede album & bilder",
+      "✅ Lagre filtre & collager",
+      "✅ Dokumentopplasting"
+    ],
+    "cta": "Oppgrader til LITE",
+    "price": "39 kr/måned"
+  },
+  "storageFull": {
+    "icon": "🚫",
+    "title": "Lagring full!",
+    "subtitle": "Slett bilder eller oppgrader",
+    "painPoint": "GRATIS = 1 GB",
+    "solution": "LITE = 10 GB",
+    "features": [
+      "✅ 10 GB lagring (10x mer)",
+      "✅ Ubegrensede album & bilder",
+      "✅ Lagre filtre & collager",
+      "✅ Dokumentopplasting"
+    ],
+    "cta": "Oppgrader til LITE",
+    "price": "39 kr/måned"
+  },
+  "qrSharing": {
+    "icon": "🔗",
+    "title": "Del med QR-koder",
+    "subtitle": "PRO-funksjon",
+    "painPoint": "LITE = Kun grunnleggende deling",
+    "solution": "PRO = QR-kodedeling",
+    "features": [
+      "✅ QR-kode albumdeling",
+      "✅ 50 GB lagring",
+      "✅ Videoopplasting",
+      "✅ Prioritert support"
+    ],
+    "cta": "Oppgrader til PRO",
+    "price": "79 kr/måned"
+  },
+  "common": {
+    "cancelAnytime": "Avbryt når som helst",
+    "maybeLater": "Kanskje senere"
+  }
+}
