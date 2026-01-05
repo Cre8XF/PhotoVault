@@ -9,10 +9,13 @@
     "editAlbum": "Rediger album"
   },
   "albums": "Album",
+  "albumNotFound": "Album ikke funnet",
   "areYouSure": "Er du sikker på at du vil fortsette?",
+  "backToAlbums": "Tilbake til album",
   "cancel": "Avbryt",
   "caption": "Bildetekst",
   "captionPlaceholder": "Legg til en bildetekst eller notat om dette bildet...",
+  "clearFilter": "Fjern filter ({{count}})",
   "addCaption": "Klikk for å legge til bildetekst",
   "captionSaved": "Bildetekst lagret",
   "saving": "Lagrer...",

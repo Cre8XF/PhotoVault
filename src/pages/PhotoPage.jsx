@@ -971,7 +971,7 @@ export default function PhotoPage() {
                 ? 'text-red-500'
                 : ''
             }`}
-            style={{ color: photo.favorite ? '#ef4444' : 'var(--text-primary)' }}
+            style={{ color: photo.favorite ? 'var(--color-error)' : 'var(--text-primary)' }}
             aria-label="Toggle favorite"
           >
             <Heart
@@ -1014,7 +1014,7 @@ export default function PhotoPage() {
             className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] rounded-lg transition active:scale-95 ${
               showInfo ? 'text-blue-400' : ''
             }`}
-            style={{ color: showInfo ? '#60a5fa' : 'var(--text-primary)' }}
+            style={{ color: showInfo ? 'var(--color-info)' : 'var(--text-primary)' }}
             aria-label={t('common:showInfo')}
           >
             <Info className="w-6 h-6" />
