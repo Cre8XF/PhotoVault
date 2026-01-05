@@ -157,7 +157,7 @@ const Modal = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
+      className="fixed inset-0 z-[1200] flex items-center justify-center p-4 animate-fade-in"
       role="presentation"
       onClick={handleBackdropClick}
     >
