@@ -10,10 +10,10 @@ import React, { useMemo } from 'react'
 import { Star, Image, Video, LayoutGrid, FolderX, Calendar, Clock } from 'lucide-react'
 import { resolvePhotoDate } from '../utils/photoDateUtils'
 
-const SmartViews = ({ photos, activeFilters, onFilterChange }) => {
+const SmartViews = ({ allContent, activeFilters, onFilterChange }) => {
   // Calculate counts for each smart view
   const counts = useMemo(() => {
-    if (!photos || photos.length === 0) {
+    if (!allContent || allContent.length === 0) {
       return {
         favorites: 0,
         photos: 0,
@@ -29,29 +29,29 @@ const SmartViews = ({ photos, activeFilters, onFilterChange }) => {
     const currentYear = now.getFullYear()
     const lastYear = currentYear - 1
 
-    // EXCLUDE DOCUMENTS from all counts
-    const mediaPhotos = photos.filter(p => p.type !== 'document')
+    // allContent already excludes documents and includes photos, videos, and collages
 
     return {
-      favorites: mediaPhotos.filter(p => p.favorite).length,
-      photos: mediaPhotos.filter(p => p.type === 'photo').length,
-      videos: mediaPhotos.filter(p => p.type === 'video').length,
-      collages: mediaPhotos.filter(p => p.contentType === 'collage').length,
-      withoutAlbum: mediaPhotos.filter(p => !p.albumId || p.albumId === '').length,
-      thisYear: mediaPhotos.filter(p => {
-        // Use dateTaken (not upload date)
+      favorites: allContent.filter(p => p.favorite).length,
+      // Photos = NOT video AND NOT collage (documents already excluded)
+      photos: allContent.filter(p => p.contentType === 'photo').length,
+      videos: allContent.filter(p => p.contentType === 'video').length,
+      collages: allContent.filter(p => p.contentType === 'collage').length,
+      withoutAlbum: allContent.filter(p => !p.albumId || p.albumId === '').length,
+      thisYear: allContent.filter(p => {
+        // Use dateTaken (not upload date) for proper calendar year
         const photoDate = resolvePhotoDate(p)
         if (!photoDate) return false
         return new Date(photoDate).getFullYear() === currentYear
       }).length,
-      lastYear: mediaPhotos.filter(p => {
-        // Use dateTaken (not upload date)
+      lastYear: allContent.filter(p => {
+        // Use dateTaken (not upload date) for proper calendar year
         const photoDate = resolvePhotoDate(p)
         if (!photoDate) return false
         return new Date(photoDate).getFullYear() === lastYear
       }).length,
     }
-  }, [photos])
+  }, [allContent])
 
   // Filter group definitions
   const filterGroups = [

@@ -372,8 +372,10 @@ const SearchPage = ({
         }
 
         res = res.filter((p) => {
-          const photoDate = new Date(p.createdAt || p.uploadedAt || 0).getTime()
-          return photoDate >= yearStart && photoDate <= yearEnd
+          const photoDate = resolvePhotoDate(p)
+          if (!photoDate) return false
+          const photoTime = new Date(photoDate).getTime()
+          return photoTime >= yearStart && photoTime <= yearEnd
         })
         if (import.meta.env.DEV) {
           devLog(`✅ Last year filter applied: ${res.length} photos`)
@@ -446,10 +448,28 @@ const SearchPage = ({
         if (import.meta.env.DEV) {
           devLog(`✅ Date filter applied: ${res.length} photos`)
         }
+      } else if (activeFilters.dateRange === 'year') {
+        // This Year filter - proper calendar year using dateTaken
+        const currentYear = new Date().getFullYear()
+
+        if (import.meta.env.DEV) {
+          devLog('🔍 Filtering photos from THIS YEAR:', {
+            year: currentYear,
+          })
+        }
+
+        res = res.filter((p) => {
+          const photoDate = resolvePhotoDate(p)
+          if (!photoDate) return false
+          return new Date(photoDate).getFullYear() === currentYear
+        })
+        if (import.meta.env.DEV) {
+          devLog(`✅ This year filter applied: ${res.length} photos`)
+        }
       } else {
-        // Original range-based filtering (week, month, year)
+        // Original range-based filtering (week, month)
         const days =
-          { week: 7, month: 30, year: 365 }[activeFilters.dateRange] || 0
+          { week: 7, month: 30 }[activeFilters.dateRange] || 0
         if (days > 0) {
           const cutoff = now - days * 24 * 60 * 60 * 1000
           res = res.filter(
@@ -624,9 +644,27 @@ const photoGroups = useMemo(() => {
   }
 
   // Phase 2A: Navigate to PhotoPage
-  const handlePhotoClick = (photo, index) => {
+  // Accepts optional sourceList parameter for memories navigation
+  const handlePhotoClick = (photo, indexOrSourceList, optionalSourceList) => {
+    // Handle different call signatures:
+    // 1. handlePhotoClick(photo, index) - from grid
+    // 2. handlePhotoClick(photo, index, sourceList) - from memories
+
+    let sourceList = filteredPhotos
+    let index = indexOrSourceList
+
+    // If second param is array, it's the old signature from MemoriesSection
+    if (Array.isArray(indexOrSourceList)) {
+      sourceList = indexOrSourceList
+      index = sourceList.findIndex((p) => p.id === photo.id)
+    } else if (optionalSourceList) {
+      // New signature with explicit source list
+      sourceList = optionalSourceList
+      index = typeof indexOrSourceList === 'number' ? indexOrSourceList : sourceList.findIndex((p) => p.id === photo.id)
+    }
+
     // Set global photo context state
-    const photoIds = filteredPhotos.map((p) => p.id)
+    const photoIds = sourceList.map((p) => p.id)
     setCurrentPhotoId(photo.id)
     setPhotoContext('search')
     setPhotoOrder(photoIds)
@@ -1220,7 +1258,7 @@ const photoGroups = useMemo(() => {
       {/* SMART ORGANIZATION: Smart Views (Quick Filters) */}
       {!editMode && (
         <SmartViews
-          photos={safePhotos}
+          allContent={allContent}
           activeFilters={activeFilters}
           onFilterChange={handleSmartViewFilter}
         />
