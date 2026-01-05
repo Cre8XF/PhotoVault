@@ -1,10 +1,12 @@
 import useEditorStore from '../store/editorStore'
 import Slider from './Slider'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Adjust Panel - Brightness, contrast, saturation, etc.
  */
 export default function AdjustPanel() {
+  const { t } = useTranslation('common')
   const transform = useEditorStore((state) => state.transform)
   const applyTransform = useEditorStore((state) => state.applyTransform)
   const resetTransform = useEditorStore((state) => state.resetTransform)
@@ -42,14 +44,14 @@ export default function AdjustPanel() {
   const hasAdjustments = Object.values(adjustments).some((v) => v !== 0)
 
   return (
-    <div className="p-3 md:p-4 bg-[#0a0a0a]">
+    <div className="p-3 md:p-4 editor-bg-primary">
       {/* Header with reset all button */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-white font-semibold">Adjustments</h3>
+        <h3 className="editor-text-primary font-semibold">Adjustments</h3>
         {hasAdjustments && (
           <button
             onClick={handleResetAll}
-            className="text-xs text-gray-400 hover:text-gray-300 transition-colors"
+            className="text-xs editor-text-muted hover:editor-text-secondary transition-colors"
           >
             Reset All
           </button>
