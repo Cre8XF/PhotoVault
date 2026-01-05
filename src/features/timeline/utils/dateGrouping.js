@@ -2,11 +2,11 @@
  * Timeline Feature - Phase 1: Date Grouping Logic
  *
  * Utilities for grouping photos by date (day, month, year)
- * Uses date-fns for date manipulation with Norwegian locale
+ * Returns structured data only - NO text generation
+ * UI layer handles all i18n text formatting
  */
 
 import { format, startOfDay, startOfMonth, startOfYear, isValid, parseISO } from 'date-fns'
-import { nb } from 'date-fns/locale'
 import { resolvePhotoDate } from '../../../utils/photoDateUtils'
 
 /**
@@ -78,8 +78,9 @@ export const groupPhotosByDate = (photos) => {
       groups[dayKey] = {
         date: startOfDay(date),
         dateKey: dayKey,
-        displayDate: format(date, 'EEEE d. MMMM yyyy', { locale: nb }),
-        shortDate: format(date, 'd. MMM yyyy', { locale: nb }),
+        day: date.getDate(),
+        monthIndex: date.getMonth(), // 0-11
+        year: date.getFullYear(),
         photos: []
       }
     }
@@ -128,10 +129,8 @@ export const groupPhotosByMonth = (photos) => {
       groups[monthKey] = {
         date: startOfMonth(date),
         dateKey: monthKey,
-        displayDate: format(date, 'MMMM yyyy', { locale: nb }),
-        shortDate: format(date, 'MMM yyyy', { locale: nb }),
-        month: format(date, 'MMMM', { locale: nb }),
-        year: format(date, 'yyyy'),
+        monthIndex: date.getMonth(), // 0-11
+        year: date.getFullYear(),
         photos: []
       }
     }
@@ -180,8 +179,7 @@ export const groupPhotosByYear = (photos) => {
       groups[yearKey] = {
         date: startOfYear(date),
         dateKey: yearKey,
-        displayDate: yearKey,
-        year: yearKey,
+        year: parseInt(yearKey),
         photos: []
       }
     }
@@ -228,9 +226,7 @@ export const getDateStatistics = (photos) => {
     withoutDates: photos.length - validPhotos.length,
     dateRange: dates.length > 0 ? {
       oldest: dates[0],
-      newest: dates[dates.length - 1],
-      oldestFormatted: format(dates[0], 'd. MMMM yyyy', { locale: nb }),
-      newestFormatted: format(dates[dates.length - 1], 'd. MMMM yyyy', { locale: nb })
+      newest: dates[dates.length - 1]
     } : null
   }
 }
@@ -310,7 +306,7 @@ export const getAvailableYears = (photos) => {
  * Get available months for a specific year
  * @param {Array} photos - Array of photo objects
  * @param {string|number} year - Year to filter by
- * @returns {Array} - Array of month objects
+ * @returns {Array} - Array of month objects with monthIndex (0-11) and monthKey
  */
 export const getAvailableMonthsForYear = (photos, year) => {
   if (!photos || photos.length === 0 || !year) {
@@ -328,17 +324,11 @@ export const getAvailableMonthsForYear = (photos, year) => {
     }
   })
 
-  const monthNames = [
-    'Januar', 'Februar', 'Mars', 'April', 'Mai', 'Juni',
-    'Juli', 'August', 'September', 'Oktober', 'November', 'Desember'
-  ]
-
   return Array.from(months)
     .sort((a, b) => b - a) // Newest first
-    .map(monthNum => ({
-      monthNum,
-      monthName: monthNames[monthNum],
-      monthKey: `${yearStr}-${String(monthNum + 1).padStart(2, '0')}`
+    .map(monthIndex => ({
+      monthIndex, // 0-11
+      monthKey: `${yearStr}-${String(monthIndex + 1).padStart(2, '0')}`
     }))
 }
 
@@ -453,9 +443,11 @@ export const getLastYearHighlights = (photos, referenceDate = new Date()) => {
  * 2. Same month, previous years
  * 3. Last year highlights (favorites or most recent)
  *
+ * Returns structured data only - UI layer handles text formatting
+ *
  * @param {Array} photos - Array of photo objects
  * @param {Date} referenceDate - The date to compare against (default: today)
- * @returns {Object|null} - Memory object with type and photos, or null if no memories
+ * @returns {Object|null} - Memory object with structured data, or null if no memories
  */
 export const getMemories = (photos, referenceDate = new Date()) => {
   if (!photos || photos.length === 0) {
@@ -465,27 +457,23 @@ export const getMemories = (photos, referenceDate = new Date()) => {
   // Priority 1: On this day (same date, previous years)
   const onThisDay = getPhotosOnThisDay(photos, referenceDate)
   if (onThisDay.length > 0) {
-    const monthName = format(referenceDate, 'MMMM', { locale: nb })
-    const day = referenceDate.getDate()
     return {
       type: 'on-this-day',
-      title: `${day}. ${monthName}`,
-      subtitle: onThisDay.length === 1
-        ? `${onThisDay[0].yearsAgo} år siden`
-        : `${onThisDay.length} minner fra tidligere år`,
+      day: referenceDate.getDate(),
+      monthIndex: referenceDate.getMonth(), // 0-11
       photos: onThisDay.slice(0, 10), // Limit to 10
-      count: onThisDay.length
+      count: onThisDay.length,
+      // Include yearsAgo only if single memory
+      ...(onThisDay.length === 1 && { yearsAgo: onThisDay[0].yearsAgo })
     }
   }
 
   // Priority 2: Same month, previous years
   const sameMonth = getPhotosFromSameMonth(photos, referenceDate)
   if (sameMonth.length > 0) {
-    const monthName = format(referenceDate, 'MMMM', { locale: nb })
     return {
       type: 'same-month',
-      title: `${monthName} i tidligere år`,
-      subtitle: `${sameMonth.length} ${sameMonth.length === 1 ? 'bilde' : 'bilder'} fra denne måneden`,
+      monthIndex: referenceDate.getMonth(), // 0-11
       photos: sameMonth.slice(0, 10), // Limit to 10
       count: sameMonth.length
     }
@@ -498,12 +486,10 @@ export const getMemories = (photos, referenceDate = new Date()) => {
     const hasFavorites = lastYearHighlights.some(p => p.favorite)
     return {
       type: 'last-year',
-      title: `Minner fra ${lastYear}`,
-      subtitle: hasFavorites
-        ? `Favoritter fra i fjor`
-        : `Bilder fra i fjor`,
+      year: lastYear,
       photos: lastYearHighlights,
-      count: lastYearHighlights.length
+      count: lastYearHighlights.length,
+      hasFavorites
     }
   }
 

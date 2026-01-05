@@ -13,10 +13,34 @@ import OnThisDayWidget from './OnThisDayWidget'
 import JumpToDatePicker from './JumpToDatePicker'
 
 const TimelineView = ({ photos, onPhotoClick }) => {
-  const { t } = useTranslation(['timeline'])
+  const { t, i18n } = useTranslation(['timeline'])
   const [groupBy, setGroupBy] = useState('day') // 'day' | 'month' | 'year'
   const [showDatePicker, setShowDatePicker] = useState(false)
   const sectionRefs = useRef({})
+
+  // Helper to format date based on grouping and current language
+  const formatGroupDate = useCallback((group) => {
+    const locale = i18n.language === 'en' ? 'en-US' : 'nb-NO'
+
+    if (groupBy === 'day') {
+      // Format: "Friday, January 5, 2026" or "Fredag 5. januar 2026"
+      return group.date.toLocaleDateString(locale, {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+    } else if (groupBy === 'month') {
+      // Format: "January 2026" or "Januar 2026"
+      return group.date.toLocaleDateString(locale, {
+        year: 'numeric',
+        month: 'long'
+      })
+    } else {
+      // Format: "2026"
+      return String(group.year)
+    }
+  }, [groupBy, i18n.language])
 
   // Group photos based on selected view
   const groups = useMemo(() => {
@@ -138,7 +162,7 @@ const TimelineView = ({ photos, onPhotoClick }) => {
                   }}
                 >
                   <DateSection
-                    date={group.displayDate}
+                    date={formatGroupDate(group)}
                     photos={group.photos}
                     onPhotoClick={onPhotoClick}
                   />

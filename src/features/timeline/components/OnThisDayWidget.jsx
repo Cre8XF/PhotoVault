@@ -28,9 +28,12 @@ const OnThisDayWidget = ({ photos, onPhotoClick, referenceDate = new Date() }) =
     return null
   }
 
-  // Get today's date formatted
+  // Get today's date formatted using i18n
   const today = new Date(referenceDate)
-  const dayMonth = today.toLocaleDateString('nb-NO', { day: 'numeric', month: 'long' })
+  const day = today.getDate()
+  const monthIndex = today.getMonth()
+  const monthName = t(`timeline:months.${monthIndex}`)
+  const dayMonth = `${day}. ${monthName}`
 
   return (
     <div className="on-this-day-widget glass-card p-6 rounded-2xl mb-8 border border-purple-500/20">

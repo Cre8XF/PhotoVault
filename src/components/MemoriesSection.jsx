@@ -7,11 +7,14 @@
  */
 
 import React, { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Calendar } from 'lucide-react'
 import { getMemories } from '../features/timeline/utils/dateGrouping'
 import LazyImage from './LazyImage'
 
 const MemoriesSection = ({ photos, onPhotoClick }) => {
+  const { t } = useTranslation(['timeline'])
+
   // Calculate memories using priority-based logic
   // EXCLUDE DOCUMENTS - only photos and videos
   const memory = useMemo(() => {
@@ -30,10 +33,48 @@ const MemoriesSection = ({ photos, onPhotoClick }) => {
     return getMemories(mediaPhotos, today)
   }, [photos])
 
+  // Generate title and subtitle from structured data
+  const getMemoryText = (memory) => {
+    if (!memory) return { title: '', subtitle: '' }
+
+    const monthName = t(`timeline:monthsCapitalized.${memory.monthIndex}`)
+
+    switch (memory.type) {
+      case 'on-this-day':
+        return {
+          title: t('timeline:memories.onThisDay.title', { day: memory.day, month: monthName }),
+          subtitle: memory.yearsAgo
+            ? t('timeline:memories.onThisDay.subtitle_single', { yearsAgo: memory.yearsAgo })
+            : t('timeline:memories.onThisDay.subtitle_multiple', { count: memory.count })
+        }
+
+      case 'same-month':
+        return {
+          title: t('timeline:memories.sameMonth.title', { month: monthName }),
+          subtitle: memory.count === 1
+            ? t('timeline:memories.sameMonth.subtitle_single', { count: memory.count })
+            : t('timeline:memories.sameMonth.subtitle_multiple', { count: memory.count })
+        }
+
+      case 'last-year':
+        return {
+          title: t('timeline:memories.lastYear.title', { year: memory.year }),
+          subtitle: memory.hasFavorites
+            ? t('timeline:memories.lastYear.subtitle_favorites')
+            : t('timeline:memories.lastYear.subtitle_recent')
+        }
+
+      default:
+        return { title: '', subtitle: '' }
+    }
+  }
+
   // Don't render if no memories
   if (!memory || !memory.photos || memory.photos.length === 0) {
     return null
   }
+
+  const { title, subtitle } = getMemoryText(memory)
 
   // Show max 6 photos in compact grid
   const displayPhotos = memory.photos.slice(0, 6)
@@ -47,8 +88,8 @@ const MemoriesSection = ({ photos, onPhotoClick }) => {
             <Calendar className="w-5 h-5 text-white" />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-bold">{memory.title}</h3>
-            <p className="text-sm text-muted">{memory.subtitle}</p>
+            <h3 className="text-lg font-bold">{title}</h3>
+            <p className="text-sm text-muted">{subtitle}</p>
           </div>
         </div>
 
@@ -74,7 +115,7 @@ const MemoriesSection = ({ photos, onPhotoClick }) => {
               {/* Year badge for "on this day" memories */}
               {memory.type === 'on-this-day' && photo.yearsAgo && (
                 <div className="absolute bottom-1 left-1 right-1 bg-black/80 text-white text-xs py-0.5 px-1 rounded text-center font-medium">
-                  {photo.yearsAgo} år siden
+                  {t('timeline:yearBadge', { yearsAgo: photo.yearsAgo })}
                 </div>
               )}
             </div>
@@ -84,7 +125,7 @@ const MemoriesSection = ({ photos, onPhotoClick }) => {
         {/* Show count if more photos available */}
         {memory.count > displayPhotos.length && (
           <p className="text-xs text-muted mt-2 text-center">
-            +{memory.count - displayPhotos.length} flere
+            {t('timeline:memories.morePhotos', { count: memory.count - displayPhotos.length })}
           </p>
         )}
       </div>

@@ -1,0 +1,24 @@
+{
+  "months": {
+    "0": "januar",
+    "1": "februar",
+    "2": "mars",
+    "3": "april",
+    "4": "mai",
+    "5": "juni",
+    "6": "juli",
+    "7": "august",
+    "8": "september",
+    "9": "oktober",
+    "10": "november",
+    "11": "desember"
+  },
+  "memories": {
+    "title": "På denne dagen",
+    "description": "Minner fra {{date}}",
+    "yearsAgo": "{{count}} år siden",
+    "yearsAgo_plural": "{{count}} år siden",
+    "viewAll": "Se alle",
+    "viewAllWithCount": "Se alle {{count}} minner"
+  }
+}
