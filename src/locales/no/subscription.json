@@ -1,0 +1,53 @@
+{
+  "pageTitle": "Abonnement & Lagring",
+  "currentPlan": "Nåværende Plan",
+  "storage": "Lagring",
+  "photos": "Bilder",
+  "compression": "Komprimering",
+  "video": "Video",
+  "storageUsage": "Lagringsbruk",
+  "criticalLowStorage": "Kritisk lav lagring!",
+  "criticalStorageMessage": "Du har kun {remaining} igjen. Oppgrader nå for å fortsette å laste opp bilder.",
+  "upgradeSubscription": "Oppgrader abonnement",
+  "lowStorage": "Lav lagring",
+  "lowStorageMessage": "Du har brukt {percent}% av lagringskvoten din. Vurder å oppgradere snart.",
+  "choosePlan": "Velg Din Plan",
+  "recommended": "ANBEFALT",
+  "yourPlan": "DIN PLAN",
+  "currentPlanButton": "Nåværende Plan",
+  "upgradeToButton": "Oppgrader til {plan}",
+  "aboutSubscriptions": "Om Abonnementene",
+  "aboutGratis": "GRATIS: Perfekt for å teste ut Pixtr. Original bildekvalitet uten komprimering.",
+  "aboutLite": "LITE: For deg som trenger mer plass med bildekomprimering for optimal lagring.",
+  "allPlansInclude": "Alle planer inkluderer QR-kode deling, Collage Builder, Timeline og søkefunksjonalitet.",
+  "yes": "Ja",
+  "no": "Nei",
+  "noOriginal": "Nei (original)",
+  "forever": "for alltid",
+  "originalQuality": "Original kvalitet",
+  "perMonth": "per måned",
+  "features": {
+    "gratis": {
+      "storage": "1 GB lagring",
+      "quality": "Original bildekvalitet",
+      "albums": "Album-organisering",
+      "qrCode": "QR-kode deling",
+      "collage": "Collage Builder",
+      "timeline": "Timeline",
+      "search": "Søk i bilder"
+    },
+    "lite": {
+      "allInGratis": "Alt i GRATIS",
+      "storage": "10 GB lagring",
+      "compression": "Bildekomprimering",
+      "support": "Prioritert support"
+    }
+  },
+  "billingCancel": {
+    "title": "Checkout Avbrutt",
+    "message": "Du har avbrutt checkout-prosessen. Ingen endringer er gjort til ditt abonnement.",
+    "backToSubscriptions": "Tilbake til Abonnementer",
+    "goToHome": "Gå til Hjem",
+    "needHelp": "Har du spørsmål? Kontakt oss på support@pixtr.no"
+  }
+}
