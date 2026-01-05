@@ -509,6 +509,7 @@ const UploadModal = ({
   const handleAlbumSave = async (albumData) => {
     // Reentrancy guard - prevent double creation in StrictMode
     if (isCreatingAlbum) {
+      devLog('⚠️ handleAlbumSave blocked by reentrancy guard')
       return
     }
     devLog('🔥 handleAlbumSave CALLED', albumData)
@@ -549,9 +550,10 @@ const UploadModal = ({
       // Single Firestore write - creates album document
       const newAlbumRef = await addAlbum(cleanAlbum)
 
-      devLog('✅ Album created:', {
+      devLog('✅ Album created successfully:', {
         id: newAlbumRef.id,
         name: cleanAlbum.name,
+        timestamp: new Date().toISOString(),
       })
 
       window.showToast?.(
@@ -590,6 +592,7 @@ const UploadModal = ({
   }
 
   const handleCreateAlbumClick = () => {
+    devLog('📁 Opening AlbumModal from UploadModal')
     setShowAlbumModal(true)
   }
 
@@ -605,9 +608,8 @@ const UploadModal = ({
 
   return (
     <div
-      className={`fixed inset-0 bg-black/70 flex items-center justify-center z-[1001] p-4 animate-fade-in ${
-        showAlbumModal ? 'pointer-events-none' : ''
-      }`}
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1001] p-4 animate-fade-in"
+      style={{ display: showAlbumModal ? 'none' : 'flex' }}
     >
       <div
         ref={modalRef}
@@ -1104,17 +1106,13 @@ const UploadModal = ({
                 })()}
           </Button>
 
-          {showAlbumModal &&
-            createPortal(
-              <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/70 p-4 animate-fade-in">
-                <AlbumModal
-                  isOpen={showAlbumModal}
-                  onClose={() => setShowAlbumModal(false)}
-                  onSave={handleAlbumSave}
-                />
-              </div>,
-              document.body
-            )}
+          {showAlbumModal && (
+            <AlbumModal
+              isOpen={showAlbumModal}
+              onClose={() => setShowAlbumModal(false)}
+              onSave={handleAlbumSave}
+            />
+          )}
         </div>
       </div>
     </div>
