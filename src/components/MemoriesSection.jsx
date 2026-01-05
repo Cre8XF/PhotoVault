@@ -13,7 +13,7 @@ import { getMemories } from '../features/timeline/utils/dateGrouping'
 import LazyImage from './LazyImage'
 
 const MemoriesSection = ({ photos, onPhotoClick }) => {
-  const { t } = useTranslation(['timeline'])
+  const { t } = useTranslation('timeline')
 
   // Calculate memories using priority-based logic
   // EXCLUDE DOCUMENTS - only photos and videos
