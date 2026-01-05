@@ -11,7 +11,7 @@
   align-items: center; /* Vertikal sentrering */
   justify-content: center; /* Horisontal sentrering */
   overflow: hidden;
-  background: #0a0a0a;
+  background: var(--bg-editor-dark);
   position: relative; /* For crop overlay positioning */
 }
 
@@ -84,7 +84,7 @@ body.light-mode .editor-viewport {
 .rotate-container input[type='range'] {
   width: 80%;
   height: 6px; /* smaller height for slider */
-  background: #3a3a3a;
+  background: var(--bg-editor-hover);
   border-radius: 4px;
   -webkit-appearance: none;
 }
@@ -109,19 +109,19 @@ body.light-mode .rotate-container input[type='range'] {
 
 /* Editor backgrounds */
 .editor-bg-primary {
-  background-color: #0a0a0a;
+  background-color: var(--bg-editor-dark);
 }
 
 .editor-bg-secondary {
-  background-color: #1a1a1a;
+  background-color: var(--bg-editor-surface);
 }
 
 .editor-bg-tertiary {
-  background-color: #2a2a2a;
+  background-color: var(--bg-editor-elevated);
 }
 
 .editor-bg-tertiary-hover:hover {
-  background-color: #3a3a3a;
+  background-color: var(--bg-editor-hover);
 }
 
 /* Editor text colors */
@@ -139,7 +139,7 @@ body.light-mode .rotate-container input[type='range'] {
 
 /* Editor borders */
 .editor-border {
-  border-color: #2a2a2a;
+  border-color: var(--bg-editor-elevated);
 }
 
 /* Light mode overrides for editor */

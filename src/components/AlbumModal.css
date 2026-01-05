@@ -44,7 +44,7 @@
 .album-modal-icon {
   width: 20px;
   height: 20px;
-  color: #a78bfa;
+  color: var(--color-purple-300);
 }
 
 .album-modal-close {
@@ -84,7 +84,7 @@
 }
 
 .album-modal-required {
-  color: #ef4444;
+  color: var(--color-error);
 }
 
 .album-modal-input,
@@ -107,7 +107,7 @@
 
 .album-modal-input:focus,
 .album-modal-textarea:focus {
-  border-color: #a78bfa;
+  border-color: var(--color-purple-300);
 }
 
 .album-modal-textarea {
@@ -151,8 +151,8 @@
   font-weight: 600;
   border: none;
   border-radius: 8px;
-  background: linear-gradient(to right, #a855f7, #ec4899);
-  color: white;
+  background: var(--gradient-purple-pink);
+  color: var(--color-white);
   cursor: pointer;
   transition: opacity 0.2s, transform 0.2s;
 }
