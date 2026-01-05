@@ -86,10 +86,7 @@ const UploadModal = ({
   const storageLimit = useStore((state) => state.storageLimit)
 
   // ✅ Phase 3-3: Get AbortController-based cancellation
-  const {
-    activeUploads,
-    cancelUpload: cancelPhotoDataUpload
-  } = usePhotoData()
+  const { activeUploads, cancelUpload: cancelPhotoDataUpload } = usePhotoData()
 
   const {
     uploading,
@@ -137,8 +134,8 @@ const UploadModal = ({
   const parsedTags = useMemo(() => {
     return uploadTags
       .split(',')
-      .map(t => t.trim().toLowerCase())
-      .filter(t => t.length > 0)
+      .map((t) => t.trim().toLowerCase())
+      .filter((t) => t.length > 0)
   }, [uploadTags])
 
   // Refs
@@ -410,17 +407,17 @@ const UploadModal = ({
               await sendEmailVerification(user)
               setNotification({
                 type: 'success',
-                message: 'Verification email sent! Check your inbox.'
+                message: 'Verification email sent! Check your inbox.',
               })
             } catch (error) {
               console.error('Failed to send verification email:', error)
               setNotification({
                 type: 'error',
-                message: 'Failed to send verification email. Please try again.'
+                message: 'Failed to send verification email. Please try again.',
               })
             }
-          }
-        }
+          },
+        },
       })
 
       return // STOP here - don't process files
@@ -489,13 +486,13 @@ const UploadModal = ({
         const uploadedCount = result.processedCount || selectedFiles.length
         setNotification({
           message: `${uploadedCount} photos uploaded. ${result.exifWarnings.length} without original date (using upload time instead).`,
-          type: 'warning'
+          type: 'warning',
         })
       } else if (result.cancelled) {
         // ✅ PHASE 2: Show partial success message if cancelled
         setNotification({
           message: `Upload cancelled. ${result.processedCount}/${result.totalCount} photos saved.`,
-          type: 'info'
+          type: 'info',
         })
       }
 
@@ -514,6 +511,7 @@ const UploadModal = ({
     if (isCreatingAlbum) {
       return
     }
+    devLog('🔥 handleAlbumSave CALLED', albumData)
 
     // 🆕 FREEMIUM: Check album limit BEFORE creating
     const albumLimitCheck = canCreateAlbum()
@@ -576,7 +574,10 @@ const UploadModal = ({
 
       // Handle email verification error
       if (error.code === 'EMAIL_NOT_VERIFIED') {
-        window.showToast?.('Please verify your email before creating albums', 'error')
+        window.showToast?.(
+          'Please verify your email before creating albums',
+          'error'
+        )
         navigate('/verify-email')
         return
       }
@@ -603,13 +604,15 @@ const UploadModal = ({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1001] p-4 animate-fade-in">
+    <div
+      className={`fixed inset-0 bg-black/70 flex items-center justify-center z-[1001] p-4 animate-fade-in ${
+        showAlbumModal ? 'pointer-events-none' : ''
+      }`}
+    >
       <div
         ref={modalRef}
         tabIndex="-1"
-        className={`bg-[var(--bg-secondary)] rounded-2xl shadow-2xl border border-white/10 w-full max-w-2xl max-h-[85vh] overflow-y-auto modal-content-enhanced pb-24 md:pb-8 ${
-          showAlbumModal ? 'pointer-events-none opacity-50' : ''
-        }`}
+        className="bg-[var(--bg-secondary)] rounded-2xl shadow-2xl border border-white/10 w-full max-w-2xl max-h-[85vh] overflow-y-auto modal-content-enhanced pb-24 md:pb-8"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -741,21 +744,32 @@ const UploadModal = ({
 
               {/* ✅ FEATURE #2: Storage Pre-Check & File Size Preview */}
               {(() => {
-                const totalSelectedSize = selectedFiles.reduce((sum, f) => sum + (f.size || 0), 0)
+                const totalSelectedSize = selectedFiles.reduce(
+                  (sum, f) => sum + (f.size || 0),
+                  0
+                )
                 const storageAfterUpload = storageUsed + totalSelectedSize
                 const willExceedStorage = storageAfterUpload > storageLimit
-                const storagePercentageAfterUpload = storageLimit > 0 ? (storageAfterUpload / storageLimit) * 100 : 0
+                const storagePercentageAfterUpload =
+                  storageLimit > 0
+                    ? (storageAfterUpload / storageLimit) * 100
+                    : 0
 
                 return (
                   <div className="mt-4 p-4 bg-white/5 rounded-xl border border-white/10">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm text-gray-400">Total size:</span>
-                      <span className="text-sm font-semibold">{formatFileSize(totalSelectedSize)}</span>
+                      <span className="text-sm font-semibold">
+                        {formatFileSize(totalSelectedSize)}
+                      </span>
                     </div>
 
                     <div className="flex justify-between items-center text-xs text-gray-400">
                       <span>Current storage:</span>
-                      <span>{formatFileSize(storageUsed)} / {formatFileSize(storageLimit)}</span>
+                      <span>
+                        {formatFileSize(storageUsed)} /{' '}
+                        {formatFileSize(storageLimit)}
+                      </span>
                     </div>
 
                     {/* Critical warning - will exceed storage */}
@@ -765,32 +779,43 @@ const UploadModal = ({
                           ⚠️ Not enough storage space!
                         </p>
                         <p className="text-xs text-red-300">
-                          Upload requires {formatFileSize(totalSelectedSize)} but you only have {formatFileSize(storageLimit - storageUsed)} available.
-                          Please remove some files or upgrade your plan.
+                          Upload requires {formatFileSize(totalSelectedSize)}{' '}
+                          but you only have{' '}
+                          {formatFileSize(storageLimit - storageUsed)}{' '}
+                          available. Please remove some files or upgrade your
+                          plan.
                         </p>
                       </div>
                     )}
 
                     {/* Warning - close to limit (80-100%) */}
-                    {!willExceedStorage && storagePercentageAfterUpload > 80 && (
-                      <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                        <p className="text-sm text-yellow-400">
-                          ⚠️ After upload: {storagePercentageAfterUpload.toFixed(1)}% of storage used
-                        </p>
-                        <p className="text-xs text-yellow-300 mt-1">
-                          You'll have {formatFileSize(storageLimit - storageAfterUpload)} remaining.
-                        </p>
-                      </div>
-                    )}
+                    {!willExceedStorage &&
+                      storagePercentageAfterUpload > 80 && (
+                        <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                          <p className="text-sm text-yellow-400">
+                            ⚠️ After upload:{' '}
+                            {storagePercentageAfterUpload.toFixed(1)}% of
+                            storage used
+                          </p>
+                          <p className="text-xs text-yellow-300 mt-1">
+                            You'll have{' '}
+                            {formatFileSize(storageLimit - storageAfterUpload)}{' '}
+                            remaining.
+                          </p>
+                        </div>
+                      )}
 
                     {/* Info - safe upload (< 80%) */}
-                    {!willExceedStorage && storagePercentageAfterUpload <= 80 && (
-                      <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                        <p className="text-xs text-blue-400">
-                          ✓ After upload: {storagePercentageAfterUpload.toFixed(1)}% of storage used
-                        </p>
-                      </div>
-                    )}
+                    {!willExceedStorage &&
+                      storagePercentageAfterUpload <= 80 && (
+                        <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                          <p className="text-xs text-blue-400">
+                            ✓ After upload:{' '}
+                            {storagePercentageAfterUpload.toFixed(1)}% of
+                            storage used
+                          </p>
+                        </div>
+                      )}
                   </div>
                 )
               })()}
@@ -978,7 +1003,9 @@ const UploadModal = ({
           {uploading && (
             <div className="mt-6">
               <div className="flex justify-between text-sm mb-2">
-                <span>{uploadCancelled ? 'Cancelling...' : t('upload:processing')}</span>
+                <span>
+                  {uploadCancelled ? 'Cancelling...' : t('upload:processing')}
+                </span>
                 {/* ✅ OPPDATERT: Vis både antall og prosent */}
                 <span>
                   {totalFiles > 0 && uploadCount > 0
@@ -1011,7 +1038,7 @@ const UploadModal = ({
                     cancelUploadLocal()
                     // Cancel active uploads via AbortController (usePhotoData)
                     if (activeUploads.length > 0) {
-                      activeUploads.forEach(upload => {
+                      activeUploads.forEach((upload) => {
                         cancelPhotoDataUpload(upload.id)
                       })
                     }
@@ -1045,7 +1072,10 @@ const UploadModal = ({
             disabled={(() => {
               if (selectedFiles.length === 0 || uploading) return true
               // ✅ Disable if storage will be exceeded
-              const totalSelectedSize = selectedFiles.reduce((sum, f) => sum + (f.size || 0), 0)
+              const totalSelectedSize = selectedFiles.reduce(
+                (sum, f) => sum + (f.size || 0),
+                0
+              )
               const storageAfterUpload = storageUsed + totalSelectedSize
               return storageAfterUpload > storageLimit
             })()}
@@ -1057,27 +1087,31 @@ const UploadModal = ({
             {uploading
               ? t('upload:uploading', { count: selectedFiles.length })
               : (() => {
-                  const totalSelectedSize = selectedFiles.reduce((sum, f) => sum + (f.size || 0), 0)
+                  const totalSelectedSize = selectedFiles.reduce(
+                    (sum, f) => sum + (f.size || 0),
+                    0
+                  )
                   const storageAfterUpload = storageUsed + totalSelectedSize
-                  if (storageAfterUpload > storageLimit && selectedFiles.length > 0) {
+                  if (
+                    storageAfterUpload > storageLimit &&
+                    selectedFiles.length > 0
+                  ) {
                     return 'Storage limit exceeded'
                   }
-                  return t('upload:uploadButton', { count: selectedFiles.length })
+                  return t('upload:uploadButton', {
+                    count: selectedFiles.length,
+                  })
                 })()}
           </Button>
 
           {showAlbumModal &&
             createPortal(
-              <div
-                className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/50 animate-fade-in"
-                onClick={() => setShowAlbumModal(false)}
-              >
-                <div onClick={(e) => e.stopPropagation()}>
-                  <AlbumModal
-                    onClose={() => setShowAlbumModal(false)}
-                    onSave={handleAlbumSave}
-                  />
-                </div>
+              <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/70 p-4 animate-fade-in">
+                <AlbumModal
+                  isOpen={showAlbumModal}
+                  onClose={() => setShowAlbumModal(false)}
+                  onSave={handleAlbumSave}
+                />
               </div>,
               document.body
             )}
