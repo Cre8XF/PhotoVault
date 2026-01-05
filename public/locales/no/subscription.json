@@ -4,5 +4,5 @@
   "upgradeRequired": "Oppgradering kreves",
   "videoUpgradeMessage": "For å laste opp video, oppgrader til PRO-abonnementet (50 GB for 79 kr/måned)",
   "storageFullTitle": "Lagringen er full",
-  "storageFullMessage": "Du har brukt {{used}} av {{limit}}. Kun {{available}} ledig. Oppgrader til LITE (10 GB for 29 kr/måned) eller slett noen bilder."
+  "storageFullMessage": "Du har brukt {{used}} av {{limit}}. Kun {{available}} ledig. Oppgrader til LITE (10 GB for 39 kr/måned) eller slett noen bilder."
 }
