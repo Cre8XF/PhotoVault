@@ -105,7 +105,7 @@ const SearchPage = ({
     dateRange: null,
     albumId: null,
     selectedTag: null,
-    contentTypes: ['photo'], // Default: Photos only
+    contentTypes: null, // Default: Show all media types (photos, videos, collages)
   })
   const [showFilters, setShowFilters] = useState(false)
   const [searchExpanded, setSearchExpanded] = useState(false)
@@ -518,10 +518,11 @@ const SearchPage = ({
   )
 
   // 🎯 FILTER BY CONTENT TYPE: Apply contentTypes filter
-  const selectedContentTypes = activeFilters.contentTypes || ['photo', 'video']
-  const filtered = merged.filter(item =>
-    selectedContentTypes.includes(item.contentType)
-  )
+  // If no filter active, show all content types (photos, videos, collages)
+  const selectedContentTypes = activeFilters.contentTypes
+  const filtered = selectedContentTypes
+    ? merged.filter(item => selectedContentTypes.includes(item.contentType))
+    : merged
 
   if (import.meta.env.DEV) {
     devLog('🎨 Merged content:', {
@@ -681,7 +682,7 @@ const photoGroups = useMemo(() => {
       dateRange: null,
       albumId: null,
       selectedTag: null,
-      contentTypes: ['photo'], // Reset to default: Photos only
+      contentTypes: null, // Reset to default: Show all media types
     })
     setSearchQuery('')
     setSearchExpanded(false) // Also collapse search when resetting
