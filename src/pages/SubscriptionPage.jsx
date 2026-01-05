@@ -66,8 +66,8 @@ const SubscriptionPage = ({ user }) => {
         return {
           name: 'PRO',
           storage: '50 GB',
-          compression: 'Ja',
-          video: 'Ja',
+          compression: t('subscription:yes'),
+          video: t('subscription:yes'),
           color: 'from-purple-600 to-pink-600',
           icon: <Crown className="w-6 h-6" />,
         }
@@ -75,8 +75,8 @@ const SubscriptionPage = ({ user }) => {
         return {
           name: 'LITE',
           storage: '10 GB',
-          compression: 'Ja',
-          video: 'Nei',
+          compression: t('subscription:yes'),
+          video: t('subscription:no'),
           color: 'from-blue-600 to-cyan-600',
           icon: <Zap className="w-6 h-6" />,
         }
@@ -85,13 +85,13 @@ const SubscriptionPage = ({ user }) => {
         return {
           name: 'GRATIS',
           storage: '1 GB',
-          compression: 'Nei (original)',
-          video: 'Nei',
+          compression: t('subscription:noOriginal'),
+          video: t('subscription:no'),
           color: 'from-gray-600 to-gray-700',
           icon: <Database className="w-6 h-6" />,
         }
     }
-  }, [currentTier])
+  }, [currentTier, t])
 
   /**
    * Subscription plans
@@ -101,18 +101,18 @@ const SubscriptionPage = ({ user }) => {
       id: 'GRATIS',
       name: 'GRATIS',
       price: '0 kr',
-      period: 'for alltid',
+      period: t('subscription:forever'),
       storage: '1 GB',
-      compression: 'Original kvalitet',
-      video: 'Nei',
+      compression: t('subscription:originalQuality'),
+      video: t('subscription:no'),
       features: [
-        '1 GB lagring',
-        'Original bildekvalitet',
-        'Album-organisering',
-        'QR-kode deling',
-        'Collage Builder',
-        'Timeline',
-        'Søk i bilder',
+        t('subscription:features.gratis.storage'),
+        t('subscription:features.gratis.quality'),
+        t('subscription:features.gratis.albums'),
+        t('subscription:features.gratis.qrCode'),
+        t('subscription:features.gratis.collage'),
+        t('subscription:features.gratis.timeline'),
+        t('subscription:features.gratis.search'),
       ],
       color: 'from-gray-600 to-gray-700',
       current: currentTier === 'GRATIS',
@@ -121,15 +121,15 @@ const SubscriptionPage = ({ user }) => {
       id: 'LITE',
       name: 'LITE',
       price: '39 kr',
-      period: 'per måned',
+      period: t('subscription:perMonth'),
       storage: '10 GB',
-      compression: 'Ja',
-      video: 'Nei',
+      compression: t('subscription:yes'),
+      video: t('subscription:no'),
       features: [
-        'Alt i GRATIS',
-        '10 GB lagring',
-        'Bildekomprimering',
-        'Prioritert support',
+        t('subscription:features.lite.allInGratis'),
+        t('subscription:features.lite.storage'),
+        t('subscription:features.lite.compression'),
+        t('subscription:features.lite.support'),
       ],
       color: 'from-blue-600 to-cyan-600',
       current: currentTier === 'LITE',
@@ -171,7 +171,7 @@ const SubscriptionPage = ({ user }) => {
           >
             <ArrowLeft className="w-6 h-6" />
           </button>
-          <h1 className="text-2xl font-bold">Subscription & Storage</h1>
+          <h1 className="text-2xl font-bold">{t('subscription:pageTitle')}</h1>
         </div>
       </div>
 
@@ -180,7 +180,7 @@ const SubscriptionPage = ({ user }) => {
           {/* Current Plan Card */}
           <div className="glass-card p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Current Plan</h2>
+              <h2 className="text-xl font-semibold">{t('subscription:currentPlan')}</h2>
               <div
                 className={`px-4 py-2 bg-gradient-to-r ${currentPlan.color} rounded-full text-white font-medium flex items-center gap-2`}
               >
@@ -194,7 +194,7 @@ const SubscriptionPage = ({ user }) => {
               <div className="p-4 bg-white/5 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <HardDrive className="w-5 h-5 text-purple" />
-                  <span className="text-sm text-gray-400">Lagring</span>
+                  <span className="text-sm text-gray-400">{t('subscription:storage')}</span>
                 </div>
                 <p className="text-2xl font-bold">{currentPlan.storage}</p>
               </div>
@@ -203,7 +203,7 @@ const SubscriptionPage = ({ user }) => {
               <div className="p-4 bg-white/5 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <Image className="w-5 h-5 text-pink-400" />
-                  <span className="text-sm text-gray-400">Bilder</span>
+                  <span className="text-sm text-gray-400">{t('subscription:photos')}</span>
                 </div>
                 <p className="text-2xl font-bold">{photos.length}</p>
               </div>
@@ -212,7 +212,7 @@ const SubscriptionPage = ({ user }) => {
               <div className="p-4 bg-white/5 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles className="w-5 h-5 text-blue-400" />
-                  <span className="text-sm text-gray-400">Komprimering</span>
+                  <span className="text-sm text-gray-400">{t('subscription:compression')}</span>
                 </div>
                 <p className="text-lg font-bold">{currentPlan.compression}</p>
               </div>
@@ -221,7 +221,7 @@ const SubscriptionPage = ({ user }) => {
               <div className="p-4 bg-white/5 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <Zap className="w-5 h-5 text-yellow-400" />
-                  <span className="text-sm text-gray-400">Video</span>
+                  <span className="text-sm text-gray-400">{t('subscription:video')}</span>
                 </div>
                 <p className="text-lg font-bold">{currentPlan.video}</p>
               </div>
@@ -230,7 +230,7 @@ const SubscriptionPage = ({ user }) => {
 
           {/* Storage Usage */}
           <div className="glass-card p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4">Lagringsbruk</h2>
+            <h2 className="text-xl font-semibold mb-4">{t('subscription:storageUsage')}</h2>
 
             <div className="mb-4">
               <div className="flex justify-between items-center mb-2">
@@ -263,11 +263,11 @@ const SubscriptionPage = ({ user }) => {
                 <div className="flex items-center gap-2 mb-2">
                   <AlertTriangle className="w-5 h-5 text-red-400" />
                   <p className="text-sm font-semibold text-red-400">
-                    Kritisk lav lagring!
+                    {t('subscription:criticalLowStorage')}
                   </p>
                 </div>
                 <p className="text-sm text-red-300 mb-3">
-                  Du har kun {formatBytes(storageLimit - storageUsed)} igjen. Oppgrader nå for å fortsette å laste opp bilder.
+                  {t('subscription:criticalStorageMessage', { remaining: formatBytes(storageLimit - storageUsed) })}
                 </p>
                 <button
                   onClick={() => {
@@ -279,7 +279,7 @@ const SubscriptionPage = ({ user }) => {
                   }}
                   className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white text-sm font-medium transition-colors"
                 >
-                  Oppgrader abonnement
+                  {t('subscription:upgradeSubscription')}
                 </button>
               </div>
             )}
@@ -290,11 +290,11 @@ const SubscriptionPage = ({ user }) => {
                 <div className="flex items-center gap-2 mb-2">
                   <AlertCircle className="w-5 h-5 text-yellow-400" />
                   <p className="text-sm font-semibold text-yellow-400">
-                    Lav lagring
+                    {t('subscription:lowStorage')}
                   </p>
                 </div>
                 <p className="text-sm text-yellow-300">
-                  Du har brukt {storagePercentage.toFixed(0)}% av lagringskvoten din. Vurder å oppgradere snart.
+                  {t('subscription:lowStorageMessage', { percent: storagePercentage.toFixed(0) })}
                 </p>
               </div>
             )}
@@ -303,7 +303,7 @@ const SubscriptionPage = ({ user }) => {
           {/* Available Plans */}
           <div className="mb-6">
             <h2 id="plans-section" className="text-2xl font-bold mb-6 text-center">
-              Velg Din Plan
+              {t('subscription:choosePlan')}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -317,7 +317,7 @@ const SubscriptionPage = ({ user }) => {
                   {plan.recommended && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                       <span className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-4 py-1 rounded-full text-xs font-bold">
-                        ANBEFALT
+                        {t('subscription:recommended')}
                       </span>
                     </div>
                   )}
@@ -325,7 +325,7 @@ const SubscriptionPage = ({ user }) => {
                   {plan.current && (
                     <div className="absolute -top-3 right-4">
                       <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                        DIN PLAN
+                        {t('subscription:yourPlan')}
                       </span>
                     </div>
                   )}
@@ -365,8 +365,8 @@ const SubscriptionPage = ({ user }) => {
                     disabled={plan.current}
                   >
                     {plan.current
-                      ? 'Nåværende Plan'
-                      : `Oppgrader til ${plan.name}`}
+                      ? t('subscription:currentPlanButton')
+                      : t('subscription:upgradeToButton', { plan: plan.name })}
                   </button>
                 </div>
               ))}
@@ -375,20 +375,17 @@ const SubscriptionPage = ({ user }) => {
 
           {/* Info Section */}
           <div className="glass-card p-6">
-            <h3 className="text-lg font-semibold mb-3">Om Abonnementene</h3>
+            <h3 className="text-lg font-semibold mb-3">{t('subscription:aboutSubscriptions')}</h3>
             <div className="space-y-2 text-sm text-gray-400">
               <p>
-                • <strong>GRATIS:</strong> Perfekt for å teste ut Pixtr.
-                Original bildekvalitet uten komprimering.
+                • <strong>GRATIS:</strong> {t('subscription:aboutGratis')}
               </p>
               <p>
-                • <strong>LITE:</strong> For deg som trenger mer plass med
-                bildekomprimering for optimal lagring.
+                • <strong>LITE:</strong> {t('subscription:aboutLite')}
               </p>
               {/* PHASE 3: PRO info hidden but tier logic remains */}
               <p className="pt-2 border-t border-white/10">
-                Alle planer inkluderer QR-kode deling, Collage Builder, Timeline
-                og søkefunksjonalitet.
+                {t('subscription:allPlansInclude')}
               </p>
             </div>
           </div>
