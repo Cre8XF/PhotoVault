@@ -27,12 +27,12 @@ const HomeMemoriesWidget = ({ photos, onPhotoClick, onViewAll }) => {
     return null
   }
 
-  // Format today's date
+  // Format today's date using i18n
   const today = new Date()
-  const dayMonth = today.toLocaleDateString('nb-NO', {
-    day: 'numeric',
-    month: 'long'
-  })
+  const day = today.getDate()
+  const monthIndex = today.getMonth()
+  const monthName = t(`home:months.${monthIndex}`, { defaultValue: today.toLocaleDateString(undefined, { month: 'long' }) })
+  const dayMonth = `${day}. ${monthName}`
 
   // Show max 4 photos in grid, rest can be accessed via "View All"
   const displayMemories = memories.slice(0, 4)

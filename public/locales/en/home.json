@@ -1,0 +1,24 @@
+{
+  "months": {
+    "0": "january",
+    "1": "february",
+    "2": "march",
+    "3": "april",
+    "4": "may",
+    "5": "june",
+    "6": "july",
+    "7": "august",
+    "8": "september",
+    "9": "october",
+    "10": "november",
+    "11": "december"
+  },
+  "memories": {
+    "title": "On This Day",
+    "description": "Memories from {{date}}",
+    "yearsAgo": "{{count}} year ago",
+    "yearsAgo_plural": "{{count}} years ago",
+    "viewAll": "View all",
+    "viewAllWithCount": "View all {{count}} memories"
+  }
+}

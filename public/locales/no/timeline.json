@@ -1,0 +1,73 @@
+{
+  "months": {
+    "0": "januar",
+    "1": "februar",
+    "2": "mars",
+    "3": "april",
+    "4": "mai",
+    "5": "juni",
+    "6": "juli",
+    "7": "august",
+    "8": "september",
+    "9": "oktober",
+    "10": "november",
+    "11": "desember"
+  },
+  "monthsCapitalized": {
+    "0": "Januar",
+    "1": "Februar",
+    "2": "Mars",
+    "3": "April",
+    "4": "Mai",
+    "5": "Juni",
+    "6": "Juli",
+    "7": "August",
+    "8": "September",
+    "9": "Oktober",
+    "10": "November",
+    "11": "Desember"
+  },
+  "memories": {
+    "onThisDay": {
+      "title": "{{day}}. {{month}}",
+      "subtitle_single": "{{yearsAgo}} år siden",
+      "subtitle_multiple": "{{count}} minner fra tidligere år"
+    },
+    "sameMonth": {
+      "title": "{{month}} i tidligere år",
+      "subtitle_single": "{{count}} bilde fra denne måneden",
+      "subtitle_multiple": "{{count}} bilder fra denne måneden"
+    },
+    "lastYear": {
+      "title": "Minner fra {{year}}",
+      "subtitle_favorites": "Favoritter fra i fjor",
+      "subtitle_recent": "Bilder fra i fjor"
+    },
+    "morePhotos": "+{{count}} flere"
+  },
+  "onThisDay": {
+    "title": "På denne dagen",
+    "description": "Minner fra {{date}}",
+    "yearsAgo": "{{count}} år siden",
+    "more": "+{{count}}",
+    "memory": "minne til",
+    "memory_plural": "minner til"
+  },
+  "yearBadge": "{{yearsAgo}} år siden",
+  "emptyState": {
+    "title": "Ingen bilder",
+    "description": "Last opp bilder for å se dem her"
+  },
+  "stats": {
+    "showing": "Viser",
+    "photo": "bilde",
+    "photo_plural": "bilder",
+    "in": "i",
+    "day": "dag",
+    "day_plural": "dager",
+    "month": "måned",
+    "month_plural": "måneder",
+    "year": "år",
+    "year_plural": "år"
+  }
+}
