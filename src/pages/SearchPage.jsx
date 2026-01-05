@@ -49,6 +49,24 @@ import useCollageData from '../hooks/useCollageData'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { devLog, devWarn } from '../utils/log'
 
+// 🔧 Resolve logical date for collages (based on slot photos)
+function resolveCollageDate(collage) {
+  if (!Array.isArray(collage.slots)) return null
+
+  const timestamps = collage.slots
+    .map((slot) => {
+      const p = slot.photo
+      return p?.takenAt || p?.createdAt || p?.uploadedAt || null
+    })
+    .filter(Boolean)
+    .map((d) => new Date(d).getTime())
+    .filter((t) => !Number.isNaN(t))
+
+  if (timestamps.length === 0) return null
+
+  return new Date(Math.min(...timestamps))
+}
+
 const SearchPage = ({
   photos = [],
   albums = [],
@@ -502,11 +520,11 @@ const SearchPage = ({
     const collagesWithType = collages
       .map((c) => ({
         ...c,
-        id: c.id || c.collageId, // Normalize ID: prefer id, fallback to collageId
+        id: c.id || c.collageId,
         contentType: 'collage',
-        sortDate: new Date(c.createdAt || Date.now()),
+        sortDate: resolveCollageDate(c) || new Date(c.createdAt || Date.now()),
       }))
-      .filter((c) => c.id) // Filter out collages without valid ID
+      .filter((c) => c.id)
 
     if (import.meta.env.DEV && collagesWithType.length < collages.length) {
       devWarn(
@@ -521,28 +539,28 @@ const SearchPage = ({
       (a, b) => b.sortDate - a.sortDate
     )
 
-    // 🎯 FILTER BY CONTENT TYPE: Apply contentTypes filter
-    const selectedContentTypes = activeFilters.contentTypes || [
-      'photo',
-      'video',
-    ]
-    const filtered = merged.filter((item) =>
-      selectedContentTypes.includes(item.contentType)
-    )
+    // 🎯 APPLY CROSS-CONTENT RULES
+    let result = merged
 
-    if (import.meta.env.DEV) {
-      devLog('🎨 Merged content:', {
-        photos: photosWithType.filter((p) => p.contentType === 'photo').length,
-        videos: photosWithType.filter((p) => p.contentType === 'video').length,
-        collages: collagesWithType.length,
-        total: merged.length,
-        filtered: filtered.length,
-        activeContentTypes: selectedContentTypes,
-      })
+    // Favorites = photos only
+    if (activeFilters.favorites === true) {
+      result = result.filter((item) => item.contentType !== 'collage')
     }
 
-    return filtered
-  }, [filteredPhotos, collages, activeFilters.contentTypes])
+    // Explicit content type filter
+    if (Array.isArray(activeFilters.contentTypes)) {
+      result = result.filter((item) =>
+        activeFilters.contentTypes.includes(item.contentType)
+      )
+    }
+
+    return result
+  }, [
+    filteredPhotos,
+    collages,
+    activeFilters.favorites,
+    activeFilters.contentTypes,
+  ])
 
   // 📅 DATE GROUPING: Group merged content by Month + Year
   const photoGroups = useMemo(() => {
