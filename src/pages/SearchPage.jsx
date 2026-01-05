@@ -28,7 +28,11 @@ import {
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
 import { format } from 'date-fns'
 import { nb } from 'date-fns/locale'
-import { softDeletePhoto, setAlbumCover, updateAlbumPhotoCount } from '../firebase'
+import {
+  softDeletePhoto,
+  setAlbumCover,
+  updateAlbumPhotoCount,
+} from '../firebase'
 import MoveModal from '../components/MoveModal'
 import ConfirmModal from '../components/ConfirmModal'
 import CollageCard from '../components/CollageCard'
@@ -123,11 +127,7 @@ const SearchPage = ({
   const [specialFilter, setSpecialFilter] = useState(null)
 
   // Collage data - real-time from Firestore
-  const {
-    collages,
-    collagesLoading,
-    deleteCollage,
-  } = useCollageData()
+  const { collages, collagesLoading, deleteCollage } = useCollageData()
 
   // 🆕 PHASE 3B: Keyboard shortcuts for desktop
   useKeyboardShortcuts([
@@ -271,7 +271,7 @@ const SearchPage = ({
     const set = new Set()
     safePhotos.forEach((p) => {
       if (Array.isArray(p.tags)) {
-        p.tags.forEach(tag => set.add(tag))
+        p.tags.forEach((tag) => set.add(tag))
       }
     })
     return Array.from(set).sort()
@@ -340,8 +340,9 @@ const SearchPage = ({
 
     // Filter by manual tag
     if (activeFilters.selectedTag) {
-      res = res.filter((p) =>
-        Array.isArray(p.tags) && p.tags.includes(activeFilters.selectedTag)
+      res = res.filter(
+        (p) =>
+          Array.isArray(p.tags) && p.tags.includes(activeFilters.selectedTag)
       )
     }
 
@@ -468,8 +469,7 @@ const SearchPage = ({
         }
       } else {
         // Original range-based filtering (week, month)
-        const days =
-          { week: 7, month: 30 }[activeFilters.dateRange] || 0
+        const days = { week: 7, month: 30 }[activeFilters.dateRange] || 0
         if (days > 0) {
           const cutoff = now - days * 24 * 60 * 60 * 1000
           res = res.filter(
@@ -492,74 +492,80 @@ const SearchPage = ({
   // 🎨 MERGE PHOTOS AND COLLAGES: Combine content chronologically
   const allContent = useMemo(() => {
     // Tag photos with contentType - differentiate between photos and videos
-    const photosWithType = filteredPhotos.map(p => ({
+    const photosWithType = filteredPhotos.map((p) => ({
       ...p,
       contentType: p.type === 'video' ? 'video' : 'photo',
-      sortDate: new Date(p.createdAt || p.uploadedAt || Date.now())
+      sortDate: new Date(p.createdAt || p.uploadedAt || Date.now()),
     }))
 
     // Tag collages with contentType - ensure valid ID
     const collagesWithType = collages
-      .map(c => ({
+      .map((c) => ({
         ...c,
         id: c.id || c.collageId, // Normalize ID: prefer id, fallback to collageId
         contentType: 'collage',
-        sortDate: new Date(c.createdAt || Date.now())
+        sortDate: new Date(c.createdAt || Date.now()),
       }))
-      .filter(c => c.id) // Filter out collages without valid ID
+      .filter((c) => c.id) // Filter out collages without valid ID
 
     if (import.meta.env.DEV && collagesWithType.length < collages.length) {
-      devWarn('⚠️ Filtered out', collages.length - collagesWithType.length, 'collages without valid ID')
+      devWarn(
+        '⚠️ Filtered out',
+        collages.length - collagesWithType.length,
+        'collages without valid ID'
+      )
     }
 
-  // 🔀 MERGE: Photos + Collages → unified content list
-  const merged = [...photosWithType, ...collagesWithType].sort(
-    (a, b) => b.sortDate - a.sortDate
-  )
-
-  // 🎯 FILTER BY CONTENT TYPE: Apply contentTypes filter
-  // If no filter active, show all content types (photos, videos, collages)
-  const selectedContentTypes = activeFilters.contentTypes
-  const filtered = selectedContentTypes
-    ? merged.filter(item => selectedContentTypes.includes(item.contentType))
-    : merged
-
-  if (import.meta.env.DEV) {
-    devLog('🎨 Merged content:', {
-      photos: photosWithType.filter(p => p.contentType === 'photo').length,
-      videos: photosWithType.filter(p => p.contentType === 'video').length,
-      collages: collagesWithType.length,
-      total: merged.length,
-      filtered: filtered.length,
-      activeContentTypes: selectedContentTypes,
-    })
-  }
-
-  return filtered
-}, [filteredPhotos, collages, activeFilters.contentTypes])
-
-// 📅 DATE GROUPING: Group merged content by Month + Year
-const photoGroups = useMemo(() => {
-  if (!Array.isArray(allContent) || allContent.length === 0) {
-    return []
-  }
-
-  if (import.meta.env.DEV) {
-    devLog('📅 Grouping content by Month + Year (unified utility)...')
-  }
-
-  // Works for BOTH photos and collages
-  const groups = groupPhotosByMonth(allContent, 'nb')
-
-  if (import.meta.env.DEV) {
-    devLog(
-      `✅ Created ${groups.length} month groups:`,
-      groups.map((g) => `${g.label} (${g.photos.length})`)
+    // 🔀 MERGE: Photos + Collages → unified content list
+    const merged = [...photosWithType, ...collagesWithType].sort(
+      (a, b) => b.sortDate - a.sortDate
     )
-  }
 
-  return groups
-}, [allContent])
+    // 🎯 FILTER BY CONTENT TYPE: Apply contentTypes filter
+    const selectedContentTypes = activeFilters.contentTypes || [
+      'photo',
+      'video',
+    ]
+    const filtered = merged.filter((item) =>
+      selectedContentTypes.includes(item.contentType)
+    )
+
+    if (import.meta.env.DEV) {
+      devLog('🎨 Merged content:', {
+        photos: photosWithType.filter((p) => p.contentType === 'photo').length,
+        videos: photosWithType.filter((p) => p.contentType === 'video').length,
+        collages: collagesWithType.length,
+        total: merged.length,
+        filtered: filtered.length,
+        activeContentTypes: selectedContentTypes,
+      })
+    }
+
+    return filtered
+  }, [filteredPhotos, collages, activeFilters.contentTypes])
+
+  // 📅 DATE GROUPING: Group merged content by Month + Year
+  const photoGroups = useMemo(() => {
+    if (!Array.isArray(allContent) || allContent.length === 0) {
+      return []
+    }
+
+    if (import.meta.env.DEV) {
+      devLog('📅 Grouping content by Month + Year (unified utility)...')
+    }
+
+    // Works for BOTH photos and collages
+    const groups = groupPhotosByMonth(allContent, 'nb')
+
+    if (import.meta.env.DEV) {
+      devLog(
+        `✅ Created ${groups.length} month groups:`,
+        groups.map((g) => `${g.label} (${g.photos.length})`)
+      )
+    }
+
+    return groups
+  }, [allContent])
 
   // 🆕 PHASE 3A: Virtual pagination - limit displayed items
   const { displayedGroups, totalItems, hasMore } = useMemo(() => {
@@ -613,10 +619,11 @@ const photoGroups = useMemo(() => {
 
     // Count contentTypes only if different from default
     const defaultContentTypes = ['photo', 'video']
-    const currentContentTypes = activeFilters.contentTypes || defaultContentTypes
+    const currentContentTypes =
+      activeFilters.contentTypes || defaultContentTypes
     const isDefaultContentTypes =
       currentContentTypes.length === defaultContentTypes.length &&
-      defaultContentTypes.every(type => currentContentTypes.includes(type))
+      defaultContentTypes.every((type) => currentContentTypes.includes(type))
     if (!isDefaultContentTypes) count++
 
     return count
@@ -661,7 +668,10 @@ const photoGroups = useMemo(() => {
     } else if (optionalSourceList) {
       // New signature with explicit source list
       sourceList = optionalSourceList
-      index = typeof indexOrSourceList === 'number' ? indexOrSourceList : sourceList.findIndex((p) => p.id === photo.id)
+      index =
+        typeof indexOrSourceList === 'number'
+          ? indexOrSourceList
+          : sourceList.findIndex((p) => p.id === photo.id)
     }
 
     // Set global photo context state
@@ -840,9 +850,7 @@ const photoGroups = useMemo(() => {
     if (moveResults.failed.length === 0) {
       // All succeeded - no need to alert, move modal closes smoothly
       if (import.meta.env.DEV) {
-        devLog(
-          `✅ All ${moveResults.success.length} photos moved successfully`
-        )
+        devLog(`✅ All ${moveResults.success.length} photos moved successfully`)
       }
     } else if (moveResults.success.length === 0) {
       // All failed
@@ -886,7 +894,7 @@ const photoGroups = useMemo(() => {
     // Otherwise, we're setting it
     setActiveFilters((prev) => ({
       ...prev,
-      ...filterUpdate
+      ...filterUpdate,
     }))
   }
 
@@ -1250,10 +1258,7 @@ const photoGroups = useMemo(() => {
 
       {/* SMART ORGANIZATION: Memories Section */}
       {!editMode && !searchQuery && !showFilters && (
-        <MemoriesSection
-          photos={safePhotos}
-          onPhotoClick={handlePhotoClick}
-        />
+        <MemoriesSection photos={safePhotos} onPhotoClick={handlePhotoClick} />
       )}
 
       {/* SMART ORGANIZATION: Smart Views (Quick Filters) */}
@@ -1526,7 +1531,7 @@ const photoGroups = useMemo(() => {
           description="Prøv å endre søkekriteriene eller filteret for å finne bilder."
           action={t('search:resetFilters') || 'Nullstill filtre'}
           onAction={
-            (searchQuery || Object.values(activeFilters).some((v) => v))
+            searchQuery || Object.values(activeFilters).some((v) => v)
               ? () => {
                   setSearchQuery('')
                   setActiveFilters({
@@ -1534,7 +1539,7 @@ const photoGroups = useMemo(() => {
                     dateRange: null,
                     albumId: null,
                     selectedTag: null,
-                    contentTypes: ['photo', 'video'], // Reset to default: hide collages
+                    contentTypes: null,
                   })
                 }
               : null
