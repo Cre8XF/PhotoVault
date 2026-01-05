@@ -7,7 +7,15 @@
  */
 
 import React, { useMemo } from 'react'
-import { Star, Image, Video, LayoutGrid, FolderX, Calendar, Clock } from 'lucide-react'
+import {
+  Star,
+  Image,
+  Video,
+  LayoutGrid,
+  FolderX,
+  Calendar,
+  Clock,
+} from 'lucide-react'
 import { resolvePhotoDate } from '../utils/photoDateUtils'
 
 const SmartViews = ({ allContent, activeFilters, onFilterChange }) => {
@@ -29,45 +37,37 @@ const SmartViews = ({ allContent, activeFilters, onFilterChange }) => {
     const currentYear = now.getFullYear()
     const lastYear = currentYear - 1
 
-    // allContent already excludes documents and includes photos, videos, and collages
-    // Canonical media set: exclude documents once
+    // Canonical content set: photos, videos, collages
     const mediaContent = allContent.filter(
-      p => p.type !== 'document'
+      (p) =>
+        p.contentType === 'photo' ||
+        p.contentType === 'video' ||
+        p.contentType === 'collage'
     )
 
     return {
-      favorites: mediaContent.filter(p => p.favorite).length,
+      favorites: mediaContent.filter((p) => p.favorite).length,
 
-      // Photos = images only (not videos, not collages)
-      photos: mediaContent.filter(
-        p => p.type === 'photo' && p.contentType !== 'collage'
-      ).length,
+      photos: mediaContent.filter((p) => p.contentType === 'photo').length,
 
-      videos: mediaContent.filter(
-        p => p.type === 'video'
-      ).length,
+      videos: mediaContent.filter((p) => p.contentType === 'video').length,
 
-      collages: mediaContent.filter(
-        p => p.contentType === 'collage'
-      ).length,
+      collages: mediaContent.filter((p) => p.contentType === 'collage').length,
 
-      withoutAlbum: mediaContent.filter(
-        p => !p.albumId || p.albumId === ''
-      ).length,
+      withoutAlbum: mediaContent.filter((p) => !p.albumId || p.albumId === '')
+        .length,
 
-      thisYear: mediaContent.filter(p => {
-        const photoDate = resolvePhotoDate(p)
-        if (!photoDate) return false
-        return new Date(photoDate).getFullYear() === currentYear
+      thisYear: mediaContent.filter((p) => {
+        const d = resolvePhotoDate(p)
+        return d && new Date(d).getFullYear() === currentYear
       }).length,
 
-      lastYear: mediaContent.filter(p => {
-        const photoDate = resolvePhotoDate(p)
-        if (!photoDate) return false
-        return new Date(photoDate).getFullYear() === lastYear
+      lastYear: mediaContent.filter((p) => {
+        const d = resolvePhotoDate(p)
+        return d && new Date(d).getFullYear() === lastYear
       }).length,
     }
- }, [allContent])
+  }, [allContent])
 
   // Filter group definitions
   const filterGroups = [
@@ -183,9 +183,11 @@ const SmartViews = ({ allContent, activeFilters, onFilterChange }) => {
           >
             <view.icon size={16} />
             <span className="whitespace-nowrap">{view.label}</span>
-            <span className={`px-1.5 py-0.5 rounded text-xs font-semibold ${
-              view.isActive ? 'bg-white/30' : 'bg-white/10'
-            }`}>
+            <span
+              className={`px-1.5 py-0.5 rounded text-xs font-semibold ${
+                view.isActive ? 'bg-white/30' : 'bg-white/10'
+              }`}
+            >
               {view.count}
             </span>
           </button>
