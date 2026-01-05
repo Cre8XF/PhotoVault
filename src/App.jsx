@@ -92,20 +92,37 @@ import useStore from './state/store'
 import { useToast } from './hooks/useToast'
 
 // P3-B: Browser Detection
-import { isRestrictedBrowserContext, getContextMessage, logBrowserContext, isLikelyFromEmailLink } from './utils/browserDetect'
+import {
+  isRestrictedBrowserContext,
+  getContextMessage,
+  logBrowserContext,
+  isLikelyFromEmailLink,
+} from './utils/browserDetect'
 
 // PATCH 5: Development utilities
 import { runEnvDiagnostics } from './utils/envDiagnostics'
 
 // Icons
-import { Home, FolderOpen, Plus, Search, Menu, Bell, User, ExternalLink, FileText, Image } from 'lucide-react'
+import {
+  Home,
+  FolderOpen,
+  Plus,
+  Search,
+  Menu,
+  Bell,
+  User,
+  ExternalLink,
+  FileText,
+  Image,
+} from 'lucide-react'
 
 /**
  * Main App Component with new architecture
  */
 function App() {
   // P3-B: Browser context detection
-  const [showBrowserContextBanner, setShowBrowserContextBanner] = React.useState(false)
+  const [showBrowserContextBanner, setShowBrowserContextBanner] =
+    React.useState(false)
   const [browserContextMessage, setBrowserContextMessage] = React.useState(null)
 
   // Initialize browser context detection on mount
@@ -162,77 +179,94 @@ function App() {
                   </div>
                 }
               >
-              <Routes>
-                {/* Public landing page */}
-                <Route path="/landing" element={<PublicRoute />} />
+                <Routes>
+                  {/* Public landing page */}
+                  <Route path="/landing" element={<PublicRoute />} />
 
-                {/* Login page */}
-                <Route path="/login" element={<LoginPage />} />
+                  {/* Login page */}
+                  <Route path="/login" element={<LoginPage />} />
 
-                {/* Public album sharing */}
-                <Route path="/share/:slug" element={<PublicAlbumPage />} />
+                  {/* Public album sharing */}
+                  <Route path="/share/:slug" element={<PublicAlbumPage />} />
 
-                {/* Email verification landing page - handleCodeInApp: true */}
-                <Route path="/verify-email" element={<VerifyEmailPage />} />
+                  {/* Email verification landing page - handleCodeInApp: true */}
+                  <Route path="/verify-email" element={<VerifyEmailPage />} />
 
-                {/* Firebase auth action handler - handles email verification links from Netlify */}
-                <Route path="/__/auth/action" element={<AuthActionHandler />} />
+                  {/* Firebase auth action handler - handles email verification links from Netlify */}
+                  <Route
+                    path="/__/auth/action"
+                    element={<AuthActionHandler />}
+                  />
 
-                {/* Function Worlds - Protected Routes */}
-                <Route path={ROUTES.TOOLS} element={
-                  <ProtectedRoute>
-                    <ToolsPage />
-                  </ProtectedRoute>
-                } />
-                <Route
-                  path={ROUTES.COLLAGE_TEMPLATES}
-                  element={
-                    <ProtectedRoute>
-                      <CollageTemplatesPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path={ROUTES.COLLAGE_NEW} element={
-                  <ProtectedRoute>
-                    <CollageNewPage />
-                  </ProtectedRoute>
-                } />
-                <Route
-                  path={ROUTES.COLLAGE_EDIT}
-                  element={
-                    <ProtectedRoute>
-                      <CollageEditPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path={ROUTES.PHOTO} element={
-                  <ProtectedRoute>
-                    <PhotoPage />
-                  </ProtectedRoute>
-                } />
-                <Route path={ROUTES.SLIDESHOW} element={
-                  <ProtectedRoute>
-                    <SlideshowPage />
-                  </ProtectedRoute>
-                } />
-                <Route
-                  path="/edit/:photoId"
-                  element={
-                    <ProtectedRoute>
-                      <Suspense fallback={
-                        <div className="fixed inset-0 flex items-center justify-center editor-bg-primary">
-                          <Loading size="xl" />
-                        </div>
-                      }>
-                        <EditorPage />
-                      </Suspense>
-                    </ProtectedRoute>
-                  }
-                />
+                  {/* Function Worlds - Protected Routes */}
+                  <Route
+                    path={ROUTES.TOOLS}
+                    element={
+                      <ProtectedRoute>
+                        <ToolsPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path={ROUTES.COLLAGE_TEMPLATES}
+                    element={
+                      <ProtectedRoute>
+                        <CollageTemplatesPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path={ROUTES.COLLAGE_NEW}
+                    element={
+                      <ProtectedRoute>
+                        <CollageNewPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path={ROUTES.COLLAGE_EDIT}
+                    element={
+                      <ProtectedRoute>
+                        <CollageEditPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path={ROUTES.PHOTO}
+                    element={
+                      <ProtectedRoute>
+                        <PhotoPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path={ROUTES.SLIDESHOW}
+                    element={
+                      <ProtectedRoute>
+                        <SlideshowPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/edit/:photoId"
+                    element={
+                      <ProtectedRoute>
+                        <Suspense
+                          fallback={
+                            <div className="fixed inset-0 flex items-center justify-center editor-bg-primary">
+                              <Loading size="xl" />
+                            </div>
+                          }
+                        >
+                          <EditorPage />
+                        </Suspense>
+                      </ProtectedRoute>
+                    }
+                  />
 
-                {/* ⚠️ PHASE 2: AI Tools - HIDDEN FOR LAUNCH (code kept latent) */}
-                {/* AI routes disabled - no navigation, deep links return 404 */}
-                {/*
+                  {/* ⚠️ PHASE 2: AI Tools - HIDDEN FOR LAUNCH (code kept latent) */}
+                  {/* AI routes disabled - no navigation, deep links return 404 */}
+                  {/*
                 <Route path={ROUTES.AI_TOOLS} element={
                   <ProtectedRoute>
                     <AIToolsPage />
@@ -268,26 +302,32 @@ function App() {
                 } />
                 */}
 
-                {/* Collage view - Protected Route */}
-                <Route path="/collage/:id" element={
-                  <ProtectedRoute>
-                    <CollageView />
-                  </ProtectedRoute>
-                } />
+                  {/* Collage view - Protected Route */}
+                  <Route
+                    path="/collage/:id"
+                    element={
+                      <ProtectedRoute>
+                        <CollageView />
+                      </ProtectedRoute>
+                    }
+                  />
 
-                {/* All authenticated routes - wrapped in ProtectedRoute */}
-                <Route path="/*" element={
-                  <ProtectedRoute>
-                    <AppContent />
-                  </ProtectedRoute>
-                } />
-              </Routes>
-            </Suspense>
-          </SecurityProvider>
-        </ToastProvider>
-      </AuthProvider>
-    </ErrorBoundary>
-  </BrowserRouter>
+                  {/* All authenticated routes - wrapped in ProtectedRoute */}
+                  <Route
+                    path="/*"
+                    element={
+                      <ProtectedRoute>
+                        <AppContent />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Routes>
+              </Suspense>
+            </SecurityProvider>
+          </ToastProvider>
+        </AuthProvider>
+      </ErrorBoundary>
+    </BrowserRouter>
   )
 }
 
@@ -360,7 +400,8 @@ function AppContent() {
   const location = useLocation()
 
   // Custom hooks
-  const { user, userProfile, loading, handleLogout, isAdmin, emailVerified } = useAuth()
+  const { user, userProfile, loading, handleLogout, isAdmin, emailVerified } =
+    useAuth()
   const {
     albums,
     photos,
@@ -525,7 +566,8 @@ function AppContent() {
 
     const handleBeforeUnload = (e) => {
       // Force immediate save before page closes
-      if (import.meta.env.DEV) console.log('🔄 [App] Saving metadata before page unload...')
+      if (import.meta.env.DEV)
+        console.log('🔄 [App] Saving metadata before page unload...')
       saveMetadata(true) // immediate save
     }
 
@@ -815,7 +857,9 @@ function AppContent() {
                 location.pathname.startsWith('/more') ||
                 location.pathname.startsWith('/profile') ||
                 location.pathname.startsWith('/settings') ||
-                location.pathname.startsWith('/account') ? 'active' : ''
+                location.pathname.startsWith('/account')
+                  ? 'active'
+                  : ''
               }`}
               aria-label={t('nav:account')}
             >
@@ -843,6 +887,7 @@ function AppContent() {
 
       {albumModalOpen && (
         <AlbumModal
+          isOpen={albumModalOpen}
           editingAlbum={editingAlbum}
           onClose={() => {
             setAlbumModalOpen(false)

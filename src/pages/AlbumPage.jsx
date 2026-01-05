@@ -87,7 +87,7 @@ const AlbumPage = ({
   const { albumId } = useParams()
 
   // Get album from route params
-  const album = albums.find(a => a.id === albumId)
+  const album = albums.find((a) => a.id === albumId)
 
   const [editMode, setEditMode] = useState(false)
   const [selectedPhotos, setSelectedPhotos] = useState([])
@@ -141,7 +141,9 @@ const AlbumPage = ({
     if (!album) return []
     const safePhotos = Array.isArray(photos) ? photos : []
     // ✅ EXCLUDE DOCUMENTS: Albums contain only images and videos
-    return safePhotos.filter((p) => p.albumId === album.id && p.type !== 'document')
+    return safePhotos.filter(
+      (p) => p.albumId === album.id && p.type !== 'document'
+    )
   }, [photos, album])
 
   // Filter and sort photos
@@ -273,7 +275,7 @@ const AlbumPage = ({
 
     try {
       // Extract photo IDs in new order
-      const photoIds = reorderedPhotos.map(p => p.id)
+      const photoIds = reorderedPhotos.map((p) => p.id)
 
       // Batch update in Firestore
       await updatePhotoOrder(photoIds)
@@ -364,7 +366,11 @@ const AlbumPage = ({
         } else if (deleteResults.success.length === 0) {
           // All failed
           setNotification({
-            message: t('albums:errors.couldNotDeleteAll') + `\n${deleteResults.failed.length} photo${deleteResults.failed.length > 1 ? 's' : ''} failed`,
+            message:
+              t('albums:errors.couldNotDeleteAll') +
+              `\n${deleteResults.failed.length} photo${
+                deleteResults.failed.length > 1 ? 's' : ''
+              } failed`,
             type: 'error',
           })
         } else {
@@ -485,7 +491,11 @@ const AlbumPage = ({
     } else if (moveResults.success.length === 0) {
       // All failed
       setNotification({
-        message: t('albums:errors.couldNotMovePhotos') + `\n${moveResults.failed.length} photo${moveResults.failed.length > 1 ? 's' : ''} failed`,
+        message:
+          t('albums:errors.couldNotMovePhotos') +
+          `\n${moveResults.failed.length} photo${
+            moveResults.failed.length > 1 ? 's' : ''
+          } failed`,
         type: 'error',
       })
     } else {
@@ -539,9 +549,13 @@ const AlbumPage = ({
             <ArrowLeft className="w-5 h-5 md:w-6 md:h-6" />
           </button>
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl md:text-3xl font-bold truncate">{album.name}</h1>
+            <h1 className="text-xl md:text-3xl font-bold truncate">
+              {album.name}
+            </h1>
             {album.description && (
-              <p className="text-gray-400 text-sm md:text-base mt-0.5 md:mt-1 truncate">{album.description}</p>
+              <p className="text-gray-400 text-sm md:text-base mt-0.5 md:mt-1 truncate">
+                {album.description}
+              </p>
             )}
           </div>
         </div>
@@ -591,10 +605,13 @@ const AlbumPage = ({
             <button
               onClick={() => {
                 // Filter out documents from slideshow
-                const slideshowPhotos = filteredPhotos.filter((p) => p.type !== 'document')
+                const slideshowPhotos = filteredPhotos.filter(
+                  (p) => p.type !== 'document'
+                )
                 if (slideshowPhotos.length === 0) {
                   setNotification({
-                    message: 'No photos or videos available for slideshow. Documents cannot be shown in slideshow.',
+                    message:
+                      'No photos or videos available for slideshow. Documents cannot be shown in slideshow.',
                     type: 'info',
                   })
                   return
@@ -632,19 +649,18 @@ const AlbumPage = ({
             className="ripple-effect px-2 py-1.5 md:px-4 md:py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 transition flex items-center gap-1.5 md:gap-2 text-xs md:text-base"
           >
             <Share2 className="w-4 h-4 md:w-5 md:h-5" />
-            <span className="hidden sm:inline">
-              {t('albums:shareAlbum')}
-            </span>
+            <span className="hidden sm:inline">{t('albums:shareAlbum')}</span>
           </button>
 
           {/* Edit Album Button - Using Settings icon to distinguish from Edit Mode */}
           <button
             onClick={() => {
-              if (import.meta.env.DEV) console.log('🔧 Edit album clicked:', {
-                albumId: album.id,
-                albumName: album.name,
-                albumDescription: album.description
-              })
+              if (import.meta.env.DEV)
+                console.log('🔧 Edit album clicked:', {
+                  albumId: album.id,
+                  albumName: album.name,
+                  albumDescription: album.description,
+                })
               setEditingAlbum(album)
             }}
             className="ripple-effect p-1.5 md:p-2 hover:bg-white/10 rounded-lg transition"
@@ -686,7 +702,9 @@ const AlbumPage = ({
               <button
                 onClick={() => setMoveOpen(true)}
                 className="ripple-effect px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-1.5 md:gap-2 transition text-sm md:text-base touch-target touch-manipulation"
-                aria-label={`Move ${selectedPhotos.length} selected photo${selectedPhotos.length > 1 ? 's' : ''}`}
+                aria-label={`Move ${selectedPhotos.length} selected photo${
+                  selectedPhotos.length > 1 ? 's' : ''
+                }`}
               >
                 <Move className="w-4 h-4" />
                 {t('common:move')}
@@ -694,7 +712,9 @@ const AlbumPage = ({
               <button
                 onClick={handleBulkDelete}
                 className="ripple-effect px-3 py-1.5 md:px-4 md:py-2 bg-red-600 hover:bg-red-700 rounded-lg flex items-center gap-1.5 md:gap-2 transition text-sm md:text-base touch-target touch-manipulation"
-                aria-label={`Delete ${selectedPhotos.length} selected photo${selectedPhotos.length > 1 ? 's' : ''}`}
+                aria-label={`Delete ${selectedPhotos.length} selected photo${
+                  selectedPhotos.length > 1 ? 's' : ''
+                }`}
               >
                 <Trash2 className="w-4 h-4" />
                 {t('common:delete')}
@@ -710,7 +730,7 @@ const AlbumPage = ({
               onChange={(e) => setBulkTagInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && bulkTagInput.trim()) {
-                  const selectedPhotoIds = selectedPhotos.map(p => p.id)
+                  const selectedPhotoIds = selectedPhotos.map((p) => p.id)
                   bulkAddTag(selectedPhotoIds, bulkTagInput)
                   setBulkTagInput('')
                   setSelectedPhotos([])
@@ -723,7 +743,7 @@ const AlbumPage = ({
             <button
               onClick={() => {
                 if (bulkTagInput.trim()) {
-                  const selectedPhotoIds = selectedPhotos.map(p => p.id)
+                  const selectedPhotoIds = selectedPhotos.map((p) => p.id)
                   bulkAddTag(selectedPhotoIds, bulkTagInput)
                   setBulkTagInput('')
                   setSelectedPhotos([])
@@ -803,13 +823,9 @@ const AlbumPage = ({
       {/* Manual Order Helper Text */}
       {sortBy === 'manual' && viewMode === 'grid' && (
         <div className="mb-3 p-3 bg-purple-600/10 border border-purple-500/30 rounded-lg flex items-start gap-2">
-          <div className="flex-shrink-0 mt-0.5">
-            ✋
-          </div>
+          <div className="flex-shrink-0 mt-0.5">✋</div>
           <div className="text-xs md:text-sm">
-            <p className="font-medium text-purple mb-1">
-              Manual Order Active
-            </p>
+            <p className="font-medium text-purple mb-1">Manual Order Active</p>
             <p className="text-gray-400">
               Drag photos to reorder. Changes save automatically.
             </p>
@@ -843,7 +859,10 @@ const AlbumPage = ({
                 ? undefined
                 : (url) => {
                     const index = displayedPhotos.findIndex(
-                      (p) => p.url === url || p.thumbnailUrl === url || p.displayUrl === url
+                      (p) =>
+                        p.url === url ||
+                        p.thumbnailUrl === url ||
+                        p.displayUrl === url
                     )
                     if (index !== -1) {
                       handlePhotoClick(displayedPhotos[index], index)
@@ -874,11 +893,14 @@ const AlbumPage = ({
       )}
 
       {/* All loaded indicator */}
-      {viewMode === 'grid' && !hasMore && filteredPhotos.length > 0 && filteredPhotos.length > 50 && (
-        <p className="text-center text-gray-500 py-8 text-sm">
-          All {filteredPhotos.length} photos loaded
-        </p>
-      )}
+      {viewMode === 'grid' &&
+        !hasMore &&
+        filteredPhotos.length > 0 &&
+        filteredPhotos.length > 50 && (
+          <p className="text-center text-gray-500 py-8 text-sm">
+            All {filteredPhotos.length} photos loaded
+          </p>
+        )}
 
       {/* Photos List View - Compact Redesign */}
       {!isInitialLoading &&
@@ -1023,15 +1045,17 @@ const AlbumPage = ({
 
       {editingAlbum && (
         <AlbumModal
+          isOpen={Boolean(editingAlbum)}
           editingAlbum={editingAlbum}
           onClose={() => setEditingAlbum(null)}
           onSave={async (data, editingAlbumParam) => {
-            if (import.meta.env.DEV) console.log('💾 Saving album changes:', {
-              data,
-              editingAlbumParam,
-              editingAlbumState: editingAlbum,
-              currentAlbum: album
-            })
+            if (import.meta.env.DEV)
+              console.log('💾 Saving album changes:', {
+                data,
+                editingAlbumParam,
+                editingAlbumState: editingAlbum,
+                currentAlbum: album,
+              })
 
             // Use editingAlbumParam (from modal), fallback to state, then to current album
             const albumToSave = editingAlbumParam || editingAlbum || album
@@ -1045,11 +1069,17 @@ const AlbumPage = ({
               return
             }
 
-            if (import.meta.env.DEV) console.log('✅ Using album for save:', albumToSave.id, albumToSave.name)
+            if (import.meta.env.DEV)
+              console.log(
+                '✅ Using album for save:',
+                albumToSave.id,
+                albumToSave.name
+              )
 
             try {
               await onSaveAlbum(data, albumToSave)
-              if (import.meta.env.DEV) console.log('✅ Album saved successfully')
+              if (import.meta.env.DEV)
+                console.log('✅ Album saved successfully')
               setEditingAlbum(null)
             } catch (error) {
               console.error('❌ Failed to save album:', error)
