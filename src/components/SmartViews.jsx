@@ -30,28 +30,44 @@ const SmartViews = ({ allContent, activeFilters, onFilterChange }) => {
     const lastYear = currentYear - 1
 
     // allContent already excludes documents and includes photos, videos, and collages
+    // Canonical media set: exclude documents once
+    const mediaContent = allContent.filter(
+      p => p.type !== 'document'
+    )
 
     return {
-      favorites: allContent.filter(p => p.favorite).length,
-      // Photos = NOT video AND NOT collage (documents already excluded)
-      photos: allContent.filter(p => p.contentType === 'photo').length,
-      videos: allContent.filter(p => p.contentType === 'video').length,
-      collages: allContent.filter(p => p.contentType === 'collage').length,
-      withoutAlbum: allContent.filter(p => !p.albumId || p.albumId === '').length,
-      thisYear: allContent.filter(p => {
-        // Use dateTaken (not upload date) for proper calendar year
+      favorites: mediaContent.filter(p => p.favorite).length,
+
+      // Photos = images only (not videos, not collages)
+      photos: mediaContent.filter(
+        p => p.type === 'photo' && p.contentType !== 'collage'
+      ).length,
+
+      videos: mediaContent.filter(
+        p => p.type === 'video'
+      ).length,
+
+      collages: mediaContent.filter(
+        p => p.contentType === 'collage'
+      ).length,
+
+      withoutAlbum: mediaContent.filter(
+        p => !p.albumId || p.albumId === ''
+      ).length,
+
+      thisYear: mediaContent.filter(p => {
         const photoDate = resolvePhotoDate(p)
         if (!photoDate) return false
         return new Date(photoDate).getFullYear() === currentYear
       }).length,
-      lastYear: allContent.filter(p => {
-        // Use dateTaken (not upload date) for proper calendar year
+
+      lastYear: mediaContent.filter(p => {
         const photoDate = resolvePhotoDate(p)
         if (!photoDate) return false
         return new Date(photoDate).getFullYear() === lastYear
       }).length,
     }
-  }, [allContent])
+ }, [allContent])
 
   // Filter group definitions
   const filterGroups = [

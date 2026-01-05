@@ -5,7 +5,6 @@
 // Phase 4: XSS Protection added
 // ============================================================================
 import React, { useState, memo } from 'react'
-import { Edit3 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { sanitizeImageUrl, PLACEHOLDER_ALBUM } from '../utils/security'
 
@@ -92,19 +91,6 @@ const AlbumCard = memo(
               className="max-h-full max-w-full object-contain rounded-xl"
               loading="lazy"
             />
-
-            {/* 🔹 Redigeringsknapp (vises ved hover) */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                if (onEdit) onEdit(album)
-              }}
-              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-2 bg-blue-600 hover:bg-blue-700 hover:shadow-md active:scale-95 rounded-lg transition-all duration-150 ripple-effect focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
-              title={t('common:albumCard.editAlbum')}
-              aria-label={`Edit ${album.name || 'album'}`}
-            >
-              <Edit3 size={16} />
-            </button>
           </div>
         ) : (
           <div className="album-thumb flex items-center justify-center text-gray-400 bg-gradient-to-br from-gray-900 to-indigo-900 aspect-[16/9] rounded-xl">

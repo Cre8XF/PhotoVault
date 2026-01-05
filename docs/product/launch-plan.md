@@ -349,7 +349,7 @@
 │ [████████████████░░░░] 80%        │
 │ 800 MB av 1 GB brukt              │
 │                                   │
-│ [Oppgrader til LITE] 5 GB / 29kr │
+│ [Oppgrader til LITE] 10 GB / 39kr │
 └───────────────────────────────────┘
 ```
 

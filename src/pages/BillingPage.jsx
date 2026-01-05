@@ -28,7 +28,7 @@ const BillingPage = () => {
     {
       id: 'LITE',
       name: 'LITE',
-      price: '29 kr',
+      price: '39 kr',
       period: 'per måned',
       storage: '10 GB',
       priceId: STRIPE_LITE_PRICE_ID,

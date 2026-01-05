@@ -4,5 +4,5 @@
   "upgradeRequired": "Upgrade Required",
   "videoUpgradeMessage": "To upload videos, upgrade to PRO subscription (50 GB for 79 kr/month)",
   "storageFullTitle": "Storage Full",
-  "storageFullMessage": "You have used {{used}} of {{limit}}. Only {{available}} available. Upgrade to LITE (10 GB for 29 kr/month) or delete some photos."
+  "storageFullMessage": "You have used {{used}} of {{limit}}. Only {{available}} available. Upgrade to LITE (10 GB for 39 kr/month) or delete some photos."
 }

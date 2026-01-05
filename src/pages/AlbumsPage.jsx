@@ -11,7 +11,6 @@ import {
   List,
   Move,
   Plus,
-  Edit2,
   Trash2,
 } from 'lucide-react'
 import AlbumCard from '../components/AlbumCard'
@@ -428,19 +427,6 @@ const AlbumsPage = ({
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
-                          setEditingAlbum(album)
-                          setAlbumModalOpen(true)
-                          if (onEditAlbum) onEditAlbum(album)
-                        }}
-                        className="p-2 bg-blue-600/90 hover:bg-blue-700 text-white rounded-lg shadow-lg transition"
-                        title={t('common:edit')}
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
                           handleDeleteAlbum(album)
                           if (onDeleteAlbum) onDeleteAlbum(album)
                         }}
@@ -523,19 +509,6 @@ const AlbumsPage = ({
 
                         {/* Action buttons */}
                         <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setEditingAlbum(album)
-                              setAlbumModalOpen(true)
-                              if (onEditAlbum) onEditAlbum(album)
-                            }}
-                            className="p-2 bg-blue-600/90 hover:bg-blue-700 text-white rounded-lg shadow-lg transition"
-                            title={t('common:edit')}
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-
                           <button
                             onClick={(e) => {
                               e.stopPropagation()

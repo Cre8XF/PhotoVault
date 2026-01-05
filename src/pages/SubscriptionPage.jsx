@@ -120,7 +120,7 @@ const SubscriptionPage = ({ user }) => {
     {
       id: 'LITE',
       name: 'LITE',
-      price: '29 kr',
+      price: '39 kr',
       period: 'per måned',
       storage: '10 GB',
       compression: 'Ja',
