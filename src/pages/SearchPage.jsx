@@ -109,7 +109,7 @@ const SearchPage = ({
     dateRange: null,
     albumId: null,
     selectedTag: null,
-    contentTypes: ['photo'], // Default: Photos only
+    contentTypes: null, // Default: Show all media types (photos, videos, collages)
   })
   const [showFilters, setShowFilters] = useState(false)
   const [searchExpanded, setSearchExpanded] = useState(false)
@@ -692,7 +692,7 @@ const SearchPage = ({
       dateRange: null,
       albumId: null,
       selectedTag: null,
-      contentTypes: ['photo'], // Reset to default: Photos only
+      contentTypes: null, // Reset to default: Show all media types
     })
     setSearchQuery('')
     setSearchExpanded(false) // Also collapse search when resetting
