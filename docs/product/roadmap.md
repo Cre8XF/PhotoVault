@@ -20,26 +20,26 @@
 
 ## 📊 Tier Comparison Table
 
-| Feature | GRATIS | LITE | PRO | ADMIN |
-|---------|--------|------|-----|-------|
-| **Storage** | 1 GB | 5 GB | 50 GB | Unlimited |
-| **Image Quality** | Original | Compressed | Compressed | Original |
-| **Video Upload** | ❌ | ❌ | ✅ | ✅ |
-| **Compression** | ❌ | ✅ | ✅ | ✅ (optional) |
-| **Albums** | ✅ Unlimited | ✅ Unlimited | ✅ Unlimited | ✅ All users |
-| **Batch Ops** | ✅ | ✅ | ✅ | ✅ |
-| **QR Sharing** | ✅ | ✅ | ✅ | ✅ |
-| **Collage Builder** | ✅ Basic | ✅ Full | ✅ Premium | ✅ All modes |
-| **Search** | ✅ | ✅ | ✅ | ✅ Global |
-| **Captions** | ✅ | ✅ | ✅ | ✅ |
-| **Slideshow** | ✅ | ✅ | ✅ Advanced | ✅ |
-| **AI Auto-tag** | ❌ | ❌ | ✅ | ✅ |
-| **AI Enhance** | ❌ | ❌ | ✅ | ✅ |
-| **Background Removal** | ❌ | ❌ | ✅ | ✅ |
-| **Duplicate Detection** | ❌ | ❌ | ✅ | ✅ |
-| **Face Recognition** | ❌ | ❌ | 🔜 Future | ✅ |
-| **Analytics** | ❌ | ❌ | ❌ | ✅ |
-| **User Management** | ❌ | ❌ | ❌ | ✅ |
+| Feature                 | GRATIS       | LITE         | PRO          | ADMIN         |
+| ----------------------- | ------------ | ------------ | ------------ | ------------- |
+| **Storage**             | 1 GB         | 5 GB         | 50 GB        | Unlimited     |
+| **Image Quality**       | Original     | Compressed   | Compressed   | Original      |
+| **Video Upload**        | ❌           | ❌           | ✅           | ✅            |
+| **Compression**         | ❌           | ✅           | ✅           | ✅ (optional) |
+| **Albums**              | ✅ Unlimited | ✅ Unlimited | ✅ Unlimited | ✅ All users  |
+| **Batch Ops**           | ✅           | ✅           | ✅           | ✅            |
+| **QR Sharing**          | ✅           | ✅           | ✅           | ✅            |
+| **Collage Builder**     | ✅ Basic     | ✅ Full      | ✅ Premium   | ✅ All modes  |
+| **Search**              | ✅           | ✅           | ✅           | ✅ Global     |
+| **Captions**            | ✅           | ✅           | ✅           | ✅            |
+| **Slideshow**           | ✅           | ✅           | ✅ Advanced  | ✅            |
+| **AI Auto-tag**         | ❌           | ❌           | ✅           | ✅            |
+| **AI Enhance**          | ❌           | ❌           | ✅           | ✅            |
+| **Background Removal**  | ❌           | ❌           | ✅           | ✅            |
+| **Duplicate Detection** | ❌           | ❌           | ✅           | ✅            |
+| **Face Recognition**    | ❌           | ❌           | 🔜 Future    | ✅            |
+| **Analytics**           | ❌           | ❌           | ❌           | ✅            |
+| **User Management**     | ❌           | ❌           | ❌           | ✅            |
 
 ---
 
@@ -48,6 +48,7 @@
 ### Status: 85% Complete
 
 #### ✅ Already Implemented
+
 ```
 ✅ User authentication (Firebase Auth)
 ✅ Photo upload (original quality)
@@ -66,12 +67,14 @@
 ```
 
 #### 🔧 In Progress (This Sprint)
+
 ```
 🔧 Captions/Notes per photo
 🔧 Slideshow mode with controls
 ```
 
 #### 📋 Testing Required
+
 ```
 📋 Mobile device testing (iOS/Android)
 📋 Performance benchmarks
@@ -81,6 +84,7 @@
 ```
 
 #### 🎯 Launch Criteria
+
 ```
 1. All features tested on mobile
 2. No P0 bugs
@@ -99,6 +103,7 @@
 ### Goal: Simple upgrade path for more storage
 
 #### New Features
+
 ```
 🆕 5 GB storage quota
 🆕 Image compression toggle
@@ -109,6 +114,7 @@
 ```
 
 #### Implementation Steps
+
 1. Update `useAuth.js` - Add compression logic
 2. Update `useUpload.js` - Add compression step
 3. Update `UploadModal.jsx` - Add compression toggle
@@ -116,6 +122,7 @@
 5. Add compression utilities in `utils/imageCompression.js`
 
 #### Estimated Effort
+
 - Development: 1-2 days
 - Testing: 1 day
 - Total: 2-3 days
@@ -127,6 +134,7 @@
 ### Goal: Premium features for power users
 
 #### New Features
+
 ```
 🆕 Video upload & playback
 🆕 Video thumbnail generation
@@ -141,18 +149,22 @@
 ```
 
 #### Implementation Steps
+
 1. **Video Support** (Already 90% done)
+
    - Enable video upload for PRO
    - Test iOS/Android playback
    - Optimize thumbnail generation
 
 2. **AI Integration**
+
    - Google Vision API setup
    - Auto-tagging on upload
    - Batch tag existing photos
    - AI categories
 
 3. **Advanced Tools**
+
    - Picsart API for enhancement
    - Background removal API
    - Duplicate detection algorithm
@@ -163,6 +175,7 @@
    - Export options
 
 #### Estimated Effort
+
 - Development: 2-3 weeks
 - API integration: 1 week
 - Testing: 1 week
@@ -175,6 +188,7 @@
 ### Goal: Platform management & analytics
 
 #### New Features
+
 ```
 🆕 User management dashboard
 🆕 Analytics & insights
@@ -188,6 +202,7 @@
 ```
 
 #### Implementation Steps
+
 1. Admin authentication & roles
 2. Analytics dashboard (Chart.js)
 3. User management UI
@@ -196,6 +211,7 @@
 6. Subscription analytics
 
 #### Estimated Effort
+
 - Development: 2-3 weeks
 - Dashboard design: 1 week
 - Testing: 1 week
@@ -220,6 +236,7 @@ Total: ~13 weeks from now to full platform
 ## 💰 Cost Optimization Strategy
 
 ### Current Costs (POST-LAUNCH - R2 MIGRATED)
+
 ```
 Cloudflare R2 (Primary Storage):
 - 10 GB storage: FREE
@@ -235,6 +252,7 @@ Total without AI: ~200-300 NOK/month (50% reduction!)
 ```
 
 ### With AI Features (PRO Tier)
+
 ```
 Google Vision API:
 - Auto-tagging: ~0.01 NOK per image
@@ -252,6 +270,7 @@ AI Total: ~1100 NOK/month (if heavily used)
 ```
 
 ### Launch Strategy
+
 ```
 Phase 1: Launch GRATIS without AI ✅ R2 MIGRATED
          → Build user base
@@ -276,6 +295,7 @@ Goal: 100 PRO users = 7900 NOK/month revenue
 ## 🎯 Success Metrics
 
 ### GRATIS Launch
+
 ```
 Week 1:  50 users
 Week 4:  200 users
@@ -283,15 +303,17 @@ Week 12: 500 users
 ```
 
 ### LITE Conversion
+
 ```
 Target: 10% of GRATIS users
 Week 1:  5 LITE users
 Week 4:  20 LITE users
 Week 12: 50 LITE users
-Revenue: 50 × 29 NOK = 1,450 NOK/month
+Revenue: 50 × 39 NOK = 1,950 NOK/month
 ```
 
 ### PRO Conversion
+
 ```
 Target: 5% of LITE users, 1% of GRATIS
 Week 1:  2 PRO users
@@ -301,13 +323,14 @@ Revenue: 25 × 79 NOK = 1,975 NOK/month
 ```
 
 ### 6-Month Goal (WITH R2 MIGRATION)
+
 ```
 500 GRATIS (free)
-50 LITE (1,450 NOK)
+50 LITE (1,950 NOK)
 25 PRO (1,975 NOK)
-Total Revenue: 3,425 NOK/month
+Total Revenue: 3,925 NOK/month
 Total Costs: 300 NOK/month (R2 savings!)
-Net Profit: 3,125 NOK/month (+10% vs Firebase)
+Net Profit: 3,625 NOK/month (+10% vs Firebase)
 ```
 
 ---
@@ -315,6 +338,7 @@ Net Profit: 3,125 NOK/month (+10% vs Firebase)
 ## 🔐 Security & Privacy
 
 ### Implemented
+
 ```
 ✅ Firebase Authentication
 ✅ Firestore Security Rules
@@ -324,6 +348,7 @@ Net Profit: 3,125 NOK/month (+10% vs Firebase)
 ```
 
 ### To Implement (PRO)
+
 ```
 🔜 End-to-end encryption (vault)
 🔜 2FA authentication
@@ -337,6 +362,7 @@ Net Profit: 3,125 NOK/month (+10% vs Firebase)
 ## 📱 Platform Support
 
 ### Current (GRATIS)
+
 ```
 ✅ Web (Desktop Chrome/Firefox/Safari)
 ✅ Web (Mobile Chrome/Safari)
@@ -345,6 +371,7 @@ Net Profit: 3,125 NOK/month (+10% vs Firebase)
 ```
 
 ### Future (PRO)
+
 ```
 🔜 Native iOS app (Capacitor)
 🔜 Native Android app (Capacitor)
@@ -357,12 +384,14 @@ Net Profit: 3,125 NOK/month (+10% vs Firebase)
 ## 🌍 Internationalization
 
 ### Current
+
 ```
 ✅ Norwegian (Bokmål)
 ✅ English
 ```
 
 ### Future
+
 ```
 🔜 Swedish
 🔜 Danish
@@ -375,6 +404,7 @@ Net Profit: 3,125 NOK/month (+10% vs Firebase)
 ## 🎨 Design System
 
 ### Current Theme
+
 ```
 ✅ Dark mode (default)
 ✅ Glass morphism
@@ -384,6 +414,7 @@ Net Profit: 3,125 NOK/month (+10% vs Firebase)
 ```
 
 ### Future
+
 ```
 🔜 Light mode
 🔜 Custom themes
@@ -397,6 +428,7 @@ Net Profit: 3,125 NOK/month (+10% vs Firebase)
 ## 🏁 Ready to Start?
 
 ### Next Steps:
+
 1. ✅ Read `PIXTR_FREE_TIER_IMPLEMENTATION.md`
 2. ✅ Use Claude Code to implement captions
 3. ✅ Use Claude Code to implement slideshow
