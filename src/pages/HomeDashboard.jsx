@@ -298,7 +298,7 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
                 onClick={() => setSelectedTags([])}
                 className="text-sm text-purple hover:underline"
               >
-                Fjern filter ({selectedTags.length})
+                {t('common:clearFilter', { count: selectedTags.length })}
               </button>
             )}
           </div>

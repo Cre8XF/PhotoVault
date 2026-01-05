@@ -9,10 +9,13 @@
     "editAlbum": "Edit album"
   },
   "albums": "Albums",
+  "albumNotFound": "Album not found",
   "areYouSure": "Are you sure you want to continue?",
+  "backToAlbums": "Back to albums",
   "cancel": "Cancel",
   "caption": "Caption",
   "captionPlaceholder": "Add a caption or note about this photo...",
+  "clearFilter": "Clear filter ({{count}})",
   "addCaption": "Click to add caption",
   "captionSaved": "Caption saved",
   "saving": "Saving...",
