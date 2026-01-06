@@ -15,15 +15,15 @@ export default function Slider({ label, value, min, max, onChange, onReset }) {
   return (
     <div className="mb-3">
       <div className="flex items-center justify-between mb-2">
-        <label className="text-sm text-gray-300 font-medium">{label}</label>
+        <label className="text-sm editor-text-secondary font-medium">{label}</label>
         <div className="flex items-center gap-2">
-          <span className="text-sm font-mono text-gray-400 min-w-[3rem] text-right">
+          <span className="text-sm font-mono editor-text-muted min-w-[3rem] text-right">
             {displayValue}
           </span>
           {value !== 0 && onReset && (
             <button
               onClick={onReset}
-              className="text-xs text-gray-500 hover:text-gray-400 transition-colors"
+              className="text-xs editor-text-muted hover:editor-text-secondary transition-colors"
               title="Reset to 0"
             >
               �
@@ -38,7 +38,7 @@ export default function Slider({ label, value, min, max, onChange, onReset }) {
         max={max}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full h-2 bg-[#2a2a2a] rounded-lg appearance-none cursor-pointer
+        className="w-full h-2 editor-bg-tertiary rounded-lg appearance-none cursor-pointer
                    [&::-webkit-slider-thumb]:appearance-none
                    [&::-webkit-slider-thumb]:w-4
                    [&::-webkit-slider-thumb]:h-4

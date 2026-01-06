@@ -48,15 +48,17 @@ body.light-mode .memories-widget {
   width: 56px;
   height: 56px;
   border-radius: 16px;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(59, 130, 246, 0.3));
+  background: var(--gradient-purple-blue);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  opacity: 0.3;
 }
 
 body.light-mode .memories-icon-wrapper {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.2));
+  background: var(--gradient-purple-blue);
+  opacity: 0.2;
 }
 
 .memories-icon {

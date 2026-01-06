@@ -1,9 +1,11 @@
 import useEditorStore from '../store/editorStore'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Rotate Panel - Rotation and flip controls
  */
 export default function RotatePanel() {
+  const { t } = useTranslation(['common', 'editor'])
   const transform = useEditorStore((state) => state.transform)
   const applyTransform = useEditorStore((state) => state.applyTransform)
 
@@ -61,34 +63,34 @@ export default function RotatePanel() {
   const hasChanges = rotation !== 0 || flipH || flipV
 
   return (
-    <div className="p-4 bg-[#0a0a0a]">
+    <div className="p-4 editor-bg-primary">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-white font-semibold">Rotate & Flip</h3>
+        <h3 className="editor-text-primary font-semibold">{t('editor:rotateAndFlip')}</h3>
         {hasChanges && (
           <button
             onClick={handleReset}
-            className="text-xs text-gray-400 hover:text-gray-300 transition-colors"
+            className="text-xs editor-text-muted hover:editor-text-secondary transition-colors"
           >
-            Reset
+            {t('common:reset')}
           </button>
         )}
       </div>
 
       {/* Quick Rotate Buttons */}
       <div className="mb-3">
-        <p className="text-sm text-gray-400 mb-3">Quick Rotate</p>
+        <p className="text-sm editor-text-muted mb-3">{t('editor:quickRotate')}</p>
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={handleRotateCCW}
-            className="py-1.5 bg-[#2a2a2a] hover:bg-[#3a3a3a] text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation"
+            className="py-1.5 editor-bg-tertiary editor-bg-tertiary-hover editor-text-primary rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation"
           >
             <span className="text-lg">↶</span>
             <span>90° Left</span>
           </button>
           <button
             onClick={handleRotateCW}
-            className="py-1.5 bg-[#2a2a2a] hover:bg-[#3a3a3a] text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation"
+            className="py-1.5 editor-bg-tertiary editor-bg-tertiary-hover editor-text-primary rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation"
           >
             <span className="text-lg">↷</span>
             <span>90° Right</span>
@@ -99,17 +101,17 @@ export default function RotatePanel() {
       {/* Free Rotation Slider */}
       <div className="mb-3">
         <div className="flex items-center justify-between mb-2">
-          <label className="text-sm text-gray-300 font-medium">
+          <label className="text-sm editor-text-secondary font-medium">
             Free Rotation
           </label>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-mono text-gray-400 min-w-[3rem] text-right">
+            <span className="text-sm font-mono editor-text-muted min-w-[3rem] text-right">
               {rotation}°
             </span>
             {rotation !== 0 && (
               <button
                 onClick={() => handleFreeRotation(0)}
-                className="text-xs text-gray-500 hover:text-gray-400 transition-colors"
+                className="text-xs editor-text-muted hover:editor-text-secondary transition-colors"
                 title="Reset to 0"
               >
                 ↺
@@ -125,7 +127,7 @@ export default function RotatePanel() {
           step={1}
           value={rotation}
           onChange={(e) => handleFreeRotation(parseInt(e.target.value))}
-          className="w-full max-w-xs h-1 bg-[#2a2a2a] rounded-lg appearance-none cursor-pointer
+          className="w-full max-w-xs h-1 editor-bg-tertiary rounded-lg appearance-none cursor-pointer
                      [&::-webkit-slider-thumb]:appearance-none
                      [&::-webkit-slider-thumb]:w-4
                      [&::-webkit-slider-thumb]:h-4
@@ -140,7 +142,7 @@ export default function RotatePanel() {
                      [&::-moz-range-thumb]:cursor-pointer"
         />
 
-        <div className="flex justify-between text-xs text-gray-500 mt-1">
+        <div className="flex justify-between text-xs editor-text-muted mt-1">
           <span>-180°</span>
           <span>0°</span>
           <span>+180°</span>
@@ -149,14 +151,14 @@ export default function RotatePanel() {
 
       {/* Flip Buttons */}
       <div>
-        <p className="text-sm text-gray-400 mb-3">Flip</p>
+        <p className="text-sm editor-text-muted mb-3">Flip</p>
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={handleFlipH}
             className={`py-1.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation ${
               flipH
-                ? 'bg-blue-600 text-white'
-                : 'bg-[#2a2a2a] text-white hover:bg-[#3a3a3a]'
+                ? 'bg-blue-600 editor-text-primary'
+                : 'editor-bg-tertiary editor-text-primary editor-bg-tertiary-hover'
             }`}
           >
             <span className="text-lg">↔</span>
@@ -166,8 +168,8 @@ export default function RotatePanel() {
             onClick={handleFlipV}
             className={`py-1.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation ${
               flipV
-                ? 'bg-blue-600 text-white'
-                : 'bg-[#2a2a2a] text-white hover:bg-[#3a3a3a]'
+                ? 'bg-blue-600 editor-text-primary'
+                : 'editor-bg-tertiary editor-text-primary editor-bg-tertiary-hover'
             }`}
           >
             <span className="text-lg">↕</span>
@@ -178,7 +180,7 @@ export default function RotatePanel() {
 
       {/* Current Transform - Compact */}
       {hasChanges && (
-        <div className="mt-3 px-3 py-1.5 bg-[#1a1a1a] rounded-lg text-xs text-gray-400">
+        <div className="mt-3 px-3 py-1.5 editor-bg-secondary rounded-lg text-xs editor-text-muted">
           {rotation !== 0 && `${rotation}° `}
           {flipH && `↔ `}
           {flipV && `↕`}

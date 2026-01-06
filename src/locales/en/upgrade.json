@@ -1,0 +1,111 @@
+{
+  "albumLimit": {
+    "icon": "📁",
+    "title": "You've hit the album limit!",
+    "subtitle": "But you're clearly loving Pixtr 🎉",
+    "painPoint": "GRATIS = 5 albums max",
+    "solution": "LITE = Unlimited albums",
+    "features": [
+      "✅ Unlimited albums",
+      "✅ 20 photos per album → Unlimited",
+      "✅ 750 MB → 5 GB storage",
+      "✅ Save filters & collages"
+    ],
+    "cta": "Upgrade to LITE",
+    "price": "$4.99/month"
+  },
+  "photoLimit": {
+    "icon": "📸",
+    "title": "Album full!",
+    "subtitle": "Time to upgrade or create a new album",
+    "painPoint": "GRATIS = 20 photos per album",
+    "solution": "LITE = Unlimited photos per album",
+    "features": [
+      "✅ Unlimited photos per album",
+      "✅ Unlimited albums",
+      "✅ 5 GB storage (6.5x more)",
+      "✅ Save filters & collages"
+    ],
+    "cta": "Upgrade to LITE",
+    "price": "$4.99/month"
+  },
+  "editorSave": {
+    "icon": "🎨",
+    "title": "Love this edit?",
+    "subtitle": "Upgrade to save it!",
+    "painPoint": "GRATIS = Preview only",
+    "solution": "LITE = Save all edits",
+    "features": [
+      "✅ Save filters & adjustments",
+      "✅ Unlimited albums & photos",
+      "✅ 5 GB storage",
+      "✅ Save collages"
+    ],
+    "cta": "Upgrade to LITE",
+    "price": "$4.99/month"
+  },
+  "collageSave": {
+    "icon": "🖼️",
+    "title": "Beautiful collage!",
+    "subtitle": "Upgrade to save it",
+    "painPoint": "GRATIS = Build only",
+    "solution": "LITE = Save collages",
+    "features": [
+      "✅ Save unlimited collages",
+      "✅ Save filters & edits",
+      "✅ Unlimited albums & photos",
+      "✅ 5 GB storage"
+    ],
+    "cta": "Upgrade to LITE",
+    "price": "$4.99/month"
+  },
+  "storageWarning": {
+    "icon": "⚠️",
+    "title": "Storage almost full",
+    "subtitle": "You've used 90% of your storage",
+    "painPoint": "GRATIS = 1 GB",
+    "solution": "LITE = 10 GB (10x more)",
+    "features": [
+      "✅ 10 GB storage (10x more)",
+      "✅ Unlimited albums & photos",
+      "✅ Save filters & collages",
+      "✅ Document uploads"
+    ],
+    "cta": "Upgrade to LITE",
+    "price": "$4.99/month"
+  },
+  "storageFull": {
+    "icon": "🚫",
+    "title": "Storage full!",
+    "subtitle": "Delete photos or upgrade",
+    "painPoint": "GRATIS = 1 GB",
+    "solution": "LITE = 10 GB",
+    "features": [
+      "✅ 10 GB storage (10x more)",
+      "✅ Unlimited albums & photos",
+      "✅ Save filters & collages",
+      "✅ Document uploads"
+    ],
+    "cta": "Upgrade to LITE",
+    "price": "$4.99/month"
+  },
+  "qrSharing": {
+    "icon": "🔗",
+    "title": "Share with QR codes",
+    "subtitle": "PRO feature",
+    "painPoint": "LITE = Basic sharing only",
+    "solution": "PRO = QR code sharing",
+    "features": [
+      "✅ QR code album sharing",
+      "✅ 50 GB storage",
+      "✅ Video uploads",
+      "✅ Priority support"
+    ],
+    "cta": "Upgrade to PRO",
+    "price": "$9.99/month"
+  },
+  "common": {
+    "cancelAnytime": "Cancel anytime",
+    "maybeLater": "Maybe later"
+  }
+}

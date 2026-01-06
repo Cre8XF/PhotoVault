@@ -285,7 +285,7 @@ export default function EditorPage() {
   // Simple guard - no photo found
   if (!photo) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-[#0a0a0a]">
+      <div className="fixed inset-0 flex items-center justify-center editor-bg-primary">
         <div className="text-center">
           <p className="text-red-400 text-lg mb-4">Photo not found</p>
           <button
@@ -302,28 +302,28 @@ export default function EditorPage() {
   // ✅ Show error state (Firebase Storage CORS)
   if (imageError) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-[#0a0a0a] p-8">
+      <div className="fixed inset-0 flex items-center justify-center editor-bg-primary p-8">
         <div className="max-w-md text-center">
           <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
             <div className="text-red-400 text-5xl">⚠️</div>
           </div>
           <p className="text-red-300 text-lg mb-2">{imageError}</p>
-          <p className="text-gray-400 text-sm mb-4">
+          <p className="editor-text-muted text-sm mb-4">
             Firebase Storage CORS must be configured by Roger.
           </p>
-          <div className="text-xs text-gray-500 mb-6 p-3 bg-[#1a1a1a] rounded-lg break-all">
+          <div className="text-xs editor-text-muted mb-6 p-3 editor-bg-secondary rounded-lg break-all">
             <p className="font-mono">{photo.url.substring(0, 100)}...</p>
           </div>
           <div className="flex gap-3 justify-center">
             <button
               onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 editor-text-primary rounded-lg transition"
             >
               Retry
             </button>
             <button
               onClick={() => navigate(-1)}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition"
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 editor-text-primary rounded-lg transition"
             >
               Go back
             </button>
@@ -336,11 +336,11 @@ export default function EditorPage() {
   // ✅ Show loading state
   if (!imageLoaded) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-[#0a0a0a]">
+      <div className="fixed inset-0 flex items-center justify-center editor-bg-primary">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading image from Firebase Storage...</p>
-          <p className="text-xs text-gray-600 mt-2">
+          <p className="editor-text-muted">Loading image from Firebase Storage...</p>
+          <p className="text-xs editor-text-muted mt-2">
             Verifying CORS configuration...
           </p>
         </div>

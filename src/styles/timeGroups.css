@@ -28,14 +28,14 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(59, 130, 246, 0.8));
+  background: var(--gradient-purple-blue);
   box-shadow: 0 0 12px rgba(139, 92, 246, 0.5);
   flex-shrink: 0;
   animation: pulse-dot 2s ease-in-out infinite;
 }
 
 body.light-mode .timeline-dot {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 1), rgba(59, 130, 246, 1));
+  background: var(--gradient-purple-blue);
 }
 
 @keyframes pulse-dot {

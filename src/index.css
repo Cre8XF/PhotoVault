@@ -58,6 +58,39 @@ body.light-mode {
   --tag-bg: rgba(109, 40, 217, 0.12);      /* Subtle purple background */
   --tag-border: rgba(109, 40, 217, 0.35);  /* Defined border */
   --tag-text: var(--color-purple-text);    /* WCAG AA compliant purple text */
+
+  /* ============================================ */
+  /* Editor Tokens - Light Mode                 */
+  /* ============================================ */
+  --bg-editor-dark: #ffffff;
+  --bg-editor-surface: #f8fafc;
+  --bg-editor-elevated: #f1f5f9;
+  --bg-editor-hover: #e2e8f0;
+
+  /* ============================================ */
+  /* State Tokens                               */
+  /* ============================================ */
+  --opacity-disabled: 0.5;
+  --opacity-dragging: 0.5;
+
+  /* ============================================ */
+  /* Color Tokens                               */
+  /* ============================================ */
+  --color-primary-500: #8b5cf6;
+  --color-purple-300: #a78bfa;
+  --color-purple-800: #6B21A8;
+  --color-white: #ffffff;
+  --bg-black: #000000;
+
+  /* ============================================ */
+  /* Gradient Tokens                            */
+  /* ============================================ */
+  --gradient-primary: linear-gradient(180deg, #8b5cf6, #a78bfa);
+  --gradient-modal-dark: linear-gradient(135deg, #1a1a2e, #16213e);
+  --gradient-hero: linear-gradient(to bottom right, #f8fafc, #ede9fe, #f8fafc);
+  --gradient-purple-blue: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(59, 130, 246, 0.8));
+  --gradient-purple-pink: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(236, 72, 153, 0.9));
+  --gradient-avatar: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 /* Dark Mode */
@@ -115,6 +148,33 @@ body.dark-mode {
   --tag-bg: rgba(139, 92, 246, 0.25);      /* Brighter purple background for dark mode */
   --tag-border: rgba(139, 92, 246, 0.55);  /* Stronger border for definition */
   --tag-text: #ede9fe;                     /* Light purple text for dark backgrounds */
+
+  /* ============================================ */
+  /* Editor Tokens - Dark Mode                  */
+  /* ============================================ */
+  --bg-editor-dark: #0a0a0a;
+  --bg-editor-surface: #1a1a1a;
+  --bg-editor-elevated: #2a2a2a;
+  --bg-editor-hover: #3a3a3a;
+
+  /* State Tokens (same for both modes) */
+  --opacity-disabled: 0.5;
+  --opacity-dragging: 0.5;
+
+  /* Color Tokens (same for both modes) */
+  --color-primary-500: #8b5cf6;
+  --color-purple-300: #a78bfa;
+  --color-purple-800: #6B21A8;
+  --color-white: #ffffff;
+  --bg-black: #000000;
+
+  /* Gradient Tokens (same for both modes) */
+  --gradient-primary: linear-gradient(180deg, #8b5cf6, #a78bfa);
+  --gradient-modal-dark: linear-gradient(135deg, #1a1a2e, #16213e);
+  --gradient-hero: linear-gradient(to bottom right, #f8fafc, #ede9fe, #f8fafc);
+  --gradient-purple-blue: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(59, 130, 246, 0.8));
+  --gradient-purple-pink: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(236, 72, 153, 0.9));
+  --gradient-avatar: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 /* ============================================================================
@@ -244,7 +304,7 @@ body.dark-mode {
 }
 
 .input-field:focus {
-  border-color: #a78bfa;
+  border-color: var(--color-purple-300);
   outline: none;
 }
 
@@ -384,7 +444,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-  color: #1f2937;
+  color: var(--text-primary);
   overflow-x: hidden;
   position: relative;
 
@@ -405,7 +465,7 @@ body.dark-mode {
     /* lilla-blå */ #7c62f5 80%,
     /* mykere lys lilla */ #9b8dfb 100% /* dus høylys */
   );
-  color: #e8e6f0;
+  color: var(--text-primary);
 }
 
 /* Gradient animation */
@@ -496,7 +556,7 @@ body.light-mode textarea::placeholder {
 body.light-mode .bg-purple-600,
 body.light-mode .bg-purple-500,
 body.light-mode .bg-purple-700 {
-  color: #ffffff;
+  color: var(--color-white);
 }
 
 /* Ensure good contrast for small text */
@@ -746,18 +806,18 @@ body.light-mode ::-webkit-scrollbar-track {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #8b5cf6, #a78bfa);
+  background: var(--gradient-primary);
   border-radius: 10px;
   border: 2px solid rgba(0, 0, 0, 0.2);
 }
 
 body.light-mode ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #8b5cf6, #a78bfa);
+  background: var(--gradient-primary);
   border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #7c3aed, #8b5cf6);
+  background: var(--gradient-primary);
 }
 /* Animations for ConfirmModal */
 @keyframes fade-in {

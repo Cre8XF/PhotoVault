@@ -1,9 +1,11 @@
 import useEditorStore from '../store/editorStore'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Crop Panel - Aspect ratio presets and crop controls
  */
 export default function CropPanel() {
+  const { t } = useTranslation(['common', 'editor'])
   const transform = useEditorStore((state) => state.transform)
   const applyTransform = useEditorStore((state) => state.applyTransform)
   const resetTransform = useEditorStore((state) => state.resetTransform)
@@ -105,16 +107,16 @@ export default function CropPanel() {
   ]
 
   return (
-    <div className="p-4 bg-[#0a0a0a]">
+    <div className="p-4 editor-bg-primary">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-white font-semibold">Crop</h3>
+        <h3 className="editor-text-primary font-semibold">Crop</h3>
         {crop && (
           <button
             onClick={handleReset}
-            className="text-xs text-gray-400 hover:text-gray-300 transition-colors"
+            className="text-xs editor-text-muted hover:editor-text-secondary transition-colors"
           >
-            Reset
+            {t('common:reset')}
           </button>
         )}
       </div>
@@ -143,8 +145,8 @@ export default function CropPanel() {
                   onClick={() => applyAspectRatio(preset.ratio, preset.label)}
                   className={`py-2 px-3 rounded-lg text-sm font-medium transition-colors touch-manipulation ${
                     isActive
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-[#2a2a2a] text-gray-300 hover:bg-[#3a3a3a]'
+                      ? 'bg-blue-600 editor-text-primary'
+                      : 'editor-bg-tertiary editor-text-secondary editor-bg-tertiary-hover'
                   }`}
                 >
                   {preset.label}
@@ -154,7 +156,7 @@ export default function CropPanel() {
           </div>
 
           {/* Instructions */}
-          <div className="text-xs text-gray-500 space-y-1">
+          <div className="text-xs editor-text-muted space-y-1">
             <p>• Drag corners to resize crop area</p>
             <p>• Drag center to reposition</p>
             <p>• Select aspect ratio for constrained crop</p>
