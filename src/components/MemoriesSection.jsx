@@ -13,7 +13,15 @@ import { getMemories } from '../features/timeline/utils/dateGrouping'
 import LazyImage from './LazyImage'
 
 const MemoriesSection = ({ photos, onPhotoClick }) => {
-  const { t } = useTranslation('timeline')
+  const { t, i18n } = useTranslation('timeline')
+  console.log(
+    'timeline has key:',
+    t('memories.sameMonth.title', { defaultValue: '__MISSING__' })
+  )
+
+  console.log('LANG:', i18n.language)
+  console.log('HAS timeline NO:', i18n.hasResourceBundle('no', 'timeline'))
+  console.log('TEST:', t('memories.sameMonth.title'))
 
   // Calculate memories using priority-based logic
   // EXCLUDE DOCUMENTS - only photos and videos
@@ -23,7 +31,7 @@ const MemoriesSection = ({ photos, onPhotoClick }) => {
     }
 
     // Filter out documents before passing to getMemories
-    const mediaPhotos = photos.filter(p => p.type !== 'document')
+    const mediaPhotos = photos.filter((p) => p.type !== 'document')
 
     if (mediaPhotos.length === 0) {
       return null
@@ -33,35 +41,50 @@ const MemoriesSection = ({ photos, onPhotoClick }) => {
     return getMemories(mediaPhotos, today)
   }, [photos])
 
-  // Generate title and subtitle from structured data
   const getMemoryText = (memory) => {
     if (!memory) return { title: '', subtitle: '' }
 
-    const monthName = t(`timeline:monthsCapitalized.${memory.monthIndex}`)
+    const monthName = t(`monthsCapitalized.${memory.monthIndex}`)
 
     switch (memory.type) {
       case 'on-this-day':
         return {
-          title: t('timeline:memories.onThisDay.title', { day: memory.day, month: monthName }),
+          title: t('memories.onThisDay.title', {
+            day: memory.day,
+            month: monthName,
+          }),
           subtitle: memory.yearsAgo
-            ? t('timeline:memories.onThisDay.subtitle_single', { yearsAgo: memory.yearsAgo })
-            : t('timeline:memories.onThisDay.subtitle_multiple', { count: memory.count })
+            ? t('memories.onThisDay.subtitle_single', {
+                yearsAgo: memory.yearsAgo,
+              })
+            : t('memories.onThisDay.subtitle_multiple', {
+                count: memory.count,
+              }),
         }
 
       case 'same-month':
         return {
-          title: t('timeline:memories.sameMonth.title', { month: monthName }),
-          subtitle: memory.count === 1
-            ? t('timeline:memories.sameMonth.subtitle_single', { count: memory.count })
-            : t('timeline:memories.sameMonth.subtitle_multiple', { count: memory.count })
+          title: t('memories.sameMonth.title', {
+            month: monthName,
+          }),
+          subtitle:
+            memory.count === 1
+              ? t('memories.sameMonth.subtitle_single', {
+                  count: memory.count,
+                })
+              : t('memories.sameMonth.subtitle_multiple', {
+                  count: memory.count,
+                }),
         }
 
       case 'last-year':
         return {
-          title: t('timeline:memories.lastYear.title', { year: memory.year }),
+          title: t('memories.lastYear.title', {
+            year: memory.year,
+          }),
           subtitle: memory.hasFavorites
-            ? t('timeline:memories.lastYear.subtitle_favorites')
-            : t('timeline:memories.lastYear.subtitle_recent')
+            ? t('memories.lastYear.subtitle_favorites')
+            : t('memories.lastYear.subtitle_recent'),
         }
 
       default:
@@ -103,7 +126,11 @@ const MemoriesSection = ({ photos, onPhotoClick }) => {
               style={{ animationDelay: `${index * 0.05}s` }}
             >
               <LazyImage
-                src={photo.type === 'video' ? (photo.thumbnailUrl || photo.url) : photo.url}
+                src={
+                  photo.type === 'video'
+                    ? photo.thumbnailUrl || photo.url
+                    : photo.url
+                }
                 thumbnail={photo.thumbnailSmall}
                 photoId={photo.id}
                 alt={photo.name || 'Memory'}
@@ -125,7 +152,9 @@ const MemoriesSection = ({ photos, onPhotoClick }) => {
         {/* Show count if more photos available */}
         {memory.count > displayPhotos.length && (
           <p className="text-xs text-muted mt-2 text-center">
-            {t('timeline:memories.morePhotos', { count: memory.count - displayPhotos.length })}
+            {t('timeline:memories.morePhotos', {
+              count: memory.count - displayPhotos.length,
+            })}
           </p>
         )}
       </div>
