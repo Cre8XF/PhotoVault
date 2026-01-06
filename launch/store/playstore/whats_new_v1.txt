@@ -1,0 +1,5 @@
+Initial release.
+Photo storage and albums.
+Memories from previous years.
+Built-in photo editor.
+Secure Vault with client-side encryption.

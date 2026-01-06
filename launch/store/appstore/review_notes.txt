@@ -1,0 +1,5 @@
+Pixtr includes a Secure Vault feature.
+Vault photos are encrypted client-side on the user’s device.
+Vault passwords are never stored, transmitted, or recoverable by Pixtr.
+If a user forgets their Vault password, encrypted photos cannot be recovered by design.
+Biometric unlock is optional and requires a Vault PIN/password to be enabled first.

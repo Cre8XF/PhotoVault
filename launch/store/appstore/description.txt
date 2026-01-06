@@ -1,0 +1,9 @@
+Pixtr is a premium photo storage app built for people who value both simplicity and privacy.
+
+Keep all your photos in one place, organize them into albums, relive memories from previous years, and edit your images with ease.
+
+Pixtr includes a secure Vault for sensitive photos. Vault photos are encrypted on your device using client-side encryption. Your password is never stored or transmitted.
+
+Lost Vault passwords cannot be recovered.
+
+Pixtr is designed to give you full control — without compromise.
