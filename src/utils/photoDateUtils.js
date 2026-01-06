@@ -35,15 +35,18 @@ export function resolvePhotoDate(photo) {
   // 4. uploadedAt - Upload timestamp
   // 5. createdAt - Firestore creation time (last resort)
   const dateValue =
-    photo.dateTaken ||      // ✅ EXIF date (canonical)
-    photo.displayDate ||    // ✅ User override or computed date
-    photo.takenAt ||        // Legacy EXIF field
-    photo.uploadedAt ||     // Upload timestamp
-    photo.createdAt         // Firestore timestamp (fallback)
+    photo.dateTaken || // ✅ EXIF date (canonical)
+    photo.displayDate || // ✅ User override or computed date
+    photo.takenAt || // Legacy EXIF field
+    photo.uploadedAt || // Upload timestamp
+    photo.createdAt // Firestore timestamp (fallback)
 
   if (!dateValue) {
     if (import.meta.env.DEV) {
-      console.warn('[photoDateUtils] Photo missing all date fields:', photo.id || photo)
+      console.warn(
+        '[photoDateUtils] Photo missing all date fields:',
+        photo.id || photo
+      )
     }
     return null
   }
@@ -82,7 +85,10 @@ function parseDateValue(dateValue) {
       return isValid(date) ? date : null
     } catch (error) {
       if (import.meta.env.DEV) {
-        console.error('[photoDateUtils] Failed to parse Firestore Timestamp:', error)
+        console.error(
+          '[photoDateUtils] Failed to parse Firestore Timestamp:',
+          error
+        )
       }
       return null
     }
@@ -96,7 +102,11 @@ function parseDateValue(dateValue) {
 
   // Unknown format
   if (import.meta.env.DEV) {
-    console.warn('[photoDateUtils] Unknown date format:', typeof dateValue, dateValue)
+    console.warn(
+      '[photoDateUtils] Unknown date format:',
+      typeof dateValue,
+      dateValue
+    )
   }
   return null
 }
@@ -110,7 +120,10 @@ function parseDateValue(dateValue) {
 export function sortPhotosByDate(photos, order = 'desc') {
   if (!Array.isArray(photos)) {
     if (import.meta.env.DEV) {
-      console.warn('[photoDateUtils] sortPhotosByDate received non-array:', typeof photos)
+      console.warn(
+        '[photoDateUtils] sortPhotosByDate received non-array:',
+        typeof photos
+      )
     }
     return []
   }
@@ -153,7 +166,9 @@ export function groupPhotosByMonth(photos, locale = 'nb') {
       return // Skip photos without valid dates
     }
 
-    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+    const monthKey = `${date.getFullYear()}-${String(
+      date.getMonth() + 1
+    ).padStart(2, '0')}`
 
     if (!groups[monthKey]) {
       groups[monthKey] = {
@@ -178,20 +193,13 @@ export function groupPhotosByMonth(photos, locale = 'nb') {
  * @param {string} locale - Locale code ('no'/'nb' or 'en')
  * @returns {string} - Formatted string (e.g., "Januar 2024")
  */
-function formatMonthYear(date, locale) {
-  if (locale === 'nb' || locale === 'no') {
-    const norwegianMonths = [
-      'januar', 'februar', 'mars', 'april', 'mai', 'juni',
-      'juli', 'august', 'september', 'oktober', 'november', 'desember'
-    ]
-    const monthName = norwegianMonths[date.getMonth()]
-    const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1)
-    return `${capitalizedMonth} ${date.getFullYear()}`
-  } else {
-    // English format
-    const monthName = date.toLocaleString('en-US', { month: 'long' })
-    return `${monthName} ${date.getFullYear()}`
-  }
+function formatMonthYear(date, locale = 'nb') {
+  const lang = locale.startsWith('en') ? 'en-US' : 'nb-NO'
+
+  const monthName = date.toLocaleString(lang, { month: 'long' })
+  const capitalized = monthName.charAt(0).toUpperCase() + monthName.slice(1)
+
+  return `${capitalized} ${date.getFullYear()}`
 }
 
 /**

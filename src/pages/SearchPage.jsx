@@ -74,7 +74,7 @@ const SearchPage = ({
   toggleFavorite,
   refreshData,
 }) => {
-  const { t } = useTranslation(['search', 'common'])
+  const { t, i18n } = useTranslation(['search', 'common'])
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -573,7 +573,7 @@ const SearchPage = ({
     }
 
     // Works for BOTH photos and collages
-    const groups = groupPhotosByMonth(allContent, 'nb')
+    const groups = groupPhotosByMonth(allContent, i18n.language || 'nb', t)
 
     if (import.meta.env.DEV) {
       devLog(

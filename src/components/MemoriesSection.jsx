@@ -44,7 +44,7 @@ const MemoriesSection = ({ photos, onPhotoClick }) => {
   const getMemoryText = (memory) => {
     if (!memory) return { title: '', subtitle: '' }
 
-    const monthName = t(`monthsCapitalized.${memory.monthIndex}`)
+    const monthName = t(`months.${memory.monthKey}`)
 
     switch (memory.type) {
       case 'on-this-day':

@@ -46,5 +46,23 @@
     "more": "flere",
     "memory": "minne",
     "memory_plural": "minner"
+  },
+  "memories": {
+    "onThisDay": {
+      "title": "På denne dagen",
+      "subtitle_single": "{{yearsAgo}} år siden",
+      "subtitle_multiple": "{{count}} minner fra tidligere år"
+    },
+    "sameMonth": {
+      "title": "Denne måneden i tidligere år",
+      "subtitle_single": "1 bilde fra denne måneden",
+      "subtitle_multiple": "{{count}} bilder fra denne måneden"
+    },
+    "lastYear": {
+      "title": "Minner fra {{year}}",
+      "subtitle_favorites": "Favoritter fra i fjor",
+      "subtitle_recent": "Bilder fra i fjor"
+    }
   }
+
 }

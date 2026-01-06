@@ -46,5 +46,23 @@
     "more": "more",
     "memory": "memory",
     "memory_plural": "memories"
+  },
+  "memories": {
+    "onThisDay": {
+      "title": "On this day",
+      "subtitle_single": "{{yearsAgo}} years ago",
+      "subtitle_multiple": "{{count}} memories from previous years"
+    },
+    "sameMonth": {
+      "title": "This month in previous years",
+      "subtitle_single": "1 photo from this month",
+      "subtitle_multiple": "{{count}} photos from this month"
+    },
+    "lastYear": {
+      "title": "Memories from {{year}}",
+      "subtitle_favorites": "Favorites from last year",
+      "subtitle_recent": "Photos from last year"
+    }
   }
+
 }
