@@ -22,6 +22,7 @@ import { doc, deleteDoc } from 'firebase/firestore'
 import { db, auth } from '../firebase'
 import useStore from '../state/store'
 import { useCollageData } from '../hooks/useCollageData'
+import EmptyState from '../components/EmptyState'
 
 const AlbumsPage = ({
   user,
@@ -207,7 +208,9 @@ const AlbumsPage = ({
         <>
           <button
             onClick={() => {
-              console.log('📁 AlbumsPage: Create new album clicked - opening UploadModal in album mode')
+              console.log(
+                '📁 AlbumsPage: Create new album clicked - opening UploadModal in album mode'
+              )
               openUploadModal('album')
             }}
             className="ripple-effect px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center gap-2 transition"
@@ -255,91 +258,94 @@ const AlbumsPage = ({
             collages &&
             collages.length > 0 && (
               <section className="mb-8">
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <GridIcon className="w-5 h-5 text-purple" />
-                {t('collage:myCollages')}
-              </h2>
+                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                  <GridIcon className="w-5 h-5 text-purple" />
+                  {t('collage:myCollages')}
+                </h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {collages.map((collage, idx) => (
-                  <div
-                    key={collage.id}
-                    className={`relative group animate-fade-in-up stagger-${
-                      (idx % 12) + 1
-                    }`}
-                  >
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {collages.map((collage, idx) => (
                     <div
-                      onClick={() => navigate(`/collage/${collage.id}`)}
-                      className="cursor-pointer glass-card rounded-xl overflow-hidden border border-white/10 hover:border-purple-400/50 transition-all"
+                      key={collage.id}
+                      className={`relative group animate-fade-in-up stagger-${
+                        (idx % 12) + 1
+                      }`}
                     >
-                      <div className="aspect-square bg-gradient-to-br from-purple-900/20 to-blue-900/20 flex items-center justify-center overflow-hidden">
-                        {collage.thumbnailUrl ? (
-                          <img
-                            src={collage.thumbnailUrl}
-                            alt={collage.title || 'Collage'}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              // Fallback to placeholder if image fails to load
-                              e.target.style.display = 'none'
-                              e.target.nextElementSibling.style.display = 'flex'
+                      <div
+                        onClick={() => navigate(`/collage/${collage.id}`)}
+                        className="cursor-pointer glass-card rounded-xl overflow-hidden border border-white/10 hover:border-purple-400/50 transition-all"
+                      >
+                        <div className="aspect-square bg-gradient-to-br from-purple-900/20 to-blue-900/20 flex items-center justify-center overflow-hidden">
+                          {collage.thumbnailUrl ? (
+                            <img
+                              src={collage.thumbnailUrl}
+                              alt={collage.title || 'Collage'}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                // Fallback to placeholder if image fails to load
+                                e.target.style.display = 'none'
+                                e.target.nextElementSibling.style.display =
+                                  'flex'
+                              }}
+                            />
+                          ) : null}
+                          <div
+                            className="w-full h-full flex items-center justify-center"
+                            style={{
+                              display: collage.thumbnailUrl ? 'none' : 'flex',
                             }}
-                          />
-                        ) : null}
-                        <div
-                          className="w-full h-full flex items-center justify-center"
-                          style={{ display: collage.thumbnailUrl ? 'none' : 'flex' }}
-                        >
-                          <GridIcon className="w-16 h-16 opacity-30" />
+                          >
+                            <GridIcon className="w-16 h-16 opacity-30" />
+                          </div>
+                        </div>
+                        <div className="p-4">
+                          <h3 className="font-semibold text-sm truncate">
+                            {collage.title}
+                          </h3>
+                          <p className="text-xs opacity-60 mt-1">
+                            {collage.photoIds?.length || 0} photos •{' '}
+                            {collage.createdAt
+                              ? new Date(collage.createdAt).toLocaleDateString()
+                              : ''}
+                          </p>
                         </div>
                       </div>
-                      <div className="p-4">
-                        <h3 className="font-semibold text-sm truncate">
-                          {collage.title}
-                        </h3>
-                        <p className="text-xs opacity-60 mt-1">
-                          {collage.photoIds?.length || 0} photos •{' '}
-                          {collage.createdAt
-                            ? new Date(collage.createdAt).toLocaleDateString()
-                            : ''}
-                        </p>
+
+                      <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            navigate(`/collage/edit/${collage.id}`)
+                          }}
+                          className="p-2 bg-blue-600/90 hover:bg-blue-700 text-white rounded-lg shadow-lg transition"
+                          title={t('common:edit')}
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setConfirmModal({
+                              title: t('buttons:confirmDelete'),
+                              message: `Are you sure you want to delete "${collage.title}"?`,
+                              onConfirm: async () => {
+                                await deleteCollage(collage.id)
+                                // Real-time listener will auto-update collages
+                              },
+                            })
+                          }}
+                          className="p-2 bg-red-600/90 hover:bg-red-700 text-white rounded-lg shadow-lg transition"
+                          title={t('common:delete')}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
-
-                    <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          navigate(`/collage/edit/${collage.id}`)
-                        }}
-                        className="p-2 bg-blue-600/90 hover:bg-blue-700 text-white rounded-lg shadow-lg transition"
-                        title={t('common:edit')}
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setConfirmModal({
-                            title: t('buttons:confirmDelete'),
-                            message: `Are you sure you want to delete "${collage.title}"?`,
-                            onConfirm: async () => {
-                              await deleteCollage(collage.id)
-                              // Real-time listener will auto-update collages
-                            },
-                          })
-                        }}
-                        className="p-2 bg-red-600/90 hover:bg-red-700 text-white rounded-lg shadow-lg transition"
-                        title={t('common:delete')}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+                  ))}
+                </div>
+              </section>
+            )}
 
           {/* Collage empty state */}
           {!isFreeUser &&
@@ -353,7 +359,7 @@ const AlbumsPage = ({
                 onAction={() => setCurrentPage('collage')}
                 className="mb-8"
               />
-          )}
+            )}
 
           {/* Albums list */}
           {viewMode === 'albums' && (
@@ -401,7 +407,9 @@ const AlbumsPage = ({
                   description={t('albums:emptyState.description')}
                   action={t('albums:emptyState.createFirst')}
                   onAction={() => {
-                    console.log('📁 AlbumsPage: Create first album - opening UploadModal in album mode')
+                    console.log(
+                      '📁 AlbumsPage: Create first album - opening UploadModal in album mode'
+                    )
                     openUploadModal('album')
                   }}
                 />
@@ -410,122 +418,124 @@ const AlbumsPage = ({
                   {/* Grid view */}
                   {albumViewMode === 'grid' && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {safeAlbums.map((album, index) => (
-                  <div
-                    key={album.id}
-                    className={`relative group animate-fade-in-up stagger-${
-                      (index % 12) + 1
-                    }`}
-                  >
-                    <AlbumCard
-                      album={album}
-                      photos={safePhotos}
-                      onOpen={() => onAlbumClick(album)}
-                    />
+                      {safeAlbums.map((album, index) => (
+                        <div
+                          key={album.id}
+                          className={`relative group animate-fade-in-up stagger-${
+                            (index % 12) + 1
+                          }`}
+                        >
+                          <AlbumCard
+                            album={album}
+                            photos={safePhotos}
+                            onOpen={() => onAlbumClick(album)}
+                          />
 
-                    <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleDeleteAlbum(album)
-                          if (onDeleteAlbum) onDeleteAlbum(album)
-                        }}
-                        className="p-2 bg-red-600/90 hover:bg-red-700 text-white rounded-lg shadow-lg transition"
-                        title={t('common:delete')}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                          <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteAlbum(album)
+                                if (onDeleteAlbum) onDeleteAlbum(album)
+                              }}
+                              className="p-2 bg-red-600/90 hover:bg-red-700 text-white rounded-lg shadow-lg transition"
+                              title={t('common:delete')}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                ))}
-                </div>
-              )}
+                  )}
 
-              {/* List view */}
-              {albumViewMode === 'list' && (
-                <div className="flex flex-col gap-3">
-                  {safeAlbums.map((album, index) => {
-                    const albumPhotosList = safePhotos.filter(
-                      (p) => p.albumId === album.id
-                    )
-                    const count = albumPhotosList.length
+                  {/* List view */}
+                  {albumViewMode === 'list' && (
+                    <div className="flex flex-col gap-3">
+                      {safeAlbums.map((album, index) => {
+                        const albumPhotosList = safePhotos.filter(
+                          (p) => p.albumId === album.id
+                        )
+                        const count = albumPhotosList.length
 
-                    // Handle video thumbnails for album cover
-                    const firstPhoto = albumPhotosList[0]
-                    const fallbackUrl = firstPhoto?.type === 'video'
-                      ? (firstPhoto.thumbnailUrl || firstPhoto.url)
-                      : firstPhoto?.url
-                    const coverUrl = album.cover || fallbackUrl || ''
+                        // Handle video thumbnails for album cover
+                        const firstPhoto = albumPhotosList[0]
+                        const fallbackUrl =
+                          firstPhoto?.type === 'video'
+                            ? firstPhoto.thumbnailUrl || firstPhoto.url
+                            : firstPhoto?.url
+                        const coverUrl = album.cover || fallbackUrl || ''
 
-                    let updatedStr = ''
-                    const updatedAt = album.updatedAt || album.createdAt
-                    if (updatedAt) {
-                      const d = new Date(updatedAt)
-                      if (!isNaN(d.getTime())) {
-                        updatedStr = d.toLocaleDateString('no-NO', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric',
-                        })
-                      }
-                    }
+                        let updatedStr = ''
+                        const updatedAt = album.updatedAt || album.createdAt
+                        if (updatedAt) {
+                          const d = new Date(updatedAt)
+                          if (!isNaN(d.getTime())) {
+                            updatedStr = d.toLocaleDateString('no-NO', {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric',
+                            })
+                          }
+                        }
 
-                    return (
-                      <div
-                        key={album.id}
-                        className={`relative group animate-fade-in-up stagger-${
-                          (index % 12) + 1
-                        } glass-card rounded-xl p-3 flex items-center gap-4 cursor-pointer hover:bg-white/10 transition`}
-                        onClick={() => onAlbumClick(album)}
-                      >
-                        {/* Thumbnail */}
-                        <div className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-gradient-to-br from-gray-900 to-indigo-900">
-                          {coverUrl ? (
-                            <img
-                              src={coverUrl}
-                              alt={album.name || 'Album'}
-                              className="w-full h-full object-cover"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <Folder className="w-8 h-8 opacity-30" />
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Info */}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-base truncate">
-                            {typeof album.name === 'object'
-                              ? album.name.name || JSON.stringify(album.name)
-                              : album.name || t('common:noName')}
-                          </h3>
-                          <p className="text-sm text-gray-400 truncate">
-                            {t('common:photoCount', { count })}
-                            {updatedStr ? ' · ' + updatedStr : ''}
-                          </p>
-                        </div>
-
-                        {/* Action buttons */}
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleDeleteAlbum(album)
-                              if (onDeleteAlbum) onDeleteAlbum(album)
-                            }}
-                            className="p-2 bg-red-600/90 hover:bg-red-700 text-white rounded-lg shadow-lg transition"
-                            title={t('common:delete')}
+                        return (
+                          <div
+                            key={album.id}
+                            className={`relative group animate-fade-in-up stagger-${
+                              (index % 12) + 1
+                            } glass-card rounded-xl p-3 flex items-center gap-4 cursor-pointer hover:bg-white/10 transition`}
+                            onClick={() => onAlbumClick(album)}
                           >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
+                            {/* Thumbnail */}
+                            <div className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-gradient-to-br from-gray-900 to-indigo-900">
+                              {coverUrl ? (
+                                <img
+                                  src={coverUrl}
+                                  alt={album.name || 'Album'}
+                                  className="w-full h-full object-cover"
+                                  loading="lazy"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <Folder className="w-8 h-8 opacity-30" />
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Info */}
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-base truncate">
+                                {typeof album.name === 'object'
+                                  ? album.name.name ||
+                                    JSON.stringify(album.name)
+                                  : album.name || t('common:noName')}
+                              </h3>
+                              <p className="text-sm text-gray-400 truncate">
+                                {t('common:photoCount', { count })}
+                                {updatedStr ? ' · ' + updatedStr : ''}
+                              </p>
+                            </div>
+
+                            {/* Action buttons */}
+                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleDeleteAlbum(album)
+                                  if (onDeleteAlbum) onDeleteAlbum(album)
+                                }}
+                                className="p-2 bg-red-600/90 hover:bg-red-700 text-white rounded-lg shadow-lg transition"
+                                title={t('common:delete')}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
                 </>
               )}
             </section>

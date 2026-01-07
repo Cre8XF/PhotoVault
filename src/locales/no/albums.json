@@ -141,5 +141,10 @@
     "switchToGrid": "Bytt til rutenett",
     "switchToList": "Bytt til liste",
     "unassigned": "Uten album"
+  },
+   "emptyState": {
+    "title": "Ingen album ennå",
+    "description": "Opprett ditt første album for å organisere bildene dine.",
+    "createFirst": "Opprett album"
   }
 }

@@ -141,5 +141,10 @@
     "switchToGrid": "Switch to grid",
     "switchToList": "Switch to list",
     "unassigned": "Without album"
+  },
+"emptyState": {
+    "title": "No albums yet",
+    "description": "Create your first album to organize your photos.",
+    "createFirst": "Create album"
   }
 }
