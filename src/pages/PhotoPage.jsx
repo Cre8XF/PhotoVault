@@ -31,6 +31,7 @@ import ConfirmModal from '../components/ConfirmModal'
 import { sanitizeImageUrl, PLACEHOLDER_IMAGE } from '../utils/security'
 import DocumentCard from '../components/DocumentCard'
 import TagInput from '../components/TagInput'
+import EmptyState from '../components/EmptyState'
 
 export default function PhotoPage() {
   const { id } = useParams()
@@ -497,17 +498,15 @@ export default function PhotoPage() {
   // Error state
   if (error || !photo) {
     return (
-      <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center text-primary">
-        <div className="text-center max-w-sm px-4">
-          <p className="text-lg font-semibold mb-2">Error</p>
-          <p className="text-muted mb-4">{error || 'Photo not found'}</p>
-          <button
-            onClick={handleBack}
-            className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-full transition"
-          >
-            Go back
-          </button>
-        </div>
+      <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center">
+        <EmptyState
+          variant="error"
+          title={t('common:errors.title') || 'Photo not found'}
+          description={error || t('common:errors.description') || 'This photo could not be found or has been deleted'}
+          action={t('common:close') || 'Go back'}
+          onAction={handleBack}
+          size="md"
+        />
       </div>
     )
   }
