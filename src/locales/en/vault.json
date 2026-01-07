@@ -77,7 +77,7 @@
     "complete": "Complete Setup",
     "getStarted": "Get Started",
     "intro": {
-      "description": "The vault uses military-grade AES-256 encryption to protect your sensitive photos. Only you can access them with your password.",
+      "description": "The vault uses strong AES-256 encryption to protect your private photos. Only you can access them with your password.",
       "feature1": "Client-side encryption - your password never leaves your device",
       "feature2": "Biometric unlock support (FaceID/TouchID)",
       "feature3": "Auto-lock after inactivity",
