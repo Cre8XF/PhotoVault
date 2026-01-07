@@ -1,98 +1,111 @@
 // ============================================================================
 // COMPONENT: VaultSetupModal.jsx – Phase 3.1: Vault Setup
 // ============================================================================
-import React, { useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { X, Lock, Shield, Eye, EyeOff, Check, AlertCircle, Fingerprint } from "lucide-react";
-import { validatePasswordStrength } from "../services/encryption";
-import { useVault } from "../hooks/useVault";
+import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import {
+  X,
+  Lock,
+  Shield,
+  Eye,
+  EyeOff,
+  Check,
+  AlertCircle,
+  Fingerprint,
+} from 'lucide-react'
+import { validatePasswordStrength } from '../services/encryption'
+import { useVault } from '../hooks/useVault'
 
 const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
-  const { t } = useTranslation(['vault', 'common']);
-  const { setupVaultWithPassword, checkBiometricAvailability } = useVault();
+  const { t } = useTranslation(['vault', 'common'])
+  const { setupVaultWithPassword, checkBiometricAvailability } = useVault()
 
-  const [step, setStep] = useState(1); // 1: intro, 2: password, 3: biometric, 4: complete
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [passwordStrength, setPasswordStrength] = useState({ valid: false, errors: [] });
-  const [enableBiometric, setEnableBiometric] = useState(false);
-  const [biometricAvailable, setBiometricAvailable] = useState(false);
-  const [autoLockTimeout, setAutoLockTimeout] = useState(300000); // 5 minutes
-  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(1) // 1: intro, 2: password, 3: biometric, 4: complete
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [passwordStrength, setPasswordStrength] = useState({
+    valid: false,
+    errors: [],
+  })
+  const [enableBiometric, setEnableBiometric] = useState(false)
+  const [biometricAvailable, setBiometricAvailable] = useState(false)
+  const [autoLockTimeout, setAutoLockTimeout] = useState(300000) // 5 minutes
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     // Check biometric availability
-    checkBiometricAvailability().then(setBiometricAvailable);
-  }, [checkBiometricAvailability]);
+    checkBiometricAvailability().then(setBiometricAvailable)
+  }, [checkBiometricAvailability])
 
   useEffect(() => {
     // Validate password strength
     if (password) {
-      const validation = validatePasswordStrength(password);
-      setPasswordStrength(validation);
+      const validation = validatePasswordStrength(password)
+      setPasswordStrength(validation)
     } else {
-      setPasswordStrength({ valid: false, errors: [] });
+      setPasswordStrength({ valid: false, errors: [] })
     }
-  }, [password]);
+  }, [password])
 
   const handleNextStep = () => {
     if (step === 1) {
-      setStep(2);
+      setStep(2)
     } else if (step === 2) {
       if (!passwordStrength.valid) {
-        return;
+        return
       }
       if (password !== confirmPassword) {
-        return;
+        return
       }
       if (biometricAvailable) {
-        setStep(3);
+        setStep(3)
       } else {
-        handleComplete();
+        handleComplete()
       }
     } else if (step === 3) {
-      handleComplete();
+      handleComplete()
     }
-  };
+  }
 
   const handleComplete = async () => {
-    setLoading(true);
+    setLoading(true)
     try {
       const success = await setupVaultWithPassword(password, {
         autoLockTimeout,
         requireBiometric: enableBiometric,
         biometricEnabled: enableBiometric && biometricAvailable,
-      });
+      })
 
       if (success) {
-        setStep(4);
+        setStep(4)
         setTimeout(() => {
-          onComplete && onComplete(password);
-          onClose();
-        }, 2000);
+          onComplete && onComplete(password)
+          onClose()
+        }, 2000)
       }
     } catch (error) {
-      console.error('Vault setup failed:', error);
+      console.error('Vault setup failed:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleClose = () => {
     if (!loading) {
-      setPassword("");
-      setConfirmPassword("");
-      setStep(1);
-      onClose();
+      setPassword('')
+      setConfirmPassword('')
+      setStep(1)
+      onClose()
     }
-  };
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
-  const isPasswordMatch = password === confirmPassword;
-  const canProceed = step === 1 || (step === 2 && passwordStrength.valid && isPasswordMatch);
+  const isPasswordMatch = password === confirmPassword
+  const canProceed =
+    step === 1 || (step === 2 && passwordStrength.valid && isPasswordMatch)
 
   return (
     <div
@@ -108,7 +121,9 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <Shield className="w-5 h-5 text-purple" />
-            {t('vault:setupModal.title', { defaultValue: 'Set Up Secure Vault' })}
+            {t('vault:setupModal.title', {
+              defaultValue: 'Set Up Secure Vault',
+            })}
           </h2>
           {step !== 4 && (
             <button
@@ -141,11 +156,14 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
                 <Lock className="w-5 h-5 text-purple flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
                   <p className="font-semibold text-gray-900 dark:text-white">
-                    {t('vault:setupModal.intro.title', { defaultValue: 'Secure Your Private Photos' })}
+                    {t('vault:setupModal.intro.title', {
+                      defaultValue: 'Secure Your Private Photos',
+                    })}
                   </p>
                   <p>
                     {t('vault:setupModal.intro.description', {
-                      defaultValue: 'The vault uses military-grade AES-256 encryption to protect your sensitive photos. Only you can access them with your password.'
+                      defaultValue:
+                        'The vault uses strong AES-256 encryption to protect your private photos. Only you can access them with your password.',
                     })}
                   </p>
                 </div>
@@ -154,24 +172,43 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
 
             <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <p className="font-semibold text-gray-900 dark:text-white">
-                {t('vault:setupModal.intro.featuresTitle', { defaultValue: 'Features:' })}
+                {t('vault:setupModal.intro.featuresTitle', {
+                  defaultValue: 'Features:',
+                })}
               </p>
               <ul className="space-y-2">
                 <li className="flex items-start gap-2">
                   <Check className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
-                  <span>{t('vault:setupModal.intro.feature1', { defaultValue: 'Client-side encryption - your password never leaves your device' })}</span>
+                  <span>
+                    {t('vault:setupModal.intro.feature1', {
+                      defaultValue:
+                        'Client-side encryption - your password never leaves your device',
+                    })}
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
-                  <span>{t('vault:setupModal.intro.feature2', { defaultValue: 'Biometric unlock support (FaceID/TouchID)' })}</span>
+                  <span>
+                    {t('vault:setupModal.intro.feature2', {
+                      defaultValue: 'Biometric unlock support (FaceID/TouchID)',
+                    })}
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
-                  <span>{t('vault:setupModal.intro.feature3', { defaultValue: 'Auto-lock after inactivity' })}</span>
+                  <span>
+                    {t('vault:setupModal.intro.feature3', {
+                      defaultValue: 'Auto-lock after inactivity',
+                    })}
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
-                  <span>{t('vault:setupModal.intro.feature4', { defaultValue: 'Hidden from main gallery' })}</span>
+                  <span>
+                    {t('vault:setupModal.intro.feature4', {
+                      defaultValue: 'Hidden from main gallery',
+                    })}
+                  </span>
                 </li>
               </ul>
             </div>
@@ -181,7 +218,9 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
               className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600
                          text-white font-semibold hover:from-purple-700 hover:to-blue-700 transition"
             >
-              {t('vault:setupModal.getStarted', { defaultValue: 'Get Started' })}
+              {t('vault:setupModal.getStarted', {
+                defaultValue: 'Get Started',
+              })}
             </button>
           </div>
         )}
@@ -194,7 +233,8 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
                 <AlertCircle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-gray-700 dark:text-gray-300">
                   {t('vault:setupModal.password.warning', {
-                    defaultValue: 'Important: If you forget your password, your vault photos cannot be recovered. Write it down securely.'
+                    defaultValue:
+                      'Important: If you forget your password, your vault photos cannot be recovered. Write it down securely.',
                   })}
                 </p>
               </div>
@@ -202,14 +242,18 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
 
             <div>
               <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">
-                {t('vault:setupModal.password.label', { defaultValue: 'Vault Password' })}
+                {t('vault:setupModal.password.label', {
+                  defaultValue: 'Vault Password',
+                })}
               </label>
               <div className="relative">
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder={t('vault:setupModal.password.placeholder', { defaultValue: 'Enter strong password' })}
+                  placeholder={t('vault:setupModal.password.placeholder', {
+                    defaultValue: 'Enter strong password',
+                  })}
                   className="w-full p-3 pr-10 rounded-xl bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-600/50
                              text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
@@ -218,13 +262,20 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
               {password && (
                 <div className="mt-2 space-y-1">
                   {passwordStrength.errors.map((error, index) => (
-                    <p key={index} className="text-xs text-red-400 flex items-center gap-1">
+                    <p
+                      key={index}
+                      className="text-xs text-red-400 flex items-center gap-1"
+                    >
                       <AlertCircle className="w-3 h-3" />
                       {error}
                     </p>
@@ -232,7 +283,9 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
                   {passwordStrength.valid && (
                     <p className="text-xs text-green-400 flex items-center gap-1">
                       <Check className="w-3 h-3" />
-                      {t('vault:setupModal.password.strong', { defaultValue: 'Strong password' })}
+                      {t('vault:setupModal.password.strong', {
+                        defaultValue: 'Strong password',
+                      })}
                     </p>
                   )}
                 </div>
@@ -241,14 +294,19 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
 
             <div>
               <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">
-                {t('vault:setupModal.password.confirmLabel', { defaultValue: 'Confirm Password' })}
+                {t('vault:setupModal.password.confirmLabel', {
+                  defaultValue: 'Confirm Password',
+                })}
               </label>
               <div className="relative">
                 <input
-                  type={showConfirmPassword ? "text" : "password"}
+                  type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder={t('vault:setupModal.password.confirmPlaceholder', { defaultValue: 'Re-enter password' })}
+                  placeholder={t(
+                    'vault:setupModal.password.confirmPlaceholder',
+                    { defaultValue: 'Re-enter password' }
+                  )}
                   className="w-full p-3 pr-10 rounded-xl bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-600/50
                              text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
@@ -257,20 +315,28 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
                 >
-                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
               {confirmPassword && !isPasswordMatch && (
                 <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
-                  {t('vault:setupModal.password.mismatch', { defaultValue: 'Passwords do not match' })}
+                  {t('vault:setupModal.password.mismatch', {
+                    defaultValue: 'Passwords do not match',
+                  })}
                 </p>
               )}
             </div>
 
             <div>
               <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">
-                {t('vault:setupModal.autoLock.label', { defaultValue: 'Auto-Lock Timeout' })}
+                {t('vault:setupModal.autoLock.label', {
+                  defaultValue: 'Auto-Lock Timeout',
+                })}
               </label>
               <select
                 value={autoLockTimeout}
@@ -278,10 +344,29 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
                 className="w-full p-3 rounded-xl bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-600/50
                            text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                <option value={60000}>1 {t('vault:setupModal.autoLock.minute', { defaultValue: 'minute' })}</option>
-                <option value={300000}>5 {t('vault:setupModal.autoLock.minutes', { defaultValue: 'minutes' })}</option>
-                <option value={900000}>15 {t('vault:setupModal.autoLock.minutes', { defaultValue: 'minutes' })}</option>
-                <option value={0}>{t('vault:setupModal.autoLock.never', { defaultValue: 'Never' })}</option>
+                <option value={60000}>
+                  1{' '}
+                  {t('vault:setupModal.autoLock.minute', {
+                    defaultValue: 'minute',
+                  })}
+                </option>
+                <option value={300000}>
+                  5{' '}
+                  {t('vault:setupModal.autoLock.minutes', {
+                    defaultValue: 'minutes',
+                  })}
+                </option>
+                <option value={900000}>
+                  15{' '}
+                  {t('vault:setupModal.autoLock.minutes', {
+                    defaultValue: 'minutes',
+                  })}
+                </option>
+                <option value={0}>
+                  {t('vault:setupModal.autoLock.never', {
+                    defaultValue: 'Never',
+                  })}
+                </option>
               </select>
             </div>
 
@@ -292,7 +377,9 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
                          text-white font-semibold hover:from-purple-700 hover:to-blue-700 transition
                          disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? t('common:loading', { defaultValue: 'Loading...' }) : t('vault:setupModal.next', { defaultValue: 'Next' })}
+              {loading
+                ? t('common:loading', { defaultValue: 'Loading...' })
+                : t('vault:setupModal.next', { defaultValue: 'Next' })}
             </button>
           </div>
         )}
@@ -305,11 +392,14 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
                 <Fingerprint className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
                   <p className="font-semibold text-gray-900 dark:text-white">
-                    {t('vault:setupModal.biometric.title', { defaultValue: 'Enable Biometric Unlock' })}
+                    {t('vault:setupModal.biometric.title', {
+                      defaultValue: 'Enable Biometric Unlock',
+                    })}
                   </p>
                   <p>
                     {t('vault:setupModal.biometric.description', {
-                      defaultValue: 'Use your fingerprint or Face ID to quickly unlock the vault without typing your password.'
+                      defaultValue:
+                        'Use your fingerprint or Face ID to quickly unlock the vault without typing your password.',
                     })}
                   </p>
                 </div>
@@ -319,10 +409,14 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
             <div className="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800/60 rounded-xl">
               <div>
                 <p className="text-gray-900 dark:text-white font-semibold">
-                  {t('vault:setupModal.biometric.enable', { defaultValue: 'Enable Biometric' })}
+                  {t('vault:setupModal.biometric.enable', {
+                    defaultValue: 'Enable Biometric',
+                  })}
                 </p>
                 <p className="text-xs text-gray-600 dark:text-gray-400">
-                  {t('vault:setupModal.biometric.optional', { defaultValue: 'Optional, can be changed later' })}
+                  {t('vault:setupModal.biometric.optional', {
+                    defaultValue: 'Optional, can be changed later',
+                  })}
                 </p>
               </div>
               <button
@@ -346,7 +440,11 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
                          text-white font-semibold hover:from-purple-700 hover:to-blue-700 transition
                          disabled:opacity-50"
             >
-              {loading ? t('common:loading', { defaultValue: 'Loading...' }) : t('vault:setupModal.complete', { defaultValue: 'Complete Setup' })}
+              {loading
+                ? t('common:loading', { defaultValue: 'Loading...' })
+                : t('vault:setupModal.complete', {
+                    defaultValue: 'Complete Setup',
+                  })}
             </button>
           </div>
         )}
@@ -358,16 +456,20 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
               <Check className="w-8 h-8 text-green-400" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-              {t('vault:setupModal.success.title', { defaultValue: 'Vault Setup Complete!' })}
+              {t('vault:setupModal.success.title', {
+                defaultValue: 'Vault Setup Complete!',
+              })}
             </h3>
             <p className="text-gray-700 dark:text-gray-300">
-              {t('vault:setupModal.success.message', { defaultValue: 'Your secure vault is ready to use.' })}
+              {t('vault:setupModal.success.message', {
+                defaultValue: 'Your secure vault is ready to use.',
+              })}
             </p>
           </div>
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default VaultSetupModal;
+export default VaultSetupModal
