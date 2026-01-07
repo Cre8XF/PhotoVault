@@ -120,23 +120,23 @@ function LandingPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white overflow-x-hidden">
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass-card border-b border-white/10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-              <span className="text-xl font-bold">P</span>
+        <div className="w-full max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-3 md:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-cyan-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <span className="text-lg md:text-xl font-bold">P</span>
             </div>
-            <span className="text-2xl font-bold">PIXTR</span>
+            <span className="text-xl md:text-2xl font-bold">PIXTR</span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             <button
               onClick={toggleLanguage}
-              className="flex items-center gap-2 px-4 py-2 hover:bg-white/10 rounded-lg transition"
+              className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-2 hover:bg-white/10 rounded-lg transition"
             >
-              <Globe className="w-4 h-4" />
+              <Globe className="w-4 h-4 flex-shrink-0" />
               <span className="text-sm">
                 {currentLang === 'no' ? 'NO' : 'EN'}
               </span>
@@ -144,7 +144,7 @@ function LandingPage() {
 
             <button
               onClick={() => navigate('/login')}
-              className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-lg font-semibold transition"
+              className="px-3 md:px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-lg font-semibold transition text-sm md:text-base whitespace-nowrap"
             >
               {t('landing:cta.startFree')}
             </button>
@@ -153,127 +153,126 @@ function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center space-y-6">
-            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+      <section className="pt-24 md:pt-32 pb-12 md:pb-20 px-4 md:px-6 lg:px-8">
+        <div className="w-full max-w-6xl mx-auto">
+          <div className="text-center space-y-4 md:space-y-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent px-2">
               {t('landing:hero.title')}
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 max-w-3xl mx-auto px-2">
               {t('landing:hero.subtitle')}
             </p>
-            <p className="text-sm text-gray-400 pt-1">
+            <p className="text-xs md:text-sm text-gray-400 pt-1 px-2">
               {t('landing:hero.trustLine')}
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center items-center pt-2 md:pt-4 px-4">
               <button
                 onClick={() => navigate('/login')}
-                className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-xl font-semibold text-lg transition flex items-center gap-2"
+                className="w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-xl font-semibold text-base md:text-lg transition flex items-center justify-center gap-2"
               >
                 {t('landing:cta.startFree')}
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
               </button>
 
               <a
                 href="#pricing"
-                className="px-8 py-4 border border-white/20 hover:bg-white/10 rounded-xl font-semibold text-lg transition"
+                className="w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 border border-white/20 hover:bg-white/10 rounded-xl font-semibold text-base md:text-lg transition text-center"
               >
                 {t('landing:cta.seePlans')}
               </a>
             </div>
 
-            <p className="text-sm text-gray-400 pt-2">
+            <p className="text-xs md:text-sm text-gray-400 pt-2 px-2">
               {t('landing:hero.noCreditCard')}
             </p>
           </div>
 
           {/* Hero Image */}
-          <div className="mt-16 relative">
+          <div className="mt-12 md:mt-16 relative px-2">
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 blur-3xl" />
 
             <img
               src="/landing-hero.jpg"
               alt="Pixtr App Screenshot"
-              className="relative mx-auto rounded-2xl shadow-2xl border border-white/10"
-              style={{ maxWidth: '900px' }}
+              className="relative w-full max-w-5xl mx-auto rounded-xl md:rounded-2xl shadow-2xl border border-white/10"
             />
           </div>
         </div>
       </section>
 
       {/* Why Pixtr */}
-      <section className="py-20 px-4 bg-black/20">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center space-y-4 mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold">
+      <section className="py-12 md:py-20 px-4 md:px-6 lg:px-8 bg-black/20">
+        <div className="w-full max-w-6xl mx-auto">
+          <div className="text-center space-y-3 md:space-y-4 mb-12 md:mb-16">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold px-2">
               {t('landing:why.title')}
             </h2>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto px-2">
               {t('landing:why.subtitle')}
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="glass-card p-8 space-y-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+            <div className="glass-card p-6 md:p-8 space-y-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0">
                 <Shield className="w-6 h-6" />
               </div>
-              <h3 className="text-2xl font-bold">
+              <h3 className="text-xl md:text-2xl font-bold">
                 {t('landing:why.noTracking.title')}
               </h3>
-              <p className="text-gray-300">
+              <p className="text-gray-300 text-sm md:text-base">
                 {t('landing:why.noTracking.desc')}
               </p>
             </div>
 
-            <div className="glass-card p-8 space-y-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-500 rounded-xl flex items-center justify-center">
+            <div className="glass-card p-6 md:p-8 space-y-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-500 rounded-xl flex items-center justify-center flex-shrink-0">
                 <Lock className="w-6 h-6" />
               </div>
-              <h3 className="text-2xl font-bold">
+              <h3 className="text-xl md:text-2xl font-bold">
                 {t('landing:why.yourData.title')}
               </h3>
-              <p className="text-gray-300">{t('landing:why.yourData.desc')}</p>
+              <p className="text-gray-300 text-sm md:text-base">{t('landing:why.yourData.desc')}</p>
             </div>
 
-            <div className="glass-card p-8 space-y-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center">
+            <div className="glass-card p-6 md:p-8 space-y-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
                 <Sparkles className="w-6 h-6" />
               </div>
-              <h3 className="text-2xl font-bold">
+              <h3 className="text-xl md:text-2xl font-bold">
                 {t('landing:why.creative.title')}
               </h3>
-              <p className="text-gray-300">{t('landing:why.creative.desc')}</p>
+              <p className="text-gray-300 text-sm md:text-base">{t('landing:why.creative.desc')}</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Features */}
-      <section id="features" className="py-20 px-4">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center space-y-4 mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold">
+      <section id="features" className="py-12 md:py-20 px-4 md:px-6 lg:px-8">
+        <div className="w-full max-w-6xl mx-auto">
+          <div className="text-center space-y-3 md:space-y-4 mb-12 md:mb-16">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold px-2">
               {t('landing:features.title')}
             </h2>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto px-2">
               {t('landing:features.subtitle')}
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="glass-card p-6 space-y-4 hover:scale-105 transition"
+                className="glass-card p-5 md:p-6 space-y-3 md:space-y-4 hover:scale-105 transition"
               >
                 <div
-                  className={`w-12 h-12 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center`}
+                  className={`w-12 h-12 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center flex-shrink-0`}
                 >
                   <feature.icon className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold">{feature.title}</h3>
+                <h3 className="text-lg md:text-xl font-bold">{feature.title}</h3>
                 <p className="text-gray-300 text-sm">{feature.description}</p>
               </div>
             ))}
@@ -282,36 +281,36 @@ function LandingPage() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="py-20 px-4 bg-black/20">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center space-y-4 mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold">
+      <section id="pricing" className="py-12 md:py-20 px-4 md:px-6 lg:px-8 bg-black/20">
+        <div className="w-full max-w-6xl mx-auto">
+          <div className="text-center space-y-3 md:space-y-4 mb-12 md:mb-16">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold px-2">
               {t('landing:pricing.title')}
             </h2>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto px-2">
               {t('landing:pricing.subtitle')}
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
             {pricing.map((plan, index) => (
               <div
                 key={index}
-                className={`glass-card p-8 space-y-6 relative ${
-                  plan.recommended ? 'ring-2 ring-purple-500 scale-105' : ''
+                className={`glass-card p-6 md:p-8 space-y-5 md:space-y-6 relative ${
+                  plan.recommended ? 'ring-2 ring-purple-500 md:scale-105' : ''
                 }`}
               >
                 {plan.recommended && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-1 rounded-full text-sm font-bold">
+                  <div className="absolute -top-3 md:-top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 px-3 md:px-4 py-1 rounded-full text-xs md:text-sm font-bold whitespace-nowrap">
                     {t('landing:pricing.recommended')}
                   </div>
                 )}
 
                 <div className="text-center space-y-2">
-                  <h3 className="text-2xl font-bold">{plan.name}</h3>
+                  <h3 className="text-xl md:text-2xl font-bold">{plan.name}</h3>
                   <div className="flex items-baseline justify-center gap-1">
-                    <span className="text-5xl font-bold">{plan.price}</span>
-                    <span className="text-gray-400">/{plan.period}</span>
+                    <span className="text-4xl md:text-5xl font-bold">{plan.price}</span>
+                    <span className="text-gray-400 text-sm md:text-base">/{plan.period}</span>
                   </div>
                   <p className="text-sm text-gray-400">
                     {plan.storage} {t('landing:pricing.storage')}
@@ -356,7 +355,7 @@ function LandingPage() {
 
                 <button
                   onClick={() => navigate('/login')}
-                  className={`w-full py-3 rounded-lg font-semibold transition ${
+                  className={`w-full py-3 rounded-lg font-semibold transition text-sm md:text-base ${
                     plan.recommended
                       ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500'
                       : 'border border-white/20 hover:bg-white/10'
@@ -371,44 +370,44 @@ function LandingPage() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-20 px-4">
-        <div className="container mx-auto max-w-4xl">
-          <div className="glass-card p-12 text-center space-y-6 bg-gradient-to-br from-purple-600/20 to-pink-600/20">
-            <h2 className="text-4xl md:text-5xl font-bold">
+      <section className="py-12 md:py-20 px-4 md:px-6 lg:px-8">
+        <div className="w-full max-w-4xl mx-auto">
+          <div className="glass-card p-8 md:p-12 text-center space-y-5 md:space-y-6 bg-gradient-to-br from-purple-600/20 to-pink-600/20">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold px-2">
               {t('landing:finalCta.title')}
             </h2>
-            <p className="text-xl text-gray-300">
+            <p className="text-lg md:text-xl text-gray-300 px-2">
               {t('landing:finalCta.subtitle')}
             </p>
             <button
               onClick={() => navigate('/login')}
-              className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-xl font-semibold text-lg transition inline-flex items-center gap-2"
+              className="w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-xl font-semibold text-base md:text-lg transition inline-flex items-center justify-center gap-2"
             >
               {t('landing:cta.startFree')}
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
             </button>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-4 border-t border-white/10">
-        <div className="container mx-auto max-w-6xl">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+      <footer className="py-8 md:py-12 px-4 md:px-6 lg:px-8 border-t border-white/10">
+        <div className="w-full max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 via-purple-500 to-pink-500 rounded-lg" />
+              <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 via-purple-500 to-pink-500 rounded-lg flex-shrink-0" />
               <span className="text-xl font-bold">PIXTR</span>
             </div>
 
-            <p className="text-sm text-gray-400">
+            <p className="text-xs md:text-sm text-gray-400 text-center">
               {t('landing:footer.tagline')}
             </p>
 
-            <div className="flex gap-6 text-sm text-gray-400">
-              <a href="#" className="hover:text-white transition">
+            <div className="flex gap-4 md:gap-6 text-xs md:text-sm text-gray-400">
+              <a href="#" className="hover:text-white transition whitespace-nowrap">
                 {t('landing:footer.privacy')}
               </a>
-              <a href="#" className="hover:text-white transition">
+              <a href="#" className="hover:text-white transition whitespace-nowrap">
                 {t('landing:footer.terms')}
               </a>
             </div>
