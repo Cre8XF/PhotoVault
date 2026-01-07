@@ -242,5 +242,37 @@
   "writeReply": "Skriv et svar...",
   "youAndOthersReacted": "Du og {{count}} annen",
   "youAndOthersReacted_plural": "Du og {{count}} andre",
-  "youReacted": "Du reagerte"
+  "youReacted": "Du reagerte",
+  "emptyStates": {
+    "noPhotos": {
+      "title": "Ingen bilder ennå",
+      "description": "Last opp ditt første bilde for å komme i gang",
+      "action": "Last opp bilder"
+    },
+    "noAlbums": {
+      "title": "Ingen album ennå",
+      "description": "Opprett ditt første album for å organisere bildene dine",
+      "action": "Opprett album"
+    },
+    "noResults": {
+      "title": "Ingen resultater funnet",
+      "description": "Prøv å justere søket eller filtrene",
+      "action": "Fjern filtre"
+    },
+    "noFavorites": {
+      "title": "Ingen favoritter ennå",
+      "description": "Trykk på hjertet på bilder for å lagre dem her",
+      "action": null
+    },
+    "noCollages": {
+      "title": "Ingen kollasjer ennå",
+      "description": "Lag flotte fotokollasjer fra galleriet ditt",
+      "action": "Lag kollasj"
+    },
+    "error": {
+      "title": "Noe gikk galt",
+      "description": "Vennligst prøv igjen eller kontakt support hvis problemet vedvarer",
+      "action": "Prøv igjen"
+    }
+  }
 }

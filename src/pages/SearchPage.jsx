@@ -87,6 +87,7 @@ const SearchPage = ({
   const setPhotoContext = useStore((state) => state.setPhotoContext)
   const setPhotoOrder = useStore((state) => state.setPhotoOrder)
   const setPhotoIndex = useStore((state) => state.setPhotoIndex)
+  const openUploadModal = useStore((state) => state.openUploadModal)
 
   // 🔒 SIKRE AT PROPS ER ARRAYS
   const safePhotos = useMemo(() => {
@@ -1543,26 +1544,49 @@ const SearchPage = ({
         </div>
       ) : (
         /* No results - EmptyState component */
-        <EmptyState
-          variant="no-results"
-          title={t('search:noResults') || 'Ingen resultater'}
-          description="Prøv å endre søkekriteriene eller filteret for å finne bilder."
-          action={t('search:resetFilters') || 'Nullstill filtre'}
-          onAction={
-            searchQuery || Object.values(activeFilters).some((v) => v)
-              ? () => {
-                  setSearchQuery('')
-                  setActiveFilters({
-                    favorites: false,
-                    dateRange: null,
-                    albumId: null,
-                    selectedTag: null,
-                    contentTypes: null,
-                  })
+        (() => {
+          // Determine if this is first-run (no photos at all) or just empty filter results
+          const hasAnyPhotos = safePhotos.length > 0
+          const hasActiveFiltersOrSearch = searchQuery || Object.values(activeFilters).some((v) => v)
+          const isFirstRun = !hasAnyPhotos
+
+          if (isFirstRun) {
+            // First-run: User has 0 photos total
+            return (
+              <EmptyState
+                variant="no-photos"
+                title={t('common:emptyStates.noPhotos.title') || 'No Photos Yet'}
+                description={t('common:emptyStates.noPhotos.description') || 'Upload your first photo to get started'}
+                action={t('common:emptyStates.noPhotos.action') || 'Upload Photos'}
+                onAction={() => openUploadModal && openUploadModal('photos')}
+              />
+            )
+          } else {
+            // Empty filter results: User has photos, but filter/search returns 0
+            return (
+              <EmptyState
+                variant="no-results"
+                title={t('search:noResults') || 'No results found'}
+                description={t('common:noMatchingPhotos') || 'Try adjusting your search or filters'}
+                action={hasActiveFiltersOrSearch ? (t('search:resetFilters') || 'Clear Filters') : null}
+                onAction={
+                  hasActiveFiltersOrSearch
+                    ? () => {
+                        setSearchQuery('')
+                        setActiveFilters({
+                          favorites: false,
+                          dateRange: null,
+                          albumId: null,
+                          selectedTag: null,
+                          contentTypes: null,
+                        })
+                      }
+                    : null
                 }
-              : null
+              />
+            )
           }
-        />
+        })()
       )}
 
       {/* Modals */}

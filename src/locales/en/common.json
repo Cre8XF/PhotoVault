@@ -242,5 +242,37 @@
   "writeReply": "Write a reply...",
   "youAndOthersReacted": "You and {{count}} other",
   "youAndOthersReacted_plural": "You and {{count}} others",
-  "youReacted": "You reacted"
+  "youReacted": "You reacted",
+  "emptyStates": {
+    "noPhotos": {
+      "title": "No Photos Yet",
+      "description": "Upload your first photo to get started",
+      "action": "Upload Photos"
+    },
+    "noAlbums": {
+      "title": "No Albums Yet",
+      "description": "Create your first album to organize your photos",
+      "action": "Create Album"
+    },
+    "noResults": {
+      "title": "No Results Found",
+      "description": "Try adjusting your search or filters",
+      "action": "Clear Filters"
+    },
+    "noFavorites": {
+      "title": "No Favorites Yet",
+      "description": "Tap the heart icon on photos to save them here",
+      "action": null
+    },
+    "noCollages": {
+      "title": "No Collages Yet",
+      "description": "Create beautiful photo collages from your gallery",
+      "action": "Create Collage"
+    },
+    "error": {
+      "title": "Something Went Wrong",
+      "description": "Please try again or contact support if the problem persists",
+      "action": "Try Again"
+    }
+  }
 }
