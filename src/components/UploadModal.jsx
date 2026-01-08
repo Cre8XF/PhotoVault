@@ -461,6 +461,66 @@ const UploadModal = ({
       }
     }
 
+    // ============================================================
+    // PRE-CHECK: Album photo limit (Free tier only)
+    // MUST happen BEFORE any upload starts
+    // ============================================================
+    if (selectedAlbumId && userTier === 'GRATIS') {
+      // Find the selected album
+      const selectedAlbum = (Array.isArray(albums) ? albums : []).find(
+        (a) => a.id === selectedAlbumId
+      ) || newlyCreatedAlbum
+
+      if (selectedAlbum) {
+        const currentPhotoCount = selectedAlbum.photoCount || 0
+        const filesToUpload = selectedFiles.length
+        const totalAfterUpload = currentPhotoCount + filesToUpload
+        const ALBUM_PHOTO_LIMIT = 20
+
+        devLog('📊 Album photo limit pre-check:', {
+          albumId: selectedAlbumId,
+          albumName: selectedAlbum.name,
+          currentCount: currentPhotoCount,
+          uploadingCount: filesToUpload,
+          totalAfter: totalAfterUpload,
+          limit: ALBUM_PHOTO_LIMIT,
+        })
+
+        // Block if album is already full
+        if (currentPhotoCount >= ALBUM_PHOTO_LIMIT) {
+          setNotification({
+            type: 'error',
+            message: `This album is full (${currentPhotoCount}/${ALBUM_PHOTO_LIMIT} photos). Free users can store up to 20 photos per album. Please upgrade to Lite for unlimited photos per album.`,
+            action: {
+              label: 'Upgrade to Lite',
+              onClick: () => navigate('/subscription'),
+            },
+          })
+          devLog('❌ Upload blocked: Album is full')
+          return // STOP - don't upload anything
+        }
+
+        // Block if upload would exceed limit
+        if (totalAfterUpload > ALBUM_PHOTO_LIMIT) {
+          const remaining = ALBUM_PHOTO_LIMIT - currentPhotoCount
+          setNotification({
+            type: 'error',
+            message: `This album can contain a maximum of 20 photos. You can upload ${remaining} more photo${remaining === 1 ? '' : 's'} or upgrade your plan.`,
+            action: {
+              label: 'Upgrade to Lite',
+              onClick: () => navigate('/subscription'),
+            },
+          })
+          devLog(
+            `❌ Upload blocked: Would exceed limit (${totalAfterUpload} > ${ALBUM_PHOTO_LIMIT})`
+          )
+          return // STOP - don't upload anything
+        }
+
+        devLog('✅ Album photo limit check passed')
+      }
+    }
+
     // ✅ Derive explicit compression permission
     const canUseCompression = tier() !== 'GRATIS' && autoCompress === true
 
