@@ -310,6 +310,33 @@ const SearchPage = ({
     return Array.from(years).sort((a, b) => b - a) // Newest first
   }, [safePhotos])
 
+  // 🆕 Extract available months (context-aware based on selected years)
+  const availableMonths = useMemo(() => {
+    const months = new Set()
+
+    // Determine which photos to consider
+    let photosToCheck = safePhotos
+
+    // If years are selected, only check photos from those years
+    if (activeFilters.selectedYears && activeFilters.selectedYears.length > 0) {
+      photosToCheck = safePhotos.filter((p) => {
+        const photoDate = resolvePhotoDate(p)
+        if (!photoDate) return false
+        return activeFilters.selectedYears.includes(photoDate.getFullYear())
+      })
+    }
+
+    // Extract months from the filtered photo set
+    photosToCheck.forEach((p) => {
+      const photoDate = resolvePhotoDate(p)
+      if (photoDate) {
+        months.add(photoDate.getMonth() + 1) // 1-12 format
+      }
+    })
+
+    return Array.from(months).sort((a, b) => a - b) // Jan to Dec
+  }, [safePhotos, activeFilters.selectedYears])
+
   // 🔒 SIKRET: Filtrering med array-guards
   const filteredPhotos = useMemo(() => {
     // ✅ EXCLUDE DOCUMENTS: SearchPage shows only images and videos by default
@@ -390,31 +417,7 @@ const SearchPage = ({
     if (activeFilters.dateRange) {
       const now = Date.now()
 
-      // Handle "last year" filter - SMART ORGANIZATION
-      if (activeFilters.dateRange === 'lastyear') {
-        const currentYear = new Date().getFullYear()
-        const lastYear = currentYear - 1
-        const yearStart = new Date(lastYear, 0, 1).getTime()
-        const yearEnd = new Date(lastYear, 11, 31, 23, 59, 59, 999).getTime()
-
-        if (import.meta.env.DEV) {
-          devLog('🔍 Filtering photos from LAST YEAR:', {
-            year: lastYear,
-            start: new Date(yearStart).toISOString(),
-            end: new Date(yearEnd).toISOString(),
-          })
-        }
-
-        res = res.filter((p) => {
-          const photoDate = resolvePhotoDate(p)
-          if (!photoDate) return false
-          const photoTime = new Date(photoDate).getTime()
-          return photoTime >= yearStart && photoTime <= yearEnd
-        })
-        if (import.meta.env.DEV) {
-          devLog(`✅ Last year filter applied: ${res.length} photos`)
-        }
-      } else if (activeFilters.dateRange === 'today') {
+      if (activeFilters.dateRange === 'today') {
         const todayStart = new Date()
         todayStart.setHours(0, 0, 0, 0)
         const todayEnd = new Date()
@@ -481,24 +484,6 @@ const SearchPage = ({
         })
         if (import.meta.env.DEV) {
           devLog(`✅ Date filter applied: ${res.length} photos`)
-        }
-      } else if (activeFilters.dateRange === 'year') {
-        // This Year filter - proper calendar year using dateTaken
-        const currentYear = new Date().getFullYear()
-
-        if (import.meta.env.DEV) {
-          devLog('🔍 Filtering photos from THIS YEAR:', {
-            year: currentYear,
-          })
-        }
-
-        res = res.filter((p) => {
-          const photoDate = resolvePhotoDate(p)
-          if (!photoDate) return false
-          return new Date(photoDate).getFullYear() === currentYear
-        })
-        if (import.meta.env.DEV) {
-          devLog(`✅ This year filter applied: ${res.length} photos`)
         }
       } else {
         // Original range-based filtering (week, month)
@@ -1457,46 +1442,56 @@ const SearchPage = ({
               </div>
             </div>
 
-            {/* 🆕 MONTH FILTER */}
+            {/* 🆕 MONTH FILTER (context-aware) */}
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-sm font-medium">
                 <Calendar size={16} />
                 Month
               </label>
               <div className="flex flex-wrap gap-2">
-                {[
-                  { num: 1, name: 'Jan' },
-                  { num: 2, name: 'Feb' },
-                  { num: 3, name: 'Mar' },
-                  { num: 4, name: 'Apr' },
-                  { num: 5, name: 'May' },
-                  { num: 6, name: 'Jun' },
-                  { num: 7, name: 'Jul' },
-                  { num: 8, name: 'Aug' },
-                  { num: 9, name: 'Sep' },
-                  { num: 10, name: 'Oct' },
-                  { num: 11, name: 'Nov' },
-                  { num: 12, name: 'Dec' },
-                ].map((month) => (
-                  <button
-                    key={month.num}
-                    onClick={() => {
-                      setActiveFilters((f) => ({
-                        ...f,
-                        selectedMonths: f.selectedMonths.includes(month.num)
-                          ? f.selectedMonths.filter((m) => m !== month.num)
-                          : [...f.selectedMonths, month.num],
-                      }))
-                    }}
-                    className={`px-2.5 py-1.5 rounded-lg border text-sm transition ${
-                      activeFilters.selectedMonths.includes(month.num)
-                        ? 'bg-purple-600 border-purple-500 text-white'
-                        : 'border-white/10 hover:border-white/30'
-                    }`}
-                  >
-                    {month.name}
-                  </button>
-                ))}
+                {availableMonths.length === 0 ? (
+                  <p className="text-sm text-gray-400">
+                    {activeFilters.selectedYears.length > 0
+                      ? 'No photos in selected year(s)'
+                      : 'No months available'}
+                  </p>
+                ) : (
+                  [
+                    { num: 1, name: 'Jan' },
+                    { num: 2, name: 'Feb' },
+                    { num: 3, name: 'Mar' },
+                    { num: 4, name: 'Apr' },
+                    { num: 5, name: 'May' },
+                    { num: 6, name: 'Jun' },
+                    { num: 7, name: 'Jul' },
+                    { num: 8, name: 'Aug' },
+                    { num: 9, name: 'Sep' },
+                    { num: 10, name: 'Oct' },
+                    { num: 11, name: 'Nov' },
+                    { num: 12, name: 'Dec' },
+                  ]
+                    .filter((month) => availableMonths.includes(month.num))
+                    .map((month) => (
+                      <button
+                        key={month.num}
+                        onClick={() => {
+                          setActiveFilters((f) => ({
+                            ...f,
+                            selectedMonths: f.selectedMonths.includes(month.num)
+                              ? f.selectedMonths.filter((m) => m !== month.num)
+                              : [...f.selectedMonths, month.num],
+                          }))
+                        }}
+                        className={`px-2.5 py-1.5 rounded-lg border text-sm transition ${
+                          activeFilters.selectedMonths.includes(month.num)
+                            ? 'bg-purple-600 border-purple-500 text-white'
+                            : 'border-white/10 hover:border-white/30'
+                        }`}
+                      >
+                        {month.name}
+                      </button>
+                    ))
+                )}
                 {activeFilters.selectedMonths.length > 0 && (
                   <button
                     onClick={() =>

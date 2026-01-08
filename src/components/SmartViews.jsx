@@ -13,10 +13,7 @@ import {
   Video,
   LayoutGrid,
   FolderX,
-  Calendar,
-  Clock,
 } from 'lucide-react'
-import { resolvePhotoDate } from '../utils/photoDateUtils'
 
 const SmartViews = ({ allContent, activeFilters, onFilterChange }) => {
   // Calculate counts for each smart view
@@ -28,14 +25,8 @@ const SmartViews = ({ allContent, activeFilters, onFilterChange }) => {
         videos: 0,
         collages: 0,
         withoutAlbum: 0,
-        thisYear: 0,
-        lastYear: 0,
       }
     }
-
-    const now = new Date()
-    const currentYear = now.getFullYear()
-    const lastYear = currentYear - 1
 
     // Canonical content set: photos, videos, collages
     const mediaContent = allContent.filter(
@@ -56,16 +47,6 @@ const SmartViews = ({ allContent, activeFilters, onFilterChange }) => {
 
       withoutAlbum: mediaContent.filter((p) => !p.albumId || p.albumId === '')
         .length,
-
-      thisYear: mediaContent.filter((p) => {
-        const d = resolvePhotoDate(p)
-        return d && new Date(d).getFullYear() === currentYear
-      }).length,
-
-      lastYear: mediaContent.filter((p) => {
-        const d = resolvePhotoDate(p)
-        return d && new Date(d).getFullYear() === lastYear
-      }).length,
     }
   }, [allContent])
 
@@ -120,28 +101,6 @@ const SmartViews = ({ allContent, activeFilters, onFilterChange }) => {
       isActive:
         activeFilters.contentTypes?.length === 1 &&
         activeFilters.contentTypes[0] === 'collage',
-    },
-    {
-      id: 'this-year',
-      label: 'This Year',
-      icon: Calendar,
-      count: counts.thisYear,
-      color: 'from-indigo-600 to-blue-600',
-      group: 'time',
-      filterKey: 'dateRange',
-      filterValue: 'year',
-      isActive: activeFilters.dateRange === 'year',
-    },
-    {
-      id: 'last-year',
-      label: 'Last Year',
-      icon: Clock,
-      count: counts.lastYear,
-      color: 'from-cyan-600 to-sky-600',
-      group: 'time',
-      filterKey: 'dateRange',
-      filterValue: 'lastyear',
-      isActive: activeFilters.dateRange === 'lastyear',
     },
     {
       id: 'without-album',
