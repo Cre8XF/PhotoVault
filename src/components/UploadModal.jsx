@@ -519,10 +519,14 @@ const UploadModal = ({
     // 🆕 FREEMIUM: Check album limit BEFORE creating
     const albumLimitCheck = canCreateAlbum()
     if (!albumLimitCheck.allowed) {
-      window.showToast?.(
-        `Album limit reached (${albumLimitCheck.current}/${albumLimitCheck.max}). Upgrade to LITE for unlimited albums.`,
-        'error'
-      )
+      setNotification({
+        type: 'error',
+        message: `Album limit reached (${albumLimitCheck.current}/${albumLimitCheck.max}). Free users can create up to 5 albums. Upgrade to Lite for unlimited albums.`,
+        action: {
+          label: 'Upgrade to Lite',
+          onClick: () => navigate('/subscription'),
+        },
+      })
       return
     }
 
@@ -578,6 +582,19 @@ const UploadModal = ({
       if (onCreateAlbum) onCreateAlbum({ id: newAlbumRef.id, ...cleanAlbum })
     } catch (error) {
       console.error('❌ Error creating album:', error)
+
+      // Handle album limit error
+      if (error.code === 'ALBUM_LIMIT_REACHED') {
+        setNotification({
+          type: 'error',
+          message: `Album limit reached (${error.current || 5}/${error.max || 5}). Free users can create up to 5 albums. Upgrade to Lite for unlimited albums.`,
+          action: {
+            label: 'Upgrade to Lite',
+            onClick: () => navigate('/subscription'),
+          },
+        })
+        return
+      }
 
       // Handle email verification error
       if (error.code === 'EMAIL_NOT_VERIFIED') {
