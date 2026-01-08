@@ -129,6 +129,8 @@ const SearchPage = ({
     albumId: null,
     selectedTag: null,
     contentTypes: null, // Default: Show all media types (photos, videos, collages)
+    selectedYears: [], // 🆕 Year filter (array for multi-select)
+    selectedMonths: [], // 🆕 Month filter (array for multi-select)
   })
   const [showFilters, setShowFilters] = useState(false)
   const [searchExpanded, setSearchExpanded] = useState(false)
@@ -294,6 +296,18 @@ const SearchPage = ({
       }
     })
     return Array.from(set).sort()
+  }, [safePhotos])
+
+  // 🆕 Extract unique years from photos (dynamically)
+  const availableYears = useMemo(() => {
+    const years = new Set()
+    safePhotos.forEach((p) => {
+      const photoDate = resolvePhotoDate(p)
+      if (photoDate) {
+        years.add(photoDate.getFullYear())
+      }
+    })
+    return Array.from(years).sort((a, b) => b - a) // Newest first
   }, [safePhotos])
 
   // 🔒 SIKRET: Filtrering med array-guards
@@ -499,6 +513,37 @@ const SearchPage = ({
       }
     }
 
+    // 🆕 YEAR FILTER: Filter by selected years
+    if (activeFilters.selectedYears && activeFilters.selectedYears.length > 0) {
+      if (import.meta.env.DEV) {
+        devLog('🔍 Filtering photos by selected years:', activeFilters.selectedYears)
+      }
+      res = res.filter((p) => {
+        const photoDate = resolvePhotoDate(p)
+        if (!photoDate) return false
+        return activeFilters.selectedYears.includes(photoDate.getFullYear())
+      })
+      if (import.meta.env.DEV) {
+        devLog(`✅ Year filter applied: ${res.length} photos`)
+      }
+    }
+
+    // 🆕 MONTH FILTER: Filter by selected months (1-12)
+    if (activeFilters.selectedMonths && activeFilters.selectedMonths.length > 0) {
+      if (import.meta.env.DEV) {
+        devLog('🔍 Filtering photos by selected months:', activeFilters.selectedMonths)
+      }
+      res = res.filter((p) => {
+        const photoDate = resolvePhotoDate(p)
+        if (!photoDate) return false
+        // getMonth() returns 0-11, so add 1 to match our 1-12 format
+        return activeFilters.selectedMonths.includes(photoDate.getMonth() + 1)
+      })
+      if (import.meta.env.DEV) {
+        devLog(`✅ Month filter applied: ${res.length} photos`)
+      }
+    }
+
     return res
   }, [
     safePhotos,
@@ -635,6 +680,8 @@ const SearchPage = ({
     if (activeFilters.dateRange) count++
     if (activeFilters.albumId) count++
     if (activeFilters.selectedTag) count++
+    if (activeFilters.selectedYears && activeFilters.selectedYears.length > 0) count++ // 🆕 Year filter
+    if (activeFilters.selectedMonths && activeFilters.selectedMonths.length > 0) count++ // 🆕 Month filter
 
     // Count contentTypes only if different from default
     const defaultContentTypes = ['photo', 'video']
@@ -712,6 +759,8 @@ const SearchPage = ({
       albumId: null,
       selectedTag: null,
       contentTypes: null, // Reset to default: Show all media types
+      selectedYears: [], // 🆕 Clear year filter
+      selectedMonths: [], // 🆕 Clear month filter
     })
     setSearchQuery('')
     setSearchExpanded(false) // Also collapse search when resetting
@@ -1309,7 +1358,7 @@ const SearchPage = ({
           </div>
 
           {/* Avanserte valg */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {/* Album */}
             <label className="flex items-center gap-2">
               <Folder size={16} />
@@ -1360,8 +1409,110 @@ const SearchPage = ({
                 ))}
               </select>
             </label>
+          </div>
 
-            {/* Dato */}
+          {/* 🆕 DATE FILTERS: Year and Month (side by side) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* 🆕 YEAR FILTER */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <Calendar size={16} />
+                Year
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {availableYears.length === 0 ? (
+                  <p className="text-sm text-gray-400">No years available</p>
+                ) : (
+                  availableYears.map((year) => (
+                    <button
+                      key={year}
+                      onClick={() => {
+                        setActiveFilters((f) => ({
+                          ...f,
+                          selectedYears: f.selectedYears.includes(year)
+                            ? f.selectedYears.filter((y) => y !== year)
+                            : [...f.selectedYears, year],
+                        }))
+                      }}
+                      className={`px-3 py-1.5 rounded-lg border text-sm transition ${
+                        activeFilters.selectedYears.includes(year)
+                          ? 'bg-purple-600 border-purple-500 text-white'
+                          : 'border-white/10 hover:border-white/30'
+                      }`}
+                    >
+                      {year}
+                    </button>
+                  ))
+                )}
+                {activeFilters.selectedYears.length > 0 && (
+                  <button
+                    onClick={() =>
+                      setActiveFilters((f) => ({ ...f, selectedYears: [] }))
+                    }
+                    className="px-3 py-1.5 rounded-lg border border-red-500/50 text-red-400 hover:bg-red-500/10 text-sm transition"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* 🆕 MONTH FILTER */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <Calendar size={16} />
+                Month
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { num: 1, name: 'Jan' },
+                  { num: 2, name: 'Feb' },
+                  { num: 3, name: 'Mar' },
+                  { num: 4, name: 'Apr' },
+                  { num: 5, name: 'May' },
+                  { num: 6, name: 'Jun' },
+                  { num: 7, name: 'Jul' },
+                  { num: 8, name: 'Aug' },
+                  { num: 9, name: 'Sep' },
+                  { num: 10, name: 'Oct' },
+                  { num: 11, name: 'Nov' },
+                  { num: 12, name: 'Dec' },
+                ].map((month) => (
+                  <button
+                    key={month.num}
+                    onClick={() => {
+                      setActiveFilters((f) => ({
+                        ...f,
+                        selectedMonths: f.selectedMonths.includes(month.num)
+                          ? f.selectedMonths.filter((m) => m !== month.num)
+                          : [...f.selectedMonths, month.num],
+                      }))
+                    }}
+                    className={`px-2.5 py-1.5 rounded-lg border text-sm transition ${
+                      activeFilters.selectedMonths.includes(month.num)
+                        ? 'bg-purple-600 border-purple-500 text-white'
+                        : 'border-white/10 hover:border-white/30'
+                    }`}
+                  >
+                    {month.name}
+                  </button>
+                ))}
+                {activeFilters.selectedMonths.length > 0 && (
+                  <button
+                    onClick={() =>
+                      setActiveFilters((f) => ({ ...f, selectedMonths: [] }))
+                    }
+                    className="px-3 py-1.5 rounded-lg border border-red-500/50 text-red-400 hover:bg-red-500/10 text-sm transition"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Legacy date range filter (for Today, Week, Month quick filters) */}
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
             <label className="flex items-center gap-2">
               <Calendar size={16} />
               <select
@@ -1378,7 +1529,6 @@ const SearchPage = ({
                 <option value="today">{t('search:filterOptions.today')}</option>
                 <option value="week">{t('search:filterOptions.week')}</option>
                 <option value="month">{t('search:filterOptions.month')}</option>
-                <option value="year">{t('search:filterOptions.year')}</option>
               </select>
             </label>
           </div>
@@ -1579,6 +1729,8 @@ const SearchPage = ({
                           albumId: null,
                           selectedTag: null,
                           contentTypes: null,
+                          selectedYears: [], // 🆕 Clear year filter
+                          selectedMonths: [], // 🆕 Clear month filter
                         })
                       }
                     : null
