@@ -1006,14 +1006,13 @@ const UploadModal = ({
             <div className="mt-6">
               <div className="flex justify-between text-sm mb-2">
                 <span>
-                  {uploadCancelled ? 'Cancelling...' : t('upload:processing')}
+                  {uploadCancelled
+                    ? 'Cancelling...'
+                    : uploadCount === totalFiles && processingProgress < 100
+                    ? 'Processing photos...'
+                    : `Uploading ${uploadCount} / ${totalFiles} photos`}
                 </span>
-                {/* ✅ OPPDATERT: Vis både antall og prosent */}
-                <span>
-                  {totalFiles > 0 && uploadCount > 0
-                    ? `${uploadCount}/${totalFiles} bilder (${processingProgress}%)`
-                    : `${processingProgress}%`}
-                </span>
+                <span>{processingProgress}%</span>
               </div>
               <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                 <div
@@ -1021,14 +1020,17 @@ const UploadModal = ({
                   style={{ width: `${processingProgress}%` }}
                 />
               </div>
-              {/* ✅ NY: Vise detaljert status */}
-              {totalFiles > 0 && uploadCount > 0 && (
+              {/* ✅ Status message */}
+              {totalFiles > 0 && (
                 <p className="text-xs text-gray-400 mt-2 text-center">
-                  {uploadCount === totalFiles
-                    ? t('upload:uploadComplete', 'Opplasting fullført! ✓')
+                  {processingProgress === 100
+                    ? '✓ Upload complete!'
                     : uploadCancelled
                     ? 'Finishing current file...'
-                    : t('upload:uploadingFiles', 'Laster opp bilder...')}
+                    : uploadCount === totalFiles
+                    ? 'Saving to cloud storage...'
+                    : 'Preparing files for upload...'
+                  }
                 </p>
               )}
 

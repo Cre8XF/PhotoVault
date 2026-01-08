@@ -280,8 +280,10 @@ export function useUpload() {
             type: 'document',
           })
 
+          // Update progress: 0-90% during processing
+          setUploadCount(i + 1)
           setProcessingProgress(
-            Math.round(((i + 1) / selectedFiles.length) * 50)
+            Math.round(((i + 1) / selectedFiles.length) * 90)
           )
         }
         // ✅ TIER-AWARE VIDEO PROCESSING
@@ -338,8 +340,10 @@ export function useUpload() {
             },
           })
 
+          // Update progress: 0-90% during processing
+          setUploadCount(i + 1)
           setProcessingProgress(
-            Math.round(((i + 1) / selectedFiles.length) * 50)
+            Math.round(((i + 1) / selectedFiles.length) * 90)
           )
         }
         // ✅ TIER-AWARE IMAGE PROCESSING
@@ -431,8 +435,10 @@ export function useUpload() {
             )
           }
 
+          // Update progress: 0-90% during processing
+          setUploadCount(i + 1)
           setProcessingProgress(
-            Math.round(((i + 1) / selectedFiles.length) * 50)
+            Math.round(((i + 1) / selectedFiles.length) * 90)
           )
         }
       }
@@ -461,10 +467,12 @@ export function useUpload() {
       // ✅ P2-A FIX: Call onUpload ONCE with all processed files
       // This prevents multiple success notifications (one per file)
       // onUpload callback (handleUpload) will show a single success message with correct count
+      // Note: uploadCount already reflects processed files (set during processing loop)
+      // Now we're in the "uploading to R2" phase (90-100%)
+      setProcessingProgress(95) // Show we're in upload phase
       await onUpload(processedFiles, albumId, aiTagging, uploadTags)
 
-      // Update progress to 100%
-      setUploadCount(processedFiles.length)
+      // Upload complete - set to 100%
       setProcessingProgress(100)
 
       // ✅ PHASE 2: Return partial success if cancelled
