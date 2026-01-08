@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
-import { Mail, X } from 'lucide-react'
+import { Mail, X, RefreshCw } from 'lucide-react'
+import { sendVerificationEmail } from '../utils/emailVerification'
+import useStore from '../state/store'
 
 /**
  * Banner shown to unverified users
@@ -9,11 +10,49 @@ import { Mail, X } from 'lucide-react'
  */
 const VerificationBanner = ({ user, onDismiss }) => {
   const { t } = useTranslation('common')
-  const navigate = useNavigate()
+  const setNotification = useStore((state) => state.setNotification)
+
+  const [resending, setResending] = useState(false)
+  const [cooldownSeconds, setCooldownSeconds] = useState(0)
+
+  // Cooldown timer effect
+  useEffect(() => {
+    if (cooldownSeconds > 0) {
+      const timer = setTimeout(() => {
+        setCooldownSeconds(cooldownSeconds - 1)
+      }, 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [cooldownSeconds])
 
   if (!user || user.emailVerified) {
     return null
   }
+
+  const handleResendVerification = async () => {
+    if (resending || cooldownSeconds > 0) return
+
+    setResending(true)
+    try {
+      await sendVerificationEmail(user)
+      setNotification({
+        message: 'Verification email sent! Check your inbox.',
+        type: 'success',
+      })
+      // Start 30-second cooldown
+      setCooldownSeconds(30)
+    } catch (error) {
+      console.error('Failed to resend verification:', error)
+      setNotification({
+        message: 'Failed to send verification email. Please try again.',
+        type: 'error',
+      })
+    } finally {
+      setResending(false)
+    }
+  }
+
+  const isButtonDisabled = resending || cooldownSeconds > 0
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg">
@@ -32,10 +71,20 @@ const VerificationBanner = ({ user, onDismiss }) => {
 
         <div className="flex items-center gap-2">
           <button
-            onClick={() => navigate('/verify-email')}
-            className="px-4 py-2 bg-white text-orange-600 rounded-lg font-semibold text-sm hover:bg-gray-100 transition-colors"
+            onClick={handleResendVerification}
+            disabled={isButtonDisabled}
+            className="px-4 py-2 bg-white text-orange-600 rounded-lg font-semibold text-sm hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            {t('verificationBanner.verifyButton')}
+            {resending ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                Sending...
+              </>
+            ) : cooldownSeconds > 0 ? (
+              `Wait ${cooldownSeconds}s`
+            ) : (
+              t('verificationBanner.verifyButton')
+            )}
           </button>
 
           {onDismiss && (
