@@ -1,204 +1,224 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { Lock, Mail, Eye, EyeOff, Fingerprint } from "lucide-react";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification } from "firebase/auth";
-import { auth } from "../firebase";
-import { checkKillSwitches } from '../hooks/useKillSwitches';
-import { sendVerificationEmail } from '../utils/emailVerification';
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { Lock, Mail, Eye, EyeOff, Fingerprint } from 'lucide-react'
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  sendEmailVerification,
+} from 'firebase/auth'
+import { auth } from '../firebase'
+import { checkKillSwitches } from '../hooks/useKillSwitches'
+import { sendVerificationEmail } from '../utils/emailVerification'
 import {
   isBiometricAvailable,
   verifyBiometric,
   setCredentials,
   getCredentials,
-  getBiometricTypeText
-} from "../utils/nativeBiometric";
-import { isNative, triggerHaptic, showToast } from "../utils/nativeUtils";
-import useAuth from "../hooks/useAuth";
-import Particles from "../components/Particles";
-import LogoLight from '../assets/logo_light.png';
-import LogoDark from '../assets/logo_dark.png';
+  getBiometricTypeText,
+} from '../utils/nativeBiometric'
+import { isNative, triggerHaptic, showToast } from '../utils/nativeUtils'
+import useAuth from '../hooks/useAuth'
+import Particles from '../components/Particles'
+import LogoLight from '../assets/logo_light.png'
+import LogoDark from '../assets/logo_dark.png'
 const LoginPage = ({ onLogin = () => {} }) => {
-  const { t } = useTranslation('auth');
-  const navigate = useNavigate();
+  const { t } = useTranslation('auth')
+  const navigate = useNavigate()
 
   // ✅ Get auth state to redirect when user logs in
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth()
 
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [biometricAvailable, setBiometricAvailable] = useState(false);
-  const [biometricType, setBiometricType] = useState('none');
-  const [savedCredentials, setSavedCredentials] = useState(null);
-  const [resetEmailSent, setResetEmailSent] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isLogin, setIsLogin] = useState(true)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [biometricAvailable, setBiometricAvailable] = useState(false)
+  const [biometricType, setBiometricType] = useState('none')
+  const [savedCredentials, setSavedCredentials] = useState(null)
+  const [resetEmailSent, setResetEmailSent] = useState(false)
+  const [isDarkMode, setIsDarkMode] = useState(true)
 
   useEffect(() => {
-    checkBiometric();
+    checkBiometric()
     // Determine theme from localStorage or system preference
-    const savedTheme = localStorage.getItem('theme');
-    const isDark = savedTheme !== 'light';
-    setIsDarkMode(isDark);
-  }, []);
+    const savedTheme = localStorage.getItem('theme')
+    const isDark = savedTheme !== 'light'
+    setIsDarkMode(isDark)
+  }, [])
 
   // ✅ FIX: Redirect to /home when user is authenticated
   // CRITICAL: This useEffect must always run to handle post-login redirect
   // Condition is INSIDE the effect, not wrapping it
   useEffect(() => {
     if (!authLoading && user) {
-      navigate('/home', { replace: true });
+      navigate('/home', { replace: true })
     }
-  }, [authLoading, user, navigate]);
+  }, [authLoading, user, navigate])
 
   const handleForgotPassword = async () => {
     if (!email) {
-      setError(t('errors.emailRequired') || "Vennligst skriv inn e-postadressen din");
-      return;
+      setError(
+        t('errors.emailRequired') || 'Vennligst skriv inn e-postadressen din'
+      )
+      return
     }
 
     try {
-      await sendPasswordResetEmail(auth, email);
-      setResetEmailSent(true);
-      setError("");
-      await showToast(t('passwordResetSent') || "E-post for tilbakestilling sendt!");
-      setTimeout(() => setResetEmailSent(false), 5000);
+      await sendPasswordResetEmail(auth, email)
+      setResetEmailSent(true)
+      setError('')
+      await showToast(
+        t('passwordResetSent') || 'E-post for tilbakestilling sendt!'
+      )
+      setTimeout(() => setResetEmailSent(false), 5000)
     } catch (error) {
-      console.error("Password reset error:", error);
-      if (error.code === "auth/user-not-found") {
-        setError(t('errors.userNotFound') || "Fant ingen bruker med denne e-posten");
-      } else if (error.code === "auth/invalid-email") {
-        setError(t('errors.invalidEmail') || "Ugyldig e-postadresse");
+      console.error('Password reset error:', error)
+      if (error.code === 'auth/user-not-found') {
+        setError(
+          t('errors.userNotFound') || 'Fant ingen bruker med denne e-posten'
+        )
+      } else if (error.code === 'auth/invalid-email') {
+        setError(t('errors.invalidEmail') || 'Ugyldig e-postadresse')
       } else {
-        setError(t('errors.passwordResetFailed') || "Kunne ikke sende tilbakestillingslenke");
+        setError(
+          t('errors.passwordResetFailed') ||
+            'Kunne ikke sende tilbakestillingslenke'
+        )
       }
     }
-  };
+  }
 
   const checkBiometric = async () => {
-    if (!isNative()) return;
+    if (!isNative()) return
 
-    const { available, biometryType } = await isBiometricAvailable();
-    setBiometricAvailable(available);
-    setBiometricType(biometryType);
+    const { available, biometryType } = await isBiometricAvailable()
+    setBiometricAvailable(available)
+    setBiometricType(biometryType)
 
     if (available) {
-      const creds = await getCredentials();
+      const creds = await getCredentials()
       if (creds) {
-        setSavedCredentials(creds);
+        setSavedCredentials(creds)
       }
     }
-  };
+  }
 
   const handleBiometricLogin = async () => {
-    if (!savedCredentials) return;
+    if (!savedCredentials) return
 
     try {
-      await triggerHaptic('light');
-      setLoading(true);
-      setError("");
+      await triggerHaptic('light')
+      setLoading(true)
+      setError('')
 
-      await verifyBiometric();
-      
+      await verifyBiometric()
+
       await signInWithEmailAndPassword(
         auth,
         savedCredentials.username,
         savedCredentials.password
-      );
+      )
 
-      await triggerHaptic('heavy');
-      await showToast(t('loggedInSuccess'));
-      onLogin();
+      await triggerHaptic('heavy')
+      await showToast(t('loggedInSuccess'))
+      onLogin()
     } catch (error) {
-      console.error("Biometric login error:", error);
-      setError(t('errors.biometricFailed'));
-      await triggerHaptic('medium');
+      console.error('Biometric login error:', error)
+      setError(t('errors.biometricFailed'))
+      await triggerHaptic('medium')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    await triggerHaptic('light');
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    await triggerHaptic('light')
 
     try {
       if (!isLogin) {
         if (password !== confirmPassword) {
-          setError(t('errors.passwordMismatch'));
-          setLoading(false);
-          return;
+          setError(t('errors.passwordMismatch'))
+          setLoading(false)
+          return
         }
 
         // ✅ KILL-SWITCH: Check if signups are disabled
-        const killSwitches = await checkKillSwitches();
+        const killSwitches = await checkKillSwitches()
         if (killSwitches.disableSignups) {
-          setError('New account creation is temporarily disabled. Please try again later.');
-          setLoading(false);
-          return;
+          setError(
+            'New account creation is temporarily disabled. Please try again later.'
+          )
+          setLoading(false)
+          return
         }
 
         // Create account
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const newUser = userCredential.user;
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        )
+        const newUser = userCredential.user
 
         // ✅ SEND VERIFICATION EMAIL with proper config
         try {
-          await sendVerificationEmail(newUser);
-          console.log('✅ Verification email sent successfully');
+          await sendVerificationEmail(newUser)
+          console.log('✅ Verification email sent successfully')
         } catch (emailError) {
-          console.error('⚠️ Could not send verification email:', emailError);
+          console.error('⚠️ Could not send verification email:', emailError)
           // Don't block signup if email fails - user can resend later from Account page
         }
 
         if (isNative() && biometricAvailable) {
-          await setCredentials(email, password);
+          await setCredentials(email, password)
         }
 
-        await showToast('Konto opprettet! Sjekk e-posten din for å verifisere.');
+        await showToast('Konto opprettet! Sjekk e-posten din for å verifisere.')
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        await signInWithEmailAndPassword(auth, email, password)
 
         if (isNative() && biometricAvailable) {
-          await setCredentials(email, password);
+          await setCredentials(email, password)
         }
 
-        await showToast(t('loggedInSuccess'));
+        await showToast(t('loggedInSuccess'))
       }
 
-      await triggerHaptic('heavy');
-      onLogin();
+      await triggerHaptic('heavy')
+      onLogin()
     } catch (error) {
-      console.error("Auth error:", error);
-      
-      let errorMessage = t('errors.generic');
-      if (error.code === "auth/invalid-email") {
-        errorMessage = t('errors.invalidEmail');
-      } else if (error.code === "auth/user-not-found") {
-        errorMessage = t('errors.userNotFound');
-      } else if (error.code === "auth/wrong-password") {
-        errorMessage = t('errors.wrongPassword');
-      } else if (error.code === "auth/invalid-credential") {
-        errorMessage = t('errors.invalidCredential');
-      } else if (error.code === "auth/email-already-in-use") {
-        errorMessage = t('errors.emailInUse');
-      } else if (error.code === "auth/weak-password") {
-        errorMessage = t('errors.weakPassword');
+      console.error('Auth error:', error)
+
+      let errorMessage = t('errors.generic')
+      if (error.code === 'auth/invalid-email') {
+        errorMessage = t('errors.invalidEmail')
+      } else if (error.code === 'auth/user-not-found') {
+        errorMessage = t('errors.userNotFound')
+      } else if (error.code === 'auth/wrong-password') {
+        errorMessage = t('errors.wrongPassword')
+      } else if (error.code === 'auth/invalid-credential') {
+        errorMessage = t('errors.invalidCredential')
+      } else if (error.code === 'auth/email-already-in-use') {
+        errorMessage = t('errors.emailInUse')
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = t('errors.weakPassword')
       }
-      
-      setError(errorMessage);
-      await triggerHaptic('medium');
-      await showToast(errorMessage);
+
+      setError(errorMessage)
+      await triggerHaptic('medium')
+      await showToast(errorMessage)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-[var(--bg-gradient-start)] to-[var(--bg-gradient-end)]">
@@ -226,7 +246,9 @@ const LoginPage = ({ onLogin = () => {} }) => {
             className="ripple-effect w-full mb-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-3"
           >
             <Fingerprint className="w-5 h-5" />
-            <span>{t('loginWith', { type: getBiometricTypeText(biometricType) })}</span>
+            <span>
+              {t('loginWith', { type: getBiometricTypeText(biometricType) })}
+            </span>
           </button>
         )}
 
@@ -236,7 +258,9 @@ const LoginPage = ({ onLogin = () => {} }) => {
               <div className="w-full border-t border-white/10"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-[var(--bg-secondary)] text-gray-400">{t('orContinueWith')}</span>
+              <span className="px-4 bg-[var(--bg-secondary)] text-gray-400">
+                {t('orContinueWith')}
+              </span>
             </div>
           </div>
         )}
@@ -245,7 +269,9 @@ const LoginPage = ({ onLogin = () => {} }) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email */}
           <div>
-            <label className="block text-white font-medium mb-2">{t('email')}</label>
+            <label className="block text-white font-medium mb-2">
+              {t('email')}
+            </label>
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
@@ -254,30 +280,37 @@ const LoginPage = ({ onLogin = () => {} }) => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t('emailPlaceholder')}
                 required
-                className="w-full bg-[var(--bg-primary)] text-white pl-12 pr-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                className="w-full bg-[var(--bg-primary)] text-slate-900 placeholder:text-slate-400 pl-12 pr-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
               />
             </div>
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-white font-medium mb-2">{t('password')}</label>
+            <label className="block text-white font-medium mb-2">
+              {t('password')}
+            </label>
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={t('passwordPlaceholder')}
                 required
-                className="w-full bg-[var(--bg-primary)] text-white pl-12 pr-12 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                className="w-full bg-[var(--bg-primary)] text-slate-900 placeholder:text-slate-400 pl-12 pr-12 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
               />
+
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="ripple-effect absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
               >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
               </button>
             </div>
           </div>
@@ -285,16 +318,18 @@ const LoginPage = ({ onLogin = () => {} }) => {
           {/* Confirm Password (Register only) */}
           {!isLogin && (
             <div>
-              <label className="block text-white font-medium mb-2">{t('confirmPassword')}</label>
+              <label className="block text-white font-medium mb-2">
+                {t('confirmPassword')}
+              </label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder={t('passwordPlaceholder')}
                   required
-                  className="w-full bg-[var(--bg-primary)] text-white pl-12 pr-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                  className="w-full bg-[var(--bg-primary)] text-slate-900 placeholder:text-slate-400 pl-12 pr-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
                 />
               </div>
             </div>
@@ -303,7 +338,8 @@ const LoginPage = ({ onLogin = () => {} }) => {
           {/* Success Message (Password Reset) */}
           {resetEmailSent && (
             <div className="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-3 rounded-xl text-sm">
-              {t('passwordResetEmailSent') || "E-post for tilbakestilling sendt! Sjekk innboksen din."}
+              {t('passwordResetEmailSent') ||
+                'E-post for tilbakestilling sendt! Sjekk innboksen din.'}
             </div>
           )}
 
@@ -322,7 +358,7 @@ const LoginPage = ({ onLogin = () => {} }) => {
                 onClick={handleForgotPassword}
                 className="text-sm text-purple hover:text-purple transition-colors"
               >
-                {t('forgotPassword') || "Glemt passord?"}
+                {t('forgotPassword') || 'Glemt passord?'}
               </button>
             </div>
           )}
@@ -333,7 +369,11 @@ const LoginPage = ({ onLogin = () => {} }) => {
             disabled={loading}
             className="ripple-effect w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium hover:shadow-lg transition-all disabled:opacity-50"
           >
-            {loading ? t('pleaseWait') : isLogin ? t('login') : t('createAccount')}
+            {loading
+              ? t('pleaseWait')
+              : isLogin
+              ? t('login')
+              : t('createAccount')}
           </button>
         </form>
 
@@ -341,27 +381,33 @@ const LoginPage = ({ onLogin = () => {} }) => {
         <div className="mt-6 text-center">
           <button
             onClick={() => {
-              setIsLogin(!isLogin);
-              setError("");
-              setPassword("");
-              setConfirmPassword("");
+              setIsLogin(!isLogin)
+              setError('')
+              setPassword('')
+              setConfirmPassword('')
             }}
             className="ripple-effect text-gray-400 hover:text-white transition-colors"
           >
             {isLogin ? (
               <>
-                {t('noAccount')} <span className="text-purple-500 font-medium">{t('signUp')}</span>
+                {t('noAccount')}{' '}
+                <span className="text-purple-500 font-medium">
+                  {t('signUp')}
+                </span>
               </>
             ) : (
               <>
-                {t('hasAccount')} <span className="text-purple-500 font-medium">{t('login')}</span>
+                {t('hasAccount')}{' '}
+                <span className="text-purple-500 font-medium">
+                  {t('login')}
+                </span>
               </>
             )}
           </button>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LoginPage;
+export default LoginPage

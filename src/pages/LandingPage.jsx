@@ -162,7 +162,7 @@ function LandingPage() {
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 max-w-3xl mx-auto px-2">
               {t('landing:hero.subtitle')}
             </p>
-            <p className="text-xs md:text-sm text-gray-400 pt-1 px-2">
+            <p className="text-xs md:text-sm text-white/70 pt-1 px-2">
               {t('landing:hero.trustLine')}
             </p>
 
@@ -183,7 +183,7 @@ function LandingPage() {
               </a>
             </div>
 
-            <p className="text-xs md:text-sm text-gray-400 pt-2 px-2">
+            <p className="text-xs md:text-sm text-white/70 pt-2 px-2">
               {t('landing:hero.noCreditCard')}
             </p>
           </div>
@@ -218,10 +218,10 @@ function LandingPage() {
               <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0">
                 <Shield className="w-6 h-6" />
               </div>
-              <h3 className="text-xl md:text-2xl font-bold">
+              <h3 className="text-xl md:text-2xl font-bold text-white">
                 {t('landing:why.noTracking.title')}
               </h3>
-              <p className="text-gray-300 text-sm md:text-base">
+              <p className="text-gray-300 text-sm md:text-base text-white/80">
                 {t('landing:why.noTracking.desc')}
               </p>
             </div>
@@ -230,20 +230,24 @@ function LandingPage() {
               <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-500 rounded-xl flex items-center justify-center flex-shrink-0">
                 <Lock className="w-6 h-6" />
               </div>
-              <h3 className="text-xl md:text-2xl font-bold">
+              <h3 className="text-xl md:text-2xl font-bold text-white">
                 {t('landing:why.yourData.title')}
               </h3>
-              <p className="text-gray-300 text-sm md:text-base">{t('landing:why.yourData.desc')}</p>
+              <p className="text-gray-300 text-sm md:text-base text-white/80">
+                {t('landing:why.yourData.desc')}
+              </p>
             </div>
 
             <div className="glass-card p-6 md:p-8 space-y-4">
               <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
                 <Sparkles className="w-6 h-6" />
               </div>
-              <h3 className="text-xl md:text-2xl font-bold">
+              <h3 className="text-xl md:text-2xl font-bold text-white">
                 {t('landing:why.creative.title')}
               </h3>
-              <p className="text-gray-300 text-sm md:text-base">{t('landing:why.creative.desc')}</p>
+              <p className="text-gray-300 text-sm md:text-base text-white/80">
+                {t('landing:why.creative.desc')}
+              </p>
             </div>
           </div>
         </div>
@@ -272,8 +276,10 @@ function LandingPage() {
                 >
                   <feature.icon className="w-6 h-6" />
                 </div>
-                <h3 className="text-lg md:text-xl font-bold">{feature.title}</h3>
-                <p className="text-gray-300 text-sm">{feature.description}</p>
+                <h3 className="text-lg md:text-xl font-bold text-white">
+                  {feature.title}
+                </h3>
+                <p className="text-white/70 text-sm">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -281,7 +287,10 @@ function LandingPage() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="py-12 md:py-20 px-4 md:px-6 lg:px-8 bg-black/20">
+      <section
+        id="pricing"
+        className="py-12 md:py-20 px-4 md:px-6 lg:px-8 bg-black/20"
+      >
         <div className="w-full max-w-6xl mx-auto">
           <div className="text-center space-y-3 md:space-y-4 mb-12 md:mb-16">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold px-2">
@@ -307,12 +316,18 @@ function LandingPage() {
                 )}
 
                 <div className="text-center space-y-2">
-                  <h3 className="text-xl md:text-2xl font-bold">{plan.name}</h3>
+                  <h3 className="text-xl md:text-2xl font-bold text-white">
+                    {plan.name}
+                  </h3>
                   <div className="flex items-baseline justify-center gap-1">
-                    <span className="text-4xl md:text-5xl font-bold">{plan.price}</span>
-                    <span className="text-gray-400 text-sm md:text-base">/{plan.period}</span>
+                    <span className="text-4xl md:text-5xl font-bold">
+                      {plan.price}
+                    </span>
+                    <span className="text-white/70 text-sm md:text-base">
+                      /{plan.period}
+                    </span>
                   </div>
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-white/70">
                     {plan.storage} {t('landing:pricing.storage')}
                   </p>
                   {plan.trustLine && (
@@ -337,7 +352,9 @@ function LandingPage() {
                       {plan.unlocks.map((unlock, idx) => (
                         <li key={idx} className="flex items-start gap-2">
                           <Sparkles className="w-4 h-4 text-purple flex-shrink-0 mt-0.5" />
-                          <span className="text-xs text-gray-300">{unlock}</span>
+                          <span className="text-xs text-gray-300">
+                            {unlock}
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -399,15 +416,21 @@ function LandingPage() {
               <span className="text-xl font-bold">PIXTR</span>
             </div>
 
-            <p className="text-xs md:text-sm text-gray-400 text-center">
+            <p className="text-xs md:text-sm text-white/70 text-center">
               {t('landing:footer.tagline')}
             </p>
 
-            <div className="flex gap-4 md:gap-6 text-xs md:text-sm text-gray-400">
-              <a href="#" className="hover:text-white transition whitespace-nowrap">
+            <div className="flex gap-4 md:gap-6 text-xs md:text-sm text-white/70">
+              <a
+                href="#"
+                className="hover:text-white transition whitespace-nowrap"
+              >
                 {t('landing:footer.privacy')}
               </a>
-              <a href="#" className="hover:text-white transition whitespace-nowrap">
+              <a
+                href="#"
+                className="hover:text-white transition whitespace-nowrap"
+              >
                 {t('landing:footer.terms')}
               </a>
             </div>
