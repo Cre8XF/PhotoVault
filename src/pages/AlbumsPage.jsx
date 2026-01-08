@@ -17,9 +17,8 @@ import AlbumCard from '../components/AlbumCard'
 import Loading from '../components/Loading'
 import PhotoGridUnified from '../components/PhotoGridUnified'
 import MoveModal from '../components/MoveModal'
-import { updatePhotoAlbum, updatePhoto } from '../firebase'
-import { doc, deleteDoc } from 'firebase/firestore'
-import { db, auth } from '../firebase'
+import { updatePhotoAlbum, updatePhoto, deleteAlbum } from '../firebase'
+import { auth } from '../firebase'
 import useStore from '../state/store'
 import { useCollageData } from '../hooks/useCollageData'
 import EmptyState from '../components/EmptyState'
@@ -126,8 +125,12 @@ const AlbumsPage = ({
             await updatePhoto(p.id, { albumId: null })
           }
 
-          // Delete album doc
-          await deleteDoc(doc(db, 'albums', album.id))
+          // Delete album doc and decrement counter
+          const userIdToUse = album.userId || auth.currentUser?.uid
+          if (!userIdToUse) {
+            throw new Error('Cannot delete album: userId not found')
+          }
+          await deleteAlbum(album.id, userIdToUse)
 
           if (refreshData) await refreshData()
 

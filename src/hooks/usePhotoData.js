@@ -4,7 +4,6 @@
 import { useCallback, useEffect, useState, startTransition } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { doc, deleteDoc } from 'firebase/firestore'
 import {
   getAlbumsByUser,
   getPhotosByUser,
@@ -12,6 +11,7 @@ import {
   listenToPhotosByUser,
   addAlbum,
   updateAlbum,
+  deleteAlbum,
   uploadPhoto,
   updatePhoto,
   deletePhoto,
@@ -21,7 +21,6 @@ import {
   updatePhotoCaption,
   toggleFavorite as firebaseToggleFavorite,
 } from '../firebase'
-import { db } from '../firebase'
 import useStore from '../state/store'
 import { devLog, devWarn } from '../utils/log'
 import { getErrorMessage } from '../utils/errorMessages'
@@ -519,7 +518,13 @@ export const usePhotoData = () => {
             for (const photo of albumPhotos) {
               await updatePhoto(photo.id, { albumId: null })
             }
-            await deleteDoc(doc(db, 'albums', album.id))
+
+            // Delete album and decrement counter
+            const userIdToUse = album.userId || user?.uid
+            if (!userIdToUse) {
+              throw new Error('Cannot delete album: userId not found')
+            }
+            await deleteAlbum(album.id, userIdToUse)
 
             setNotification({
               message: t('common:notifications.albumDeleted'),
