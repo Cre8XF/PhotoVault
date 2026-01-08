@@ -390,31 +390,7 @@ const SearchPage = ({
     if (activeFilters.dateRange) {
       const now = Date.now()
 
-      // Handle "last year" filter - SMART ORGANIZATION
-      if (activeFilters.dateRange === 'lastyear') {
-        const currentYear = new Date().getFullYear()
-        const lastYear = currentYear - 1
-        const yearStart = new Date(lastYear, 0, 1).getTime()
-        const yearEnd = new Date(lastYear, 11, 31, 23, 59, 59, 999).getTime()
-
-        if (import.meta.env.DEV) {
-          devLog('🔍 Filtering photos from LAST YEAR:', {
-            year: lastYear,
-            start: new Date(yearStart).toISOString(),
-            end: new Date(yearEnd).toISOString(),
-          })
-        }
-
-        res = res.filter((p) => {
-          const photoDate = resolvePhotoDate(p)
-          if (!photoDate) return false
-          const photoTime = new Date(photoDate).getTime()
-          return photoTime >= yearStart && photoTime <= yearEnd
-        })
-        if (import.meta.env.DEV) {
-          devLog(`✅ Last year filter applied: ${res.length} photos`)
-        }
-      } else if (activeFilters.dateRange === 'today') {
+      if (activeFilters.dateRange === 'today') {
         const todayStart = new Date()
         todayStart.setHours(0, 0, 0, 0)
         const todayEnd = new Date()
@@ -481,24 +457,6 @@ const SearchPage = ({
         })
         if (import.meta.env.DEV) {
           devLog(`✅ Date filter applied: ${res.length} photos`)
-        }
-      } else if (activeFilters.dateRange === 'year') {
-        // This Year filter - proper calendar year using dateTaken
-        const currentYear = new Date().getFullYear()
-
-        if (import.meta.env.DEV) {
-          devLog('🔍 Filtering photos from THIS YEAR:', {
-            year: currentYear,
-          })
-        }
-
-        res = res.filter((p) => {
-          const photoDate = resolvePhotoDate(p)
-          if (!photoDate) return false
-          return new Date(photoDate).getFullYear() === currentYear
-        })
-        if (import.meta.env.DEV) {
-          devLog(`✅ This year filter applied: ${res.length} photos`)
         }
       } else {
         // Original range-based filtering (week, month)
