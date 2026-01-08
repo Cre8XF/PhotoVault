@@ -104,6 +104,7 @@ const UploadModal = ({
   const [showAlbumModal, setShowAlbumModal] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState([])
   const [selectedAlbumId, setSelectedAlbumId] = useState(selectedAlbum || '')
+  const [newlyCreatedAlbum, setNewlyCreatedAlbum] = useState(null) // 🆕 Track newly created album
   const [uploadTags, setUploadTags] = useState('')
   const [dragActive, setDragActive] = useState(false)
   const [permissions, setPermissions] = useState({
@@ -500,6 +501,7 @@ const UploadModal = ({
       selectedFiles.forEach((f) => URL.revokeObjectURL(f.preview))
       setSelectedFiles([])
       setSelectedAlbumId(selectedAlbum || '')
+      setNewlyCreatedAlbum(null) // 🆕 Clear newly created album data
       setUploadTags('') // ✅ Clear tags after upload
       onClose()
     }
@@ -567,6 +569,9 @@ const UploadModal = ({
       // CRITICAL: Pre-select the new album for photo upload
       setSelectedAlbumId(newAlbumRef.id)
 
+      // 🆕 Store newly created album data for immediate display
+      setNewlyCreatedAlbum({ id: newAlbumRef.id, name: cleanAlbum.name })
+
       devLog('📸 Album pre-selected for upload:', newAlbumRef.id)
 
       // Notify parent to refresh UI - does NOT create another document
@@ -601,6 +606,7 @@ const UploadModal = ({
     if (uploading) return
     selectedFiles.forEach((f) => URL.revokeObjectURL(f.preview))
     setSelectedFiles([])
+    setNewlyCreatedAlbum(null) // 🆕 Clear newly created album data
     onClose()
   }
 
@@ -835,9 +841,21 @@ const UploadModal = ({
                 <FolderOpen className="w-5 h-5" />
                 <span className="text-sm font-medium">
                   {selectedAlbumId
-                    ? (Array.isArray(albums) ? albums : []).find(
-                        (a) => a.id === selectedAlbumId
-                      )?.name || t('upload:selectAlbum')
+                    ? (() => {
+                        // 🆕 Check if this is a newly created album
+                        if (
+                          newlyCreatedAlbum &&
+                          newlyCreatedAlbum.id === selectedAlbumId
+                        ) {
+                          return newlyCreatedAlbum.name
+                        }
+                        // Otherwise look in albums prop
+                        return (
+                          (Array.isArray(albums) ? albums : []).find(
+                            (a) => a.id === selectedAlbumId
+                          )?.name || t('upload:selectAlbum')
+                        )
+                      })()
                     : t('upload:noAlbum')}
                 </span>
               </div>
@@ -848,6 +866,7 @@ const UploadModal = ({
                 <button
                   onClick={() => {
                     setSelectedAlbumId('')
+                    setNewlyCreatedAlbum(null) // 🆕 Clear when selecting "No album"
                     setShowAlbums(false)
                   }}
                   className="ripple-effect w-full p-3 text-left hover:bg-white/10 transition text-sm"
@@ -859,6 +878,7 @@ const UploadModal = ({
                     key={album.id}
                     onClick={() => {
                       setSelectedAlbumId(album.id)
+                      setNewlyCreatedAlbum(null) // 🆕 Clear when selecting existing album
                       setShowAlbums(false)
                     }}
                     className="ripple-effect w-full p-3 text-left hover:bg-white/10 transition text-sm border-t border-white/5"
