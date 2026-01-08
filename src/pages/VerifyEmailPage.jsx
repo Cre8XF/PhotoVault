@@ -12,14 +12,17 @@ import { Loader2, CheckCircle, XCircle } from 'lucide-react'
 /**
  * VerifyEmailPage Component
  *
- * Handles email verification when handleCodeInApp: true
- * Passive verification endpoint - does NOT attempt to sync app state
+ * Dedicated landing page for email verification links
+ * Provides clear confirmation and next steps after verification
  *
  * Flow:
  * 1. Parse URL params (mode, oobCode)
  * 2. Apply verification code via Firebase
- * 3. Show success confirmation with manual return option
- * 4. User manually returns to app or refreshes to see verified state
+ * 3. Show success confirmation with clear instructions
+ * 4. User can return to Pixtr or close tab if app is already open
+ * 5. App state automatically refreshes on navigation/refresh
+ *
+ * Mobile-friendly with clear CTAs to eliminate tab confusion
  */
 const VerifyEmailPage = () => {
   const [searchParams] = useSearchParams()
@@ -68,9 +71,8 @@ const VerifyEmailPage = () => {
       await applyActionCode(auth, oobCode)
       console.log('[VERIFY EMAIL] ✅ Verification code applied successfully')
 
-      // Show success state
+      // Show success state - message now handled in JSX for better UX
       setStatus('success')
-      setMessage('You can now return to Pixtr. If Pixtr is already open, please refresh the page.')
     } catch (error) {
       console.error('[VERIFY EMAIL] Verification failed:', error)
 
@@ -115,29 +117,48 @@ const VerifyEmailPage = () => {
 
           {/* Status Message */}
           <h1 className="text-2xl font-bold text-white mb-2">
-            {status === 'processing' && 'Verifying Email'}
-            {status === 'success' && 'Email Verified!'}
+            {status === 'processing' && 'Verifying Email...'}
+            {status === 'success' && 'Email Verified! 🎉'}
             {status === 'error' && 'Verification Failed'}
           </h1>
 
-          <p className="text-gray-300 mb-6">{message}</p>
-
-          {/* Action Buttons */}
+          {/* Success State */}
           {status === 'success' && (
-            <button
-              onClick={() => window.location.href = '/'}
-              className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
-            >
-              Open Pixtr
-            </button>
+            <>
+              <p className="text-gray-300 mb-3">
+                Your email has been successfully verified. You can now access all Pixtr features!
+              </p>
+              <p className="text-gray-400 text-sm mb-6">
+                If Pixtr is already open in another tab, you can close this one or refresh the app to see your verified status.
+              </p>
+              <button
+                onClick={() => {
+                  // Navigate to home - user state will be automatically refreshed
+                  window.location.href = '/'
+                }}
+                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all duration-200"
+              >
+                Open Pixtr
+              </button>
+            </>
           )}
+
+          {/* Processing State */}
+          {status === 'processing' && (
+            <p className="text-gray-300">{message}</p>
+          )}
+
+          {/* Error State */}
           {status === 'error' && (
-            <button
-              onClick={() => window.location.href = '/'}
-              className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
-            >
-              Go to Home
-            </button>
+            <>
+              <p className="text-gray-300 mb-6">{message}</p>
+              <button
+                onClick={() => window.location.href = '/'}
+                className="px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
+              >
+                Return to Pixtr
+              </button>
+            </>
           )}
         </div>
       </div>
