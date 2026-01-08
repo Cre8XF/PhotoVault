@@ -521,6 +521,51 @@ const UploadModal = ({
       }
     }
 
+    // ============================================================
+    // PRE-CHECK: Total storage limit (Free tier only)
+    // MUST happen BEFORE any upload starts
+    // ============================================================
+    if (userTier === 'GRATIS') {
+      const totalSelectedSize = selectedFiles.reduce(
+        (sum, f) => sum + (f.size || 0),
+        0
+      )
+      const storageAfterUpload = storageUsed + totalSelectedSize
+      const remainingStorage = storageLimit - storageUsed
+
+      devLog('📊 Storage limit pre-check:', {
+        currentUsed: storageUsed,
+        limit: storageLimit,
+        uploadSize: totalSelectedSize,
+        afterUpload: storageAfterUpload,
+        remaining: remainingStorage,
+        willExceed: storageAfterUpload > storageLimit,
+      })
+
+      // Block if storage limit would be exceeded
+      if (storageAfterUpload > storageLimit) {
+        const usedMB = Math.round(storageUsed / (1024 * 1024))
+        const limitMB = Math.round(storageLimit / (1024 * 1024))
+        const uploadMB = Math.round(totalSelectedSize / (1024 * 1024))
+        const remainingMB = Math.round(remainingStorage / (1024 * 1024))
+
+        setNotification({
+          type: 'error',
+          message: `Storage limit reached. You have ${usedMB} MB of ${limitMB} MB used. This upload requires ${uploadMB} MB, but only ${remainingMB} MB is available. Upgrade to Lite for more storage.`,
+          action: {
+            label: 'Upgrade to Lite',
+            onClick: () => navigate('/subscription'),
+          },
+        })
+        devLog(
+          `❌ Upload blocked: Storage limit exceeded (${storageAfterUpload} > ${storageLimit})`
+        )
+        return // STOP - don't upload anything
+      }
+
+      devLog('✅ Storage limit check passed')
+    }
+
     // ✅ Derive explicit compression permission
     const canUseCompression = tier() !== 'GRATIS' && autoCompress === true
 
