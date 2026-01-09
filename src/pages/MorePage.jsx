@@ -69,7 +69,10 @@ import {
   migratePhotosAddUserId,
   getPhotosByUser,
 } from '../firebase'
-import { migratePhotosAddDeletedField, migratePhotosAddOrderField } from '../utils/photoMigrations'
+import {
+  migratePhotosAddDeletedField,
+  migratePhotosAddOrderField,
+} from '../utils/photoMigrations'
 import { reauthenticateUser, deleteAuthUser } from '../utils/authHelpers'
 import { deleteAllUserR2Objects } from '../utils/r2Upload'
 import ComingSoonModal from '../components/ComingSoonModal'
@@ -423,7 +426,12 @@ const MorePage = ({
         const collections = ['photos', 'albums', 'shared', 'favorites']
 
         for (const collectionName of collections) {
-          const collectionRef = collection(db, 'users', user.uid, collectionName)
+          const collectionRef = collection(
+            db,
+            'users',
+            user.uid,
+            collectionName
+          )
           const snapshot = await getDocs(collectionRef)
 
           console.log(
@@ -570,7 +578,11 @@ const MorePage = ({
   }
 
   const handleMigrateDeletedField = async () => {
-    if (!window.confirm('Run migration to add deleted:false to all photos? This is required for Phase 4B trash feature.')) {
+    if (
+      !window.confirm(
+        'Run migration to add deleted:false to all photos? This is required for Phase 4B trash feature.'
+      )
+    ) {
       return
     }
 
@@ -605,7 +617,9 @@ const MorePage = ({
   }
 
   const handleMigrateOrderField = async () => {
-    if (!window.confirm('Add order field to all photos for drag-drop sorting?')) {
+    if (
+      !window.confirm('Add order field to all photos for drag-drop sorting?')
+    ) {
       return
     }
 
@@ -662,7 +676,11 @@ const MorePage = ({
   }, [isAdmin])
 
   const handleManualReconcile = async () => {
-    if (!window.confirm('Kjør manuell counter reconciliation? Dette kan ta noen minutter.')) {
+    if (
+      !window.confirm(
+        'Kjør manuell counter reconciliation? Dette kan ta noen minutter.'
+      )
+    ) {
       return
     }
 
@@ -675,14 +693,15 @@ const MorePage = ({
 
       console.log('✅ Manual reconciliation result:', result.data)
 
-      const { success, message, usersProcessed, issuesFound, issuesFixed } = result.data
+      const { success, message, usersProcessed, issuesFound, issuesFixed } =
+        result.data
 
       setReconcileResult({
         success,
         message,
         usersProcessed,
         issuesFound,
-        issuesFixed
+        issuesFixed,
       })
 
       showNotification(
@@ -695,13 +714,12 @@ const MorePage = ({
       if (reportDoc.exists()) {
         setLastReconciliation(reportDoc.data())
       }
-
     } catch (error) {
       console.error('❌ Manual reconciliation error:', error)
 
       setReconcileResult({
         success: false,
-        message: error.message
+        message: error.message,
       })
 
       showNotification('Reconciliation feilet: ' + error.message, 'error')
@@ -784,7 +802,9 @@ const MorePage = ({
               disabled={sendingVerification}
               className="flex-shrink-0 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {sendingVerification ? t('auth:sendingVerification') : t('auth:verify')}
+              {sendingVerification
+                ? t('auth:sendingVerification')
+                : t('auth:verify')}
             </button>
           </div>
         </div>
@@ -881,7 +901,10 @@ const MorePage = ({
                 {t('content.title', 'Content')}
               </h3>
               <p className="text-xs text-muted">
-                {t('content.subtitle', 'Your uploaded files and protected content')}
+                {t(
+                  'content.subtitle',
+                  'Your uploaded files and protected content'
+                )}
               </p>
             </div>
           </div>
@@ -895,7 +918,10 @@ const MorePage = ({
               <div className="flex-1">
                 <p className="font-medium">{t('nav:documents', 'Documents')}</p>
                 <p className="text-xs text-muted">
-                  {t('documents:subtitle', 'PDFs, Word files and other documents')}
+                  {t(
+                    'documents:subtitle',
+                    'PDFs, Word files and other documents'
+                  )}
                 </p>
               </div>
               <ChevronRight className="w-5 h-5 opacity-50" />
@@ -1117,9 +1143,14 @@ const MorePage = ({
                 >
                   <FileText className="w-5 h-5 text-purple" />
                   <div className="flex-1">
-                    <p className="font-medium">{t('nav:documents', 'Documents')}</p>
+                    <p className="font-medium">
+                      {t('nav:documents', 'Documents')}
+                    </p>
                     <p className="text-xs text-muted">
-                      {t('documents:subtitle', 'Manage your uploaded documents')}
+                      {t(
+                        'documents:subtitle',
+                        'Manage your uploaded documents'
+                      )}
                     </p>
                   </div>
                   <ChevronRight className="w-5 h-5 opacity-50" />
@@ -1503,7 +1534,8 @@ const MorePage = ({
             </div>
 
             <p className="text-xs text-muted mb-3">
-              Sjekk og fiks album count, photo count og storage used for alle brukere.
+              Sjekk og fiks album count, photo count og storage used for alle
+              brukere.
             </p>
 
             <button
@@ -1525,11 +1557,13 @@ const MorePage = ({
             </button>
 
             {reconcileResult && (
-              <div className={`mt-3 p-3 rounded-lg ${
-                reconcileResult.success
-                  ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200'
-                  : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200'
-              }`}>
+              <div
+                className={`mt-3 p-3 rounded-lg ${
+                  reconcileResult.success
+                    ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200'
+                    : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200'
+                }`}
+              >
                 <p className="text-sm">{reconcileResult.message}</p>
               </div>
             )}
@@ -1538,7 +1572,9 @@ const MorePage = ({
               <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <p className="text-xs text-gray-600 dark:text-gray-400">
                   <strong>Siste kjøring:</strong>{' '}
-                  {lastReconciliation.timestamp?.toDate?.()?.toLocaleString('nb-NO') || 'N/A'}
+                  {lastReconciliation.timestamp
+                    ?.toDate?.()
+                    ?.toLocaleString('nb-NO') || 'N/A'}
                 </p>
                 <p className="text-xs text-gray-600 dark:text-gray-400">
                   Brukere prosessert: {lastReconciliation.usersProcessed || 0}
@@ -1571,16 +1607,16 @@ const MorePage = ({
             {/* EXPLICIT WARNING */}
             <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4">
               <p className="text-sm font-semibold text-red-400 mb-2">
-                ⚠️ This action is permanent and cannot be undone
+                ⚠️ {t('modals.deleteWarning')}
               </p>
               <p className="text-sm opacity-90 mb-2">
-                The following will be permanently deleted:
+                {t('modals.deleteWillRemove')}
               </p>
               <ul className="text-sm opacity-90 space-y-1 list-disc list-inside">
-                <li>All your photos, videos and documents</li>
-                <li>All albums and collections</li>
-                <li>All metadata and EXIF data</li>
-                <li>Your account and profile</li>
+                <li>{t('modals.deleteItem1')}</li>
+                <li>{t('modals.deleteItem2')}</li>
+                <li>{t('modals.deleteItem3')}</li>
+                <li>{t('modals.deleteItem4')}</li>
               </ul>
             </div>
 

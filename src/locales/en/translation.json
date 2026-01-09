@@ -356,5 +356,35 @@
     "photo": {
       "untitled": "Untitled Photo"
     }
+  },
+  "modals": {
+    "deleteAccountTitle": "Delete account",
+    "deleteAccountMessage": "Are you sure you want to permanently delete your account? All photos, albums and data will be lost and cannot be recovered.",
+    "processing": "Processing...",
+
+    "deleteWarning": "This action is permanent and cannot be undone",
+    "deleteWillRemove": "The following will be permanently deleted:",
+    "deleteItem1": "All your photos, videos and documents",
+    "deleteItem2": "All albums and collections",
+    "deleteItem3": "All metadata and EXIF data",
+    "deleteItem4": "Your account and profile",
+    "confirmPassword": "Confirm Your Password",
+    "confirmPasswordDesc": "For security, please enter your password to confirm account deletion.",
+    "enterPassword": "Enter your password"
+  },
+  "buttons": {
+    "upgrade": "Upgrade",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "deletePermanent": "Delete permanently",
+    "share": "Share",
+    "export": "Export",
+    "import": "Import",
+    "help": "Help",
+    "close": "Close",
+    "confirmDelete": "Confirm deletion",
+
+    "continue": "Continue"
   }
 }

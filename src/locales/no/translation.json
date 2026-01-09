@@ -356,5 +356,35 @@
     "photo": {
       "untitled": "Uten Tittel"
     }
+  },
+  "modals": {
+    "deleteAccountTitle": "Slett konto",
+    "deleteAccountMessage": "Er du sikker på at du vil slette kontoen din permanent? Alle bilder, album og data vil bli slettet og kan ikke gjenopprettes.",
+    "processing": "Behandler...",
+
+    "deleteWarning": "Denne handlingen er permanent og kan ikke angres",
+    "deleteWillRemove": "Følgende vil bli permanent slettet:",
+    "deleteItem1": "Alle dine bilder, videoer og dokumenter",
+    "deleteItem2": "Alle album og samlinger",
+    "deleteItem3": "All metadata og EXIF-data",
+    "deleteItem4": "Din konto og profil",
+    "confirmPassword": "Bekreft passord",
+    "confirmPasswordDesc": "For sikkerhet, vennligst skriv inn passordet ditt for å bekrefte sletting av konto.",
+    "enterPassword": "Skriv inn passordet ditt"
+  },
+  "buttons": {
+    "upgrade": "Oppgrader",
+    "cancel": "Avbryt",
+    "confirm": "Bekreft",
+    "delete": "Slett",
+    "deletePermanent": "Slett permanent",
+    "share": "Del",
+    "export": "Eksporter",
+    "import": "Importer",
+    "help": "Hjelp",
+    "close": "Lukk",
+    "confirmDelete": "Bekreft sletting",
+
+    "continue": "Fortsett"
   }
 }

@@ -317,8 +317,9 @@ function LandingPage() {
 
                 <div className="text-center space-y-2">
                   <h3 className="text-xl md:text-2xl font-bold text-white">
-                    {plan.name}
+                    {t(`common:tiers.${plan.name}`)}
                   </h3>
+
                   <div className="flex items-baseline justify-center gap-1">
                     <span className="text-4xl md:text-5xl font-bold">
                       {plan.price}
