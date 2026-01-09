@@ -114,8 +114,11 @@ export default function EditorShell({
 
       {/* Tools section - compact on mobile */}
       <div className="editor-tools border-t editor-border max-h-[50vh] md:max-h-[400px] flex flex-col">
-        <ToolSelector activeTool={activeTool} onToolChange={setActiveTool} />
-        <div className="overflow-y-auto flex-1">{renderToolPanel()}</div>
+        {/* Sticky tab bar - always visible while scrolling */}
+        <div className="sticky top-0 z-10 editor-bg-secondary">
+          <ToolSelector activeTool={activeTool} onToolChange={setActiveTool} />
+        </div>
+        <div className="overflow-y-auto flex-1 editor-scroll-container">{renderToolPanel()}</div>
       </div>
 
       {/* Saving overlay */}
