@@ -76,8 +76,8 @@ import {
 import { reauthenticateUser, deleteAuthUser } from '../utils/authHelpers'
 import { deleteAllUserR2Objects } from '../utils/r2Upload'
 import ComingSoonModal from '../components/ComingSoonModal'
-import SharePixtrModal from '../components/SharePixtrModal'
 import UpgradePromptModal from '../components/UpgradePromptModal'
+import SharePixtrModal from '../components/SharePixtrModal'
 import { useStorageCalc } from '../hooks/useStorageCalc'
 import SystemStatus from '../components/admin/SystemStatus'
 import useStore from '../state/store'
@@ -119,18 +119,22 @@ const MorePage = ({
   const [reconciling, setReconciling] = useState(false)
   const [reconcileResult, setReconcileResult] = useState(null)
   const [lastReconciliation, setLastReconciliation] = useState(null)
-  const [showUpgradeModal, setShowUpgradeModal] = useState(null)
-
   const { pinEnabled, biometricEnabled } = useSecurityContext()
 
   // ✅ DOCUMENT ACCESS CONTROL
   const { canUploadDocument, isAdmin: checkIsAdmin, userProfile } = useAuth()
 
   // 🔒 FEATURE CAPABILITIES BASED ON SUBSCRIPTION TIER
-  const capabilities = {
-    documents: userProfile?.subscriptionTier !== 'FREE',
-    vault: userProfile?.subscriptionTier !== 'FREE',
-  }
+  const capabilities = React.useMemo(() => {
+    const tier = userProfile?.subscriptionTier || 'FREE'
+    return {
+      documents: tier !== 'FREE', // LITE or PRO only
+      vault: tier !== 'FREE', // LITE or PRO only
+    }
+  }, [userProfile])
+
+  // State for upgrade modal
+  const [showUpgradeModal, setShowUpgradeModal] = useState(null)
 
   // 🔒 SIKRE AT PROPS ER ARRAYS
   const safePhotos = React.useMemo(() => {
@@ -898,7 +902,6 @@ const MorePage = ({
       </div>
 
       {/* === CONTENT === */}
-      {/* Always show Content section - with locks for FREE users */}
       <section className="glass rounded-2xl p-6 mb-6">
         <div className="flex items-center gap-2 mb-4">
           <div className="p-2 bg-purple-600/20 rounded-lg">
@@ -918,13 +921,15 @@ const MorePage = ({
         </div>
 
         <div className="space-y-2">
-          {/* Documents button */}
+          {/* Documents Button */}
           <button
-            onClick={() =>
-              capabilities.documents
-                ? navigate('/documents')
-                : setShowUpgradeModal('documents')
-            }
+            onClick={() => {
+              if (capabilities.documents) {
+                navigate('/documents')
+              } else {
+                setShowUpgradeModal('documents')
+              }
+            }}
             className={`ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10 relative ${
               !capabilities.documents ? 'opacity-60' : ''
             }`}
@@ -947,13 +952,15 @@ const MorePage = ({
             <ChevronRight className="w-5 h-5 opacity-50" />
           </button>
 
-          {/* Vault button */}
+          {/* Vault Button */}
           <button
-            onClick={() =>
-              capabilities.vault
-                ? navigate('/vault')
-                : setShowUpgradeModal('vault')
-            }
+            onClick={() => {
+              if (capabilities.vault) {
+                navigate('/vault')
+              } else {
+                setShowUpgradeModal('vault')
+              }
+            }}
             className={`ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10 relative ${
               !capabilities.vault ? 'opacity-60' : ''
             }`}
@@ -1732,6 +1739,12 @@ const MorePage = ({
         onClose={() => setShowShareModal(false)}
       />
 
+      {/* === UPGRADE PROMPT MODAL === */}
+      <UpgradePromptModal
+        isOpen={showUpgradeModal !== null}
+        onClose={() => setShowUpgradeModal(null)}
+        feature={showUpgradeModal}
+      />
       {/* === UPGRADE PROMPT MODAL === */}
       <UpgradePromptModal
         isOpen={showUpgradeModal !== null}

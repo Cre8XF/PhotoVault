@@ -3,32 +3,33 @@
 // Shows upgrade prompt when FREE users click locked premium features
 // ============================================================================
 
-import React from "react";
-import { X, Lock, Check } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
+import React from 'react'
+import { X, Lock, Check } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
+import useAuth from '../hooks/useAuth'
 
-const UpgradePromptModal = ({
-  isOpen,
-  onClose,
-  feature = null
-}) => {
-  const { t } = useTranslation(['translation']);
-  const navigate = useNavigate();
-  const { userProfile } = useAuth();
+const UpgradePromptModal = ({ isOpen, onClose, feature = null }) => {
+  const { t } = useTranslation(['translation'])
+  const navigate = useNavigate()
+  const { userProfile } = useAuth()
 
-  if (!isOpen || !feature) return null;
+  if (!isOpen || !feature) return null
 
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
-      onClose();
+      onClose()
     }
-  };
+  }
 
   // Determine target tier based on current tier
-  const currentTier = userProfile?.subscriptionTier || 'FREE';
-  const targetTier = currentTier === 'FREE' ? 'LITE' : 'PRO';
+  const currentTier = userProfile?.subscriptionTier || 'FREE'
+  const targetTier =
+    feature === 'documents' || feature === 'vault'
+      ? 'LITE'
+      : currentTier === 'FREE'
+      ? 'LITE'
+      : 'PRO'
 
   // Get feature content
   const featureContent = {
@@ -37,14 +38,14 @@ const UpgradePromptModal = ({
     benefits: [
       t(`upgrade.${feature}.benefits.0`, ''),
       t(`upgrade.${feature}.benefits.1`, ''),
-      t(`upgrade.${feature}.benefits.2`, '')
-    ].filter(Boolean)
-  };
+      t(`upgrade.${feature}.benefits.2`, ''),
+    ].filter(Boolean),
+  }
 
   const handleUpgrade = () => {
-    onClose();
-    navigate('/subscription');
-  };
+    onClose()
+    navigate('/subscription')
+  }
 
   return (
     <div
@@ -96,13 +97,14 @@ const UpgradePromptModal = ({
 
             <ul className="space-y-3">
               {featureContent.benefits.map((benefit, index) => (
-                <li key={index} className="flex items-center gap-3 text-gray-200">
+                <li
+                  key={index}
+                  className="flex items-center gap-3 text-gray-200"
+                >
                   <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
                     <Check className="w-3 h-3 text-green-400" />
                   </div>
-                  <span className="text-sm">
-                    {benefit}
-                  </span>
+                  <span className="text-sm">{benefit}</span>
                 </li>
               ))}
             </ul>
@@ -126,7 +128,7 @@ const UpgradePromptModal = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default UpgradePromptModal;
+export default UpgradePromptModal
