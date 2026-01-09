@@ -26,16 +26,9 @@ const UpgradePromptModal = ({
     }
   };
 
-  // ✅ FIX: Determine correct target tier based on FEATURE
+  // Determine target tier based on current tier
   const currentTier = userProfile?.subscriptionTier || 'FREE';
-
-  // Documents and Vault require LITE
-  // Videos and other premium features might require PRO in future
-  const targetTier = (feature === 'documents' || feature === 'vault')
-    ? 'LITE'
-    : currentTier === 'FREE'
-      ? 'LITE'  // FREE → LITE (default)
-      : 'PRO';  // LITE → PRO (for future premium features)
+  const targetTier = currentTier === 'FREE' ? 'LITE' : 'PRO';
 
   // Get feature content
   const featureContent = {

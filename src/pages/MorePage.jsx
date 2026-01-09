@@ -129,7 +129,7 @@ const MorePage = ({
   // 🔒 FEATURE CAPABILITIES BASED ON SUBSCRIPTION TIER
   const capabilities = {
     documents: userProfile?.subscriptionTier !== 'FREE',
-    vault: userProfile?.subscriptionTier !== 'FREE'
+    vault: userProfile?.subscriptionTier !== 'FREE',
   }
 
   // 🔒 SIKRE AT PROPS ER ARRAYS
@@ -920,9 +920,10 @@ const MorePage = ({
         <div className="space-y-2">
           {/* Documents button */}
           <button
-            onClick={() => capabilities.documents
-              ? navigate('/documents')
-              : setShowUpgradeModal('documents')
+            onClick={() =>
+              capabilities.documents
+                ? navigate('/documents')
+                : setShowUpgradeModal('documents')
             }
             className={`ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10 relative ${
               !capabilities.documents ? 'opacity-60' : ''
@@ -948,9 +949,10 @@ const MorePage = ({
 
           {/* Vault button */}
           <button
-            onClick={() => capabilities.vault
-              ? navigate('/vault')
-              : setShowUpgradeModal('vault')
+            onClick={() =>
+              capabilities.vault
+                ? navigate('/vault')
+                : setShowUpgradeModal('vault')
             }
             className={`ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10 relative ${
               !capabilities.vault ? 'opacity-60' : ''
@@ -1166,25 +1168,6 @@ const MorePage = ({
               }`}
             >
               <div className="px-6 pb-6 space-y-2">
-                <button
-                  onClick={() => navigate('/documents')}
-                  className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
-                >
-                  <FileText className="w-5 h-5 text-purple" />
-                  <div className="flex-1">
-                    <p className="font-medium">
-                      {t('nav:documents', 'Documents')}
-                    </p>
-                    <p className="text-xs text-muted">
-                      {t(
-                        'documents:subtitle',
-                        'Manage your uploaded documents'
-                      )}
-                    </p>
-                  </div>
-                  <ChevronRight className="w-5 h-5 opacity-50" />
-                </button>
-
                 <button
                   onClick={() => navigate('/security')}
                   className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
