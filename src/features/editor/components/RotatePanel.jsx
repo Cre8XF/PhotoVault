@@ -63,10 +63,10 @@ export default function RotatePanel() {
   const hasChanges = rotation !== 0 || flipH || flipV
 
   return (
-    <div className="p-4 editor-bg-primary">
+    <div className="p-2 md:p-3 editor-bg-primary">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="editor-text-primary font-semibold">{t('editor:rotateAndFlip')}</h3>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="editor-text-primary font-semibold text-sm">{t('editor:rotateAndFlip')}</h3>
         {hasChanges && (
           <button
             onClick={handleReset}
@@ -78,8 +78,8 @@ export default function RotatePanel() {
       </div>
 
       {/* Quick Rotate Buttons */}
-      <div className="mb-3">
-        <p className="text-sm editor-text-muted mb-3">{t('editor:quickRotate')}</p>
+      <div className="mb-2">
+        <p className="text-sm editor-text-muted mb-2">{t('editor:quickRotate')}</p>
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={handleRotateCCW}
@@ -99,7 +99,7 @@ export default function RotatePanel() {
       </div>
 
       {/* Free Rotation Slider */}
-      <div className="mb-3">
+      <div className="mb-2">
         <div className="flex items-center justify-between mb-2">
           <label className="text-sm editor-text-secondary font-medium">
             Free Rotation
@@ -151,7 +151,7 @@ export default function RotatePanel() {
 
       {/* Flip Buttons */}
       <div>
-        <p className="text-sm editor-text-muted mb-3">Flip</p>
+        <p className="text-sm editor-text-muted mb-2">Flip</p>
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={handleFlipH}
@@ -180,7 +180,7 @@ export default function RotatePanel() {
 
       {/* Current Transform - Compact */}
       {hasChanges && (
-        <div className="mt-3 px-3 py-1.5 editor-bg-secondary rounded-lg text-xs editor-text-muted">
+        <div className="mt-2 px-2 py-1 editor-bg-secondary rounded-lg text-xs editor-text-muted">
           {rotation !== 0 && `${rotation}° `}
           {flipH && `↔ `}
           {flipV && `↕`}

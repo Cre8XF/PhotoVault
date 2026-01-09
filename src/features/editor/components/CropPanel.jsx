@@ -107,10 +107,10 @@ export default function CropPanel() {
   ]
 
   return (
-    <div className="p-4 editor-bg-primary">
+    <div className="p-2 md:p-3 editor-bg-primary">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="editor-text-primary font-semibold">Crop</h3>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="editor-text-primary font-semibold text-sm">Crop</h3>
         {crop && (
           <button
             onClick={handleReset}
@@ -125,7 +125,7 @@ export default function CropPanel() {
       {!crop && (
         <button
           onClick={initializeCrop}
-          className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors mb-4 touch-manipulation"
+          className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors mb-3 touch-manipulation"
         >
           Start Cropping
         </button>
@@ -134,8 +134,8 @@ export default function CropPanel() {
       {/* Aspect ratio presets */}
       {crop && (
         <>
-          <p className="text-sm text-gray-400 mb-3">Aspect Ratio</p>
-          <div className="grid grid-cols-3 gap-2 mb-3">
+          <p className="text-sm text-gray-400 mb-2">Aspect Ratio</p>
+          <div className="grid grid-cols-3 gap-2 mb-2">
             {aspectRatios.map((preset) => {
               const isActive = crop.aspectRatio === preset.ratio
 

@@ -46,10 +46,10 @@ export default function FiltersPanel() {
   const hasFilter = filter.active && filter.active !== 'none'
 
   return (
-    <div className="p-4 editor-bg-primary">
+    <div className="p-2 md:p-3 editor-bg-primary">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="editor-text-primary font-semibold">Filters</h3>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="editor-text-primary font-semibold text-sm">Filters</h3>
         {hasFilter && (
           <button
             onClick={handleReset}
@@ -62,7 +62,7 @@ export default function FiltersPanel() {
 
       {/* 🆕 FREEMIUM: Preview Banner for FREE users */}
       {tier === 'FREE' && (
-        <div className="mb-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+        <div className="mb-2 p-2 bg-blue-500/10 border border-blue-500/20 rounded-lg">
           <p className="text-xs text-blue-300">
             🎨 Try all filters! Upgrade to LITE to save.
           </p>
@@ -70,7 +70,7 @@ export default function FiltersPanel() {
       )}
 
       {/* Filter Grid */}
-      <div className="grid grid-cols-4 gap-2 mb-3">
+      <div className="grid grid-cols-4 gap-2 mb-2">
         {FILTER_PRESETS.map((filterName) => {
           const metadata = getFilterMetadata(filterName)
           const isActive = filter.active === filterName
@@ -97,7 +97,7 @@ export default function FiltersPanel() {
 
       {/* Intensity Slider - only show when filter is active */}
       {hasFilter && (
-        <div className="mb-4">
+        <div className="mb-2">
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm editor-text-secondary font-medium">
               Intensity
@@ -139,7 +139,7 @@ export default function FiltersPanel() {
 
       {/* Current Filter Display */}
       {hasFilter && (
-        <div className="p-3 editor-bg-secondary rounded-lg">
+        <div className="p-2 editor-bg-secondary rounded-lg">
           <p className="text-xs editor-text-muted mb-1">Active Filter:</p>
           <div className="flex items-center gap-2">
             <span className="text-xl">

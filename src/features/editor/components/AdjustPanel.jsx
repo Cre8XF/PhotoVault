@@ -44,10 +44,10 @@ export default function AdjustPanel() {
   const hasAdjustments = Object.values(adjustments).some((v) => v !== 0)
 
   return (
-    <div className="p-3 md:p-4 editor-bg-primary">
+    <div className="p-2 md:p-3 editor-bg-primary">
       {/* Header with reset all button */}
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="editor-text-primary font-semibold">Adjustments</h3>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="editor-text-primary font-semibold text-sm">Adjustments</h3>
         {hasAdjustments && (
           <button
             onClick={handleResetAll}
