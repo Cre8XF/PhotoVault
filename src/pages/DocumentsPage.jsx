@@ -7,7 +7,7 @@
 // - Actions: Preview (PDF), Download, Delete
 // ============================================================================
 
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -26,6 +26,8 @@ import { formatDistanceToNow } from 'date-fns'
 import { nb } from 'date-fns/locale'
 import useStore from '../state/store'
 import EmptyState from '../components/EmptyState'
+import UpgradePromptModal from '../components/UpgradePromptModal'
+import useAuth from '../hooks/useAuth'
 
 /**
  * Get icon and color for document based on MIME type
@@ -107,10 +109,19 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
   const { t, i18n } = useTranslation(['common', 'documents'])
   const [searchQuery, setSearchQuery] = useState('')
   const [previewDoc, setPreviewDoc] = useState(null)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
-  // Store
+  // Auth & Store
+  const { canUploadDocument } = useAuth()
   const setConfirmModal = useStore((state) => state.setConfirmModal)
   const setNotification = useStore((state) => state.setNotification)
+
+  // ✅ ROUTE GUARD: Redirect FREE users with upgrade modal
+  useEffect(() => {
+    if (!canUploadDocument()) {
+      setShowUpgradeModal(true)
+    }
+  }, [canUploadDocument])
 
   // Filter only documents
   const documents = useMemo(() => {
@@ -426,6 +437,16 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
           </div>
         </div>
       )}
+
+      {/* Upgrade Prompt Modal for FREE users */}
+      <UpgradePromptModal
+        isOpen={showUpgradeModal}
+        onClose={() => {
+          setShowUpgradeModal(false)
+          navigate('/more')
+        }}
+        feature="documents"
+      />
     </div>
   )
 }
