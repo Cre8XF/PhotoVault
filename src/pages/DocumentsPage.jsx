@@ -353,7 +353,7 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
       ) : documents.length === 0 ? (
         /* No documents uploaded */
         <EmptyState
-          icon={<FolderOpen className="w-12 h-12" />}
+          icon={FolderOpen}
           title={t('documents:emptyTitle', 'No documents yet')}
           description={t(
             'documents:emptyDescription',
@@ -369,7 +369,7 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
       ) : (
         /* No search results */
         <EmptyState
-          icon={<Search className="w-12 h-12" />}
+          icon={Search}
           title={t('documents:noSearchResults', 'No documents found')}
           description={t(
             'documents:tryDifferentSearch',
