@@ -34,9 +34,10 @@
     "unsupportedImageType": "Bildeformat ikke støttet",
     "unsupportedVideoType": "Videoformat ikke støttet",
     "unsupportedDocumentType": "Dokumentformat ikke støttet",
-    "videoNotAllowedGratis": "Video upload er ikke tilgjengelig på gratis-kontoen. Oppgrader til PRO for å laste opp videoer.",
+    "videoNotAllowedFree": "Video upload er ikke tilgjengelig på gratis-kontoen. Oppgrader til PRO for å laste opp videoer.",
     "videoNotAllowedLite": "Video upload er ikke tilgjengelig på LITE-kontoen. Oppgrader til PRO for å laste opp videoer.",
-    "documentNotAllowedGratis": "Dokumentopplasting er tilgjengelig for Lite og Pro",
+    "documentNotAllowedFree": "Dokumentopplasting er tilgjengelig for Lite og Pro",
+    "freeUserCompressionInfo": "💡 Gratis-brukere får original bildekvalitet uten komprimering. Oppgrader til LITE eller PRO for bildekomprimering som sparer lagring.",
     "uploadFailed": "Opplasting feilet",
     "blockedFiles": "Blokerte filer:",
     "blockedFilesMessage": "{{message}}\n\n{{label}}\n{{files}}"

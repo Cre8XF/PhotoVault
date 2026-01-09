@@ -378,10 +378,10 @@ const SubscriptionPage = ({ user }) => {
             <h3 className="text-lg font-semibold mb-3">{t('subscription:aboutSubscriptions')}</h3>
             <div className="space-y-2 text-sm text-gray-400">
               <p>
-                • <strong>GRATIS:</strong> {t('subscription:aboutFree')}
+                • <strong>{t('common:tiers.FREE')}:</strong> {t('subscription:aboutFree')}
               </p>
               <p>
-                • <strong>LITE:</strong> {t('subscription:aboutLite')}
+                • <strong>{t('common:tiers.LITE')}:</strong> {t('subscription:aboutLite')}
               </p>
               {/* PHASE 3: PRO info hidden but tier logic remains */}
               <p className="pt-2 border-t border-white/10">

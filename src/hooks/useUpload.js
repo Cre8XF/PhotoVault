@@ -90,7 +90,7 @@ export function useUpload() {
         if (!canUploadVideo) {
           fileErrors.push(
             tier() === 'FREE'
-              ? t('errors.videoNotAllowedGratis')
+              ? t('errors.videoNotAllowedFree')
               : t('errors.videoNotAllowedLite')
           )
           devLog(`❌ Video blocked: ${file.name} (tier: ${tier()})`)
@@ -103,7 +103,7 @@ export function useUpload() {
       // ✅ DOCUMENT TIER CHECK (LITE + PRO only)
       if (isDocument) {
         if (!canUploadDocument) {
-          fileErrors.push(t('errors.documentNotAllowedGratis'))
+          fileErrors.push(t('errors.documentNotAllowedFree'))
           devLog(`❌ Document blocked: ${file.name} (tier: ${tier()})`)
         } else if (!ALLOWED_DOCUMENT_TYPES.includes(fileType) && !/\.(pdf|docx?|xlsx?|txt)$/i.test(file.name)) {
           fileErrors.push(t('errors.unsupportedDocumentType'))

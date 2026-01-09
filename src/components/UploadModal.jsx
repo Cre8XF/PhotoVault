@@ -272,7 +272,7 @@ const UploadModal = ({
       if (blockedVideos.length > 0) {
         const baseMessage =
           tier() === 'FREE'
-            ? t('upload:errors.videoNotAllowedGratis')
+            ? t('upload:errors.videoNotAllowedFree')
             : t('upload:errors.videoNotAllowedLite')
 
         const message = `${baseMessage}\n\n${t(
@@ -1075,9 +1075,7 @@ const UploadModal = ({
               {tier() === 'FREE' && (
                 <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                   <p className="text-xs text-blue-400">
-                    💡 gratis-brukere får original bildekvalitet uten
-                    komprimering. Oppgrader til LITE eller PRO for
-                    bildekomprimering som sparer lagring.
+                    {t('upload:errors.freeUserCompressionInfo')}
                   </p>
                 </div>
               )}
