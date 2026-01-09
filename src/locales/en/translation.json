@@ -384,7 +384,38 @@
     "help": "Help",
     "close": "Close",
     "confirmDelete": "Confirm deletion",
-
     "continue": "Continue"
+  },
+  "upgrade": {
+    "title": "Upgrade to {{tier}}",
+    "documents": {
+      "title": "Documents",
+      "description": "Store and manage PDFs, Word files and other documents",
+      "benefits": [
+        "Unlimited document uploads",
+        "Secure cloud storage",
+        "Fast preview and download"
+      ]
+    },
+    "vault": {
+      "title": "Secure Vault",
+      "description": "Encrypted private photos and files",
+      "benefits": [
+        "End-to-end encryption",
+        "Biometric protection",
+        "Private sharing"
+      ]
+    },
+    "videos": {
+      "title": "Videos",
+      "description": "Upload and manage videos",
+      "benefits": [
+        "Unlimited video storage",
+        "HD video support",
+        "Automatic compression"
+      ]
+    },
+    "cta": "Upgrade to {{tier}}",
+    "cancel": "Cancel"
   }
 }

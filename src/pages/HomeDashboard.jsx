@@ -21,7 +21,8 @@ import {
   Heart,
   Upload,
   FolderPlus,
-  Image
+  Image,
+  Lock
 } from "lucide-react";
 import LazyImage from "../components/LazyImage";
 import { useTranslation } from "react-i18next";
@@ -39,6 +40,8 @@ import ActivityFeed from "../components/ActivityFeed";
 import TipsCarousel from "../components/TipsCarousel";
 import { Chip } from "../components/Chip";
 import { groupPhotosByTime } from "../utils/groupPhotosByTime";
+import UpgradePromptModal from "../components/UpgradePromptModal";
+import useAuth from "../hooks/useAuth";
 import "../styles/emptyState.css";
 import "../styles/scrollToTop.css";
 import "../styles/quickActions.css";
@@ -49,10 +52,28 @@ import "../styles/collageTeaser.css";
 const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, onPhotoClick }) => {
   const navigate = useNavigate();
   const { t } = useTranslation(["common", "home"]);
+  const { userProfile } = useAuth();
   const [isUploadOpen, setUploadOpen] = useState(false);
   const [uploadMode, setUploadMode] = useState('upload'); // 'upload' or 'album'
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [selectedTags, setSelectedTags] = useState([]);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(null);
+
+  // 🔒 FEATURE CAPABILITIES BASED ON SUBSCRIPTION TIER
+  const capabilities = {
+    videos: userProfile?.subscriptionTier !== 'FREE'
+  };
+
+  // Wrap onPhotoClick to check for video lock
+  const handlePhotoClickWithLock = (photo, allPhotos) => {
+    // Check if it's a locked video
+    if (photo.type === 'video' && !capabilities.videos) {
+      setShowUpgradeModal('videos');
+      return;
+    }
+    // Otherwise, proceed with normal photo click
+    onPhotoClick(photo, allPhotos);
+  };
 
   // ✅ DEFENSIVE GUARD: Prevent render before user is ready (mobile resume stability)
   if (!user) {
@@ -327,8 +348,9 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
       {!isInitialLoading && (
         <HomeMemoriesWidget
           photos={filteredPhotosByTags}
-          onPhotoClick={onPhotoClick}
+          onPhotoClick={handlePhotoClickWithLock}
           onViewAll={() => navigate('/timeline')}
+          capabilities={capabilities}
         />
       )}
 
@@ -417,27 +439,41 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
                 </button>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-                {favoritePhotos.map((photo, i) => (
-                  <div
-                    key={photo.id}
-                    className="relative group cursor-pointer aspect-square rounded-xl overflow-hidden"
-                    onClick={() => onPhotoClick(photo, favoritePhotos)}
-                    style={{ animationDelay: `${Math.min(i * 0.05, 0.2)}s` }}
-                  >
-                    <LazyImage
-                      src={photo.type === 'video' ? (photo.thumbnailUrl || photo.url) : photo.url}
-                      thumbnail={photo.thumbnailSmall}
-                      photoId={photo.id}
-                      alt={photo.name || t("common:photo")}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <Star
-                      className="absolute top-2 right-2 w-5 h-5 text-yellow-400 drop-shadow-lg"
-                      fill="currentColor"
-                    />
-                  </div>
-                ))}
+                {favoritePhotos.map((photo, i) => {
+                  const isVideoLocked = photo.type === 'video' && !capabilities.videos
+
+                  return (
+                    <div
+                      key={photo.id}
+                      className="relative group cursor-pointer aspect-square rounded-xl overflow-hidden"
+                      onClick={() => handlePhotoClickWithLock(photo, favoritePhotos)}
+                      style={{ animationDelay: `${Math.min(i * 0.05, 0.2)}s` }}
+                    >
+                      <LazyImage
+                        src={photo.type === 'video' ? (photo.thumbnailUrl || photo.url) : photo.url}
+                        thumbnail={photo.thumbnailSmall}
+                        photoId={photo.id}
+                        alt={photo.name || t("common:photo")}
+                        className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 ${
+                          isVideoLocked ? 'opacity-60' : ''
+                        }`}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <Star
+                        className="absolute top-2 right-2 w-5 h-5 text-yellow-400 drop-shadow-lg"
+                        fill="currentColor"
+                      />
+                      {/* Lock overlay for locked videos */}
+                      {isVideoLocked && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <div className="glass p-3 rounded-xl">
+                            <Lock className="w-6 h-6 text-white" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </section>
           ) : (
@@ -502,7 +538,8 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
               <TimeGroupSection
                 key={group.key}
                 group={group}
-                onPhotoClick={onPhotoClick}
+                onPhotoClick={handlePhotoClickWithLock}
+                capabilities={capabilities}
                 onHeaderClick={(group) => {
                   console.log('═══════════════════════════════════════');
                   console.log('📅 TIME GROUP CLICKED');
@@ -646,6 +683,13 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
         onCreateAlbum={handleCreateAlbum}
         albums={albums}
         initialMode={uploadMode}
+      />
+
+      {/* Upgrade Prompt Modal */}
+      <UpgradePromptModal
+        isOpen={showUpgradeModal !== null}
+        onClose={() => setShowUpgradeModal(null)}
+        feature={showUpgradeModal}
       />
     </div>
   );

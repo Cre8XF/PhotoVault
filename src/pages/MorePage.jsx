@@ -77,6 +77,7 @@ import { reauthenticateUser, deleteAuthUser } from '../utils/authHelpers'
 import { deleteAllUserR2Objects } from '../utils/r2Upload'
 import ComingSoonModal from '../components/ComingSoonModal'
 import SharePixtrModal from '../components/SharePixtrModal'
+import UpgradePromptModal from '../components/UpgradePromptModal'
 import { useStorageCalc } from '../hooks/useStorageCalc'
 import SystemStatus from '../components/admin/SystemStatus'
 import useStore from '../state/store'
@@ -118,11 +119,18 @@ const MorePage = ({
   const [reconciling, setReconciling] = useState(false)
   const [reconcileResult, setReconcileResult] = useState(null)
   const [lastReconciliation, setLastReconciliation] = useState(null)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(null)
 
   const { pinEnabled, biometricEnabled } = useSecurityContext()
 
   // ✅ DOCUMENT ACCESS CONTROL
   const { canUploadDocument, isAdmin: checkIsAdmin, userProfile } = useAuth()
+
+  // 🔒 FEATURE CAPABILITIES BASED ON SUBSCRIPTION TIER
+  const capabilities = {
+    documents: userProfile?.subscriptionTier !== 'FREE',
+    vault: userProfile?.subscriptionTier !== 'FREE'
+  }
 
   // 🔒 SIKRE AT PROPS ER ARRAYS
   const safePhotos = React.useMemo(() => {
@@ -890,63 +898,84 @@ const MorePage = ({
       </div>
 
       {/* === CONTENT === */}
-      {canUploadDocument() && (
-        <section className="glass rounded-2xl p-6 mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="p-2 bg-purple-600/20 rounded-lg">
-              <Folder className="w-5 h-5 text-purple" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg">
-                {t('content.title', 'Content')}
-              </h3>
+      {/* Always show Content section - with locks for FREE users */}
+      <section className="glass rounded-2xl p-6 mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="p-2 bg-purple-600/20 rounded-lg">
+            <Folder className="w-5 h-5 text-purple" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg">
+              {t('content.title', 'Content')}
+            </h3>
+            <p className="text-xs text-muted">
+              {t(
+                'content.subtitle',
+                'Your uploaded files and protected content'
+              )}
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          {/* Documents button */}
+          <button
+            onClick={() => capabilities.documents
+              ? navigate('/documents')
+              : setShowUpgradeModal('documents')
+            }
+            className={`ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10 relative ${
+              !capabilities.documents ? 'opacity-60' : ''
+            }`}
+          >
+            {!capabilities.documents && (
+              <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                <Lock className="w-5 h-5 text-purple" />
+              </div>
+            )}
+            <FileText className="w-5 h-5 text-purple" />
+            <div className="flex-1">
+              <p className="font-medium">{t('nav:documents', 'Documents')}</p>
               <p className="text-xs text-muted">
                 {t(
-                  'content.subtitle',
-                  'Your uploaded files and protected content'
+                  'documents:subtitle',
+                  'PDFs, Word files and other documents'
                 )}
               </p>
             </div>
-          </div>
+            <ChevronRight className="w-5 h-5 opacity-50" />
+          </button>
 
-          <div className="space-y-2">
-            <button
-              onClick={() => navigate('/documents')}
-              className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
-            >
-              <FileText className="w-5 h-5 text-purple" />
-              <div className="flex-1">
-                <p className="font-medium">{t('nav:documents', 'Documents')}</p>
-                <p className="text-xs text-muted">
-                  {t(
-                    'documents:subtitle',
-                    'PDFs, Word files and other documents'
-                  )}
-                </p>
+          {/* Vault button */}
+          <button
+            onClick={() => capabilities.vault
+              ? navigate('/vault')
+              : setShowUpgradeModal('vault')
+            }
+            className={`ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10 relative ${
+              !capabilities.vault ? 'opacity-60' : ''
+            }`}
+          >
+            {!capabilities.vault && (
+              <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                <Lock className="w-5 h-5 text-purple" />
               </div>
-              <ChevronRight className="w-5 h-5 opacity-50" />
-            </button>
-
-            <button
-              onClick={() => navigate('/vault')}
-              className="ripple-effect w-full bg-white/5 hover:bg-white/10 p-4 rounded-xl transition flex items-center gap-3 text-left border border-white/10"
-            >
-              <Lock className="w-5 h-5 text-purple" />
-              <div className="flex-1">
-                <p className="font-medium">
-                  {t('vault.title', { defaultValue: 'Secure Vault' })}
-                </p>
-                <p className="text-xs text-muted">
-                  {t('vault.description', {
-                    defaultValue: 'Encrypted private photos and files',
-                  })}
-                </p>
-              </div>
-              <ChevronRight className="w-5 h-5 opacity-50" />
-            </button>
-          </div>
-        </section>
-      )}
+            )}
+            <Lock className="w-5 h-5 text-purple" />
+            <div className="flex-1">
+              <p className="font-medium">
+                {t('vault.title', { defaultValue: 'Secure Vault' })}
+              </p>
+              <p className="text-xs text-muted">
+                {t('vault.description', {
+                  defaultValue: 'Encrypted private photos and files',
+                })}
+              </p>
+            </div>
+            <ChevronRight className="w-5 h-5 opacity-50" />
+          </button>
+        </div>
+      </section>
 
       {/* === MAIN CONTENT GRID === */}
       <div className="grid md:grid-cols-2 gap-6">
@@ -1718,6 +1747,13 @@ const MorePage = ({
       <SharePixtrModal
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
+      />
+
+      {/* === UPGRADE PROMPT MODAL === */}
+      <UpgradePromptModal
+        isOpen={showUpgradeModal !== null}
+        onClose={() => setShowUpgradeModal(null)}
+        feature={showUpgradeModal}
       />
     </div>
   )
