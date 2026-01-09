@@ -384,7 +384,38 @@
     "help": "Hjelp",
     "close": "Lukk",
     "confirmDelete": "Bekreft sletting",
-
     "continue": "Fortsett"
+  },
+  "upgrade": {
+    "title": "Oppgrader til {{tier}}",
+    "documents": {
+      "title": "Dokumenter",
+      "description": "Lagre og administrer PDF-er, Word-filer og andre dokumenter",
+      "benefits": [
+        "Ubegrensede dokumentopplastinger",
+        "Sikker skylagring",
+        "Rask forhåndsvisning og nedlasting"
+      ]
+    },
+    "vault": {
+      "title": "Sikker Vault",
+      "description": "Krypterte private bilder og filer",
+      "benefits": [
+        "Ende-til-ende-kryptering",
+        "Biometrisk beskyttelse",
+        "Privat deling"
+      ]
+    },
+    "videos": {
+      "title": "Videoer",
+      "description": "Last opp og administrer videoer",
+      "benefits": [
+        "Ubegrenset videolagring",
+        "HD-videostøtte",
+        "Automatisk komprimering"
+      ]
+    },
+    "cta": "Oppgrader til {{tier}}",
+    "cancel": "Avbryt"
   }
 }
