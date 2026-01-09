@@ -81,17 +81,19 @@
   align-items: center;
 }
 
-/* Viewport */
+/* Viewport - ABSOLUTE POSITIONED for fullscreen */
 .editor-v4-viewport {
-  position: relative;
-  flex: 1;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  top: 50px;
+  bottom: 80px;
+  left: 0;
+  right: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #000;
   overflow: hidden;
+  z-index: 1;
 }
 
 .editor-v4-canvas-wrapper {
@@ -156,15 +158,15 @@
   font-weight: 500;
 }
 
-/* Overlay panels */
+/* Overlay panels - TRUE OVERLAYS above viewport */
 .editor-v4-overlay {
   position: absolute;
   bottom: 80px; /* Above toolbar */
   left: 0;
   right: 0;
-  max-height: 280px;
+  max-height: 50vh; /* Use viewport height for better responsiveness */
   background: rgba(30, 30, 30, 0.95);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px);
   border-radius: 16px 16px 0 0;
   padding: 20px;
   z-index: 25;
@@ -223,9 +225,14 @@
     height: 70px;
   }
 
+  .editor-v4-viewport {
+    top: 50px;
+    bottom: 70px;
+  }
+
   .editor-v4-overlay {
     bottom: 70px;
-    max-height: 320px;
+    max-height: 55vh; /* Slightly larger on mobile for better usability */
   }
 
   .editor-v4-toolbar-button {
