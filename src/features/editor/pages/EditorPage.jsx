@@ -29,7 +29,7 @@ export default function EditorPage() {
 
   // 🆕 FREEMIUM: Get user tier
   const { userProfile } = useAuth()
-  const tier = userProfile?.subscriptionTier || 'GRATIS'
+  const tier = userProfile?.subscriptionTier || 'FREE'
 
   // Get photo from data layer
   const photo = getPhotoById(photoId)
@@ -110,8 +110,8 @@ export default function EditorPage() {
       return
     }
 
-    // 🆕 FREEMIUM: Block save for GRATIS users with filters/adjustments
-    if (tier === 'GRATIS') {
+    // 🆕 FREEMIUM: Block save for FREE users with filters/adjustments
+    if (tier === 'FREE') {
       const hasFilterOrAdjustments =
         (transform.filter?.active && transform.filter.active !== 'none') ||
         Object.values(transform.adjustments).some((v) => v !== 0)

@@ -33,7 +33,7 @@ const BillingPage = () => {
       storage: '10 GB',
       priceId: STRIPE_LITE_PRICE_ID,
       features: [
-        'Alt i GRATIS',
+        'Everything in Free',
         '10 GB lagring',
         'Bildekomprimering',
         'Dokumentopplasting',

@@ -89,7 +89,7 @@ export function useUpload() {
       if (isVideo) {
         if (!canUploadVideo) {
           fileErrors.push(
-            tier() === 'GRATIS'
+            tier() === 'FREE'
               ? t('errors.videoNotAllowedGratis')
               : t('errors.videoNotAllowedLite')
           )
@@ -419,7 +419,7 @@ export function useUpload() {
               `🖼️ Image compressed: ${(file.size / 1024 / 1024).toFixed(1)}MB → ${(compressedFile.size / 1024 / 1024).toFixed(1)}MB`
             )
           } else {
-            // Original quality (GRATIS tier OR toggle OFF)
+            // Original quality (FREE tier OR toggle OFF)
             totalCompressedSize += file.size
             processedFiles.push({
               file: file, // ✅ Original file

@@ -69,7 +69,7 @@ function LandingPage() {
 
   const pricing = [
     {
-      name: 'GRATIS',
+      name: 'FREE',
       price: '0 kr',
       period: t('landing:pricing.free.period'),
       storage: '1 GB',

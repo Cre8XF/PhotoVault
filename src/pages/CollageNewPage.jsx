@@ -72,7 +72,7 @@ const CollageNewPage = () => {
 
   // 🆕 FREEMIUM: Get user tier
   const { userProfile } = useAuth()
-  const tier = userProfile?.subscriptionTier || 'GRATIS'
+  const tier = userProfile?.subscriptionTier || 'FREE'
 
   // Get template ID from query params
   const templateId = searchParams.get('template')
@@ -178,8 +178,8 @@ const CollageNewPage = () => {
       return
     }
 
-    // 🆕 FREEMIUM: Block save for GRATIS users
-    if (tier === 'GRATIS') {
+    // 🆕 FREEMIUM: Block save for FREE users
+    if (tier === 'FREE') {
       setSaveError('💎 Upgrade to LITE to save collages')
       return
     }
@@ -572,8 +572,8 @@ const CollageNewPage = () => {
             </div>
           )}
 
-          {/* 🆕 FREEMIUM: Preview Banner for GRATIS users */}
-          {tier === 'GRATIS' && !saveError && (
+          {/* 🆕 FREEMIUM: Preview Banner for FREE users */}
+          {tier === 'FREE' && !saveError && (
             <div className="bg-blue-500/20 border-t border-blue-500/30 px-4 py-2">
               <span className="text-sm text-blue-300">
                 🎨 Build your collage! Upgrade to LITE to save.

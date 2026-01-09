@@ -114,16 +114,16 @@ const UploadModal = ({
   const [showAlbums, setShowAlbums] = useState(false)
   const [autoCompress, setAutoCompress] = useState(() => {
     // FREE users cannot compress - always false
-    if (tier() === 'GRATIS') return false
+    if (tier() === 'FREE') return false
 
     // LITE/PRO users - read from localStorage
     const saved = localStorage.getItem('autoCompress')
     return saved !== 'false' // Default true for LITE/PRO
   })
-  // 🔒 FORCE autoCompress OFF for GRATIS users (visual + state safety)
+  // 🔒 FORCE autoCompress OFF for FREE users (visual + state safety)
   // Also prevents race condition where localStorage loads before userProfile
   useEffect(() => {
-    if (authReady && tier() === 'GRATIS' && autoCompress) {
+    if (authReady && tier() === 'FREE' && autoCompress) {
       setAutoCompress(false)
     }
   }, [authReady, tier, autoCompress])
@@ -151,7 +151,7 @@ const UploadModal = ({
 
   // Update localStorage when autoCompress changes (only for LITE/PRO users)
   useEffect(() => {
-    if (tier() !== 'GRATIS') {
+    if (tier() !== 'FREE') {
       localStorage.setItem('autoCompress', autoCompress)
     }
   }, [autoCompress, tier])
@@ -271,7 +271,7 @@ const UploadModal = ({
       // Show feedback if videos were blocked
       if (blockedVideos.length > 0) {
         const baseMessage =
-          tier() === 'GRATIS'
+          tier() === 'FREE'
             ? t('upload:errors.videoNotAllowedGratis')
             : t('upload:errors.videoNotAllowedLite')
 
@@ -382,9 +382,9 @@ const UploadModal = ({
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
   }
 
-  // Toggle compression (disabled for GRATIS users and before auth is ready)
+  // Toggle compression (disabled for FREE users and before auth is ready)
   const handleCompressToggle = () => {
-    if (!authReady || tier() === 'GRATIS') return // Cannot toggle before auth or for FREE users
+    if (!authReady || tier() === 'FREE') return // Cannot toggle before auth or for FREE users
     const newValue = !autoCompress
     setAutoCompress(newValue)
     localStorage.setItem('autoCompress', newValue.toString())
@@ -465,7 +465,7 @@ const UploadModal = ({
     // PRE-CHECK: Album photo limit (Free tier only)
     // MUST happen BEFORE any upload starts
     // ============================================================
-    if (selectedAlbumId && userTier === 'GRATIS') {
+    if (selectedAlbumId && userTier === 'FREE') {
       // Find the selected album
       const selectedAlbum = (Array.isArray(albums) ? albums : []).find(
         (a) => a.id === selectedAlbumId
@@ -522,7 +522,7 @@ const UploadModal = ({
     }
 
     // ✅ Derive explicit compression permission
-    const canUseCompression = tier() !== 'GRATIS' && autoCompress === true
+    const canUseCompression = tier() !== 'FREE' && autoCompress === true
 
     devLog('🔒 Compression check:', {
       tier: tier(),
@@ -1011,7 +1011,7 @@ const UploadModal = ({
             {/* Auto Compress Toggle */}
             <div
               className={`rounded-xl p-4 border ${
-                tier() === 'GRATIS'
+                tier() === 'FREE'
                   ? 'bg-gray-600/10 border-gray-600/20'
                   : 'bg-green-500/10 border-green-500/20'
               }`}
@@ -1020,29 +1020,29 @@ const UploadModal = ({
                 <div className="flex items-center gap-3">
                   <div
                     className={`p-2 rounded-lg ${
-                      tier() === 'GRATIS' ? 'bg-gray-600/20' : 'bg-green-600/30'
+                      tier() === 'FREE' ? 'bg-gray-600/20' : 'bg-green-600/30'
                     }`}
                   >
                     <Zap
                       className={`w-5 h-5 ${
-                        tier() === 'GRATIS' ? 'text-gray-400' : 'text-green-400'
+                        tier() === 'FREE' ? 'text-gray-400' : 'text-green-400'
                       }`}
                     />
                   </div>
                   <div>
                     <p
                       className={`font-medium ${
-                        tier() === 'GRATIS' ? 'text-gray-400' : ''
+                        tier() === 'FREE' ? 'text-gray-400' : ''
                       }`}
                     >
                       {t('upload:autoCompress')}
                     </p>
                     <p
                       className={`text-xs ${
-                        tier() === 'GRATIS' ? 'text-gray-500' : 'text-gray-400'
+                        tier() === 'FREE' ? 'text-gray-500' : 'text-gray-400'
                       }`}
                     >
-                      {tier() === 'GRATIS'
+                      {tier() === 'FREE'
                         ? 'Available on Lite & Pro'
                         : t('upload:autoCompressDesc')}
                     </p>
@@ -1052,9 +1052,9 @@ const UploadModal = ({
                 {/* Toggle switch */}
                 <button
                   onClick={handleCompressToggle}
-                  disabled={uploading || !authReady || tier() === 'GRATIS'}
+                  disabled={uploading || !authReady || tier() === 'FREE'}
                   className={`relative w-14 h-7 rounded-full transition ${
-                    !authReady || tier() === 'GRATIS'
+                    !authReady || tier() === 'FREE'
                       ? 'bg-gray-700 cursor-not-allowed'
                       : autoCompress
                       ? 'bg-green-600'
@@ -1063,7 +1063,7 @@ const UploadModal = ({
                 >
                   <div
                     className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                      authReady && autoCompress && tier() !== 'GRATIS'
+                      authReady && autoCompress && tier() !== 'FREE'
                         ? 'translate-x-7'
                         : 'translate-x-0'
                     }`}
@@ -1072,10 +1072,10 @@ const UploadModal = ({
               </div>
 
               {/* Info badge for FREE users */}
-              {tier() === 'GRATIS' && (
+              {tier() === 'FREE' && (
                 <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                   <p className="text-xs text-blue-400">
-                    💡 GRATIS-brukere får original bildekvalitet uten
+                    💡 gratis-brukere får original bildekvalitet uten
                     komprimering. Oppgrader til LITE eller PRO for
                     bildekomprimering som sparer lagring.
                   </p>
@@ -1083,7 +1083,7 @@ const UploadModal = ({
               )}
 
               {/* Compression stats - only show if tier allows compression */}
-              {tier() !== 'GRATIS' && compressionStats && (
+              {tier() !== 'FREE' && compressionStats && (
                 <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
                   <p className="text-sm text-green-400 font-medium">
                     {t('upload:compressionSaved')}:{' '}

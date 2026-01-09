@@ -3,7 +3,7 @@
     "icon": "📁",
     "title": "Du har nådd albumgrensen!",
     "subtitle": "Men du elsker tydeligvis Pixtr 🎉",
-    "painPoint": "GRATIS = maks 5 album",
+    "painPoint": "Gratis = maks 5 album",
     "solution": "LITE = Ubegrensede album",
     "features": [
       "✅ Ubegrensede album",
@@ -18,7 +18,7 @@
     "icon": "📸",
     "title": "Albumet er fullt!",
     "subtitle": "Tid å oppgradere eller lage et nytt album",
-    "painPoint": "GRATIS = 20 bilder per album",
+    "painPoint": "Gratis = 20 bilder per album",
     "solution": "LITE = Ubegrensede bilder per album",
     "features": [
       "✅ Ubegrensede bilder per album",
@@ -33,7 +33,7 @@
     "icon": "🎨",
     "title": "Liker du denne redigeringen?",
     "subtitle": "Oppgrader for å lagre den!",
-    "painPoint": "GRATIS = Kun forhåndsvisning",
+    "painPoint": "Gratis = Kun forhåndsvisning",
     "solution": "LITE = Lagre alle redigeringer",
     "features": [
       "✅ Lagre filtre & justeringer",
@@ -48,7 +48,7 @@
     "icon": "🖼️",
     "title": "Flott collage!",
     "subtitle": "Oppgrader for å lagre den",
-    "painPoint": "GRATIS = Kun bygging",
+    "painPoint": "Gratis = Kun bygging",
     "solution": "LITE = Lagre collager",
     "features": [
       "✅ Lagre ubegrensede collager",
@@ -63,7 +63,7 @@
     "icon": "⚠️",
     "title": "Lagring nesten full",
     "subtitle": "Du har brukt 90% av lagringsplassen din",
-    "painPoint": "GRATIS = 1 GB",
+    "painPoint": "Gratis = 1 GB",
     "solution": "LITE = 10 GB (10x mer)",
     "features": [
       "✅ 10 GB lagring (10x mer)",
@@ -78,7 +78,7 @@
     "icon": "🚫",
     "title": "Lagring full!",
     "subtitle": "Slett bilder eller oppgrader",
-    "painPoint": "GRATIS = 1 GB",
+    "painPoint": "Gratis = 1 GB",
     "solution": "LITE = 10 GB",
     "features": [
       "✅ 10 GB lagring (10x mer)",

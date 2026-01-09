@@ -56,7 +56,7 @@ const AboutPage = () => {
 
   const plans = [
     {
-      name: 'GRATIS',
+      name: 'FREE',
       storage: '1 GB',
       features: [
         t('landing:pricing.free.feature1'),

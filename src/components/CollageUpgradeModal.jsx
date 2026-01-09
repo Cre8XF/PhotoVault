@@ -3,7 +3,7 @@ import { X, Sparkles, Check } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 /**
- * CollageUpgradeModal - Shown to GRATIS users when they try to create a collage
+ * CollageUpgradeModal - Shown to FREE users when they try to create a collage
  * Encourages upgrade BEFORE user invests time in building
  *
  * @param {boolean} isOpen - Modal visibility

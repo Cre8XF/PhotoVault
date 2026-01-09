@@ -1,6 +1,6 @@
 // ============================================================================
 // cleanup-invalid-documents.mjs
-// Script to remove documents uploaded by GRATIS users (tier bypass)
+// Script to remove documents uploaded by FREE tier users (tier bypass)
 // ============================================================================
 
 import { initializeApp } from 'firebase/app'

@@ -17,7 +17,7 @@
   "currentPlanButton": "Nåværende Plan",
   "upgradeToButton": "Oppgrader til {plan}",
   "aboutSubscriptions": "Om Abonnementene",
-  "aboutGratis": "GRATIS: Perfekt for å teste ut Pixtr. Original bildekvalitet uten komprimering.",
+  "aboutFree": "GRATIS: Perfekt for å teste ut Pixtr. Original bildekvalitet uten komprimering.",
   "aboutLite": "LITE: For deg som trenger mer plass med bildekomprimering for optimal lagring.",
   "allPlansInclude": "Alle planer inkluderer QR-kode deling, Collage Builder, Timeline og søkefunksjonalitet.",
   "yes": "Ja",
@@ -27,7 +27,7 @@
   "originalQuality": "Original kvalitet",
   "perMonth": "per måned",
   "features": {
-    "gratis": {
+    "free": {
       "storage": "1 GB lagring",
       "quality": "Original bildekvalitet",
       "albums": "Album-organisering",
@@ -37,7 +37,7 @@
       "search": "Søk i bilder"
     },
     "lite": {
-      "allInGratis": "Alt i GRATIS",
+      "allInFree": "Alt i Gratis",
       "storage": "10 GB lagring",
       "compression": "Bildekomprimering",
       "support": "Prioritert support"

@@ -10,11 +10,11 @@ const StorageIndicator = () => {
   const { photos } = usePhotoData()
 
   // Get user tier (from Firestore user document or subscription tier)
-  const userTier = userProfile?.subscriptionTier || user?.tier || 'GRATIS'
+  const userTier = userProfile?.subscriptionTier || user?.tier || 'FREE'
 
   // Storage limits (in bytes)
   const limits = {
-    GRATIS: 1 * 1024 * 1024 * 1024, // 1 GB
+    FREE: 1 * 1024 * 1024 * 1024, // 1 GB
     LITE: 10 * 1024 * 1024 * 1024,  // 10 GB
     PRO: 50 * 1024 * 1024 * 1024    // 50 GB
   }
@@ -50,7 +50,7 @@ const StorageIndicator = () => {
           </h3>
         </div>
 
-        <Badge variant="purple">{userTier}</Badge>
+        <Badge variant="purple">{t(`common:tiers.${userTier}`)}</Badge>
       </div>
 
       {/* Progress bar */}
@@ -71,7 +71,7 @@ const StorageIndicator = () => {
       </div>
 
       {/* Upgrade CTA if near limit or on free tier */}
-      {(percentage > 80 || userTier === 'GRATIS') && (
+      {(percentage > 80 || userTier === 'FREE') && (
         <div className="mt-4 p-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white">
           <div className="flex items-center justify-between">
             <div>
@@ -81,7 +81,7 @@ const StorageIndicator = () => {
                   : t('storage:upgradeMessage')}
               </p>
               <p className="text-sm opacity-90">
-                {userTier === 'GRATIS'
+                {userTier === 'FREE'
                   ? t('storage:liteOffer')
                   : t('storage:proOffer')}
               </p>

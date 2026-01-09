@@ -17,7 +17,7 @@
   "currentPlanButton": "Current Plan",
   "upgradeToButton": "Upgrade to {plan}",
   "aboutSubscriptions": "About Subscriptions",
-  "aboutGratis": "GRATIS: Perfect for testing out Pixtr. Original image quality without compression.",
+  "aboutFree": "FREE: Perfect for testing out Pixtr. Original image quality without compression.",
   "aboutLite": "LITE: For those who need more space with image compression for optimal storage.",
   "allPlansInclude": "All plans include QR code sharing, Collage Builder, Timeline and search functionality.",
   "yes": "Yes",
@@ -27,7 +27,7 @@
   "originalQuality": "Original quality",
   "perMonth": "per month",
   "features": {
-    "gratis": {
+    "free": {
       "storage": "1 GB storage",
       "quality": "Original image quality",
       "albums": "Album organization",
@@ -37,7 +37,7 @@
       "search": "Search in photos"
     },
     "lite": {
-      "allInGratis": "All in GRATIS",
+      "allInFree": "Everything in Free",
       "storage": "10 GB storage",
       "compression": "Image compression",
       "support": "Priority support"

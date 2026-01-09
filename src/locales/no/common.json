@@ -274,5 +274,10 @@
       "description": "Vennligst prøv igjen eller kontakt support hvis problemet vedvarer",
       "action": "Prøv igjen"
     }
+  },
+  "tiers": {
+    "FREE": "Gratis",
+    "LITE": "Lite",
+    "PRO": "Pro"
   }
 }

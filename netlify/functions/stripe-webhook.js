@@ -84,7 +84,7 @@ function mapPriceIdToTierAndStorage(priceId) {
   // Default to GRATIS if price ID doesn't match
   console.warn(`⚠️ Unknown price ID: ${priceId}, defaulting to GRATIS`)
   return {
-    tier: 'GRATIS',
+    tier: 'FREE',
     storageLimit: 1073741824, // 1 GB in bytes
   }
 }
@@ -363,7 +363,7 @@ export async function handler(event) {
       const db = getFirestore()
       await db.collection('users').doc(uid).set(
         {
-          subscriptionTier: 'GRATIS',
+          subscriptionTier: 'FREE',
           subscriptionStatus: 'canceled',
           stripeSubscriptionId: null,
           storageLimit: 1073741824, // 1 GB in bytes for GRATIS tier
@@ -382,7 +382,7 @@ export async function handler(event) {
           received: true,
           type: stripeEvent.type,
           uid: uid,
-          tier: 'GRATIS',
+          tier: 'FREE',
         }),
       }
     } catch (error) {

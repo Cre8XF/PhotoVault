@@ -211,7 +211,7 @@ export async function getAlbumsByUser(userId) {
 // 🔹 Legg til nytt album (oppdatert og sikret) - WITH FREEMIUM LIMITS
 /**
  * Create album with automatic rollback on error
- * Enforces GRATIS tier limit: 5 albums max
+ * Enforces FREE tier limit: 5 albums max
  */
 export async function addAlbum(data) {
   const user = auth.currentUser
@@ -237,11 +237,11 @@ export async function addAlbum(data) {
     }
 
     const userData = userSnap.data()
-    const tier = userData.subscriptionTier || 'GRATIS'
+    const tier = userData.subscriptionTier || 'FREE'
     const currentCount = userData.currentAlbumCount || 0
 
-    // ENFORCE LIMIT for GRATIS tier
-    if (tier === 'GRATIS' && currentCount >= 5) {
+    // ENFORCE LIMIT for FREE tier
+    if (tier === 'FREE' && currentCount >= 5) {
       const error = new Error('Album limit reached')
       error.code = 'ALBUM_LIMIT_REACHED'
       error.current = currentCount
@@ -1042,11 +1042,11 @@ export async function uploadPhoto(
       const albumData = albumSnap.data()
       const userRef = doc(db, 'users', userId)
       const userSnap = await getDoc(userRef)
-      const tier = userSnap.data()?.subscriptionTier || 'GRATIS'
+      const tier = userSnap.data()?.subscriptionTier || 'FREE'
       const currentPhotoCount = albumData.photoCount || 0
 
-      // ENFORCE LIMIT for GRATIS tier
-      if (tier === 'GRATIS' && currentPhotoCount >= 20) {
+      // ENFORCE LIMIT for FREE tier
+      if (tier === 'FREE' && currentPhotoCount >= 20) {
         const error = new Error('Photo limit reached for this album')
         error.code = 'PHOTO_LIMIT_REACHED'
         error.current = currentPhotoCount
