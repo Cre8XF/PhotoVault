@@ -76,13 +76,13 @@ export default function AdminDashboard() {
 
       usersSnapshot.forEach((doc) => {
         const data = doc.data()
-        const tier = data.subscriptionTier || 'GRATIS'
+        const tier = data.subscriptionTier || 'FREE'
         const storageUsed = data.storageUsed || 0
 
         totalUsers++
 
         // Count by tier
-        if (tier === 'GRATIS') {
+        if (tier === 'FREE') {
           gratisUsers++
           gratisStorageBytes += storageUsed
         } else if (tier === 'LITE') {
@@ -607,7 +607,7 @@ function KillSwitch({ icon, label, description, enabled, onToggle, disabled }) {
 
 function TierBadge({ tier }) {
   const styles = {
-    GRATIS: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200',
+    FREE: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200',
     LITE: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200',
     PRO: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200',
   }
@@ -615,7 +615,7 @@ function TierBadge({ tier }) {
   return (
     <span
       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-        styles[tier] || styles.GRATIS
+        styles[tier] || styles.FREE
       }`}
     >
       {tier}

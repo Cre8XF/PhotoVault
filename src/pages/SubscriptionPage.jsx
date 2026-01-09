@@ -73,17 +73,17 @@ const SubscriptionPage = ({ user }) => {
         }
       case 'LITE':
         return {
-          name: 'LITE',
+          name: t('common:tiers.LITE'),
           storage: '10 GB',
           compression: t('subscription:yes'),
           video: t('subscription:no'),
           color: 'from-blue-600 to-cyan-600',
           icon: <Zap className="w-6 h-6" />,
         }
-      case 'GRATIS':
+      case 'FREE':
       default:
         return {
-          name: 'GRATIS',
+          name: t('common:tiers.FREE'),
           storage: '1 GB',
           compression: t('subscription:noOriginal'),
           video: t('subscription:no'),
@@ -98,35 +98,35 @@ const SubscriptionPage = ({ user }) => {
    */
   const plans = [
     {
-      id: 'GRATIS',
-      name: 'GRATIS',
+      id: 'FREE',
+      name: t('common:tiers.FREE'),
       price: '0 kr',
       period: t('subscription:forever'),
       storage: '1 GB',
       compression: t('subscription:originalQuality'),
       video: t('subscription:no'),
       features: [
-        t('subscription:features.gratis.storage'),
-        t('subscription:features.gratis.quality'),
-        t('subscription:features.gratis.albums'),
-        t('subscription:features.gratis.qrCode'),
-        t('subscription:features.gratis.collage'),
-        t('subscription:features.gratis.timeline'),
-        t('subscription:features.gratis.search'),
+        t('subscription:features.free.storage'),
+        t('subscription:features.free.quality'),
+        t('subscription:features.free.albums'),
+        t('subscription:features.free.qrCode'),
+        t('subscription:features.free.collage'),
+        t('subscription:features.free.timeline'),
+        t('subscription:features.free.search'),
       ],
       color: 'from-gray-600 to-gray-700',
-      current: currentTier === 'GRATIS',
+      current: currentTier === 'FREE',
     },
     {
       id: 'LITE',
-      name: 'LITE',
+      name: t('common:tiers.LITE'),
       price: '39 kr',
       period: t('subscription:perMonth'),
       storage: '10 GB',
       compression: t('subscription:yes'),
       video: t('subscription:no'),
       features: [
-        t('subscription:features.lite.allInGratis'),
+        t('subscription:features.lite.allInFree'),
         t('subscription:features.lite.storage'),
         t('subscription:features.lite.compression'),
         t('subscription:features.lite.support'),
@@ -378,10 +378,10 @@ const SubscriptionPage = ({ user }) => {
             <h3 className="text-lg font-semibold mb-3">{t('subscription:aboutSubscriptions')}</h3>
             <div className="space-y-2 text-sm text-gray-400">
               <p>
-                • <strong>GRATIS:</strong> {t('subscription:aboutGratis')}
+                • <strong>{t('common:tiers.FREE')}:</strong> {t('subscription:aboutFree')}
               </p>
               <p>
-                • <strong>LITE:</strong> {t('subscription:aboutLite')}
+                • <strong>{t('common:tiers.LITE')}:</strong> {t('subscription:aboutLite')}
               </p>
               {/* PHASE 3: PRO info hidden but tier logic remains */}
               <p className="pt-2 border-t border-white/10">

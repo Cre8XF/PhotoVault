@@ -96,7 +96,7 @@ export const AuthProvider = ({ children }) => {
           uid,
           userId: uid,
           role: 'user',
-          subscriptionTier: 'GRATIS',
+          subscriptionTier: 'FREE',
           storageLimit: 1073741824, // 1 GB
           storageUsed: 0,
           currentAlbumCount: 0, // 🆕 Counter for freemium limits

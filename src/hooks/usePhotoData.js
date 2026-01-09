@@ -292,7 +292,7 @@ export const usePhotoData = () => {
               setUpgradeModal({
                 type: 'tier-upgrade',
                 requiredTier: uploadError.details?.requiredTier || 'PRO',
-                currentTier: uploadError.details?.currentTier || 'GRATIS',
+                currentTier: uploadError.details?.currentTier || 'FREE',
                 message: t('subscription:videoUpgradeMessage') || 'Upgrade to PRO to upload videos'
               })
               return // Stop processing remaining files

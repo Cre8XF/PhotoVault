@@ -153,13 +153,13 @@ export const useAuth = () => {
   }, [userProfile, user])
 
   /**
-   * Check if user is on GRATIS tier
+   * Check if user is on FREE tier
    */
   const isGratis = useCallback(() => {
     if (!userProfile) return true // Default for new users
     if (userProfile.role === 'admin') return false
     return (
-      userProfile.subscriptionTier === 'GRATIS' || !userProfile.subscriptionTier
+      userProfile.subscriptionTier === 'FREE' || !userProfile.subscriptionTier
     )
   }, [userProfile])
 
@@ -186,7 +186,7 @@ export const useAuth = () => {
    */
   const getTier = useCallback(() => {
     if (isAdmin()) return 'ADMIN'
-    return userProfile?.subscriptionTier || 'GRATIS'
+    return userProfile?.subscriptionTier || 'FREE'
   }, [userProfile, isAdmin])
 
   /**
@@ -201,15 +201,15 @@ export const useAuth = () => {
       }
     }
 
-    const tier = userProfile?.subscriptionTier || 'GRATIS'
+    const tier = userProfile?.subscriptionTier || 'FREE'
     const limits = {
-      GRATIS: 1073741824, // 1GB
+      FREE: 1073741824, // 1GB
       LITE: 10737418240, // 10GB
       PRO: 53687091200, // 50GB
     }
 
     return {
-      limit: userProfile?.storageLimit || limits[tier] || limits.GRATIS,
+      limit: userProfile?.storageLimit || limits[tier] || limits.FREE,
       unlimited: false,
       tier,
     }
@@ -236,11 +236,11 @@ export const useAuth = () => {
    */
   const getTierLimit = useCallback((tier) => {
     const limits = {
-      GRATIS: 1 * 1024 * 1024 * 1024, // 1 GB
+      FREE: 1 * 1024 * 1024 * 1024, // 1 GB
       LITE: 10 * 1024 * 1024 * 1024, // 10 GB
       PRO: 50 * 1024 * 1024 * 1024, // 50 GB
     }
-    return limits[tier] || limits.GRATIS
+    return limits[tier] || limits.FREE
   }, [])
 
   /**
@@ -277,14 +277,14 @@ export const useAuth = () => {
   const canCreateAlbum = useCallback(() => {
     if (!userProfile) return { allowed: false }
 
-    const tier = userProfile.subscriptionTier || 'GRATIS'
+    const tier = userProfile.subscriptionTier || 'FREE'
 
     // LITE/PRO/ADMIN always allowed
-    if (tier !== 'GRATIS') {
+    if (tier !== 'FREE') {
       return { allowed: true }
     }
 
-    // GRATIS: Check counter
+    // FREE: Check counter
     const current = userProfile.currentAlbumCount || 0
     const max = 5
 
@@ -303,14 +303,14 @@ export const useAuth = () => {
     (album) => {
       if (!userProfile || !album) return { allowed: false }
 
-      const tier = userProfile.subscriptionTier || 'GRATIS'
+      const tier = userProfile.subscriptionTier || 'FREE'
 
       // LITE/PRO/ADMIN always allowed
-      if (tier !== 'GRATIS') {
+      if (tier !== 'FREE') {
         return { allowed: true }
       }
 
-      // GRATIS: Check counter
+      // FREE: Check counter
       const current = album.photoCount || 0
       const max = 20
 
@@ -331,7 +331,7 @@ export const useAuth = () => {
     (newFileSize) => {
       if (!userProfile) return { allowed: false }
 
-      const tier = userProfile.subscriptionTier || 'GRATIS'
+      const tier = userProfile.subscriptionTier || 'FREE'
       const storageUsed = userProfile.storageUsed || 0
       const storageLimit = userProfile.storageLimit || 1073741824 // 1 GB
 

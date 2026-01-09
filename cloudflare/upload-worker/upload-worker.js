@@ -432,7 +432,7 @@ async function getUserData(userId, idToken, env) {
 
   // Firestore REST format: { fields: { fieldName: { stringValue: "..." } } }
   return {
-    subscriptionTier: data.fields?.subscriptionTier?.stringValue || 'GRATIS',
+    subscriptionTier: data.fields?.subscriptionTier?.stringValue || 'FREE',
     storageUsed: parseInt(data.fields?.storageUsed?.integerValue || '0'),
     storageLimit: parseInt(data.fields?.storageLimit?.integerValue || '1073741824') // 1GB default
   }

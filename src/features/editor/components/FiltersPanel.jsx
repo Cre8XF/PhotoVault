@@ -13,7 +13,7 @@ export default function FiltersPanel() {
   const resetTransform = useEditorStore((state) => state.resetTransform)
   const { userProfile } = useAuth()
 
-  const tier = userProfile?.subscriptionTier || 'GRATIS'
+  const tier = userProfile?.subscriptionTier || 'FREE'
   const filter = transform.filter || { active: null, intensity: 100 }
 
   /**
@@ -60,8 +60,8 @@ export default function FiltersPanel() {
         )}
       </div>
 
-      {/* 🆕 FREEMIUM: Preview Banner for GRATIS users */}
-      {tier === 'GRATIS' && (
+      {/* 🆕 FREEMIUM: Preview Banner for FREE users */}
+      {tier === 'FREE' && (
         <div className="mb-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
           <p className="text-xs text-blue-300">
             🎨 Try all filters! Upgrade to LITE to save.

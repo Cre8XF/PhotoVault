@@ -141,7 +141,7 @@ async function reconcileUserAlbumCounts() {
     const userData = userDoc.data()
     const storedCount = userData.currentAlbumCount || 0
     const email = userData.email || 'Unknown'
-    const tier = userData.subscriptionTier || 'GRATIS'
+    const tier = userData.subscriptionTier || 'FREE'
 
     // Count actual albums for this user
     const albumsQuery = query(

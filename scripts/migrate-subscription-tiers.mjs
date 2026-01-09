@@ -61,7 +61,7 @@ const db = getFirestore(app)
 
 // Storage limits in bytes
 const STORAGE_LIMITS = {
-  GRATIS: 1073741824,      // 1GB
+  FREE: 1073741824,        // 1GB
   LITE: 5368709120,        // 5GB
   PRO: 53687091200,        // 50GB
   ADMIN: null              // Unlimited
@@ -73,9 +73,10 @@ const STORAGE_LIMITS = {
 async function migrateTiers() {
   console.log('🚀 Starting subscription tier migration...\n')
   console.log('📋 Migration Logic:')
+  console.log('   • GRATIS → FREE (normalize Norwegian to English)')
   console.log('   • role: "admin" → PRO tier (50GB)')
   console.log('   • isPro: true → PRO tier (50GB)')
-  console.log('   • default → GRATIS tier (1GB)')
+  console.log('   • default → FREE tier (1GB)')
   console.log('')
 
   try {
@@ -100,40 +101,53 @@ async function migrateTiers() {
       const email = data.email || 'unknown'
 
       try {
-        // Check if already migrated
-        if (data.subscriptionTier && data.storageLimit) {
+        // Migrate GRATIS → FREE (always, even if already has tier)
+        let needsUpdate = false
+        let newTier = data.subscriptionTier
+        let newStorageLimit = data.storageLimit
+
+        // CRITICAL: Normalize GRATIS to FREE
+        if (data.subscriptionTier === 'GRATIS') {
+          newTier = 'FREE'
+          newStorageLimit = STORAGE_LIMITS.FREE
+          needsUpdate = true
+          console.log(`🔄 ${email}: Normalizing GRATIS → FREE`)
+        }
+        // Check if already migrated (and not GRATIS)
+        else if (data.subscriptionTier && data.storageLimit) {
           console.log(`⏭️  ${email}: Already migrated (${data.subscriptionTier})`)
           skipped++
           continue
         }
-
-        // Determine new tier based on old isPro/role
-        let newTier = 'GRATIS'
-        let newStorageLimit = STORAGE_LIMITS.GRATIS
-
-        if (data.role === 'admin') {
-          // Admins get PRO tier
-          newTier = 'PRO'
-          newStorageLimit = STORAGE_LIMITS.PRO
-        } else if (data.isPro === true) {
-          // Old pro users get PRO tier
-          newTier = 'PRO'
-          newStorageLimit = STORAGE_LIMITS.PRO
-        } else {
-          // Everyone else gets GRATIS tier
-          newTier = 'GRATIS'
-          newStorageLimit = STORAGE_LIMITS.GRATIS
+        // New migration: Determine tier based on old isPro/role
+        else {
+          if (data.role === 'admin') {
+            // Admins get PRO tier
+            newTier = 'PRO'
+            newStorageLimit = STORAGE_LIMITS.PRO
+          } else if (data.isPro === true) {
+            // Old pro users get PRO tier
+            newTier = 'PRO'
+            newStorageLimit = STORAGE_LIMITS.PRO
+          } else {
+            // Everyone else gets FREE tier
+            newTier = 'FREE'
+            newStorageLimit = STORAGE_LIMITS.FREE
+          }
+          needsUpdate = true
         }
 
-        // Update user document
-        await updateDoc(doc(db, 'users', userDoc.id), {
-          subscriptionTier: newTier,
-          storageLimit: newStorageLimit,
-          updatedAt: new Date().toISOString()
-        })
+        // Update user document if needed
+        if (needsUpdate) {
+          await updateDoc(doc(db, 'users', userDoc.id), {
+            subscriptionTier: newTier,
+            storageLimit: newStorageLimit,
+            updatedAt: new Date().toISOString()
+          })
 
-        updated++
-        console.log(`✅ ${email}: ${newTier} (${formatBytes(newStorageLimit)})`)
+          updated++
+          console.log(`✅ ${email}: ${newTier} (${formatBytes(newStorageLimit)})`)
+        }
 
       } catch (error) {
         errors++

@@ -97,7 +97,7 @@ export default function CollageTemplatesPage() {
 
     // FREEMIUM GATE: Check tier before allowing access
     if (!canCreateCollage()) {
-      console.log('🚫 GRATIS user - showing upgrade modal');
+      console.log('🚫 FREE user - showing upgrade modal');
       setSelectedTemplate(template);
       setShowUpgradeModal(true);
       return;

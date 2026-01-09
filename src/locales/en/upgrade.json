@@ -3,7 +3,7 @@
     "icon": "📁",
     "title": "You've hit the album limit!",
     "subtitle": "But you're clearly loving Pixtr 🎉",
-    "painPoint": "GRATIS = 5 albums max",
+    "painPoint": "Free tier = 5 albums max",
     "solution": "LITE = Unlimited albums",
     "features": [
       "✅ Unlimited albums",
@@ -18,7 +18,7 @@
     "icon": "📸",
     "title": "Album full!",
     "subtitle": "Time to upgrade or create a new album",
-    "painPoint": "GRATIS = 20 photos per album",
+    "painPoint": "Free tier = 20 photos per album",
     "solution": "LITE = Unlimited photos per album",
     "features": [
       "✅ Unlimited photos per album",
@@ -33,7 +33,7 @@
     "icon": "🎨",
     "title": "Love this edit?",
     "subtitle": "Upgrade to save it!",
-    "painPoint": "GRATIS = Preview only",
+    "painPoint": "Free tier = Preview only",
     "solution": "LITE = Save all edits",
     "features": [
       "✅ Save filters & adjustments",
@@ -48,7 +48,7 @@
     "icon": "🖼️",
     "title": "Beautiful collage!",
     "subtitle": "Upgrade to save it",
-    "painPoint": "GRATIS = Build only",
+    "painPoint": "Free tier = Build only",
     "solution": "LITE = Save collages",
     "features": [
       "✅ Save unlimited collages",
@@ -63,7 +63,7 @@
     "icon": "⚠️",
     "title": "Storage almost full",
     "subtitle": "You've used 90% of your storage",
-    "painPoint": "GRATIS = 1 GB",
+    "painPoint": "Free tier = 1 GB",
     "solution": "LITE = 10 GB (10x more)",
     "features": [
       "✅ 10 GB storage (10x more)",
@@ -78,7 +78,7 @@
     "icon": "🚫",
     "title": "Storage full!",
     "subtitle": "Delete photos or upgrade",
-    "painPoint": "GRATIS = 1 GB",
+    "painPoint": "Free tier = 1 GB",
     "solution": "LITE = 10 GB",
     "features": [
       "✅ 10 GB storage (10x more)",

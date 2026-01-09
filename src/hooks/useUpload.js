@@ -89,8 +89,8 @@ export function useUpload() {
       if (isVideo) {
         if (!canUploadVideo) {
           fileErrors.push(
-            tier() === 'GRATIS'
-              ? t('errors.videoNotAllowedGratis')
+            tier() === 'FREE'
+              ? t('errors.videoNotAllowedFree')
               : t('errors.videoNotAllowedLite')
           )
           devLog(`❌ Video blocked: ${file.name} (tier: ${tier()})`)
@@ -103,7 +103,7 @@ export function useUpload() {
       // ✅ DOCUMENT TIER CHECK (LITE + PRO only)
       if (isDocument) {
         if (!canUploadDocument) {
-          fileErrors.push(t('errors.documentNotAllowedGratis'))
+          fileErrors.push(t('errors.documentNotAllowedFree'))
           devLog(`❌ Document blocked: ${file.name} (tier: ${tier()})`)
         } else if (!ALLOWED_DOCUMENT_TYPES.includes(fileType) && !/\.(pdf|docx?|xlsx?|txt)$/i.test(file.name)) {
           fileErrors.push(t('errors.unsupportedDocumentType'))
@@ -419,7 +419,7 @@ export function useUpload() {
               `🖼️ Image compressed: ${(file.size / 1024 / 1024).toFixed(1)}MB → ${(compressedFile.size / 1024 / 1024).toFixed(1)}MB`
             )
           } else {
-            // Original quality (GRATIS tier OR toggle OFF)
+            // Original quality (FREE tier OR toggle OFF)
             totalCompressedSize += file.size
             processedFiles.push({
               file: file, // ✅ Original file
