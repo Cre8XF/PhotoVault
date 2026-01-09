@@ -56,6 +56,7 @@ const CollageEditPage = lazy(() => import('./pages/CollageEditPage'))
 const PhotoPage = lazy(() => import('./pages/PhotoPage'))
 const SlideshowPage = lazy(() => import('./pages/SlideshowPage'))
 const EditorPage = lazy(() => import('./features/editor/pages/EditorPage'))
+const EditorPageV4 = lazy(() => import('./features/editor/pages/EditorPageV4'))
 
 // AI Tools - Phase 5 - Lazy loaded
 const AIToolsPage = lazy(() => import('./pages/ai/AIToolsPage'))
@@ -115,6 +116,33 @@ import {
   FileText,
   Image,
 } from 'lucide-react'
+
+/**
+ * EditorPageWrapper - Conditionally renders V3 or V4 editor based on settings
+ */
+function EditorPageWrapper() {
+  const [useV4, setUseV4] = React.useState(() => {
+    const saved = localStorage.getItem('useEditorV4')
+    return saved === 'true'
+  })
+
+  // Listen for localStorage changes (when user toggles in settings)
+  React.useEffect(() => {
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem('useEditorV4')
+      setUseV4(saved === 'true')
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    return () => window.removeEventListener('storage', handleStorageChange)
+  }, [])
+
+  if (import.meta.env.DEV) {
+    console.log(`🎨 Using Editor ${useV4 ? 'V4 (Google Photos style)' : 'V3 (Classic)'}`)
+  }
+
+  return useV4 ? <EditorPageV4 /> : <EditorPage />
+}
 
 /**
  * Main App Component with new architecture
@@ -258,7 +286,7 @@ function App() {
                             </div>
                           }
                         >
-                          <EditorPage />
+                          <EditorPageWrapper />
                         </Suspense>
                       </ProtectedRoute>
                     }
