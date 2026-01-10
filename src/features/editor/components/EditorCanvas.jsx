@@ -1,14 +1,14 @@
 import { useCanvas } from '../hooks/useCanvas'
 import useEditorStore from '../store/editorStore'
-import CropOverlay from '../components/CropOverlay'
+import CropOverlay from './CropOverlay'
 
 /**
- * EditorViewportV4 - Fullscreen canvas viewport
+ * Canvas component for editor
+ * NOW WITH FILTER PRESETS
  *
- * SAME canvas rendering logic as V3
- * DIFFERENT layout - fills entire screen (no padding)
+ * @param {string} imageUrl - URL of image to display
  */
-export default function EditorViewportV4({ imageUrl }) {
+export default function EditorCanvas({ imageUrl }) {
   // Get state from store
   const adjustments = useEditorStore((state) => state.transform.adjustments)
   const filter = useEditorStore((state) => state.transform.filter)
@@ -19,7 +19,7 @@ export default function EditorViewportV4({ imageUrl }) {
   const activeTool = useEditorStore((state) => state.activeTool)
   const applyTransform = useEditorStore((state) => state.applyTransform)
 
-  // Canvas hook with all transformations (SAME as V3)
+  // Canvas hook with all transformations
   const { canvasRef, containerRef, isLoading, error, dimensions } = useCanvas(
     imageUrl,
     adjustments,
@@ -38,16 +38,14 @@ export default function EditorViewportV4({ imageUrl }) {
 
   if (error) {
     return (
-      <div className="editor-v4-viewport">
-        <div className="flex items-center justify-center text-red-400">
-          {error}
-        </div>
+      <div className="flex-1 flex items-center justify-center text-red-400">
+        {error}
       </div>
     )
   }
 
   return (
-    <div ref={containerRef} className="editor-v4-viewport">
+    <div ref={containerRef} className="editor-viewport">
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-gray-400">Loading canvas...</div>
@@ -55,7 +53,7 @@ export default function EditorViewportV4({ imageUrl }) {
       )}
 
       {/* Wrapper to constrain overlay to canvas size */}
-      <div className="editor-v4-canvas-wrapper">
+      <div className="relative" style={{ display: 'inline-block' }}>
         <canvas ref={canvasRef} />
 
         {/* Crop overlay when crop tool is active */}

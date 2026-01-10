@@ -1,5 +1,5 @@
 import useEditorStore from '../store/editorStore'
-import Slider from './Slider'
+import Slider from '../components/Slider'
 import { useTranslation } from 'react-i18next'
 
 /**
@@ -51,7 +51,9 @@ export default function AdjustOverlay() {
       {/* Header with reset all button */}
       <div className="editor-v4-overlay-header">
         <h3>Adjustments</h3>
-        {hasAdjustments && <button onClick={handleResetAll}>Reset All</button>}
+        {hasAdjustments && (
+          <button onClick={handleResetAll}>Reset All</button>
+        )}
       </div>
 
       {/* Sliders */}

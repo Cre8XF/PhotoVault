@@ -1,0 +1,223 @@
+/* ============================================================================
+   EDITOR POLISH – PHASE 1: VIEWPORT SCALING FIX
+   ============================================================================ */
+
+/* ============================================================================
+   VIEWPORT - Fyller resterende plass mellom header og toolbar
+   ============================================================================ */
+.editor-viewport {
+  flex: 1; /* Tar all tilgjengelig plass */
+  display: flex;
+  align-items: center; /* Vertikal sentrering */
+  justify-content: center; /* Horisontal sentrering */
+  overflow: hidden;
+  background: var(--bg-editor-dark);
+  position: relative; /* For crop overlay positioning */
+}
+
+body.light-mode .editor-viewport {
+  background: var(--bg-secondary);
+}
+
+/* ============================================================================
+   CANVAS - CSS-skalering (IKKE JavaScript!)
+   ============================================================================ */
+.editor-viewport canvas {
+  max-width: 100%; /* Aldri bredere enn viewport */
+  max-height: 100%; /* Aldri høyere enn viewport */
+  width: auto; /* La browser regne ut bredde basert på høyde */
+  height: auto; /* La browser regne ut høyde basert på bredde */
+  display: block;
+  object-fit: contain; /* Behold aspect ratio */
+}
+
+/* ============================================================================
+   RESPONSIV: Desktop og mobil tilpasninger
+   ============================================================================ */
+
+/* Desktop: Begrens canvas-størrelse for å sikre at UI er tilgjengelig */
+@media (min-width: 769px) {
+  .editor-viewport canvas {
+    max-height: 70vh; /* Forhindrer at canvas skyver toolbar ut av viewport */
+  }
+}
+
+/* Mobil: Ekstra spacing og optimal bruk av plass */
+@media (max-width: 768px) {
+  .editor-viewport {
+    padding: 8px; /* Litt luft rundt bildet på mobil */
+  }
+
+  .editor-viewport canvas {
+    max-height: 85vh; /* Mer plass til bildet på mobil */
+  }
+}
+/* =========================================================
+   EDITOR TOOLS – FINJUSTERT HØYDE OG SPACING
+   (Trygg V3-justering – påvirker kun UI)
+   ========================================================= */
+
+/* Desktop */
+.editor-tools {
+  max-height: 32vh;
+}
+
+/* Selve panelet med sliders / buttons */
+.editor-tools-panel {
+  padding-bottom: 12px;
+}
+
+/* Mobil */
+@media (max-width: 768px) {
+  .editor-tools {
+    max-height: 40vh;
+  }
+}
+.rotate-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px;
+  width: 100%;
+}
+
+.rotate-container input[type='range'] {
+  width: 80%;
+  height: 6px; /* smaller height for slider */
+  background: var(--bg-editor-hover);
+  border-radius: 4px;
+  -webkit-appearance: none;
+}
+
+body.light-mode .rotate-container input[type='range'] {
+  background: var(--border-color);
+}
+
+.rotate-container input[type='range']:focus {
+  outline: none;
+}
+
+.rotate-container span {
+  margin-top: 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* ============================================================================
+   EDITOR THEME-AWARE UTILITIES
+   ============================================================================ */
+
+/* Editor backgrounds */
+.editor-bg-primary {
+  background-color: var(--bg-editor-dark);
+}
+
+.editor-bg-secondary {
+  background-color: var(--bg-editor-surface);
+}
+
+.editor-bg-tertiary {
+  background-color: var(--bg-editor-elevated);
+}
+
+.editor-bg-tertiary-hover:hover {
+  background-color: var(--bg-editor-hover);
+}
+
+/* Editor text colors */
+.editor-text-primary {
+  color: var(--text-primary);
+}
+
+.editor-text-secondary {
+  color: var(--text-secondary);
+}
+
+.editor-text-muted {
+  color: var(--text-muted);
+}
+
+/* Editor borders */
+.editor-border {
+  border-color: var(--bg-editor-elevated);
+}
+
+/* Light mode overrides for editor */
+body.light-mode .editor-bg-primary {
+  background-color: var(--bg-primary);
+}
+
+body.light-mode .editor-bg-secondary {
+  background-color: var(--bg-secondary);
+}
+
+body.light-mode .editor-bg-tertiary {
+  background-color: var(--bg-tertiary);
+}
+
+body.light-mode .editor-bg-tertiary-hover:hover {
+  background-color: var(--interactive-hover);
+}
+
+body.light-mode .editor-border {
+  border-color: var(--border-color);
+}
+
+/* ============================================================================
+   MOBILE UX FIX: THICKER SCROLLBAR & TOUCH-SAFE SLIDERS
+   ============================================================================ */
+
+/* Thicker scrollbar for mobile - easier to grab without hitting sliders */
+.editor-scroll-container::-webkit-scrollbar {
+  width: 12px; /* 3x thicker than default 4px */
+}
+
+.editor-scroll-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.editor-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(147, 51, 234, 0.6); /* Purple to match brand */
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.editor-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(147, 51, 234, 0.8);
+}
+
+/* Firefox scrollbar */
+.editor-scroll-container {
+  scrollbar-width: thick;
+  scrollbar-color: rgba(147, 51, 234, 0.6) rgba(255, 255, 255, 0.1);
+}
+
+/* Touch-safe slider zones - larger touch targets */
+.slider-touch-safe {
+  height: 32px; /* Increased from default 24px */
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  padding: 4px 0; /* Extra vertical touch area */
+}
+
+.slider-touch-safe::-webkit-slider-thumb {
+  width: 24px; /* Larger thumb - easier to grab */
+  height: 24px;
+  cursor: grab;
+}
+
+.slider-touch-safe:active::-webkit-slider-thumb {
+  cursor: grabbing;
+}
+
+.slider-touch-safe::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  cursor: grab;
+}
+
+.slider-touch-safe:active::-moz-range-thumb {
+  cursor: grabbing;
+}
