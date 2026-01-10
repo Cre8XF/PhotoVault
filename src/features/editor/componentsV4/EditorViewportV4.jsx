@@ -1,6 +1,6 @@
 import { useCanvas } from '../hooks/useCanvas'
 import useEditorStore from '../store/editorStore'
-import CropOverlay from '../components/CropOverlay'
+import CropOverlay from '../componentsV4/CropOverlayV4'
 
 /**
  * EditorViewportV4 - Fullscreen canvas viewport
