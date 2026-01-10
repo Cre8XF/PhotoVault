@@ -60,8 +60,11 @@ export default function FiltersOverlay() {
 
       {/* FREEMIUM: Preview Banner for FREE users */}
       {tier === 'FREE' && (
-        <div className="mb-3 p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-          <p className="text-xs text-blue-300">
+        <div className="mb-3 p-2.5 rounded-lg" style={{
+          backgroundColor: 'var(--interactive-active)',
+          border: '1px solid var(--border-color)'
+        }}>
+          <p className="text-xs" style={{ color: 'var(--color-info)' }}>
             🎨 Try all filters! Upgrade to LITE to save.
           </p>
         </div>
@@ -77,11 +80,19 @@ export default function FiltersOverlay() {
             <button
               key={filterName}
               onClick={() => handleFilterSelect(filterName)}
-              className={`filter-thumb transition-all p-2.5 rounded-lg flex flex-col items-center gap-1 ${
-                isActive
-                  ? 'bg-blue-600 text-white ring-2 ring-blue-400'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
+              className="filter-thumb transition-all p-2.5 rounded-lg flex flex-col items-center gap-1"
+              style={{
+                backgroundColor: isActive ? 'var(--color-primary-500)' : 'var(--bg-editor-elevated)',
+                color: 'var(--text-primary)',
+                border: `2px solid ${isActive ? 'var(--color-primary-500)' : 'var(--border-color)'}`,
+                minHeight: '44px'
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) e.currentTarget.style.backgroundColor = 'var(--bg-editor-hover)'
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) e.currentTarget.style.backgroundColor = 'var(--bg-editor-elevated)'
+              }}
               title={metadata.description}
             >
               <span className="text-lg leading-none">{metadata.icon}</span>
@@ -97,10 +108,10 @@ export default function FiltersOverlay() {
       {hasFilter && (
         <div className="mb-3">
           <div className="flex items-center justify-between mb-2">
-            <label className="text-sm text-gray-300 font-medium">
+            <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
               Intensity
             </label>
-            <span className="text-sm font-mono text-gray-400">
+            <span className="text-sm font-mono" style={{ color: 'var(--text-muted)' }}>
               {filter.intensity}%
             </span>
           </div>
@@ -112,22 +123,17 @@ export default function FiltersOverlay() {
             step={5}
             value={filter.intensity}
             onChange={(e) => handleIntensityChange(parseInt(e.target.value))}
-            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer
-                       [&::-webkit-slider-thumb]:appearance-none
-                       [&::-webkit-slider-thumb]:w-5
-                       [&::-webkit-slider-thumb]:h-5
-                       [&::-webkit-slider-thumb]:bg-blue-400
-                       [&::-webkit-slider-thumb]:rounded-full
-                       [&::-webkit-slider-thumb]:cursor-pointer
-                       [&::-moz-range-thumb]:w-5
-                       [&::-moz-range-thumb]:h-5
-                       [&::-moz-range-thumb]:bg-blue-400
-                       [&::-moz-range-thumb]:rounded-full
-                       [&::-moz-range-thumb]:border-0
-                       [&::-moz-range-thumb]:cursor-pointer"
+            style={{
+              width: '100%',
+              height: '8px',
+              background: 'var(--bg-editor-elevated)',
+              borderRadius: '8px',
+              appearance: 'none',
+              cursor: 'pointer'
+            }}
           />
 
-          <div className="flex justify-between text-xs text-gray-500 mt-1">
+          <div className="flex justify-between text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
             <span>0%</span>
             <span>50%</span>
             <span>100%</span>
@@ -137,17 +143,20 @@ export default function FiltersOverlay() {
 
       {/* Current Filter Display */}
       {hasFilter && (
-        <div className="p-3 bg-gray-800 rounded-lg">
-          <p className="text-xs text-gray-400 mb-1">Active Filter:</p>
+        <div className="p-3 rounded-lg" style={{
+          backgroundColor: 'var(--bg-editor-elevated)',
+          border: '1px solid var(--border-color)'
+        }}>
+          <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Active Filter:</p>
           <div className="flex items-center gap-2">
             <span className="text-xl">
               {getFilterMetadata(filter.active).icon}
             </span>
             <div>
-              <p className="text-sm text-white font-medium">
+              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                 {getFilterMetadata(filter.active).name}
               </p>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                 {getFilterMetadata(filter.active).description}
               </p>
             </div>
@@ -157,7 +166,7 @@ export default function FiltersOverlay() {
 
       {/* Info */}
       {!hasFilter && (
-        <p className="text-xs text-gray-400 text-center py-2">
+        <p className="text-xs text-center py-2" style={{ color: 'var(--text-muted)' }}>
           Select a filter to enhance your photo
         </p>
       )}

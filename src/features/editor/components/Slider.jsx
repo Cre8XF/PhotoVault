@@ -1,5 +1,5 @@
 /**
- * Slider Component
+ * Slider Component - Theme-aware
  *
  * @param {string} label - Slider label
  * @param {number} value - Current value
@@ -15,18 +15,25 @@ export default function Slider({ label, value, min, max, onChange, onReset }) {
   return (
     <div className="mb-2">
       <div className="flex items-center justify-between mb-1.5">
-        <label className="text-sm editor-text-secondary font-medium">{label}</label>
+        <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>{label}</label>
         <div className="flex items-center gap-2">
-          <span className="text-sm font-mono editor-text-muted min-w-[3rem] text-right">
+          <span className="text-sm font-mono min-w-[3rem] text-right" style={{ color: 'var(--text-muted)' }}>
             {displayValue}
           </span>
           {value !== 0 && onReset && (
             <button
               onClick={onReset}
-              className="text-xs editor-text-muted hover:editor-text-secondary transition-colors"
+              className="text-xs transition-colors"
+              style={{
+                color: 'var(--text-muted)',
+                minHeight: '44px',
+                padding: '8px'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+              onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
               title="Reset to 0"
             >
-              �
+              ↺
             </button>
           )}
         </div>
@@ -40,21 +47,14 @@ export default function Slider({ label, value, min, max, onChange, onReset }) {
           max={max}
           value={value}
           onChange={(e) => onChange(parseFloat(e.target.value))}
-          className="slider-touch-safe w-full h-2 editor-bg-tertiary rounded-lg appearance-none
-                     [&::-webkit-slider-thumb]:appearance-none
-                     [&::-webkit-slider-thumb]:w-5
-                     [&::-webkit-slider-thumb]:h-5
-                     [&::-webkit-slider-thumb]:bg-blue-400
-                     [&::-webkit-slider-thumb]:rounded-full
-                     [&::-webkit-slider-thumb]:cursor-grab
-                     [&::-webkit-slider-thumb]:active:cursor-grabbing
-                     [&::-moz-range-thumb]:w-5
-                     [&::-moz-range-thumb]:h-5
-                     [&::-moz-range-thumb]:bg-blue-400
-                     [&::-moz-range-thumb]:rounded-full
-                     [&::-moz-range-thumb]:border-0
-                     [&::-moz-range-thumb]:cursor-grab
-                     [&::-moz-range-thumb]:active:cursor-grabbing"
+          style={{
+            width: '100%',
+            height: '8px',
+            background: 'var(--bg-editor-elevated)',
+            borderRadius: '8px',
+            appearance: 'none',
+            cursor: 'grab'
+          }}
         />
       </div>
     </div>

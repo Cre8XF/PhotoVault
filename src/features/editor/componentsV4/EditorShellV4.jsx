@@ -9,13 +9,16 @@ import useEditorStore from '../store/editorStore'
 import './EditorShellV4.css'
 
 /**
- * EditorShellV4 - Google Photos Style Layout
+ * EditorShellV4 - Ultimate Responsive Layout
  *
  * Layout:
- * - Minimal header (icons only, overlay)
- * - Fullscreen viewport (fills entire space)
- * - Bottom toolbar (compact icon toolbar)
- * - Overlay panels (slide up from bottom)
+ * - Minimal header (overlay on top)
+ * - Responsive viewport (flex: 1, shrinks when tool active)
+ * - Tool panel (in flow, NOT absolute - pushes viewport up)
+ * - Bottom toolbar (compact with text labels)
+ *
+ * When tool inactive: Viewport fills space
+ * When tool active: Panel appears, viewport shrinks, image scales down
  */
 export default function EditorShellV4({
   imageUrl,
@@ -42,17 +45,23 @@ export default function EditorShellV4({
         isSaving={isSaving}
       />
 
-      {/* Fullscreen viewport */}
-      <EditorViewportV4 imageUrl={imageUrl} />
+      {/* Responsive viewport - grows/shrinks based on panel */}
+      <div className="editor-v4-viewport">
+        <EditorViewportV4 imageUrl={imageUrl} />
+      </div>
+
+      {/* Tool panel - in normal flow (NOT absolute) */}
+      {activeTool && (
+        <div className="editor-v4-panel">
+          {activeTool === 'adjust' && <AdjustOverlay />}
+          {activeTool === 'crop' && <CropOverlay />}
+          {activeTool === 'rotate' && <RotateOverlay />}
+          {activeTool === 'filters' && <FiltersOverlay />}
+        </div>
+      )}
 
       {/* Bottom toolbar */}
       <EditorToolbarV4 />
-
-      {/* Overlay panels - slide up from bottom */}
-      {activeTool === 'adjust' && <AdjustOverlay />}
-      {activeTool === 'crop' && <CropOverlay />}
-      {activeTool === 'rotate' && <RotateOverlay />}
-      {activeTool === 'filters' && <FiltersOverlay />}
 
       {/* Saving overlay */}
       {isSaving && (
@@ -61,10 +70,10 @@ export default function EditorShellV4({
             <div className="flex items-center gap-4">
               <span className="text-4xl animate-spin">⟳</span>
               <div>
-                <p className="font-semibold mb-1 text-white">
+                <p className="font-semibold mb-1">
                   Saving your photo
                 </p>
-                <p className="opacity-70 text-sm text-gray-300">Applying all edits...</p>
+                <p className="opacity-70 text-sm">Applying all edits...</p>
               </div>
             </div>
           </div>
