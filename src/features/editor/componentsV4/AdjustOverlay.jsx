@@ -1,5 +1,5 @@
 import useEditorStore from '../store/editorStore'
-import Slider from '../components/Slider'
+import Slider from './Slider'
 import { useTranslation } from 'react-i18next'
 
 /**
