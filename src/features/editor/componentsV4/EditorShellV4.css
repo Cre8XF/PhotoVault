@@ -14,6 +14,10 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  /* Prevent any scroll chaining */
+  overscroll-behavior: none;
+  /* Ensure container is on top of everything */
+  z-index: 9999;
 }
 
 /* Saving overlay */
@@ -240,6 +244,43 @@
   .editor-v4-toolbar-button span.label {
     font-size: 11px;
   }
+
+  /* CRITICAL: Strengthen scroll containment on mobile */
+  .editor-v4-container {
+    /* Force fixed positioning to prevent any parent scroll */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Absolute overflow lock */
+    overflow: hidden !important;
+    /* Prevent overscroll bounce */
+    overscroll-behavior: none;
+    /* Lock touch scrolling to this container only */
+    -webkit-overflow-scrolling: auto;
+  }
+
+  /* Ensure viewport never scrolls */
+  .editor-v4-viewport {
+    overflow: hidden;
+    overscroll-behavior: none;
+    /* Prevent any accidental scroll */
+    touch-action: none;
+  }
+
+  /* Overlay is the ONLY scrollable element */
+  .editor-v4-overlay {
+    /* Contain all scrolling within this element */
+    overscroll-behavior: contain;
+    /* Smooth momentum scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+    /* Prevent scroll from chaining to parent */
+    overscroll-behavior-y: contain;
+    /* Ensure scrolling works properly */
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
 }
 
 /* Touch-optimized slider behavior */
@@ -259,9 +300,32 @@
     padding: 8px 0; /* Larger touch target */
     margin: 4px 0;
   }
+}
 
-  /* Ensure overlay content doesn't bounce scroll */
-  .editor-v4-overlay {
-    overscroll-behavior-y: contain;
-  }
+/* ============================================================================
+   SCROLL LOCK - Applied to body/root when Editor V4 is active
+   ============================================================================ */
+/* This class is added to body when Editor V4 mounts (mobile only) */
+body.editor-v4-active {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100dvh !important;
+  overscroll-behavior: none !important;
+  /* Prevent iOS Safari bounce */
+  -webkit-overflow-scrolling: auto !important;
+}
+
+/* Lock the root element as well */
+body.editor-v4-active #root {
+  overflow: hidden !important;
+  height: 100dvh !important;
+  overscroll-behavior: none !important;
+}
+
+/* Override global main padding when editor is active */
+body.editor-v4-active main {
+  padding-bottom: 0 !important;
+  overflow: hidden !important;
+  height: 100dvh !important;
 }

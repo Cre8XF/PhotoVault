@@ -93,21 +93,12 @@ export default function EditorPageV4() {
 
   // Lock body scroll while editor is active (mobile UX improvement)
   useEffect(() => {
-    // Save original body styles
-    const originalOverflow = document.body.style.overflow
-    const originalHeight = document.body.style.height
-    const originalOverscrollBehavior = document.body.style.overscrollBehavior
+    // Add scroll lock class to body (defined in EditorShellV4.css)
+    document.body.classList.add('editor-v4-active')
 
-    // Lock body scroll completely
-    document.body.style.overflow = 'hidden'
-    document.body.style.height = '100dvh'
-    document.body.style.overscrollBehavior = 'none'
-
-    // Restore on unmount
+    // Remove class on unmount
     return () => {
-      document.body.style.overflow = originalOverflow
-      document.body.style.height = originalHeight
-      document.body.style.overscrollBehavior = originalOverscrollBehavior
+      document.body.classList.remove('editor-v4-active')
     }
   }, [])
 
