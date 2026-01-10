@@ -48,9 +48,9 @@ export default function EditorShellV4({
       {/* Bottom toolbar */}
       <EditorToolbarV4 />
 
-      {/* Overlay panels - slide up from bottom */}
+      {/* Overlay panels - slide up from bottom (control panels, NOT interactive overlays) */}
       {activeTool === 'adjust' && <AdjustOverlay />}
-      {activeTool === 'crop' && <CropOverlay />}
+      {activeTool === 'crop' && <CropOverlay />} {/* Control panel: aspect ratio buttons, NOT the visual crop rectangle */}
       {activeTool === 'rotate' && <RotateOverlay />}
       {activeTool === 'filters' && <FiltersOverlay />}
 
