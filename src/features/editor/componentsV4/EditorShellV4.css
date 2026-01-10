@@ -1,47 +1,51 @@
 /**
- * EditorShellV4 - Ultimate Responsive Layout
+ * EditorShellV4 - Stable Canvas Principle (Google Photos Model)
  * Theme-aware, mobile-first, elegant design
  *
+ * Key Philosophy:
+ * "Ingen UI-state har lov til å påvirke viewport-størrelsen."
+ * "Bildet reagerer aldri på UI-endringer. UI reagerer på bildet."
+ *
  * Key Features:
- * - Flexbox layout (NO absolute positioning for panels)
- * - CSS variables for complete theme integration
- * - Responsive viewport that shrinks when tools active
- * - 60fps smooth animations
+ * - Fixed viewport height (NEVER shrinks)
+ * - Scrollable container (panels add to height)
+ * - Sticky header/toolbar for constant access
+ * - Image size calculated ONCE and remains stable
  * - Mobile-first design
  */
 
 /* ============================================ */
-/* Main Container - Fullscreen Flexbox         */
+/* Main Container - Scrollable Flexbox         */
 /* ============================================ */
 .editor-v4-container {
   position: fixed;
   inset: 0;
-  width: 100vw;
-  height: 100vh;
-  background: var(--bg-editor-dark, #000);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
+  background: var(--bg-primary, #000);
+  overflow-y: auto; /* KEY: Allow scrolling */
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ============================================ */
-/* Header - Overlay on Top                     */
+/* Header - Sticky at Top                      */
 /* ============================================ */
 .editor-v4-header {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 56px;
-  background: var(--glass-bg, rgba(255, 255, 255, 0.08));
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  flex-shrink: 0;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
+  background: var(--bg-secondary, rgba(0, 0, 0, 0.8));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  position: sticky; /* Stays visible when scrolling */
+  top: 0;
   z-index: 30;
-  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.05));
 }
 
 .editor-v4-header button {
@@ -82,18 +86,22 @@
 }
 
 /* ============================================ */
-/* Viewport - FLEX GROWS/SHRINKS               */
+/* Viewport - FIXED SIZE (NEVER SHRINKS)       */
 /* ============================================ */
 .editor-v4-viewport {
-  flex: 1; /* Grows to fill available space */
+  /* CRITICAL: Fixed height, calculated once */
+  height: calc(100vh - 50px - 80px);
+  min-height: calc(100vh - 50px - 80px);
+  flex-shrink: 0; /* NEVER shrink */
+
+  /* Layout */
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-editor-dark, #000);
-  overflow: hidden;
-  position: relative;
-  min-height: 0; /* Important for flex shrinking */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--bg-primary, #000);
+  padding: 8px;
+
+  /* DO NOT USE: flex: 1 */
 }
 
 .editor-v4-canvas-wrapper {
@@ -113,23 +121,20 @@
 }
 
 /* ============================================ */
-/* Panel - IN FLOW (NOT ABSOLUTE)              */
+/* Panel - Adds Height (Scrollable)            */
 /* ============================================ */
 .editor-v4-panel {
-  /* NO position: absolute */
-  /* Panel is in normal document flow */
-  width: 100%;
+  flex-shrink: 0;
+  min-height: 200px;
   max-height: 50vh;
-  background: var(--bg-editor-surface, rgba(30, 30, 30, 0.95));
+  background: var(--bg-secondary, rgba(18, 18, 18, 0.98));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-radius: 16px 16px 0 0;
   border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
-  padding: 20px;
   overflow-y: auto;
-  z-index: 25;
+  padding: 20px 16px;
   animation: slideUp 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 -4px 20px var(--overlay-bg, rgba(0, 0, 0, 0.5));
+  scroll-margin-top: 50px; /* For smooth auto-scroll */
 }
 
 @keyframes slideUp {
@@ -144,20 +149,22 @@
 }
 
 /* ============================================ */
-/* Toolbar - At Bottom                         */
+/* Toolbar - Sticky at Bottom                  */
 /* ============================================ */
 .editor-v4-toolbar {
-  width: 100%;
-  min-height: 80px;
-  background: var(--bg-editor-elevated, rgba(30, 30, 30, 0.95));
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  flex-shrink: 0;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 12px 16px;
+  background: var(--bg-secondary, rgba(0, 0, 0, 0.95));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
-  gap: 4px;
+  position: sticky; /* Stays visible at bottom */
+  bottom: 0;
+  z-index: 20;
+  padding: 0 8px;
 }
 
 .editor-v4-toolbar-button {
@@ -291,13 +298,14 @@
 /* Mobile Responsive - First Priority          */
 /* ============================================ */
 @media (max-width: 768px) {
-  .editor-v4-header {
-    height: 50px;
+  .editor-v4-toolbar {
+    height: 70px;
+    padding: 8px 8px;
   }
 
-  .editor-v4-toolbar {
-    min-height: 70px;
-    padding: 8px 8px;
+  .editor-v4-viewport {
+    height: calc(100vh - 50px - 70px);
+    min-height: calc(100vh - 50px - 70px);
   }
 
   .editor-v4-toolbar-button {
