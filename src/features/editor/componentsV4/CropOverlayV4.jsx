@@ -123,8 +123,15 @@ export default function CropOverlayV4() {
       {!crop && (
         <button
           onClick={initializeCrop}
-          className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors mb-3"
-          style={{ fontSize: '16px' }}
+          className="w-full py-3 rounded-lg font-medium transition-all mb-3"
+          style={{
+            fontSize: '16px',
+            backgroundColor: 'var(--color-primary-500)',
+            color: 'var(--text-primary)',
+            minHeight: '44px'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
         >
           Start Cropping
         </button>
@@ -133,7 +140,7 @@ export default function CropOverlayV4() {
       {/* Aspect ratio presets */}
       {crop && (
         <>
-          <p className="text-sm text-gray-400 mb-3">Aspect Ratio</p>
+          <p className="text-sm mb-3" style={{ color: 'var(--text-muted)' }}>Aspect Ratio</p>
           <div className="grid grid-cols-3 gap-2 mb-3">
             {aspectRatios.map((preset) => {
               const isActive = crop.aspectRatio === preset.ratio
@@ -142,12 +149,20 @@ export default function CropOverlayV4() {
                 <button
                   key={preset.label}
                   onClick={() => applyAspectRatio(preset.ratio, preset.label)}
-                  className={`py-2.5 px-3 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
-                  style={{ fontSize: '15px' }}
+                  className="py-2.5 px-3 rounded-lg text-sm font-medium transition-all"
+                  style={{
+                    fontSize: '15px',
+                    backgroundColor: isActive ? 'var(--color-primary-500)' : 'var(--bg-editor-elevated)',
+                    color: 'var(--text-primary)',
+                    border: `1px solid ${isActive ? 'var(--color-primary-500)' : 'var(--border-color)'}`,
+                    minHeight: '44px'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) e.currentTarget.style.backgroundColor = 'var(--bg-editor-hover)'
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) e.currentTarget.style.backgroundColor = 'var(--bg-editor-elevated)'
+                  }}
                 >
                   {preset.label}
                 </button>
@@ -156,7 +171,11 @@ export default function CropOverlayV4() {
           </div>
 
           {/* Instructions */}
-          <div className="text-xs text-gray-400 space-y-1 mt-3 bg-gray-800/50 p-3 rounded-lg">
+          <div className="text-xs space-y-1 mt-3 p-3 rounded-lg" style={{
+            color: 'var(--text-muted)',
+            backgroundColor: 'var(--bg-editor-elevated)',
+            border: '1px solid var(--border-color)'
+          }}>
             <p>• Drag corners to resize crop area</p>
             <p>• Drag center to reposition</p>
             <p>• Select aspect ratio for constrained crop</p>

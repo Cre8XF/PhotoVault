@@ -77,20 +77,36 @@ export default function RotateOverlay() {
 
       {/* Quick Rotate Buttons */}
       <div className="mb-3">
-        <p className="text-sm text-gray-400 mb-2">{t('editor:quickRotate')}</p>
+        <p className="text-sm mb-2" style={{ color: 'var(--text-muted)' }}>{t('editor:quickRotate')}</p>
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={handleRotateCCW}
-            className="py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-            style={{ fontSize: '15px' }}
+            className="py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
+            style={{
+              fontSize: '15px',
+              backgroundColor: 'var(--bg-editor-elevated)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-color)',
+              minHeight: '44px'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-editor-hover)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-editor-elevated)'}
           >
             <span className="text-lg">↶</span>
             <span>90° Left</span>
           </button>
           <button
             onClick={handleRotateCW}
-            className="py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-            style={{ fontSize: '15px' }}
+            className="py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
+            style={{
+              fontSize: '15px',
+              backgroundColor: 'var(--bg-editor-elevated)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-color)',
+              minHeight: '44px'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-editor-hover)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-editor-elevated)'}
           >
             <span className="text-lg">↷</span>
             <span>90° Right</span>
@@ -101,17 +117,20 @@ export default function RotateOverlay() {
       {/* Free Rotation Slider */}
       <div className="mb-3">
         <div className="flex items-center justify-between mb-2">
-          <label className="text-sm text-gray-300 font-medium">
+          <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
             Free Rotation
           </label>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-mono text-gray-400 min-w-[3rem] text-right">
+            <span className="text-sm font-mono min-w-[3rem] text-right" style={{ color: 'var(--text-muted)' }}>
               {rotation}°
             </span>
             {rotation !== 0 && (
               <button
                 onClick={() => handleFreeRotation(0)}
-                className="text-xs text-gray-400 hover:text-white transition-colors"
+                className="text-xs transition-colors"
+                style={{ color: 'var(--text-muted)', minHeight: '44px' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
                 title="Reset to 0"
               >
                 ↺
@@ -127,22 +146,17 @@ export default function RotateOverlay() {
           step={1}
           value={rotation}
           onChange={(e) => handleFreeRotation(parseInt(e.target.value))}
-          className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer
-                     [&::-webkit-slider-thumb]:appearance-none
-                     [&::-webkit-slider-thumb]:w-5
-                     [&::-webkit-slider-thumb]:h-5
-                     [&::-webkit-slider-thumb]:bg-blue-400
-                     [&::-webkit-slider-thumb]:rounded-full
-                     [&::-webkit-slider-thumb]:cursor-pointer
-                     [&::-moz-range-thumb]:w-5
-                     [&::-moz-range-thumb]:h-5
-                     [&::-moz-range-thumb]:bg-blue-400
-                     [&::-moz-range-thumb]:rounded-full
-                     [&::-moz-range-thumb]:border-0
-                     [&::-moz-range-thumb]:cursor-pointer"
+          style={{
+            width: '100%',
+            height: '8px',
+            background: 'var(--bg-editor-elevated)',
+            borderRadius: '8px',
+            appearance: 'none',
+            cursor: 'pointer'
+          }}
         />
 
-        <div className="flex justify-between text-xs text-gray-500 mt-1">
+        <div className="flex justify-between text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
           <span>-180°</span>
           <span>0°</span>
           <span>+180°</span>
@@ -151,28 +165,44 @@ export default function RotateOverlay() {
 
       {/* Flip Buttons */}
       <div className="mb-2">
-        <p className="text-sm text-gray-400 mb-2">Flip</p>
+        <p className="text-sm mb-2" style={{ color: 'var(--text-muted)' }}>Flip</p>
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={handleFlipH}
-            className={`py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
-              flipH
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-700 text-white hover:bg-gray-600'
-            }`}
-            style={{ fontSize: '15px' }}
+            className="py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
+            style={{
+              fontSize: '15px',
+              backgroundColor: flipH ? 'var(--color-primary-500)' : 'var(--bg-editor-elevated)',
+              color: 'var(--text-primary)',
+              border: `1px solid ${flipH ? 'var(--color-primary-500)' : 'var(--border-color)'}`,
+              minHeight: '44px'
+            }}
+            onMouseEnter={(e) => {
+              if (!flipH) e.currentTarget.style.backgroundColor = 'var(--bg-editor-hover)'
+            }}
+            onMouseLeave={(e) => {
+              if (!flipH) e.currentTarget.style.backgroundColor = 'var(--bg-editor-elevated)'
+            }}
           >
             <span className="text-lg">↔</span>
             <span>Horizontal</span>
           </button>
           <button
             onClick={handleFlipV}
-            className={`py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
-              flipV
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-700 text-white hover:bg-gray-600'
-            }`}
-            style={{ fontSize: '15px' }}
+            className="py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
+            style={{
+              fontSize: '15px',
+              backgroundColor: flipV ? 'var(--color-primary-500)' : 'var(--bg-editor-elevated)',
+              color: 'var(--text-primary)',
+              border: `1px solid ${flipV ? 'var(--color-primary-500)' : 'var(--border-color)'}`,
+              minHeight: '44px'
+            }}
+            onMouseEnter={(e) => {
+              if (!flipV) e.currentTarget.style.backgroundColor = 'var(--bg-editor-hover)'
+            }}
+            onMouseLeave={(e) => {
+              if (!flipV) e.currentTarget.style.backgroundColor = 'var(--bg-editor-elevated)'
+            }}
           >
             <span className="text-lg">↕</span>
             <span>Vertical</span>
@@ -182,7 +212,11 @@ export default function RotateOverlay() {
 
       {/* Current Transform - Compact */}
       {hasChanges && (
-        <div className="mt-3 px-3 py-2 bg-gray-800 rounded-lg text-xs text-gray-400">
+        <div className="mt-3 px-3 py-2 rounded-lg text-xs" style={{
+          backgroundColor: 'var(--bg-editor-elevated)',
+          color: 'var(--text-muted)',
+          border: '1px solid var(--border-color)'
+        }}>
           {rotation !== 0 && `${rotation}° `}
           {flipH && `↔ `}
           {flipV && `↕`}
