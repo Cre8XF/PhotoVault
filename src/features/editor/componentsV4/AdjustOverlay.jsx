@@ -56,8 +56,8 @@ export default function AdjustOverlay() {
         )}
       </div>
 
-      {/* Sliders */}
-      <div className="space-y-1">
+      {/* Sliders - 2-column grid */}
+      <div className="adjust-panel-grid">
         <Slider
           label="Brightness"
           value={adjustments.brightness}

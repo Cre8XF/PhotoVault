@@ -383,6 +383,28 @@
 }
 
 /* ============================================ */
+/* Adjust Panel - 2-Column Grid                */
+/* ============================================ */
+.adjust-panel-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 20px;
+  margin-top: 8px;
+}
+
+@media (max-width: 480px) {
+  .adjust-panel-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+/* Compact slider for grid layout */
+.adjust-panel-grid .mb-2 {
+  margin-bottom: 0;
+}
+
+/* ============================================ */
 /* Smooth Scroll                               */
 /* ============================================ */
 .editor-v4-overlay::-webkit-scrollbar,
