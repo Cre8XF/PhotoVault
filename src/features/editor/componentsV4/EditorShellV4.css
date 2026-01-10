@@ -9,6 +9,7 @@
   inset: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh; /* Use dynamic viewport height for better mobile support */
   background: #000;
   overflow: hidden;
   display: flex;
@@ -170,6 +171,8 @@
   z-index: 25;
   animation: slideUp 300ms ease-out;
   overflow-y: auto;
+  overscroll-behavior: contain; /* Prevent scroll chaining to body */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
 }
 
@@ -225,7 +228,8 @@
 
   .editor-v4-overlay {
     bottom: 70px;
-    max-height: 320px;
+    max-height: 45vh; /* Use viewport height percentage for better mobile control */
+    max-height: 45dvh; /* Dynamic viewport height for mobile */
   }
 
   .editor-v4-toolbar-button {
@@ -235,5 +239,29 @@
 
   .editor-v4-toolbar-button span.label {
     font-size: 11px;
+  }
+}
+
+/* Touch-optimized slider behavior */
+.editor-v4-overlay input[type='range'] {
+  touch-action: pan-x; /* Allow horizontal drag, prevent vertical scroll */
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+
+.editor-v4-overlay input[type='range']:active {
+  cursor: grabbing;
+}
+
+/* Prevent accidental scroll during slider interaction on mobile */
+@media (max-width: 768px) {
+  .editor-v4-overlay input[type='range'] {
+    padding: 8px 0; /* Larger touch target */
+    margin: 4px 0;
+  }
+
+  /* Ensure overlay content doesn't bounce scroll */
+  .editor-v4-overlay {
+    overscroll-behavior-y: contain;
   }
 }

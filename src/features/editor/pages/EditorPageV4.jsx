@@ -91,6 +91,20 @@ export default function EditorPageV4() {
     }
   }, [photo?.url, setOriginalUrl, setPreloadedImage, cleanup])
 
+  // Lock body scroll while editor is active (mobile UX improvement)
+  useEffect(() => {
+    // Save original overflow value
+    const originalOverflow = document.body.style.overflow
+
+    // Lock body scroll
+    document.body.style.overflow = 'hidden'
+
+    // Restore on unmount
+    return () => {
+      document.body.style.overflow = originalOverflow
+    }
+  }, [])
+
   const handleClose = () => {
     navigate(-1)
   }
