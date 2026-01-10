@@ -39,6 +39,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
+  padding-top: env(safe-area-inset-top, 0px); /* P1: Safe area for notch/status bar */
   background: var(--bg-secondary, rgba(0, 0, 0, 0.8));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -90,6 +91,7 @@
 /* ============================================ */
 .editor-v4-viewport {
   /* CRITICAL: Fixed height, calculated once */
+  /* Fallback for browsers without dvh support */
   height: calc(100vh - 50px - 80px);
   min-height: calc(100vh - 50px - 80px);
   flex-shrink: 0; /* NEVER shrink */
@@ -102,6 +104,15 @@
   padding: 8px;
 
   /* DO NOT USE: flex: 1 */
+}
+
+/* P0: Dynamic viewport height for mobile stability */
+/* Prevents canvas resize when browser chrome shows/hides */
+@supports (height: 100dvh) {
+  .editor-v4-viewport {
+    height: calc(100dvh - 50px - env(safe-area-inset-top, 0px) - 80px - env(safe-area-inset-bottom, 0px));
+    min-height: calc(100dvh - 50px - env(safe-area-inset-top, 0px) - 80px - env(safe-area-inset-bottom, 0px));
+  }
 }
 
 .editor-v4-canvas-wrapper {
@@ -165,6 +176,7 @@
   bottom: 0;
   z-index: 20;
   padding: 0 8px;
+  padding-bottom: env(safe-area-inset-bottom, 0px); /* P1: Safe area for home indicator */
 }
 
 .editor-v4-toolbar-button {
@@ -301,11 +313,21 @@
   .editor-v4-toolbar {
     height: 70px;
     padding: 8px 8px;
+    padding-bottom: env(safe-area-inset-bottom, 0px); /* Maintain safe area on mobile */
   }
 
   .editor-v4-viewport {
+    /* Fallback for browsers without dvh support */
     height: calc(100vh - 50px - 70px);
     min-height: calc(100vh - 50px - 70px);
+  }
+
+  /* P0: Dynamic viewport height for mobile (70px toolbar on mobile) */
+  @supports (height: 100dvh) {
+    .editor-v4-viewport {
+      height: calc(100dvh - 50px - env(safe-area-inset-top, 0px) - 70px - env(safe-area-inset-bottom, 0px));
+      min-height: calc(100dvh - 50px - env(safe-area-inset-top, 0px) - 70px - env(safe-area-inset-bottom, 0px));
+    }
   }
 
   .editor-v4-toolbar-button {
