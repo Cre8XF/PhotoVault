@@ -263,6 +263,22 @@ function App() {
                       </ProtectedRoute>
                     }
                   />
+                  <Route
+                    path="/edit-v5/:photoId"
+                    element={
+                      <ProtectedRoute>
+                        <Suspense
+                          fallback={
+                            <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#000' }}>
+                              <Loading size="xl" />
+                            </div>
+                          }
+                        >
+                          <EditorPageV5 />
+                        </Suspense>
+                      </ProtectedRoute>
+                    }
+                  />
 
                   {/* ⚠️ PHASE 2: AI Tools - HIDDEN FOR LAUNCH (code kept latent) */}
                   {/* AI routes disabled - no navigation, deep links return 404 */}
