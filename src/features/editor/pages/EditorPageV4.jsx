@@ -51,8 +51,10 @@ export default function EditorPageV4() {
   useEffect(() => {
     if (!photo?.url) return
 
-    if (import.meta.env.DEV) console.log('🔍 [V4] Preloading image from Firebase Storage')
-    if (import.meta.env.DEV) console.log('   URL:', photo.url.substring(0, 80) + '...')
+    if (import.meta.env.DEV)
+      console.log('🔍 [V4] Preloading image from Firebase Storage')
+    if (import.meta.env.DEV)
+      console.log('   URL:', photo.url.substring(0, 80) + '...')
 
     const img = new Image()
 
@@ -60,10 +62,11 @@ export default function EditorPageV4() {
     img.crossOrigin = 'anonymous'
 
     img.onload = () => {
-      if (import.meta.env.DEV) console.log('🎨 [V4] Image ready for canvas render', {
-        width: img.naturalWidth,
-        height: img.naturalHeight,
-      })
+      if (import.meta.env.DEV)
+        console.log('🎨 [V4] Image ready for canvas render', {
+          width: img.naturalWidth,
+          height: img.naturalHeight,
+        })
       setImageLoaded(true)
       setImageError(null)
       setOriginalUrl(photo.url)
@@ -138,24 +141,27 @@ export default function EditorPageV4() {
       setProcessing(true)
 
       // Step 1: Export from active canvas
-      if (import.meta.env.DEV) console.log('💾 [V4] Exporting from editor canvas...')
+      if (import.meta.env.DEV)
+        console.log('💾 [V4] Exporting from editor canvas...')
 
       if (!canvasRef) {
         throw new Error('Editor canvas not found. Cannot save.')
       }
 
-      if (import.meta.env.DEV) console.log('✅ [V4] Using active editor canvas', {
-        width: canvasRef.width,
-        height: canvasRef.height,
-        hasCrop: !!transform.crop,
-      })
+      if (import.meta.env.DEV)
+        console.log('✅ [V4] Using active editor canvas', {
+          width: canvasRef.width,
+          height: canvasRef.height,
+          hasCrop: !!transform.crop,
+        })
 
       // Determine which canvas to export
       let canvasToExport = canvasRef
 
       // If crop is active, create offscreen canvas with cropped region
       if (transform.crop) {
-        if (import.meta.env.DEV) console.log('🔪 [V4] Applying crop before export:', transform.crop)
+        if (import.meta.env.DEV)
+          console.log('🔪 [V4] Applying crop before export:', transform.crop)
 
         const crop = transform.crop
         const cropX = crop.x1 * canvasRef.width
@@ -163,12 +169,13 @@ export default function EditorPageV4() {
         const cropWidth = (crop.x2 - crop.x1) * canvasRef.width
         const cropHeight = (crop.y2 - crop.y1) * canvasRef.height
 
-        if (import.meta.env.DEV) console.log('   Crop region (pixels):', {
-          x: Math.round(cropX),
-          y: Math.round(cropY),
-          width: Math.round(cropWidth),
-          height: Math.round(cropHeight),
-        })
+        if (import.meta.env.DEV)
+          console.log('   Crop region (pixels):', {
+            x: Math.round(cropX),
+            y: Math.round(cropY),
+            width: Math.round(cropWidth),
+            height: Math.round(cropHeight),
+          })
 
         // Create offscreen canvas for cropped output
         const offscreenCanvas = document.createElement('canvas')
@@ -190,20 +197,22 @@ export default function EditorPageV4() {
         )
 
         canvasToExport = offscreenCanvas
-        if (import.meta.env.DEV) console.log('✅ [V4] Cropped canvas ready', {
-          width: offscreenCanvas.width,
-          height: offscreenCanvas.height,
-        })
+        if (import.meta.env.DEV)
+          console.log('✅ [V4] Cropped canvas ready', {
+            width: offscreenCanvas.width,
+            height: offscreenCanvas.height,
+          })
       }
 
       const editedBlob = await new Promise((resolve, reject) => {
         canvasToExport.toBlob(
           (blob) => {
             if (blob) {
-              if (import.meta.env.DEV) console.log('✅ [V4] Canvas exported successfully', {
-                size: blob.size,
-                type: blob.type,
-              })
+              if (import.meta.env.DEV)
+                console.log('✅ [V4] Canvas exported successfully', {
+                  size: blob.size,
+                  type: blob.type,
+                })
               resolve(blob)
             } else {
               reject(new Error('Canvas toBlob failed'))
@@ -234,10 +243,7 @@ export default function EditorPageV4() {
     } catch (error) {
       console.error('[V4] Save failed:', error)
 
-      showNotification(
-        'Failed to save photo. Please try again.',
-        'error'
-      )
+      showNotification('Failed to save photo. Please try again.', 'error')
     } finally {
       setProcessing(false)
     }
@@ -262,11 +268,12 @@ export default function EditorPageV4() {
     try {
       setProcessing(true)
 
-      if (import.meta.env.DEV) console.log('🔄 [V4] Reverting to original photo:', {
-        photoId: photo.id,
-        currentUrl: photo.url,
-        originalUrl: photo.originalUrl,
-      })
+      if (import.meta.env.DEV)
+        console.log('🔄 [V4] Reverting to original photo:', {
+          photoId: photo.id,
+          currentUrl: photo.url,
+          originalUrl: photo.originalUrl,
+        })
 
       // Update Firestore: Reset to original URL
       await updatePhoto(photo.id, {
@@ -278,7 +285,8 @@ export default function EditorPageV4() {
         filter: null,
       })
 
-      if (import.meta.env.DEV) console.log('✅ [V4] Reverted to original successfully')
+      if (import.meta.env.DEV)
+        console.log('✅ [V4] Reverted to original successfully')
       showNotification('Reverted to original image', 'success')
 
       // Navigate back
@@ -348,7 +356,9 @@ export default function EditorPageV4() {
       <div className="fixed inset-0 flex items-center justify-center bg-black">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading image from Firebase Storage...</p>
+          <p className="text-gray-400">
+            Loading image from Firebase Storage...
+          </p>
           <p className="text-xs text-gray-500 mt-2">
             Verifying CORS configuration...
           </p>
