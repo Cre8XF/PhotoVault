@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import EditorHeaderV4 from './EditorHeaderV4'
 import EditorViewportV4 from './EditorViewportV4'
 import EditorToolbarV4 from './EditorToolbarV4'
@@ -9,16 +10,21 @@ import useEditorStore from '../store/editorStore'
 import './EditorShellV4.css'
 
 /**
- * EditorShellV4 - Ultimate Responsive Layout
+ * EditorShellV4 - Stable Canvas Principle (Google Photos Model)
+ *
+ * Philosophy:
+ * "Ingen UI-state har lov til å påvirke viewport-størrelsen."
+ * "Bildet reagerer aldri på UI-endringer. UI reagerer på bildet."
  *
  * Layout:
- * - Minimal header (overlay on top)
- * - Responsive viewport (flex: 1, shrinks when tool active)
- * - Tool panel (in flow, NOT absolute - pushes viewport up)
- * - Bottom toolbar (compact with text labels)
+ * - Sticky header at top
+ * - FIXED viewport (height: calc(100vh - 50px - 80px), NEVER shrinks)
+ * - Tool panel (adds to container height, making it scrollable)
+ * - Sticky toolbar at bottom
  *
- * When tool inactive: Viewport fills space
- * When tool active: Panel appears, viewport shrinks, image scales down
+ * Behavior:
+ * No panel: Container = 100vh, no scroll, image large
+ * Panel opens: Container > 100vh, scrollable, image SAME size
  */
 export default function EditorShellV4({
   imageUrl,
@@ -32,9 +38,24 @@ export default function EditorShellV4({
 }) {
   const activeTool = useEditorStore((state) => state.activeTool)
 
+  // Auto-scroll to panel when tool activates
+  useEffect(() => {
+    if (activeTool) {
+      setTimeout(() => {
+        const panel = document.querySelector('.editor-v4-panel')
+        if (panel) {
+          panel.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+          })
+        }
+      }, 100)
+    }
+  }, [activeTool])
+
   return (
     <div className="editor-v4-container">
-      {/* Minimal header - overlay on top */}
+      {/* Sticky header at top */}
       <EditorHeaderV4
         photoName={photoName}
         onClose={onClose}
@@ -45,12 +66,12 @@ export default function EditorShellV4({
         isSaving={isSaving}
       />
 
-      {/* Responsive viewport - grows/shrinks based on panel */}
+      {/* FIXED viewport - NEVER shrinks */}
       <div className="editor-v4-viewport">
         <EditorViewportV4 imageUrl={imageUrl} />
       </div>
 
-      {/* Tool panel - in normal flow (NOT absolute) */}
+      {/* Tool panel - adds to container height */}
       {activeTool && (
         <div className="editor-v4-panel">
           {activeTool === 'adjust' && <AdjustOverlay />}
@@ -60,7 +81,7 @@ export default function EditorShellV4({
         </div>
       )}
 
-      {/* Bottom toolbar */}
+      {/* Sticky toolbar at bottom */}
       <EditorToolbarV4 />
 
       {/* Saving overlay */}
