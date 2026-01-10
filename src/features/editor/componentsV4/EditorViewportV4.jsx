@@ -1,6 +1,6 @@
 import { useCanvas } from '../hooks/useCanvas'
 import useEditorStore from '../store/editorStore'
-import CropOverlay from '../componentsV4/CropOverlayV4'
+import InteractiveCropOverlay from '../componentsV4/InteractiveCropOverlayV4'
 
 /**
  * EditorViewportV4 - Fullscreen canvas viewport
@@ -60,7 +60,7 @@ export default function EditorViewportV4({ imageUrl }) {
 
         {/* Crop overlay when crop tool is active */}
         {activeTool === 'crop' && crop && (
-          <CropOverlay
+          <InteractiveCropOverlay
             crop={crop}
             onChange={handleCropChange}
             containerDimensions={dimensions}
