@@ -37,18 +37,6 @@ const SettingsPage = () => {
     albums: false
   })
 
-  // V4 Editor toggle
-  const [useV4Editor, setUseV4Editor] = useState(() => {
-    const saved = localStorage.getItem('useEditorV4')
-    return saved === 'true'
-  })
-
-  const handleV4EditorToggle = () => {
-    const newValue = !useV4Editor
-    setUseV4Editor(newValue)
-    localStorage.setItem('useEditorV4', newValue.toString())
-  }
-
   const accountCreated = user?.metadata?.creationTime
     ? new Date(user.metadata.creationTime).toLocaleDateString('no-NO')
     : t('settings:unknown')
@@ -218,30 +206,6 @@ const SettingsPage = () => {
                 <option value="no">Norsk (Bokmål)</option>
                 <option value="en">English</option>
               </select>
-            </div>
-
-            {/* V4 Editor Toggle */}
-            <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Use V4 Editor (Beta)
-                  </label>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Google Photos style layout with fullscreen image and overlay panels
-                  </p>
-                </div>
-                <button
-                  onClick={handleV4EditorToggle}
-                  className={`relative w-12 h-6 rounded-full transition-colors ml-4 ${
-                    useV4Editor ? 'bg-purple-600' : 'bg-gray-300 dark:bg-gray-600'
-                  }`}
-                >
-                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
-                    useV4Editor ? 'left-7' : 'left-1'
-                  }`} />
-                </button>
-              </div>
             </div>
           </div>
         </div>
