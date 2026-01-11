@@ -94,22 +94,27 @@ const CollageNewPage = () => {
     console.log('Referrer:', document.referrer)
     console.log('═══════════════════════════════════════')
 
+    // Guard: Redirect to template selection if no template specified
+    if (!templateId) {
+      console.warn('⚠️ No template ID provided - redirecting to template selection')
+      navigate('/tools/collage/templates', { replace: true })
+      return
+    }
+
     setIsWorldView(true)
 
     // Load template and initialize collage
-    if (templateId) {
-      const templateData = getTemplateById(templateId)
-      if (templateData) {
-        const expandedTemplate = expandTemplate(templateData)
-        initializeFromTemplate(expandedTemplate)
-      }
+    const templateData = getTemplateById(templateId)
+    if (templateData) {
+      const expandedTemplate = expandTemplate(templateData)
+      initializeFromTemplate(expandedTemplate)
     }
 
     return () => {
       setIsWorldView(false)
       reset()
     }
-  }, [setIsWorldView, templateId, initializeFromTemplate, reset])
+  }, [setIsWorldView, templateId, initializeFromTemplate, reset, navigate])
 
   // ============================================================================
   // HANDLERS

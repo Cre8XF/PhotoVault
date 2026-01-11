@@ -439,7 +439,7 @@ const AlbumsPage = ({
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  navigate('/tools/collage/new', {
+                                  navigate('/tools/collage/templates', {
                                     state: { albumId: album.id }
                                   })
                                 }}
@@ -541,7 +541,7 @@ const AlbumsPage = ({
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation()
-                                    navigate('/tools/collage/new', {
+                                    navigate('/tools/collage/templates', {
                                       state: { albumId: album.id }
                                     })
                                   }}

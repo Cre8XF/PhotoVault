@@ -106,8 +106,11 @@ export default function CollageTemplatesPage() {
     // LITE/PRO/ADMIN: Allow access
     console.log('✅ Tier allows collage creation - navigating to builder');
     console.log('Navigating to:', `${ROUTES.COLLAGE_NEW}?template=${template.id}`);
+    console.log('Preserving state:', location.state);
     console.log('═══════════════════════════════════════');
-    navigate(`${ROUTES.COLLAGE_NEW}?template=${template.id}`);
+    navigate(`${ROUTES.COLLAGE_NEW}?template=${template.id}`, {
+      state: location.state // Preserve albumId from previous navigation
+    });
   };
 
   return (

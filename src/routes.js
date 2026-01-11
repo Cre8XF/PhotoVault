@@ -10,6 +10,7 @@ export const ROUTES = {
   COLLAGE_TEMPLATES: '/tools/collage/templates',
   COLLAGE_NEW: '/tools/collage/new',
   COLLAGE_EDIT: '/tools/collage/edit/:id',
+  COLLAGE_VIEW: '/collage/:id',  // View saved collage
   PHOTO: '/photo/:id',
   SLIDESHOW: '/slideshow/:id',
   // Phase 5: AI Tools World
