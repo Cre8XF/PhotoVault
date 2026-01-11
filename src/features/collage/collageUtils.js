@@ -109,7 +109,8 @@ export const serializeCollage = (collageData) => {
   }
 
   return {
-    id: safe(collageData.id),
+    // NOTE: Do NOT include 'id' field - Firestore document ID (doc.id) is the source of truth
+    // Including id: null causes issues when reading documents back
     templateId: safe(collageData.templateId),
     title: safe(collageData.title) || '',
     photoIds: photoIds, // CRITICAL: Always include photoIds array
