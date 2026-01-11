@@ -202,17 +202,30 @@ const CollageNewPage = () => {
         throw new Error('Not authenticated')
       }
 
+      // ✅ DERIVE photoIds from slots (single source of truth)
+      const photoIds = slots
+        .map(s => s.photo?.id)
+        .filter(Boolean)
+
+      if (photoIds.length === 0) {
+        throw new Error('No photos in collage')
+      }
+
+      const collagePhotos = photos.filter(p => photoIds.includes(p.id))
+
       console.log('═══════════════════════════════════════')
       console.log('💾 COLLAGE SAVE AS PHOTO - DEBUG')
       console.log('═══════════════════════════════════════')
       console.log('Album ID:', albumId)
       console.log('Return path:', returnPath)
+      console.log('📊 Collage data:', {
+        photoIds,
+        photoCount: collagePhotos.length,
+        slotsCount: slots.length
+      })
 
       // Get collage data with validation
       const collageData = getCollageData()
-      const collagePhotos = photos.filter(p =>
-        slots.find(s => s.photo?.id === p.id)
-      )
 
       // Step 1: Render full-size collage image
       console.log('🎨 Rendering collage to image...')
@@ -251,7 +264,7 @@ const CollageNewPage = () => {
         customMetadata: {
           type: 'collage',
           templateId: template.id,
-          photoCount: collageData.photoIds.length.toString(),
+          photoCount: photoIds.length.toString(),
           createdAt: new Date().toISOString()
         }
       })
@@ -308,7 +321,7 @@ const CollageNewPage = () => {
         // Lightweight collage metadata
         collageData: {
           templateId: template.id,
-          photoIds: collageData.photoIds,
+          photoIds: photoIds,
           version: 2
         },
 
@@ -322,7 +335,7 @@ const CollageNewPage = () => {
         // Metadata
         favorite: false,
         tags: ['collage'],
-        aiTags: [`collage-${template.id}`, `${collageData.photoIds.length}-photos`]
+        aiTags: [`collage-${template.id}`, `${photoIds.length}-photos`]
       }
 
       const docRef = await addDoc(photosRef, photoDoc)
