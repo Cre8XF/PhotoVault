@@ -176,16 +176,20 @@ service cloud.firestore {
         (isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin()))
         || albumExistsAndIsPublic(resource.data.albumId);
 
+      // Allow creating collages
       allow create: if isAuthenticated()
         && request.resource.data.userId == request.auth.uid
         && isEmailVerified()
+        && (request.resource.data.type in ['photo', 'video', 'collage', 'document'])
+        && (request.resource.data.type != 'collage' || request.resource.data.isCollage == true)
         // Tier restrictions by mime/type
         && (!isVideoUpload() || canUploadVideo())
         && (!isDocumentUpload() || canUploadDocument());
 
-      allow update: if isAuthenticated() && (
-        resource.data.userId == request.auth.uid || isAdmin()
-      );
+      // Allow updating collages (only by owner)
+      allow update: if isAuthenticated()
+        && request.auth.uid == resource.data.userId
+        && request.resource.data.userId == resource.data.userId; // Prevent userId change
 
       allow delete: if isAuthenticated()
         && (resource.data.userId == request.auth.uid || isAdmin())

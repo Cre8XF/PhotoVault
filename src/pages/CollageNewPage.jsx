@@ -6,8 +6,9 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Save, AlertCircle } from 'lucide-react'
-import { collection, addDoc, updateDoc, doc } from 'firebase/firestore'
-import { auth, db } from '../firebase'
+import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore'
+import { auth, db, storage } from '../firebase'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import useStore from '../state/store'
 import useCollageStore from '../features/collage/collageStore'
 import {
@@ -18,7 +19,7 @@ import {
   serializeCollage,
   validateCollageData,
 } from '../features/collage/collageUtils'
-import { renderCollageToCanvas } from '../utils/renderCollageToCanvas'
+import { renderCollageToCanvas, renderCollageThumbnail } from '../utils/renderCollageToCanvas'
 import { uploadWithFallback } from '../utils/r2Upload'
 import { normalizePhotoFields } from '../utils/photoHelpers'
 import CollageCanvas from '../features/collage/components/CollageCanvas'
@@ -48,7 +49,7 @@ const CollageNewPage = () => {
   const returnPath = location.state?.returnPath || '/albums'
 
   // Global store
-  const { setIsWorldView, photos, setUpgradeModal } = useStore()
+  const { setIsWorldView, photos, setUpgradeModal, setNotification } = useStore()
 
   // Collage store
   const {
@@ -196,291 +197,158 @@ const CollageNewPage = () => {
       setIsSaving(true)
       setSaveError(null)
 
-      console.log('═══════════════════════════════════════')
-      console.log('💾 COLLAGE SAVE DEBUG')
-      console.log('═══════════════════════════════════════')
-      console.log('Current path:', window.location.pathname)
-      console.log('History length:', window.history.length)
-
-      const collageData = getCollageData()
-      const validation = validateCollageData(collageData)
-
-      if (!validation.valid) {
-        setSaveError(validation.error)
-        return
-      }
-
-      const serialized = serializeCollage(collageData)
-
-      // Save to Firestore
       const user = auth.currentUser
       if (!user) {
         throw new Error('Not authenticated')
       }
 
-      const collagesRef = collection(db, 'users', user.uid, 'collages')
-      const docRef = await addDoc(collagesRef, {
-        ...serialized,
-        userId: user.uid,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+      console.log('═══════════════════════════════════════')
+      console.log('💾 COLLAGE SAVE AS PHOTO - DEBUG')
+      console.log('═══════════════════════════════════════')
+      console.log('Album ID:', albumId)
+      console.log('Return path:', returnPath)
+
+      const collageData = getCollageData()
+      const collagePhotos = photos.filter(p =>
+        slots.find(s => s.photo?.id === p.id)
+      )
+
+      // Step 1: Render full-size collage image
+      console.log('🎨 Rendering collage to image...')
+      const collageBlob = await renderCollageToCanvas({
+        layout: template,
+        photos: collagePhotos,
+        transforms: collageData.transforms || {},
+        options: {
+          quality: 0.92,
+          useHighRes: true
+        }
       })
+
+      // Get actual dimensions (with fallback for older devices)
+      let actualWidth, actualHeight
+      try {
+        const img = await createImageBitmap(collageBlob)
+        actualWidth = img.width
+        actualHeight = img.height
+        img.close() // Free memory
+      } catch (bitmapError) {
+        console.warn('⚠️ createImageBitmap failed, using template dimensions:', bitmapError)
+        actualWidth = template.canvas.width
+        actualHeight = template.canvas.height
+      }
+
+      // Step 2: Upload full image
+      const timestamp = Date.now()
+      const collageFileName = `collage_${timestamp}.jpg`
+      const storagePath = `users/${user.uid}/${albumId || 'collages'}/${collageFileName}`
+      const storageRef = ref(storage, storagePath)
+
+      console.log('☁️ Uploading collage image...')
+      await uploadBytes(storageRef, collageBlob, {
+        contentType: 'image/jpeg',
+        customMetadata: {
+          type: 'collage',
+          templateId: template.id,
+          photoCount: collageData.photoIds.length.toString(),
+          createdAt: new Date().toISOString()
+        }
+      })
+
+      const collageUrl = await getDownloadURL(storageRef)
+      console.log('✅ Collage image uploaded:', collageUrl)
+
+      // Step 3: Generate and upload thumbnail
+      console.log('🖼️ Generating thumbnail...')
+      const thumbnailBlob = await renderCollageThumbnail({
+        layout: template,
+        photos: collagePhotos,
+        transforms: collageData.transforms || {},
+        maxWidth: 400
+      })
+
+      const thumbnailPath = `users/${user.uid}/thumbnails/collage_${timestamp}_thumb.jpg`
+      const thumbnailRef = ref(storage, thumbnailPath)
+
+      await uploadBytes(thumbnailRef, thumbnailBlob, {
+        contentType: 'image/jpeg'
+      })
+
+      const thumbnailUrl = await getDownloadURL(thumbnailRef)
+      console.log('✅ Thumbnail uploaded')
+
+      // Step 4: Build slotPhotos mapping (normalized)
+      const slotPhotos = {}
+      slots.forEach((slot, index) => {
+        if (slot.photo?.id) {
+          slotPhotos[index.toString()] = slot.photo.id
+        }
+      })
+
+      // Step 5: Save as photo document
+      const photosRef = collection(db, 'photos')
+      const photoDoc = {
+        // Standard fields
+        userId: user.uid,
+        albumId: albumId || null,
+        url: collageUrl,
+        thumbnailUrl: thumbnailUrl,
+        name: `Collage - ${template.name}`,
+        width: actualWidth,
+        height: actualHeight,
+        fileSize: collageBlob.size,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+
+        // Type identification
+        type: 'collage',
+        isCollage: true,
+
+        // Lightweight collage metadata
+        collageData: {
+          templateId: template.id,
+          photoIds: collageData.photoIds,
+          version: 2
+        },
+
+        // Editor data (normalized)
+        collageEditorData: {
+          slotPhotos: slotPhotos,
+          transforms: collageData.transforms || {},
+          editorVersion: '2.1'
+        },
+
+        // Metadata
+        favorite: false,
+        tags: ['collage'],
+        aiTags: [`collage-${template.id}`, `${collageData.photoIds.length}-photos`]
+      }
+
+      const docRef = await addDoc(photosRef, photoDoc)
+      console.log('✅ Collage saved as photo:', docRef.id)
 
       markAsSaved(docRef.id)
 
-      console.log('✅ Collage saved successfully:', docRef.id)
 
-      // Generate and upload static collage image to R2
-      try {
-        console.log('🖼️ Generating static collage image...')
+      // Show success notification
+      setNotification({
+        message: t('collage:notifications.collageSaved', 'Collage saved!'),
+        type: 'success'
+      })
 
-        // Create snapshots from serialized data to avoid race conditions
-        const slotsSnapshot = structuredClone(serialized.slots || [])
-        const layoutSnapshot = template
-
-        // 🔍 DEBUG TEMPLATE STRUCTURE
-        console.log('🔍 TEMPLATE STRUCTURE DEBUG:', {
-          template,
-          templateKeys: template ? Object.keys(template) : [],
-          templateType: typeof template,
-          hasId: !!template?.id,
-          hasLayout: !!template?.layout,
-          hasCanvas: !!template?.canvas,
-          hasSlots: !!template?.slots,
-          // Check nested
-          nestedLayoutKeys: template?.layout
-            ? Object.keys(template.layout)
-            : [],
-          nestedCanvas: template?.layout?.canvas,
-          // Check flat
-          directCanvas: template?.canvas,
-          directSlots: template?.slots,
-        })
-
-        // Guard: layout/template must exist
-        if (!layoutSnapshot) {
-          throw new Error(
-            `Missing layout/template for templateId=${templateId}`
-          )
-        }
-
-        // Build lookup map from global photos (resolve slot photo IDs to full photo objects)
-        const photosById = new Map(
-          (photos || [])
-            .map((p) => normalizePhotoFields(p))
-            .filter((p) => p?.id)
-            .map((p) => [p.id, p])
-        )
-
-        // Normalize slots by merging slot.photo with full photo from store
-        const normalizedSlots = slotsSnapshot.map((slot) => {
-          if (!slot.photo?.id) return slot
-
-          const fullPhoto = photosById.get(slot.photo.id)
-          const mergedPhoto = normalizePhotoFields({
-            ...(fullPhoto || {}),
-            ...(slot.photo || {}),
-          })
-
-          return {
-            ...slot,
-            photo: mergedPhoto,
-          }
-        })
-
-        // Build photos array for renderCollageToCanvas (must have URLs + dimensions)
-        const photosForRender = normalizedSlots
-          .filter((slot) => {
-            const p = slot.photo
-            return p && (p.url || p.r2Url || p.downloadURL || p.imageUrl)
-          })
-          .map((slot) => {
-            const photo = slot.photo
-
-            // Ensure all required fields exist with fallbacks
-            return {
-              id: photo.id,
-              url:
-                photo.url || photo.r2Url || photo.downloadURL || photo.imageUrl,
-              thumbnailUrl:
-                photo.thumbnailUrl ||
-                photo.thumbnailURL ||
-                photo.thumbnail ||
-                photo.url,
-              name: photo.name || 'Untitled',
-              width: photo.width || 1920, // Fallback if metadata missing
-              height: photo.height || 1080, // Fallback if metadata missing
-              type: photo.type || 'image',
-            }
-          })
-
-        // Validate we have photos to render
-        if (photosForRender.length === 0) {
-          console.error(
-            '❌ No photos with usable URL found in slots (cannot generate static collage).'
-          )
-          throw new Error('No photos with usable URL found in slots')
-        }
-
-        console.log('📸 Static render photo resolution:', {
-          totalSlots: slotsSnapshot.length,
-          resolvedPhotos: photosForRender.length,
-          photoIds: photosForRender.map((p) => ({
-            id: p.id,
-            url: p.url?.substring(0, 50) + '...',
-            hasWidth: !!p.width,
-            hasDimensions: `${p.width}x${p.height}`,
-          })),
-        })
-
-        // Generate transforms object from slots
-        const transforms = {}
-        normalizedSlots.forEach((slot) => {
-          if (slot.photo?.id && slot.transform) {
-            transforms[slot.photo.id] = {
-              scale: slot.transform.scale || 1,
-              translateX: slot.transform.offsetX || 0,
-              translateY: slot.transform.offsetY || 0,
-            }
-          }
-        })
-
-        // Reconstruct complete layout from template (template missing canvas/grid)
-        const layoutForRender = (() => {
-          // If template has nested layout with canvas and grid, use it
-          if (layoutSnapshot?.layout?.canvas && layoutSnapshot?.layout?.grid) {
-            return layoutSnapshot.layout
-          }
-
-          // If template already has canvas and grid at root, use it
-          if (layoutSnapshot?.canvas && layoutSnapshot?.grid) {
-            return layoutSnapshot
-          }
-
-          // Reconstruct from template (has slots but missing canvas/grid/area)
-          if (layoutSnapshot?.slots) {
-            const slotCount = layoutSnapshot.slots.length
-            const gridCols = Math.ceil(Math.sqrt(slotCount))
-
-            return {
-              canvas: { width: 1600, height: 1600 },
-              grid: {
-                desktop: '1fr '.repeat(gridCols).trim(),
-                mobile: '1fr',
-              },
-              slots: layoutSnapshot.slots.map((slot) => ({
-                ...slot,
-                // Generate CSS Grid area string if missing (format: row-start / col-start / row-end / col-end)
-                area:
-                  slot.area ||
-                  `${slot.row} / ${slot.col} / ${
-                    slot.row + (slot.rowSpan || 1)
-                  } / ${slot.col + (slot.colSpan || 1)}`,
-              })),
-              gap: 16,
-              aspectRatio: layoutSnapshot.aspectRatio || '1/1',
-            }
-          }
-
-          return null
-        })()
-
-        // Validate resolved layout has required fields
-        if (
-          !layoutForRender?.canvas ||
-          !layoutForRender?.grid ||
-          !layoutForRender?.slots
-        ) {
-          console.error('❌ Cannot resolve valid layout:', {
-            layoutSnapshot,
-            resolvedLayout: layoutForRender,
-            hasCanvas: !!layoutForRender?.canvas,
-            hasGrid: !!layoutForRender?.grid,
-            hasSlots: !!layoutForRender?.slots,
-            layoutKeys: layoutSnapshot ? Object.keys(layoutSnapshot) : [],
-          })
-          throw new Error(
-            'Template layout missing required fields (canvas/grid/slots)'
-          )
-        }
-
-        console.log('🖼️ Generating static collage image...', {
-          layoutResolution: layoutSnapshot?.layout?.canvas
-            ? 'nested'
-            : layoutSnapshot?.canvas
-            ? 'flat'
-            : 'reconstructed',
-          canvasWidth: layoutForRender.canvas.width,
-          canvasHeight: layoutForRender.canvas.height,
-          gridDesktop: layoutForRender.grid.desktop,
-          slots: layoutForRender.slots?.length,
-          photos: photosForRender.length,
-        })
-
-        // Render collage to canvas with resolved layout
-        const collageBlob = await renderCollageToCanvas({
-          layout: layoutForRender,
-          photos: photosForRender,
-          transforms,
-          options: {
-            quality: 0.85,
-            useHighRes: true,
-          },
-        })
-
-        // Get Firebase token for R2 authentication
-        const firebaseToken = await user.getIdToken()
-
-        // Construct storage path for static collage
-        const timestamp = Date.now()
-        const staticStoragePath = `users/${user.uid}/collages/${timestamp}_${docRef.id}.jpg`
-
-        // Upload to R2
-        const { url: staticImageUrl } = await uploadWithFallback(
-          collageBlob,
-          staticStoragePath,
-          'image/jpeg',
-          {
-            userId: user.uid,
-            type: 'collage',
-            collageId: docRef.id,
-            uploadedAt: new Date().toISOString(),
-          },
-          null, // No Firebase fallback for static collages
-          user.uid,
-          firebaseToken
-        )
-
-        // Update Firestore document with static image fields
-        const collageDocRef = doc(db, 'users', user.uid, 'collages', docRef.id)
-        await updateDoc(collageDocRef, {
-          staticImageUrl: staticImageUrl,
-          staticStoragePath: staticStoragePath,
-          staticStorageBackend: 'r2',
-          staticGeneratedAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })
-
-        console.log('✅ Static collage uploaded to R2:', staticImageUrl)
-      } catch (staticError) {
-        console.error('⚠️ Static collage generation failed:', staticError)
-        // Continue - virtual collage is already saved
-      }
-
-      // Show success message
+      // Navigate back to origin (album, tools, or home)
       console.log('🔙 Navigating to:', returnPath)
       console.log('═══════════════════════════════════════')
-      // Navigate back to origin (album, tools, or home)
-      navigate(returnPath, {
-        replace: true,
-        state: {
-          message: 'Kollasj lagret!',
-          type: 'success',
-        },
-      })
+      navigate(returnPath, { replace: true })
+
     } catch (error) {
       console.error('❌ Failed to save collage:', error)
       setSaveError(t('collage.errors.saveFailed', 'Failed to save collage'))
+
+      setNotification({
+        message: t('collage:notifications.saveFailed', 'Failed to save collage'),
+        type: 'error'
+      })
     } finally {
       setIsSaving(false)
     }
@@ -492,9 +360,11 @@ const CollageNewPage = () => {
     t,
     tier,
     template,
-    templateId,
     photos,
+    slots,
+    albumId,
     returnPath,
+    setNotification,
   ])
 
   // ============================================================================
