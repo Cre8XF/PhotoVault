@@ -43,6 +43,9 @@ const CollageNewPage = () => {
   const { t } = useTranslation()
   const [searchParams] = useSearchParams()
 
+  // Extract albumId from location state (when creating collage from album)
+  const albumId = location.state?.albumId
+
   // Global store
   const { setIsWorldView, photos, setUpgradeModal } = useStore()
 
@@ -624,6 +627,7 @@ const CollageNewPage = () => {
           photos={photos}
           onSelectPhoto={handlePhotoSelect}
           selectedSlotIndex={selectedSlotIndex}
+          albumId={albumId}
         />
 
         {/* Exit Warning Modal */}

@@ -15,11 +15,14 @@ import { normalizePhotoFields } from '../../../utils/photoHelpers';
  * Shows user's photo library with filters
  * Mobile: slides from bottom
  * Desktop: slides from left/right
+ *
+ * @param {string} albumId - Optional album ID to filter photos (when creating collage from album)
  */
-const PhotoPickerPanel = ({ isOpen, onClose, photos, onSelectPhoto, selectedSlotIndex }) => {
+const PhotoPickerPanel = ({ isOpen, onClose, photos, onSelectPhoto, selectedSlotIndex, albumId }) => {
   const { t } = useTranslation();
   const [filter, setFilter] = useState('all'); // 'all', 'favorites'
   const [searchQuery, setSearchQuery] = useState('');
+  const [scope, setScope] = useState(albumId ? 'album' : 'all'); // 'album' | 'all'
 
   // Filter photos based on current filter and search
   const filteredPhotos = useMemo(() => {
@@ -27,6 +30,11 @@ const PhotoPickerPanel = ({ isOpen, onClose, photos, onSelectPhoto, selectedSlot
 
     // Exclude documents from collage selection
     result = result.filter((p) => p.type !== 'document');
+
+    // Apply album scope filter (if albumId provided and scope is 'album')
+    if (albumId && scope === 'album') {
+      result = result.filter((p) => p.albumId === albumId);
+    }
 
     // Apply filter
     if (filter === 'favorites') {
@@ -44,7 +52,7 @@ const PhotoPickerPanel = ({ isOpen, onClose, photos, onSelectPhoto, selectedSlot
     }
 
     return result;
-  }, [photos, filter, searchQuery]);
+  }, [photos, filter, searchQuery, albumId, scope]);
 
   const handlePhotoClick = (photo) => {
     if (onSelectPhoto) {
@@ -123,6 +131,38 @@ const PhotoPickerPanel = ({ isOpen, onClose, photos, onSelectPhoto, selectedSlot
             />
           </div>
         </div>
+
+        {/* Album Scope Toggle (when albumId provided) */}
+        {albumId && (
+          <div className="flex gap-2 px-4 pt-4 flex-shrink-0">
+            <button
+              onClick={() => setScope('album')}
+              className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition"
+              style={{
+                backgroundColor: scope === 'album' ? '#8b5cf6' : 'var(--bg-surface)',
+                color: scope === 'album' ? '#ffffff' : 'var(--text-primary)',
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                borderColor: scope === 'album' ? '#8b5cf6' : 'var(--border-color)'
+              }}
+            >
+              {t('collage.photoPicker.thisAlbum', 'This album')}
+            </button>
+            <button
+              onClick={() => setScope('all')}
+              className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition"
+              style={{
+                backgroundColor: scope === 'all' ? '#8b5cf6' : 'var(--bg-surface)',
+                color: scope === 'all' ? '#ffffff' : 'var(--text-primary)',
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                borderColor: scope === 'all' ? '#8b5cf6' : 'var(--border-color)'
+              }}
+            >
+              {t('collage.photoPicker.allPhotos', 'All photos')}
+            </button>
+          </div>
+        )}
 
         {/* Filter Tabs */}
         <div className="flex gap-2 p-4 border-b flex-shrink-0" style={{ borderColor: 'var(--border-color)' }}>
