@@ -208,6 +208,7 @@ const CollageNewPage = () => {
       console.log('Album ID:', albumId)
       console.log('Return path:', returnPath)
 
+      // Get collage data with validation
       const collageData = getCollageData()
       const collagePhotos = photos.filter(p =>
         slots.find(s => s.photo?.id === p.id)
