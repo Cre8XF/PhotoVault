@@ -210,10 +210,18 @@ const CollageEditPage = () => {
         throw new Error('Not authenticated');
       }
 
+      // ✅ DERIVE photoIds from slots (single source of truth)
+      const photoIds = slots
+        .map(s => s.photo?.id)
+        .filter(Boolean);
+
+      if (photoIds.length === 0) {
+        throw new Error('No photos in collage');
+      }
+
+      const collagePhotos = photos.filter(p => photoIds.includes(p.id));
+
       const collageData = getCollageData();
-      const collagePhotos = photos.filter(p =>
-        slots.find(s => s.photo?.id === p.id)
-      );
 
       // Re-render collage to image
       console.log('🎨 Re-rendering collage...');
@@ -285,7 +293,7 @@ const CollageEditPage = () => {
         width: actualWidth,
         height: actualHeight,
         fileSize: collageBlob.size,
-        'collageData.photoIds': collageData.photoIds,
+        'collageData.photoIds': photoIds,
         'collageEditorData.slotPhotos': slotPhotos,
         'collageEditorData.transforms': collageData.transforms || {},
         updatedAt: serverTimestamp()
