@@ -2,7 +2,7 @@
 // CollageTemplatesPage - Phase 3A: Template Selection + Freemium Gate
 // ============================================================================
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import useStore from '../state/store';
 import useAuth from '../hooks/useAuth';
@@ -43,6 +43,7 @@ function TemplatePreview({ template }) {
 export default function CollageTemplatesPage() {
   const setIsWorldView = useStore((state) => state.setIsWorldView);
   const navigate = useNavigate();
+  const location = useLocation();
   const { tier, isAdmin } = useAuth();
 
   // Upgrade modal state
