@@ -540,10 +540,10 @@ const SearchPage = ({
 
   // 🎨 MERGE PHOTOS AND COLLAGES: Combine content chronologically
   const allContent = useMemo(() => {
-    // Tag photos with contentType - differentiate between photos and videos
+    // Tag photos with contentType - differentiate between photos, videos, and collages
     const photosWithType = filteredPhotos.map((p) => ({
       ...p,
-      contentType: p.type === 'video' ? 'video' : 'photo',
+      contentType: p.type === 'collage' || p.isCollage ? 'collage' : p.type === 'video' ? 'video' : 'photo',
       sortDate: new Date(p.createdAt || p.uploadedAt || Date.now()),
     }))
 
@@ -1543,8 +1543,10 @@ const SearchPage = ({
               {/* Photo grid for this month - with collages */}
               <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
                 {group.photos.map((item) => {
-                  // Check if this is a collage or photo
-                  if (item.contentType === 'collage') {
+                  // Check if this is an old-style collage (from collages collection) or new-style (photo)
+                  // Old collages have 'slots' and no 'url', new collages have 'url' and 'isCollage'
+                  if (item.contentType === 'collage' && item.slots && !item.url) {
+                    // Old-style collage from collages collection - render with CollageCard
                     return (
                       <div key={`collage-${item.id}`}>
                         <CollageCard
@@ -1571,7 +1573,7 @@ const SearchPage = ({
                     )
                   }
 
-                  // It's a photo - render as before
+                  // It's a photo (or new-style collage) - render as photo
                   const photo = item
                   // Get the original index from filteredPhotos for navigation
                   const photoIndex = filteredPhotos.findIndex(

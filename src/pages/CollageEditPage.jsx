@@ -6,14 +6,14 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Save, AlertCircle, Loader } from 'lucide-react';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db, storage } from '../firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import useStore from '../state/store';
 import useCollageStore from '../features/collage/collageStore';
 import { getTemplateById, expandTemplate } from '../features/collage/templateEngine';
 import { serializeCollage, validateCollageData, migrateCollageV1ToV2 } from '../features/collage/collageUtils';
-import { renderCollageToCanvas } from '../utils/renderCollageToCanvas';
-import { uploadWithFallback } from '../utils/r2Upload';
+import { renderCollageToCanvas, renderCollageThumbnail } from '../utils/renderCollageToCanvas';
 import CollageCanvas from '../features/collage/components/CollageCanvas';
 import PhotoPickerPanel from '../features/collage/components/PhotoPickerPanel';
 import CollageToolbar from '../features/collage/components/CollageToolbar';
@@ -39,7 +39,7 @@ const CollageEditPage = () => {
   const returnPath = location.state?.returnPath || '/albums';
 
   // Global store
-  const { setIsWorldView, setCollageEditId, photos } = useStore();
+  const { setIsWorldView, setCollageEditId, photos, setNotification } = useStore();
 
   // Collage store
   const {
@@ -85,40 +85,52 @@ const CollageEditPage = () => {
           throw new Error('Not authenticated');
         }
 
-        // Load collage from Firestore
-        const collageRef = doc(db, 'users', user.uid, 'collages', id);
-        const collageSnap = await getDoc(collageRef);
+        // Load photo document
+        const photoRef = doc(db, 'photos', id);
+        const photoSnap = await getDoc(photoRef);
 
-        if (!collageSnap.exists()) {
-          throw new Error('Collage not found');
+        if (!photoSnap.exists()) {
+          throw new Error('Photo not found');
         }
 
-        const collageData = {
-          id: collageSnap.id,
-          ...collageSnap.data(),
-        };
+        const photoData = photoSnap.data();
+
+        // Verify it's a collage
+        if (!photoData.isCollage || photoData.type !== 'collage') {
+          throw new Error('This is not a collage');
+        }
 
         // Load template
-        const templateData = getTemplateById(collageData.templateId);
+        const templateData = getTemplateById(photoData.collageData.templateId);
         if (!templateData) {
-          throw new Error(`Template "${collageData.templateId}" not found`);
+          throw new Error(`Template not found: ${photoData.collageData.templateId}`);
         }
 
         const expandedTemplate = expandTemplate(templateData);
 
-        // Check version and migrate if needed
-        let finalData = collageData;
-        if (collageData.version === 1) {
-          console.log('🔄 Migrating collage from v1 to v2...');
-          finalData = migrateCollageV1ToV2(collageData, expandedTemplate);
-        }
+        // Initialize collage with template
+        const { initializeFromTemplate } = useCollageStore.getState();
+        initializeFromTemplate(expandedTemplate);
 
-        // Load into store
-        loadCollage(finalData, expandedTemplate);
+        // Restore photos in slots
+        const editorData = photoData.collageEditorData || {};
+        const slotPhotos = editorData.slotPhotos || {};
 
+        Object.entries(slotPhotos).forEach(([slotIndex, photoId]) => {
+          const photo = photos.find(p => p.id === photoId);
+          if (photo) {
+            const { setSlotPhoto } = useCollageStore.getState();
+            setSlotPhoto(parseInt(slotIndex), photo);
+          }
+        });
+
+        // Apply transforms if they exist in editor data
+        // Note: transforms are applied automatically when loading from collageEditorData
+
+        console.log('✅ Collage loaded for editing');
         setIsLoading(false);
       } catch (error) {
-        console.error('Error loading collage:', error);
+        console.error('❌ Error loading collage:', error);
         setLoadError(error.message);
         setIsLoading(false);
       }
@@ -193,128 +205,112 @@ const CollageEditPage = () => {
       setIsSaving(true);
       setSaveError(null);
 
-      const collageData = getCollageData();
-      const validation = validateCollageData(collageData);
-
-      if (!validation.valid) {
-        setSaveError(validation.error);
-        return;
-      }
-
-      const serialized = serializeCollage(collageData);
-
-      // Get Firebase user
       const user = auth.currentUser;
       if (!user) {
         throw new Error('Not authenticated');
       }
 
-      // Generate and upload static collage image BEFORE Firestore update
-      let staticImageData = {};
+      const collageData = getCollageData();
+      const collagePhotos = photos.filter(p =>
+        slots.find(s => s.photo?.id === p.id)
+      );
+
+      // Re-render collage to image
+      console.log('🎨 Re-rendering collage...');
+      const collageBlob = await renderCollageToCanvas({
+        layout: template,
+        photos: collagePhotos,
+        transforms: collageData.transforms || {},
+        options: { quality: 0.92, useHighRes: true }
+      });
+
+      // Get dimensions with fallback
+      let actualWidth, actualHeight;
       try {
-        console.log('🖼️ Generating static collage image...');
-
-        // Build photos array for rendering from slots
-        const photosForRender = (serialized.slots || [])
-          .filter((slot) => {
-            const p = slot.photo;
-            return p && (p.url || p.r2Url || p.downloadURL || p.imageUrl);
-          })
-          .map((slot) => {
-            const photo = slot.photo;
-            return {
-              id: photo.id,
-              url: photo.url || photo.r2Url || photo.downloadURL || photo.imageUrl,
-              thumbnailUrl: photo.thumbnailUrl || photo.thumbnailURL || photo.thumbnail || photo.url,
-              name: photo.name || 'Untitled',
-              width: photo.width || 1920,
-              height: photo.height || 1080,
-              type: photo.type || 'image',
-            };
-          });
-
-        if (photosForRender.length > 0 && template) {
-          // Build transforms object from slots
-          const transforms = {};
-          (serialized.slots || []).forEach((slot) => {
-            if (slot.photo?.id && slot.transform) {
-              transforms[slot.photo.id] = {
-                scale: slot.transform.scale || 1,
-                translateX: slot.transform.offsetX || 0,
-                translateY: slot.transform.offsetY || 0,
-              };
-            }
-          });
-
-          // Render collage to canvas
-          const collageBlob = await renderCollageToCanvas({
-            layout: template,
-            photos: photosForRender,
-            transforms,
-            options: {
-              quality: 0.9,
-              useHighRes: true,
-            },
-          });
-
-          // Get Firebase token for R2 authentication
-          const firebaseToken = await user.getIdToken();
-
-          // Construct storage path for static collage
-          const timestamp = Date.now();
-          const staticStoragePath = `users/${user.uid}/collages/${timestamp}_${id}.jpg`;
-
-          // Upload to R2
-          const { url: staticImageUrl } = await uploadWithFallback(
-            collageBlob,
-            staticStoragePath,
-            'image/jpeg',
-            {
-              userId: user.uid,
-              type: 'collage',
-              collageId: id,
-              uploadedAt: new Date().toISOString(),
-            },
-            null, // No Firebase fallback for static collages
-            user.uid,
-            firebaseToken
-          );
-
-          // Prepare static image metadata for Firestore
-          staticImageData = {
-            staticImageUrl,
-            staticStoragePath,
-            staticStorageBackend: 'r2',
-            staticGeneratedAt: new Date().toISOString(),
-            width: template.canvas?.width || 1200,
-            height: template.canvas?.height || 1200,
-          };
-
-          console.log('✅ Static collage uploaded to R2:', staticImageUrl);
-        }
-      } catch (staticError) {
-        console.warn('⚠️ Static collage generation failed (continuing with save):', staticError);
-        // Continue - collage will be saved without static image
+        const img = await createImageBitmap(collageBlob);
+        actualWidth = img.width;
+        actualHeight = img.height;
+        img.close();
+      } catch {
+        actualWidth = template.canvas.width;
+        actualHeight = template.canvas.height;
       }
 
-      // Update in Firestore with collage data + static image metadata
-      const collageRef = doc(db, 'users', user.uid, 'collages', id);
-      await updateDoc(collageRef, {
-        ...serialized,
-        ...staticImageData,
-        updatedAt: new Date().toISOString(),
+      // Load existing photo doc to get albumId
+      const photoDoc = await getDoc(doc(db, 'photos', id));
+      const albumId = photoDoc.data()?.albumId;
+
+      // Upload new version
+      const timestamp = Date.now();
+      const storagePath = `users/${user.uid}/${albumId || 'collages'}/collage_${timestamp}.jpg`;
+      const storageRef = ref(storage, storagePath);
+
+      await uploadBytes(storageRef, collageBlob, {
+        contentType: 'image/jpeg',
+        customMetadata: {
+          type: 'collage',
+          editedAt: new Date().toISOString()
+        }
       });
+
+      const newUrl = await getDownloadURL(storageRef);
+      console.log('✅ Updated collage uploaded');
+
+      // Generate new thumbnail
+      const thumbnailBlob = await renderCollageThumbnail({
+        layout: template,
+        photos: collagePhotos,
+        transforms: collageData.transforms || {},
+        maxWidth: 400
+      });
+
+      const thumbnailPath = `users/${user.uid}/thumbnails/collage_${timestamp}_thumb.jpg`;
+      const thumbnailRef = ref(storage, thumbnailPath);
+      await uploadBytes(thumbnailRef, thumbnailBlob, { contentType: 'image/jpeg' });
+      const thumbnailUrl = await getDownloadURL(thumbnailRef);
+
+      // Build updated slotPhotos
+      const slotPhotos = {};
+      slots.forEach((slot, index) => {
+        if (slot.photo?.id) {
+          slotPhotos[index.toString()] = slot.photo.id;
+        }
+      });
+
+      // Update photo document
+      const photoRef = doc(db, 'photos', id);
+      await updateDoc(photoRef, {
+        url: newUrl,
+        thumbnailUrl: thumbnailUrl,
+        width: actualWidth,
+        height: actualHeight,
+        fileSize: collageBlob.size,
+        'collageData.photoIds': collageData.photoIds,
+        'collageEditorData.slotPhotos': slotPhotos,
+        'collageEditorData.transforms': collageData.transforms || {},
+        updatedAt: serverTimestamp()
+      });
+
+      console.log('✅ Collage updated');
 
       markAsSaved(id);
 
-      // Show success message
-      console.log('✅ Collage updated:', id);
+      setNotification({
+        message: t('collage:notifications.collageUpdated', 'Collage updated!'),
+        type: 'success'
+      });
 
-      // Navigate back to origin
+      // Navigate back
       navigate(returnPath, { replace: true });
+
     } catch (error) {
-      console.error('Error updating collage:', error);
+      console.error('❌ Save failed:', error);
       setSaveError(t('collage.errors.saveFailed', 'Failed to save collage'));
+
+      setNotification({
+        message: t('collage:notifications.saveFailed', 'Failed to save collage'),
+        type: 'error'
+      });
     } finally {
       setIsSaving(false);
     }
@@ -326,6 +322,10 @@ const CollageEditPage = () => {
     navigate,
     t,
     template,
+    photos,
+    slots,
+    returnPath,
+    setNotification,
   ]);
 
   // ============================================================================
