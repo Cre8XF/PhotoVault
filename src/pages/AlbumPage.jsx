@@ -585,7 +585,9 @@ const AlbumPage = ({
 
           {/* Create Collage Button - Phase 6: Navigate to CollageNewPage */}
           <button
-            onClick={() => navigate(ROUTES.COLLAGE_NEW)}
+            onClick={() => navigate(ROUTES.COLLAGE_TEMPLATES, {
+              state: { albumId: album.id }
+            })}
             disabled={albumPhotos.length < 2}
             className="ripple-effect px-2 py-1.5 md:px-4 md:py-2.5 rounded-lg bg-purple-600 hover:bg-purple-700 transition flex items-center gap-1.5 md:gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-xs md:text-base"
             title={
