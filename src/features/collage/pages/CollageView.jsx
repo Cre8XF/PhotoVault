@@ -552,19 +552,19 @@ const CollageView = () => {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-black/80 dark:bg-black/80 [html[data-theme=light]_&]:bg-white/90 backdrop-blur-xl border-b border-white/10 dark:border-white/10 [html[data-theme=light]_&]:border-gray-200">
+      <header className="sticky top-0 z-20 bg-black/80 dark:bg-black/80 [.light-mode_&]:bg-white/90 backdrop-blur-xl border-b border-white/10 dark:border-white/10 [.light-mode_&]:border-gray-200">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           {/* Left: Back button + Title */}
           <div className="flex items-center gap-4">
             <button
               onClick={handleBack}
-              className="p-2 hover:bg-white/10 dark:hover:bg-white/10 [html[data-theme=light]_&]:hover:bg-gray-100 rounded-lg transition-colors text-white dark:text-white [html[data-theme=light]_&]:text-gray-900"
+              className="p-2 hover:bg-white/10 dark:hover:bg-white/10 [.light-mode_&]:hover:bg-gray-100 rounded-lg transition-colors text-white dark:text-white [.light-mode_&]:text-gray-900"
               aria-label={t('common:back')}
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-lg font-semibold text-white dark:text-white [html[data-theme=light]_&]:text-gray-900">
+              <h1 className="text-lg font-semibold text-white dark:text-white [.light-mode_&]:text-gray-900">
                 {collage.title || t('collage:untitled')}
               </h1>
             </div>
@@ -574,7 +574,7 @@ const CollageView = () => {
           <div className="relative">
             <button
               onClick={() => setShowActions(!showActions)}
-              className="p-2 hover:bg-white/10 dark:hover:bg-white/10 [html[data-theme=light]_&]:hover:bg-gray-100 rounded-lg transition-colors text-white dark:text-white [html[data-theme=light]_&]:text-gray-900"
+              className="p-2 hover:bg-white/10 dark:hover:bg-white/10 [.light-mode_&]:hover:bg-gray-100 rounded-lg transition-colors text-white dark:text-white [.light-mode_&]:text-gray-900"
               aria-label="Actions"
             >
               <MoreVertical className="w-5 h-5" />
@@ -587,15 +587,15 @@ const CollageView = () => {
                   className="fixed inset-0 z-30"
                   onClick={() => setShowActions(false)}
                 />
-                <div className="absolute right-0 top-full mt-2 w-56 bg-black/95 dark:bg-black/95 [html[data-theme=light]_&]:bg-white backdrop-blur-xl border border-white/20 dark:border-white/20 [html[data-theme=light]_&]:border-gray-200 rounded-xl overflow-hidden shadow-2xl z-40">
+                <div className="absolute right-0 top-full mt-2 w-56 bg-black/95 dark:bg-black/95 [.light-mode_&]:bg-white backdrop-blur-xl border border-white/20 dark:border-white/20 [.light-mode_&]:border-gray-200 rounded-xl overflow-hidden shadow-2xl z-40">
                   <button
                     onClick={() => {
                       handleEdit()
                       setShowActions(false)
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 dark:hover:bg-white/10 [html[data-theme=light]_&]:hover:bg-gray-100 transition-colors text-white dark:text-white [html[data-theme=light]_&]:text-gray-900"
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 dark:hover:bg-white/10 [.light-mode_&]:hover:bg-gray-100 transition-colors text-white dark:text-white [.light-mode_&]:text-gray-900"
                   >
-                    <Edit className="w-5 h-5 text-blue-400 dark:text-blue-400 [html[data-theme=light]_&]:text-blue-600" />
+                    <Edit className="w-5 h-5 text-blue-400 dark:text-blue-400 [.light-mode_&]:text-blue-600" />
                     <span className="text-sm font-medium">
                       {t('collage:actions.editCollage')}
                     </span>
@@ -607,9 +607,9 @@ const CollageView = () => {
                       setShowActions(false)
                     }}
                     disabled={isDownloading}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 dark:hover:bg-white/10 [html[data-theme=light]_&]:hover:bg-gray-100 transition-colors border-t border-white/10 dark:border-white/10 [html[data-theme=light]_&]:border-gray-200 disabled:opacity-50 text-white dark:text-white [html[data-theme=light]_&]:text-gray-900"
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 dark:hover:bg-white/10 [.light-mode_&]:hover:bg-gray-100 transition-colors border-t border-white/10 dark:border-white/10 [.light-mode_&]:border-gray-200 disabled:opacity-50 text-white dark:text-white [.light-mode_&]:text-gray-900"
                   >
-                    <Download className="w-5 h-5 text-green-400 dark:text-green-400 [html[data-theme=light]_&]:text-green-600" />
+                    <Download className="w-5 h-5 text-green-400 dark:text-green-400 [.light-mode_&]:text-green-600" />
                     <span className="text-sm font-medium">
                       {isDownloading
                         ? t('collage:actions.downloading')
@@ -622,9 +622,9 @@ const CollageView = () => {
                       handleShare()
                       setShowActions(false)
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 dark:hover:bg-white/10 [html[data-theme=light]_&]:hover:bg-gray-100 transition-colors border-t border-white/10 dark:border-white/10 [html[data-theme=light]_&]:border-gray-200 text-white dark:text-white [html[data-theme=light]_&]:text-gray-900"
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 dark:hover:bg-white/10 [.light-mode_&]:hover:bg-gray-100 transition-colors border-t border-white/10 dark:border-white/10 [.light-mode_&]:border-gray-200 text-white dark:text-white [.light-mode_&]:text-gray-900"
                   >
-                    <Share2 className="w-5 h-5 text-purple dark:text-purple [html[data-theme=light]_&]:text-purple-600" />
+                    <Share2 className="w-5 h-5 text-purple dark:text-purple [.light-mode_&]:text-purple-600" />
                     <span className="text-sm font-medium">
                       {t('collage:actions.share')}
                     </span>
@@ -636,10 +636,10 @@ const CollageView = () => {
                       setShowActions(false)
                     }}
                     disabled={isDeleting}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-500/20 dark:hover:bg-red-500/20 [html[data-theme=light]_&]:hover:bg-red-50 transition-colors border-t border-white/10 dark:border-white/10 [html[data-theme=light]_&]:border-gray-200 disabled:opacity-50"
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-500/20 dark:hover:bg-red-500/20 [.light-mode_&]:hover:bg-red-50 transition-colors border-t border-white/10 dark:border-white/10 [.light-mode_&]:border-gray-200 disabled:opacity-50"
                   >
                     <Trash2 className="w-5 h-5 text-red-400" />
-                    <span className="text-sm font-medium text-red-400 dark:text-red-400 [html[data-theme=light]_&]:text-red-600">
+                    <span className="text-sm font-medium text-red-400 dark:text-red-400 [.light-mode_&]:text-red-600">
                       {t('collage:actions.delete')}
                     </span>
                   </button>
