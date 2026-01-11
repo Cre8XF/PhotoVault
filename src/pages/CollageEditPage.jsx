@@ -211,42 +211,9 @@ const CollageEditPage = () => {
       }
 
       const collageData = getCollageData();
-
-      // Validate collage data
-      if (!collageData) {
-        throw new Error('Collage data is missing');
-      }
-
-      // Ensure photoIds exists - build from slots if missing
-      if (!collageData.photoIds || !Array.isArray(collageData.photoIds)) {
-        console.warn('⚠️ photoIds missing, building from slots...');
-        collageData.photoIds = slots
-          .filter(s => s?.photo?.id)
-          .map(s => s.photo.id);
-      }
-
-      if (collageData.photoIds.length === 0) {
-        throw new Error('No photos in collage');
-      }
-
-      // Ensure slots is valid
-      if (!slots || !Array.isArray(slots)) {
-        throw new Error('Slots data is invalid');
-      }
-
       const collagePhotos = photos.filter(p =>
         slots.find(s => s.photo?.id === p.id)
       );
-
-      if (collagePhotos.length === 0) {
-        throw new Error('No photos found for collage');
-      }
-
-      console.log('📊 Collage validation passed:', {
-        photoIds: collageData.photoIds,
-        photoCount: collagePhotos.length,
-        slotsCount: slots.length
-      });
 
       // Re-render collage to image
       console.log('🎨 Re-rendering collage...');
@@ -257,11 +224,6 @@ const CollageEditPage = () => {
         options: { quality: 0.92, useHighRes: true }
       });
 
-      // Validate blob
-      if (!collageBlob || collageBlob.size === 0) {
-        throw new Error('Failed to render collage image');
-      }
-
       // Get dimensions with fallback
       let actualWidth, actualHeight;
       try {
@@ -270,8 +232,8 @@ const CollageEditPage = () => {
         actualHeight = img.height;
         img.close();
       } catch {
-        actualWidth = template.canvas?.width || 1200;
-        actualHeight = template.canvas?.height || 1200;
+        actualWidth = template.canvas.width;
+        actualHeight = template.canvas.height;
       }
 
       // Load existing photo doc to get albumId
@@ -309,17 +271,10 @@ const CollageEditPage = () => {
 
       // Build updated slotPhotos
       const slotPhotos = {};
-      if (Array.isArray(slots)) {
-        slots.forEach((slot, index) => {
-          if (slot?.photo?.id) {
-            slotPhotos[index.toString()] = slot.photo.id;
-          }
-        });
-      }
-
-      console.log('✅ Slot photos mapped:', {
-        slotCount: Object.keys(slotPhotos).length,
-        photoIds: Object.values(slotPhotos)
+      slots.forEach((slot, index) => {
+        if (slot.photo?.id) {
+          slotPhotos[index.toString()] = slot.photo.id;
+        }
       });
 
       // Update photo document
@@ -330,7 +285,7 @@ const CollageEditPage = () => {
         width: actualWidth,
         height: actualHeight,
         fileSize: collageBlob.size,
-        'collageData.photoIds': collageData.photoIds || [],
+        'collageData.photoIds': collageData.photoIds,
         'collageEditorData.slotPhotos': slotPhotos,
         'collageEditorData.transforms': collageData.transforms || {},
         updatedAt: serverTimestamp()
@@ -350,11 +305,10 @@ const CollageEditPage = () => {
 
     } catch (error) {
       console.error('❌ Save failed:', error);
-      const errorMessage = error.message || t('collage.errors.saveFailed', 'Failed to save collage');
-      setSaveError(errorMessage);
+      setSaveError(t('collage.errors.saveFailed', 'Failed to save collage'));
 
       setNotification({
-        message: errorMessage,
+        message: t('collage:notifications.saveFailed', 'Failed to save collage'),
         type: 'error'
       });
     } finally {
