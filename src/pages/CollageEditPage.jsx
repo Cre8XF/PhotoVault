@@ -3,7 +3,7 @@
 // ============================================================================
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Save, AlertCircle, Loader } from 'lucide-react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -31,8 +31,12 @@ import { PageWrapper } from '../components/layout/PageWrapper';
  */
 const CollageEditPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams();
   const { t } = useTranslation();
+
+  // Extract returnPath from navigation state (for proper back navigation)
+  const returnPath = location.state?.returnPath || '/albums';
 
   // Global store
   const { setIsWorldView, setCollageEditId, photos } = useStore();
@@ -137,9 +141,9 @@ const CollageEditPage = () => {
     if (isDirty) {
       setShowExitWarning(true);
     } else {
-      navigate(-1);
+      navigate(returnPath, { replace: true });
     }
-  }, [isDirty, navigate]);
+  }, [isDirty, navigate, returnPath]);
 
   const handleSlotClick = useCallback(
     (slotIndex) => {
@@ -306,8 +310,8 @@ const CollageEditPage = () => {
       // Show success message
       console.log('✅ Collage updated:', id);
 
-      // Navigate back
-      navigate(-1);
+      // Navigate back to origin
+      navigate(returnPath, { replace: true });
     } catch (error) {
       console.error('Error updating collage:', error);
       setSaveError(t('collage.errors.saveFailed', 'Failed to save collage'));
@@ -356,7 +360,7 @@ const CollageEditPage = () => {
             </h2>
             <p className="text-sm opacity-70 mb-4">{loadError}</p>
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => navigate(returnPath, { replace: true })}
               className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition"
             >
               {t('common:back', 'Back')}
@@ -378,7 +382,7 @@ const CollageEditPage = () => {
               {t('collage.errors.noTemplate', 'No template found')}
             </h2>
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => navigate(returnPath, { replace: true })}
               className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition"
             >
               {t('common:back', 'Back')}
@@ -501,7 +505,7 @@ const CollageEditPage = () => {
                   {t('common:cancel', 'Cancel')}
                 </button>
                 <button
-                  onClick={() => navigate(-1)}
+                  onClick={() => navigate(returnPath, { replace: true })}
                   className="flex-1 bg-red-600 hover:bg-red-700 py-3 rounded-xl font-semibold transition"
                 >
                   {t('collage.discardChanges', 'Discard')}

@@ -46,6 +46,9 @@ export default function CollageTemplatesPage() {
   const location = useLocation();
   const { tier, isAdmin } = useAuth();
 
+  // Extract navigation state (albumId and returnPath from origin)
+  const { albumId, returnPath = '/albums' } = location.state || {};
+
   // Upgrade modal state
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -69,11 +72,10 @@ export default function CollageTemplatesPage() {
     console.log('═══════════════════════════════════════');
     console.log('Current path:', window.location.pathname);
     console.log('History length:', window.history.length);
-    console.log('🏠 Navigating to Home with replace: true');
+    console.log('🔙 Navigating to:', returnPath);
     console.log('═══════════════════════════════════════');
-    // FIX: Navigate to Home (not to /tools!)
-    // Using replace: true removes templates page from history
-    navigate('/', { replace: true });
+    // Navigate back to origin (album, tools, or home)
+    navigate(returnPath);
   };
 
   /**
@@ -107,10 +109,11 @@ export default function CollageTemplatesPage() {
     // LITE/PRO/ADMIN: Allow access
     console.log('✅ Tier allows collage creation - navigating to builder');
     console.log('Navigating to:', `${ROUTES.COLLAGE_NEW}?template=${template.id}`);
-    console.log('Preserving state:', location.state);
+    console.log('Forwarding albumId:', albumId);
+    console.log('Forwarding returnPath:', returnPath);
     console.log('═══════════════════════════════════════');
     navigate(`${ROUTES.COLLAGE_NEW}?template=${template.id}`, {
-      state: location.state // Preserve albumId from previous navigation
+      state: { albumId, returnPath } // Forward albumId and returnPath
     });
   };
 

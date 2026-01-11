@@ -24,7 +24,9 @@ export default function ToolsPage() {
       icon: Layout,
       gradient: 'from-purple-500 to-pink-500',
       available: true,
-      onClick: () => navigate(ROUTES.COLLAGE_TEMPLATES),
+      onClick: () => navigate(ROUTES.COLLAGE_TEMPLATES, {
+        state: { returnPath: '/tools' }
+      }),
     },
     {
       id: 'video',

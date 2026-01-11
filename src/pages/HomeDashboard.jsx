@@ -380,7 +380,9 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
             console.log('History length:', window.history.length);
             console.log('Navigating to: /tools/collage/templates');
             console.log('═══════════════════════════════════════');
-            navigate('/tools/collage/templates');
+            navigate('/tools/collage/templates', {
+              state: { returnPath: '/' }
+            });
           }}
           onSearchFaces={() => {
             console.log('═══════════════════════════════════════');
