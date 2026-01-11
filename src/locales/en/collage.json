@@ -241,6 +241,7 @@
   "photos": "photos",
   "actions": {
     "edit": "Edit",
+    "editCollage": "Edit collage",
     "download": "Download",
     "downloading": "Downloading...",
     "share": "Share",
