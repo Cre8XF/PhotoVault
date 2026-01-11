@@ -241,6 +241,7 @@
   "photos": "bilder",
   "actions": {
     "edit": "Rediger",
+    "editCollage": "Rediger kollasj",
     "download": "Last ned",
     "downloading": "Laster ned...",
     "share": "Del",

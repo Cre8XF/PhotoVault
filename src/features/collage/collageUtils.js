@@ -248,7 +248,7 @@ export const validateCollageData = (collageData) => {
 /**
  * Get grid style for CSS Grid layout
  */
-export const getGridStyle = (rows, cols, gap = 2) => {
+export const getGridStyle = (rows, cols, gap = 0) => {
   return {
     display: 'grid',
     gridTemplateRows: `repeat(${rows}, 1fr)`,

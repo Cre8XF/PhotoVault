@@ -33,7 +33,7 @@ const CollageCanvas = ({
   // Get aspect ratio for canvas container
   const aspectRatio = template?.aspectRatio || 1;
 
-  const gridStyle = useMemo(() => getGridStyle(rows, cols, 4), [rows, cols]);
+  const gridStyle = useMemo(() => getGridStyle(rows, cols, 0), [rows, cols]);
 
   if (!template || !slots) {
     return (

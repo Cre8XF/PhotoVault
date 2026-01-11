@@ -79,8 +79,8 @@ export const expandTemplate = (template) => {
       crop: 'center',
       objectFit: 'cover',
     })),
-    // Add default gap and padding
-    gap: template.gap || 8,
+    // Add default gap and padding (gap: 0 for edge-to-edge Instagram-style)
+    gap: template.gap || 0,
     padding: template.padding || 0,
   };
 };
