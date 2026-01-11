@@ -43,8 +43,9 @@ const CollageNewPage = () => {
   const { t } = useTranslation()
   const [searchParams] = useSearchParams()
 
-  // Extract albumId from location state (when creating collage from album)
+  // Extract navigation state (albumId and returnPath from origin)
   const albumId = location.state?.albumId
+  const returnPath = location.state?.returnPath || '/albums'
 
   // Global store
   const { setIsWorldView, photos, setUpgradeModal } = useStore()
@@ -132,13 +133,12 @@ const CollageNewPage = () => {
       console.log('⚠️ Showing exit warning (unsaved changes)')
       setShowExitWarning(true)
     } else {
-      console.log('🏠 Navigating to Home with replace: true')
+      console.log('🔙 Navigating to:', returnPath)
       console.log('═══════════════════════════════════════')
-      // FIX: Navigate to Home (not back!)
-      // Using replace: true removes collage builder from history
-      navigate('/', { replace: true })
+      // Navigate back to origin (album, tools, or home)
+      navigate(returnPath, { replace: true })
     }
-  }, [isDirty, navigate])
+  }, [isDirty, navigate, returnPath])
 
   const handleSlotClick = useCallback(
     (slotIndex) => {
@@ -468,11 +468,10 @@ const CollageNewPage = () => {
       }
 
       // Show success message
-      console.log('🏠 Navigating to Home with replace: true')
+      console.log('🔙 Navigating to:', returnPath)
       console.log('═══════════════════════════════════════')
-      // FIX: Navigate directly to Home (not back!)
-      // Using replace: true removes collage builder from history
-      navigate('/', {
+      // Navigate back to origin (album, tools, or home)
+      navigate(returnPath, {
         replace: true,
         state: {
           message: 'Kollasj lagret!',
@@ -495,6 +494,7 @@ const CollageNewPage = () => {
     template,
     templateId,
     photos,
+    returnPath,
   ])
 
   // ============================================================================
@@ -661,9 +661,9 @@ const CollageNewPage = () => {
                 <button
                   onClick={() => {
                     console.log(
-                      '🗑️ User confirmed: Discard changes and go Home'
+                      '🗑️ User confirmed: Discard changes and navigate to:', returnPath
                     )
-                    navigate('/', { replace: true })
+                    navigate(returnPath, { replace: true })
                   }}
                   className="flex-1 bg-red-600 hover:bg-red-700 py-3 rounded-xl font-semibold transition"
                 >

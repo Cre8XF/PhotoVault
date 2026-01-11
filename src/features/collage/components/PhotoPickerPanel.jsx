@@ -166,23 +166,26 @@ const PhotoPickerPanel = ({ isOpen, onClose, photos, onSelectPhoto, selectedSlot
 
         {/* Filter Tabs */}
         <div className="flex gap-2 p-4 border-b flex-shrink-0" style={{ borderColor: 'var(--border-color)' }}>
-          <button
-            onClick={() => setFilter('all')}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition"
-            style={{
-              backgroundColor: filter === 'all' ? '#8b5cf6' : 'var(--bg-surface)',
-              color: filter === 'all' ? '#ffffff' : 'var(--text-primary)'
-            }}
-            onMouseEnter={(e) => {
-              if (filter !== 'all') e.currentTarget.style.backgroundColor = 'var(--interactive-hover)'
-            }}
-            onMouseLeave={(e) => {
-              if (filter !== 'all') e.currentTarget.style.backgroundColor = 'var(--bg-surface)'
-            }}
-          >
-            <ImageIcon className="w-4 h-4 inline mr-1" />
-            {t('collage.photoPicker.all', 'All')} ({photos?.length || 0})
-          </button>
+          {/* Only show "All" button when NOT in album context (to avoid duplicate with scope toggle) */}
+          {!albumId && (
+            <button
+              onClick={() => setFilter('all')}
+              className="px-4 py-2 rounded-lg text-sm font-medium transition"
+              style={{
+                backgroundColor: filter === 'all' ? '#8b5cf6' : 'var(--bg-surface)',
+                color: filter === 'all' ? '#ffffff' : 'var(--text-primary)'
+              }}
+              onMouseEnter={(e) => {
+                if (filter !== 'all') e.currentTarget.style.backgroundColor = 'var(--interactive-hover)'
+              }}
+              onMouseLeave={(e) => {
+                if (filter !== 'all') e.currentTarget.style.backgroundColor = 'var(--bg-surface)'
+              }}
+            >
+              <ImageIcon className="w-4 h-4 inline mr-1" />
+              {t('collage.photoPicker.all', 'All')} ({photos?.length || 0})
+            </button>
+          )}
           <button
             onClick={() => setFilter('favorites')}
             className="px-4 py-2 rounded-lg text-sm font-medium transition"
