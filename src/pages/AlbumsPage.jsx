@@ -435,6 +435,21 @@ const AlbumsPage = ({
                           />
 
                           <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            {!isFreeUser && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  navigate('/tools/collage/new', {
+                                    state: { albumId: album.id }
+                                  })
+                                }}
+                                className="p-2 bg-purple-600/90 hover:bg-purple-700 text-white rounded-lg shadow-lg transition"
+                                title={t('collage:createButton')}
+                              >
+                                <GridIcon className="w-4 h-4" />
+                              </button>
+                            )}
+
                             <button
                               onClick={(e) => {
                                 e.stopPropagation()
@@ -522,6 +537,21 @@ const AlbumsPage = ({
 
                             {/* Action buttons */}
                             <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              {!isFreeUser && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    navigate('/tools/collage/new', {
+                                      state: { albumId: album.id }
+                                    })
+                                  }}
+                                  className="p-2 bg-purple-600/90 hover:bg-purple-700 text-white rounded-lg shadow-lg transition"
+                                  title={t('collage:createButton')}
+                                >
+                                  <GridIcon className="w-4 h-4" />
+                                </button>
+                              )}
+
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation()
