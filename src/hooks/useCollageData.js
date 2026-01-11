@@ -120,176 +120,21 @@ export const useCollageData = () => {
     }
   }, [user?.uid])
 
-  /**
-   * Create a new collage
-   * @param {Object} collageData - { title, photoIds, layoutId, transforms, photos, layout }
-   * @returns {Promise<string>} - Collage ID
-   */
-  const createCollage = useCallback(
-    async (collageData) => {
-      // ✅ P0: EMAIL VERIFICATION GATING
-      if (!ensureEmailVerified()) {
-        return null // Abort collage creation if email not verified
-      }
-
-      if (!user?.uid) {
-        throw new Error('No user logged in')
-      }
-
-      if (isSaving) {
-        console.warn('⚠️ Save already in progress')
-        return null
-      }
-
-      setIsSaving(true)
-
-      try {
-        const { title, photoIds, layoutId, transforms = {}, photos, layout } = collageData
-
-        // Validate required fields
-        if (!photoIds || photoIds.length === 0) {
-          throw new Error('No photos provided')
-        }
-        if (!layoutId) {
-          throw new Error('No layout selected')
-        }
-
-        // Get layout if not provided
-        const collageLayout = layout || Object.values(LAYOUTS_V3).find(l => l.id === layoutId)
-        if (!collageLayout) {
-          throw new Error('Layout not found')
-        }
-
-        // Generate thumbnail
-        let thumbnailUrl = null
-        if (photos && photos.length > 0 && collageLayout) {
-          try {
-            console.log('🖼️ Generating collage thumbnail...')
-
-            // Render thumbnail
-            const thumbnailBlob = await renderCollageThumbnail({
-              layout: collageLayout,
-              photos: photos,
-              transforms: transforms,
-              maxWidth: 800
-            })
-
-            // Upload thumbnail to Storage
-            const timestamp = Date.now()
-            const thumbnailPath = `users/${user.uid}/collages/thumbnails/${timestamp}.jpg`
-            const thumbnailRef = ref(storage, thumbnailPath)
-
-            await uploadBytes(thumbnailRef, thumbnailBlob, {
-              contentType: 'image/jpeg'
-            })
-
-            thumbnailUrl = await getDownloadURL(thumbnailRef)
-
-            console.log('✅ Thumbnail uploaded:', thumbnailUrl)
-          } catch (thumbError) {
-            console.error('⚠️ Thumbnail generation failed:', thumbError)
-            // Continue without thumbnail - not critical
-          }
-        }
-
-        // Generate and upload full-size collage to R2
-        let collageImageUrl = null
-        let collageStoragePath = null
-        if (photos && photos.length > 0 && collageLayout) {
-          try {
-            console.log('🖼️ Generating full-size collage image...')
-
-            // Render full-size collage
-            const collageBlob = await renderCollageToCanvas({
-              layout: collageLayout,
-              photos: photos,
-              transforms: transforms,
-              options: {
-                quality: 0.9,
-                useHighRes: true
-              }
-            })
-
-            // Get Firebase token for R2 authentication
-            const currentUser = auth.currentUser
-            if (!currentUser) {
-              throw new Error('User not authenticated')
-            }
-            const firebaseToken = await currentUser.getIdToken()
-
-            // Construct storage path for collage
-            const timestamp = Date.now()
-            collageStoragePath = `users/${user.uid}/collages/${timestamp}_collage.jpg`
-
-            // Upload to R2
-            const { url: r2Url } = await uploadWithFallback(
-              collageBlob,
-              collageStoragePath,
-              'image/jpeg',
-              {
-                userId: user.uid,
-                type: 'collage',
-                uploadedAt: new Date().toISOString()
-              },
-              null, // No Firebase fallback for collages
-              user.uid,
-              firebaseToken
-            )
-
-            collageImageUrl = r2Url
-
-            console.log('✅ Full collage uploaded to R2:', collageImageUrl)
-          } catch (collageError) {
-            console.error('⚠️ Full collage upload failed:', collageError)
-            // Continue without full collage - not critical for MVP
-          }
-        }
-
-        // Prepare collage document
-        const collageDoc = {
-          userId: user.uid,
-          title: title || `Collage ${new Date().toLocaleDateString()}`,
-          photoIds: photoIds,
-          layoutId: layoutId,
-          transforms: transforms,
-          type: 'collage',
-          ...(thumbnailUrl && { thumbnailUrl }),
-          ...(collageImageUrl && {
-            imageUrl: collageImageUrl,
-            url: collageImageUrl, // Alias for compatibility with photo listing
-            storagePath: collageStoragePath,
-            storageBackend: 'r2'
-          }),
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        }
-
-        console.log('💾 Creating collage:', collageDoc)
-
-        // Add to Firestore (user's collages subcollection)
-        const docRef = await addDoc(collection(db, 'users', user.uid, 'collages'), collageDoc)
-
-        console.log('✅ Collage created with ID:', docRef.id)
-
-        setNotification({
-          message: t('collage:notifications.collageSaved'),
-          type: 'success'
-        })
-
-        return docRef.id
-      } catch (error) {
-        console.error('❌ Error creating collage:', error)
-        setNotification({
-          message: t('collage:notifications.saveFailed'),
-          type: 'error'
-        })
-        throw error
-      } finally {
-        setIsSaving(false)
-      }
-    },
-    [user, isSaving, setNotification, t, ensureEmailVerified]
-  )
+  // ============================================================
+  // REMOVED: createCollage() - Legacy v1 Implementation
+  // ============================================================
+  // The createCollage() function has been REMOVED to prevent data corruption.
+  //
+  // Why removed:
+  // - Used legacy v1 structure (photoIds + layoutId + transforms)
+  // - Incompatible with v2 collage system (templateId + slots)
+  // - CollageNewPage and CollageEditPage use their own v2 save logic
+  //   via collageStore + serializeCollage()
+  //
+  // Do NOT re-add this function. Collage creation is handled by:
+  // - CollageNewPage.jsx (new collages)
+  // - CollageEditPage.jsx (editing existing collages)
+  // ============================================================
 
   /**
    * Get a collage by ID
@@ -569,8 +414,7 @@ export const useCollageData = () => {
     collages,
     collagesLoading,
 
-    // CRUD operations
-    createCollage,
+    // CRUD operations (createCollage removed - see comment above)
     getCollage,
     getCollagesByUser,
     updateCollage,
