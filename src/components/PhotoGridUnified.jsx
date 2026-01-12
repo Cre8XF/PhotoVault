@@ -431,7 +431,6 @@ const PhotoGridUnified = ({
           >
             <img
               src={imageSrc}
-              src={photo.thumbnailUrl || photo.displayUrl || photo.url}
               alt={photo.title || photo.name || ''}
               className="w-full h-full object-contain"
               loading="lazy"
