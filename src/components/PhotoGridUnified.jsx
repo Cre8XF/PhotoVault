@@ -372,7 +372,7 @@ const PhotoGridUnified = ({
     const selectable = selectionMode !== 'none' && (!maxReached || selected)
 
     const isCollage = photo.type === 'collage' || photo.isCollage
-    const imageSrc = photo.thumbnailUrl || photo.displayUrl || photo.url
+    const imageSrc = photo.displayUrl || photo.url || photo.thumbnailUrl
 
     const photoCardContent = (
       <div
