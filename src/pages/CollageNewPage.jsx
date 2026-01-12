@@ -27,6 +27,7 @@ import PhotoPickerPanel from '../features/collage/components/PhotoPickerPanel'
 import CollageToolbar from '../features/collage/components/CollageToolbar'
 import { PageWrapper } from '../components/layout/PageWrapper'
 import useAuth from '../hooks/useAuth'
+import { createPhotoDocument } from '../factories/createPhotoDocument'
 
 /**
  * CollageNewPage - New Collage Builder World
@@ -301,42 +302,26 @@ const CollageNewPage = () => {
 
       // Step 5: Save as photo document
       const photosRef = collection(db, 'photos')
-      const photoDoc = {
-        // Standard fields
+      const photoDoc = createPhotoDocument({
         userId: user.uid,
         albumId: albumId || null,
-        url: collageUrl,
+        displayUrl: collageUrl,
         thumbnailUrl: thumbnailUrl,
-        name: `Collage - ${template.name}`,
         width: actualWidth,
         height: actualHeight,
-        fileSize: collageBlob.size,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-
-        // Type identification
-        type: 'collage',
+        size: collageBlob.size,
         isCollage: true,
-
-        // Lightweight collage metadata
         collageData: {
           templateId: template.id,
           photoIds: photoIds,
-          version: 2
+          version: 2,
         },
-
-        // Editor data (normalized)
         collageEditorData: {
           slotPhotos: slotPhotos,
           transforms: collageData.transforms || {},
-          editorVersion: '2.1'
+          editorVersion: '2.1',
         },
-
-        // Metadata
-        favorite: false,
-        tags: ['collage'],
-        aiTags: [`collage-${template.id}`, `${photoIds.length}-photos`]
-      }
+      })
 
       const docRef = await addDoc(photosRef, photoDoc)
       console.log('✅ Collage saved as photo:', docRef.id)
