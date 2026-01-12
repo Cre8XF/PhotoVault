@@ -3,12 +3,32 @@
 // ============================================================================
 import React, { useState, useMemo } from 'react'
 import PropTypes from 'prop-types'
-import { ImageOff, Trash2, Star, Image as ImageIcon, Play, Video, Check, GripVertical, Layout } from 'lucide-react'
+import {
+  ImageOff,
+  Trash2,
+  Star,
+  Image as ImageIcon,
+  Play,
+  Video,
+  Check,
+  GripVertical,
+  Layout,
+} from 'lucide-react'
 import { softDeletePhoto, toggleFavorite, setAlbumCover } from '../firebase'
 import { formatDuration } from '../utils/videoTools'
 import { useTranslation } from 'react-i18next'
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  rectSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
 /**
@@ -170,7 +190,10 @@ const PhotoGridUnified = ({
         dateValue = photo.dateTaken
       } else if (groupBy === 'createdAt' && photo.createdAt) {
         dateValue = photo.createdAt
-      } else if (groupBy === 'uploadDate' && (photo.uploadedAt || photo.uploadDate)) {
+      } else if (
+        groupBy === 'uploadDate' &&
+        (photo.uploadedAt || photo.uploadDate)
+      ) {
         dateValue = photo.uploadedAt || photo.uploadDate
       } else {
         // Fallback: try createdAt or uploadedAt
@@ -226,7 +249,9 @@ const PhotoGridUnified = ({
   const safeSelectedPhotos = Array.isArray(selectedPhotos) ? selectedPhotos : []
 
   const isSelected = (photo) => {
-    return safeSelectedPhotos.some((p) => (typeof p === 'string' ? p === photo.id : p.id === photo.id))
+    return safeSelectedPhotos.some((p) =>
+      typeof p === 'string' ? p === photo.id : p.id === photo.id
+    )
   }
 
   const toggleSelection = (photo) => {
@@ -242,7 +267,8 @@ const PhotoGridUnified = ({
       )
     } else {
       // Add to selection
-      const maxReached = maxSelection && safeSelectedPhotos.length >= maxSelection
+      const maxReached =
+        maxSelection && safeSelectedPhotos.length >= maxSelection
       if (maxReached) {
         // If max reached, don't add
         return
@@ -263,7 +289,7 @@ const PhotoGridUnified = ({
       toggleSelection(photo)
     } else if (onPhotoClick) {
       // Default: Open photo (use same fallback as image src)
-      onPhotoClick(photo.displayUrl || photo.thumbnailUrl || photo.url)
+      onPhotoClick(photo)
     }
   }
 
@@ -274,7 +300,9 @@ const PhotoGridUnified = ({
 
   // Delete handler (soft delete - moved to trash)
   const handleDelete = async (photo) => {
-    const confirmed = window.confirm('Photo will be moved to trash. You can restore it within 7 days.')
+    const confirmed = window.confirm(
+      'Photo will be moved to trash. You can restore it within 7 days.'
+    )
     if (!confirmed) return
 
     setLoading(true)
@@ -321,9 +349,10 @@ const PhotoGridUnified = ({
   }
 
   // ===== Grid Styling =====
-  const gridClasses = layout === 'compact'
-    ? 'grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4'
-    : 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4'
+  const gridClasses =
+    layout === 'compact'
+      ? 'grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4'
+      : 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4'
 
   const photoHeight = layout === 'compact' ? 'h-40' : 'h-56'
 
@@ -354,7 +383,9 @@ const PhotoGridUnified = ({
       >
         {/* ===== VIDEO CARD ===== */}
         {photo.type === 'video' ? (
-          <div className={`w-full ${photoHeight} relative bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20`}>
+          <div
+            className={`w-full ${photoHeight} relative bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20`}
+          >
             {/* Video Thumbnail or Gradient Placeholder */}
             {photo.thumbnailUrl ? (
               <img
@@ -411,20 +442,28 @@ const PhotoGridUnified = ({
 
         {/* ===== COVER INDICATOR ===== */}
         {/* For regular photos (no type badge) - position at left */}
-        {currentAlbum && currentAlbum.cover === (photo.displayUrl || photo.url) && photo.type !== 'video' && photo.type !== 'collage' && !photo.isCollage && (
-          <div className="absolute top-2 left-2 bg-yellow-500 text-black px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
-            <ImageIcon className="w-3 h-3" />
-            {t('common:grid.coverBadge')}
-          </div>
-        )}
+        {currentAlbum &&
+          currentAlbum.cover === (photo.displayUrl || photo.url) &&
+          photo.type !== 'video' &&
+          photo.type !== 'collage' &&
+          !photo.isCollage && (
+            <div className="absolute top-2 left-2 bg-yellow-500 text-black px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
+              <ImageIcon className="w-3 h-3" />
+              {t('common:grid.coverBadge')}
+            </div>
+          )}
 
         {/* Cover indicator for videos and collages (adjusted position to not overlap type badge) */}
-        {currentAlbum && currentAlbum.cover === (photo.displayUrl || photo.url) && (photo.type === 'video' || photo.type === 'collage' || photo.isCollage) && (
-          <div className="absolute top-2 left-20 bg-yellow-500 text-black px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
-            <ImageIcon className="w-3 h-3" />
-            {t('common:grid.coverBadge')}
-          </div>
-        )}
+        {currentAlbum &&
+          currentAlbum.cover === (photo.displayUrl || photo.url) &&
+          (photo.type === 'video' ||
+            photo.type === 'collage' ||
+            photo.isCollage) && (
+            <div className="absolute top-2 left-20 bg-yellow-500 text-black px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
+              <ImageIcon className="w-3 h-3" />
+              {t('common:grid.coverBadge')}
+            </div>
+          )}
 
         {/* ===== SELECTION CHECKBOX (if selection enabled) ===== */}
         {selectionMode !== 'none' && (
@@ -478,14 +517,21 @@ const PhotoGridUnified = ({
           {onToggleFavorite && (
             <button
               onClick={(e) => handleToggleFavorite(e, photo)}
-              title={photo.favorite ? t('common:removeFavorite') : t('common:addToFavorites')}
+              title={
+                photo.favorite
+                  ? t('common:removeFavorite')
+                  : t('common:addToFavorites')
+              }
               className={`p-1.5 rounded-full ${
                 photo.favorite
                   ? 'bg-red-500/80 text-white'
                   : 'bg-black/50 text-gray-300 hover:bg-red-500/70'
               } transition shadow-lg ripple-effect`}
             >
-              <Star className="w-4 h-4" fill={photo.favorite ? 'currentColor' : 'none'} />
+              <Star
+                className="w-4 h-4"
+                fill={photo.favorite ? 'currentColor' : 'none'}
+              />
             </button>
           )}
 
