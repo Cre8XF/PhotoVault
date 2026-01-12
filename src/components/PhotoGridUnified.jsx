@@ -290,13 +290,8 @@ const PhotoGridUnified = ({
       // Toggle mode: Click to toggle selection
       toggleSelection(photo)
     } else {
-      // Check if this is a collage - route to CollageViewer
-      if (photo.type === 'collage' || photo.isCollage) {
-        navigate(`/collage/view/${photo.id}`)
-        return
-      }
-
       // Default: Open photo (use displayUrl for full quality, fallback to url then thumbnail)
+      // Note: Collages are treated as photos and use PhotoPage for UX parity
       if (onPhotoClick) {
         onPhotoClick(photo.displayUrl || photo.url || photo.thumbnailUrl)
       }
