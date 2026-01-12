@@ -342,24 +342,8 @@ const PhotoGridUnified = ({
     const selected = isSelected(photo)
     const selectable = selectionMode !== 'none' && (!maxReached || selected)
 
-    // 🐛 DEBUG: Log render details for each item
     const isCollage = photo.type === 'collage' || photo.isCollage;
     const imageSrc = photo.thumbnailUrl || photo.displayUrl || photo.url;
-
-    if (isCollage) {
-      console.log('[GRID ITEM - COLLAGE]', {
-        id: photo.id,
-        type: photo.type,
-        isCollage: photo.isCollage,
-        photoHeight: photoHeight,
-        thumbnailUrl: photo.thumbnailUrl ? 'EXISTS' : 'MISSING',
-        displayUrl: photo.displayUrl ? 'EXISTS' : 'MISSING',
-        url: photo.url ? 'EXISTS' : 'MISSING',
-        imageSrc: imageSrc ? imageSrc.substring(0, 50) + '...' : 'NONE',
-        width: photo.width,
-        height: photo.height,
-      });
-    }
 
     const photoCardContent = (
       <div
@@ -409,23 +393,29 @@ const PhotoGridUnified = ({
               <span>{t('common:grid.video')}</span>
             </div>
           </div>
-        ) : (
-          /* ===== PHOTO CARD (includes photos and collages) ===== */
-          <>
+        ) : isCollage ? (
+          /* ===== COLLAGE CARD (wrapped for layout stability) ===== */
+          <div className={`w-full ${photoHeight} relative bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20 overflow-hidden`}>
             <img
-              src={photo.thumbnailUrl || photo.displayUrl || photo.url}
+              src={imageSrc}
               alt={photo.title || photo.name || ''}
-              className={`w-full ${photoHeight} object-contain bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20`}
+              className="w-full h-full object-contain"
               loading="lazy"
             />
             {/* Collage Type Badge */}
-            {(photo.type === 'collage' || photo.isCollage) && (
-              <div className="absolute top-2 left-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-medium px-2 py-1 rounded flex items-center gap-1 backdrop-blur-sm">
-                <Layout className="w-3 h-3" />
-                <span>Collage</span>
-              </div>
-            )}
-          </>
+            <div className="absolute top-2 left-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-medium px-2 py-1 rounded flex items-center gap-1 backdrop-blur-sm z-10">
+              <Layout className="w-3 h-3" />
+              <span>Collage</span>
+            </div>
+          </div>
+        ) : (
+          /* ===== PHOTO CARD ===== */
+          <img
+            src={photo.thumbnailUrl || photo.displayUrl || photo.url}
+            alt={photo.title || photo.name || ''}
+            className={`w-full ${photoHeight} object-contain bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20`}
+            loading="lazy"
+          />
         )}
 
         {/* ===== COVER INDICATOR ===== */}
