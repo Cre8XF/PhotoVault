@@ -342,6 +342,25 @@ const PhotoGridUnified = ({
     const selected = isSelected(photo)
     const selectable = selectionMode !== 'none' && (!maxReached || selected)
 
+    // 🐛 DEBUG: Log render details for each item
+    const isCollage = photo.type === 'collage' || photo.isCollage;
+    const imageSrc = photo.thumbnailUrl || photo.displayUrl || photo.url;
+
+    if (isCollage) {
+      console.log('[GRID ITEM - COLLAGE]', {
+        id: photo.id,
+        type: photo.type,
+        isCollage: photo.isCollage,
+        photoHeight: photoHeight,
+        thumbnailUrl: photo.thumbnailUrl ? 'EXISTS' : 'MISSING',
+        displayUrl: photo.displayUrl ? 'EXISTS' : 'MISSING',
+        url: photo.url ? 'EXISTS' : 'MISSING',
+        imageSrc: imageSrc ? imageSrc.substring(0, 50) + '...' : 'NONE',
+        width: photo.width,
+        height: photo.height,
+      });
+    }
+
     const photoCardContent = (
       <div
         key={photo.id}
