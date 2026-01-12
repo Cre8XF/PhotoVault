@@ -398,6 +398,7 @@ const PhotoGridUnified = ({
           <div className={`w-full ${photoHeight} relative bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20 overflow-hidden`}>
             <img
               src={imageSrc}
+              src={photo.thumbnailUrl || photo.displayUrl || photo.url}
               alt={photo.title || photo.name || ''}
               className="w-full h-full object-contain"
               loading="lazy"
