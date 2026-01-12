@@ -440,7 +440,7 @@ const AlbumsPage = ({
                                 onClick={(e) => {
                                   e.stopPropagation()
                                   navigate('/tools/collage/templates', {
-                                    state: { albumId: album.id }
+                                    state: { albumId: album.id },
                                   })
                                 }}
                                 className="p-2 bg-purple-600/90 hover:bg-purple-700 text-white rounded-lg shadow-lg transition"
@@ -542,7 +542,7 @@ const AlbumsPage = ({
                                   onClick={(e) => {
                                     e.stopPropagation()
                                     navigate('/tools/collage/templates', {
-                                      state: { albumId: album.id }
+                                      state: { albumId: album.id },
                                     })
                                   }}
                                   className="p-2 bg-purple-600/90 hover:bg-purple-700 text-white rounded-lg shadow-lg transition"
