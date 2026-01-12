@@ -427,7 +427,7 @@ const PhotoGridUnified = ({
         ) : isCollage ? (
           /* ===== COLLAGE CARD (wrapped for layout stability) ===== */
           <div
-            className={`w-full ${photoHeight} relative bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20 overflow-hidden`}
+            className="w-full aspect-square relative bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20 overflow-hidden"
           >
             <img
               src={imageSrc}
