@@ -426,21 +426,32 @@ const PhotoGridUnified = ({
           </div>
         ) : isCollage ? (
           /* ===== COLLAGE CARD (wrapped for layout stability) ===== */
-          <div
-            className="w-full aspect-square relative bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20 overflow-hidden"
-          >
-            <img
-              src={imageSrc}
-              alt={photo.title || photo.name || ''}
-              className="w-full h-full object-contain"
-              loading="lazy"
-            />
-            {/* Collage Type Badge */}
-            <div className="absolute top-2 left-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-medium px-2 py-1 rounded flex items-center gap-1 backdrop-blur-sm z-10">
-              <Layout className="w-3 h-3" />
-              <span>Collage</span>
-            </div>
-          </div>
+          (() => {
+            // Calculate dynamic aspect ratio for collages
+            const aspectStyle =
+              photo.width && photo.height
+                ? { aspectRatio: `${photo.width} / ${photo.height}` }
+                : { aspectRatio: '1 / 1' } // Fallback to square if dimensions missing
+
+            return (
+              <div
+                className="w-full relative bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20 overflow-hidden"
+                style={aspectStyle}
+              >
+                <img
+                  src={imageSrc}
+                  alt={photo.title || photo.name || ''}
+                  className="w-full h-full object-contain"
+                  loading="lazy"
+                />
+                {/* Collage Type Badge */}
+                <div className="absolute top-2 left-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-medium px-2 py-1 rounded flex items-center gap-1 backdrop-blur-sm z-10">
+                  <Layout className="w-3 h-3" />
+                  <span>Collage</span>
+                </div>
+              </div>
+            )
+          })()
         ) : (
           /* ===== PHOTO CARD ===== */
           <img
