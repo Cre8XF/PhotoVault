@@ -262,8 +262,8 @@ const PhotoGridUnified = ({
       // Toggle mode: Click to toggle selection
       toggleSelection(photo)
     } else if (onPhotoClick) {
-      // Default: Open photo (use same fallback as image src)
-      onPhotoClick(photo.displayUrl || photo.thumbnailUrl || photo.url)
+      // Default: Open photo (use thumbnailUrl first for grid optimization)
+      onPhotoClick(photo.thumbnailUrl || photo.displayUrl || photo.url)
     }
   }
 
@@ -394,7 +394,7 @@ const PhotoGridUnified = ({
           /* ===== PHOTO CARD (includes photos and collages) ===== */
           <>
             <img
-              src={photo.displayUrl || photo.thumbnailUrl || photo.url}
+              src={photo.thumbnailUrl || photo.displayUrl || photo.url}
               alt={photo.title || photo.name || ''}
               className={`w-full ${photoHeight} object-contain bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20`}
               loading="lazy"
