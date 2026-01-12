@@ -288,8 +288,8 @@ const PhotoGridUnified = ({
       // Toggle mode: Click to toggle selection
       toggleSelection(photo)
     } else if (onPhotoClick) {
-      // Default: Open photo (use thumbnailUrl first for grid optimization)
-      onPhotoClick(photo.thumbnailUrl || photo.displayUrl || photo.url)
+      // Default: Open photo (use displayUrl for full quality, fallback to url then thumbnail)
+      onPhotoClick(photo.displayUrl || photo.url || photo.thumbnailUrl)
     }
   }
 
