@@ -304,7 +304,7 @@ export default function PhotoPage() {
     if (import.meta.env.DEV) console.log('📥 PhotoPage: Download clicked', { photoId: photo.id })
 
     const link = document.createElement('a')
-    link.href = photo.url
+    link.href = photo.url || photo.displayUrl
     link.download = photo.name || 'photo.jpg'
     link.click()
 
@@ -321,7 +321,7 @@ export default function PhotoPage() {
     if (navigator.share) {
       navigator.share({
         title: photo.name || 'Photo',
-        url: photo.url
+        url: photo.url || photo.displayUrl
       }).catch(err => {
         if (err.name !== 'AbortError') {
           console.error('Share failed:', err)

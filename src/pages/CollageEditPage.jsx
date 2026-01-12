@@ -95,8 +95,10 @@ const CollageEditPage = () => {
 
         const photoData = photoSnap.data();
 
-        // Verify it's a collage
-        if (!photoData.isCollage || photoData.type !== 'collage') {
+        // Verify it's a collage (accept both new and legacy collages)
+        // New collages: type='photo' + isCollage=true
+        // Legacy collages: type='collage'
+        if (!photoData.isCollage && photoData.type !== 'collage') {
           throw new Error('This is not a collage');
         }
 
