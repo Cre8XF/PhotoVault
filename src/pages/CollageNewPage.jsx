@@ -6,7 +6,13 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Save, AlertCircle } from 'lucide-react'
-import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore'
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  serverTimestamp,
+} from 'firebase/firestore'
 import { auth, db, storage } from '../firebase'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import useStore from '../state/store'
@@ -19,7 +25,10 @@ import {
   serializeCollage,
   validateCollageData,
 } from '../features/collage/collageUtils'
-import { renderCollageToCanvas, renderCollageThumbnail } from '../utils/renderCollageToCanvas'
+import {
+  renderCollageToCanvas,
+  renderCollageThumbnail,
+} from '../utils/renderCollageToCanvas'
 import { uploadWithFallback } from '../utils/r2Upload'
 import { normalizePhotoFields } from '../utils/photoHelpers'
 import CollageCanvas from '../features/collage/components/CollageCanvas'
@@ -49,7 +58,8 @@ const CollageNewPage = () => {
   const returnPath = location.state?.returnPath || '/albums'
 
   // Global store
-  const { setIsWorldView, photos, setUpgradeModal, setNotification } = useStore()
+  const { setIsWorldView, photos, setUpgradeModal, setNotification } =
+    useStore()
 
   // Collage store
   const {
@@ -98,7 +108,9 @@ const CollageNewPage = () => {
 
     // Guard: Redirect to template selection if no template specified
     if (!templateId) {
-      console.warn('⚠️ No template ID provided - redirecting to template selection')
+      console.warn(
+        '⚠️ No template ID provided - redirecting to template selection'
+      )
       navigate('/tools/collage/templates', { replace: true })
       return
     }
@@ -203,15 +215,13 @@ const CollageNewPage = () => {
       }
 
       // ✅ DERIVE photoIds from slots (single source of truth)
-      const photoIds = slots
-        .map(s => s.photo?.id)
-        .filter(Boolean)
+      const photoIds = slots.map((s) => s.photo?.id).filter(Boolean)
 
       if (photoIds.length === 0) {
         throw new Error('No photos in collage')
       }
 
-      const collagePhotos = photos.filter(p => photoIds.includes(p.id))
+      const collagePhotos = photos.filter((p) => photoIds.includes(p.id))
 
       console.log('═══════════════════════════════════════')
       console.log('💾 COLLAGE SAVE AS PHOTO - DEBUG')
@@ -221,7 +231,7 @@ const CollageNewPage = () => {
       console.log('📊 Collage data:', {
         photoIds,
         photoCount: collagePhotos.length,
-        slotsCount: slots.length
+        slotsCount: slots.length,
       })
 
       // Get collage data with validation
@@ -235,8 +245,8 @@ const CollageNewPage = () => {
         transforms: collageData.transforms || {},
         options: {
           quality: 0.92,
-          useHighRes: true
-        }
+          useHighRes: true,
+        },
       })
 
       // Get actual dimensions (with fallback for older devices)
@@ -247,7 +257,10 @@ const CollageNewPage = () => {
         actualHeight = img.height
         img.close() // Free memory
       } catch (bitmapError) {
-        console.warn('⚠️ createImageBitmap failed, using template dimensions:', bitmapError)
+        console.warn(
+          '⚠️ createImageBitmap failed, using template dimensions:',
+          bitmapError
+        )
         actualWidth = template.canvas.width
         actualHeight = template.canvas.height
       }
@@ -255,7 +268,9 @@ const CollageNewPage = () => {
       // Step 2: Upload full image
       const timestamp = Date.now()
       const collageFileName = `collage_${timestamp}.jpg`
-      const storagePath = `users/${user.uid}/${albumId || 'collages'}/${collageFileName}`
+      const storagePath = `users/${user.uid}/${
+        albumId || 'collages'
+      }/${collageFileName}`
       const storageRef = ref(storage, storagePath)
 
       console.log('☁️ Uploading collage image...')
@@ -265,8 +280,8 @@ const CollageNewPage = () => {
           type: 'collage',
           templateId: template.id,
           photoCount: photoIds.length.toString(),
-          createdAt: new Date().toISOString()
-        }
+          createdAt: new Date().toISOString(),
+        },
       })
 
       const collageUrl = await getDownloadURL(storageRef)
@@ -278,14 +293,14 @@ const CollageNewPage = () => {
         layout: template,
         photos: collagePhotos,
         transforms: collageData.transforms || {},
-        maxWidth: 400
+        maxWidth: 400,
       })
 
       const thumbnailPath = `users/${user.uid}/thumbnails/collage_${timestamp}_thumb.jpg`
       const thumbnailRef = ref(storage, thumbnailPath)
 
       await uploadBytes(thumbnailRef, thumbnailBlob, {
-        contentType: 'image/jpeg'
+        contentType: 'image/jpeg',
       })
 
       const thumbnailUrl = await getDownloadURL(thumbnailRef)
@@ -315,27 +330,27 @@ const CollageNewPage = () => {
         updatedAt: serverTimestamp(),
 
         // Type identification
-        type: 'collage',
+        type: 'photo',
         isCollage: true,
 
         // Lightweight collage metadata
         collageData: {
           templateId: template.id,
           photoIds: photoIds,
-          version: 2
+          version: 2,
         },
 
         // Editor data (normalized)
         collageEditorData: {
           slotPhotos: slotPhotos,
           transforms: collageData.transforms || {},
-          editorVersion: '2.1'
+          editorVersion: '2.1',
         },
 
         // Metadata
         favorite: false,
         tags: ['collage'],
-        aiTags: [`collage-${template.id}`, `${photoIds.length}-photos`]
+        aiTags: [`collage-${template.id}`, `${photoIds.length}-photos`],
       }
 
       const docRef = await addDoc(photosRef, photoDoc)
@@ -343,25 +358,26 @@ const CollageNewPage = () => {
 
       markAsSaved(docRef.id)
 
-
       // Show success notification
       setNotification({
         message: t('collage:notifications.collageSaved', 'Collage saved!'),
-        type: 'success'
+        type: 'success',
       })
 
       // Navigate back to origin (album, tools, or home)
       console.log('🔙 Navigating to:', returnPath)
       console.log('═══════════════════════════════════════')
       navigate(returnPath, { replace: true })
-
     } catch (error) {
       console.error('❌ Failed to save collage:', error)
       setSaveError(t('collage.errors.saveFailed', 'Failed to save collage'))
 
       setNotification({
-        message: t('collage:notifications.saveFailed', 'Failed to save collage'),
-        type: 'error'
+        message: t(
+          'collage:notifications.saveFailed',
+          'Failed to save collage'
+        ),
+        type: 'error',
       })
     } finally {
       setIsSaving(false)
@@ -545,7 +561,8 @@ const CollageNewPage = () => {
                 <button
                   onClick={() => {
                     console.log(
-                      '🗑️ User confirmed: Discard changes and navigate to:', returnPath
+                      '🗑️ User confirmed: Discard changes and navigate to:',
+                      returnPath
                     )
                     navigate(returnPath, { replace: true })
                   }}
