@@ -3,7 +3,7 @@
 // ============================================================================
 import React, { useState, useMemo } from 'react'
 import PropTypes from 'prop-types'
-import { ImageOff, Trash2, Star, Image as ImageIcon, Play, Video, Check, GripVertical } from 'lucide-react'
+import { ImageOff, Trash2, Star, Image as ImageIcon, Play, Video, Check, GripVertical, Layout } from 'lucide-react'
 import { softDeletePhoto, toggleFavorite, setAlbumCover } from '../firebase'
 import { formatDuration } from '../utils/videoTools'
 import { useTranslation } from 'react-i18next'
@@ -262,8 +262,8 @@ const PhotoGridUnified = ({
       // Toggle mode: Click to toggle selection
       toggleSelection(photo)
     } else if (onPhotoClick) {
-      // Default: Open photo
-      onPhotoClick(photo.displayUrl || photo.url)
+      // Default: Open photo (use same fallback as image src)
+      onPhotoClick(photo.displayUrl || photo.thumbnailUrl || photo.url)
     }
   }
 
@@ -391,25 +391,35 @@ const PhotoGridUnified = ({
             </div>
           </div>
         ) : (
-          /* ===== PHOTO CARD ===== */
-          <img
-            src={photo.displayUrl || photo.url}
-            alt={photo.title || photo.name || ''}
-            className={`w-full ${photoHeight} object-contain bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20`}
-            loading="lazy"
-          />
+          /* ===== PHOTO CARD (includes photos and collages) ===== */
+          <>
+            <img
+              src={photo.displayUrl || photo.thumbnailUrl || photo.url}
+              alt={photo.title || photo.name || ''}
+              className={`w-full ${photoHeight} object-contain bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20`}
+              loading="lazy"
+            />
+            {/* Collage Type Badge */}
+            {(photo.type === 'collage' || photo.isCollage) && (
+              <div className="absolute top-2 left-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-medium px-2 py-1 rounded flex items-center gap-1 backdrop-blur-sm">
+                <Layout className="w-3 h-3" />
+                <span>Collage</span>
+              </div>
+            )}
+          </>
         )}
 
         {/* ===== COVER INDICATOR ===== */}
-        {currentAlbum && currentAlbum.cover === (photo.displayUrl || photo.url) && photo.type !== 'video' && (
+        {/* For regular photos (no type badge) - position at left */}
+        {currentAlbum && currentAlbum.cover === (photo.displayUrl || photo.url) && photo.type !== 'video' && photo.type !== 'collage' && !photo.isCollage && (
           <div className="absolute top-2 left-2 bg-yellow-500 text-black px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
             <ImageIcon className="w-3 h-3" />
             {t('common:grid.coverBadge')}
           </div>
         )}
 
-        {/* Cover indicator for videos (adjusted position to not overlap video badge) */}
-        {currentAlbum && currentAlbum.cover === (photo.displayUrl || photo.url) && photo.type === 'video' && (
+        {/* Cover indicator for videos and collages (adjusted position to not overlap type badge) */}
+        {currentAlbum && currentAlbum.cover === (photo.displayUrl || photo.url) && (photo.type === 'video' || photo.type === 'collage' || photo.isCollage) && (
           <div className="absolute top-2 left-20 bg-yellow-500 text-black px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
             <ImageIcon className="w-3 h-3" />
             {t('common:grid.coverBadge')}
