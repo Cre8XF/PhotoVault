@@ -39,6 +39,7 @@ import {
   deleteFromR2,
 } from './utils/r2Upload'
 import { devLog, devWarn, devError } from './utils/log'
+import { createPhotoDocument } from './factories/createPhotoDocument'
 
 // 🔗 Firebase-konfig (fra Vite environment variabler)
 const firebaseConfig = {
@@ -1361,53 +1362,93 @@ export async function uploadPhoto(
     )
 
     // 4. Prepare metadata with comprehensive EXIF data
-    const photoData = {
-      name: file.name,
-      url: downloadURL, // Main URL (R2)
-      userId: userId,
-      albumId: albumId,
-      size: file.size,
-      type: isDocument ? 'document' : (isVideo ? 'video' : fileType),
-      ...(isDocument && { mimeType: fileType }), // Store MIME type for documents
-      favorite: false,
-      order: Date.now(), // Phase 4B-2: Manual ordering support
+    let photoData
 
-      // ✅ TRASH FIELDS (Phase 4B-1) - CRITICAL: Required for query compatibility
-      deleted: false,        // Never deleted on upload
-      deletedAt: null,       // No deletion timestamp
-      deletedBy: null,       // No deleter user ID
+    // Use canonical contract factory for regular photos
+    if (!isVideo && !isDocument) {
+      // Extract dimensions from EXIF if available
+      const width = technicalDetails?.width || 0
+      const height = technicalDetails?.height || 0
 
-      // Storage backend tracking - R2 only
-      storageBackend: 'r2', // Always R2 for new uploads
-      r2Url: downloadURL, // R2 public URL
+      // Create base document using canonical factory
+      const baseDoc = createPhotoDocument({
+        userId: userId,
+        albumId: albumId,
+        displayUrl: downloadURL,
+        thumbnailUrl: downloadURL, // Use same URL for now
+        width: width,
+        height: height,
+        size: file.size,
+      })
 
-      // Date fields (EXIF-enhanced for photos only)
-      ...(takenAt && { takenAt: takenAt }), // ✅ Canonical EXIF date (only if exists)
-      dateTaken: takenAt, // ✅ Keep for backward compatibility
-      uploadedAt: new Date().toISOString(),
-      displayDate: takenAt || new Date().toISOString(), // ✅ Use takenAt if available, else uploadedAt
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      // Add photo-specific fields not in canonical contract
+      photoData = {
+        ...baseDoc,
+        // Backward compatibility: url alias for displayUrl
+        url: downloadURL,
+        // File name
+        name: file.name,
+        // Storage backend tracking
+        storageBackend: 'r2',
+        r2Url: downloadURL,
+        // EXIF date fields (if available)
+        ...(takenAt && {
+          takenAt: takenAt,
+          dateTaken: takenAt,
+          displayDate: takenAt, // Override factory's displayDate with EXIF date
+        }),
+        // EXIF metadata
+        ...(location && { location }),
+        ...(camera && { camera }),
+        ...(technicalDetails && { technicalDetails }),
+        // Enhancement fields
+        enhanced: false,
+        enhancedUrl: null,
+        enhancedAt: null,
+        bgRemoved: false,
+        noBgUrl: null,
+        bgRemovedAt: null,
+        // Override tags if provided
+        ...(uploadTags.length > 0 && { tags: uploadTags }),
+      }
+    } else {
+      // Keep existing logic for videos and documents
+      photoData = {
+        name: file.name,
+        url: downloadURL,
+        userId: userId,
+        albumId: albumId,
+        size: file.size,
+        type: isDocument ? 'document' : 'video',
+        ...(isDocument && { mimeType: fileType }),
+        favorite: false,
+        order: Date.now(),
 
-      // EXIF metadata (photos only)
-      ...(!isVideo && !isDocument && location && { location }),
-      ...(!isVideo && !isDocument && camera && { camera }),
-      ...(!isVideo && !isDocument && technicalDetails && { technicalDetails }),
+        deleted: false,
+        deletedAt: null,
+        deletedBy: null,
 
-      // Video-specific fields
-      ...(isVideo && {
-        thumbnailUrl: thumbnailUrl,
-        metadata: videoMetadata || {
-          duration: 0,
-          resolution: 'unknown',
-          fps: null,
-        },
-      }),
+        storageBackend: 'r2',
+        r2Url: downloadURL,
 
-      // AI fields (defaults - not for documents)
-      ...(!isDocument && {
+        ...(takenAt && { takenAt: takenAt }),
+        dateTaken: takenAt,
+        uploadedAt: new Date().toISOString(),
+        displayDate: takenAt || new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+
+        ...(isVideo && {
+          thumbnailUrl: thumbnailUrl,
+          metadata: videoMetadata || {
+            duration: 0,
+            resolution: 'unknown',
+            fps: null,
+          },
+        }),
+
         aiTags: [],
-        tags: uploadTags || [], // ✅ Manual tags from upload
+        tags: uploadTags || [],
         faces: 0,
         category: null,
         aiAnalyzed: false,
@@ -1418,7 +1459,7 @@ export async function uploadPhoto(
         bgRemoved: false,
         noBgUrl: null,
         bgRemovedAt: null,
-      }),
+      }
     }
 
     // 3. AI-tagging (deaktivert i Pixtr MVP)
