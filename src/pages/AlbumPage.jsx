@@ -146,6 +146,20 @@ const AlbumPage = ({
     )
   }, [photos, album])
 
+  // 🐛 DEBUG: Log album items to verify collages are included
+  useEffect(() => {
+    console.log('🧩 Album items:',
+      albumPhotos.map(p => ({
+        id: p.id,
+        type: p.type,
+        url: p.url,
+        thumbnailUrl: p.thumbnailUrl,
+        displayUrl: p.displayUrl,
+        name: p.name
+      }))
+    );
+  }, [albumPhotos]);
+
   // Filter and sort photos
   const filteredPhotos = useMemo(() => {
     let result = [...albumPhotos]
@@ -232,9 +246,20 @@ const AlbumPage = ({
     }
   }, [albumPhotos])
 
-  // Phase 2A: Navigate to PhotoPage
+  // Phase 2A: Navigate to PhotoPage or CollageEditPage
   const handlePhotoClick = (photo, index) => {
-    // Set global photo context state
+    // Check if it's a collage
+    if (photo.type === 'collage' || photo.isCollage) {
+      // Navigate to collage edit page
+      navigate(`/collage/${photo.id}/edit`, {
+        state: {
+          returnPath: `/album/${album?.id || albumId}`
+        }
+      })
+      return
+    }
+
+    // For regular photos: Set global photo context state
     const photoIds = filteredPhotos.map((p) => p.id)
     setCurrentPhotoId(photo.id)
     setPhotoContext('album')
