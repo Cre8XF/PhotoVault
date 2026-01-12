@@ -17,12 +17,9 @@ export async function renderCollageToCanvas({
   layout,
   photos,
   transforms = {},
-  options = {}
+  options = {},
 }) {
-  const {
-    quality = 0.85,
-    useHighRes = true
-  } = options
+  const { quality = 0.85, useHighRes = true } = options
 
   // Validate inputs
   if (!layout) {
@@ -38,9 +35,8 @@ export async function renderCollageToCanvas({
   canvas.height = layout.canvas.height
   const ctx = canvas.getContext('2d')
 
-  // Fill background
-  ctx.fillStyle = '#000000'
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  // ✅ NO background fill - full-bleed collage
+  // (removed to prevent gaps from showing as black areas)
 
   // Calculate slot positions from CSS Grid template
   const slotBounds = calculateSlotBounds(layout)
@@ -54,13 +50,15 @@ export async function renderCollageToCanvas({
     const transform = transforms[photo.id] || {
       scale: 1,
       translateX: 0,
-      translateY: 0
+      translateY: 0,
     }
 
     try {
       // Load high-res image with fallbacks
-      const hiResUrl = photo.url || photo.downloadURL || photo.imageUrl || photo.src
-      const thumbnailUrl = photo.thumbnailUrl || photo.thumbnailURL || photo.thumbnail || hiResUrl
+      const hiResUrl =
+        photo.url || photo.downloadURL || photo.imageUrl || photo.src
+      const thumbnailUrl =
+        photo.thumbnailUrl || photo.thumbnailURL || photo.thumbnail || hiResUrl
       const imageUrl = useHighRes ? hiResUrl : thumbnailUrl
 
       if (!imageUrl) {
@@ -103,13 +101,7 @@ export async function renderCollageToCanvas({
       }
 
       // Draw image centered
-      ctx.drawImage(
-        img,
-        -drawWidth / 2,
-        -drawHeight / 2,
-        drawWidth,
-        drawHeight
-      )
+      ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight)
 
       ctx.restore()
     } catch (error) {
@@ -147,7 +139,7 @@ export async function renderCollageToCanvas({
 function loadImage(url) {
   return new Promise((resolve, reject) => {
     const img = new Image()
-    img.crossOrigin = 'anonymous'  // CORS support
+    img.crossOrigin = 'anonymous' // CORS support
     img.onload = () => resolve(img)
     img.onerror = (error) => {
       console.error('Image load error:', url, error)
@@ -171,18 +163,18 @@ function calculateSlotBounds(layout) {
 
   // Parse grid template to determine columns and rows
   const gridTemplate = layout.grid.desktop
-  const gridParts = gridTemplate.split(' ').filter(p => p.trim())
+  const gridParts = gridTemplate.split(' ').filter((p) => p.trim())
 
   // Determine number of columns and rows from grid template
   // Grid templates are typically like "1fr 1fr" or "2fr 1fr 1fr"
   const numCols = gridParts.length
 
-  // Calculate total grid area
-  const totalGridWidth = canvasWidth - (padding * 2) - (gap * (numCols - 1))
-  const totalGridHeight = canvasHeight - (padding * 2)
+  // Calculate total grid area (NO GAPS - full-bleed)
+  const totalGridWidth = canvasWidth - padding * 2
+  const totalGridHeight = canvasHeight - padding * 2
 
   // Calculate fr (fractional unit) values
-  const colFractions = gridParts.map(part => {
+  const colFractions = gridParts.map((part) => {
     const match = part.match(/(\d+(?:\.\d+)?)fr/)
     return match ? parseFloat(match[1]) : 1
   })
@@ -190,38 +182,39 @@ function calculateSlotBounds(layout) {
   const totalFractions = colFractions.reduce((sum, fr) => sum + fr, 0)
   const frUnit = totalGridWidth / totalFractions
 
-  // Calculate column positions and widths
+  // Calculate column positions and widths (NO GAPS)
   const columns = []
   let currentX = padding
   for (let i = 0; i < numCols; i++) {
     const width = colFractions[i] * frUnit
     columns.push({ x: currentX, width })
-    currentX += width + gap
+    currentX += width // ✅ No gap addition
   }
 
   // For rows, we need to analyze the slot areas to determine row count
-  const maxRow = Math.max(...layout.slots.map(slot => {
-    const parts = slot.area.split('/').map(s => parseInt(s.trim()))
-    return parts[2] || 1 // row-end
-  }))
+  const maxRow = Math.max(
+    ...layout.slots.map((slot) => {
+      const parts = slot.area.split('/').map((s) => parseInt(s.trim()))
+      return parts[2] || 1 // row-end
+    })
+  )
 
   const numRows = maxRow - 1 // Grid lines are 1-indexed
 
-  // Calculate row heights (equal distribution for now)
-  const totalGapsHeight = gap * (numRows - 1)
-  const rowHeight = (totalGridHeight - totalGapsHeight) / numRows
+  // Calculate row heights (equal distribution, NO GAPS)
+  const rowHeight = totalGridHeight / numRows
 
   const rows = []
   let currentY = padding
   for (let i = 0; i < numRows; i++) {
     rows.push({ y: currentY, height: rowHeight })
-    currentY += rowHeight + gap
+    currentY += rowHeight // ✅ No gap addition
   }
 
   // Calculate bounds for each slot
-  const bounds = layout.slots.map(slot => {
+  const bounds = layout.slots.map((slot) => {
     // Parse slot.area: "row-start / col-start / row-end / col-end"
-    const parts = slot.area.split('/').map(s => parseInt(s.trim()))
+    const parts = slot.area.split('/').map((s) => parseInt(s.trim()))
     const [rowStart, colStart, rowEnd, colEnd] = parts
 
     // Convert 1-indexed grid positions to 0-indexed array positions
@@ -234,18 +227,18 @@ function calculateSlotBounds(layout) {
     const x = columns[startCol].x
     const y = rows[startRow].y
 
-    // Width: sum of column widths + gaps between them
+    // Width: sum of column widths (NO GAPS - full-bleed)
     let width = 0
     for (let i = startCol; i < endCol; i++) {
       width += columns[i].width
-      if (i < endCol - 1) width += gap
+      // ✅ Removed gap addition - full-bleed render
     }
 
-    // Height: sum of row heights + gaps between them
+    // Height: sum of row heights (NO GAPS - full-bleed)
     let height = 0
     for (let i = startRow; i < endRow; i++) {
       height += rows[i].height
-      if (i < endRow - 1) height += gap
+      // ✅ Removed gap addition - full-bleed render
     }
 
     return { x, y, width, height }
@@ -266,7 +259,7 @@ export async function renderCollageThumbnail({
   layout,
   photos,
   transforms = {},
-  maxWidth = 800
+  maxWidth = 800,
 }) {
   // Calculate scale factor
   const scale = maxWidth / layout.canvas.width
@@ -276,10 +269,10 @@ export async function renderCollageThumbnail({
     ...layout,
     canvas: {
       width: Math.round(layout.canvas.width * scale),
-      height: Math.round(layout.canvas.height * scale)
+      height: Math.round(layout.canvas.height * scale),
     },
     gap: Math.round((layout.gap || 8) * scale),
-    padding: Math.round((layout.padding || 0) * scale)
+    padding: Math.round((layout.padding || 0) * scale),
   }
 
   // Render with lower quality and thumbnail URLs
@@ -289,8 +282,8 @@ export async function renderCollageThumbnail({
     transforms,
     options: {
       quality: 0.7,
-      useHighRes: false // Use thumbnails for faster loading
-    }
+      useHighRes: false, // Use thumbnails for faster loading
+    },
   })
 }
 
@@ -314,5 +307,5 @@ export function downloadCollageBlob(blob, filename = 'collage.jpg') {
 export default {
   renderCollageToCanvas,
   renderCollageThumbnail,
-  downloadCollageBlob
+  downloadCollageBlob,
 }

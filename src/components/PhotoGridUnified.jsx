@@ -441,7 +441,7 @@ const PhotoGridUnified = ({
                 <img
                   src={imageSrc}
                   alt={photo.title || photo.name || ''}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-cover"
                   loading="lazy"
                 />
                 {/* Collage Type Badge */}
