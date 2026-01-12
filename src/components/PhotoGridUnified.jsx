@@ -3,6 +3,7 @@
 // ============================================================================
 import React, { useState, useMemo } from 'react'
 import PropTypes from 'prop-types'
+import { useNavigate } from 'react-router-dom'
 import {
   ImageOff,
   Trash2,
@@ -134,6 +135,7 @@ const PhotoGridUnified = ({
   refreshPhotos,
 }) => {
   const { t } = useTranslation(['common'])
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
 
   // ===== Drag & Drop Setup =====
@@ -287,9 +289,17 @@ const PhotoGridUnified = ({
     } else if (selectionMode === 'toggle') {
       // Toggle mode: Click to toggle selection
       toggleSelection(photo)
-    } else if (onPhotoClick) {
+    } else {
+      // Check if this is a collage - route to CollageViewer
+      if (photo.type === 'collage' || photo.isCollage) {
+        navigate(`/collage/view/${photo.id}`)
+        return
+      }
+
       // Default: Open photo (use displayUrl for full quality, fallback to url then thumbnail)
-      onPhotoClick(photo.displayUrl || photo.url || photo.thumbnailUrl)
+      if (onPhotoClick) {
+        onPhotoClick(photo.displayUrl || photo.url || photo.thumbnailUrl)
+      }
     }
   }
 

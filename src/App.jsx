@@ -68,6 +68,7 @@ const AIUpscalePage = lazy(() => import('./pages/ai/AIUpscalePage'))
 
 // Collage View (for viewing saved collages) - Lazy loaded
 const CollageView = lazy(() => import('./features/collage/pages/CollageView'))
+const CollageViewer = lazy(() => import('./pages/CollageViewer'))
 
 // Route map
 import { ROUTES } from './routes'
@@ -329,6 +330,16 @@ function App() {
                   </ProtectedRoute>
                 } />
                 */}
+
+                  {/* Collage viewer - Protected Route (read-only display) */}
+                  <Route
+                    path="/collage/view/:id"
+                    element={
+                      <ProtectedRoute>
+                        <CollageViewer />
+                      </ProtectedRoute>
+                    }
+                  />
 
                   {/* Collage view - Protected Route */}
                   <Route
