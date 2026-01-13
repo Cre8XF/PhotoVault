@@ -396,7 +396,7 @@ const PhotoGridUnified = ({
     const selectable = selectionMode !== 'none' && (!maxReached || selected)
 
     const isCollage = photo.type === 'collage' || photo.isCollage
-    const imageSrc = photo.displayUrl || photo.url || photo.thumbnailUrl
+    const imageSrc = photo.displayUrl || photo.thumbnailUrl || photo.url
 
     const photoCardContent = (
       <div
@@ -449,39 +449,26 @@ const PhotoGridUnified = ({
             </div>
           </div>
         ) : isCollage ? (
-          /* ===== COLLAGE CARD (wrapped for layout stability) ===== */
-          (() => {
-            // Calculate dynamic aspect ratio for collages
-            const aspectStyle =
-              photo.width && photo.height
-                ? { aspectRatio: `${photo.width} / ${photo.height}` }
-                : { aspectRatio: '1 / 1' } // Fallback to square if dimensions missing
-
-            return (
-              <div
-                className="w-full relative bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20 overflow-hidden"
-                style={aspectStyle}
-              >
-                <img
-                  src={imageSrc}
-                  alt={photo.title || photo.name || ''}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-                {/* Collage Type Badge */}
-                <div className="absolute top-2 left-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-medium px-2 py-1 rounded flex items-center gap-1 backdrop-blur-sm z-10">
-                  <Layout className="w-3 h-3" />
-                  <span>Collage</span>
-                </div>
-              </div>
-            )
-          })()
+          /* ===== COLLAGE CARD ===== */
+          <div className="relative">
+            <img
+              src={imageSrc}
+              alt={photo.title || photo.name || ''}
+              className={`w-full ${photoHeight} object-cover bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20`}
+              loading="lazy"
+            />
+            {/* Collage Type Badge */}
+            <div className="absolute top-2 left-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-medium px-2 py-1 rounded flex items-center gap-1 backdrop-blur-sm z-10">
+              <Layout className="w-3 h-3" />
+              <span>Collage</span>
+            </div>
+          </div>
         ) : (
           /* ===== PHOTO CARD ===== */
           <img
-            src={photo.thumbnailUrl || photo.displayUrl || photo.url}
+            src={imageSrc}
             alt={photo.title || photo.name || ''}
-            className={`w-full ${photoHeight} object-contain bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20`}
+            className={`w-full ${photoHeight} object-cover bg-gray-900 rounded-xl border border-gray-700 shadow-md transform transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/20`}
             loading="lazy"
           />
         )}
