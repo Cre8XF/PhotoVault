@@ -320,6 +320,7 @@ const CollageNewPage = () => {
       const photoDoc = createPhotoDocument({
         userId: user.uid,
         albumId: albumId || null,
+        url: collageUrl,
         displayUrl: collageUrl,
         thumbnailUrl: thumbnailUrl,
         width: actualWidth,
