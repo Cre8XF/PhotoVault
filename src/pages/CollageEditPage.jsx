@@ -78,6 +78,17 @@ const CollageEditPage = () => {
   const [saveError, setSaveError] = useState(null)
   const [showExitWarning, setShowExitWarning] = useState(false)
 
+  // 📍 DIAGNOSTIC: Log component mount
+  useEffect(() => {
+    console.log('📍 [CollageEditPage] mounted', {
+      pathname: location.pathname,
+      params: { id },
+      state: location.state,
+      returnPath,
+      timestamp: new Date().toISOString(),
+    })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // ============================================================================
   // LOAD COLLAGE
   // ============================================================================
@@ -363,6 +374,12 @@ const CollageEditPage = () => {
 
   // Loading state
   if (isLoading) {
+    console.log('⏳ [CollageEditPage] Loading state', {
+      id,
+      isLoading,
+      template: !!template,
+      timestamp: new Date().toISOString(),
+    })
     return (
       <PageWrapper>
         <div className="min-h-screen flex items-center justify-center">
@@ -379,6 +396,12 @@ const CollageEditPage = () => {
 
   // Error state
   if (loadError) {
+    console.warn('⛔ [CollageEditPage] render blocked', {
+      reason: 'Load error',
+      id,
+      loadError,
+      timestamp: new Date().toISOString(),
+    })
     return (
       <PageWrapper>
         <div className="min-h-screen flex items-center justify-center p-6">
@@ -402,6 +425,12 @@ const CollageEditPage = () => {
 
   // No template loaded
   if (!template) {
+    console.warn('⛔ [CollageEditPage] render blocked', {
+      reason: 'No template loaded',
+      id,
+      template: !!template,
+      timestamp: new Date().toISOString(),
+    })
     return (
       <PageWrapper>
         <div className="min-h-screen flex items-center justify-center p-6">

@@ -106,6 +106,19 @@ export default function PhotoPage() {
     }
   }, [photo])
 
+  // 📍 DIAGNOSTIC: Log component mount
+  useEffect(() => {
+    console.log('📍 [PhotoPage] mounted', {
+      pathname: location.pathname,
+      params: { id },
+      state: location.state,
+      photoContext,
+      photoOrder: photoOrder?.slice(0, 5), // First 5 IDs
+      photoIndex,
+      timestamp: new Date().toISOString(),
+    })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Set world view on mount
   useEffect(() => {
     setIsWorldView(true)
@@ -515,6 +528,12 @@ export default function PhotoPage() {
 
   // Loading state
   if (loading) {
+    console.log('⏳ [PhotoPage] Loading state', {
+      id,
+      loading,
+      photo: !!photo,
+      timestamp: new Date().toISOString(),
+    })
     return (
       <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center">
         <div className="spinner" />
@@ -524,6 +543,15 @@ export default function PhotoPage() {
 
   // Error state
   if (error || !photo) {
+    console.warn('⛔ [PhotoPage] render blocked', {
+      reason: error || 'Photo not found',
+      id,
+      photo: !!photo,
+      loading,
+      error,
+      availablePhotosCount: photos?.length,
+      timestamp: new Date().toISOString(),
+    })
     return (
       <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center">
         <EmptyState
