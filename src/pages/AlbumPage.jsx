@@ -127,6 +127,18 @@ const AlbumPage = ({
   const [displayLimit, setDisplayLimit] = useState(50)
   const ITEMS_PER_PAGE = 50
 
+  // 📍 DIAGNOSTIC: Log component mount
+  useEffect(() => {
+    console.log('📍 [AlbumPage] mounted', {
+      pathname: location.pathname,
+      params: { albumId },
+      state: location.state,
+      album: album ? { id: album.id, name: album.name } : null,
+      albumPhotosCount: albumPhotos?.length,
+      timestamp: new Date().toISOString(),
+    })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Track initial data loading
   useEffect(() => {
     if (photos && photos.length > 0) {
@@ -249,8 +261,25 @@ const AlbumPage = ({
 
   // Phase 2A: Navigate to PhotoPage or CollageEditPage
   const handlePhotoClick = (photo, index) => {
+    console.log('🖱️ [AlbumPage] handlePhotoClick', {
+      photo,
+      index,
+      photoId: photo?.id,
+      type: photo?.type,
+      isCollage: photo?.isCollage,
+      albumId: album?.id || albumId,
+      timestamp: new Date().toISOString(),
+    })
+
     // Check if it's a collage
     if (photo.type === 'collage' || photo.isCollage) {
+      console.log('➡️ [AlbumPage] Navigating to collage editor', {
+        target: `/collage/${photo.id}/edit`,
+        id: photo.id,
+        source: 'album',
+        returnPath: `/album/${album?.id || albumId}`,
+        timestamp: new Date().toISOString(),
+      })
       // Navigate to collage edit page
       navigate(`/collage/${photo.id}/edit`, {
         state: {
@@ -267,6 +296,16 @@ const AlbumPage = ({
     setPhotoOrder(photoIds)
     setPhotoIndex(index)
     setCurrentAlbumId(album?.id || null)
+
+    console.log('➡️ [AlbumPage] Navigating to photo viewer', {
+      target: `/photo/${photo.id}`,
+      id: photo.id,
+      source: 'album',
+      photoContext: 'album',
+      photoIndex: index,
+      totalPhotos: photoIds.length,
+      timestamp: new Date().toISOString(),
+    })
 
     // Navigate to PhotoPage
     navigate(`/photo/${photo.id}`, { state: { from: location } })
@@ -548,6 +587,13 @@ const AlbumPage = ({
 
   // Handle album not found
   if (!album) {
+    console.warn('⛔ [AlbumPage] render blocked', {
+      reason: 'Album not found',
+      albumId,
+      availableAlbums: albums?.length,
+      albumsList: albums?.map((a) => ({ id: a.id, name: a.name })),
+      timestamp: new Date().toISOString(),
+    })
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

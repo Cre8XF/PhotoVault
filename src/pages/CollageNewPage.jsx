@@ -93,6 +93,18 @@ const CollageNewPage = () => {
   // Get template ID from query params
   const templateId = searchParams.get('template')
 
+  // 📍 DIAGNOSTIC: Log component mount
+  useEffect(() => {
+    console.log('📍 [CollageNewPage] mounted', {
+      pathname: location.pathname,
+      params: { templateId },
+      state: location.state,
+      albumId,
+      returnPath,
+      timestamp: new Date().toISOString(),
+    })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // ============================================================================
   // INITIALIZATION
   // ============================================================================

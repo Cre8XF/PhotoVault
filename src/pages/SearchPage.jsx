@@ -150,6 +150,17 @@ const SearchPage = ({
   // Collage data - real-time from Firestore
   const { collages, collagesLoading, deleteCollage } = useCollageData()
 
+  // 📍 DIAGNOSTIC: Log component mount
+  useEffect(() => {
+    console.log('📍 [SearchPage] mounted', {
+      pathname: location.pathname,
+      state: location.state,
+      photosCount: safePhotos?.length,
+      collagesCount: collages?.length,
+      timestamp: new Date().toISOString(),
+    })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // 🆕 PHASE 3B: Keyboard shortcuts for desktop
   useKeyboardShortcuts([
     {
@@ -705,6 +716,16 @@ const SearchPage = ({
   // Phase 2A: Navigate to PhotoPage
   // Accepts optional sourceList parameter for memories navigation
   const handlePhotoClick = (photo, indexOrSourceList, optionalSourceList) => {
+    console.log('🖱️ [SearchPage] handlePhotoClick', {
+      photo,
+      indexOrSourceList,
+      optionalSourceList: !!optionalSourceList,
+      photoId: photo?.id,
+      type: photo?.type,
+      isCollage: photo?.isCollage,
+      timestamp: new Date().toISOString(),
+    })
+
     // Handle different call signatures:
     // 1. handlePhotoClick(photo, index) - from grid
     // 2. handlePhotoClick(photo, index, sourceList) - from memories
@@ -731,6 +752,16 @@ const SearchPage = ({
     setPhotoContext('search')
     setPhotoOrder(photoIds)
     setPhotoIndex(index)
+
+    console.log('➡️ [SearchPage] Navigating to photo viewer', {
+      target: `/photo/${photo.id}`,
+      id: photo.id,
+      source: 'search',
+      photoContext: 'search',
+      photoIndex: index,
+      totalPhotos: photoIds.length,
+      timestamp: new Date().toISOString(),
+    })
 
     // Navigate to PhotoPage
     navigate(`/photo/${photo.id}`, { state: { from: location } })
