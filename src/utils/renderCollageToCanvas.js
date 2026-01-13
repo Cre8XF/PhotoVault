@@ -38,8 +38,8 @@ export async function renderCollageToCanvas({
   // ✅ NO background fill - full-bleed collage
   // (removed to prevent gaps from showing as black areas)
 
-  // Calculate slot positions from CSS Grid template
-  const slotBounds = calculateSlotBounds(layout)
+  // Use hardcoded slot canvas coordinates (more reliable than calculating from grid template)
+  // Each slot in the layout has canvas: { x, y, w, h } defining exact pixel coordinates
 
   // Render each photo
   for (let i = 0; i < layout.slots.length; i++) {
@@ -67,8 +67,13 @@ export async function renderCollageToCanvas({
 
       const img = await loadImage(imageUrl)
 
-      // Get slot bounds
-      const bounds = slotBounds[i]
+      // Get slot bounds from hardcoded canvas coordinates
+      const bounds = {
+        x: slot.canvas.x,
+        y: slot.canvas.y,
+        width: slot.canvas.w,
+        height: slot.canvas.h,
+      }
 
       // Apply transforms
       ctx.save()
@@ -108,7 +113,12 @@ export async function renderCollageToCanvas({
       console.error(`Failed to render photo ${photo.id}:`, error)
       // Render placeholder for failed images
       ctx.save()
-      const bounds = slotBounds[i]
+      const bounds = {
+        x: slot.canvas.x,
+        y: slot.canvas.y,
+        width: slot.canvas.w,
+        height: slot.canvas.h,
+      }
       ctx.fillStyle = '#333333'
       ctx.fillRect(bounds.x, bounds.y, bounds.width, bounds.height)
       ctx.restore()
@@ -147,104 +157,6 @@ function loadImage(url) {
     }
     img.src = url
   })
-}
-
-/**
- * Helper: Calculate physical bounds of each slot in the canvas
- * Parses CSS Grid template and converts to pixel coordinates
- * @param {Object} layout - Layout configuration
- * @returns {Array<Object>} Array of bounds { x, y, width, height }
- */
-function calculateSlotBounds(layout) {
-  const canvasWidth = layout.canvas.width
-  const canvasHeight = layout.canvas.height
-  const gap = layout.gap || 8
-  const padding = layout.padding || 0
-
-  // Parse grid template to determine columns and rows
-  const gridTemplate = layout.grid.desktop
-  const gridParts = gridTemplate.split(' ').filter((p) => p.trim())
-
-  // Determine number of columns and rows from grid template
-  // Grid templates are typically like "1fr 1fr" or "2fr 1fr 1fr"
-  const numCols = gridParts.length
-
-  // Calculate total grid area (NO GAPS - full-bleed)
-  const totalGridWidth = canvasWidth - padding * 2
-  const totalGridHeight = canvasHeight - padding * 2
-
-  // Calculate fr (fractional unit) values
-  const colFractions = gridParts.map((part) => {
-    const match = part.match(/(\d+(?:\.\d+)?)fr/)
-    return match ? parseFloat(match[1]) : 1
-  })
-
-  const totalFractions = colFractions.reduce((sum, fr) => sum + fr, 0)
-  const frUnit = totalGridWidth / totalFractions
-
-  // Calculate column positions and widths (NO GAPS)
-  const columns = []
-  let currentX = padding
-  for (let i = 0; i < numCols; i++) {
-    const width = colFractions[i] * frUnit
-    columns.push({ x: currentX, width })
-    currentX += width // ✅ No gap addition
-  }
-
-  // For rows, we need to analyze the slot areas to determine row count
-  const maxRow = Math.max(
-    ...layout.slots.map((slot) => {
-      const parts = slot.area.split('/').map((s) => parseInt(s.trim()))
-      return parts[2] || 1 // row-end
-    })
-  )
-
-  const numRows = maxRow - 1 // Grid lines are 1-indexed
-
-  // Calculate row heights (equal distribution, NO GAPS)
-  const rowHeight = totalGridHeight / numRows
-
-  const rows = []
-  let currentY = padding
-  for (let i = 0; i < numRows; i++) {
-    rows.push({ y: currentY, height: rowHeight })
-    currentY += rowHeight // ✅ No gap addition
-  }
-
-  // Calculate bounds for each slot
-  const bounds = layout.slots.map((slot) => {
-    // Parse slot.area: "row-start / col-start / row-end / col-end"
-    const parts = slot.area.split('/').map((s) => parseInt(s.trim()))
-    const [rowStart, colStart, rowEnd, colEnd] = parts
-
-    // Convert 1-indexed grid positions to 0-indexed array positions
-    const startCol = colStart - 1
-    const endCol = colEnd - 1
-    const startRow = rowStart - 1
-    const endRow = rowEnd - 1
-
-    // Calculate bounds
-    const x = columns[startCol].x
-    const y = rows[startRow].y
-
-    // Width: sum of column widths (NO GAPS - full-bleed)
-    let width = 0
-    for (let i = startCol; i < endCol; i++) {
-      width += columns[i].width
-      // ✅ Removed gap addition - full-bleed render
-    }
-
-    // Height: sum of row heights (NO GAPS - full-bleed)
-    let height = 0
-    for (let i = startRow; i < endRow; i++) {
-      height += rows[i].height
-      // ✅ Removed gap addition - full-bleed render
-    }
-
-    return { x, y, width, height }
-  })
-
-  return bounds
 }
 
 /**
