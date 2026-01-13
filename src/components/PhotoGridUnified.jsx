@@ -282,18 +282,37 @@ const PhotoGridUnified = ({
   }
 
   // Handle photo click based on selection mode
-  const handlePhotoClick = (e, photo) => {
+  const handlePhotoClick = (e, photo, index) => {
+    console.log('🖱️ [PhotoGridUnified] handlePhotoClick', {
+      photo,
+      index,
+      photoId: photo?.id,
+      type: photo?.type,
+      isCollage: photo?.isCollage,
+      selectionMode,
+      hasOnPhotoClick: !!onPhotoClick,
+      timestamp: new Date().toISOString(),
+    })
+
     if (selectionMode === 'modifier' && (e.ctrlKey || e.metaKey)) {
       // Modifier mode: Ctrl/Cmd + click to select
+      console.log('🎯 [PhotoGridUnified] Selection mode: modifier')
       toggleSelection(photo)
     } else if (selectionMode === 'toggle') {
       // Toggle mode: Click to toggle selection
+      console.log('🎯 [PhotoGridUnified] Selection mode: toggle')
       toggleSelection(photo)
     } else {
-      // Default: Open photo (use displayUrl for full quality, fallback to url then thumbnail)
-      // Note: Collages are treated as photos and use PhotoPage for UX parity
+      // Default: Open photo (pass photo object and index to parent handler)
+      // Note: Collages are handled by parent (AlbumPage routes to collage editor)
+      console.log('🎯 [PhotoGridUnified] Calling parent onPhotoClick', {
+        photoId: photo?.id,
+        type: photo?.type,
+        isCollage: photo?.isCollage,
+        index,
+      })
       if (onPhotoClick) {
-        onPhotoClick(photo.displayUrl || photo.url || photo.thumbnailUrl)
+        onPhotoClick(photo, index)
       }
     }
   }
@@ -387,7 +406,7 @@ const PhotoGridUnified = ({
             ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-gray-900'
             : ''
         }`}
-        onClick={(e) => handlePhotoClick(e, photo)}
+        onClick={(e) => handlePhotoClick(e, photo, i)}
       >
         {/* ===== VIDEO CARD ===== */}
         {photo.type === 'video' ? (

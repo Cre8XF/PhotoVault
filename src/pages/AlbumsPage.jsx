@@ -2,7 +2,7 @@
 // Rewritten and cleaned version
 
 import React, { useState, useMemo, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   Folder,
@@ -34,6 +34,7 @@ const AlbumsPage = ({
   onEditAlbum = null,
 }) => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { t } = useTranslation(['common', 'albums', 'collage'])
 
   // Plan detection
@@ -49,6 +50,16 @@ const AlbumsPage = ({
 
   // Collage data - real-time from Firestore
   const { collages, collagesLoading, deleteCollage } = useCollageData()
+
+  // 📍 DIAGNOSTIC: Log component mount
+  useEffect(() => {
+    console.log('📍 [AlbumsPage] mounted', {
+      pathname: location.pathname,
+      albumsCount: albums?.length,
+      photosCount: photos?.length,
+      timestamp: new Date().toISOString(),
+    })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Store actions
   const setConfirmModal = useStore((s) => s.setConfirmModal)

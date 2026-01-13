@@ -48,6 +48,15 @@ const CollageView = () => {
   const [showActions, setShowActions] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
 
+  // 📍 DIAGNOSTIC: Log component mount
+  useEffect(() => {
+    console.log('📍 [CollageView] mounted', {
+      pathname: window.location.pathname,
+      params: { id },
+      timestamp: new Date().toISOString(),
+    })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Fetch collage data
   useEffect(() => {
     const loadCollage = async () => {
@@ -57,7 +66,11 @@ const CollageView = () => {
         const collageData = await getCollage(id)
 
         if (!collageData) {
-          console.error('Collage not found:', id)
+          console.warn('⛔ [CollageView] render blocked', {
+            reason: 'Collage not found',
+            id,
+            timestamp: new Date().toISOString(),
+          })
           navigate('/albums')
           return
         }
