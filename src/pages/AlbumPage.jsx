@@ -261,6 +261,20 @@ const AlbumPage = ({
 
   // Phase 2A: Navigate to PhotoPage or CollageEditPage
   const handlePhotoClick = (photo, index) => {
+    // Early guard: Collages MUST go to editor, never PhotoPage
+    if (photo.isCollage === true) {
+      console.log('🧩 [AlbumPage] Opening collage editor', {
+        collageId: photo.id,
+        albumId: album?.id || albumId,
+      })
+      navigate(`/collage/${photo.id}/edit`, {
+        state: {
+          returnPath: `/album/${album?.id || albumId}`,
+        },
+      })
+      return
+    }
+
     console.log('🖱️ [AlbumPage] handlePhotoClick', {
       photo,
       index,
@@ -270,24 +284,6 @@ const AlbumPage = ({
       albumId: album?.id || albumId,
       timestamp: new Date().toISOString(),
     })
-
-    // Check if it's a collage
-    if (photo.type === 'collage' || photo.isCollage) {
-      console.log('➡️ [AlbumPage] Navigating to collage editor', {
-        target: `/collage/${photo.id}/edit`,
-        id: photo.id,
-        source: 'album',
-        returnPath: `/album/${album?.id || albumId}`,
-        timestamp: new Date().toISOString(),
-      })
-      // Navigate to collage edit page
-      navigate(`/collage/${photo.id}/edit`, {
-        state: {
-          returnPath: `/album/${album?.id || albumId}`,
-        },
-      })
-      return
-    }
 
     // For regular photos: Set global photo context state
     const photoIds = filteredPhotos.map((p) => p.id)
