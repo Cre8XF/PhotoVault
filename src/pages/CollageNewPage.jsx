@@ -338,7 +338,11 @@ const CollageNewPage = () => {
         },
       })
 
-      const docRef = await addDoc(photosRef, photoDoc)
+      const docRef = await addDoc(photosRef, {
+        ...photoDoc,
+        url: collageUrl, // 👈 KRITISK: manglet tidligere
+      })
+
       console.log('✅ Collage saved as photo:', docRef.id)
 
       markAsSaved(docRef.id)
