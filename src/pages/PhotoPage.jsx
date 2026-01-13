@@ -33,6 +33,9 @@ import DocumentCard from '../components/DocumentCard'
 import TagInput from '../components/TagInput'
 import EmptyState from '../components/EmptyState'
 
+const getPhotoUrl = (photo) =>
+  photo.url || photo.displayUrl || photo.thumbnailUrl
+
 export default function PhotoPage() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -84,9 +87,7 @@ export default function PhotoPage() {
   // Get suggestions (exclude already-added tags)
   const tagSuggestions = useMemo(() => {
     if (!photo || !photo.tags) return allTags.slice(0, 5)
-    return allTags
-      .filter((tag) => !photo.tags.includes(tag))
-      .slice(0, 5)
+    return allTags.filter((tag) => !photo.tags.includes(tag)).slice(0, 5)
   }, [allTags, photo])
 
   // Prefetch adjacent photos
@@ -100,7 +101,7 @@ export default function PhotoPage() {
         tags: photo.tags,
         tagsLength: photo.tags?.length,
         isArray: Array.isArray(photo.tags),
-        fullPhoto: photo
+        fullPhoto: photo,
       })
     }
   }, [photo])
@@ -182,23 +183,27 @@ export default function PhotoPage() {
   const handleToggleFavorite = useCallback(async () => {
     if (!photo) return
 
-    if (import.meta.env.DEV) console.log('🎯 PhotoPage.handleToggleFavorite called:', {
-      photoId: photo.id,
-      currentFavorite: photo.favorite,
-      timestamp: new Date().toISOString()
-    })
+    if (import.meta.env.DEV)
+      console.log('🎯 PhotoPage.handleToggleFavorite called:', {
+        photoId: photo.id,
+        currentFavorite: photo.favorite,
+        timestamp: new Date().toISOString(),
+      })
 
     const newFavoriteStatus = !photo.favorite
 
     // Optimistic update in Zustand
-    if (import.meta.env.DEV) console.log('⚡ Optimistically updating Zustand store...')
+    if (import.meta.env.DEV)
+      console.log('⚡ Optimistically updating Zustand store...')
     updatePhotoInStore(photo.id, { favorite: newFavoriteStatus })
 
     try {
       // Sync to Firestore using toggleFavorite
-      if (import.meta.env.DEV) console.log('🔥 Calling firebase.toggleFavorite()...')
+      if (import.meta.env.DEV)
+        console.log('🔥 Calling firebase.toggleFavorite()...')
       const result = await firebaseToggleFavorite(photo.id, photo.favorite)
-      if (import.meta.env.DEV) console.log('✅ firebase.toggleFavorite() returned:', result)
+      if (import.meta.env.DEV)
+        console.log('✅ firebase.toggleFavorite() returned:', result)
     } catch (err) {
       console.error('❌ PhotoPage favorite toggle failed:', err)
       // Revert UI state on error
@@ -230,7 +235,8 @@ export default function PhotoPage() {
   const handleDelete = useCallback(() => {
     if (!photo) return
 
-    if (import.meta.env.DEV) console.log('🗑️ PhotoPage: Delete button clicked, showing confirm modal')
+    if (import.meta.env.DEV)
+      console.log('🗑️ PhotoPage: Delete button clicked, showing confirm modal')
     setShowDeleteConfirm(true)
     resetUiTimer()
   }, [photo, resetUiTimer])
@@ -240,17 +246,19 @@ export default function PhotoPage() {
     if (!photo) return
 
     if (import.meta.env.DEV) console.log('✅ Delete confirmed, executing...')
-    if (import.meta.env.DEV) console.log('🗑️ Deleting photo:', {
-      photoId: photo.id,
-      storagePath: photo.storagePath,
-      filename: photo.name
-    })
+    if (import.meta.env.DEV)
+      console.log('🗑️ Deleting photo:', {
+        photoId: photo.id,
+        storagePath: photo.storagePath,
+        filename: photo.name,
+      })
 
     // CRITICAL: Navigate away IMMEDIATELY to prevent "Photo not found" error
     // The usePhotoById hook will try to re-fetch the photo after deletion,
     // causing a "not found" error. By navigating first, we unmount the component
     // before that can happen.
-    if (import.meta.env.DEV) console.log('🚀 Navigating away immediately to prevent re-fetch')
+    if (import.meta.env.DEV)
+      console.log('🚀 Navigating away immediately to prevent re-fetch')
 
     // Close confirmation modal first
     setShowDeleteConfirm(false)
@@ -264,35 +272,47 @@ export default function PhotoPage() {
     // Delete from Firebase in background
     // This happens after navigation, so any errors won't affect the user
     try {
-      if (import.meta.env.DEV) console.log('🗑️ Deleting photo from Firebase + R2 in background...')
+      if (import.meta.env.DEV)
+        console.log('🗑️ Deleting photo from Firebase + R2 in background...')
       await firebaseDeletePhoto(photo.id, photo)
-      if (import.meta.env.DEV) console.log('✅ Photo deleted successfully from Firebase + R2')
+      if (import.meta.env.DEV)
+        console.log('✅ Photo deleted successfully from Firebase + R2')
 
       // Show success notification (user already on Home page)
       setNotification({
         message: t('common:notifications.photoDeleted'),
-        type: 'success'
+        type: 'success',
       })
     } catch (error) {
       console.error('❌ Background delete failed:', error)
 
       // Show error notification (user already on Home page)
       setNotification({
-        message: t('common:notifications.photoDeleteError') || 'Failed to delete photo',
-        type: 'error'
+        message:
+          t('common:notifications.photoDeleteError') ||
+          'Failed to delete photo',
+        type: 'error',
       })
 
       // Note: Photo already removed from UI, so error is just logged
       // Consider refreshing data from server to restore photo if needed
     }
-  }, [photo, deletePhotoFromStore, setNotification, handleBack, t, setShowDeleteConfirm])
+  }, [
+    photo,
+    deletePhotoFromStore,
+    setNotification,
+    handleBack,
+    t,
+    setShowDeleteConfirm,
+  ])
 
   // Toggle info panel
   const handleToggleInfo = useCallback(() => {
-    if (import.meta.env.DEV) console.log('ℹ️ PhotoPage: Info toggled', {
-      photoId: photo?.id,
-      currentState: showInfo
-    })
+    if (import.meta.env.DEV)
+      console.log('ℹ️ PhotoPage: Info toggled', {
+        photoId: photo?.id,
+        currentState: showInfo,
+      })
     setShowInfo(!showInfo)
     resetUiTimer()
   }, [photo, showInfo, resetUiTimer])
@@ -301,10 +321,11 @@ export default function PhotoPage() {
   const handleDownload = useCallback(() => {
     if (!photo) return
 
-    if (import.meta.env.DEV) console.log('📥 PhotoPage: Download clicked', { photoId: photo.id })
+    if (import.meta.env.DEV)
+      console.log('📥 PhotoPage: Download clicked', { photoId: photo.id })
 
     const link = document.createElement('a')
-    link.href = photo.url || photo.displayUrl
+    link.href = getPhotoUrl(photo)
     link.download = photo.name || 'photo.jpg'
     link.click()
 
@@ -316,17 +337,20 @@ export default function PhotoPage() {
   const handleShare = useCallback(() => {
     if (!photo) return
 
-    if (import.meta.env.DEV) console.log('🔗 PhotoPage: Share clicked', { photoId: photo.id })
+    if (import.meta.env.DEV)
+      console.log('🔗 PhotoPage: Share clicked', { photoId: photo.id })
 
     if (navigator.share) {
-      navigator.share({
-        title: photo.name || 'Photo',
-        url: photo.url || photo.displayUrl
-      }).catch(err => {
-        if (err.name !== 'AbortError') {
-          console.error('Share failed:', err)
-        }
-      })
+      navigator
+        .share({
+          title: photo.name || 'Photo',
+          url: photo.url || photo.displayUrl,
+        })
+        .catch((err) => {
+          if (err.name !== 'AbortError') {
+            console.error('Share failed:', err)
+          }
+        })
     } else {
       alert('Share not supported on this browser')
     }
@@ -336,17 +360,20 @@ export default function PhotoPage() {
   }, [photo, resetUiTimer])
 
   // Format file size
-  const formatFileSize = useCallback((bytes) => {
-    if (!bytes) return t('common:unknown')
-    if (bytes < 1024) return bytes + ' B'
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
-  }, [t])
+  const formatFileSize = useCallback(
+    (bytes) => {
+      if (!bytes) return t('common:unknown')
+      if (bytes < 1024) return bytes + ' B'
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+    },
+    [t]
+  )
 
   // Get album name
   const getAlbumName = useCallback(() => {
     if (!photo?.albumId) return t('common:unassigned')
-    const album = albums.find(a => a.id === photo.albumId)
+    const album = albums.find((a) => a.id === photo.albumId)
     return album?.name || t('common:unknown')
   }, [photo, albums, t])
 
@@ -502,7 +529,11 @@ export default function PhotoPage() {
         <EmptyState
           variant="error"
           title={t('common:errors.title') || 'Photo not found'}
-          description={error || t('common:errors.description') || 'This photo could not be found or has been deleted'}
+          description={
+            error ||
+            t('common:errors.description') ||
+            'This photo could not be found or has been deleted'
+          }
           action={t('common:close') || 'Go back'}
           onAction={handleBack}
           size="md"
@@ -520,7 +551,7 @@ export default function PhotoPage() {
         }`}
         style={{
           backgroundColor: 'var(--glass-bg)',
-          color: 'var(--text-primary)'
+          color: 'var(--text-primary)',
         }}
       >
         <div className="flex items-center justify-between px-4 h-full">
@@ -529,8 +560,13 @@ export default function PhotoPage() {
             onClick={handleBack}
             className="flex items-center gap-2 rounded-full p-2 transition active:scale-95"
             style={{ color: 'var(--text-primary)' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--interactive-hover)'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor =
+                'var(--interactive-hover)')
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = 'transparent')
+            }
             aria-label="Go back"
           >
             <ArrowLeft className="w-6 h-6" />
@@ -570,9 +606,10 @@ export default function PhotoPage() {
             {photo.isCollage || photo.type === 'collage' ? (
               <button
                 onClick={() => {
-                  if (import.meta.env.DEV) console.log('🎨 Re-edit collage button clicked')
+                  if (import.meta.env.DEV)
+                    console.log('🎨 Re-edit collage button clicked')
                   navigate(`/collage/edit/${id}`, {
-                    state: { returnPath: location.pathname }
+                    state: { returnPath: location.pathname },
                   })
                 }}
                 className="text-white hover:bg-purple-500/10 hover:text-purple-400 p-2 rounded-full transition active:scale-95"
@@ -584,7 +621,8 @@ export default function PhotoPage() {
             ) : (
               <button
                 onClick={() => {
-                  if (import.meta.env.DEV) console.log('✏️ Edit button clicked, navigating to editor')
+                  if (import.meta.env.DEV)
+                    console.log('✏️ Edit button clicked, navigating to editor')
                   navigate(`/edit/${id}`)
                 }}
                 className="text-white hover:bg-blue-500/10 hover:text-blue-400 p-2 rounded-full transition active:scale-95"
@@ -620,7 +658,8 @@ export default function PhotoPage() {
             {/* More menu */}
             <button
               onClick={() => {
-                if (import.meta.env.DEV) console.log('📋 PhotoPage: More menu toggled')
+                if (import.meta.env.DEV)
+                  console.log('📋 PhotoPage: More menu toggled')
                 setShowMoreMenu(!showMoreMenu)
                 resetUiTimer()
               }}
@@ -670,7 +709,8 @@ export default function PhotoPage() {
 
                 <button
                   onClick={() => {
-                    if (import.meta.env.DEV) console.log('📁 Move to album - TODO')
+                    if (import.meta.env.DEV)
+                      console.log('📁 Move to album - TODO')
                     alert(t('common:comingSoon.title') || 'Coming soon')
                     setShowMoreMenu(false)
                     resetUiTimer()
@@ -709,10 +749,16 @@ export default function PhotoPage() {
           </video>
         ) : (
           <img
-            src={sanitizeImageUrl(photo.displayUrl || photo.url, PLACEHOLDER_IMAGE)}
+            src={sanitizeImageUrl(
+              photo.displayUrl || photo.url,
+              PLACEHOLDER_IMAGE
+            )}
             alt={photo.caption || photo.name || 'Photo'}
             onError={(e) => {
-              console.error('❌ Failed to load photo:', photo.displayUrl || photo.url)
+              console.error(
+                '❌ Failed to load photo:',
+                photo.displayUrl || photo.url
+              )
               e.target.src = PLACEHOLDER_IMAGE
             }}
             className={`max-w-full max-h-[100vh] object-contain transition-opacity duration-300 cursor-pointer ${
@@ -774,21 +820,29 @@ export default function PhotoPage() {
             backgroundColor: 'var(--bg-secondary)',
             borderColor: 'var(--border-color)',
             color: 'var(--text-primary)',
-            animation: 'slideInRight 0.3s ease-out'
+            animation: 'slideInRight 0.3s ease-out',
           }}
         >
           <div className="p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
+              <h2
+                className="text-xl font-bold"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 {t('common:photoInfo')}
               </h2>
               <button
                 onClick={() => setShowInfo(false)}
                 className="p-2 rounded-full transition"
                 style={{ color: 'var(--text-secondary)' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--interactive-hover)'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor =
+                    'var(--interactive-hover)')
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.backgroundColor = 'transparent')
+                }
                 aria-label="Close info"
               >
                 <X className="w-5 h-5" />
@@ -799,8 +853,13 @@ export default function PhotoPage() {
             <div className="space-y-4 text-sm">
               {/* Filename */}
               <div>
-                <div className="mb-1" style={{ color: 'var(--text-muted)' }}>{t('common:name')}</div>
-                <div className="break-all" style={{ color: 'var(--text-primary)' }}>
+                <div className="mb-1" style={{ color: 'var(--text-muted)' }}>
+                  {t('common:name')}
+                </div>
+                <div
+                  className="break-all"
+                  style={{ color: 'var(--text-primary)' }}
+                >
                   {photo.name || t('common:unknown')}
                 </div>
               </div>
@@ -808,15 +867,21 @@ export default function PhotoPage() {
               {/* Size */}
               {photo.size && (
                 <div>
-                  <div className="mb-1" style={{ color: 'var(--text-muted)' }}>{t('common:size')}</div>
-                  <div style={{ color: 'var(--text-primary)' }}>{formatFileSize(photo.size)}</div>
+                  <div className="mb-1" style={{ color: 'var(--text-muted)' }}>
+                    {t('common:size')}
+                  </div>
+                  <div style={{ color: 'var(--text-primary)' }}>
+                    {formatFileSize(photo.size)}
+                  </div>
                 </div>
               )}
 
               {/* Date taken (EXIF) */}
               {photo.dateTaken && (
                 <div>
-                  <div className="mb-1" style={{ color: 'var(--text-muted)' }}>{t('common:dateTaken') || 'Date taken'}</div>
+                  <div className="mb-1" style={{ color: 'var(--text-muted)' }}>
+                    {t('common:dateTaken') || 'Date taken'}
+                  </div>
                   <div style={{ color: 'var(--text-primary)' }}>
                     {typeof photo.dateTaken === 'string'
                       ? format(new Date(photo.dateTaken), 'PPP p')
@@ -830,8 +895,16 @@ export default function PhotoPage() {
               {/* Date uploaded - shown as secondary info */}
               {photo.uploadedAt && (
                 <div>
-                  <div className="mb-1 text-xs" style={{ color: 'var(--text-muted)' }}>{t('common:uploaded') || 'Uploaded'}</div>
-                  <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  <div
+                    className="mb-1 text-xs"
+                    style={{ color: 'var(--text-muted)' }}
+                  >
+                    {t('common:uploaded') || 'Uploaded'}
+                  </div>
+                  <div
+                    className="text-xs"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
                     {typeof photo.uploadedAt === 'string'
                       ? format(new Date(photo.uploadedAt), 'PPP')
                       : photo.uploadedAt.toDate
@@ -842,31 +915,51 @@ export default function PhotoPage() {
               )}
 
               {/* GPS Location (EXIF) */}
-              {photo.location && photo.location.latitude && photo.location.longitude && (
-                <div>
-                  <div className="mb-1" style={{ color: 'var(--text-muted)' }}>{t('common:location') || 'Location'}</div>
-                  <div className="font-mono text-xs" style={{ color: 'var(--text-primary)' }}>
-                    {photo.location.latitude.toFixed(6)}, {photo.location.longitude.toFixed(6)}
-                  </div>
-                  {photo.location.altitude && (
-                    <div className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
-                      {t('common:altitude') || 'Altitude'}: {Math.round(photo.location.altitude)}m
+              {photo.location &&
+                photo.location.latitude &&
+                photo.location.longitude && (
+                  <div>
+                    <div
+                      className="mb-1"
+                      style={{ color: 'var(--text-muted)' }}
+                    >
+                      {t('common:location') || 'Location'}
                     </div>
-                  )}
-                </div>
-              )}
+                    <div
+                      className="font-mono text-xs"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      {photo.location.latitude.toFixed(6)},{' '}
+                      {photo.location.longitude.toFixed(6)}
+                    </div>
+                    {photo.location.altitude && (
+                      <div
+                        className="text-xs mt-1"
+                        style={{ color: 'var(--text-secondary)' }}
+                      >
+                        {t('common:altitude') || 'Altitude'}:{' '}
+                        {Math.round(photo.location.altitude)}m
+                      </div>
+                    )}
+                  </div>
+                )}
 
               {/* Camera info (EXIF) */}
               {photo.camera && (photo.camera.make || photo.camera.model) && (
                 <div>
-                  <div className="mb-1" style={{ color: 'var(--text-muted)' }}>{t('common:camera') || 'Camera'}</div>
+                  <div className="mb-1" style={{ color: 'var(--text-muted)' }}>
+                    {t('common:camera') || 'Camera'}
+                  </div>
                   <div style={{ color: 'var(--text-primary)' }}>
                     {photo.camera.make && photo.camera.model
                       ? `${photo.camera.make} ${photo.camera.model}`
                       : photo.camera.make || photo.camera.model}
                   </div>
                   {photo.camera.lens && (
-                    <div className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
+                    <div
+                      className="text-xs mt-1"
+                      style={{ color: 'var(--text-secondary)' }}
+                    >
                       {t('common:lens') || 'Lens'}: {photo.camera.lens}
                     </div>
                   )}
@@ -874,36 +967,48 @@ export default function PhotoPage() {
               )}
 
               {/* Technical details (EXIF) */}
-              {photo.technicalDetails && (photo.technicalDetails.iso || photo.technicalDetails.shutterSpeed || photo.technicalDetails.aperture || photo.technicalDetails.focalLength) && (
-                <div>
-                  <div className="mb-1" style={{ color: 'var(--text-muted)' }}>{t('common:technicalDetails') || 'Technical Details'}</div>
-                  <div className="text-primary space-y-1 text-xs">
-                    {photo.technicalDetails.iso && (
-                      <div>ISO {photo.technicalDetails.iso}</div>
-                    )}
-                    {photo.technicalDetails.shutterSpeed && (
-                      <div>
-                        {t('common:shutterSpeed') || 'Shutter'}: {
-                          photo.technicalDetails.shutterSpeed < 1
-                            ? `1/${Math.round(1 / photo.technicalDetails.shutterSpeed)}s`
-                            : `${photo.technicalDetails.shutterSpeed}s`
-                        }
-                      </div>
-                    )}
-                    {photo.technicalDetails.aperture && (
-                      <div>f/{photo.technicalDetails.aperture}</div>
-                    )}
-                    {photo.technicalDetails.focalLength && (
-                      <div>{photo.technicalDetails.focalLength}mm</div>
-                    )}
-                    {(photo.technicalDetails.width || photo.technicalDetails.height) && (
-                      <div>
-                        {photo.technicalDetails.width} × {photo.technicalDetails.height}
-                      </div>
-                    )}
+              {photo.technicalDetails &&
+                (photo.technicalDetails.iso ||
+                  photo.technicalDetails.shutterSpeed ||
+                  photo.technicalDetails.aperture ||
+                  photo.technicalDetails.focalLength) && (
+                  <div>
+                    <div
+                      className="mb-1"
+                      style={{ color: 'var(--text-muted)' }}
+                    >
+                      {t('common:technicalDetails') || 'Technical Details'}
+                    </div>
+                    <div className="text-primary space-y-1 text-xs">
+                      {photo.technicalDetails.iso && (
+                        <div>ISO {photo.technicalDetails.iso}</div>
+                      )}
+                      {photo.technicalDetails.shutterSpeed && (
+                        <div>
+                          {t('common:shutterSpeed') || 'Shutter'}:{' '}
+                          {photo.technicalDetails.shutterSpeed < 1
+                            ? `1/${Math.round(
+                                1 / photo.technicalDetails.shutterSpeed
+                              )}s`
+                            : `${photo.technicalDetails.shutterSpeed}s`}
+                        </div>
+                      )}
+                      {photo.technicalDetails.aperture && (
+                        <div>f/{photo.technicalDetails.aperture}</div>
+                      )}
+                      {photo.technicalDetails.focalLength && (
+                        <div>{photo.technicalDetails.focalLength}mm</div>
+                      )}
+                      {(photo.technicalDetails.width ||
+                        photo.technicalDetails.height) && (
+                        <div>
+                          {photo.technicalDetails.width} ×{' '}
+                          {photo.technicalDetails.height}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* Album */}
               <div>
@@ -943,13 +1048,18 @@ export default function PhotoPage() {
               {photo.caption && (
                 <div>
                   <div className="text-muted mb-1">{t('common:caption')}</div>
-                  <div className="text-primary break-words">{photo.caption}</div>
+                  <div className="text-primary break-words">
+                    {photo.caption}
+                  </div>
                 </div>
               )}
 
               {/* Tags Section */}
               <div>
-                <div className="mb-2 flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
+                <div
+                  className="mb-2 flex items-center gap-2"
+                  style={{ color: 'var(--text-muted)' }}
+                >
                   <TagIcon className="w-4 h-4" />
                   <span>Tags</span>
                 </div>
@@ -982,11 +1092,13 @@ export default function PhotoPage() {
           <button
             onClick={handleToggleFavorite}
             className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] rounded-lg transition active:scale-95 ${
-              photo.favorite
-                ? 'text-red-500'
-                : ''
+              photo.favorite ? 'text-red-500' : ''
             }`}
-            style={{ color: photo.favorite ? 'var(--color-error)' : 'var(--text-primary)' }}
+            style={{
+              color: photo.favorite
+                ? 'var(--color-error)'
+                : 'var(--text-primary)',
+            }}
             aria-label="Toggle favorite"
           >
             <Heart
@@ -1001,7 +1113,10 @@ export default function PhotoPage() {
           {/* Edit */}
           <button
             onClick={() => {
-              if (import.meta.env.DEV) console.log('✏️ Edit button clicked (mobile), navigating to editor')
+              if (import.meta.env.DEV)
+                console.log(
+                  '✏️ Edit button clicked (mobile), navigating to editor'
+                )
               navigate(`/edit/${id}`)
             }}
             className="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] rounded-lg transition active:scale-95"
@@ -1029,7 +1144,9 @@ export default function PhotoPage() {
             className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] rounded-lg transition active:scale-95 ${
               showInfo ? 'text-blue-400' : ''
             }`}
-            style={{ color: showInfo ? 'var(--color-info)' : 'var(--text-primary)' }}
+            style={{
+              color: showInfo ? 'var(--color-info)' : 'var(--text-primary)',
+            }}
             aria-label={t('common:showInfo')}
           >
             <Info className="w-6 h-6" />

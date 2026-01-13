@@ -2,22 +2,32 @@
 // PAGE: CollageEditPage.jsx - Edit Existing Collage World (Phase 3B)
 // ============================================================================
 
-import React, { useEffect, useState, useCallback } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Save, AlertCircle, Loader } from 'lucide-react';
-import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db, storage } from '../firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import useStore from '../state/store';
-import useCollageStore from '../features/collage/collageStore';
-import { getTemplateById, expandTemplate } from '../features/collage/templateEngine';
-import { serializeCollage, validateCollageData, migrateCollageV1ToV2 } from '../features/collage/collageUtils';
-import { renderCollageToCanvas, renderCollageThumbnail } from '../utils/renderCollageToCanvas';
-import CollageCanvas from '../features/collage/components/CollageCanvas';
-import PhotoPickerPanel from '../features/collage/components/PhotoPickerPanel';
-import CollageToolbar from '../features/collage/components/CollageToolbar';
-import { PageWrapper } from '../components/layout/PageWrapper';
+import React, { useEffect, useState, useCallback } from 'react'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { ArrowLeft, Save, AlertCircle, Loader } from 'lucide-react'
+import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { auth, db, storage } from '../firebase'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import useStore from '../state/store'
+import useCollageStore from '../features/collage/collageStore'
+import {
+  getTemplateById,
+  expandTemplate,
+} from '../features/collage/templateEngine'
+import {
+  serializeCollage,
+  validateCollageData,
+  migrateCollageV1ToV2,
+} from '../features/collage/collageUtils'
+import {
+  renderCollageToCanvas,
+  renderCollageThumbnail,
+} from '../utils/renderCollageToCanvas'
+import CollageCanvas from '../features/collage/components/CollageCanvas'
+import PhotoPickerPanel from '../features/collage/components/PhotoPickerPanel'
+import CollageToolbar from '../features/collage/components/CollageToolbar'
+import { PageWrapper } from '../components/layout/PageWrapper'
 
 /**
  * CollageEditPage - Edit Existing Collage World
@@ -30,16 +40,17 @@ import { PageWrapper } from '../components/layout/PageWrapper';
  * - Auto-save warning
  */
 const CollageEditPage = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { id } = useParams();
-  const { t } = useTranslation();
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { id } = useParams()
+  const { t } = useTranslation()
 
   // Extract returnPath from navigation state (for proper back navigation)
-  const returnPath = location.state?.returnPath || '/albums';
+  const returnPath = location.state?.returnPath || '/albums'
 
   // Global store
-  const { setIsWorldView, setCollageEditId, photos, setNotification } = useStore();
+  const { setIsWorldView, setCollageEditId, photos, setNotification } =
+    useStore()
 
   // Collage store
   const {
@@ -59,93 +70,95 @@ const CollageEditPage = () => {
     reset,
     getCollageData,
     isReadyToSave,
-  } = useCollageStore();
+  } = useCollageStore()
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadError, setLoadError] = useState(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState(null);
-  const [showExitWarning, setShowExitWarning] = useState(false);
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState(null)
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
+  const [showExitWarning, setShowExitWarning] = useState(false)
 
   // ============================================================================
   // LOAD COLLAGE
   // ============================================================================
 
   useEffect(() => {
-    setIsWorldView(true);
-    setCollageEditId(id);
+    setIsWorldView(true)
+    setCollageEditId(id)
 
     const loadCollageData = async () => {
       try {
-        setIsLoading(true);
-        setLoadError(null);
+        setIsLoading(true)
+        setLoadError(null)
 
-        const user = auth.currentUser;
+        const user = auth.currentUser
         if (!user) {
-          throw new Error('Not authenticated');
+          throw new Error('Not authenticated')
         }
 
         // Load photo document
-        const photoRef = doc(db, 'photos', id);
-        const photoSnap = await getDoc(photoRef);
+        const photoRef = doc(db, 'photos', id)
+        const photoSnap = await getDoc(photoRef)
 
         if (!photoSnap.exists()) {
-          throw new Error('Photo not found');
+          throw new Error('Photo not found')
         }
 
-        const photoData = photoSnap.data();
+        const photoData = photoSnap.data()
 
         // Verify it's a collage (accept both new and legacy collages)
         // New collages: type='photo' + isCollage=true
         // Legacy collages: type='collage'
-        if (!photoData.isCollage && photoData.type !== 'collage') {
-          throw new Error('This is not a collage');
+        if (!photoData.isCollage) {
+          throw new Error('This is not a collage')
         }
 
         // Load template
-        const templateData = getTemplateById(photoData.collageData.templateId);
+        const templateData = getTemplateById(photoData.collageData.templateId)
         if (!templateData) {
-          throw new Error(`Template not found: ${photoData.collageData.templateId}`);
+          throw new Error(
+            `Template not found: ${photoData.collageData.templateId}`
+          )
         }
 
-        const expandedTemplate = expandTemplate(templateData);
+        const expandedTemplate = expandTemplate(templateData)
 
         // Initialize collage with template
-        const { initializeFromTemplate } = useCollageStore.getState();
-        initializeFromTemplate(expandedTemplate);
+        const { initializeFromTemplate } = useCollageStore.getState()
+        initializeFromTemplate(expandedTemplate)
 
         // Restore photos in slots
-        const editorData = photoData.collageEditorData || {};
-        const slotPhotos = editorData.slotPhotos || {};
+        const editorData = photoData.collageEditorData || {}
+        const slotPhotos = editorData.slotPhotos || {}
 
         Object.entries(slotPhotos).forEach(([slotIndex, photoId]) => {
-          const photo = photos.find(p => p.id === photoId);
+          const photo = photos.find((p) => p.id === photoId)
           if (photo) {
-            const { setSlotPhoto } = useCollageStore.getState();
-            setSlotPhoto(parseInt(slotIndex), photo);
+            const { setSlotPhoto } = useCollageStore.getState()
+            setSlotPhoto(parseInt(slotIndex), photo)
           }
-        });
+        })
 
         // Apply transforms if they exist in editor data
         // Note: transforms are applied automatically when loading from collageEditorData
 
-        console.log('✅ Collage loaded for editing');
-        setIsLoading(false);
+        console.log('✅ Collage loaded for editing')
+        setIsLoading(false)
       } catch (error) {
-        console.error('❌ Error loading collage:', error);
-        setLoadError(error.message);
-        setIsLoading(false);
+        console.error('❌ Error loading collage:', error)
+        setLoadError(error.message)
+        setIsLoading(false)
       }
-    };
+    }
 
-    loadCollageData();
+    loadCollageData()
 
     return () => {
-      setIsWorldView(false);
-      setCollageEditId(null);
-      reset();
-    };
-  }, [setIsWorldView, setCollageEditId, id, loadCollage, reset]);
+      setIsWorldView(false)
+      setCollageEditId(null)
+      reset()
+    }
+  }, [setIsWorldView, setCollageEditId, id, loadCollage, reset])
 
   // ============================================================================
   // HANDLERS
@@ -153,142 +166,146 @@ const CollageEditPage = () => {
 
   const handleBack = useCallback(() => {
     if (isDirty) {
-      setShowExitWarning(true);
+      setShowExitWarning(true)
     } else {
-      navigate(returnPath, { replace: true });
+      navigate(returnPath, { replace: true })
     }
-  }, [isDirty, navigate, returnPath]);
+  }, [isDirty, navigate, returnPath])
 
   const handleSlotClick = useCallback(
     (slotIndex) => {
-      setSelectedSlot(slotIndex);
+      setSelectedSlot(slotIndex)
     },
     [setSelectedSlot]
-  );
+  )
 
   const handleSlotRotate = useCallback(
     (slotIndex) => {
-      rotateSlotPhoto(slotIndex);
+      rotateSlotPhoto(slotIndex)
     },
     [rotateSlotPhoto]
-  );
+  )
 
   const handleSlotRemove = useCallback(
     (slotIndex) => {
-      removeSlotPhoto(slotIndex);
+      removeSlotPhoto(slotIndex)
     },
     [removeSlotPhoto]
-  );
+  )
 
   const handleSlotAddPhoto = useCallback(
     (slotIndex) => {
-      openPhotoPicker(slotIndex);
+      openPhotoPicker(slotIndex)
     },
     [openPhotoPicker]
-  );
+  )
 
   const handlePhotoSelect = useCallback(
     (photo) => {
       if (selectedSlotIndex !== null) {
-        setSlotPhoto(selectedSlotIndex, photo);
-        closePhotoPicker();
+        setSlotPhoto(selectedSlotIndex, photo)
+        closePhotoPicker()
       }
     },
     [selectedSlotIndex, setSlotPhoto, closePhotoPicker]
-  );
+  )
 
   const handleSave = useCallback(async () => {
     if (!isReadyToSave()) {
-      setSaveError(t('collage.errors.noPhotos', 'Add at least one photo before saving'));
-      return;
+      setSaveError(
+        t('collage.errors.noPhotos', 'Add at least one photo before saving')
+      )
+      return
     }
 
     try {
-      setIsSaving(true);
-      setSaveError(null);
+      setIsSaving(true)
+      setSaveError(null)
 
-      const user = auth.currentUser;
+      const user = auth.currentUser
       if (!user) {
-        throw new Error('Not authenticated');
+        throw new Error('Not authenticated')
       }
 
       // ✅ DERIVE photoIds from slots (single source of truth)
-      const photoIds = slots
-        .map(s => s.photo?.id)
-        .filter(Boolean);
+      const photoIds = slots.map((s) => s.photo?.id).filter(Boolean)
 
       if (photoIds.length === 0) {
-        throw new Error('No photos in collage');
+        throw new Error('No photos in collage')
       }
 
-      const collagePhotos = photos.filter(p => photoIds.includes(p.id));
+      const collagePhotos = photos.filter((p) => photoIds.includes(p.id))
 
-      const collageData = getCollageData();
+      const collageData = getCollageData()
 
       // Re-render collage to image
-      console.log('🎨 Re-rendering collage...');
+      console.log('🎨 Re-rendering collage...')
       const collageBlob = await renderCollageToCanvas({
         layout: template,
         photos: collagePhotos,
         transforms: collageData.transforms || {},
-        options: { quality: 0.92, useHighRes: true }
-      });
+        options: { quality: 0.92, useHighRes: true },
+      })
 
       // Get dimensions with fallback
-      let actualWidth, actualHeight;
+      let actualWidth, actualHeight
       try {
-        const img = await createImageBitmap(collageBlob);
-        actualWidth = img.width;
-        actualHeight = img.height;
-        img.close();
+        const img = await createImageBitmap(collageBlob)
+        actualWidth = img.width
+        actualHeight = img.height
+        img.close()
       } catch {
-        actualWidth = template.canvas.width;
-        actualHeight = template.canvas.height;
+        actualWidth = template.canvas.width
+        actualHeight = template.canvas.height
       }
 
       // Load existing photo doc to get albumId
-      const photoDoc = await getDoc(doc(db, 'photos', id));
-      const albumId = photoDoc.data()?.albumId;
+      const photoDoc = await getDoc(doc(db, 'photos', id))
+      const albumId = photoDoc.data()?.albumId
 
       // Upload new version
-      const timestamp = Date.now();
-      const storagePath = `users/${user.uid}/${albumId || 'collages'}/collage_${timestamp}.jpg`;
-      const storageRef = ref(storage, storagePath);
+      const timestamp = Date.now()
+      const storagePath = `users/${user.uid}/${
+        albumId || 'collages'
+      }/collage_${timestamp}.jpg`
+      const storageRef = ref(storage, storagePath)
 
       await uploadBytes(storageRef, collageBlob, {
         contentType: 'image/jpeg',
         customMetadata: {
           type: 'collage',
-          editedAt: new Date().toISOString()
-        }
-      });
+          editedAt: new Date().toISOString(),
+        },
+      })
 
-      const newUrl = await getDownloadURL(storageRef);
-      console.log('✅ Updated collage uploaded');
+      const newUrl = await getDownloadURL(storageRef)
+      console.log('✅ Updated collage uploaded')
 
       // Generate new thumbnail
       const thumbnailBlob = await renderCollageThumbnail({
         layout: template,
         photos: collagePhotos,
         transforms: collageData.transforms || {},
-        maxWidth: 400
-      });
+        maxWidth: 400,
+      })
 
-      const thumbnailPath = `users/${user.uid}/thumbnails/collage_${timestamp}_thumb.jpg`;
-      const thumbnailRef = ref(storage, thumbnailPath);
-      await uploadBytes(thumbnailRef, thumbnailBlob, { contentType: 'image/jpeg' });
-      const thumbnailUrl = await getDownloadURL(thumbnailRef);
+      const thumbnailPath = `users/${user.uid}/thumbnails/collage_${timestamp}_thumb.jpg`
+      const thumbnailRef = ref(storage, thumbnailPath)
+      await uploadBytes(thumbnailRef, thumbnailBlob, {
+        contentType: 'image/jpeg',
+      })
+      const thumbnailUrl = await getDownloadURL(thumbnailRef)
 
       // Build updated slotPhotos
-      const slotPhotos = {};
+      const slotPhotos = {}
       slots.forEach((slot, index) => {
         if (slot.photo?.id) {
-          slotPhotos[index.toString()] = slot.photo.id;
+          slotPhotos[index.toString()] = slot.photo.id
         }
-      });
+      })
 
       // Update photo document
-      const photoRef = doc(db, 'photos', id);
+      const photoRef = doc(db, 'photos', id)
       await updateDoc(photoRef, {
         url: newUrl,
         thumbnailUrl: thumbnailUrl,
@@ -298,31 +315,33 @@ const CollageEditPage = () => {
         'collageData.photoIds': photoIds,
         'collageEditorData.slotPhotos': slotPhotos,
         'collageEditorData.transforms': collageData.transforms || {},
-        updatedAt: serverTimestamp()
-      });
+        updatedAt: serverTimestamp(),
+      })
 
-      console.log('✅ Collage updated');
+      console.log('✅ Collage updated')
 
-      markAsSaved(id);
+      markAsSaved(id)
 
       setNotification({
         message: t('collage:notifications.collageUpdated', 'Collage updated!'),
-        type: 'success'
-      });
+        type: 'success',
+      })
 
       // Navigate back
-      navigate(returnPath, { replace: true });
-
+      navigate(returnPath, { replace: true })
     } catch (error) {
-      console.error('❌ Save failed:', error);
-      setSaveError(t('collage.errors.saveFailed', 'Failed to save collage'));
+      console.error('❌ Save failed:', error)
+      setSaveError(t('collage.errors.saveFailed', 'Failed to save collage'))
 
       setNotification({
-        message: t('collage:notifications.saveFailed', 'Failed to save collage'),
-        type: 'error'
-      });
+        message: t(
+          'collage:notifications.saveFailed',
+          'Failed to save collage'
+        ),
+        type: 'error',
+      })
     } finally {
-      setIsSaving(false);
+      setIsSaving(false)
     }
   }, [
     id,
@@ -336,7 +355,7 @@ const CollageEditPage = () => {
     slots,
     returnPath,
     setNotification,
-  ]);
+  ])
 
   // ============================================================================
   // RENDER
@@ -355,7 +374,7 @@ const CollageEditPage = () => {
           </div>
         </div>
       </PageWrapper>
-    );
+    )
   }
 
   // Error state
@@ -378,7 +397,7 @@ const CollageEditPage = () => {
           </div>
         </div>
       </PageWrapper>
-    );
+    )
   }
 
   // No template loaded
@@ -400,11 +419,12 @@ const CollageEditPage = () => {
           </div>
         </div>
       </PageWrapper>
-    );
+    )
   }
 
-  const selectedSlot = selectedSlotIndex !== null ? slots[selectedSlotIndex] : null;
-  const hasSelectedPhoto = selectedSlot?.photo !== null;
+  const selectedSlot =
+    selectedSlotIndex !== null ? slots[selectedSlotIndex] : null
+  const hasSelectedPhoto = selectedSlot?.photo !== null
 
   return (
     <PageWrapper>
@@ -439,7 +459,9 @@ const CollageEditPage = () => {
             >
               <Save className="w-4 h-4" />
               <span className="text-sm">
-                {isSaving ? t('common:saving', 'Saving...') : t('common:save', 'Save')}
+                {isSaving
+                  ? t('common:saving', 'Saving...')
+                  : t('common:save', 'Save')}
               </span>
             </button>
           </div>
@@ -469,7 +491,10 @@ const CollageEditPage = () => {
             {/* Helper Text */}
             <div className="mt-6 text-center">
               <p className="text-sm opacity-50">
-                {t('collage.builder.helpText', 'Tap a slot to add or edit photos')}
+                {t(
+                  'collage.builder.helpText',
+                  'Tap a slot to add or edit photos'
+                )}
               </p>
             </div>
           </div>
@@ -505,7 +530,10 @@ const CollageEditPage = () => {
                 </h3>
               </div>
               <p className="opacity-70 mb-6">
-                {t('collage.unsavedWarning', 'You have unsaved changes. Are you sure you want to leave?')}
+                {t(
+                  'collage.unsavedWarning',
+                  'You have unsaved changes. Are you sure you want to leave?'
+                )}
               </p>
               <div className="flex gap-3">
                 <button
@@ -526,7 +554,7 @@ const CollageEditPage = () => {
         )}
       </div>
     </PageWrapper>
-  );
-};
+  )
+}
 
-export default CollageEditPage;
+export default CollageEditPage

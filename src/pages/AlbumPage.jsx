@@ -148,17 +148,18 @@ const AlbumPage = ({
 
   // 🐛 DEBUG: Log album items to verify collages are included
   useEffect(() => {
-    console.log('🧩 Album items:',
-      albumPhotos.map(p => ({
+    console.log(
+      '🧩 Album items:',
+      albumPhotos.map((p) => ({
         id: p.id,
         type: p.type,
         url: p.url,
         thumbnailUrl: p.thumbnailUrl,
         displayUrl: p.displayUrl,
-        name: p.name
+        name: p.name,
       }))
-    );
-  }, [albumPhotos]);
+    )
+  }, [albumPhotos])
 
   // Filter and sort photos
   const filteredPhotos = useMemo(() => {
@@ -253,8 +254,8 @@ const AlbumPage = ({
       // Navigate to collage edit page
       navigate(`/collage/${photo.id}/edit`, {
         state: {
-          returnPath: `/album/${album?.id || albumId}`
-        }
+          returnPath: `/album/${album?.id || albumId}`,
+        },
       })
       return
     }
@@ -891,16 +892,8 @@ const AlbumPage = ({
             onPhotoClick={
               editMode
                 ? undefined
-                : (url) => {
-                    const index = displayedPhotos.findIndex(
-                      (p) =>
-                        p.url === url ||
-                        p.thumbnailUrl === url ||
-                        p.displayUrl === url
-                    )
-                    if (index !== -1) {
-                      handlePhotoClick(displayedPhotos[index], index)
-                    }
+                : (photo, index) => {
+                    handlePhotoClick(photo, index)
                   }
             }
             enableDragDrop={sortBy === 'manual'}
