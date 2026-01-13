@@ -5,8 +5,9 @@ import { ArrowLeft } from 'lucide-react'
 
 // Hooks
 import usePhotoData from '../../../hooks/usePhotoData'
+import ErrorBoundary from '../../../components/ErrorBoundary'
 
-const CollageView = () => {
+const CollageViewContent = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
@@ -35,11 +36,40 @@ const CollageView = () => {
   // Render guard: collage not found
   if (!collage) {
     console.warn('⛔ [CollageView] Photo-collage not found', id)
-    return null
+    return (
+      <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center">
+        <div className="text-center p-6">
+          <p className="text-white text-lg mb-4">{t('collage:notFound', 'Collage not found')}</p>
+          <button
+            onClick={handleBack}
+            className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition"
+          >
+            {t('common:back', 'Go Back')}
+          </button>
+        </div>
+      </div>
+    )
   }
 
-  // Render collage as simple image view
+  // 🛡️ SAFETY: Ensure we have a valid image URL
   const imageUrl = collage.displayUrl || collage.url
+
+  if (!imageUrl) {
+    console.warn('⛔ [CollageView] Collage has no displayUrl or url', id, collage)
+    return (
+      <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center">
+        <div className="text-center p-6">
+          <p className="text-white text-lg mb-4">{t('collage:noImage', 'Collage image not available')}</p>
+          <button
+            onClick={handleBack}
+            className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition"
+          >
+            {t('common:back', 'Go Back')}
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="fixed inset-0 z-[9999] bg-black flex flex-col">
@@ -78,5 +108,12 @@ const CollageView = () => {
     </div>
   )
 }
+
+// 🛡️ SAFETY: Wrap CollageView with ErrorBoundary to handle render errors gracefully
+const CollageView = () => (
+  <ErrorBoundary>
+    <CollageViewContent />
+  </ErrorBoundary>
+)
 
 export default CollageView
