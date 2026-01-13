@@ -47,6 +47,33 @@ export async function renderCollageToCanvas({
     const photo = photos[i]
     if (!photo) continue
 
+    // 🛡️ SAFETY: Guard against missing or invalid slot.canvas
+    if (!slot || !slot.canvas || typeof slot.canvas !== 'object') {
+      if (import.meta.env.DEV) {
+        console.warn(`⚠️ [renderCollageToCanvas] Slot ${i} has invalid canvas data, skipping`, slot)
+      }
+      continue
+    }
+
+    // 🛡️ SAFETY: Validate canvas coordinates
+    const { x, y, w, h } = slot.canvas
+    if (
+      typeof x !== 'number' ||
+      typeof y !== 'number' ||
+      typeof w !== 'number' ||
+      typeof h !== 'number' ||
+      w <= 0 ||
+      h <= 0
+    ) {
+      if (import.meta.env.DEV) {
+        console.warn(
+          `⚠️ [renderCollageToCanvas] Slot ${i} has invalid canvas coordinates, skipping`,
+          slot.canvas
+        )
+      }
+      continue
+    }
+
     const transform = transforms[photo.id] || {
       scale: 1,
       translateX: 0,
@@ -69,10 +96,10 @@ export async function renderCollageToCanvas({
 
       // Get slot bounds from hardcoded canvas coordinates
       const bounds = {
-        x: slot.canvas.x,
-        y: slot.canvas.y,
-        width: slot.canvas.w,
-        height: slot.canvas.h,
+        x: x,
+        y: y,
+        width: w,
+        height: h,
       }
 
       // Apply transforms
@@ -111,17 +138,18 @@ export async function renderCollageToCanvas({
       ctx.restore()
     } catch (error) {
       console.error(`Failed to render photo ${photo.id}:`, error)
-      // Render placeholder for failed images
-      ctx.save()
-      const bounds = {
-        x: slot.canvas.x,
-        y: slot.canvas.y,
-        width: slot.canvas.w,
-        height: slot.canvas.h,
+      // Render placeholder for failed images (using validated coordinates)
+      try {
+        ctx.save()
+        ctx.fillStyle = '#333333'
+        ctx.fillRect(x, y, w, h)
+        ctx.restore()
+      } catch (fallbackError) {
+        // Even placeholder rendering failed - log and continue
+        if (import.meta.env.DEV) {
+          console.warn(`⚠️ [renderCollageToCanvas] Failed to render placeholder for slot ${i}`, fallbackError)
+        }
       }
-      ctx.fillStyle = '#333333'
-      ctx.fillRect(bounds.x, bounds.y, bounds.width, bounds.height)
-      ctx.restore()
     }
   }
 
