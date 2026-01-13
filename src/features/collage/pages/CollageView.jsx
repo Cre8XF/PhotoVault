@@ -42,37 +42,38 @@ const CollageView = () => {
   const imageUrl = collage.displayUrl || collage.url
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="fixed inset-0 z-[9999] bg-black flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-white/10">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={handleBack}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-              aria-label={t('common:back')}
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div>
-              <h1 className="text-lg font-semibold">
-                {collage.name || t('collage:untitled')}
-              </h1>
-              <p className="text-xs opacity-50">Collage</p>
-            </div>
+      <header className="fixed top-0 inset-x-0 z-[10000] h-14 backdrop-blur-xl">
+        <div className="flex items-center justify-between px-4 h-full">
+          <button
+            onClick={handleBack}
+            className="flex items-center gap-2 rounded-full p-2 hover:bg-white/10 transition active:scale-95"
+            aria-label={t('common:back')}
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+
+          <div className="flex-1 text-center px-4">
+            <h1 className="text-sm font-medium truncate">
+              {collage.name || t('collage:untitled')}
+            </h1>
+            <p className="text-xs text-gray-400">Collage</p>
           </div>
+
+          {/* Right side spacer for balance */}
+          <div className="w-10"></div>
         </div>
       </header>
 
-      {/* Main content - Simple image display */}
-      <main className="p-4 max-w-6xl mx-auto">
-        <div className="mb-6">
-          <img
-            src={imageUrl}
-            alt={collage.name || 'Collage'}
-            className="w-full rounded-xl shadow-2xl"
-          />
-        </div>
+      {/* Main content - Edge-to-edge image display */}
+      <main className="flex-1 flex items-center justify-center p-0">
+        <img
+          src={imageUrl}
+          alt={collage.name || 'Collage'}
+          className="max-w-full max-h-[100vh] object-contain"
+          draggable={false}
+        />
       </main>
     </div>
   )
