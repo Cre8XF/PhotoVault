@@ -259,15 +259,16 @@ const AlbumPage = ({
     }
   }, [albumPhotos])
 
-  // Phase 2A: Navigate to PhotoPage or CollageEditPage
+  // Phase 2A: Navigate to PhotoPage or CollageViewPage
   const handlePhotoClick = (photo, index) => {
-    // Early guard: Collages MUST go to editor, never PhotoPage
+    // 🧩 Collages: open VIEW (not editor)
     if (photo.isCollage === true) {
-      console.log('🧩 [AlbumPage] Opening collage editor', {
+      console.log('🧩 [AlbumPage] Opening collage view', {
         collageId: photo.id,
         albumId: album?.id || albumId,
       })
-      navigate(`/collage/${photo.id}/edit`, {
+
+      navigate(`/collage/${photo.id}`, {
         state: {
           returnPath: `/album/${album?.id || albumId}`,
         },
@@ -285,8 +286,9 @@ const AlbumPage = ({
       timestamp: new Date().toISOString(),
     })
 
-    // For regular photos: Set global photo context state
-    const photoIds = filteredPhotos.map((p) => p.id)
+    // 📸 Regular photos → PhotoPage
+    const photoIds = displayedPhotos.map((p) => p.id)
+
     setCurrentPhotoId(photo.id)
     setPhotoContext('album')
     setPhotoOrder(photoIds)
@@ -304,7 +306,7 @@ const AlbumPage = ({
     })
 
     // Navigate to PhotoPage
-    navigate(`/photo/${photo.id}`, { state: { from: location } })
+    navigate(`/photo/${photo.id}`)
   }
 
   const handleSetCover = async (photo) => {
