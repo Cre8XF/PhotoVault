@@ -39,6 +39,7 @@ import CollageCard from '../components/CollageCard'
 import EmptyState from '../components/EmptyState'
 import MemoriesSection from '../components/MemoriesSection'
 import SmartViews from '../components/SmartViews'
+import { SkeletonGrid } from '../components/Loading'
 import useStore from '../state/store'
 import {
   resolvePhotoDate,
@@ -150,6 +151,9 @@ const SearchPage = ({
   // Collage data - real-time from Firestore
   const { collages, collagesLoading, deleteCollage } = useCollageData()
 
+  // 🚀 PERCEIVED PERFORMANCE: Track initial loading state
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
+
   // 📍 DIAGNOSTIC: Log component mount
   useEffect(() => {
     console.log('📍 [SearchPage] mounted', {
@@ -160,6 +164,18 @@ const SearchPage = ({
       timestamp: new Date().toISOString(),
     })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 🚀 PERCEIVED PERFORMANCE: Set loading to false once data arrives or timeout expires
+  useEffect(() => {
+    if (safePhotos.length > 0 || collages.length > 0) {
+      // Data has arrived - stop loading immediately
+      setIsInitialLoading(false)
+    } else {
+      // Set timeout to stop showing skeleton after 2s (prevents infinite loading)
+      const timer = setTimeout(() => setIsInitialLoading(false), 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [safePhotos.length, collages.length])
 
   // 🆕 PHASE 3B: Keyboard shortcuts for desktop
   useKeyboardShortcuts([
@@ -1561,8 +1577,17 @@ const SearchPage = ({
         </div>
       )}
 
-      {/* 📅 DATE GROUPED RESULTS */}
-      {displayedGroups.length > 0 ? (
+      {/* 🚀 PERCEIVED PERFORMANCE: Show skeleton during initial load */}
+      {isInitialLoading ? (
+        <div className="space-y-8">
+          <div className="space-y-4">
+            {/* Skeleton date header */}
+            <div className="h-8 w-48 bg-white/10 rounded animate-pulse" />
+            {/* Skeleton grid */}
+            <SkeletonGrid count={12} />
+          </div>
+        </div>
+      ) : displayedGroups.length > 0 ? (
         <div className="space-y-8">
           {displayedGroups.map((group) => (
             <section key={group.key}>
@@ -1703,7 +1728,7 @@ const SearchPage = ({
             <div className="flex flex-col items-center gap-4 py-8">
               <button
                 onClick={() => setDisplayLimit((prev) => prev + ITEMS_PER_PAGE)}
-                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:opacity-90 transition-opacity font-medium flex items-center gap-2"
+                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:opacity-90 active:scale-95 transition-all font-medium flex items-center gap-2"
               >
                 Load More Photos
               </button>
