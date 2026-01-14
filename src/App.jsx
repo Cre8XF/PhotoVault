@@ -32,6 +32,7 @@ const SearchPage = lazy(() => import('./pages/SearchPage'))
 const MorePage = lazy(() => import('./pages/MorePage'))
 const AlbumPage = lazy(() => import('./pages/AlbumPage'))
 const DocumentsPage = lazy(() => import('./pages/DocumentsPage'))
+const FilesPage = lazy(() => import('./pages/FilesPage'))
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
 const SecuritySettings = lazy(() => import('./pages/SecuritySettings'))
 const VaultPage = lazy(() => import('./pages/VaultPage'))
@@ -115,6 +116,7 @@ import {
   ExternalLink,
   FileText,
   Image,
+  Folder,
 } from 'lucide-react'
 
 /**
@@ -761,6 +763,8 @@ function AppContent() {
             }
           />
 
+          <Route path="/files" element={<FilesPage />} />
+
           <Route
             path="/more"
             element={
@@ -886,6 +890,18 @@ function AppContent() {
               data-upload-trigger
             >
               <Plus className="w-7 h-7 text-white" />
+            </button>
+
+            {/* Files */}
+            <button
+              onClick={() => navigate('/files')}
+              className={`ripple-effect nav-item-premium ${
+                location.pathname === '/files' ? 'active' : ''
+              }`}
+              aria-label={t('nav:files')}
+            >
+              <Folder className="w-6 h-6" />
+              <span className="text-xs font-medium">{t('nav:files')}</span>
             </button>
 
             {/* Account */}
