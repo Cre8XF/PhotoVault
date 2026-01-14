@@ -38,9 +38,10 @@ const Particles = ({ darkMode = true }) => {
       }
 
       draw() {
-        ctx.fillStyle = darkMode 
-          ? `rgba(167, 139, 250, ${this.opacity})`
-          : `rgba(139, 92, 246, ${this.opacity})`;
+        // Use theme-aware colors: purple-400 in dark, purple-600 in light
+        ctx.fillStyle = darkMode
+          ? `rgba(167, 139, 250, ${this.opacity})` // purple-400
+          : `rgba(147, 51, 234, ${this.opacity})`; // purple-600
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();

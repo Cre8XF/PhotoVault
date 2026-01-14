@@ -10,7 +10,7 @@
   width: 100vw;
   height: 100vh;
   height: 100dvh; /* Use dynamic viewport height for better mobile support */
-  background: #000;
+  background: var(--bg-editor-dark);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -25,7 +25,7 @@
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--glass-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -33,7 +33,7 @@
 }
 
 .editor-v4-saving-content {
-  background: rgba(30, 30, 30, 0.95);
+  background: var(--bg-editor-surface);
   border-radius: 12px;
   padding: 24px;
   max-width: 90%;
@@ -47,7 +47,7 @@
   left: 0;
   right: 0;
   height: 50px;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--glass-bg);
   backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
@@ -59,7 +59,7 @@
 .editor-v4-header button {
   background: none;
   border: none;
-  color: white;
+  color: var(--text-primary);
   opacity: 0.9;
   cursor: pointer;
   transition: opacity 0.2s;
@@ -72,7 +72,7 @@
 
 .editor-v4-header button:hover {
   opacity: 1;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--glass-bg-hover);
 }
 
 .editor-v4-header button:disabled {
@@ -95,7 +95,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #000;
+  background: var(--bg-editor-dark);
   overflow: hidden;
 }
 
@@ -120,7 +120,7 @@
   left: 0;
   right: 0;
   height: 80px;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--glass-bg);
   backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
@@ -132,7 +132,7 @@
 .editor-v4-toolbar-button {
   background: none;
   border: none;
-  color: white;
+  color: var(--text-primary);
   opacity: 0.6;
   cursor: pointer;
   transition: all 0.2s;
@@ -147,12 +147,12 @@
 
 .editor-v4-toolbar-button:hover {
   opacity: 0.9;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--glass-bg-hover);
 }
 
 .editor-v4-toolbar-button.active {
   opacity: 1;
-  border-bottom: 2px solid white;
+  border-bottom: 2px solid var(--text-primary);
   border-radius: 8px 8px 0 0;
 }
 
@@ -168,7 +168,7 @@
   left: 0;
   right: 0;
   max-height: 280px;
-  background: rgba(30, 30, 30, 0.95);
+  background: var(--bg-editor-surface);
   backdrop-filter: blur(10px);
   border-radius: 16px 16px 0 0;
   padding: 20px;
@@ -177,7 +177,7 @@
   overflow-y: auto;
   overscroll-behavior: contain; /* Prevent scroll chaining to body */
   -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 -4px 20px var(--glass-bg);
 }
 
 @keyframes slideUp {
@@ -193,7 +193,7 @@
 
 /* Overlay content styling */
 .editor-v4-overlay h3 {
-  color: white;
+  color: var(--text-primary);
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 16px;
@@ -209,7 +209,7 @@
 .editor-v4-overlay-header button {
   background: none;
   border: none;
-  color: #999;
+  color: var(--text-muted);
   cursor: pointer;
   font-size: 12px;
   transition: color 0.2s;
@@ -217,7 +217,7 @@
 }
 
 .editor-v4-overlay-header button:hover {
-  color: #fff;
+  color: var(--text-primary);
 }
 
 /* Responsive */

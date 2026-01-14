@@ -107,11 +107,11 @@ const CollageCard = ({
               return (
                 <div
                   key={photo.id || index}
+                  className="bg-gray-900"
                   style={{
                     gridColumn: slot ? `${slot.col} / span ${slot.colSpan}` : 'auto',
                     gridRow: slot ? `${slot.row} / span ${slot.rowSpan}` : 'auto',
                     overflow: 'hidden',
-                    background: '#000',
                   }}
                 >
                   <img
