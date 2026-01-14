@@ -129,7 +129,7 @@ export default function PhotoPage() {
       hasMultipleItems: photoOrder?.length > 1,
       canNavigate: Array.isArray(photoOrder) && photoOrder.length > 1,
       prevAvailable: photoIndex > 0,
-      nextAvailable: photoIndex < (photoOrder?.length - 1),
+      nextAvailable: photoIndex < photoOrder?.length - 1,
     })
   }, [id, photoOrder, photoIndex])
 
@@ -155,18 +155,26 @@ export default function PhotoPage() {
   }, [])
 
   // Helper: Get correct viewer route based on item type
-  const getViewerRouteForId = useCallback((itemId) => {
-    // Look up item in photos array
-    const item = photos?.find((p) => p.id === itemId)
+  const getViewerRouteForId = useCallback(
+    (itemId) => {
+      // Look up item in photos array
+      const item = photos?.find((p) => p.id === itemId)
 
-    // Check if it's a collage (multiple ways to identify)
-    if (item && (item.isCollage === true || item.category === 'collage' || item.type === 'collage')) {
-      return `/collage/view/${itemId}`
-    }
+      // Check if it's a collage (multiple ways to identify)
+      if (
+        item &&
+        (item.isCollage === true ||
+          item.category === 'collage' ||
+          item.type === 'collage')
+      ) {
+        return `/collage/view/${itemId}`
+      }
 
-    // Default to photo route
-    return `/photo/${itemId}`
-  }, [photos])
+      // Default to photo route
+      return `/photo/${itemId}`
+    },
+    [photos]
+  )
 
   // Handle navigation
   const handleNext = useCallback(() => {
@@ -462,37 +470,19 @@ export default function PhotoPage() {
     return album?.name || t('common:unknown')
   }, [photo, albums, t])
 
-  // 🆕 PHASE 3B: Keyboard shortcuts (replaces old keyboard navigation)
-  const keyboardShortcuts = [
-    {
-      key: 'ArrowRight',
-      action: handleNext,
-    },
-    {
-      key: 'ArrowLeft',
-      action: handlePrev,
-    },
-    {
-      key: 'Escape',
-      action: handleBack,
-    },
-    {
-      key: 'Delete',
-      action: () => setShowDeleteConfirm(true),
-    },
-    {
-      key: 'Backspace',
-      action: () => setShowDeleteConfirm(true),
-    },
-    {
-      key: 'f',
-      action: handleToggleFavorite,
-    },
-  ]
+  // ✅ PHASE 3B – Keyboard shortcuts (CORRECT FORMAT)
+  const keyboardShortcuts = {
+    ArrowRight: handleNext,
+    ArrowLeft: handlePrev,
+    Escape: handleBack,
+    Delete: () => setShowDeleteConfirm(true),
+    Backspace: () => setShowDeleteConfirm(true),
+    f: handleToggleFavorite,
+  }
 
   console.log('🔍 [NAV DEBUG] Keyboard shortcuts registered:', {
-    shortcutsType: Array.isArray(keyboardShortcuts) ? 'array' : 'object',
-    shortcutsCount: keyboardShortcuts.length,
+    shortcutsType: typeof keyboardShortcuts,
+    shortcutsCount: Object.keys(keyboardShortcuts).length,
     shortcuts: keyboardShortcuts,
   })
 
@@ -886,37 +876,48 @@ export default function PhotoPage() {
       </main>
 
       {/* Navigation Arrows */}
-      {photoOrder && photoOrder.length > 1 && (
+      {Array.isArray(photoOrder) && photoOrder.length > 1 && (
         <div
-          className={`fixed inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-4 pointer-events-none transition-opacity duration-300 text-on-glass ${
-            uiVisible ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`fixed inset-x-0 top-1/2 -translate-y-1/2 z-50 flex justify-between px-4
+      transition-opacity duration-300 text-on-glass
+      ${uiVisible ? 'opacity-100' : 'opacity-0'}
+    `}
         >
           {/* Previous arrow */}
-          {photoIndex > 0 ? (
-            <button
-              onClick={handlePrev}
-              className="pointer-events-auto bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full p-3 text-white drop-shadow-md active:scale-95 transition"
-              aria-label="Previous photo"
-            >
-              <ArrowLeft className="w-6 h-6" />
-            </button>
-          ) : (
-            <div />
-          )}
+          <button
+            onClick={handlePrev}
+            disabled={photoIndex <= 0}
+            aria-label="Previous photo"
+            className={`
+        pointer-events-auto
+        bg-black/40 backdrop-blur-md rounded-full p-3 text-white
+        drop-shadow-md transition
+        active:scale-95
+        ${photoIndex <= 0 ? 'opacity-30 cursor-default' : 'hover:bg-black/60'}
+      `}
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
 
           {/* Next arrow */}
-          {photoIndex < photoOrder.length - 1 ? (
-            <button
-              onClick={handleNext}
-              className="pointer-events-auto bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full p-3 text-white drop-shadow-md active:scale-95 transition"
-              aria-label="Next photo"
-            >
-              <ArrowLeft className="w-6 h-6 rotate-180" />
-            </button>
-          ) : (
-            <div />
-          )}
+          <button
+            onClick={handleNext}
+            disabled={photoIndex >= photoOrder.length - 1}
+            aria-label="Next photo"
+            className={`
+        pointer-events-auto
+        bg-black/40 backdrop-blur-md rounded-full p-3 text-white
+        drop-shadow-md transition
+        active:scale-95
+        ${
+          photoIndex >= photoOrder.length - 1
+            ? 'opacity-30 cursor-default'
+            : 'hover:bg-black/60'
+        }
+      `}
+          >
+            <ArrowLeft className="w-6 h-6 rotate-180" />
+          </button>
         </div>
       )}
 
