@@ -68,17 +68,30 @@ export const expandTemplate = (template) => {
       mobile: gridTemplate, // Use same grid for mobile (templates are simple)
     },
     // Expand preview slots into full slot structure
-    slots: template.previewSlots.map((slot, index) => ({
-      id: slot.id,
-      slotIndex: index,
-      row: slot.row,
-      col: slot.col,
-      rowSpan: slot.rowSpan,
-      colSpan: slot.colSpan,
-      area: `${slot.row} / ${slot.col} / ${slot.row + slot.rowSpan} / ${slot.col + slot.colSpan}`,
-      crop: 'center',
-      objectFit: 'cover',
-    })),
+    slots: template.previewSlots.map((slot, index) => {
+      // Calculate cell dimensions for pixel-based canvas coordinates
+      const cellWidth = canvasWidth / gridDims.cols;
+      const cellHeight = canvasHeight / gridDims.rows;
+
+      return {
+        id: slot.id,
+        slotIndex: index,
+        row: slot.row,
+        col: slot.col,
+        rowSpan: slot.rowSpan,
+        colSpan: slot.colSpan,
+        area: `${slot.row} / ${slot.col} / ${slot.row + slot.rowSpan} / ${slot.col + slot.colSpan}`,
+        crop: 'center',
+        objectFit: 'cover',
+        // ✅ PHASE 1 FIX: Generate pixel-based canvas coordinates for renderer
+        canvas: {
+          x: (slot.col - 1) * cellWidth,
+          y: (slot.row - 1) * cellHeight,
+          w: slot.colSpan * cellWidth,
+          h: slot.rowSpan * cellHeight,
+        },
+      };
+    }),
     // Add default gap and padding (gap: 0 for edge-to-edge Instagram-style)
     gap: template.gap || 0,
     padding: template.padding || 0,
