@@ -200,7 +200,7 @@ export default function PhotoPage() {
     setPhotoIndex(nextIndex)
     setCurrentPhotoId(nextId)
     setImageLoaded(false)
-    navigate(nextRoute, { replace: true })
+    navigate(getViewerRouteForId(nextId), { replace: true })
     resetUiTimer()
   }, [
     photoOrder,
@@ -243,7 +243,7 @@ export default function PhotoPage() {
     setPhotoIndex(prevIndex)
     setCurrentPhotoId(prevId)
     setImageLoaded(false)
-    navigate(prevRoute, { replace: true })
+    navigate(getViewerRouteForId(prevId), { replace: true })
     resetUiTimer()
   }, [
     photoOrder,
