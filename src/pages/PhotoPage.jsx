@@ -700,36 +700,25 @@ export default function PhotoPage() {
               />
             </button>
 
-            {/* Edit button (for regular photos) or Re-edit button (for collages) */}
-            {photo.isCollage || photo.type === 'collage' ? (
-              <button
-                onClick={() => {
-                  if (import.meta.env.DEV)
-                    console.log('🎨 Re-edit collage button clicked')
-                  navigate(`/collage/edit/${id}`, {
-                    state: { returnPath: location.pathname },
-                  })
-                }}
-                className="text-white hover:bg-purple-500/10 hover:text-purple-400 p-2 rounded-full transition active:scale-95"
-                aria-label="Re-edit Collage"
-                title="Re-edit Collage"
-              >
-                <Edit2 className="w-5 h-5" />
-              </button>
-            ) : (
-              <button
-                onClick={() => {
-                  if (import.meta.env.DEV)
-                    console.log('✏️ Edit button clicked, navigating to editor')
-                  navigate(`/edit/${id}`)
-                }}
-                className="text-white hover:bg-blue-500/10 hover:text-blue-400 p-2 rounded-full transition active:scale-95"
-                aria-label={t('common:edit')}
-                title={t('common:edit')}
-              >
-                <Edit2 className="w-5 h-5" />
-              </button>
-            )}
+            {/* Edit button - only shown for regular photos, hidden for collages */}
+            {!photo.isCollage &&
+              photo.type !== 'collage' &&
+              photo.category !== 'collage' && (
+                <button
+                  onClick={() => {
+                    if (import.meta.env.DEV)
+                      console.log(
+                        '✏️ Edit button clicked, navigating to editor'
+                      )
+                    navigate(`/edit/${id}`)
+                  }}
+                  className="text-white hover:bg-blue-500/10 hover:text-blue-400 p-2 rounded-full transition active:scale-95"
+                  aria-label={t('common:edit')}
+                  title={t('common:edit')}
+                >
+                  <Edit2 className="w-5 h-5" />
+                </button>
+              )}
 
             {/* Delete button */}
             <button
@@ -1219,22 +1208,26 @@ export default function PhotoPage() {
             </span>
           </button>
 
-          {/* Edit */}
-          <button
-            onClick={() => {
-              if (import.meta.env.DEV)
-                console.log(
-                  '✏️ Edit button clicked (mobile), navigating to editor'
-                )
-              navigate(`/edit/${id}`)
-            }}
-            className="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] rounded-lg transition active:scale-95"
-            style={{ color: 'var(--text-primary)' }}
-            aria-label={t('common:edit')}
-          >
-            <Edit2 className="w-6 h-6" />
-            <span className="text-xs mt-1">{t('common:edit')}</span>
-          </button>
+          {/* Edit - only shown for regular photos, hidden for collages */}
+          {!photo.isCollage &&
+            photo.type !== 'collage' &&
+            photo.category !== 'collage' && (
+              <button
+                onClick={() => {
+                  if (import.meta.env.DEV)
+                    console.log(
+                      '✏️ Edit button clicked (mobile), navigating to editor'
+                    )
+                  navigate(`/edit/${id}`)
+                }}
+                className="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] rounded-lg transition active:scale-95"
+                style={{ color: 'var(--text-primary)' }}
+                aria-label={t('common:edit')}
+              >
+                <Edit2 className="w-6 h-6" />
+                <span className="text-xs mt-1">{t('common:edit')}</span>
+              </button>
+            )}
 
           {/* Delete */}
           <button
