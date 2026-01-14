@@ -121,6 +121,30 @@ const TrashPage = () => {
     }
   }
 
+  const handleRestoreAll = async () => {
+    if (deletedPhotos.length === 0) return
+
+    try {
+      setIsProcessing(true)
+      const photoIds = deletedPhotos.map((p) => p.id)
+      await restorePhotos(photoIds)
+      setDeletedPhotos([])
+      setSelectedPhotos([])
+      setNotification({
+        message: `All photos restored successfully`,
+        type: 'success',
+      })
+    } catch (error) {
+      console.error('❌ Restore error:', error)
+      setNotification({
+        message: 'Failed to restore photos',
+        type: 'error',
+      })
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
   const handleRestoreSelected = async () => {
     if (selectedPhotos.length === 0) return
 
@@ -132,7 +156,7 @@ const TrashPage = () => {
       )
       setSelectedPhotos([])
       setNotification({
-        message: `${selectedPhotos.length} photos restored`,
+        message: `${selectedPhotos.length} photo${selectedPhotos.length > 1 ? 's' : ''} restored`,
         type: 'success',
       })
     } catch (error) {
@@ -149,9 +173,10 @@ const TrashPage = () => {
   // Permanent delete handlers
   const handlePermanentDelete = (photoId) => {
     setShowConfirmModal({
-      title: 'Permanently Delete Photo?',
+      title: 'Delete photos permanently?',
       message:
-        'This action cannot be undone. The photo will be permanently deleted from storage.',
+        'This will permanently delete 1 photo. This action cannot be undone.',
+      confirmLabel: 'Delete Permanently',
       onConfirm: async () => {
         try {
           setIsProcessing(true)
@@ -179,9 +204,11 @@ const TrashPage = () => {
   const handlePermanentDeleteSelected = () => {
     if (selectedPhotos.length === 0) return
 
+    const count = selectedPhotos.length
     setShowConfirmModal({
-      title: 'Permanently Delete Selected Photos?',
-      message: `This will permanently delete ${selectedPhotos.length} photos. This action cannot be undone.`,
+      title: 'Delete photos permanently?',
+      message: `This will permanently delete ${count} photo${count > 1 ? 's' : ''}. This action cannot be undone.`,
+      confirmLabel: 'Delete Permanently',
       onConfirm: async () => {
         try {
           setIsProcessing(true)
@@ -191,7 +218,7 @@ const TrashPage = () => {
           )
           setSelectedPhotos([])
           setNotification({
-            message: `${selectedPhotos.length} photos permanently deleted`,
+            message: `${count} photo${count > 1 ? 's' : ''} permanently deleted`,
             type: 'success',
           })
         } catch (error) {
@@ -212,9 +239,11 @@ const TrashPage = () => {
   const handleEmptyTrash = () => {
     if (deletedPhotos.length === 0) return
 
+    const count = deletedPhotos.length
     setShowConfirmModal({
-      title: 'Empty Trash?',
-      message: `This will permanently delete all ${deletedPhotos.length} photos in trash. This action cannot be undone.`,
+      title: 'Delete photos permanently?',
+      message: `This will permanently delete ${count} photo${count > 1 ? 's' : ''}. This action cannot be undone.`,
+      confirmLabel: 'Delete Permanently',
       onConfirm: async () => {
         try {
           setIsProcessing(true)
@@ -264,14 +293,13 @@ const TrashPage = () => {
           </button>
         </div>
 
-        {/* Warning Banner */}
+        {/* Info Banner */}
         {deletedPhotos.length > 0 && (
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-500 flex-shrink-0 mt-0.5" />
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-blue-600 dark:text-blue-500 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                Photos in trash are automatically deleted after 7 days. Restore
-                photos you want to keep before they are permanently removed.
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                Photos in Trash are automatically deleted after 7 days. You can restore them anytime before that.
               </p>
             </div>
           </div>
@@ -280,59 +308,86 @@ const TrashPage = () => {
 
       {/* Action Bar */}
       {deletedPhotos.length > 0 && (
-        <div className="mb-6 flex items-center gap-3 flex-wrap">
-          {/* Selection */}
-          <button
-            onClick={
-              selectedPhotos.length === deletedPhotos.length
-                ? deselectAll
-                : selectAll
-            }
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg text-sm font-medium"
-          >
-            {selectedPhotos.length === deletedPhotos.length ? (
-              <CheckSquare className="w-4 h-4" />
-            ) : (
-              <Square className="w-4 h-4" />
-            )}
-            {selectedPhotos.length > 0
-              ? `${selectedPhotos.length} selected`
-              : 'Select All'}
-          </button>
-
-          {/* Restore Selected */}
-          {selectedPhotos.length > 0 && (
+        <div className="mb-6 space-y-3">
+          {/* Global Actions - Always Visible */}
+          <div className="flex items-center gap-3 flex-wrap">
             <button
-              onClick={handleRestoreSelected}
+              onClick={handleRestoreAll}
               disabled={isProcessing}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
+              aria-label="Restore all photos from trash"
             >
               <RotateCcw className="w-4 h-4" />
-              Restore Selected
+              Restore All
             </button>
-          )}
 
-          {/* Delete Selected */}
-          {selectedPhotos.length > 0 && (
             <button
-              onClick={handlePermanentDeleteSelected}
+              onClick={handleEmptyTrash}
               disabled={isProcessing}
-              className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
+              aria-label="Permanently delete all photos in trash"
             >
               <Trash2 className="w-4 h-4" />
-              Delete Forever
+              Empty Trash
             </button>
-          )}
 
-          {/* Empty Trash */}
-          <button
-            onClick={handleEmptyTrash}
-            disabled={isProcessing}
-            className="ml-auto flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium disabled:opacity-50"
-          >
-            <Trash2 className="w-4 h-4" />
-            Empty Trash
-          </button>
+            {/* Selection Toggle */}
+            <button
+              onClick={
+                selectedPhotos.length === deletedPhotos.length
+                  ? deselectAll
+                  : selectAll
+              }
+              className="ml-auto flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors"
+              aria-label={selectedPhotos.length > 0 ? "Deselect all photos" : "Select all photos"}
+            >
+              {selectedPhotos.length === deletedPhotos.length ? (
+                <CheckSquare className="w-4 h-4" />
+              ) : (
+                <Square className="w-4 h-4" />
+              )}
+              {selectedPhotos.length > 0
+                ? `${selectedPhotos.length} selected`
+                : 'Select All'}
+            </button>
+          </div>
+
+          {/* Selection Actions - Only When Items Selected */}
+          {selectedPhotos.length > 0 && (
+            <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                {selectedPhotos.length} photo{selectedPhotos.length > 1 ? 's' : ''} selected
+              </span>
+
+              <button
+                onClick={handleRestoreSelected}
+                disabled={isProcessing}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
+                aria-label={`Restore ${selectedPhotos.length} selected photo${selectedPhotos.length > 1 ? 's' : ''}`}
+              >
+                <RotateCcw className="w-4 h-4" />
+                Restore Selected
+              </button>
+
+              <button
+                onClick={handlePermanentDeleteSelected}
+                disabled={isProcessing}
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
+                aria-label={`Permanently delete ${selectedPhotos.length} selected photo${selectedPhotos.length > 1 ? 's' : ''}`}
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete Selected Permanently
+              </button>
+
+              <button
+                onClick={deselectAll}
+                className="ml-auto text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 font-medium"
+                aria-label="Clear selection"
+              >
+                Clear
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -353,78 +408,93 @@ const TrashPage = () => {
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {photosWithDaysRemaining.map((photo) => (
-            <div key={photo.id} className="relative group">
-              {/* Selection Checkbox */}
-              <button
-                onClick={() => togglePhotoSelection(photo.id)}
-                className="absolute top-2 left-2 z-10 p-1.5 bg-white dark:bg-gray-800 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                {selectedPhotos.includes(photo.id) ? (
-                  <CheckSquare className="w-5 h-5 text-blue-600" />
-                ) : (
-                  <Square className="w-5 h-5 text-gray-400" />
-                )}
-              </button>
+          {photosWithDaysRemaining.map((photo) => {
+            const isSelected = selectedPhotos.includes(photo.id)
+            return (
+              <div key={photo.id} className="relative group">
+                {/* Selection Checkbox */}
+                <button
+                  onClick={() => togglePhotoSelection(photo.id)}
+                  className={`absolute top-2 left-2 z-10 p-1.5 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-opacity ${
+                    isSelected || selectedPhotos.length > 0
+                      ? 'opacity-100'
+                      : 'opacity-0 group-hover:opacity-100'
+                  }`}
+                  aria-label={isSelected ? 'Deselect photo' : 'Select photo'}
+                >
+                  {isSelected ? (
+                    <CheckSquare className="w-5 h-5 text-blue-600" />
+                  ) : (
+                    <Square className="w-5 h-5 text-gray-400" />
+                  )}
+                </button>
 
-              {/* Photo Card */}
-              <div className="relative aspect-[4/5] bg-black/10 rounded-lg overflow-hidden">
-                <img
-                  src={photo.url || photo.thumbnailUrl}
-                  alt={photo.name}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
+                {/* Photo Card */}
+                <div className={`relative aspect-[4/5] bg-black/10 rounded-lg overflow-hidden ${
+                  isSelected ? 'ring-4 ring-blue-500' : ''
+                }`}>
+                  <img
+                    src={photo.url || photo.thumbnailUrl}
+                    alt={photo.name}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
 
-                {/* Days Remaining Badge */}
-                <div className="absolute top-2 right-2 px-2 py-1 bg-red-600 text-white text-xs font-semibold rounded-md">
-                  {photo.daysRemaining === 0
-                    ? 'Deleting soon'
-                    : `${photo.daysRemaining}d left`}
+                  {/* Days Remaining Badge */}
+                  <div className="absolute top-2 right-2 px-2 py-1 bg-red-600 text-white text-xs font-semibold rounded-md">
+                    {photo.daysRemaining === 0
+                      ? 'Deleting soon'
+                      : `${photo.daysRemaining}d left`}
+                  </div>
+
+                  {/* Action Buttons Overlay */}
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                    <button
+                      onClick={() => handleRestore(photo.id)}
+                      disabled={isProcessing}
+                      className="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg disabled:opacity-50 transition-colors shadow-lg"
+                      aria-label="Restore this photo"
+                      title="Restore"
+                    >
+                      <RotateCcw className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => handlePermanentDelete(photo.id)}
+                      disabled={isProcessing}
+                      className="p-3 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 transition-colors shadow-lg"
+                      aria-label="Delete this photo permanently"
+                      title="Delete Permanently"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
 
-                {/* Action Buttons Overlay */}
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                  <button
-                    onClick={() => handleRestore(photo.id)}
-                    disabled={isProcessing}
-                    className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg disabled:opacity-50"
-                    title="Restore"
-                  >
-                    <RotateCcw className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => handlePermanentDelete(photo.id)}
-                    disabled={isProcessing}
-                    className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50"
-                    title="Delete Forever"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                {/* Photo Info */}
+                <div className="mt-2 text-center">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {photo.name}
+                  </p>
+                  <p className="text-xs text-gray-400 dark:text-gray-600">
+                    Deleted {photo.daysSinceDeleted}d ago
+                  </p>
                 </div>
               </div>
-
-              {/* Photo Info */}
-              <div className="mt-2 text-center">
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                  {photo.name}
-                </p>
-                <p className="text-xs text-gray-400 dark:text-gray-600">
-                  Deleted {photo.daysSinceDeleted}d ago
-                </p>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
       {/* Confirm Modal */}
       {showConfirmModal && (
         <ConfirmModal
+          isOpen={true}
           title={showConfirmModal.title}
           message={showConfirmModal.message}
+          confirmLabel={showConfirmModal.confirmLabel}
+          cancelLabel="Cancel"
           onConfirm={showConfirmModal.onConfirm}
-          onCancel={showConfirmModal.onCancel}
+          onClose={showConfirmModal.onCancel}
         />
       )}
     </div>
