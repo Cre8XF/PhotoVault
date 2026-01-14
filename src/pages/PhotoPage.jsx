@@ -119,6 +119,20 @@ export default function PhotoPage() {
     })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // 🔍 NAV DEBUG: Log navigation state changes
+  useEffect(() => {
+    console.log('🔍 [NAV DEBUG] Navigation state:', {
+      photoId: id,
+      photoOrder,
+      photoOrderLength: photoOrder?.length,
+      photoIndex,
+      hasMultipleItems: photoOrder?.length > 1,
+      canNavigate: Array.isArray(photoOrder) && photoOrder.length > 1,
+      prevAvailable: photoIndex > 0,
+      nextAvailable: photoIndex < (photoOrder?.length - 1),
+    })
+  }, [id, photoOrder, photoIndex])
+
   // Set world view on mount
   useEffect(() => {
     setIsWorldView(true)
@@ -156,11 +170,32 @@ export default function PhotoPage() {
 
   // Handle navigation
   const handleNext = useCallback(() => {
-    if (!Array.isArray(photoOrder) || photoOrder.length === 0) return
-    if (photoIndex >= photoOrder.length - 1) return // Hard boundary
+    console.log('🔍 [NAV DEBUG] handleNext called', {
+      photoOrder,
+      photoOrderLength: photoOrder?.length,
+      photoIndex,
+      nextIndex: photoIndex + 1,
+      nextId: photoOrder?.[photoIndex + 1],
+    })
+
+    if (!Array.isArray(photoOrder) || photoOrder.length === 0) {
+      console.warn('⚠️ [NAV DEBUG] handleNext blocked: photoOrder invalid')
+      return
+    }
+    if (photoIndex >= photoOrder.length - 1) {
+      console.warn('⚠️ [NAV DEBUG] handleNext blocked: at end of sequence')
+      return // Hard boundary
+    }
 
     const nextIndex = photoIndex + 1
     const nextId = photoOrder[nextIndex]
+    const nextRoute = getViewerRouteForId(nextId)
+
+    console.log('✅ [NAV DEBUG] Navigating to next:', {
+      nextIndex,
+      nextId,
+      nextRoute,
+    })
 
     setPhotoIndex(nextIndex)
     setCurrentPhotoId(nextId)
@@ -178,11 +213,32 @@ export default function PhotoPage() {
   ])
 
   const handlePrev = useCallback(() => {
-    if (!Array.isArray(photoOrder) || photoOrder.length === 0) return
-    if (photoIndex <= 0) return // Hard boundary
+    console.log('🔍 [NAV DEBUG] handlePrev called', {
+      photoOrder,
+      photoOrderLength: photoOrder?.length,
+      photoIndex,
+      prevIndex: photoIndex - 1,
+      prevId: photoOrder?.[photoIndex - 1],
+    })
+
+    if (!Array.isArray(photoOrder) || photoOrder.length === 0) {
+      console.warn('⚠️ [NAV DEBUG] handlePrev blocked: photoOrder invalid')
+      return
+    }
+    if (photoIndex <= 0) {
+      console.warn('⚠️ [NAV DEBUG] handlePrev blocked: at start of sequence')
+      return // Hard boundary
+    }
 
     const prevIndex = photoIndex - 1
     const prevId = photoOrder[prevIndex]
+    const prevRoute = getViewerRouteForId(prevId)
+
+    console.log('✅ [NAV DEBUG] Navigating to prev:', {
+      prevIndex,
+      prevId,
+      prevRoute,
+    })
 
     setPhotoIndex(prevIndex)
     setCurrentPhotoId(prevId)
@@ -407,7 +463,7 @@ export default function PhotoPage() {
   }, [photo, albums, t])
 
   // 🆕 PHASE 3B: Keyboard shortcuts (replaces old keyboard navigation)
-  useKeyboardShortcuts([
+  const keyboardShortcuts = [
     {
       key: 'ArrowRight',
       action: handleNext,
@@ -432,7 +488,15 @@ export default function PhotoPage() {
       key: 'f',
       action: handleToggleFavorite,
     },
-  ])
+  ]
+
+  console.log('🔍 [NAV DEBUG] Keyboard shortcuts registered:', {
+    shortcutsType: Array.isArray(keyboardShortcuts) ? 'array' : 'object',
+    shortcutsCount: keyboardShortcuts.length,
+    shortcuts: keyboardShortcuts,
+  })
+
+  useKeyboardShortcuts(keyboardShortcuts)
 
   // Touch/swipe navigation
   useEffect(() => {
