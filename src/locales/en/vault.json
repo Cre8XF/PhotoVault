@@ -1,4 +1,6 @@
 {
+  "title": "Secure Vault",
+  "description": "Encrypted private photos and files",
   "backToMore": "← Back to More Page",
   "settings": {
     "autoLock": {

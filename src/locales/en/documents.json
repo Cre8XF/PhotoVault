@@ -1,6 +1,7 @@
 {
   "title": "Documents",
-  "subtitle": "Manage your uploaded documents",
+  "subtitle": "PDFs, Word files and other documents",
+  "pageSubtitle": "Manage your uploaded documents",
   "searchPlaceholder": "Search documents...",
   "documentCount": "Showing {{count}} of {{total}} documents",
   "previewDocument": "Preview",

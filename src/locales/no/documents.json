@@ -1,6 +1,7 @@
 {
   "title": "Dokumenter",
-  "subtitle": "Administrer dine opplastede dokumenter",
+  "subtitle": "PDF-er, Word-filer og andre dokumenter",
+  "pageSubtitle": "Administrer dine opplastede dokumenter",
   "searchPlaceholder": "Søk i dokumenter...",
   "documentCount": "Viser {{count}} av {{total}} dokumenter",
   "previewDocument": "Forhåndsvis",

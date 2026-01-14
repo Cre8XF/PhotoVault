@@ -1,0 +1,15 @@
+{
+  "title": "Filer",
+  "subtitle": "Administrer dine opplastede dokumenter og sikkert innhold",
+  "documents": {
+    "title": "Dokumenter",
+    "description": "PDF-er, Word-filer og andre dokumenter",
+    "liteBadge": "Lite"
+  },
+  "vault": {
+    "title": "Sikker hvelv",
+    "description": "Krypterte private bilder og filer",
+    "liteBadge": "Lite"
+  },
+  "upgradeRequired": "Oppgrader til Lite eller Pro for å få tilgang til denne funksjonen"
+}
