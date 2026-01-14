@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { X, Copy, Check, Share2, QrCode } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import QRCode from 'qrcode'
+import useStore from '../state/store'
 
 /**
  * SharePixtrModal - Modal for sharing the Pixtr app
@@ -9,6 +10,7 @@ import QRCode from 'qrcode'
  */
 const SharePixtrModal = ({ isOpen, onClose }) => {
   const { t } = useTranslation(['common'])
+  const isDarkMode = useStore((state) => state.isDarkMode)
   const [copied, setCopied] = useState(false)
   const [showQR, setShowQR] = useState(false)
   const [qrDataUrl, setQrDataUrl] = useState('')
@@ -17,6 +19,14 @@ const SharePixtrModal = ({ isOpen, onClose }) => {
 
   // Check if native share is supported
   const canShare = typeof navigator !== 'undefined' && navigator.share
+
+  // Regenerate QR code when theme changes
+  useEffect(() => {
+    if (showQR && qrDataUrl) {
+      setQrDataUrl('')
+      handleShowQR()
+    }
+  }, [isDarkMode]) // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Copy link to clipboard
@@ -61,8 +71,8 @@ const SharePixtrModal = ({ isOpen, onClose }) => {
           width: 256,
           margin: 2,
           color: {
-            dark: '#6B21A8', // purple-800
-            light: '#FFFFFF',
+            dark: isDarkMode ? '#a78bfa' : '#6B21A8', // purple-400 in dark, purple-800 in light
+            light: isDarkMode ? '#0b0f1a' : '#FFFFFF', // bg-primary for each mode
           },
         })
         setQrDataUrl(dataUrl)

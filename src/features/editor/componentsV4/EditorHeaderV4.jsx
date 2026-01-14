@@ -77,11 +77,10 @@ export default function EditorHeaderV4({
           disabled={isSaving}
           aria-label="Save photo"
           title="Save photo"
+          className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50"
           style={{
-            background: isSaving ? 'rgba(147, 51, 234, 0.5)' : 'rgb(147, 51, 234)',
             padding: '8px 16px',
             borderRadius: '8px',
-            opacity: 1,
           }}
         >
           {isSaving ? (
