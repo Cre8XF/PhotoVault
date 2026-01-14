@@ -773,7 +773,9 @@ export default function PhotoPage() {
                     className="flex items-center gap-3 w-full px-4 py-3 text-left text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                   >
                     <Presentation className="w-5 h-5" />
-                    <span>{t('common:slideshow') || 'Slideshow'}</span>
+                    <span>
+                      <span>{t('common:slideshow.start', 'Slideshow')}</span>
+                    </span>
                   </button>
                 )}
 
