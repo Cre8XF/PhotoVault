@@ -319,6 +319,34 @@ export default function EditorPageV4() {
     )
   }
 
+  // Guard - collages cannot be edited (unsupported feature)
+  if (photo.isCollage || photo.type === 'collage' || photo.category === 'collage') {
+    if (import.meta.env.DEV) {
+      console.warn('⚠️ Edit is disabled for collages', {
+        photoId: photo.id,
+        type: photo.type,
+        isCollage: photo.isCollage,
+        category: photo.category,
+      })
+    }
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-black">
+        <div className="text-center max-w-md px-4">
+          <p className="text-yellow-400 text-lg mb-4">Collages can't be edited</p>
+          <p className="text-gray-400 text-sm mb-6">
+            Collages are final compositions and cannot be edited after creation.
+          </p>
+          <button
+            onClick={() => navigate(-1)}
+            className="text-blue-400 hover:text-blue-300 transition-colors px-4 py-2"
+          >
+            Go back
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   // Show error state (Firebase Storage CORS)
   if (imageError) {
     return (
