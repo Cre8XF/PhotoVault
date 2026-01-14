@@ -306,7 +306,7 @@ const AlbumPage = ({
     })
 
     // Navigate to PhotoPage
-    navigate(`/photo/${photo.id}`)
+    navigate(`/photo/${photo.id}`, { state: { from: location } })
   }
 
   const handleSetCover = async (photo) => {
