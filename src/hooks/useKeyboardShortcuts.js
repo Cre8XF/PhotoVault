@@ -26,6 +26,14 @@ import { useEffect } from 'react'
  */
 export function useKeyboardShortcuts(shortcuts, dependencies = []) {
   useEffect(() => {
+    // 🔍 DEBUG: Log what shortcuts hook receives
+    console.log('🔍 [KEYBOARD DEBUG] useKeyboardShortcuts called with:', {
+      shortcutsType: Array.isArray(shortcuts) ? 'array' : typeof shortcuts,
+      isArray: Array.isArray(shortcuts),
+      shortcutsValue: shortcuts,
+      entries: Object.entries(shortcuts),
+    })
+
     const handleKeyDown = (e) => {
       // Ignore if user is typing in input/textarea (except Escape)
       const isTyping = ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)
@@ -35,9 +43,20 @@ export function useKeyboardShortcuts(shortcuts, dependencies = []) {
         return
       }
 
+      // 🔍 DEBUG: Log key press
+      console.log('🔍 [KEYBOARD DEBUG] Key pressed:', e.key)
+
       // Check each registered shortcut
       Object.entries(shortcuts).forEach(([key, handler]) => {
+        console.log('🔍 [KEYBOARD DEBUG] Checking shortcut:', {
+          registeredKey: key,
+          registeredHandler: handler,
+          pressedKey: e.key,
+          matches: matchesShortcut(e, key),
+        })
+
         if (matchesShortcut(e, key)) {
+          console.log('✅ [KEYBOARD DEBUG] Shortcut matched! Calling handler for key:', key)
           e.preventDefault()
           handler(e)
         }
