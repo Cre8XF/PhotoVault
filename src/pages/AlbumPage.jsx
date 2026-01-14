@@ -259,23 +259,8 @@ const AlbumPage = ({
     }
   }, [albumPhotos])
 
-  // Phase 2A: Navigate to PhotoPage or CollageViewPage
+  // Phase 2: Navigate to PhotoPage for both photos and collages
   const handlePhotoClick = (photo, index) => {
-    // 🧩 Collages: open VIEW (not editor)
-    if (photo.isCollage === true) {
-      console.log('🧩 [AlbumPage] Opening collage view', {
-        collageId: photo.id,
-        albumId: album?.id || albumId,
-      })
-
-      navigate(`/collage/${photo.id}`, {
-        state: {
-          returnPath: `/album/${album?.id || albumId}`,
-        },
-      })
-      return
-    }
-
     console.log('🖱️ [AlbumPage] handlePhotoClick', {
       photo,
       index,
@@ -286,27 +271,34 @@ const AlbumPage = ({
       timestamp: new Date().toISOString(),
     })
 
-    // 📸 Regular photos → PhotoPage
+    // Build navigation list (includes both photos and collages)
     const photoIds = displayedPhotos.map((p) => p.id)
 
+    // Set navigation context for ALL items (photos and collages)
     setCurrentPhotoId(photo.id)
     setPhotoContext('album')
     setPhotoOrder(photoIds)
     setPhotoIndex(index)
     setCurrentAlbumId(album?.id || null)
 
-    console.log('➡️ [AlbumPage] Navigating to photo viewer', {
-      target: `/photo/${photo.id}`,
+    // Determine target route: collages use /collage/view/:id (PhotoPage), photos use /photo/:id
+    const targetRoute = photo.isCollage === true
+      ? `/collage/view/${photo.id}`
+      : `/photo/${photo.id}`
+
+    console.log('➡️ [AlbumPage] Navigating to viewer', {
+      target: targetRoute,
       id: photo.id,
       source: 'album',
       photoContext: 'album',
       photoIndex: index,
       totalPhotos: photoIds.length,
+      isCollage: photo.isCollage,
       timestamp: new Date().toISOString(),
     })
 
-    // Navigate to PhotoPage
-    navigate(`/photo/${photo.id}`, { state: { from: location } })
+    // Navigate to PhotoPage (handles both photos and collages)
+    navigate(targetRoute, { state: { from: location } })
   }
 
   const handleSetCover = async (photo) => {
