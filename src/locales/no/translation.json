@@ -97,6 +97,10 @@
     "location": "Lokasjon"
   },
   "ai": {
+    "aiTags": "AI-tagger",
+    "facesDetected": "Ansikter gjenkjent",
+    "aiAnalyzed": "AI-analysert",
+    "category": "Kategori",
     "autoTagging": "AI Auto-tagging",
     "autoTaggingDesc": "Analyser automatisk med Google Vision AI",
     "successWithAI": "{{count}} bilder lastet opp og AI-analysert!",

@@ -26,7 +26,7 @@ import { devLog } from '../utils/log'
 import ConfirmModal from '../components/ConfirmModal'
 
 const TrashPage = () => {
-  const { t } = useTranslation(['common'])
+  const { t } = useTranslation(['trash', 'common'])
   const navigate = useNavigate()
 
   const user = useStore((state) => state.user)
@@ -57,7 +57,7 @@ const TrashPage = () => {
     } catch (error) {
       console.error('❌ Error loading deleted photos:', error)
       setNotification({
-        message: 'Failed to load trash',
+        message: t('trash:notifications.failedToLoad'),
         type: 'error',
       })
     } finally {
@@ -107,13 +107,13 @@ const TrashPage = () => {
       await restorePhoto(photoId)
       setDeletedPhotos((prev) => prev.filter((p) => p.id !== photoId))
       setNotification({
-        message: 'Photo restored successfully',
+        message: t('trash:notifications.photoRestored'),
         type: 'success',
       })
     } catch (error) {
       console.error('❌ Restore error:', error)
       setNotification({
-        message: 'Failed to restore photo',
+        message: t('trash:notifications.failedToRestore'),
         type: 'error',
       })
     } finally {
@@ -131,13 +131,13 @@ const TrashPage = () => {
       setDeletedPhotos([])
       setSelectedPhotos([])
       setNotification({
-        message: `All photos restored successfully`,
+        message: t('trash:notifications.allRestored'),
         type: 'success',
       })
     } catch (error) {
       console.error('❌ Restore error:', error)
       setNotification({
-        message: 'Failed to restore photos',
+        message: t('trash:notifications.failedToRestoreMultiple'),
         type: 'error',
       })
     } finally {
@@ -156,13 +156,16 @@ const TrashPage = () => {
       )
       setSelectedPhotos([])
       setNotification({
-        message: `${selectedPhotos.length} photo${selectedPhotos.length > 1 ? 's' : ''} restored`,
+        message: t('trash:notifications.photosRestored', {
+          count: selectedPhotos.length,
+          s: selectedPhotos.length > 1 ? 's' : ''
+        }),
         type: 'success',
       })
     } catch (error) {
       console.error('❌ Restore error:', error)
       setNotification({
-        message: 'Failed to restore photos',
+        message: t('trash:notifications.failedToRestoreMultiple'),
         type: 'error',
       })
     } finally {
@@ -173,23 +176,22 @@ const TrashPage = () => {
   // Permanent delete handlers
   const handlePermanentDelete = (photoId) => {
     setShowConfirmModal({
-      title: 'Delete photos permanently?',
-      message:
-        'This will permanently delete 1 photo. This action cannot be undone.',
-      confirmLabel: 'Delete Permanently',
+      title: t('trash:confirm.title'),
+      message: t('trash:confirm.messageSingle'),
+      confirmLabel: t('trash:confirm.confirmLabel'),
       onConfirm: async () => {
         try {
           setIsProcessing(true)
           await permanentlyDeletePhoto(photoId)
           setDeletedPhotos((prev) => prev.filter((p) => p.id !== photoId))
           setNotification({
-            message: 'Photo permanently deleted',
+            message: t('trash:notifications.photoDeleted'),
             type: 'success',
           })
         } catch (error) {
           console.error('❌ Delete error:', error)
           setNotification({
-            message: 'Failed to delete photo',
+            message: t('trash:notifications.failedToDelete'),
             type: 'error',
           })
         } finally {
@@ -206,9 +208,9 @@ const TrashPage = () => {
 
     const count = selectedPhotos.length
     setShowConfirmModal({
-      title: 'Delete photos permanently?',
-      message: `This will permanently delete ${count} photo${count > 1 ? 's' : ''}. This action cannot be undone.`,
-      confirmLabel: 'Delete Permanently',
+      title: t('trash:confirm.title'),
+      message: t('trash:confirm.messageMultiple', { count, s: count > 1 ? 's' : '' }),
+      confirmLabel: t('trash:confirm.confirmLabel'),
       onConfirm: async () => {
         try {
           setIsProcessing(true)
@@ -218,13 +220,13 @@ const TrashPage = () => {
           )
           setSelectedPhotos([])
           setNotification({
-            message: `${count} photo${count > 1 ? 's' : ''} permanently deleted`,
+            message: t('trash:notifications.photosDeleted', { count, s: count > 1 ? 's' : '' }),
             type: 'success',
           })
         } catch (error) {
           console.error('❌ Delete error:', error)
           setNotification({
-            message: 'Failed to delete photos',
+            message: t('trash:notifications.failedToDeleteMultiple'),
             type: 'error',
           })
         } finally {
@@ -241,9 +243,9 @@ const TrashPage = () => {
 
     const count = deletedPhotos.length
     setShowConfirmModal({
-      title: 'Delete photos permanently?',
-      message: `This will permanently delete ${count} photo${count > 1 ? 's' : ''}. This action cannot be undone.`,
-      confirmLabel: 'Delete Permanently',
+      title: t('trash:confirm.title'),
+      message: t('trash:confirm.messageMultiple', { count, s: count > 1 ? 's' : '' }),
+      confirmLabel: t('trash:confirm.confirmLabel'),
       onConfirm: async () => {
         try {
           setIsProcessing(true)
@@ -252,13 +254,13 @@ const TrashPage = () => {
           setDeletedPhotos([])
           setSelectedPhotos([])
           setNotification({
-            message: 'Trash emptied successfully',
+            message: t('trash:notifications.trashEmptied'),
             type: 'success',
           })
         } catch (error) {
           console.error('❌ Empty trash error:', error)
           setNotification({
-            message: 'Failed to empty trash',
+            message: t('trash:notifications.failedToEmpty'),
             type: 'error',
           })
         } finally {
@@ -278,10 +280,10 @@ const TrashPage = () => {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <Trash2 className="w-8 h-8" />
-              Trash
+              {t('trash:title')}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Photos will be permanently deleted after 7 days
+              {t('trash:subtitle')}
             </p>
           </div>
 
@@ -299,7 +301,7 @@ const TrashPage = () => {
             <AlertTriangle className="w-5 h-5 text-blue-600 dark:text-blue-500 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <p className="text-sm text-blue-800 dark:text-blue-200">
-                Photos in Trash are automatically deleted after 7 days. You can restore them anytime before that.
+                {t('trash:infoBanner')}
               </p>
             </div>
           </div>
@@ -315,20 +317,20 @@ const TrashPage = () => {
               onClick={handleRestoreAll}
               disabled={isProcessing}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
-              aria-label="Restore all photos from trash"
+              aria-label={t('trash:aria.restoreAll')}
             >
               <RotateCcw className="w-4 h-4" />
-              Restore All
+              {t('trash:actions.restoreAll')}
             </button>
 
             <button
               onClick={handleEmptyTrash}
               disabled={isProcessing}
               className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
-              aria-label="Permanently delete all photos in trash"
+              aria-label={t('trash:aria.emptyTrash')}
             >
               <Trash2 className="w-4 h-4" />
-              Empty Trash
+              {t('trash:actions.emptyTrash')}
             </button>
 
             {/* Selection Toggle */}
@@ -339,7 +341,7 @@ const TrashPage = () => {
                   : selectAll
               }
               className="ml-auto flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors"
-              aria-label={selectedPhotos.length > 0 ? "Deselect all photos" : "Select all photos"}
+              aria-label={selectedPhotos.length > 0 ? t('trash:aria.deselectAll') : t('trash:aria.selectAll')}
             >
               {selectedPhotos.length === deletedPhotos.length ? (
                 <CheckSquare className="w-4 h-4" />
@@ -347,8 +349,8 @@ const TrashPage = () => {
                 <Square className="w-4 h-4" />
               )}
               {selectedPhotos.length > 0
-                ? `${selectedPhotos.length} selected`
-                : 'Select All'}
+                ? t('trash:selection.selected', { count: selectedPhotos.length })
+                : t('trash:actions.selectAll')}
             </button>
           </div>
 
@@ -356,35 +358,35 @@ const TrashPage = () => {
           {selectedPhotos.length > 0 && (
             <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
               <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                {selectedPhotos.length} photo{selectedPhotos.length > 1 ? 's' : ''} selected
+                {t('trash:selection.selectedPhotos', { count: selectedPhotos.length, s: selectedPhotos.length > 1 ? 's' : '' })}
               </span>
 
               <button
                 onClick={handleRestoreSelected}
                 disabled={isProcessing}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
-                aria-label={`Restore ${selectedPhotos.length} selected photo${selectedPhotos.length > 1 ? 's' : ''}`}
+                aria-label={t('trash:aria.restoreSelected', { count: selectedPhotos.length, s: selectedPhotos.length > 1 ? 's' : '' })}
               >
                 <RotateCcw className="w-4 h-4" />
-                Restore Selected
+                {t('trash:actions.restoreSelected')}
               </button>
 
               <button
                 onClick={handlePermanentDeleteSelected}
                 disabled={isProcessing}
                 className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
-                aria-label={`Permanently delete ${selectedPhotos.length} selected photo${selectedPhotos.length > 1 ? 's' : ''}`}
+                aria-label={t('trash:aria.deleteSelected', { count: selectedPhotos.length, s: selectedPhotos.length > 1 ? 's' : '' })}
               >
                 <Trash2 className="w-4 h-4" />
-                Delete Selected Permanently
+                {t('trash:actions.deleteSelectedPermanently')}
               </button>
 
               <button
                 onClick={deselectAll}
                 className="ml-auto text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 font-medium"
-                aria-label="Clear selection"
+                aria-label={t('trash:aria.clearSelection')}
               >
-                Clear
+                {t('trash:actions.clear')}
               </button>
             </div>
           )}
@@ -400,10 +402,10 @@ const TrashPage = () => {
         <div className="text-center py-20">
           <Trash2 className="w-16 h-16 text-gray-300 dark:text-gray-700 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            Trash is Empty
+            {t('trash:empty.title')}
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
-            Deleted photos will appear here
+            {t('trash:empty.subtitle')}
           </p>
         </div>
       ) : (
@@ -420,7 +422,7 @@ const TrashPage = () => {
                       ? 'opacity-100'
                       : 'opacity-0 group-hover:opacity-100'
                   }`}
-                  aria-label={isSelected ? 'Deselect photo' : 'Select photo'}
+                  aria-label={isSelected ? t('trash:aria.deselectPhoto') : t('trash:aria.selectPhoto')}
                 >
                   {isSelected ? (
                     <CheckSquare className="w-5 h-5 text-blue-600" />
@@ -443,8 +445,8 @@ const TrashPage = () => {
                   {/* Days Remaining Badge */}
                   <div className="absolute top-2 right-2 px-2 py-1 bg-red-600 text-white text-xs font-semibold rounded-md">
                     {photo.daysRemaining === 0
-                      ? 'Deleting soon'
-                      : `${photo.daysRemaining}d left`}
+                      ? t('trash:photo.deletingSoon')
+                      : t('trash:photo.daysLeft', { days: photo.daysRemaining })}
                   </div>
 
                   {/* Action Buttons Overlay */}
@@ -453,8 +455,8 @@ const TrashPage = () => {
                       onClick={() => handleRestore(photo.id)}
                       disabled={isProcessing}
                       className="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg disabled:opacity-50 transition-colors shadow-lg"
-                      aria-label="Restore this photo"
-                      title="Restore"
+                      aria-label={t('trash:aria.restorePhoto')}
+                      title={t('trash:actions.restoreSelected')}
                     >
                       <RotateCcw className="w-5 h-5" />
                     </button>
@@ -462,8 +464,8 @@ const TrashPage = () => {
                       onClick={() => handlePermanentDelete(photo.id)}
                       disabled={isProcessing}
                       className="p-3 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 transition-colors shadow-lg"
-                      aria-label="Delete this photo permanently"
-                      title="Delete Permanently"
+                      aria-label={t('trash:aria.deletePhoto')}
+                      title={t('trash:confirm.confirmLabel')}
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
@@ -476,7 +478,7 @@ const TrashPage = () => {
                     {photo.name}
                   </p>
                   <p className="text-xs text-gray-400 dark:text-gray-600">
-                    Deleted {photo.daysSinceDeleted}d ago
+                    {t('trash:photo.deletedDaysAgo', { days: photo.daysSinceDeleted })}
                   </p>
                 </div>
               </div>
@@ -492,7 +494,7 @@ const TrashPage = () => {
           title={showConfirmModal.title}
           message={showConfirmModal.message}
           confirmLabel={showConfirmModal.confirmLabel}
-          cancelLabel="Cancel"
+          cancelLabel={t('trash:confirm.cancelLabel')}
           onConfirm={showConfirmModal.onConfirm}
           onClose={showConfirmModal.onCancel}
         />

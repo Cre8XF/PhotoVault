@@ -18,9 +18,7 @@
     "totalStorage": "Total Lagring",
     "totalUsers": "Totalt Brukere",
     "totalVideos": "Totalt Videoer",
-    "users": "Brukere",
-    "errorLoading": "Feil ved henting av admindata"
-
+    "users": "Brukere"
   },
   "title": "Adminpanel",
   "totalUsers": "Totalt: {{count}} brukere",
@@ -33,7 +31,8 @@
     "photos": "Bilder",
     "storage": "Lagring",
     "proStatus": "Pro-status",
-    "actions": "Handling"
+    "actions": "Handling",
+    "errorLoading": "Feil ved henting av admindata"
   },
   "proStatus": {
     "pro": "PRO",

@@ -100,7 +100,11 @@
     "aiTags": "AI tags",
     "facesDetected": "Faces detected",
     "aiAnalyzed": "AI analyzed",
-    "category": "Category"
+    "category": "Category",
+    "autoTagging": "AI Auto-tagging",
+    "autoTaggingDesc": "Analyze automatically with Google Vision AI",
+    "successWithAI": "{{count}} photos uploaded and AI-analyzed!",
+    "analyzing": "Analyzing with AI..."
   },
   "notifications": {
     "processing": "Processing...",

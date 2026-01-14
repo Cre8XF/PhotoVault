@@ -222,7 +222,7 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
           <button
             onClick={() => navigate('/account')}
             className="ripple-effect p-2 hover:bg-white/10 rounded-xl transition"
-            aria-label="Back to Account"
+            aria-label={t('common:back')}
           >
             <ArrowLeft className="w-6 h-6" />
           </button>
@@ -232,7 +232,7 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
                 {t('documents:title', 'Documents')}
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-500">
-                {documents.length} {documents.length === 1 ? 'file' : 'files'}
+                {t('documents:documentCount', { count: documents.length, total: documents.length })}
               </p>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -270,7 +270,7 @@ const DocumentsPage = ({ photos = [], onDeletePhoto }) => {
             {/* Document Count - Secondary Meta */}
             {searchQuery && (
               <p className="text-sm text-gray-500 dark:text-gray-500 pl-1">
-                {sortedDocuments.length} of {documents.length} files
+                {t('documents:documentCount', { count: sortedDocuments.length, total: documents.length })}
               </p>
             )}
           </div>

@@ -1,0 +1,60 @@
+{
+  "title": "Trash",
+  "subtitle": "Photos will be permanently deleted after 7 days",
+  "infoBanner": "Photos in Trash are automatically deleted after 7 days. You can restore them anytime before that.",
+  "empty": {
+    "title": "Trash is Empty",
+    "subtitle": "Deleted photos will appear here"
+  },
+  "actions": {
+    "restoreAll": "Restore All",
+    "emptyTrash": "Empty Trash",
+    "selectAll": "Select All",
+    "restoreSelected": "Restore Selected",
+    "deleteSelectedPermanently": "Delete Selected Permanently",
+    "clear": "Clear"
+  },
+  "selection": {
+    "selected": "{{count}} selected",
+    "selectedPhotos": "{{count}} photo{{s}} selected"
+  },
+  "photo": {
+    "deletingSoon": "Deleting soon",
+    "daysLeft": "{{days}}d left",
+    "deletedDaysAgo": "Deleted {{days}}d ago"
+  },
+  "confirm": {
+    "title": "Delete photos permanently?",
+    "messageSingle": "This will permanently delete 1 photo. This action cannot be undone.",
+    "messageMultiple": "This will permanently delete {{count}} photo{{s}}. This action cannot be undone.",
+    "confirmLabel": "Delete Permanently",
+    "cancelLabel": "Cancel"
+  },
+  "notifications": {
+    "failedToLoad": "Failed to load trash",
+    "photoRestored": "Photo restored successfully",
+    "failedToRestore": "Failed to restore photo",
+    "allRestored": "All photos restored successfully",
+    "failedToRestoreMultiple": "Failed to restore photos",
+    "photosRestored": "{{count}} photo{{s}} restored",
+    "photoDeleted": "Photo permanently deleted",
+    "failedToDelete": "Failed to delete photo",
+    "photosDeleted": "{{count}} photo{{s}} permanently deleted",
+    "failedToDeleteMultiple": "Failed to delete photos",
+    "trashEmptied": "Trash emptied successfully",
+    "failedToEmpty": "Failed to empty trash"
+  },
+  "aria": {
+    "restoreAll": "Restore all photos from trash",
+    "emptyTrash": "Permanently delete all photos in trash",
+    "selectAll": "Select all photos",
+    "deselectAll": "Deselect all photos",
+    "clearSelection": "Clear selection",
+    "restoreSelected": "Restore {{count}} selected photo{{s}}",
+    "deleteSelected": "Permanently delete {{count}} selected photo{{s}}",
+    "selectPhoto": "Select photo",
+    "deselectPhoto": "Deselect photo",
+    "restorePhoto": "Restore this photo",
+    "deletePhoto": "Delete this photo permanently"
+  }
+}

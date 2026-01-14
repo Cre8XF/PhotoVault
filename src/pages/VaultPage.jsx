@@ -172,7 +172,7 @@ const navigate = useNavigate();
           <button
             onClick={() => navigate('/account')}
             className="absolute top-4 right-4 p-2 hover:bg-white/10 dark:hover:bg-white/10 hover:bg-gray-200 rounded-lg transition-colors ripple-effect"
-            aria-label="Back to account"
+            aria-label={t('vault:locked.backToAccount', { defaultValue: 'Back to account' })}
           >
             <X className="w-6 h-6 text-gray-900 dark:text-white" />
           </button>
@@ -342,7 +342,7 @@ const navigate = useNavigate();
     className="px-5 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 
                text-white font-semibold hover:from-purple-700 hover:to-blue-700 transition"
   >
-    ← Back to More Page
+    {t('vault:backToMore', { defaultValue: '← Back to More Page' })}
   </button>
 </div>
         </div>
