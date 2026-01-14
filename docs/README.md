@@ -1,19 +1,27 @@
 # Pixtr Documentation
 
-**Version:** V3
-**Last Updated:** 2025-12-16
+**Version:** V3 (Launch-ready)
+**Last Updated:** 2026-01-14
+
+---
+
+## 🌟 Master Document
+
+**→ [PIXTR_FEATURE_OVERVIEW.md](./PIXTR_FEATURE_OVERVIEW.md)** - Single source of truth for all features, architecture, and system state.
+
+Start here for comprehensive system documentation.
 
 ---
 
 ## 📖 What is Pixtr?
 
-Pixtr (formerly PhotoVault) is a modern photo management application with:
-- Secure photo storage (Cloudflare R2)
+Pixtr is a Norwegian alternative to Google Photos with:
+- Secure photo storage (Cloudflare R2 + Firebase)
 - Advanced editor (Adjust, Crop, Rotate, Filters)
 - Encrypted Vault for private photos
-- Album organization and sharing
-- Collage builder with multiple layouts
-- Multi-tier system (GRATIS, LITE, PRO)
+- Album organization and QR sharing
+- Collage builder with 50+ layouts
+- Freemium tiers (GRATIS, LITE, PRO hidden)
 
 ---
 
@@ -21,60 +29,48 @@ Pixtr (formerly PhotoVault) is a modern photo management application with:
 
 ### 🏗️ Architecture
 Understanding how Pixtr is built:
-- [World View Architecture](./architecture/worlds-architecture.md) - Mobile navigation system
-- Architecture Overview - *Coming soon: System overview and tech stack*
+- [Architecture Overview](./architecture/overview.md) - System overview, tech stack, data models
+- [World View Architecture](./architecture/worlds-architecture.md) - Mobile navigation pattern
+- [R2 Upload Architecture](./architecture/r2-upload.md) - Deep dive on R2 upload system
 
 ### 📦 Product
 Vision, roadmap, and business logic:
-- [Feature Roadmap](./product/roadmap.md) - Tier-based feature roadmap
-- [Launch Plan](./product/launch-plan.md) - Detailed implementation plan
-- [Launch Strategy](./product/launch-strategy.md) - Strategic launch planning
-- [Pricing Tiers](./product/tiers-and-pricing.md) - GRATIS, LITE, PRO tiers
+- [Feature Roadmap](./product/roadmap.md) - Post-launch feature planning
+- [Launch Plan](./product/launch-plan.md) - Pre-launch checklist and strategy
 
 ### 💻 Development
 Getting started and contributing:
-- [R2 Setup Guide](./development/r2-setup.md) - Cloudflare R2 metadata setup
-- Setup Guide - *Coming soon: Full setup instructions*
-- Environment Configuration - *Coming soon: .env setup*
-- Code Conventions - *Coming soon: Coding standards*
-
-### 🎨 Features
-Deep dives into major features:
-- **Editor:** [Overview](./features/editor/overview.md) - Editor V3 complete documentation
-- **Vault:** [Overview](./features/vault/overview.md) - Encrypted vault documentation
-- **Video:** [Status](./features/video-status.md) - Video feature status report
-- Sharing - *Coming soon*
-- Collage - *Coming soon*
+- [R2 Setup Guide](./development/r2-setup.md) - Cloudflare R2 configuration
 
 ### 🧪 QA & Testing
 Quality assurance and testing:
-- [Testing Guide](./qa/testing-guide.md) - Free tier testing guide
-- [System Analysis](./qa/system-analysis.md) - Full system analysis
-- [Technical Analysis](./qa/technical-analysis.md) - A-priority technical analysis
+- [Testing Guide](./qa/testing-guide.md) - Testing procedures
+- [System Analysis](./qa/system-analysis.md) - Comprehensive system analysis
 
 ### ⚙️ Operations
 Infrastructure and deployment:
-- [Cloudflare R2 Diagnostic](./operations/r2-diagnostic-plan.md) - R2 troubleshooting
-- [Cloudflare R2 Executive Summary](./operations/r2-executive-summary.md) - Quick R2 overview
-- [Cloudflare Workers](./operations/cloudflare-workers.md) - Metadata worker setup
-- Firebase Setup - *Coming soon*
-- Monitoring - *Coming soon*
+- [Cloudflare Workers](./operations/cloudflare-workers.md) - Worker deployment guide
+- [Stripe Subscription Sync](./STRIPE_SUBSCRIPTION_SYNC.md) - Manual subscription sync runbook
+- [Firestore Indexes](./FIRESTORE_INDEX_SETUP.md) - Database index configuration
 
 ### 📦 Archive
 Historical documentation and completed work:
 - [Archive Index](./archive/README.md) - What's archived and why
-- Completed patches and bugfixes
-- Migration documentation
-- QA workflow templates
+- `2025-12/` - December 2025 audit reports
+- `diagnostics/` - Resolved troubleshooting docs
+- `implementation-guides/` - Completed feature implementations
+- `feature-overviews/` - Superseded by PIXTR_FEATURE_OVERVIEW
+- `visual-polish-analysis-2025-12/` - Phase 5 visual polish docs
+- `bugfixes/`, `patches/`, `migration/`, `qa-workflow/` - Historical work
 
 ---
 
 ## 🚀 Quick Start
 
 New to Pixtr development? Start here:
-1. **Setup:** Clone the repository and install dependencies
-2. **Architecture:** Read [World View Architecture](./architecture/worlds-architecture.md) to understand the navigation system
-3. **Editor:** Read [Editor Overview](./features/editor/overview.md) to understand Editor V3
+1. **Master Doc:** Read [PIXTR_FEATURE_OVERVIEW.md](./PIXTR_FEATURE_OVERVIEW.md) for complete system understanding
+2. **Architecture:** Read [Architecture Overview](./architecture/overview.md) for tech stack and data models
+3. **Patterns:** Review [World View Architecture](./architecture/worlds-architecture.md) for navigation patterns
 4. **Testing:** Follow [Testing Guide](./qa/testing-guide.md) before making changes
 
 ---
@@ -99,21 +95,23 @@ When working with this codebase:
 
 ## 🎯 Current Focus
 
-### ✅ Completed
+### ✅ Launch-Ready (2026-01-14)
 - Editor V3 (stable and production-ready)
-- World View architecture (PhotoPage, SlideshowPage)
-- Cloudflare R2 migration
-- Free tier implementation
-- QA system and workflow
+- Collage Builder V2 (50+ templates)
+- World View architecture (PhotoPage, SlideshowPage, EditorPage)
+- Cloudflare R2 primary storage with Firebase fallback
+- Freemium tiers (GRATIS, LITE) with counter enforcement
+- Secure Vault with AES-256-GCM encryption
+- Admin dashboard with kill-switches
+- Perceived performance optimizations (skeleton loaders, optimistic UI)
+- i18n (Norwegian Bokmål + English)
+- PWA + Capacitor apps (iOS/Android ready)
 
-### 🔄 In Progress
-- Documentation consolidation
-- Launch preparation
-
-### 📋 Next Up
-- Complete LITE tier features
-- PRO tier planning
-- Mobile app development
+### 📋 Post-Launch
+- Mobile app store submissions (App Store, Play Store)
+- Swedish/Danish translations
+- Performance optimization (photo grid virtualization)
+- PRO tier launch strategy
 
 ---
 
@@ -121,45 +119,43 @@ When working with this codebase:
 
 ```
 docs/
-├── README.md                      # 📍 You are here
+├── README.md                          # 📍 You are here
+├── PIXTR_FEATURE_OVERVIEW.md          # ⭐ Master document (single source of truth)
+├── FIRESTORE_INDEX_SETUP.md           # Firestore indexes
+├── STRIPE_SUBSCRIPTION_SYNC.md        # Stripe manual sync runbook
 │
 ├── architecture/
-│   └── worlds-architecture.md     # Mobile nav system
+│   ├── overview.md                    # System overview, tech stack, data models
+│   ├── worlds-architecture.md         # Mobile navigation pattern
+│   └── r2-upload.md                   # R2 upload deep dive
 │
 ├── product/
-│   ├── roadmap.md                 # Feature roadmap
-│   ├── launch-plan.md             # Implementation plan
-│   ├── launch-strategy.md         # Strategic planning
-│   └── tiers-and-pricing.md       # GRATIS, LITE, PRO
+│   ├── roadmap.md                     # Post-launch roadmap
+│   └── launch-plan.md                 # Pre-launch checklist
 │
 ├── development/
-│   └── r2-setup.md                # R2 metadata setup
-│
-├── features/
-│   ├── editor/
-│   │   └── overview.md            # Editor V3 complete
-│   ├── vault/
-│   │   └── overview.md            # Vault documentation
-│   └── video-status.md            # Video feature status
+│   └── r2-setup.md                    # R2 configuration
 │
 ├── qa/
-│   ├── testing-guide.md           # Testing procedures
-│   ├── system-analysis.md         # System analysis
-│   └── technical-analysis.md      # Technical analysis
+│   ├── testing-guide.md               # Testing procedures
+│   └── system-analysis.md             # Comprehensive system analysis
 │
 ├── operations/
-│   ├── r2-diagnostic-plan.md      # R2 troubleshooting
-│   ├── r2-executive-summary.md    # R2 quick overview
-│   └── cloudflare-workers.md      # Worker setup
+│   └── cloudflare-workers.md          # Worker deployment
 │
 └── archive/
-    ├── README.md                  # Archive index
-    ├── patches/                   # Completed patches
-    ├── bugfixes/                  # Resolved bugs
-    ├── migration/                 # Completed migrations
-    ├── features/                  # Feature status docs
-    ├── debug/                     # Debug guides
-    └── qa-workflow/               # QA templates
+    ├── README.md                      # Archive index
+    ├── 2025-12/                       # December 2025 audits
+    ├── diagnostics/                   # Resolved troubleshooting
+    ├── implementation-guides/         # Completed implementations
+    ├── feature-overviews/             # Superseded by FEATURE_OVERVIEW
+    ├── visual-polish-analysis-2025-12/ # Phase 5 visual polish
+    ├── bugfixes/                      # Resolved bugs
+    ├── patches/                       # Completed patches
+    ├── migration/                     # Migrations
+    ├── debug/                         # Debug guides
+    ├── features/                      # Historical feature docs
+    └── qa-workflow/                   # QA templates
 ```
 
 ---
@@ -167,16 +163,16 @@ docs/
 ## 📞 Need Help?
 
 ### Common Tasks
-- **Setup Local Environment:** See development/ section (coming soon)
-- **Understand Architecture:** Read [worlds-architecture.md](./architecture/worlds-architecture.md)
-- **Work on Editor:** Read [editor overview](./features/editor/overview.md)
+- **Understand System:** Read [PIXTR_FEATURE_OVERVIEW.md](./PIXTR_FEATURE_OVERVIEW.md)
+- **Understand Architecture:** Read [architecture/overview.md](./architecture/overview.md)
+- **Work on Features:** Reference FEATURE_OVERVIEW for all feature details
 - **Fix Bugs:** Check [archive/bugfixes/](./archive/bugfixes/) for similar issues
 - **Test Features:** Follow [testing-guide.md](./qa/testing-guide.md)
 
 ### Troubleshooting
-- **Images not loading?** Check [R2 diagnostic plan](./operations/r2-diagnostic-plan.md)
-- **CORS errors?** See [R2 executive summary](./operations/r2-executive-summary.md)
-- **Editor issues?** Refer to [editor overview](./features/editor/overview.md)
+- **Images not loading?** Check [R2 upload architecture](./architecture/r2-upload.md)
+- **Worker issues?** See [cloudflare-workers.md](./operations/cloudflare-workers.md)
+- **Subscription sync failed?** Use [STRIPE_SUBSCRIPTION_SYNC.md](./STRIPE_SUBSCRIPTION_SYNC.md)
 - **Testing problems?** Follow [testing guide](./qa/testing-guide.md)
 
 ---
@@ -209,20 +205,21 @@ When creating or updating documentation:
 
 ### For New Developers
 1. Read this README first
-2. Check out [worlds-architecture.md](./architecture/worlds-architecture.md)
-3. Read [editor overview](./features/editor/overview.md)
-4. Review [testing guide](./qa/testing-guide.md)
-5. Look at [system analysis](./qa/system-analysis.md)
+2. Read [PIXTR_FEATURE_OVERVIEW.md](./PIXTR_FEATURE_OVERVIEW.md) for complete system understanding
+3. Review [architecture/overview.md](./architecture/overview.md) for technical details
+4. Check out [worlds-architecture.md](./architecture/worlds-architecture.md) for UX patterns
+5. Follow [testing guide](./qa/testing-guide.md) before making changes
 
 ### For AI Assistants
-1. Scan this README for structure
-2. Use search to find relevant docs
-3. Read feature-specific docs before implementing
+1. Start with [PIXTR_FEATURE_OVERVIEW.md](./PIXTR_FEATURE_OVERVIEW.md) - single source of truth
+2. Use this README for navigation structure
+3. Read architecture docs before implementing
 4. Check archive/ for historical context only
-5. Follow patterns in architecture docs
+5. Reference FEATURE_OVERVIEW for all feature details
 
 ---
 
-**Last Updated:** 2025-12-16
-**Maintainer:** Pixtr Development Team
-**Version:** 1.0 (Post-consolidation)
+**Last Updated:** 2026-01-14
+**Maintainer:** Roger Sørensen (Cre8XF)
+**Version:** V3 (Launch-ready)
+**Status:** ✅ Documentation cleanup complete

@@ -48,27 +48,38 @@ export const AuthProvider = ({ children }) => {
 
       // User is logged in - sync all auth state
       try {
-        // ✅ CRITICAL: Reload user BEFORE updating state to get fresh emailVerified
-        await currentUser.reload()
-        console.log('[AUTH PROVIDER] User reloaded, emailVerified:', currentUser.emailVerified)
-
-        // ✅ CRITICAL: Get fresh ID token
-        await currentUser.getIdToken(true)
-
-        // ✅ Update Zustand with new reference to force re-renders
+        // 🚀 PERCEIVED PERFORMANCE FIX: Show UI immediately, sync in background
+        // Step 1: Set user immediately with current data
         setUser({ ...currentUser })
         setEmailVerified(currentUser.emailVerified)
+        setLoading(false) // ✅ Unblock UI immediately
+        console.log('[AUTH PROVIDER] Initial user set, UI unblocked')
 
-        // ✅ Fetch user profile from Firestore
-        await fetchUserProfile(currentUser.uid)
+        // Step 2: Reload user in background to get fresh emailVerified status
+        currentUser.reload().then(() => {
+          console.log('[AUTH PROVIDER] User reloaded, emailVerified:', currentUser.emailVerified)
+          // Update with fresh data
+          setUser({ ...currentUser })
+          setEmailVerified(currentUser.emailVerified)
+        }).catch((error) => {
+          console.warn('[AUTH PROVIDER] Background reload failed:', error)
+        })
 
-        // ✅ CRITICAL: Set loading to false ONLY after all state is synced
-        setLoading(false)
-        console.log('[AUTH PROVIDER] Auth state fully synced, loading complete')
+        // Step 3: Get fresh ID token in background
+        currentUser.getIdToken(true).catch((error) => {
+          console.warn('[AUTH PROVIDER] Background token refresh failed:', error)
+        })
+
+        // Step 4: Fetch user profile in background
+        fetchUserProfile(currentUser.uid).then(() => {
+          console.log('[AUTH PROVIDER] Background profile sync complete')
+        }).catch((error) => {
+          console.warn('[AUTH PROVIDER] Background profile fetch failed:', error)
+        })
       } catch (error) {
         console.error('[AUTH PROVIDER] Error syncing auth state:', error)
 
-        // Even if reload fails, set the user and complete loading
+        // Even if sync fails, set the user and complete loading
         setUser({ ...currentUser })
         setEmailVerified(currentUser.emailVerified)
         setLoading(false)

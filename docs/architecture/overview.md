@@ -1,7 +1,8 @@
 # Pixtr Architecture Overview
 
-**Last Updated:** 2025-12-16
+**Last Updated:** 2026-01-14
 **Version:** V3
+**Master Reference:** See `/docs/PIXTR_FEATURE_OVERVIEW.md` for feature details
 
 ---
 
@@ -44,7 +45,7 @@ Pixtr is a modern, React-based photo management application designed as a Norweg
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
 | **Web Hosting** | Netlify / Firebase Hosting | Static site deployment |
-| **Mobile Apps** | Capacitor (planned) | iOS and Android native apps |
+| **Mobile Apps** | Capacitor | iOS and Android native apps (ready, not yet submitted to stores) |
 | **CI/CD** | Git + Netlify | Automated deployment pipeline |
 
 ---
@@ -136,18 +137,20 @@ Pixtr uses a "World View" pattern for immersive features:
 Pixtr uses multiple state management approaches:
 
 1. **Global State (Zustand):**
-   - Used in Editor V3 for canvas state
-   - Isolated, predictable state updates
-   - Located in `src/features/editor/store/editorStore.js`
+   - Primary state management for app-wide data
+   - User, photos, albums, UI state (modals, notifications)
+   - Located in `src/state/store.js`
+   - Editor-specific state in `src/features/editor/store/editorStore.js`
 
 2. **React Context:**
-   - Security context for authentication
+   - Security context for Vault authentication
    - Toast notifications
-   - Theme management (dark/light mode)
+   - Specialized contexts for specific features
 
 3. **Firebase Realtime Listeners:**
    - Photos, albums, and user data sync
    - Real-time updates across devices
+   - Managed via `src/hooks/usePhotoData.js`
 
 ### Data Flow
 
@@ -221,14 +224,16 @@ Component Re-render
 }
 ```
 
-**Date Resolution Priority (Google Photos style):**
-1. `dateTaken` - EXIF DateTimeOriginal (canonical)
-2. `displayDate` - User override or legacy date
-3. `takenAt` - Legacy EXIF field
-4. `uploadedAt` - Upload timestamp (fallback)
-5. `createdAt` - Firestore creation time (last resort)
+**Date Resolution Priority (Canonical):**
+1. `displayDate` - User-edited display date (if manually set)
+2. `takenAt` - EXIF date from camera (most accurate)
+3. `uploadedAt` - Upload timestamp (fallback)
+4. `createdAt` - Firestore document creation (last resort)
 
-See `src/utils/photoDateUtils.js` for canonical implementation.
+**Implementation:** `src/utils/photoDateUtils.js:resolvePhotoDate()`
+**Usage:** Timeline grouping, "On This Day" widget, date-based sorting
+
+**Note:** Legacy field `dateTaken` is now consolidated into `takenAt`.
 
 ### Album Document (Firestore)
 ```javascript
