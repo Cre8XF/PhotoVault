@@ -140,6 +140,20 @@ export default function PhotoPage() {
     }, 3000)
   }, [])
 
+  // Helper: Get correct viewer route based on item type
+  const getViewerRouteForId = useCallback((itemId) => {
+    // Look up item in photos array
+    const item = photos?.find((p) => p.id === itemId)
+
+    // Check if it's a collage (multiple ways to identify)
+    if (item && (item.isCollage === true || item.category === 'collage' || item.type === 'collage')) {
+      return `/collage/view/${itemId}`
+    }
+
+    // Default to photo route
+    return `/photo/${itemId}`
+  }, [photos])
+
   // Handle navigation
   const handleNext = useCallback(() => {
     if (!Array.isArray(photoOrder) || photoOrder.length === 0) return
@@ -151,7 +165,7 @@ export default function PhotoPage() {
     setPhotoIndex(nextIndex)
     setCurrentPhotoId(nextId)
     setImageLoaded(false)
-    navigate(`/photo/${nextId}`, { replace: true })
+    navigate(getViewerRouteForId(nextId), { replace: true })
     resetUiTimer()
   }, [
     photoOrder,
@@ -159,6 +173,7 @@ export default function PhotoPage() {
     setPhotoIndex,
     setCurrentPhotoId,
     navigate,
+    getViewerRouteForId,
     resetUiTimer,
   ])
 
@@ -172,7 +187,7 @@ export default function PhotoPage() {
     setPhotoIndex(prevIndex)
     setCurrentPhotoId(prevId)
     setImageLoaded(false)
-    navigate(`/photo/${prevId}`, { replace: true })
+    navigate(getViewerRouteForId(prevId), { replace: true })
     resetUiTimer()
   }, [
     photoOrder,
@@ -180,6 +195,7 @@ export default function PhotoPage() {
     setPhotoIndex,
     setCurrentPhotoId,
     navigate,
+    getViewerRouteForId,
     resetUiTimer,
   ])
 
