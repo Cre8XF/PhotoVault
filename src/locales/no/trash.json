@@ -1,0 +1,60 @@
+{
+  "title": "Papirkurv",
+  "subtitle": "Bilder blir permanent slettet etter 7 dager",
+  "infoBanner": "Bilder i papirkurven blir automatisk slettet etter 7 dager. Du kan gjenopprette dem når som helst før det.",
+  "empty": {
+    "title": "Papirkurven er tom",
+    "subtitle": "Slettede bilder vil vises her"
+  },
+  "actions": {
+    "restoreAll": "Gjenopprett alle",
+    "emptyTrash": "Tøm papirkurv",
+    "selectAll": "Velg alle",
+    "restoreSelected": "Gjenopprett valgte",
+    "deleteSelectedPermanently": "Slett valgte permanent",
+    "clear": "Tøm"
+  },
+  "selection": {
+    "selected": "{{count}} valgt",
+    "selectedPhotos": "{{count}} bilde{{s}} valgt"
+  },
+  "photo": {
+    "deletingSoon": "Slettes snart",
+    "daysLeft": "{{days}}d igjen",
+    "deletedDaysAgo": "Slettet {{days}}d siden"
+  },
+  "confirm": {
+    "title": "Slett bilder permanent?",
+    "messageSingle": "Dette vil permanent slette 1 bilde. Denne handlingen kan ikke angres.",
+    "messageMultiple": "Dette vil permanent slette {{count}} bilde{{s}}. Denne handlingen kan ikke angres.",
+    "confirmLabel": "Slett permanent",
+    "cancelLabel": "Avbryt"
+  },
+  "notifications": {
+    "failedToLoad": "Kunne ikke laste papirkurv",
+    "photoRestored": "Bilde gjenopprettet",
+    "failedToRestore": "Kunne ikke gjenopprette bilde",
+    "allRestored": "Alle bilder gjenopprettet",
+    "failedToRestoreMultiple": "Kunne ikke gjenopprette bilder",
+    "photosRestored": "{{count}} bilde{{s}} gjenopprettet",
+    "photoDeleted": "Bilde permanent slettet",
+    "failedToDelete": "Kunne ikke slette bilde",
+    "photosDeleted": "{{count}} bilde{{s}} permanent slettet",
+    "failedToDeleteMultiple": "Kunne ikke slette bilder",
+    "trashEmptied": "Papirkurv tømt",
+    "failedToEmpty": "Kunne ikke tømme papirkurv"
+  },
+  "aria": {
+    "restoreAll": "Gjenopprett alle bilder fra papirkurven",
+    "emptyTrash": "Slett alle bilder i papirkurven permanent",
+    "selectAll": "Velg alle bilder",
+    "deselectAll": "Fjern alle valg",
+    "clearSelection": "Tøm utvalg",
+    "restoreSelected": "Gjenopprett {{count}} valgte bilde{{s}}",
+    "deleteSelected": "Slett {{count}} valgte bilde{{s}} permanent",
+    "selectPhoto": "Velg bilde",
+    "deselectPhoto": "Fjern valg av bilde",
+    "restorePhoto": "Gjenopprett dette bildet",
+    "deletePhoto": "Slett dette bildet permanent"
+  }
+}

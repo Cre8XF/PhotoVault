@@ -74,6 +74,31 @@ import settingsEN from './locales/en/settings.json'
 import landingNO from './locales/no/landing.json'
 import landingEN from './locales/en/landing.json'
 
+// ⭐ MISSING NAMESPACES FIX: Register files, documents, vault, editor, subscription, qrshare, public
+import filesNO from './locales/no/files.json'
+import filesEN from './locales/en/files.json'
+
+import documentsNO from './locales/no/documents.json'
+import documentsEN from './locales/en/documents.json'
+
+import vaultNO from './locales/no/vault.json'
+import vaultEN from './locales/en/vault.json'
+
+import editorNO from './locales/no/editor.json'
+import editorEN from './locales/en/editor.json'
+
+import subscriptionNO from './locales/no/subscription.json'
+import subscriptionEN from './locales/en/subscription.json'
+
+import qrshareNO from './locales/no/qrshare.json'
+import qrshareEN from './locales/en/qrshare.json'
+
+import publicNO from './locales/no/public.json'
+import publicEN from './locales/en/public.json'
+
+import trashNO from './locales/no/trash.json'
+import trashEN from './locales/en/trash.json'
+
 const resources = {
   no: {
     translation: translationNO,
@@ -98,6 +123,14 @@ const resources = {
     empty: emptyNO,
     settings: settingsNO,
     landing: landingNO,
+    files: filesNO,
+    documents: documentsNO,
+    vault: vaultNO,
+    editor: editorNO,
+    subscription: subscriptionNO,
+    qrshare: qrshareNO,
+    public: publicNO,
+    trash: trashNO,
   },
   en: {
     translation: translationEN,
@@ -122,6 +155,14 @@ const resources = {
     empty: emptyEN,
     settings: settingsEN,
     landing: landingEN,
+    files: filesEN,
+    documents: documentsEN,
+    vault: vaultEN,
+    editor: editorEN,
+    subscription: subscriptionEN,
+    qrshare: qrshareEN,
+    public: publicEN,
+    trash: trashEN,
   },
 }
 
@@ -155,6 +196,14 @@ i18n
       'empty',
       'settings',
       'landing',
+      'files',
+      'documents',
+      'vault',
+      'editor',
+      'subscription',
+      'qrshare',
+      'public',
+      'trash',
     ],
 
     interpolation: {
