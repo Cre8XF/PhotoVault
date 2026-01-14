@@ -1,0 +1,15 @@
+{
+  "title": "Files",
+  "subtitle": "Manage your uploaded documents and secure content",
+  "documents": {
+    "title": "Documents",
+    "description": "PDFs, Word files and other documents",
+    "liteBadge": "Lite"
+  },
+  "vault": {
+    "title": "Secure Vault",
+    "description": "Encrypted private photos and files",
+    "liteBadge": "Lite"
+  },
+  "upgradeRequired": "Upgrade to Lite or Pro to access this feature"
+}

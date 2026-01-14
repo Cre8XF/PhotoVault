@@ -1,4 +1,6 @@
 {
+  "title": "Sikker hvelv",
+  "description": "Krypterte private bilder og filer",
   "backToMore": "← Tilbake til Mer-siden",
   "settings": {
     "autoLock": {
