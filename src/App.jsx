@@ -26,6 +26,7 @@ const LandingPage = lazy(() => import('./pages/LandingPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const AuthActionHandler = lazy(() => import('./pages/AuthActionHandler'))
 const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'))
+const VerifyComplete = lazy(() => import('./pages/VerifyComplete'))
 const HomeDashboard = lazy(() => import('./pages/HomeDashboard'))
 const AlbumsPage = lazy(() => import('./pages/AlbumsPage'))
 const SearchPage = lazy(() => import('./pages/SearchPage'))
@@ -223,6 +224,9 @@ function App() {
 
                   {/* Email verification landing page - handleCodeInApp: true */}
                   <Route path="/verify-email" element={<VerifyEmailPage />} />
+
+                  {/* Email verification completion page - redirect from verification email */}
+                  <Route path="/verify-complete" element={<VerifyComplete />} />
 
                   {/* Firebase auth action handler - handles email verification links from Netlify */}
                   <Route
