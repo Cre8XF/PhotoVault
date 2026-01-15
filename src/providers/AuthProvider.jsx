@@ -4,27 +4,15 @@
 // CRITICAL: This is the ONLY file allowed to call onAuthStateChanged
 // All other components MUST read auth state from Zustand via useAuth()
 // ============================================================================
+
 import { useEffect } from 'react'
-import { getAuth, onAuthStateChanged } from 'firebase/auth'
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { db } from '../firebase'
 import useStore from '../state/store'
 
-/**
- * AuthProvider - Initializes and manages Firebase authentication state
- *
- * RESPONSIBILITIES:
- * - Set up single onAuthStateChanged listener
- * - Reload user to get fresh emailVerified status
- * - Sync auth state to Zustand store
- * - Fetch user profile from Firestore
- * - Set loading to false ONLY after all sync is complete
- *
- * IMPORTANT: This is the ONLY component allowed to:
- * - Call onAuthStateChanged
- * - Call user.reload()
- * - Directly update auth state in Zustand
- */
+const AUTH_TIMEOUT_MS = 2500
+
 export const AuthProvider = ({ children }) => {
   const setUser = useStore((state) => state.setUser)
   const setUserProfile = useStore((state) => state.setUserProfile)
@@ -33,11 +21,23 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const auth = getAuth()
+    let resolved = false
 
-    // ✅ SINGLE AUTH LISTENER - This is the ONLY onAuthStateChanged in the entire app
+    // 🔐 HARD FAIL-SAFE: Never block UI forever
+    const timeout = setTimeout(() => {
+      if (!resolved) {
+        console.warn('[AUTH PROVIDER] Auth timeout – continuing without auth')
+        setLoading(false)
+      }
+    }, AUTH_TIMEOUT_MS)
+
+    // ✅ SINGLE AUTH LISTENER
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      resolved = true
+      clearTimeout(timeout)
+
       if (!currentUser) {
-        // User logged out - clear all auth state
+        // Logged out
         setUser(null)
         setUserProfile(null)
         setEmailVerified(false)
@@ -46,48 +46,49 @@ export const AuthProvider = ({ children }) => {
         return
       }
 
-      // User is logged in - sync all auth state
       try {
-        // 🚀 PERCEIVED PERFORMANCE FIX: Show UI immediately, sync in background
-        // Step 1: Set user immediately with current data
+        // 🚀 PERCEIVED PERFORMANCE: unblock UI immediately
         setUser({ ...currentUser })
         setEmailVerified(currentUser.emailVerified)
-        setLoading(false) // ✅ Unblock UI immediately
+        setLoading(false)
         console.log('[AUTH PROVIDER] Initial user set, UI unblocked')
 
-        // Step 2: Reload user in background to get fresh emailVerified status
-        currentUser.reload().then(() => {
-          console.log('[AUTH PROVIDER] User reloaded, emailVerified:', currentUser.emailVerified)
-          // Update with fresh data
-          setUser({ ...currentUser })
-          setEmailVerified(currentUser.emailVerified)
-        }).catch((error) => {
-          console.warn('[AUTH PROVIDER] Background reload failed:', error)
+        // 🔄 Background: reload user for fresh emailVerified
+        currentUser
+          .reload()
+          .then(() => {
+            setUser({ ...currentUser })
+            setEmailVerified(currentUser.emailVerified)
+            console.log('[AUTH PROVIDER] User reloaded')
+          })
+          .catch((err) => {
+            console.warn('[AUTH PROVIDER] Background reload failed', err)
+          })
+
+        // 🔄 Background: refresh token (fail-safe)
+        currentUser.getIdToken(true).catch((err) => {
+          console.warn(
+            '[AUTH PROVIDER] Token refresh failed – signing out',
+            err
+          )
+          signOut(auth)
         })
 
-        // Step 3: Get fresh ID token in background
-        currentUser.getIdToken(true).catch((error) => {
-          console.warn('[AUTH PROVIDER] Background token refresh failed:', error)
-        })
-
-        // Step 4: Fetch user profile in background
-        fetchUserProfile(currentUser.uid).then(() => {
-          console.log('[AUTH PROVIDER] Background profile sync complete')
-        }).catch((error) => {
-          console.warn('[AUTH PROVIDER] Background profile fetch failed:', error)
+        // 🔄 Background: profile sync
+        fetchUserProfile(currentUser.uid).catch((err) => {
+          console.warn('[AUTH PROVIDER] Background profile fetch failed', err)
         })
       } catch (error) {
-        console.error('[AUTH PROVIDER] Error syncing auth state:', error)
-
-        // Even if sync fails, set the user and complete loading
-        setUser({ ...currentUser })
-        setEmailVerified(currentUser.emailVerified)
+        console.error('[AUTH PROVIDER] Fatal auth sync error', error)
+        await signOut(auth)
         setLoading(false)
       }
     })
 
-    // Cleanup listener on unmount
-    return () => unsubscribe()
+    return () => {
+      clearTimeout(timeout)
+      unsubscribe()
+    }
   }, [setUser, setUserProfile, setLoading, setEmailVerified])
 
   /**
@@ -99,38 +100,41 @@ export const AuthProvider = ({ children }) => {
       const userDoc = await getDoc(userRef)
 
       if (userDoc.exists()) {
-        useStore.getState().setUserProfile(userDoc.data())
+        setUserProfile(userDoc.data())
         console.log('[AUTH PROVIDER] User profile loaded')
-      } else {
-        // Create default profile if it doesn't exist
-        const defaultProfile = {
-          uid,
-          userId: uid,
-          role: 'user',
-          subscriptionTier: 'FREE',
-          storageLimit: 1073741824, // 1 GB
-          storageUsed: 0,
-          currentAlbumCount: 0, // 🆕 Counter for freemium limits
-          currentPhotoCount: 0, // 🆕 Optional: total photos
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }
-
-        try {
-          await setDoc(userRef, defaultProfile)
-          console.log('[AUTH PROVIDER] Created default user profile')
-        } catch (writeErr) {
-          console.warn('[AUTH PROVIDER] Could not create user profile:', writeErr.message)
-        }
-
-        useStore.getState().setUserProfile(defaultProfile)
+        return
       }
+
+      // 🆕 Create default profile
+      const defaultProfile = {
+        uid,
+        userId: uid,
+        role: 'user',
+        subscriptionTier: 'FREE',
+        storageLimit: 1073741824, // 1 GB
+        storageUsed: 0,
+        currentAlbumCount: 0,
+        currentPhotoCount: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+
+      try {
+        await setDoc(userRef, defaultProfile)
+        console.log('[AUTH PROVIDER] Created default user profile')
+      } catch (writeErr) {
+        console.warn(
+          '[AUTH PROVIDER] Could not create user profile:',
+          writeErr.message
+        )
+      }
+
+      setUserProfile(defaultProfile)
     } catch (error) {
       console.error('[AUTH PROVIDER] Error fetching user profile:', error)
     }
   }
 
-  // Render children - this provider doesn't render any UI
   return children
 }
 
