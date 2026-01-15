@@ -960,7 +960,7 @@ const AlbumPage = ({
         !hasMore &&
         filteredPhotos.length > 0 &&
         filteredPhotos.length > 50 && (
-          <p className="text-center text-gray-500 py-8 text-sm">
+          <p className="text-center text-muted py-8 text-sm">
             All {filteredPhotos.length} photos loaded
           </p>
         )}

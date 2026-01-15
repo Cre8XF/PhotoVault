@@ -394,11 +394,11 @@ export default function SlideshowPage() {
           uiVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
-        <div className="bg-black/40 dark:bg-black/60 backdrop-blur-md rounded-full flex items-center gap-4 px-6 py-3 text-on-glass drop-shadow-lg">
+        <div className="slideshow-controls-pill rounded-full flex items-center gap-4 px-6 py-3 drop-shadow-lg">
           {/* Previous Button */}
           <button
             onClick={handlePrev}
-            className="hover:bg-white/10 p-2 rounded-full transition active:scale-95"
+            className="slideshow-control-btn p-2 rounded-full"
             aria-label="Previous photo"
           >
             <ChevronLeft className="w-6 h-6" />
@@ -407,7 +407,7 @@ export default function SlideshowPage() {
           {/* Play/Pause Button */}
           <button
             onClick={handlePlayPause}
-            className="hover:bg-white/10 p-3 rounded-full transition active:scale-95"
+            className="slideshow-control-btn p-3 rounded-full"
             aria-label={isPlaying ? 'Pause slideshow' : 'Play slideshow'}
           >
             {isPlaying ? (
@@ -420,18 +420,18 @@ export default function SlideshowPage() {
           {/* Next Button */}
           <button
             onClick={handleNext}
-            className="hover:bg-white/10 p-2 rounded-full transition active:scale-95"
+            className="slideshow-control-btn p-2 rounded-full"
             aria-label="Next photo"
           >
             <ChevronRight className="w-6 h-6" />
           </button>
 
           {/* Interval Control */}
-          <div className="border-l border-white/20 pl-4">
+          <div className="slideshow-interval-divider pl-4">
             <select
               value={intervalSec}
               onChange={(e) => setIntervalSec(Number(e.target.value))}
-              className="bg-black/40 text-white text-xs px-2 py-1 rounded border border-white/20 cursor-pointer"
+              className="slideshow-interval-select text-xs px-2 py-1 rounded cursor-pointer"
             >
               <option value={2}>2s</option>
               <option value={5}>5s</option>

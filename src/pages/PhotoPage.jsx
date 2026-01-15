@@ -870,7 +870,7 @@ export default function PhotoPage() {
       {Array.isArray(photoOrder) && photoOrder.length > 1 && (
         <div
           className={`fixed inset-x-0 top-1/2 -translate-y-1/2 z-50 flex justify-between px-4
-      transition-opacity duration-300 text-on-glass
+      transition-opacity duration-300
       ${uiVisible ? 'opacity-100' : 'opacity-0'}
     `}
         >
@@ -879,13 +879,7 @@ export default function PhotoPage() {
             onClick={handlePrev}
             disabled={photoIndex <= 0}
             aria-label="Previous photo"
-            className={`
-        pointer-events-auto
-        bg-black/40 backdrop-blur-md rounded-full p-3 text-white
-        drop-shadow-md transition
-        active:scale-95
-        ${photoIndex <= 0 ? 'opacity-30 cursor-default' : 'hover:bg-black/60'}
-      `}
+            className="viewer-nav-arrow"
           >
             <ArrowLeft className="w-6 h-6" />
           </button>
@@ -895,17 +889,7 @@ export default function PhotoPage() {
             onClick={handleNext}
             disabled={photoIndex >= photoOrder.length - 1}
             aria-label="Next photo"
-            className={`
-        pointer-events-auto
-        bg-black/40 backdrop-blur-md rounded-full p-3 text-white
-        drop-shadow-md transition
-        active:scale-95
-        ${
-          photoIndex >= photoOrder.length - 1
-            ? 'opacity-30 cursor-default'
-            : 'hover:bg-black/60'
-        }
-      `}
+            className="viewer-nav-arrow"
           >
             <ArrowLeft className="w-6 h-6 rotate-180" />
           </button>
