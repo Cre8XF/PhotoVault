@@ -389,6 +389,7 @@ function PublicRoute() {
 
   // Redirect authenticated users to home
   React.useEffect(() => {
+    console.log('[PublicRoute]', { path: '/landing', user: !!user, loading, decision: !loading && user ? 'redirect to /' : 'stay' })
     if (!loading && user) {
       navigate('/', { replace: true })
     }
@@ -416,13 +417,15 @@ function PublicRoute() {
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   // Redirect unauthenticated users to landing
   React.useEffect(() => {
+    console.log('[ProtectedRoute]', { path: location.pathname, user: !!user, loading, decision: !loading && !user ? 'redirect to /landing' : 'allow' })
     if (!loading && !user) {
       navigate('/landing', { replace: true })
     }
-  }, [user, loading, navigate])
+  }, [user, loading, navigate, location])
 
   if (loading) {
     return (

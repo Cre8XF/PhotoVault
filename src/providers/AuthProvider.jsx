@@ -48,10 +48,11 @@ export const AuthProvider = ({ children }) => {
 
       try {
         // 🚀 PERCEIVED PERFORMANCE: unblock UI immediately
+        console.log('[AUTH PROVIDER] Auth state changed:', { uid: currentUser.uid, emailVerified: currentUser.emailVerified })
         setUser({ ...currentUser })
         setEmailVerified(currentUser.emailVerified)
         setLoading(false)
-        console.log('[AUTH PROVIDER] Initial user set, UI unblocked')
+        console.log('[AUTH PROVIDER] User state set, loading=false, UI unblocked')
 
         // 🔄 Background: reload user for fresh emailVerified
         currentUser
@@ -101,11 +102,12 @@ export const AuthProvider = ({ children }) => {
 
       if (userDoc.exists()) {
         setUserProfile(userDoc.data())
-        console.log('[AUTH PROVIDER] User profile loaded')
+        console.log('[AUTH PROVIDER] Firestore profile loaded:', { uid, role: userDoc.data().role })
         return
       }
 
       // 🆕 Create default profile
+      console.log('[AUTH PROVIDER] No Firestore profile found, creating default profile...')
       const defaultProfile = {
         uid,
         userId: uid,
@@ -121,15 +123,16 @@ export const AuthProvider = ({ children }) => {
 
       try {
         await setDoc(userRef, defaultProfile)
-        console.log('[AUTH PROVIDER] Created default user profile')
+        console.log('[AUTH PROVIDER] Default Firestore profile created successfully')
       } catch (writeErr) {
         console.warn(
-          '[AUTH PROVIDER] Could not create user profile:',
+          '[AUTH PROVIDER] Failed to create Firestore profile:',
           writeErr.message
         )
       }
 
       setUserProfile(defaultProfile)
+      console.log('[AUTH PROVIDER] Profile state updated with default values')
     } catch (error) {
       console.error('[AUTH PROVIDER] Error fetching user profile:', error)
     }
