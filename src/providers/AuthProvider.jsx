@@ -91,6 +91,32 @@ export const AuthProvider = ({ children }) => {
     }
   }, [setUser, setUserProfile, setLoading, setEmailVerified])
 
+  // 🔄 Refresh emailVerified when user returns to tab (e.g., after Gmail verification)
+  useEffect(() => {
+    const auth = getAuth()
+
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible') {
+        const currentUser = auth.currentUser
+
+        // Only reload if user exists and email is not yet verified
+        if (currentUser && !currentUser.emailVerified) {
+          try {
+            await currentUser.reload()
+            setUser({ ...currentUser })
+            setEmailVerified(currentUser.emailVerified)
+            console.log('[AUTH PROVIDER] Visibility refresh: emailVerified synced')
+          } catch (error) {
+            console.warn('[AUTH PROVIDER] Visibility refresh failed:', error)
+          }
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [setUser, setEmailVerified])
+
   /**
    * Fetch user profile from Firestore
    */
