@@ -296,12 +296,6 @@ function App() {
                     }
                   />
 
-                  {/* 🔒 Catch-all: redirect unknown routes safely */}
-                  <Route
-                    path="/"
-                    element={<Navigate to="/landing" replace />}
-                  />
-
                   {/* ⚠️ PHASE 2: AI Tools - HIDDEN FOR LAUNCH (code kept latent) */}
                   {/* AI routes disabled - no navigation, deep links return 404 */}
                   {/*
