@@ -140,7 +140,9 @@ function EditorPageWrapper() {
   }, [])
 
   if (import.meta.env.DEV) {
-    console.log(`🎨 Using Editor ${useV4 ? 'V4 (Google Photos style)' : 'V3 (Classic)'}`)
+    console.log(
+      `🎨 Using Editor ${useV4 ? 'V4 (Google Photos style)' : 'V3 (Classic)'}`
+    )
   }
 
   return useV4 ? <EditorPageV4 /> : <EditorPage />
@@ -292,6 +294,12 @@ function App() {
                         </Suspense>
                       </ProtectedRoute>
                     }
+                  />
+
+                  {/* 🔒 Catch-all: redirect unknown routes safely */}
+                  <Route
+                    path="/"
+                    element={<Navigate to="/landing" replace />}
                   />
 
                   {/* ⚠️ PHASE 2: AI Tools - HIDDEN FOR LAUNCH (code kept latent) */}
