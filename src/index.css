@@ -20,6 +20,11 @@ body.light-mode {
   --text-muted: #475569;          /* 7:1 contrast on white ✅ (was #64748b = 3.8:1 ❌) */
   --text-disabled: #94a3b8;       /* For disabled states only */
 
+  /* Icons */
+  --icon-primary: #0f172a;        /* Primary icon color */
+  --icon-secondary: #475569;      /* Secondary icon color */
+  --icon-muted: #64748b;          /* Muted icon color */
+
   /* Purple text colors - WCAG AA Compliant */
   --color-purple-text: #6d28d9;        /* 7.1:1 contrast on white ✅ */
   --color-purple-text-hover: #5b21b6;  /* Darker on hover */
@@ -110,6 +115,11 @@ body.dark-mode {
   --text-muted: rgba(255, 255, 255, 0.65);     /* 4.7:1 contrast ✅ (was #94a3b8 = 3.8:1 ❌) */
   --text-disabled: rgba(255, 255, 255, 0.45);  /* For disabled states only */
 
+  /* Icons */
+  --icon-primary: #ffffff;                    /* Primary icon color */
+  --icon-secondary: rgba(255, 255, 255, 0.85); /* Secondary icon color */
+  --icon-muted: rgba(255, 255, 255, 0.65);     /* Muted icon color */
+
   /* Purple text colors - WCAG AA Compliant */
   --color-purple-text: #c4b5fd;        /* 8.2:1 contrast on dark ✅ */
   --color-purple-text-hover: #e0d7ff;  /* Lighter on hover */
@@ -196,6 +206,28 @@ body.dark-mode {
 
 .text-disabled {
   color: var(--text-disabled);
+}
+
+/* Icon colors */
+.icon-primary {
+  color: var(--icon-primary);
+}
+
+.icon-secondary {
+  color: var(--icon-secondary);
+}
+
+.icon-muted {
+  color: var(--icon-muted);
+}
+
+/* Icon hover states */
+.hover\:icon-primary:hover {
+  color: var(--icon-primary);
+}
+
+.hover\:icon-secondary:hover {
+  color: var(--icon-secondary);
 }
 
 /* Purple text - WCAG AA Compliant */
@@ -1036,6 +1068,101 @@ body.light-mode .slideshow-header * {
 body.light-mode .collage-header button:hover,
 body.light-mode .slideshow-header button:hover {
   background-color: var(--interactive-hover);
+}
+
+/* ============================================================================
+   VIEWER NAVIGATION ARROWS - Semantic tokens with desktop/mobile differentiation
+   ============================================================================ */
+.viewer-nav-arrow {
+  /* Base styling using semantic tokens */
+  color: var(--icon-muted);
+  background-color: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 9999px;
+  padding: 0.75rem;
+  opacity: 0.65;
+  transition: all 0.2s ease;
+  pointer-events: auto;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Hover state - more visible */
+.viewer-nav-arrow:hover:not(:disabled) {
+  opacity: 1;
+  color: var(--icon-primary);
+  background-color: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  transform: scale(1.05);
+}
+
+/* Active/pressed state */
+.viewer-nav-arrow:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+/* Disabled state */
+.viewer-nav-arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* Desktop: More visible arrows for better discoverability */
+@media (min-width: 1024px) {
+  .viewer-nav-arrow {
+    opacity: 0.75;
+  }
+
+  .viewer-nav-arrow:hover:not(:disabled) {
+    opacity: 1;
+  }
+}
+
+/* Mobile: Subtle arrows, secondary to swipe gestures */
+@media (max-width: 1023px) {
+  .viewer-nav-arrow {
+    opacity: 0.5;
+    padding: 0.625rem;
+  }
+
+  .viewer-nav-arrow svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+/* ============================================================================
+   SLIDESHOW CONTROLS - Semantic tokens
+   ============================================================================ */
+.slideshow-controls-pill {
+  background-color: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--icon-muted);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.slideshow-control-btn {
+  transition: all 0.2s ease;
+}
+
+.slideshow-control-btn:hover {
+  background-color: var(--interactive-hover);
+}
+
+.slideshow-control-btn:active {
+  transform: scale(0.95);
+}
+
+.slideshow-interval-divider {
+  border-left: 1px solid var(--border-color);
+}
+
+.slideshow-interval-select {
+  background-color: var(--glass-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 
 /* ============================================================================
