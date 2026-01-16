@@ -428,9 +428,14 @@ const VaultPhotoCard = ({ photo, onView, onDelete, getDecryptedUrl }) => {
           const url = await getDecryptedUrl(photo);
           if (isMounted && url) {
             setThumbnailUrl(url);
+          } else if (isMounted && !url) {
+            // Failed to get URL but no error thrown
+            console.warn('Failed to load thumbnail for', photo.id);
           }
         }
       } catch (error) {
+        // Don't show errors for thumbnail loading - grid should still work
+        // User will see error when they click to open the item
         console.error('Failed to load thumbnail:', error);
       } finally {
         if (isMounted) {
@@ -479,9 +484,12 @@ const VaultPhotoCard = ({ photo, onView, onDelete, getDecryptedUrl }) => {
           />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all" />
           <button
-            onClick={onDelete}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
             className="absolute top-2 right-2 p-2 rounded-full bg-red-600/90 text-white
-                       opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
+                       opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 z-10"
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -499,9 +507,12 @@ const VaultPhotoCard = ({ photo, onView, onDelete, getDecryptedUrl }) => {
           </div>
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all" />
           <button
-            onClick={onDelete}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
             className="absolute top-2 right-2 p-2 rounded-full bg-red-600/90 text-white
-                       opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
+                       opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 z-10"
           >
             <Trash2 className="w-4 h-4" />
           </button>

@@ -346,10 +346,14 @@ export const useVault = () => {
 
   /**
    * Decrypt and get photo blob URL
+   * NOTE: This function now throws errors instead of auto-locking
+   * Callers should handle errors and prompt user to re-unlock if needed
    */
   const getDecryptedPhotoUrl = useCallback(
     async (photo) => {
-      if (!isVaultUnlocked) return null
+      if (!isVaultUnlocked) {
+        throw new Error('VAULT_LOCKED')
+      }
 
       // Check cache first
       const cached = getCachedThumbnail(photo.id)
@@ -357,8 +361,8 @@ export const useVault = () => {
 
       const password = sessionStorage.getItem('vaultPassword')
       if (!password) {
-        lockVaultSafely()
-        return null
+        // Don't auto-lock - throw error so caller can handle
+        throw new Error('SESSION_EXPIRED')
       }
 
       try {
@@ -380,25 +384,32 @@ export const useVault = () => {
         // Cache it
         cacheDecryptedThumbnail(photo.id, blobUrl)
 
-        // Update last accessed time
-        await updateDoc(doc(db, 'vault_photos', photo.id), {
+        // Update last accessed time (don't await to improve performance)
+        updateDoc(doc(db, 'vault_photos', photo.id), {
           lastAccessedAt: serverTimestamp(),
-        })
+        }).catch((err) => console.warn('Failed to update lastAccessedAt:', err))
 
         return blobUrl
       } catch (error) {
         console.error('Failed to decrypt photo:', error)
-        if (error.code === 'INVALID_PASSWORD') {
-          lockVaultSafely()
+
+        // Don't auto-lock - throw error with proper code
+        if (error.code === 'INVALID_PASSWORD' || error.message.includes('password')) {
+          throw new Error('INVALID_PASSWORD')
         }
-        return null
+
+        if (error.message === 'SESSION_EXPIRED') {
+          throw error
+        }
+
+        // Network or other errors
+        throw new Error('DECRYPT_FAILED')
       }
     },
     [
       isVaultUnlocked,
       getCachedThumbnail,
       cacheDecryptedThumbnail,
-      lockVaultSafely,
     ]
   )
 
