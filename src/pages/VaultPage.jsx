@@ -428,9 +428,6 @@ const VaultPhotoCard = ({ photo, onView, onDelete, getDecryptedUrl }) => {
           const url = await getDecryptedUrl(photo);
           if (isMounted && url) {
             setThumbnailUrl(url);
-          } else if (isMounted && !url) {
-            // Failed to get URL but no error thrown
-            console.warn('Failed to load thumbnail for', photo.id);
           }
         }
       } catch (error) {
@@ -513,6 +510,26 @@ const VaultPhotoCard = ({ photo, onView, onDelete, getDecryptedUrl }) => {
             }}
             className="absolute top-2 right-2 p-2 rounded-full bg-red-600/90 text-white
                        opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 z-10"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </>
+      ) : !isImage ? (
+        <>
+          <div
+            className="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900/40 cursor-pointer"
+            onClick={onView}
+          >
+            {getFileIcon()}
+            <p className="mt-2 text-xs text-gray-600 dark:text-gray-400 text-center px-2 truncate w-full">
+              {photo.encryptedMetadata?.originalName || 'File'}
+            </p>
+          </div>
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all" />
+          <button
+            onClick={onDelete}
+            className="absolute top-2 right-2 p-2 rounded-full bg-red-600/90 text-white
+                       opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
           >
             <Trash2 className="w-4 h-4" />
           </button>

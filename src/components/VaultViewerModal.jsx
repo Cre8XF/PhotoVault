@@ -52,28 +52,7 @@ const VaultViewerModal = ({ isOpen, vaultItem, onClose, getDecryptedUrl }) => {
       } catch (err) {
         console.error('Failed to load vault file:', err);
         if (isMounted) {
-          // Provide specific error messages based on error type
-          let errorMessage = t('vault:viewer.loadError', { defaultValue: 'Failed to load file' });
-
-          if (err.message === 'SESSION_EXPIRED') {
-            errorMessage = t('vault:viewer.sessionExpired', {
-              defaultValue: 'Your vault session has expired. Please close this viewer and unlock the vault again.',
-            });
-          } else if (err.message === 'INVALID_PASSWORD') {
-            errorMessage = t('vault:viewer.invalidPassword', {
-              defaultValue: 'Invalid password. Your vault session may have been corrupted. Please close and unlock again.',
-            });
-          } else if (err.message === 'VAULT_LOCKED') {
-            errorMessage = t('vault:viewer.vaultLocked', {
-              defaultValue: 'Vault is locked. Please unlock to view files.',
-            });
-          } else if (err.message === 'DECRYPT_FAILED') {
-            errorMessage = t('vault:viewer.decryptFailed', {
-              defaultValue: 'Failed to decrypt file. The file may be corrupted.',
-            });
-          }
-
-          setError(errorMessage);
+          setError(t('vault:viewer.loadError', { defaultValue: 'Failed to load file' }));
         }
       } finally {
         if (isMounted) {
