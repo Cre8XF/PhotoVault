@@ -528,7 +528,10 @@ const SearchPage = ({
     // 🆕 YEAR FILTER: Filter by selected years
     if (activeFilters.selectedYears && activeFilters.selectedYears.length > 0) {
       if (import.meta.env.DEV) {
-        devLog('🔍 Filtering photos by selected years:', activeFilters.selectedYears)
+        devLog(
+          '🔍 Filtering photos by selected years:',
+          activeFilters.selectedYears
+        )
       }
       res = res.filter((p) => {
         const photoDate = resolvePhotoDate(p)
@@ -541,9 +544,15 @@ const SearchPage = ({
     }
 
     // 🆕 MONTH FILTER: Filter by selected months (1-12)
-    if (activeFilters.selectedMonths && activeFilters.selectedMonths.length > 0) {
+    if (
+      activeFilters.selectedMonths &&
+      activeFilters.selectedMonths.length > 0
+    ) {
       if (import.meta.env.DEV) {
-        devLog('🔍 Filtering photos by selected months:', activeFilters.selectedMonths)
+        devLog(
+          '🔍 Filtering photos by selected months:',
+          activeFilters.selectedMonths
+        )
       }
       res = res.filter((p) => {
         const photoDate = resolvePhotoDate(p)
@@ -570,7 +579,12 @@ const SearchPage = ({
     // Tag photos with contentType - differentiate between photos, videos, and collages
     const photosWithType = filteredPhotos.map((p) => ({
       ...p,
-      contentType: p.type === 'collage' || p.isCollage ? 'collage' : p.type === 'video' ? 'video' : 'photo',
+      contentType:
+        p.type === 'collage' || p.isCollage
+          ? 'collage'
+          : p.type === 'video'
+          ? 'video'
+          : 'photo',
       sortDate: new Date(p.createdAt || p.uploadedAt || Date.now()),
     }))
 
@@ -692,8 +706,10 @@ const SearchPage = ({
     if (activeFilters.dateRange) count++
     if (activeFilters.albumId) count++
     if (activeFilters.selectedTag) count++
-    if (activeFilters.selectedYears && activeFilters.selectedYears.length > 0) count++ // 🆕 Year filter
-    if (activeFilters.selectedMonths && activeFilters.selectedMonths.length > 0) count++ // 🆕 Month filter
+    if (activeFilters.selectedYears && activeFilters.selectedYears.length > 0)
+      count++ // 🆕 Year filter
+    if (activeFilters.selectedMonths && activeFilters.selectedMonths.length > 0)
+      count++ // 🆕 Month filter
 
     // Count contentTypes only if different from default
     const defaultContentTypes = ['photo', 'video']
@@ -1002,7 +1018,7 @@ const SearchPage = ({
     <div className="container-premium max-w-7xl mx-auto p-4">
       {/* Header - FIXED LAYOUT (Issue 4) */}
       <div
-        className={`sticky top-0 z-40 bg-gradient-to-b from-gray-900 to-transparent pb-4 mb-4 ${
+        className={`sticky top-0 z-40 bg-gradient-to-b from-black/30 to-transparent backdrop-blur-md pb-4 mb-4 ${
           editMode ? 'edit-mode' : ''
         }`}
       >
@@ -1601,7 +1617,11 @@ const SearchPage = ({
                 {group.photos.map((item) => {
                   // Check if this is an old-style collage (from collages collection) or new-style (photo)
                   // Old collages have 'slots' and no 'url', new collages have 'url' and 'isCollage'
-                  if (item.contentType === 'collage' && item.slots && !item.url) {
+                  if (
+                    item.contentType === 'collage' &&
+                    item.slots &&
+                    !item.url
+                  ) {
                     // Old-style collage from collages collection - render with CollageCard
                     return (
                       <div key={`collage-${item.id}`}>
@@ -1750,7 +1770,8 @@ const SearchPage = ({
         (() => {
           // Determine if this is first-run (no photos at all) or just empty filter results
           const hasAnyPhotos = safePhotos.length > 0
-          const hasActiveFiltersOrSearch = searchQuery || Object.values(activeFilters).some((v) => v)
+          const hasActiveFiltersOrSearch =
+            searchQuery || Object.values(activeFilters).some((v) => v)
           const isFirstRun = !hasAnyPhotos
 
           if (isFirstRun) {
@@ -1758,9 +1779,16 @@ const SearchPage = ({
             return (
               <EmptyState
                 variant="no-photos"
-                title={t('common:emptyStates.noPhotos.title') || 'No Photos Yet'}
-                description={t('common:emptyStates.noPhotos.description') || 'Upload your first photo to get started'}
-                action={t('common:emptyStates.noPhotos.action') || 'Upload Photos'}
+                title={
+                  t('common:emptyStates.noPhotos.title') || 'No Photos Yet'
+                }
+                description={
+                  t('common:emptyStates.noPhotos.description') ||
+                  'Upload your first photo to get started'
+                }
+                action={
+                  t('common:emptyStates.noPhotos.action') || 'Upload Photos'
+                }
                 onAction={() => openUploadModal && openUploadModal('photos')}
               />
             )
@@ -1770,8 +1798,15 @@ const SearchPage = ({
               <EmptyState
                 variant="no-results"
                 title={t('search:noResults') || 'No results found'}
-                description={t('common:noMatchingPhotos') || 'Try adjusting your search or filters'}
-                action={hasActiveFiltersOrSearch ? (t('search:resetFilters') || 'Clear Filters') : null}
+                description={
+                  t('common:noMatchingPhotos') ||
+                  'Try adjusting your search or filters'
+                }
+                action={
+                  hasActiveFiltersOrSearch
+                    ? t('search:resetFilters') || 'Clear Filters'
+                    : null
+                }
                 onAction={
                   hasActiveFiltersOrSearch
                     ? () => {
