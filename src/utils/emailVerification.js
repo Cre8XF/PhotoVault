@@ -5,14 +5,13 @@ export const sendVerificationEmail = async () => {
   const user = auth.currentUser
   if (!user) throw new Error('No authenticated user')
 
-  // Determine the redirect URL based on environment
   const baseUrl = import.meta.env.DEV
     ? 'http://localhost:5173'
     : 'https://pixtr.cloud'
 
   await sendEmailVerification(user, {
     url: `${baseUrl}/verify-complete`,
-    handleCodeInApp: false,
+    handleCodeInApp: true, // 🔑 KRITISK
   })
 
   if (import.meta.env.DEV) {
