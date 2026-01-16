@@ -27,6 +27,11 @@ const VerifyComplete = () => {
     const savedTheme = localStorage.getItem('theme')
     const isDark = savedTheme !== 'light'
     setIsDarkMode(isDark)
+
+    // CRITICAL: Disable PWA on this terminal page
+    // Remove manifest to prevent PWA initialization and 520 errors
+    const manifest = document.querySelector('link[rel="manifest"]')
+    if (manifest) manifest.remove()
   }, [])
 
   useEffect(() => {
