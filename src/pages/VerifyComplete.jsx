@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle, Mail } from 'lucide-react'
 import { auth } from '../firebase'
@@ -8,10 +7,18 @@ import Particles from '../components/Particles'
 import LogoLight from '../assets/logo_light.png'
 import LogoDark from '../assets/logo_dark.png'
 
+/**
+ * Email Verification Completion Page
+ *
+ * CRITICAL: This page is TERMINAL
+ * - Does NOT redirect anywhere
+ * - Does NOT navigate to landing/login
+ * - User manually closes this window/tab
+ * - Returns to original Pixtr tab
+ */
 const VerifyComplete = () => {
   const { t } = useTranslation('auth')
-  const navigate = useNavigate()
-  const { user, refreshUser } = useAuth()
+  const { refreshUser } = useAuth()
   const [status, setStatus] = useState('checking') // checking | verified | notLoggedIn | error
   const [isDarkMode, setIsDarkMode] = useState(true)
 
@@ -23,7 +30,7 @@ const VerifyComplete = () => {
   }, [])
 
   useEffect(() => {
-    const verifyAndRedirect = async () => {
+    const verifyEmail = async () => {
       try {
         // Check if user is logged in
         if (!auth.currentUser) {
@@ -38,15 +45,12 @@ const VerifyComplete = () => {
         if (auth.currentUser.emailVerified) {
           setStatus('verified')
 
-          // Refresh auth state in the app
+          // Refresh auth state in the app (for cross-tab sync)
           if (refreshUser) {
             await refreshUser()
           }
 
-          // Wait 2 seconds so user sees confirmation, then redirect
-          setTimeout(() => {
-            navigate('/', { replace: true })
-          }, 2000)
+          // CRITICAL: Do NOT navigate - page is terminal
         } else {
           // Email not verified yet (user may have clicked link before verification processed)
           setStatus('error')
@@ -57,8 +61,8 @@ const VerifyComplete = () => {
       }
     }
 
-    verifyAndRedirect()
-  }, [navigate, refreshUser])
+    verifyEmail()
+  }, [refreshUser])
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-[var(--bg-gradient-start)] to-[var(--bg-gradient-end)]">
@@ -98,26 +102,23 @@ const VerifyComplete = () => {
               </h2>
               <p className="text-gray-400 mb-6">{t('verifySuccess.body')}</p>
               <div className="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-3 rounded-xl text-sm">
-                {t('verifySuccess.redirect')}
+                {t('verifySuccess.terminal')}
               </div>
             </>
           )}
 
           {status === 'notLoggedIn' && (
             <>
-              <Mail className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+              <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-400" />
               <h2 className="text-2xl font-bold text-white mb-2">
-                {t('verifySuccess.notLoggedInTitle')}
+                {t('verifySuccess.title')}
               </h2>
               <p className="text-gray-400 mb-6">
                 {t('verifySuccess.notLoggedInBody')}
               </p>
-              <button
-                onClick={() => navigate('/login')}
-                className="ripple-effect w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
-              >
-                {t('login')}
-              </button>
+              <div className="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-3 rounded-xl text-sm">
+                {t('verifySuccess.terminal')}
+              </div>
             </>
           )}
 
@@ -128,12 +129,9 @@ const VerifyComplete = () => {
                 {t('verifySuccess.errorTitle')}
               </h2>
               <p className="text-gray-400 mb-6">{t('verifySuccess.errorBody')}</p>
-              <button
-                onClick={() => navigate('/')}
-                className="ripple-effect w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
-              >
-                {t('verifySuccess.continueToApp')}
-              </button>
+              <div className="bg-amber-500/10 border border-amber-500/20 text-amber-400 px-4 py-3 rounded-xl text-sm">
+                {t('verifySuccess.terminal')}
+              </div>
             </>
           )}
         </div>
