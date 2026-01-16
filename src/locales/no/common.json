@@ -172,7 +172,11 @@
   "verificationBanner": {
     "title": "Verifiser e-posten din",
     "description": "Du må verifisere e-posten din for å få tilgang til alle funksjoner",
-    "verifyButton": "Verifiser nå"
+    "infoOnly": "Vi har sendt en bekreftelses-epost. Sjekk innboksen for å låse opp alle funksjoner.",
+    "sendAgain": "Send på nytt",
+    "sending": "Sender...",
+    "emailSent": "Bekreftelses-epost sendt",
+    "alreadySent": "En bekreftelses-epost er nylig sendt."
   },
   "othersReacted": "{{count}} person reagerte",
   "othersReacted_plural": "{{count}} personer reagerte",

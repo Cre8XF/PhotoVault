@@ -172,7 +172,11 @@
   "verificationBanner": {
     "title": "Verify your email",
     "description": "You need to verify your email to access all features",
-    "verifyButton": "Verify now"
+    "infoOnly": "We've sent a verification email to your inbox. Please check your email to unlock all features.",
+    "sendAgain": "Send again",
+    "sending": "Sending...",
+    "emailSent": "Verification email sent",
+    "alreadySent": "A verification email was already sent recently."
   },
   "othersReacted": "{{count}} person reacted",
   "othersReacted_plural": "{{count}} people reacted",

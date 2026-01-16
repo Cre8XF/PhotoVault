@@ -171,6 +171,8 @@ const LoginPage = ({ onLogin = () => {} }) => {
         // ✅ SEND VERIFICATION EMAIL with proper config
         try {
           await sendVerificationEmail(newUser)
+          // Store timestamp for UX control (prevents false errors on first login)
+          localStorage.setItem('verificationEmailSentAt', Date.now().toString())
           console.log('✅ Verification email sent successfully')
         } catch (emailError) {
           console.error('⚠️ Could not send verification email:', emailError)
