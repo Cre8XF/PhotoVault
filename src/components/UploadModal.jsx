@@ -467,9 +467,10 @@ const UploadModal = ({
     // ============================================================
     if (selectedAlbumId && userTier === 'FREE') {
       // Find the selected album
-      const selectedAlbum = (Array.isArray(albums) ? albums : []).find(
-        (a) => a.id === selectedAlbumId
-      ) || newlyCreatedAlbum
+      const selectedAlbum =
+        (Array.isArray(albums) ? albums : []).find(
+          (a) => a.id === selectedAlbumId
+        ) || newlyCreatedAlbum
 
       if (selectedAlbum) {
         const currentPhotoCount = selectedAlbum.photoCount || 0
@@ -505,7 +506,9 @@ const UploadModal = ({
           const remaining = ALBUM_PHOTO_LIMIT - currentPhotoCount
           setNotification({
             type: 'error',
-            message: `This album can contain a maximum of 20 photos. You can upload ${remaining} more photo${remaining === 1 ? '' : 's'} or upgrade your plan.`,
+            message: `This album can contain a maximum of 20 photos. You can upload ${remaining} more photo${
+              remaining === 1 ? '' : 's'
+            } or upgrade your plan.`,
             action: {
               label: 'Upgrade to Lite',
               onClick: () => navigate('/subscription'),
@@ -647,7 +650,9 @@ const UploadModal = ({
       if (error.code === 'ALBUM_LIMIT_REACHED') {
         setNotification({
           type: 'error',
-          message: `Album limit reached (${error.current || 5}/${error.max || 5}). Free users can create up to 5 albums. Upgrade to Lite for unlimited albums.`,
+          message: `Album limit reached (${error.current || 5}/${
+            error.max || 5
+          }). Free users can create up to 5 albums. Upgrade to Lite for unlimited albums.`,
           action: {
             label: 'Upgrade to Lite',
             onClick: () => navigate('/subscription'),
@@ -974,15 +979,16 @@ const UploadModal = ({
                 htmlFor="upload-tags"
                 className="block text-sm font-medium mb-2"
               >
-                Tags (valgfritt)
+                {t('upload:tagsLabel')}
               </label>
+
               <input
                 id="upload-tags"
                 type="text"
                 value={uploadTags}
                 onChange={(e) => setUploadTags(e.target.value)}
                 disabled={uploading}
-                placeholder="Separer med komma: familie, sommer, hytta"
+                placeholder={t('upload:tagsPlaceholder')}
                 className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 disabled:opacity-50"
               />
 
@@ -1124,8 +1130,7 @@ const UploadModal = ({
                     ? 'Finishing current file...'
                     : uploadCount === totalFiles
                     ? 'Saving to cloud storage...'
-                    : 'Preparing files for upload...'
-                  }
+                    : 'Preparing files for upload...'}
                 </p>
               )}
 

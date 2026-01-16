@@ -52,5 +52,9 @@
   "browse": "Velg filer",
   "gallery": "Galleri",
   "supportedFormats": "Støtter bilder, videoer og dokumenter (PDF, DOCX, XLS, osv.)",
-  "selectedFiles": "Valgte filer"
+  "selectedFiles": "Valgte filer",
+  "tagsLabel": "Tags (valgfritt)",
+  "tagsPlaceholder": "Separer med komma: familie, sommer, hytta"
 }
+
+

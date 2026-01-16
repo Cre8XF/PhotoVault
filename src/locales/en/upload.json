@@ -52,5 +52,7 @@
   "browse": "Browse files",
   "gallery": "Gallery",
   "supportedFormats": "Supports images, videos and documents (PDF, DOCX, XLS, etc.)",
-  "selectedFiles": "Selected files"
+  "selectedFiles": "Selected files",
+  "tagsLabel": "Tags (optional)",
+  "tagsPlaceholder": "Separate with commas: family, summer, cabin"
 }
