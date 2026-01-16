@@ -16,13 +16,19 @@ import {
   ImagePlus,
   Shield,
   Clock,
-  X
+  X,
+  Video,
+  FileText,
+  File,
+  Archive
 } from "lucide-react";
 import { useVault } from "../hooks/useVault";
 import VaultSetupModal from "../components/VaultSetupModal";
 import VaultSettingsModal from "../components/VaultSettingsModal";
+import VaultViewerModal from "../components/VaultViewerModal";
 import useStore from "../state/store";
 import { useNavigate } from "react-router-dom";
+import { getAcceptedFileTypes, getVaultFileCategory } from "../utils/vaultMedia";
 import LogoLight from '../assets/logo_light.png';
 import LogoDark from '../assets/logo_dark.png';
 import IconLight from '../assets/icon_light.png';
@@ -53,8 +59,8 @@ const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [setupModalOpen, setSetupModalOpen] = useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
-  const [selectedPhoto, setSelectedPhoto] = useState(null);
-  const [decryptedUrls, setDecryptedUrls] = useState({});
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [selectedVaultItem, setSelectedVaultItem] = useState(null);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const isDarkMode = useStore((state) => state.isDarkMode);
@@ -139,16 +145,14 @@ const navigate = useNavigate();
     });
   };
 
-  const handleViewPhoto = async (photo) => {
-    const url = await getDecryptedPhotoUrl(photo);
-    if (url) {
-      setDecryptedUrls(prev => ({ ...prev, [photo.id]: url }));
-      setSelectedPhoto(photo);
-    }
+  const handleViewItem = (vaultItem) => {
+    setSelectedVaultItem(vaultItem);
+    setViewerOpen(true);
   };
 
-  const closePhotoModal = () => {
-    setSelectedPhoto(null);
+  const closeViewer = () => {
+    setViewerOpen(false);
+    setSelectedVaultItem(null);
   };
 
   const formatTimeRemaining = (ms) => {
@@ -320,7 +324,7 @@ const navigate = useNavigate();
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*,video/*"
+            accept={getAcceptedFileTypes()}
             multiple
             onChange={handleFileSelect}
             className="hidden"
@@ -374,7 +378,7 @@ const navigate = useNavigate();
               <VaultPhotoCard
                 key={photo.id}
                 photo={photo}
-                onView={() => handleViewPhoto(photo)}
+                onView={() => handleViewItem(photo)}
                 onDelete={() => handleDeletePhoto(photo.id)}
                 getDecryptedUrl={getDecryptedPhotoUrl}
               />
@@ -394,27 +398,13 @@ const navigate = useNavigate();
         onClose={() => setSettingsModalOpen(false)}
       />
 
-      {/* Photo Modal */}
-      {selectedPhoto && (
-        <div
-          className="fixed inset-0 bg-black/90 dark:bg-black/90 z-50 flex items-center justify-center p-4"
-          onClick={closePhotoModal}
-        >
-          <button
-            onClick={closePhotoModal}
-            className="absolute top-4 right-4 p-2 rounded-full bg-gray-200 dark:bg-gray-800/80 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-700 transition"
-          >
-            <X className="w-6 h-6" />
-          </button>
-
-          <img
-            src={decryptedUrls[selectedPhoto.id]}
-            alt={selectedPhoto.encryptedMetadata?.originalName || 'Vault photo'}
-            className="max-w-full max-h-full object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-      )}
+      {/* Vault Viewer Modal */}
+      <VaultViewerModal
+        isOpen={viewerOpen}
+        vaultItem={selectedVaultItem}
+        onClose={closeViewer}
+        getDecryptedUrl={getDecryptedPhotoUrl}
+      />
     </>
   );
 };
@@ -424,14 +414,21 @@ const VaultPhotoCard = ({ photo, onView, onDelete, getDecryptedUrl }) => {
   const [thumbnailUrl, setThumbnailUrl] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const mimeType = photo.encryptedMetadata?.mimeType || '';
+  const category = getVaultFileCategory(mimeType);
+  const isImage = category === 'image';
+
   useEffect(() => {
     let isMounted = true;
 
     const loadThumbnail = async () => {
       try {
-        const url = await getDecryptedUrl(photo);
-        if (isMounted && url) {
-          setThumbnailUrl(url);
+        // Only load thumbnail for images
+        if (isImage) {
+          const url = await getDecryptedUrl(photo);
+          if (isMounted && url) {
+            setThumbnailUrl(url);
+          }
         }
       } catch (error) {
         console.error('Failed to load thumbnail:', error);
@@ -446,19 +443,33 @@ const VaultPhotoCard = ({ photo, onView, onDelete, getDecryptedUrl }) => {
 
     return () => {
       isMounted = false;
-      if (thumbnailUrl) {
-        URL.revokeObjectURL(thumbnailUrl);
-      }
+      // Note: Don't revoke URL here as it's cached in Zustand store
     };
-  }, [photo, getDecryptedUrl]);
+  }, [photo, getDecryptedUrl, isImage]);
+
+  // Get icon for non-image files
+  const getFileIcon = () => {
+    switch (category) {
+      case 'video':
+        return <Video className="w-12 h-12 text-purple-400" />;
+      case 'pdf':
+        return <FileText className="w-12 h-12 text-red-400" />;
+      case 'doc':
+        return <FileText className="w-12 h-12 text-blue-400" />;
+      case 'archive':
+        return <Archive className="w-12 h-12 text-yellow-400" />;
+      default:
+        return <File className="w-12 h-12 text-gray-400" />;
+    }
+  };
 
   return (
     <div className="relative group aspect-square rounded-xl overflow-hidden bg-gray-200 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700/50">
-      {loading ? (
+      {loading && isImage ? (
         <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-900/40">
           <Lock className="w-8 h-8 text-gray-400 dark:text-gray-600 animate-pulse" />
         </div>
-      ) : thumbnailUrl ? (
+      ) : isImage && thumbnailUrl ? (
         <>
           <img
             src={thumbnailUrl}
@@ -466,6 +477,26 @@ const VaultPhotoCard = ({ photo, onView, onDelete, getDecryptedUrl }) => {
             className="w-full h-full object-cover cursor-pointer"
             onClick={onView}
           />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all" />
+          <button
+            onClick={onDelete}
+            className="absolute top-2 right-2 p-2 rounded-full bg-red-600/90 text-white
+                       opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </>
+      ) : !isImage ? (
+        <>
+          <div
+            className="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900/40 cursor-pointer"
+            onClick={onView}
+          >
+            {getFileIcon()}
+            <p className="mt-2 text-xs text-gray-600 dark:text-gray-400 text-center px-2 truncate w-full">
+              {photo.encryptedMetadata?.originalName || 'File'}
+            </p>
+          </div>
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all" />
           <button
             onClick={onDelete}
