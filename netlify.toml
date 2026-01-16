@@ -16,17 +16,16 @@ worker/**
 [functions]
   node_bundler = "esbuild"
 
-# Serve manifest.json with proper headers (must come before catch-all)
+# Serve manifest.json as a real static file (no SPA rewrite)
 [[headers]]
   for = "/manifest.json"
   [headers.values]
     Content-Type = "application/json"
     Cache-Control = "public, max-age=3600"
 
-# SPA catch-all redirect (must come after static file rules)
+# SPA catch-all redirect (must be last)
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-  conditions = {Role = ["none"]}
   force = false
