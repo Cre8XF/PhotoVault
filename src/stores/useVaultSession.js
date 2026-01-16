@@ -1,6 +1,7 @@
 /**
  * Vault Session Management Store
- * Handles vault unlock state, password caching, and session persistence
+ * Handles vault unlock state with memory-only password storage
+ * SECURITY: Password NEVER stored in browser storage (zero-knowledge architecture)
  * Separate from main vault state to prevent unnecessary re-renders
  */
 import { create } from 'zustand';
@@ -9,19 +10,15 @@ const useVaultSession = create((set, get) => ({
   // Session state
   isUnlocked: false,
   unlockedAt: null,
-  sessionPassword: null, // In-memory only, never persisted
+  sessionPassword: null, // In-memory ONLY, never persisted to browser storage
   pendingAction: null, // Action to resume after unlock
   lastError: null,
 
   /**
    * Unlock vault session with password
-   * @param {string} password - Vault password
+   * @param {string} password - Vault password (kept in memory only)
    */
   unlock: (password) => {
-    // Store password in sessionStorage for persistence across page interactions
-    // Note: This is cleared on lock or browser close
-    sessionStorage.setItem('vaultPassword', password);
-
     set({
       isUnlocked: true,
       unlockedAt: Date.now(),
@@ -34,9 +31,6 @@ const useVaultSession = create((set, get) => ({
    * Lock vault session and clear sensitive data
    */
   lock: () => {
-    // Clear password from both memory and sessionStorage
-    sessionStorage.removeItem('vaultPassword');
-
     set({
       isUnlocked: false,
       unlockedAt: null,
@@ -47,27 +41,11 @@ const useVaultSession = create((set, get) => ({
   },
 
   /**
-   * Get current session password
-   * Tries memory first, then sessionStorage
-   * @returns {string|null} Password if available
+   * Get current session password from memory only
+   * @returns {string|null} Password if available in memory
    */
   getPassword: () => {
-    const state = get();
-
-    // Check memory first
-    if (state.sessionPassword) {
-      return state.sessionPassword;
-    }
-
-    // Fallback to sessionStorage
-    const storedPassword = sessionStorage.getItem('vaultPassword');
-    if (storedPassword) {
-      // Restore to memory for faster access
-      set({ sessionPassword: storedPassword });
-      return storedPassword;
-    }
-
-    return null;
+    return get().sessionPassword;
   },
 
   /**
@@ -125,19 +103,11 @@ const useVaultSession = create((set, get) => ({
   },
 
   /**
-   * Restore session from sessionStorage on mount
-   * Used to maintain session across page navigations
+   * Restore session (placeholder for future implementation)
+   * SECURITY: Does NOT restore password - vault locks on page refresh by design
+   * @returns {boolean} Always false (no session restoration)
    */
   restoreSession: () => {
-    const storedPassword = sessionStorage.getItem('vaultPassword');
-    if (storedPassword) {
-      set({
-        isUnlocked: true,
-        unlockedAt: Date.now(),
-        sessionPassword: storedPassword,
-      });
-      return true;
-    }
     return false;
   },
 }));

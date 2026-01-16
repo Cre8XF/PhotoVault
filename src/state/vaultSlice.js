@@ -9,6 +9,7 @@ export const createVaultSlice = (set, get) => ({
   // =====================================================================
   isVaultUnlocked: false,
   vaultPasswordHash: null, // Stored hash for verification
+  vaultPassword: null, // SECURITY: In-memory only, never persisted to storage
   vaultPhotos: [],
   vaultSettings: {
     autoLockTimeout: 300000, // 5 minutes
@@ -41,18 +42,16 @@ export const createVaultSlice = (set, get) => ({
 
   /**
    * Unlock vault with password
+   * SECURITY: Password stored in memory only, never persisted
    */
-  unlockVault: (passwordHash) => {
+  unlockVault: (passwordHash, password) => {
     const storedHash = get().vaultPasswordHash;
     if (storedHash === passwordHash) {
       set({
         isVaultUnlocked: true,
+        vaultPassword: password, // Store in memory only
         lastActivityTime: Date.now(),
       });
-
-      // Store password in sessionStorage for decryption during session
-      // Note: This is cleared on lock/logout
-      sessionStorage.setItem('vaultSession', 'active');
 
       return true;
     }
@@ -61,17 +60,15 @@ export const createVaultSlice = (set, get) => ({
 
   /**
    * Lock vault
+   * SECURITY: Clears password from memory
    */
   lockVault: () => {
     set({
       isVaultUnlocked: false,
+      vaultPassword: null, // Clear password from memory
       lastActivityTime: null,
       decryptedThumbnailsCache: new Map(), // Clear cache
     });
-
-    // Clear session data
-    sessionStorage.removeItem('vaultSession');
-    sessionStorage.removeItem('vaultPassword');
   },
 
   /**
@@ -157,11 +154,13 @@ export const createVaultSlice = (set, get) => ({
 
   /**
    * Reset vault (delete all vault data)
+   * SECURITY: Clears password from memory
    */
   resetVault: () => {
     set({
       isVaultUnlocked: false,
       vaultPasswordHash: null,
+      vaultPassword: null, // Clear password from memory
       vaultPhotos: [],
       vaultSettings: {
         autoLockTimeout: 300000,
@@ -172,9 +171,6 @@ export const createVaultSlice = (set, get) => ({
       lastActivityTime: null,
       decryptedThumbnailsCache: new Map(),
     });
-
-    sessionStorage.removeItem('vaultSession');
-    sessionStorage.removeItem('vaultPassword');
   },
 
   /**

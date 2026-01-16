@@ -52,6 +52,7 @@ export const useVault = () => {
   const vaultPhotos = useStore((state) => state.vaultPhotos)
   const vaultSettings = useStore((state) => state.vaultSettings)
   const vaultPasswordHash = useStore((state) => state.vaultPasswordHash)
+  const vaultPassword = useStore((state) => state.vaultPassword) // In-memory only
   const vaultLoading = useStore((state) => state.vaultLoading)
 
   // Actions
@@ -111,6 +112,7 @@ export const useVault = () => {
 
   /**
    * Unlock vault with password
+   * SECURITY: Password stored in memory only, never persisted
    */
   const unlockWithPassword = useCallback(
     async (password) => {
@@ -119,12 +121,9 @@ export const useVault = () => {
 
         if (isValid) {
           const passwordHash = await hashPassword(password)
-          const success = unlockVault(passwordHash)
+          const success = unlockVault(passwordHash, password) // Pass password for memory storage
 
           if (success) {
-            // Store password in sessionStorage for decryption
-            sessionStorage.setItem('vaultPassword', password)
-
             // Load vault photos
             await loadVaultPhotos()
 
@@ -141,7 +140,7 @@ export const useVault = () => {
         return false
       }
     },
-    [vaultPasswordHash, unlockVault, showNotification, t]
+    [vaultPasswordHash, unlockVault, loadVaultPhotos, showNotification, t]
   )
 
   /**
@@ -181,11 +180,11 @@ export const useVault = () => {
 
   /**
    * Lock vault and clear sensitive data
+   * SECURITY: Password cleared from memory in vaultSlice.lockVault()
    */
   const lockVaultSafely = useCallback(() => {
     lockVault()
     clearThumbnailCache()
-    sessionStorage.removeItem('vaultPassword')
     showNotification(t('vault:notifications.vaultLocked'), 'info')
   }, [lockVault, clearThumbnailCache, showNotification, t])
 
@@ -219,6 +218,7 @@ export const useVault = () => {
 
   /**
    * Upload photos to vault
+   * SECURITY: Uses password from memory (Zustand state)
    */
   const uploadToVault = useCallback(
     async (files) => {
@@ -227,8 +227,7 @@ export const useVault = () => {
         return
       }
 
-      const password = sessionStorage.getItem('vaultPassword')
-      if (!password) {
+      if (!vaultPassword) {
         showNotification(t('vault:notifications.sessionExpired'), 'error')
         lockVaultSafely()
         return
@@ -240,7 +239,7 @@ export const useVault = () => {
         for (const file of files) {
           // Encrypt file
           const { blob: encryptedBlob, metadata: encryptionMetadata } =
-            await encryptFile(file, password)
+            await encryptFile(file, vaultPassword)
 
           // Generate unique ID
           const photoId = `${user.uid}_${Date.now()}_${Math.random()
@@ -299,6 +298,7 @@ export const useVault = () => {
     [
       user,
       isVaultUnlocked,
+      vaultPassword,
       addPhotoToVault,
       setVaultLoading,
       showNotification,
@@ -346,6 +346,7 @@ export const useVault = () => {
 
   /**
    * Decrypt and get photo blob URL
+   * SECURITY: Uses password from memory (Zustand state)
    * NOTE: This function now throws errors instead of auto-locking
    * Callers should handle errors and prompt user to re-unlock if needed
    */
@@ -359,8 +360,7 @@ export const useVault = () => {
       const cached = getCachedThumbnail(photo.id)
       if (cached) return cached
 
-      const password = sessionStorage.getItem('vaultPassword')
-      if (!password) {
+      if (!vaultPassword) {
         // Don't auto-lock - throw error so caller can handle
         throw new Error('SESSION_EXPIRED')
       }
@@ -375,7 +375,7 @@ export const useVault = () => {
         const decryptedBlob = await decryptFile(
           encryptedBlob,
           photo.cryptoMetadata,
-          password
+          vaultPassword
         )
 
         // Create blob URL
@@ -408,6 +408,7 @@ export const useVault = () => {
     },
     [
       isVaultUnlocked,
+      vaultPassword,
       getCachedThumbnail,
       cacheDecryptedThumbnail,
     ]
