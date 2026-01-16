@@ -250,7 +250,7 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => setPassword(e.target.value.trim())}
                   placeholder={t('vault:setupModal.password.placeholder', {
                     defaultValue: 'Enter strong password',
                   })}
@@ -274,15 +274,15 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
                   {passwordStrength.errors.map((error, index) => (
                     <p
                       key={index}
-                      className="text-xs text-red-400 flex items-center gap-1"
+                      className="text-sm text-red-400 font-medium flex items-center gap-1 px-2 py-1 bg-red-500/10 rounded"
                     >
-                      <AlertCircle className="w-3 h-3" />
+                      <AlertCircle className="w-4 h-4" />
                       {error}
                     </p>
                   ))}
                   {passwordStrength.valid && (
-                    <p className="text-xs text-green-400 flex items-center gap-1">
-                      <Check className="w-3 h-3" />
+                    <p className="text-sm text-green-400 font-medium flex items-center gap-1 px-2 py-1 bg-green-500/10 rounded">
+                      <Check className="w-4 h-4" />
                       {t('vault:setupModal.password.strong', {
                         defaultValue: 'Strong password',
                       })}
@@ -302,7 +302,7 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) => setConfirmPassword(e.target.value.trim())}
                   placeholder={t(
                     'vault:setupModal.password.confirmPlaceholder',
                     { defaultValue: 'Re-enter password' }
@@ -323,8 +323,8 @@ const VaultSetupModal = ({ isOpen, onClose, onComplete }) => {
                 </button>
               </div>
               {confirmPassword && !isPasswordMatch && (
-                <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" />
+                <p className="mt-2 text-sm text-red-400 font-semibold flex items-center gap-1 border border-red-400/30 p-2 rounded-lg bg-red-500/10">
+                  <AlertCircle className="w-4 h-4" />
                   {t('vault:setupModal.password.mismatch', {
                     defaultValue: 'Passwords do not match',
                   })}

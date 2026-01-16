@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { updateProfile, updateEmail } from 'firebase/auth';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import useAuth from '../hooks/useAuth';
 import useStore from '../state/store';
 import { sanitizeImageUrl, PLACEHOLDER_IMAGE } from '../utils/security';
@@ -64,26 +64,35 @@ const ProfilePage = () => {
 
   /**
    * Save profile changes
+   * ✅ CRITICAL FIX: Use auth.currentUser instead of Zustand user object
+   * Firebase Auth functions require live User instance, not serialized object
    */
   const handleSave = async () => {
-    if (!user) return;
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      setNotification({
+        message: 'You must be logged in to update your profile',
+        type: 'error',
+      });
+      return;
+    }
 
     setLoading(true);
 
     try {
-      // Update Firebase Auth profile
-      await updateProfile(user, {
+      // Update Firebase Auth profile with live User instance
+      await updateProfile(currentUser, {
         displayName: formData.displayName,
         photoURL: formData.photoURL,
       });
 
       // Update email if changed
-      if (formData.email !== user.email) {
-        await updateEmail(user, formData.email);
+      if (formData.email !== currentUser.email) {
+        await updateEmail(currentUser, formData.email);
       }
 
       // Update Firestore user document
-      const userDocRef = doc(db, 'users', user.uid);
+      const userDocRef = doc(db, 'users', currentUser.uid);
       await updateDoc(userDocRef, {
         displayName: formData.displayName,
         photoURL: formData.photoURL,
@@ -91,7 +100,7 @@ const ProfilePage = () => {
       });
 
       // Refresh user profile
-      await fetchUserProfile(user.uid);
+      await fetchUserProfile(currentUser.uid);
 
       setNotification({
         message: t('common:notifications.profileUpdated') || 'Profile updated successfully',
