@@ -83,6 +83,7 @@ body.light-mode {
   /* ============================================ */
   --color-primary-500: #8b5cf6;
   --color-purple-300: #a78bfa;
+  --color-purple-600: #9333ea;
   --color-purple-800: #6B21A8;
   --color-white: #ffffff;
   --bg-black: #000000;
@@ -174,6 +175,7 @@ body.dark-mode {
   /* Color Tokens (same for both modes) */
   --color-primary-500: #8b5cf6;
   --color-purple-300: #a78bfa;
+  --color-purple-600: #9333ea;
   --color-purple-800: #6B21A8;
   --color-white: #ffffff;
   --bg-black: #000000;
