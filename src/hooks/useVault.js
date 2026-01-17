@@ -109,6 +109,33 @@ export const useVault = () => {
     },
     [setupVault, showNotification, t]
   )
+  /**
+   * Load vault photos from Firestore
+   */
+  const loadVaultPhotos = useCallback(async () => {
+    if (!user) return
+
+    try {
+      setVaultLoading(true)
+      const q = query(
+        collection(db, 'vault_photos'),
+        where('userId', '==', user.uid)
+      )
+
+      const querySnapshot = await getDocs(q)
+      const photos = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+
+      setVaultPhotos(photos)
+    } catch (error) {
+      console.error('Failed to load vault photos:', error)
+      showNotification(t('vault:notifications.loadFailed'), 'error')
+    } finally {
+      setVaultLoading(false)
+    }
+  }, [user, setVaultPhotos, setVaultLoading, showNotification, t])
 
   /**
    * Unlock vault with password
@@ -189,34 +216,6 @@ export const useVault = () => {
   }, [lockVault, clearThumbnailCache, showNotification, t])
 
   /**
-   * Load vault photos from Firestore
-   */
-  const loadVaultPhotos = useCallback(async () => {
-    if (!user) return
-
-    try {
-      setVaultLoading(true)
-      const q = query(
-        collection(db, 'vault_photos'),
-        where('userId', '==', user.uid)
-      )
-
-      const querySnapshot = await getDocs(q)
-      const photos = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
-
-      setVaultPhotos(photos)
-    } catch (error) {
-      console.error('Failed to load vault photos:', error)
-      showNotification(t('vault:notifications.loadFailed'), 'error')
-    } finally {
-      setVaultLoading(false)
-    }
-  }, [user, setVaultPhotos, setVaultLoading, showNotification, t])
-
-  /**
    * Upload photos to vault
    * SECURITY: Uses password from memory (Zustand state)
    */
@@ -254,8 +253,8 @@ export const useVault = () => {
               userId: user.uid,
               photoId: photoId,
               encrypted: 'true',
-              encryptedAt: new Date().toISOString()
-            }
+              encryptedAt: new Date().toISOString(),
+            },
           })
 
           // Save metadata to Firestore
@@ -394,7 +393,10 @@ export const useVault = () => {
         console.error('Failed to decrypt photo:', error)
 
         // Don't auto-lock - throw error with proper code
-        if (error.code === 'INVALID_PASSWORD' || error.message.includes('password')) {
+        if (
+          error.code === 'INVALID_PASSWORD' ||
+          error.message.includes('password')
+        ) {
           throw new Error('INVALID_PASSWORD')
         }
 
