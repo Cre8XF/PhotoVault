@@ -136,16 +136,19 @@ const VaultViewerModal = ({ isOpen, vaultItem, onClose, getDecryptedUrl }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-black/95 dark:bg-black/95 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+      style={{ backgroundColor: 'var(--overlay-bg)' }}
       onClick={handleBackdropClick}
     >
       {/* Header */}
-      <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/50 to-transparent z-10">
+      <div className="absolute top-0 left-0 right-0 p-4 z-10" style={{
+        background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.3), transparent)'
+      }}>
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex-1 min-w-0 mr-4">
-            <h3 className="text-white font-semibold truncate">{originalName}</h3>
+            <h3 className="font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{originalName}</h3>
             {fileSize > 0 && (
-              <p className="text-gray-300 text-sm">{formatFileSize(fileSize)}</p>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{formatFileSize(fileSize)}</p>
             )}
           </div>
 
@@ -153,7 +156,8 @@ const VaultViewerModal = ({ isOpen, vaultItem, onClose, getDecryptedUrl }) => {
             {objectUrl && !loading && (
               <button
                 onClick={handleDownload}
-                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+                className="p-2 rounded-lg glass hover:bg-white/10 transition-colors"
+                style={{ color: 'var(--text-primary)' }}
                 aria-label={t('common:download', { defaultValue: 'Download' })}
               >
                 <Download className="w-5 h-5" />
@@ -162,7 +166,8 @@ const VaultViewerModal = ({ isOpen, vaultItem, onClose, getDecryptedUrl }) => {
 
             <button
               onClick={handleClose}
-              className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+              className="p-2 rounded-lg glass hover:bg-white/10 transition-colors"
+              style={{ color: 'var(--text-primary)' }}
               aria-label={t('common:close', { defaultValue: 'Close' })}
             >
               <X className="w-5 h-5" />
@@ -175,20 +180,21 @@ const VaultViewerModal = ({ isOpen, vaultItem, onClose, getDecryptedUrl }) => {
       <div className="relative w-full h-full flex items-center justify-center pt-20 pb-4">
         {loading && (
           <div className="flex flex-col items-center gap-3">
-            <Loader className="w-10 h-10 text-white animate-spin" />
-            <p className="text-white text-sm">
+            <Loader className="w-10 h-10 animate-spin" style={{ color: 'var(--text-primary)' }} />
+            <p className="text-sm" style={{ color: 'var(--text-primary)' }}>
               {t('vault:viewer.loading', { defaultValue: 'Loading...' })}
             </p>
           </div>
         )}
 
         {error && (
-          <div className="flex flex-col items-center gap-3 text-red-400">
+          <div className="flex flex-col items-center gap-3" style={{ color: 'var(--color-error)' }}>
             <AlertCircle className="w-12 h-12" />
             <p className="text-lg">{error}</p>
             <button
               onClick={handleClose}
-              className="mt-4 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+              className="mt-4 px-4 py-2 rounded-lg glass hover:bg-white/10 transition-colors"
+              style={{ color: 'var(--text-primary)' }}
             >
               {t('common:close', { defaultValue: 'Close' })}
             </button>
@@ -235,29 +241,34 @@ const VaultViewerModal = ({ isOpen, vaultItem, onClose, getDecryptedUrl }) => {
             {/* Document/Other - Download prompt */}
             {!['image', 'video', 'pdf'].includes(category) && (
               <div
-                className="bg-gray-900/90 border border-gray-700 rounded-xl p-8 max-w-md"
+                className="glass rounded-xl p-8 max-w-md"
+                style={{
+                  backgroundColor: 'var(--bg-elevated)',
+                  borderColor: 'var(--border-color)'
+                }}
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex flex-col items-center gap-4 text-center">
                   <FileText className="w-16 h-16 text-purple-400" />
                   <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">
+                    <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
                       {originalName}
                     </h3>
-                    <p className="text-gray-400 mb-1">
+                    <p className="mb-1" style={{ color: 'var(--text-secondary)' }}>
                       {t('vault:viewer.previewNotAvailable', {
                         defaultValue: 'Preview not available for this file type',
                       })}
                     </p>
                     {fileSize > 0 && (
-                      <p className="text-gray-500 text-sm">{formatFileSize(fileSize)}</p>
+                      <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{formatFileSize(fileSize)}</p>
                     )}
                   </div>
                   <button
                     onClick={handleDownload}
                     className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600
-                               hover:from-purple-700 hover:to-blue-700 text-white font-semibold
+                               hover:from-purple-700 hover:to-blue-700 font-semibold
                                flex items-center justify-center gap-2 transition-colors"
+                    style={{ color: '#ffffff' }}
                   >
                     <Download className="w-5 h-5" />
                     {t('common:download', { defaultValue: 'Download' })}
