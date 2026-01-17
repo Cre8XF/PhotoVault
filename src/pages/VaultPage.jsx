@@ -484,7 +484,7 @@ const VaultPhotoCard = ({ photo, onView, onDelete, getDecryptedUrl }) => {
               onView();
             }}
           />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all" />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all pointer-events-none" />
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -510,7 +510,7 @@ const VaultPhotoCard = ({ photo, onView, onDelete, getDecryptedUrl }) => {
               {photo.encryptedMetadata?.originalName || 'File'}
             </p>
           </div>
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all" />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all pointer-events-none" />
           <button
             onClick={(e) => {
               e.stopPropagation();
