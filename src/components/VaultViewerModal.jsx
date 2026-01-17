@@ -127,7 +127,12 @@ const VaultViewerModal = ({ isOpen, vaultItem, onClose, getDecryptedUrl }) => {
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    console.log('🚪 VaultViewerModal: Modal is CLOSED (isOpen=false)');
+    return null;
+  }
+
+  console.log('🚀 VaultViewerModal: Modal is RENDERING', { vaultItem, loading, error, objectUrl });
 
   return (
     <div
