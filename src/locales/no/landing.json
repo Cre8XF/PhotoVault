@@ -1,10 +1,11 @@
 {
   "hero": {
     "title": "Dine bilder. Din kontroll.",
-    "subtitle": "Privacy-first alternativ til Google Photos. Norskutviklet. Ingen tracking. Ingen annonser.",
+    "subtitle": "Privacy-first fototjeneste. Norskutviklet. Ingen tracking. Ingen annonser.",
     "trustLine": "Laget i Norge • Privacy-first • Ingen tracking",
     "noCreditCard": "Ingen kredittkort nødvendig"
   },
+
   "cta": {
     "getStarted": "Start gratis",
     "startFree": "Start gratis",
@@ -13,92 +14,100 @@
     "seePlans": "Se planer",
     "learnMore": "Les mer"
   },
+
   "why": {
     "title": "Hvorfor Pixtr?",
-    "subtitle": "Et alternativ som respekterer personvernet ditt",
+    "subtitle": "Et moderne alternativ som respekterer personvernet ditt",
     "noTracking": {
       "title": "Ingen tracking",
-      "desc": "Vi sporer ikke aktiviteten din. Ingen annonser. Ingen datainnsamling."
+      "desc": "Vi sporer ikke hva du gjør. Ingen annonser. Ingen skjult datainnsamling."
     },
     "yourData": {
       "title": "Dine data",
-      "desc": "Du eier bildene dine. Vi selger aldri dataene dine til tredjeparter."
+      "desc": "Du eier bildene dine fullt og helt. Vi selger aldri dataene dine videre."
     },
     "creative": {
       "title": "Kreative verktøy",
-      "desc": "Lag kollasjer, del via QR-koder, og organiser bildene som du vil."
+      "desc": "Lag collager, organiser minner og del trygt – på dine premisser."
     }
   },
+
   "features": {
     "title": "Alt du trenger",
     "subtitle": "Profesjonelle funksjoner uten kompromisser",
     "privacy": {
       "title": "Privacy-first",
-      "desc": "Sterk sikkerhet og full kontroll over dine egne data"
+      "desc": "Bygget med sikkerhet, kontroll og eierskap i fokus"
     },
     "albums": {
       "title": "Smart organisering",
-      "desc": "Album, favoritter og smarte filter for store bibliotek"
+      "desc": "Album, favoritter og effektive filtre for store samlinger"
     },
     "search": {
       "title": "Kraftig søk",
-      "desc": "Finn bilder med ansikter, datoer, album og metadata"
+      "desc": "Finn bilder raskt med dato, album og metadata"
     },
     "collage": {
       "title": "Collage Builder",
-      "desc": "Lag vakre layouts på sekunder med profesjonelle templates"
+      "desc": "Lag profesjonelle collager med ferdige templates"
     },
     "sharing": {
       "title": "QR-deling",
-      "desc": "Del album trygt via QR-koder – perfekt for arrangementer"
+      "desc": "Del album trygt via QR-koder – perfekt for familie og arrangementer"
     },
     "control": {
       "title": "Full kontroll",
-      "desc": "PIN-lås, biometrisk sikkerhet og offline tilgang"
+      "desc": "PIN-lås, biometrisk sikkerhet og tydelige personvernvalg"
     }
   },
+
   "pricing": {
     "title": "Velg din plan",
-    "subtitle": "Start gratis. Oppgrader når som helst.",
+    "subtitle": "Start gratis. Oppgrader når Pixtr blir en del av hverdagen din.",
     "recommended": "MEST POPULÆR",
     "storage": "lagring",
+
     "free": {
       "period": "for alltid",
-      "limitation": "Best for å prøve Pixtr",
+      "limitation": "Best for å teste Pixtr",
       "feature1": "1 GB lagring",
       "feature2": "Album og søk",
       "feature3": "Collage Builder",
       "feature4": "QR-deling"
     },
+
     "lite": {
       "period": "mnd",
-      "trustLine": "Perfekt for daglig bruk",
-      "unlocksTitle": "Låser opp:",
-      "unlock1": "Høyere kvalitet på opplasting",
-      "unlock2": "Mindre komprimering",
-      "unlock3": "Raskere opplasting",
-      "unlock4": "Prioritert support",
-      "feature1": "5 GB lagring",
-      "feature2": "Alt i Gratis",
-      "feature3": "Tidlig tilgang til nye funksjoner"
+      "trustLine": "For deg som faktisk vil bruke Pixtr",
+      "unlocksTitle": "Inkluderer:",
+      "unlock1": "5 GB trygg lagring",
+      "unlock2": "Vault – privat og beskyttet område",
+      "unlock3": "Files – lagre dokumenter og minner",
+      "unlock4": "Lagre og gjenbruk collager",
+      "feature1": "Alt i Gratis",
+      "feature2": "Tidlig tilgang til nye funksjoner",
+      "feature3": "Støtter videre utvikling av Pixtr",
+      "note": "Pixtr er i tidlig fase. Lagringsgrenser kan justeres i takt med videre utvikling."
+
     },
+
     "pro": {
-      "period": "mnd",
-      "trustLine": "Alt, nå og fremover",
-      "feature1": "50 GB maksimal lagring",
-      "feature2": "Alle kreative verktøy",
-      "feature3": "Videoopplasting"
-    }
+  "teaser": "Pro kommer senere – med mer lagring, avanserte kreative verktøy og video- og AI-funksjoner."
+}
+
   },
+
   "finalCta": {
     "title": "Klar til å begynne?",
-    "subtitle": "Bli med de første brukerne som tar kontroll over bildene sine"
+    "subtitle": "Bli med blant de første som tar kontroll over bildene sine"
   },
+
   "footer": {
     "tagline": "Norskutviklet photo management app",
     "privacy": "Personvern",
     "terms": "Vilkår"
   },
+
   "about": {
     "pageTitle": "Om Pixtr",
     "whatIs": {
@@ -109,9 +118,9 @@
     },
     "privacyControl": {
       "title": "Personvern og kontroll",
-      "para1": "Bildene og dataene dine tilhører deg. Pixtr er bygget på prinsippet om at du skal ha fullstendig kontroll over minnene dine og personlig informasjon.",
-      "para2": "Vi sporer ikke aktiviteten din, selger ikke dataene dine, og viser ingen annonser. Du kan eksportere eller slette dataene dine når som helst direkte fra kontoinnstillingene.",
-      "para3": "For flere detaljer, se personvernerklæringen og vilkårene for bruk i informasjonsseksjonen."
+      "para1": "Bildene og dataene dine tilhører deg. Pixtr er bygget på prinsippet om full kontroll og eierskap.",
+      "para2": "Vi sporer ikke aktivitet, selger ikke data og viser ingen annonser. Du kan eksportere eller slette alt når som helst.",
+      "para3": "Se personvernerklæringen og vilkårene for detaljer."
     }
   }
 }

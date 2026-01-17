@@ -86,9 +86,11 @@ function LandingPage() {
       name: 'LITE',
       price: '39 kr',
       period: t('landing:pricing.lite.period'),
-      storage: '10 GB',
+      storage: '5 GB',
       recommended: true,
       trustLine: t('landing:pricing.lite.trustLine'),
+      note: t('landing:pricing.lite.note'),
+      proTeaser: t('landing:pricing.pro.teaser'),
       cta: t('landing:cta.startLite'),
       unlocks: [
         t('landing:pricing.lite.unlock1'),
@@ -102,6 +104,7 @@ function LandingPage() {
         t('landing:pricing.lite.feature3'),
       ],
     },
+
     // ⚠️ PHASE 3: PRO tier hidden for launch (backend logic kept intact)
     // {
     //   name: 'PRO',
@@ -351,6 +354,11 @@ function LandingPage() {
                       {plan.limitation}
                     </p>
                   )}
+                  {plan.note && (
+                    <p className="text-xs text-[#94a3b8] text-center pt-2 italic">
+                      {plan.note}
+                    </p>
+                  )}
                 </div>
 
                 {/* Unlocks section for Lite */}
@@ -391,6 +399,11 @@ function LandingPage() {
                 >
                   {plan.cta}
                 </button>
+                {plan.proTeaser && (
+                  <div className="mt-4 pt-4 border-t border-[#e2e8f0] text-center">
+                    <p className="text-xs text-[#64748b]">{plan.proTeaser}</p>
+                  </div>
+                )}
               </div>
             ))}
           </div>

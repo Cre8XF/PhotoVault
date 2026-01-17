@@ -1,117 +1,127 @@
 {
   "hero": {
-    "title": "Your Photos. Your Control.",
-    "subtitle": "Privacy-first alternative to Google Photos. Norwegian-built. No tracking. No ads.",
+    "title": "Your photos. Your control.",
+    "subtitle": "Privacy-first photo service. Built in Norway. No tracking. No ads.",
     "trustLine": "Built in Norway • Privacy-first • No tracking",
     "noCreditCard": "No credit card required"
   },
+
   "cta": {
-    "getStarted": "Start free",
+    "getStarted": "Get started",
     "startFree": "Start free",
     "startLite": "Start Lite",
     "startPro": "Start Pro",
     "seePlans": "See plans",
-    "learnMore": "Learn More"
+    "learnMore": "Learn more"
   },
+
   "why": {
     "title": "Why Pixtr?",
-    "subtitle": "An alternative that respects your privacy",
+    "subtitle": "A modern alternative that respects your privacy",
     "noTracking": {
-      "title": "No Tracking",
-      "desc": "We don't track your activity. No ads. No data collection."
+      "title": "No tracking",
+      "desc": "We don’t track your activity. No ads. No hidden data collection."
     },
     "yourData": {
-      "title": "Your Data",
-      "desc": "You own your photos. We never sell your data to third parties."
+      "title": "Your data",
+      "desc": "You fully own your photos. We never sell your data to third parties."
     },
     "creative": {
-      "title": "Creative Tools",
-      "desc": "Create collages, share via QR codes, and organize your way."
+      "title": "Creative tools",
+      "desc": "Create collages, organize memories, and share securely — on your terms."
     }
   },
+
   "features": {
-    "title": "Everything You Need",
-    "subtitle": "Professional features without compromises",
+    "title": "Everything you need",
+    "subtitle": "Professional features without compromise",
     "privacy": {
       "title": "Privacy-first",
-      "desc": "Strong security and full control over your data"
+      "desc": "Built with security, control, and ownership at the core"
     },
     "albums": {
-      "title": "Smart Organization",
-      "desc": "Albums, favorites, and smart filters for large libraries"
+      "title": "Smart organization",
+      "desc": "Albums, favorites, and efficient filters for large libraries"
     },
     "search": {
-      "title": "Powerful Search",
-      "desc": "Find photos by faces, dates, albums and metadata"
+      "title": "Powerful search",
+      "desc": "Find photos quickly by date, album, and metadata"
     },
     "collage": {
       "title": "Collage Builder",
-      "desc": "Create beautiful layouts in seconds with professional templates"
+      "desc": "Create professional layouts using ready-made templates"
     },
     "sharing": {
-      "title": "QR Sharing",
-      "desc": "Share albums securely via QR codes – perfect for events"
+      "title": "QR sharing",
+      "desc": "Share albums securely via QR codes — perfect for events and families"
     },
     "control": {
-      "title": "Full Control",
-      "desc": "PIN lock, biometric security, and offline access"
+      "title": "Full control",
+      "desc": "PIN lock, biometric security, and clear privacy controls"
     }
   },
+
   "pricing": {
-    "title": "Choose Your Plan",
-    "subtitle": "Start free. Upgrade anytime.",
+    "title": "Choose your plan",
+    "subtitle": "Start free. Upgrade when Pixtr becomes part of your everyday life.",
     "recommended": "MOST POPULAR",
     "storage": "storage",
+
     "free": {
       "period": "forever",
       "limitation": "Best for trying Pixtr",
       "feature1": "1 GB storage",
-      "feature2": "Albums & search",
+      "feature2": "Albums and search",
       "feature3": "Collage Builder",
       "feature4": "QR sharing"
     },
+
     "lite": {
       "period": "mo",
-      "trustLine": "Perfect for daily use",
-      "unlocksTitle": "Unlocks:",
-      "unlock1": "Higher quality uploads",
-      "unlock2": "Less compression",
-      "unlock3": "Faster uploads",
-      "unlock4": "Priority support",
-      "feature1": "5 GB storage",
-      "feature2": "Everything in FREE",
-      "feature3": "Early access to new features"
+      "trustLine": "For people who actually want to use Pixtr",
+      "unlocksTitle": "Includes:",
+      "unlock1": "5 GB secure storage",
+      "unlock2": "Vault – private and protected area",
+      "unlock3": "Files – store documents and memories",
+      "unlock4": "Save and reuse collages",
+      "feature1": "Everything in Free",
+      "feature2": "Early access to new features",
+      "feature3": "Supports continued Pixtr development",
+      "note": "Pixtr is in an early phase. Storage limits may be adjusted as the service evolves."
+
     },
-    "pro": {
-      "period": "mo",
-      "trustLine": "Everything, now and going forward",
-      "feature1": "50 GB maximum storage",
-      "feature2": "All creative tools",
-      "feature3": "Video uploads"
-    }
+
+   "pro": {
+  "teaser": "Pro is coming later — with more storage, advanced creative tools, and video & AI features."
+}
+
+
   },
+
   "finalCta": {
-    "title": "Ready to Start?",
-    "subtitle": "Join early users taking control of their photos"
+    "title": "Ready to get started?",
+    "subtitle": "Join the first users taking full control of their photos"
   },
+
   "footer": {
-    "tagline": "Norwegian-built photo management app",
+    "tagline": "Privacy-first photo management app",
     "privacy": "Privacy",
     "terms": "Terms"
   },
+
   "about": {
     "pageTitle": "About Pixtr",
     "whatIs": {
       "title": "What is Pixtr"
     },
     "corePrinciples": {
-      "title": "Core Principles"
+      "title": "Core principles"
     },
     "privacyControl": {
-      "title": "Privacy & Control",
-      "para1": "Your photos and data belong to you. Pixtr is built on the principle that you should have complete control over your memories and personal information.",
-      "para2": "We don't track your activity, sell your data, or show ads. You can export or delete your data at any time directly from your account settings.",
-      "para3": "For more details, see our Privacy Policy and Terms of Service in the Information section."
+      "title": "Privacy and control",
+      "para1": "Your photos and data belong to you. Pixtr is built on the principle of full ownership and control.",
+      "para2": "We don’t track activity, sell data, or show ads. You can export or delete everything at any time.",
+      "para3": "See the privacy policy and terms for more details."
     }
   }
 }
