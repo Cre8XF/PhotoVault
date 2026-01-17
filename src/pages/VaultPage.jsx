@@ -177,10 +177,11 @@ const navigate = useNavigate();
           {/* Close button - top right */}
           <button
             onClick={() => navigate('/account')}
-            className="absolute top-4 right-4 p-2 hover:bg-white/10 dark:hover:bg-white/10 hover:bg-gray-200 rounded-lg transition-colors ripple-effect"
+            className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-lg transition-colors ripple-effect"
             aria-label={t('vault:locked.backToAccount', { defaultValue: 'Back to account' })}
+            style={{ color: 'var(--text-primary)' }}
           >
-            <X className="w-6 h-6 text-gray-900 dark:text-white" />
+            <X className="w-6 h-6" />
           </button>
 
           <div className="w-full max-w-md">
@@ -192,10 +193,10 @@ const navigate = useNavigate();
                   className="w-full h-full object-contain"
                 />
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
                 {t('vault:locked.title', { defaultValue: 'Vault Locked' })}
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p style={{ color: 'var(--text-secondary)' }}>
                 {t('vault:locked.subtitle', { defaultValue: 'Enter your password to access encrypted photos' })}
               </p>
             </div>
@@ -207,9 +208,12 @@ const navigate = useNavigate();
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={t('vault:locked.passwordPlaceholder', { defaultValue: 'Enter vault password' })}
-                  className="w-full p-4 pr-12 rounded-xl bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-600/50
-                             text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400
-                             focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full p-4 pr-12 rounded-xl border focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  style={{
+                    backgroundColor: 'var(--bg-secondary)',
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--text-primary)'
+                  }}
                 />
                 <button
                   type="button"
@@ -237,18 +241,17 @@ const navigate = useNavigate();
             {biometricAvailable && vaultSettings.biometricEnabled && (
               <>
                 <div className="flex items-center gap-3 my-4">
-                  <div className="flex-1 h-px bg-gray-300 dark:bg-gray-700" />
-                  <span className="text-gray-600 dark:text-gray-400 text-sm">
+                  <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border-color)' }} />
+                  <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                     {t('vault:locked.or', { defaultValue: 'or' })}
                   </span>
-                  <div className="flex-1 h-px bg-gray-300 dark:bg-gray-700" />
+                  <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border-color)' }} />
                 </div>
 
                 <button
                   onClick={handleUnlockWithBiometric}
-                  className="w-full py-3 rounded-xl bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-600/50
-                             text-gray-900 dark:text-white font-semibold hover:bg-gray-200 dark:hover:bg-gray-800 transition
-                             flex items-center justify-center gap-2"
+                  className="w-full py-3 rounded-xl glass hover:bg-white/10 font-semibold transition flex items-center justify-center gap-2"
+                  style={{ color: 'var(--text-primary)' }}
                 >
                   <Fingerprint className="w-5 h-5" />
                   {t('vault:locked.biometricButton', { defaultValue: 'Unlock with Biometric' })}
@@ -259,8 +262,8 @@ const navigate = useNavigate();
             {!isVaultSetup && (
               <button
                 onClick={() => setSetupModalOpen(true)}
-                className="w-full mt-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-600/50
-                           text-purple-600 dark:text-purple font-semibold hover:bg-gray-200 dark:hover:bg-gray-800 transition"
+                className="w-full mt-4 py-3 rounded-xl glass hover:bg-white/10 font-semibold transition"
+                style={{ color: 'var(--color-purple-text)' }}
               >
                 {t('vault:locked.setupButton', { defaultValue: 'Set Up Vault' })}
               </button>
@@ -284,11 +287,11 @@ const navigate = useNavigate();
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <h1 className="text-3xl font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
               <Shield className="w-7 h-7 text-purple-500 dark:text-purple" />
               {t('vault:unlocked.title', { defaultValue: 'Secure Vault' })}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
+            <p className="mt-1" style={{ color: 'var(--text-secondary)' }}>
               {vaultPhotos.length} {vaultPhotos.length === 1 ? t('vault:unlocked.photo', { defaultValue: 'photo' }) : t('vault:unlocked.photos', { defaultValue: 'photos' })}
             </p>
           </div>
@@ -305,16 +308,16 @@ const navigate = useNavigate();
 
             <button
               onClick={() => setSettingsModalOpen(true)}
-              className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-600/50
-                         text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition"
+              className="p-2 rounded-xl glass hover:bg-white/10 transition"
+              style={{ color: 'var(--text-secondary)' }}
             >
               <Settings className="w-5 h-5" />
             </button>
 
             <button
               onClick={lockVault}
-              className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-600/50
-                         text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition"
+              className="p-2 rounded-xl glass hover:bg-white/10 transition"
+              style={{ color: 'var(--text-secondary)' }}
             >
               <LockOpen className="w-5 h-5" />
             </button>
@@ -359,10 +362,10 @@ const navigate = useNavigate();
             <div className="inline-flex items-center justify-center w-20 h-20 bg-purple-500/10 rounded-full mb-4">
               <ImagePlus className="w-10 h-10 text-purple" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
               {t('vault:unlocked.empty.title', { defaultValue: 'No Photos in Vault' })}
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+            <p className="mb-6 max-w-md mx-auto" style={{ color: 'var(--text-secondary)' }}>
               {t('vault:unlocked.empty.message', { defaultValue: 'Upload your first encrypted photo to get started' })}
             </p>
             <button
@@ -468,10 +471,10 @@ const VaultPhotoCard = ({ photo, onView, onDelete, getDecryptedUrl }) => {
   };
 
   return (
-    <div className="relative group aspect-square rounded-xl overflow-hidden bg-gray-200 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700/50">
+    <div className="relative group aspect-square rounded-xl overflow-hidden glass">
       {loading && isImage ? (
-        <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-900/40">
-          <Lock className="w-8 h-8 text-gray-400 dark:text-gray-600 animate-pulse" />
+        <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+          <Lock className="w-8 h-8 animate-pulse" style={{ color: 'var(--text-muted)' }} />
         </div>
       ) : isImage && thumbnailUrl ? (
         <>
@@ -499,14 +502,15 @@ const VaultPhotoCard = ({ photo, onView, onDelete, getDecryptedUrl }) => {
       ) : !isImage ? (
         <>
           <div
-            className="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900/40 cursor-pointer"
+            className="w-full h-full flex flex-col items-center justify-center cursor-pointer"
+            style={{ backgroundColor: 'var(--bg-secondary)' }}
             onClick={() => {
               console.log('🖱️ Non-image file clicked! Calling onView...');
               onView();
             }}
           >
             {getFileIcon()}
-            <p className="mt-2 text-xs text-gray-600 dark:text-gray-400 text-center px-2 truncate w-full">
+            <p className="mt-2 text-xs text-center px-2 truncate w-full" style={{ color: 'var(--text-secondary)' }}>
               {photo.encryptedMetadata?.originalName || 'File'}
             </p>
           </div>
@@ -523,8 +527,8 @@ const VaultPhotoCard = ({ photo, onView, onDelete, getDecryptedUrl }) => {
           </button>
         </>
       ) : (
-        <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-900/40">
-          <AlertCircle className="w-8 h-8 text-red-500 dark:text-red-400" />
+        <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+          <AlertCircle className="w-8 h-8" style={{ color: 'var(--color-error)' }} />
         </div>
       )}
     </div>

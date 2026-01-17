@@ -199,24 +199,25 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      style={{ backgroundColor: 'var(--overlay-bg)' }}
       onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-2xl shadow-2xl border border-gray-700/40
-                    bg-gradient-to-b from-gray-800/90 to-gray-900/90 p-6 backdrop-blur-xl
+        className="w-full max-w-md rounded-2xl shadow-2xl glass p-6 backdrop-blur-xl
                     max-h-[90vh] overflow-y-auto"
       >
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+          <h2 className="text-xl font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
             <Settings className="w-5 h-5 text-purple" />
             {t('vault:settings.title', { defaultValue: 'Vault Settings' })}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-200 transition"
+            className="transition-opacity hover:opacity-70"
+            style={{ color: 'var(--text-secondary)' }}
           >
             <X className="w-5 h-5" />
           </button>
@@ -224,7 +225,7 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
 
         {/* Auto-lock timeout */}
         <div className="mb-6">
-          <label className="flex items-center gap-2 text-sm text-gray-300 mb-2">
+          <label className="flex items-center gap-2 text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
             <Clock className="w-4 h-4 text-purple" />
             {t('vault:settings.autoLock.label', {
               defaultValue: 'Auto-Lock Timeout',
@@ -233,8 +234,12 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
           <select
             value={autoLockTimeout}
             onChange={(e) => setAutoLockTimeout(Number(e.target.value))}
-            className="w-full p-3 rounded-xl bg-gray-800/60 border border-gray-600/50
-                       text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full p-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-purple-500"
+            style={{
+              backgroundColor: 'var(--bg-secondary)',
+              borderColor: 'var(--border-color)',
+              color: 'var(--text-primary)'
+            }}
           >
             <option value={60000}>
               1{' '}
@@ -262,7 +267,7 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
               {t('vault:settings.autoLock.never', { defaultValue: 'Never' })}
             </option>
           </select>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
             {t('vault:settings.autoLock.description', {
               defaultValue:
                 'Vault will automatically lock after this period of inactivity',
@@ -273,16 +278,16 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
         {/* Biometric toggle */}
         {biometricAvailable && (
           <div className="mb-6">
-            <div className="flex items-center justify-between p-4 bg-gray-800/60 border border-gray-600/50 rounded-xl">
+            <div className="flex items-center justify-between p-4 glass rounded-xl">
               <div className="flex items-center gap-3">
                 <Fingerprint className="w-5 h-5 text-purple" />
                 <div>
-                  <p className="text-white font-semibold">
+                  <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                     {t('vault:settings.biometric.label', {
                       defaultValue: 'Biometric Unlock',
                     })}
                   </p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                     {t('vault:settings.biometric.description', {
                       defaultValue: 'Use FaceID/TouchID',
                     })}
@@ -291,9 +296,10 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
               </div>
               <button
                 onClick={() => setBiometricEnabled(!biometricEnabled)}
-                className={`w-12 h-6 rounded-full transition-colors relative ${
-                  biometricEnabled ? 'bg-purple-600' : 'bg-gray-600'
-                }`}
+                className="w-12 h-6 rounded-full transition-colors relative"
+                style={{
+                  backgroundColor: biometricEnabled ? 'var(--color-purple-600)' : 'var(--bg-tertiary)'
+                }}
               >
                 <span
                   className={`absolute w-5 h-5 bg-white rounded-full transition-transform top-0.5 ${
@@ -318,9 +324,9 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
           </button>
 
           {showChangePassword && (
-            <div className="space-y-3 p-4 bg-gray-800/40 border border-gray-700/50 rounded-xl">
+            <div className="space-y-3 p-4 glass rounded-xl">
               <div>
-                <label className="block text-sm text-gray-300 mb-1">
+                <label className="block text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>
                   {t('vault:settings.changePassword.currentLabel', {
                     defaultValue: 'Current Password',
                   })}
@@ -330,13 +336,18 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
                     type={showCurrentPassword ? 'text' : 'password'}
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full p-3 pr-10 rounded-xl bg-gray-800/60 border border-gray-600/50
-                               text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full p-3 pr-10 rounded-xl border focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    style={{
+                      backgroundColor: 'var(--bg-secondary)',
+                      borderColor: 'var(--border-color)',
+                      color: 'var(--text-primary)'
+                    }}
                   />
                   <button
                     type="button"
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-70"
+                    style={{ color: 'var(--text-secondary)' }}
                   >
                     {showCurrentPassword ? (
                       <EyeOff className="w-4 h-4" />
@@ -348,7 +359,7 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
               </div>
 
               <div>
-                <label className="block text-sm text-gray-300 mb-1">
+                <label className="block text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>
                   {t('vault:settings.changePassword.newLabel', {
                     defaultValue: 'New Password',
                   })}
@@ -358,13 +369,18 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
                     type={showNewPassword ? 'text' : 'password'}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full p-3 pr-10 rounded-xl bg-gray-800/60 border border-gray-600/50
-                               text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full p-3 pr-10 rounded-xl border focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    style={{
+                      backgroundColor: 'var(--bg-secondary)',
+                      borderColor: 'var(--border-color)',
+                      color: 'var(--text-primary)'
+                    }}
                   />
                   <button
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-70"
+                    style={{ color: 'var(--text-secondary)' }}
                   >
                     {showNewPassword ? (
                       <EyeOff className="w-4 h-4" />
@@ -385,7 +401,7 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
               </div>
 
               <div>
-                <label className="block text-sm text-gray-300 mb-1">
+                <label className="block text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>
                   {t('vault:settings.changePassword.confirmLabel', {
                     defaultValue: 'Confirm New Password',
                   })}
@@ -395,15 +411,20 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
                     type={showConfirmNewPassword ? 'text' : 'password'}
                     value={confirmNewPassword}
                     onChange={(e) => setConfirmNewPassword(e.target.value)}
-                    className="w-full p-3 pr-10 rounded-xl bg-gray-800/60 border border-gray-600/50
-                               text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full p-3 pr-10 rounded-xl border focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    style={{
+                      backgroundColor: 'var(--bg-secondary)',
+                      borderColor: 'var(--border-color)',
+                      color: 'var(--text-primary)'
+                    }}
                   />
                   <button
                     type="button"
                     onClick={() =>
                       setShowConfirmNewPassword(!showConfirmNewPassword)
                     }
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-70"
+                    style={{ color: 'var(--text-secondary)' }}
                   >
                     {showConfirmNewPassword ? (
                       <EyeOff className="w-4 h-4" />
@@ -443,13 +464,13 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
         <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="w-5 h-5 text-red-400" />
-            <h3 className="text-white font-semibold">
+            <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
               {t('vault:settings.dangerZone.title', {
                 defaultValue: 'Danger Zone',
               })}
             </h3>
           </div>
-          <p className="text-sm text-gray-300 mb-3">
+          <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
             {t('vault:settings.dangerZone.description', {
               defaultValue:
                 'Permanently delete all vault photos and reset vault settings.',
@@ -471,8 +492,8 @@ const VaultSettingsModal = ({ isOpen, onClose }) => {
         <div className="flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 py-3 rounded-xl bg-gray-800/60 border border-gray-600/50
-                       text-white font-semibold hover:bg-gray-800 transition"
+            className="flex-1 py-3 rounded-xl glass hover:bg-white/10 font-semibold transition"
+            style={{ color: 'var(--text-primary)' }}
           >
             {t('common:cancel', { defaultValue: 'Cancel' })}
           </button>
