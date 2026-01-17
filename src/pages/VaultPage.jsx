@@ -146,8 +146,10 @@ const navigate = useNavigate();
   };
 
   const handleViewItem = (vaultItem) => {
+    console.log('🔍 handleViewItem called:', vaultItem);
     setSelectedVaultItem(vaultItem);
     setViewerOpen(true);
+    console.log('✅ State updated - viewerOpen should be true now');
   };
 
   const closeViewer = () => {
@@ -477,7 +479,10 @@ const VaultPhotoCard = ({ photo, onView, onDelete, getDecryptedUrl }) => {
             src={thumbnailUrl}
             alt={photo.encryptedMetadata?.originalName || 'Encrypted photo'}
             className="w-full h-full object-cover cursor-pointer"
-            onClick={onView}
+            onClick={() => {
+              console.log('🖱️ Image clicked! Calling onView...');
+              onView();
+            }}
           />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all" />
           <button
@@ -495,7 +500,10 @@ const VaultPhotoCard = ({ photo, onView, onDelete, getDecryptedUrl }) => {
         <>
           <div
             className="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900/40 cursor-pointer"
-            onClick={onView}
+            onClick={() => {
+              console.log('🖱️ Non-image file clicked! Calling onView...');
+              onView();
+            }}
           >
             {getFileIcon()}
             <p className="mt-2 text-xs text-gray-600 dark:text-gray-400 text-center px-2 truncate w-full">
