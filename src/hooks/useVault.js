@@ -14,7 +14,7 @@ import {
   serverTimestamp,
   updateDoc,
 } from 'firebase/firestore'
-import { db } from '../firebase'
+import { db, auth } from '../firebase'
 import useStore from '../state/store'
 import {
   encryptFile,
@@ -280,7 +280,11 @@ export const useVault = () => {
           const docRef = await addDoc(collection(db, 'vault_photos'), photoDoc)
 
           // Get Firebase auth token
-          const token = await user.getIdToken()
+          const currentUser = auth.currentUser
+          if (!currentUser) {
+            throw new Error('Not authenticated')
+          }
+          const token = await currentUser.getIdToken()
 
           // Convert encrypted blob to ArrayBuffer
           const bytes = await encryptedBlob.arrayBuffer()
@@ -344,7 +348,11 @@ export const useVault = () => {
         // Delete from R2 via Worker (best effort)
         if (isVaultApiConfigured()) {
           try {
-            const token = await user.getIdToken()
+            const currentUser = auth.currentUser
+            if (!currentUser) {
+              throw new Error('Not authenticated')
+            }
+            const token = await currentUser.getIdToken()
             await deleteVaultBlob({ id: photoId, token })
           } catch (error) {
             console.warn('Failed to delete from R2:', error)
@@ -402,7 +410,11 @@ export const useVault = () => {
 
       try {
         // Get Firebase auth token
-        const token = await user.getIdToken()
+        const currentUser = auth.currentUser
+        if (!currentUser) {
+          throw new Error('Not authenticated')
+        }
+        const token = await currentUser.getIdToken()
 
         // Download encrypted blob from R2 via Worker
         const encryptedBuffer = await fetchVaultBlob({
@@ -477,7 +489,11 @@ export const useVault = () => {
           // Delete from R2 via Worker (best effort)
           if (isVaultApiConfigured()) {
             try {
-              const token = await user.getIdToken()
+              const currentUser = auth.currentUser
+              if (!currentUser) {
+                throw new Error('Not authenticated')
+              }
+              const token = await currentUser.getIdToken()
               await deleteVaultBlob({ id: photo.id, token })
             } catch (error) {
               console.warn('Failed to delete from R2:', error)
