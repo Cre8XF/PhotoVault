@@ -71,6 +71,10 @@ const VaultViewerModal = ({ isOpen, vaultItem, onClose, getDecryptedUrl }) => {
             errorMessage = t('vault:viewer.decryptFailed', {
               defaultValue: 'Failed to decrypt file. The file may be corrupted.',
             });
+          } else if (err.message === 'VAULT_API_NOT_CONFIGURED') {
+            errorMessage = t('vault:viewer.apiNotConfigured', {
+              defaultValue: 'Vault backend not configured. Please try again later.',
+            });
           }
 
           setError(errorMessage);

@@ -14,8 +14,7 @@ import {
   serverTimestamp,
   updateDoc,
 } from 'firebase/firestore'
-import { ref, uploadBytes, getBytes, deleteObject } from 'firebase/storage'
-import { db, storage } from '../firebase'
+import { db } from '../firebase'
 import useStore from '../state/store'
 import {
   encryptFile,
@@ -23,6 +22,12 @@ import {
   hashPassword,
   verifyPassword,
 } from '../services/encryption'
+import {
+  uploadVaultBlob,
+  fetchVaultBlob,
+  deleteVaultBlob,
+  isVaultApiConfigured,
+} from '../utils/vaultApi'
 import { Capacitor } from '@capacitor/core'
 
 // Først deklarer variabelen
@@ -232,6 +237,15 @@ export const useVault = () => {
         return
       }
 
+      // Check if Vault API is configured
+      if (!isVaultApiConfigured()) {
+        showNotification(
+          'Vault backend not configured. Please try again later.',
+          'error'
+        )
+        return
+      }
+
       try {
         setVaultLoading(true)
 
@@ -245,19 +259,7 @@ export const useVault = () => {
             .toString(36)
             .substring(2, 9)}`
 
-          // Upload encrypted blob to Firebase Storage
-          const storageRef = ref(storage, `vault/${user.uid}/${photoId}.enc`)
-          await uploadBytes(storageRef, encryptedBlob, {
-            contentType: 'application/octet-stream',
-            customMetadata: {
-              userId: user.uid,
-              photoId: photoId,
-              encrypted: 'true',
-              encryptedAt: new Date().toISOString(),
-            },
-          })
-
-          // Save metadata to Firestore
+          // Save metadata to Firestore first
           const photoDoc = {
             userId: user.uid,
             encryptedMetadata: {
@@ -270,12 +272,27 @@ export const useVault = () => {
               iv: encryptionMetadata.iv,
               algorithm: encryptionMetadata.algorithm,
             },
-            storageRef: storageRef.fullPath,
+            storageRef: `vault/${user.uid}/${photoId}.enc`, // Keep for backward compat
             createdAt: serverTimestamp(),
             lastAccessedAt: serverTimestamp(),
           }
 
           const docRef = await addDoc(collection(db, 'vault_photos'), photoDoc)
+
+          // Get Firebase auth token
+          const token = await user.getIdToken()
+
+          // Convert encrypted blob to ArrayBuffer
+          const bytes = await encryptedBlob.arrayBuffer()
+
+          // Upload encrypted blob to R2 via Worker
+          await uploadVaultBlob({
+            id: docRef.id,
+            token,
+            bytes,
+            fileName: encryptionMetadata.originalName,
+            fileType: encryptionMetadata.mimeType,
+          })
 
           addPhotoToVault({
             id: docRef.id,
@@ -289,7 +306,14 @@ export const useVault = () => {
         )
       } catch (error) {
         console.error('Upload to vault failed:', error)
-        showNotification(t('vault:notifications.uploadFailed'), 'error')
+        if (error.message === 'VAULT_API_NOT_CONFIGURED') {
+          showNotification(
+            'Vault backend not configured. Please try again later.',
+            'error'
+          )
+        } else {
+          showNotification(t('vault:notifications.uploadFailed'), 'error')
+        }
       } finally {
         setVaultLoading(false)
       }
@@ -317,9 +341,16 @@ export const useVault = () => {
         const photo = vaultPhotos.find((p) => p.id === photoId)
         if (!photo) return
 
-        // Delete from Storage
-        const storageRef = ref(storage, photo.storageRef)
-        await deleteObject(storageRef)
+        // Delete from R2 via Worker (best effort)
+        if (isVaultApiConfigured()) {
+          try {
+            const token = await user.getIdToken()
+            await deleteVaultBlob({ id: photoId, token })
+          } catch (error) {
+            console.warn('Failed to delete from R2:', error)
+            // Continue with Firestore deletion even if R2 delete fails
+          }
+        }
 
         // Delete from Firestore
         await deleteDoc(doc(db, 'vault_photos', photoId))
@@ -364,11 +395,21 @@ export const useVault = () => {
         throw new Error('SESSION_EXPIRED')
       }
 
+      // Check if Vault API is configured
+      if (!isVaultApiConfigured()) {
+        throw new Error('VAULT_API_NOT_CONFIGURED')
+      }
+
       try {
-        // Download encrypted blob
-        const storageRef = ref(storage, photo.storageRef)
-        const encryptedBytes = await getBytes(storageRef)
-        const encryptedBlob = new Blob([encryptedBytes])
+        // Get Firebase auth token
+        const token = await user.getIdToken()
+
+        // Download encrypted blob from R2 via Worker
+        const encryptedBuffer = await fetchVaultBlob({
+          id: photo.id,
+          token,
+        })
+        const encryptedBlob = new Blob([encryptedBuffer])
 
         // Decrypt
         const decryptedBlob = await decryptFile(
@@ -404,11 +445,16 @@ export const useVault = () => {
           throw error
         }
 
+        if (error.message === 'VAULT_API_NOT_CONFIGURED') {
+          throw error
+        }
+
         // Network or other errors
         throw new Error('DECRYPT_FAILED')
       }
     },
     [
+      user,
       isVaultUnlocked,
       vaultPassword,
       getCachedThumbnail,
@@ -428,9 +474,16 @@ export const useVault = () => {
       // Delete all vault photos
       for (const photo of vaultPhotos) {
         try {
-          // Delete from Storage
-          const storageRef = ref(storage, photo.storageRef)
-          await deleteObject(storageRef)
+          // Delete from R2 via Worker (best effort)
+          if (isVaultApiConfigured()) {
+            try {
+              const token = await user.getIdToken()
+              await deleteVaultBlob({ id: photo.id, token })
+            } catch (error) {
+              console.warn('Failed to delete from R2:', error)
+              // Continue with Firestore deletion even if R2 delete fails
+            }
+          }
 
           // Delete from Firestore
           await deleteDoc(doc(db, 'vault_photos', photo.id))
