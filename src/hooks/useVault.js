@@ -78,6 +78,7 @@ export const useVault = () => {
   )
   const getCachedThumbnail = useStore((state) => state.getCachedThumbnail)
   const clearThumbnailCache = useStore((state) => state.clearThumbnailCache)
+  const ensureVaultUnlocked = useStore((state) => state.ensureVaultUnlocked)
 
   // Auto-lock timer
   const autoLockTimerRef = useRef(null)
@@ -213,27 +214,42 @@ export const useVault = () => {
   /**
    * Lock vault and clear sensitive data
    * SECURITY: Password cleared from memory in vaultSlice.lockVault()
+   * FIX 4: Improved UX clarity when vault locks
    */
   const lockVaultSafely = useCallback(() => {
     lockVault()
     clearThumbnailCache()
-    showNotification(t('vault:notifications.vaultLocked'), 'info')
+    // FIX 4: Clear notification that vault has been locked
+    showNotification(
+      t('vault:notifications.vaultLocked', {
+        defaultValue: 'Vault locked. Your encrypted files are secure.'
+      }),
+      'info'
+    )
   }, [lockVault, clearThumbnailCache, showNotification, t])
 
   /**
    * Upload photos to vault
    * SECURITY: Uses password from memory (Zustand state)
+   * FIX 3: Use single source of truth via ensureVaultUnlocked
    */
   const uploadToVault = useCallback(
     async (files) => {
-      if (!user || !isVaultUnlocked) {
+      // FIX 3: Use centralized unlock state check
+      if (!user) {
         showNotification(t('vault:notifications.vaultLocked'), 'error')
         return
       }
 
-      if (!vaultPassword) {
-        showNotification(t('vault:notifications.sessionExpired'), 'error')
-        lockVaultSafely()
+      // Check vault unlock state with consistency enforcement
+      if (!ensureVaultUnlocked()) {
+        // FIX 4: Clear notification when vault is locked
+        showNotification(
+          t('vault:notifications.vaultLocked', {
+            defaultValue: 'Vault is locked. Please unlock the vault to upload files.'
+          }),
+          'error'
+        )
         return
       }
 
@@ -324,12 +340,10 @@ export const useVault = () => {
     },
     [
       user,
-      isVaultUnlocked,
-      vaultPassword,
+      ensureVaultUnlocked,
       addPhotoToVault,
       setVaultLoading,
       showNotification,
-      lockVaultSafely,
       t,
     ]
   )
@@ -569,20 +583,15 @@ export const useVault = () => {
 
   /**
    * Lock vault on page visibility change
+   * FIX: Removed immediate lock on document.hidden to prevent mobile file picker
+   * from invalidating vault session. Auto-lock still active via inactivity timer.
    */
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden && isVaultUnlocked) {
-        lockVaultSafely()
-      }
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-    }
-  }, [isVaultUnlocked, lockVaultSafely])
+  // REMOVED: Aggressive page visibility lock
+  // This was causing vault to lock when mobile file pickers opened
+  // Vault now locks only via:
+  // 1. Inactivity timeout (auto-lock timer)
+  // 2. Manual lock button
+  // 3. Explicit user action
 
   return {
     // State
