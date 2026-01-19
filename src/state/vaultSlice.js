@@ -251,4 +251,27 @@ export const createVaultSlice = (set, get) => ({
 
     return Math.max(0, timeRemaining);
   },
+
+  /**
+   * FIX 2: Ensure vault unlock state consistency
+   * Single source of truth: Vault is only unlocked if BOTH conditions are true:
+   * 1. isVaultUnlocked === true
+   * 2. vaultPassword !== null
+   *
+   * If password is lost but isVaultUnlocked is true, force lock to prevent desync.
+   * Returns true if vault is properly unlocked, false otherwise.
+   */
+  ensureVaultUnlocked: () => {
+    const { isVaultUnlocked, vaultPassword } = get();
+
+    // If vault appears unlocked but password is missing, force lock to prevent desync
+    if (isVaultUnlocked && !vaultPassword) {
+      console.warn('🔒 [VAULT] State desync detected: isVaultUnlocked=true but vaultPassword=null. Forcing lock.');
+      get().lockVault();
+      return false;
+    }
+
+    // Both conditions met - vault is properly unlocked
+    return isVaultUnlocked && vaultPassword !== null;
+  },
 });
