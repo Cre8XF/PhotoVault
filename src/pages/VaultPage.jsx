@@ -14,6 +14,7 @@ import {
   Trash2,
   AlertCircle,
   ImagePlus,
+  Image,
   Shield,
   Clock,
   X,
@@ -527,9 +528,33 @@ const VaultPhotoCard = ({ photo, onView, onDelete, getDecryptedUrl }) => {
           </button>
         </>
       ) : (
-        <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-          <AlertCircle className="w-8 h-8" style={{ color: 'var(--color-error)' }} />
-        </div>
+        /* FIX: Image thumbnail failed to load - show proper fallback instead of error icon */
+        <>
+          <div
+            className="w-full h-full flex flex-col items-center justify-center cursor-pointer"
+            style={{ backgroundColor: 'var(--bg-secondary)' }}
+            onClick={() => {
+              console.log('🖱️ Image (preview unavailable) clicked! Calling onView...');
+              onView();
+            }}
+          >
+            <Image className="w-12 h-12 text-purple-400" />
+            <p className="mt-2 text-xs text-center px-2 truncate w-full" style={{ color: 'var(--text-secondary)' }}>
+              {photo.encryptedMetadata?.originalName || 'Image'}
+            </p>
+          </div>
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all pointer-events-none" />
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            className="absolute top-2 right-2 p-2 rounded-full bg-red-600/90 text-white
+                       opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 z-10"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </>
       )}
     </div>
   );
