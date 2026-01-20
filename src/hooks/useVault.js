@@ -340,6 +340,7 @@ export const useVault = () => {
     },
     [
       user,
+      vaultPassword, // CRITICAL: Must be included to prevent stale closure bug (uploadToVault uses vaultPassword on line 271)
       ensureVaultUnlocked,
       addPhotoToVault,
       setVaultLoading,
