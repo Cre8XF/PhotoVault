@@ -1,4 +1,4 @@
-import { useAuth } from '../contexts/AuthContext'
+import useAuth from '../hooks/useAuth'
 import { usePhotoData } from '../hooks/usePhotoData'
 import { useTranslation } from 'react-i18next'
 import { Server, ArrowUp } from 'lucide-react'
@@ -6,20 +6,23 @@ import Badge from './Badge'
 
 const StorageIndicator = () => {
   const { t } = useTranslation()
-  const { user, userProfile } = useAuth()
+  const { user, userProfile, isAdmin, tier } = useAuth()
   const { photos } = usePhotoData()
 
-  // Get user tier (from Firestore user document or subscription tier)
-  const userTier = userProfile?.subscriptionTier || user?.tier || 'FREE'
+  // Get user tier via useAuth (single source of truth)
+  const userTier = tier()
 
-  // Storage limits (in bytes)
+  // Storage limits (in bytes) — harmonized with Stripe webhook
   const limits = {
-    FREE: 1 * 1024 * 1024 * 1024, // 1 GB
-    LITE: 10 * 1024 * 1024 * 1024,  // 10 GB
+    FREE: 500 * 1024 * 1024, // 500 MB
+    LITE: 5 * 1024 * 1024 * 1024,  // 5 GB
     PRO: 50 * 1024 * 1024 * 1024    // 50 GB
   }
 
-  const limit = limits[userTier]
+  // Admin users: use Firestore storageLimit; others: tier-based lookup
+  const limit = isAdmin()
+    ? (userProfile?.storageLimit || limits.PRO)
+    : (userProfile?.storageLimit || limits[userTier] || limits.FREE)
 
   // Calculate storage used
   const storageUsed = photos.reduce((sum, photo) => sum + (photo.size || 0), 0)

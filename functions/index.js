@@ -164,7 +164,7 @@ exports.reconcileCounters = onSchedule(
         usersProcessed++;
 
         // Skip admins
-        if (userData.role === 'admin') {
+        if (userData.role?.toLowerCase() === 'admin') {
           console.log(`⏭️ Skipping admin user: ${userId}`);
           continue;
         }
@@ -342,7 +342,7 @@ exports.manualReconcile = onCall(async (request) => {
       usersProcessed++;
 
       // Skip admins
-      if (userData.role === 'admin') {
+      if (userData.role?.toLowerCase() === 'admin') {
         console.log(`⏭️ Skipping admin user: ${uid}`);
         continue;
       }

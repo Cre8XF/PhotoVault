@@ -29,7 +29,7 @@ service cloud.firestore {
     function getUserTier() {
       return (userDocExists() && get(userDocPath()).data.subscriptionTier != null)
         ? get(userDocPath()).data.subscriptionTier
-        : 'GRATIS';
+        : 'FREE';
     }
 
     function canUploadVideo() {
@@ -47,7 +47,7 @@ service cloud.firestore {
     // Validate subscriptionTier field on user create
     function isValidTierOnCreate() {
       return !('subscriptionTier' in request.resource.data)
-        || request.resource.data.subscriptionTier in ['GRATIS', 'LITE', 'PRO'];
+        || request.resource.data.subscriptionTier in ['FREE', 'LITE', 'PRO'];
     }
 
     function isOwnerOnCreate() {
@@ -112,7 +112,7 @@ service cloud.firestore {
 
         // LITE/PRO only (admin override)
         allow create: if isAuthenticated() && isOwner(userId)
-          && (getUserTier() != 'GRATIS' || isAdmin());
+          && (getUserTier() != 'FREE' || isAdmin());
 
         allow update, delete: if isAuthenticated() && (isOwner(userId) || isAdmin());
       }
@@ -155,9 +155,9 @@ service cloud.firestore {
 
       allow create: if isAuthenticated()
         && request.resource.data.userId == request.auth.uid
-        // 5-album limit for GRATIS based on user's currentAlbumCount
+        // 5-album limit for FREE based on user's currentAlbumCount
         && (
-          getUserTier() != 'GRATIS'
+          getUserTier() != 'FREE'
           || (userDocExists() && get(userDocPath()).data.currentAlbumCount < 5)
           || isAdmin()
         );

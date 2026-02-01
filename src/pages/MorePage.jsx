@@ -120,8 +120,8 @@ const MorePage = ({
   const [lastReconciliation, setLastReconciliation] = useState(null)
   const { pinEnabled, biometricEnabled } = useSecurityContext()
 
-  // ✅ DOCUMENT ACCESS CONTROL
-  const { canUploadDocument, isAdmin: checkIsAdmin, userProfile } = useAuth()
+  // ✅ Use useAuth as single source of truth for role/tier checks
+  const { canUploadDocument, isAdmin: checkIsAdmin, isPro: checkIsPro, isLite: checkIsLite, tier: getTier, userProfile } = useAuth()
 
   // 🔒 SIKRE AT PROPS ER ARRAYS
   const safePhotos = React.useMemo(() => {
@@ -158,18 +158,11 @@ const MorePage = ({
     formatBytes,
   } = useStorageCalc(user?.uid, propStorageUsed, propStorageLimit)
 
-  // ✅ FIX: Check for isPro using subscriptionTier (canonical source)
-  const isPro =
-    user?.isPro === true ||
-    user?.role === 'pro' ||
-    user?.role === 'admin' ||
-    userProfile?.subscriptionTier === 'PRO'
-
-  // Check for isAdmin: check role field
-  const isAdmin = user?.role === 'admin' || user?.isAdmin === true
-
-  // ✅ FIX: Check for isLite using subscriptionTier (canonical source)
-  const isLite = userProfile?.subscriptionTier === 'LITE'
+  // ✅ Single source of truth: useAuth hook (case-insensitive role checks)
+  const isPro = checkIsPro()
+  const isAdmin = checkIsAdmin()
+  const isLite = checkIsLite()
+  const currentTier = getTier()
 
   // ============================================================================
   // === NOTIFICATION SYSTEM ===
@@ -1164,12 +1157,16 @@ const MorePage = ({
                     <p className="font-medium">{t('account.subscription')}</p>
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full ${
-                        isPro
+                        isAdmin
                           ? 'bg-yellow-500/20 text-yellow-400'
+                          : isPro
+                          ? 'bg-purple-500/20 text-purple-400'
+                          : isLite
+                          ? 'bg-blue-500/20 text-blue-400'
                           : 'bg-gray-500/20 text-gray-400'
                       }`}
                     >
-                      {isPro ? t('subscription.pro') : t('subscription.free')}
+                      {isAdmin ? 'Admin' : isPro ? 'PRO' : isLite ? 'LITE' : t('subscription.free')}
                     </span>
                   </div>
                   <p className="text-xs text-muted">

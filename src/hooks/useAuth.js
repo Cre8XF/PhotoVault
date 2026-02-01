@@ -48,7 +48,12 @@ export const useAuth = () => {
         const userDoc = await getDoc(userRef)
 
         if (userDoc.exists()) {
-          useStore.getState().setUserProfile(userDoc.data())
+          const profileData = userDoc.data()
+          useStore.getState().setUserProfile(profileData)
+          // Sync storageLimit to Zustand after profile refresh
+          if (profileData.storageLimit) {
+            useStore.getState().setStorageLimit(profileData.storageLimit)
+          }
         }
       } catch (error) {
         console.error('[useAuth] Error fetching user profile:', error)
@@ -149,7 +154,7 @@ export const useAuth = () => {
    * Check if user is admin
    */
   const isAdmin = useCallback(() => {
-    return userProfile?.role === 'admin' || user?.email === 'rogsor80@gmail.com'
+    return userProfile?.role?.toLowerCase() === 'admin' || user?.email === 'rogsor80@gmail.com'
   }, [userProfile, user])
 
   /**
@@ -157,7 +162,7 @@ export const useAuth = () => {
    */
   const isGratis = useCallback(() => {
     if (!userProfile) return true // Default for new users
-    if (userProfile.role === 'admin') return false
+    if (userProfile.role?.toLowerCase() === 'admin') return false
     return (
       userProfile.subscriptionTier === 'FREE' || !userProfile.subscriptionTier
     )
@@ -168,7 +173,7 @@ export const useAuth = () => {
    */
   const isLite = useCallback(() => {
     if (!userProfile) return false
-    if (userProfile.role === 'admin') return false
+    if (userProfile.role?.toLowerCase() === 'admin') return false
     return userProfile.subscriptionTier === 'LITE'
   }, [userProfile])
 
@@ -177,7 +182,7 @@ export const useAuth = () => {
    */
   const isPro = useCallback(() => {
     if (!userProfile) return false
-    if (userProfile.role === 'admin') return true // Admins = PRO
+    if (userProfile.role?.toLowerCase() === 'admin') return true // Admins get PRO-level access
     return userProfile.subscriptionTier === 'PRO'
   }, [userProfile])
 
@@ -193,20 +198,21 @@ export const useAuth = () => {
    * Get storage quota based on tier
    */
   const getStorageQuota = useCallback(() => {
+    const limits = {
+      FREE: 524288000, // 500 MB
+      LITE: 5368709120, // 5 GB
+      PRO: 53687091200, // 50 GB
+    }
+
     if (isAdmin()) {
       return {
-        limit: null,
-        unlimited: true,
+        limit: userProfile?.storageLimit || limits.PRO,
+        unlimited: false,
         tier: 'ADMIN',
       }
     }
 
     const tier = userProfile?.subscriptionTier || 'FREE'
-    const limits = {
-      FREE: 1073741824, // 1GB
-      LITE: 10737418240, // 10GB
-      PRO: 53687091200, // 50GB
-    }
 
     return {
       limit: userProfile?.storageLimit || limits[tier] || limits.FREE,
@@ -236,8 +242,8 @@ export const useAuth = () => {
    */
   const getTierLimit = useCallback((tier) => {
     const limits = {
-      FREE: 1 * 1024 * 1024 * 1024, // 1 GB
-      LITE: 10 * 1024 * 1024 * 1024, // 10 GB
+      FREE: 500 * 1024 * 1024, // 500 MB
+      LITE: 5 * 1024 * 1024 * 1024, // 5 GB
       PRO: 50 * 1024 * 1024 * 1024, // 50 GB
     }
     return limits[tier] || limits.FREE
@@ -333,7 +339,7 @@ export const useAuth = () => {
 
       const tier = userProfile.subscriptionTier || 'FREE'
       const storageUsed = userProfile.storageUsed || 0
-      const storageLimit = userProfile.storageLimit || 1073741824 // 1 GB
+      const storageLimit = userProfile.storageLimit || 524288000 // 500 MB (FREE tier)
 
       const wouldExceed = storageUsed + newFileSize > storageLimit
 

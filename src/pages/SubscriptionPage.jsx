@@ -62,6 +62,15 @@ const SubscriptionPage = ({ user }) => {
    */
   const currentPlan = useMemo(() => {
     switch (currentTier) {
+      case 'ADMIN':
+        return {
+          name: 'Admin',
+          storage: formatBytes(userProfile?.storageLimit || 53687091200),
+          compression: t('subscription:yes'),
+          video: t('subscription:yes'),
+          color: 'from-yellow-600 to-orange-600',
+          icon: <Crown className="w-6 h-6" />,
+        }
       case 'PRO':
         return {
           name: 'PRO',
@@ -74,7 +83,7 @@ const SubscriptionPage = ({ user }) => {
       case 'LITE':
         return {
           name: t('common:tiers.LITE'),
-          storage: '10 GB',
+          storage: '5 GB',
           compression: t('subscription:yes'),
           video: t('subscription:no'),
           color: 'from-blue-600 to-cyan-600',
@@ -84,14 +93,14 @@ const SubscriptionPage = ({ user }) => {
       default:
         return {
           name: t('common:tiers.FREE'),
-          storage: '1 GB',
+          storage: '500 MB',
           compression: t('subscription:noOriginal'),
           video: t('subscription:no'),
           color: 'from-gray-600 to-gray-700',
           icon: <Database className="w-6 h-6" />,
         }
     }
-  }, [currentTier, t])
+  }, [currentTier, userProfile, t])
 
   /**
    * Subscription plans
@@ -102,7 +111,7 @@ const SubscriptionPage = ({ user }) => {
       name: t('common:tiers.FREE'),
       price: '0 kr',
       period: t('subscription:forever'),
-      storage: '1 GB',
+      storage: '500 MB',
       compression: t('subscription:originalQuality'),
       video: t('subscription:no'),
       features: [
@@ -122,7 +131,7 @@ const SubscriptionPage = ({ user }) => {
       name: t('common:tiers.LITE'),
       price: '39 kr',
       period: t('subscription:perMonth'),
-      storage: '10 GB',
+      storage: '5 GB',
       compression: t('subscription:yes'),
       video: t('subscription:no'),
       features: [

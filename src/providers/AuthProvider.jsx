@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
   const setUserProfile = useStore((state) => state.setUserProfile)
   const setLoading = useStore((state) => state.setLoading)
   const setEmailVerified = useStore((state) => state.setEmailVerified)
+  const setStorageLimit = useStore((state) => state.setStorageLimit)
 
   useEffect(() => {
     const auth = getAuth()
@@ -126,7 +127,13 @@ export const AuthProvider = ({ children }) => {
       const userDoc = await getDoc(userRef)
 
       if (userDoc.exists()) {
-        setUserProfile(userDoc.data())
+        const profileData = userDoc.data()
+        setUserProfile(profileData)
+        // Sync storageLimit from Firestore to Zustand store
+        if (profileData.storageLimit) {
+          setStorageLimit(profileData.storageLimit)
+          console.log('[AUTH PROVIDER] Storage limit synced:', profileData.storageLimit)
+        }
         console.log('[AUTH PROVIDER] User profile loaded')
         return
       }
@@ -137,7 +144,7 @@ export const AuthProvider = ({ children }) => {
         userId: uid,
         role: 'user',
         subscriptionTier: 'FREE',
-        storageLimit: 1073741824, // 1 GB
+        storageLimit: 524288000, // 500 MB (FREE tier)
         storageUsed: 0,
         currentAlbumCount: 0,
         currentPhotoCount: 0,
@@ -156,6 +163,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       setUserProfile(defaultProfile)
+      setStorageLimit(defaultProfile.storageLimit)
     } catch (error) {
       console.error('[AUTH PROVIDER] Error fetching user profile:', error)
     }

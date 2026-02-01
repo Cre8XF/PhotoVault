@@ -850,7 +850,7 @@ function AppContent() {
             }
           />
 
-          {isAdmin && <Route path="/admin" element={<AdminDashboard />} />}
+          {isAdmin() && <Route path="/admin" element={<AdminDashboard />} />}
         </Routes>
       </main>
 
