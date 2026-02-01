@@ -283,5 +283,14 @@
     "FREE": "Free",
     "LITE": "Lite",
     "PRO": "Pro"
-  }
+  },
+  "type": "Type",
+  "tags": "Tags",
+  "tagPlaceholder": "Add tag (e.g. family, summer, vacation)",
+  "yes": "Yes",
+  "no": "No",
+  "love": "Love",
+  "loved": "Loved",
+  "info": "Info",
+  "resolution": "Resolution"
 }

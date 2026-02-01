@@ -1,5 +1,13 @@
 {
   "rotateAndFlip": "Roter og speil",
   "reset": "Tilbakestill",
-  "quickRotate": "Hurtigrotasjon"
+  "quickRotate": "Hurtigrotasjon",
+  "imageLoadError": "Bildet kunne ikke lastes for redigering. Det kan være nødvendig å laste det opp på nytt.",
+  "corsHint": "Hvis problemet vedvarer, kan bildet trenge å lastes opp på nytt.",
+  "loadingImage": "Laster inn bilde...",
+  "preparingEditor": "Klargjør redigering...",
+  "photoNotFound": "Bilde ikke funnet",
+  "goBack": "Gå tilbake",
+  "retry": "Prøv igjen",
+  "untitled": "Uten tittel"
 }

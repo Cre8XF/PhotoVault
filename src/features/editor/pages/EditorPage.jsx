@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import EditorShell from '../components/EditorShell'
 import { usePhotoData } from '../../../hooks/usePhotoData'
 import useEditorStore from '../store/editorStore'
@@ -10,6 +11,7 @@ import useAuth from '../../../hooks/useAuth'
 export default function EditorPage() {
   const { photoId } = useParams()
   const navigate = useNavigate()
+  const { t } = useTranslation(['editor', 'common'])
   const { getPhotoById } = usePhotoData()
 
   // Editor store
@@ -47,7 +49,7 @@ export default function EditorPage() {
 
     const img = new Image()
 
-    // ✅ KRITISK: crossOrigin må settes FØR src (for canvas export)
+    // ✅ CRITICAL: crossOrigin must be set BEFORE src (for canvas export)
     img.crossOrigin = 'anonymous'
 
     img.onload = () => {
@@ -66,9 +68,7 @@ export default function EditorPage() {
         url: photo.url,
         error: e,
       })
-      setImageError(
-        'Failed to load image. Check Firebase Storage CORS settings.'
-      )
+      setImageError(true)
       setImageLoaded(false)
       setPreloadedImage(null)
     }
@@ -287,19 +287,19 @@ export default function EditorPage() {
     return (
       <div className="fixed inset-0 flex items-center justify-center editor-bg-primary">
         <div className="text-center">
-          <p className="text-red-400 text-lg mb-4">Photo not found</p>
+          <p className="text-red-400 text-lg mb-4">{t('editor:photoNotFound')}</p>
           <button
             onClick={() => navigate(-1)}
             className="text-blue-400 hover:text-blue-300 transition-colors px-4 py-2"
           >
-            Go back
+            {t('editor:goBack')}
           </button>
         </div>
       </div>
     )
   }
 
-  // ✅ Show error state (Firebase Storage CORS)
+  // ✅ Show error state (image load / CORS failure)
   if (imageError) {
     return (
       <div className="fixed inset-0 flex items-center justify-center editor-bg-primary p-8">
@@ -307,25 +307,22 @@ export default function EditorPage() {
           <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
             <div className="text-red-400 text-5xl">⚠️</div>
           </div>
-          <p className="text-red-300 text-lg mb-2">{imageError}</p>
-          <p className="editor-text-muted text-sm mb-4">
-            Firebase Storage CORS must be configured by Roger.
+          <p className="text-red-300 text-lg mb-2">{t('editor:imageLoadError')}</p>
+          <p className="editor-text-muted text-sm mb-6">
+            {t('editor:corsHint')}
           </p>
-          <div className="text-xs editor-text-muted mb-6 p-3 editor-bg-secondary rounded-lg break-all">
-            <p className="font-mono">{photo.url.substring(0, 100)}...</p>
-          </div>
           <div className="flex gap-3 justify-center">
             <button
               onClick={() => window.location.reload()}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 editor-text-primary rounded-lg transition"
             >
-              Retry
+              {t('editor:retry')}
             </button>
             <button
               onClick={() => navigate(-1)}
               className="px-4 py-2 bg-gray-700 hover:bg-gray-600 editor-text-primary rounded-lg transition"
             >
-              Go back
+              {t('editor:goBack')}
             </button>
           </div>
         </div>
@@ -339,9 +336,9 @@ export default function EditorPage() {
       <div className="fixed inset-0 flex items-center justify-center editor-bg-primary">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="editor-text-muted">Loading image from Firebase Storage...</p>
+          <p className="editor-text-muted">{t('editor:loadingImage')}</p>
           <p className="text-xs editor-text-muted mt-2">
-            Verifying CORS configuration...
+            {t('editor:preparingEditor')}
           </p>
         </div>
       </div>
@@ -352,7 +349,7 @@ export default function EditorPage() {
   return (
     <EditorShell
       imageUrl={photo.url}
-      photoName={photo.name || 'Untitled'}
+      photoName={photo.name || t('editor:untitled')}
       onClose={handleClose}
       onSave={handleSave}
       onReset={handleReset}

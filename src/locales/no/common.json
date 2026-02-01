@@ -283,5 +283,14 @@
     "FREE": "Gratis",
     "LITE": "Lite",
     "PRO": "Pro"
-  }
+  },
+  "type": "Type",
+  "tags": "Tagger",
+  "tagPlaceholder": "Legg til tag (f.eks. familie, sommer, hytta)",
+  "yes": "Ja",
+  "no": "Nei",
+  "love": "Lik",
+  "loved": "Likt",
+  "info": "Info",
+  "resolution": "Oppløsning"
 }
