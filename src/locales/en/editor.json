@@ -1,5 +1,13 @@
 {
   "rotateAndFlip": "Rotate & Flip",
   "reset": "Reset",
-  "quickRotate": "Quick Rotate"
+  "quickRotate": "Quick Rotate",
+  "imageLoadError": "This image could not be loaded for editing. It may need to be re-uploaded.",
+  "corsHint": "If the problem persists, the image may need to be re-uploaded.",
+  "loadingImage": "Loading image...",
+  "preparingEditor": "Preparing editor...",
+  "photoNotFound": "Photo not found",
+  "goBack": "Go back",
+  "retry": "Retry",
+  "untitled": "Untitled"
 }

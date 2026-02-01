@@ -19,6 +19,7 @@ import {
   Tag as TagIcon,
 } from 'lucide-react'
 import { format } from 'date-fns'
+import { nb } from 'date-fns/locale'
 import { useTranslation } from 'react-i18next'
 import useStore from '../state/store'
 import { usePhotoById } from '../hooks/usePhotoById'
@@ -40,7 +41,7 @@ export default function PhotoPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
-  const { t } = useTranslation(['common'])
+  const { t, i18n } = useTranslation(['common'])
 
   // State
   const [uiVisible, setUiVisible] = useState(true)
@@ -964,13 +965,13 @@ export default function PhotoPage() {
               {photo.dateTaken && (
                 <div>
                   <div className="mb-1" style={{ color: 'var(--text-muted)' }}>
-                    {t('common:dateTaken') || 'Date taken'}
+                    {t('common:dateTaken')}
                   </div>
                   <div style={{ color: 'var(--text-primary)' }}>
                     {typeof photo.dateTaken === 'string'
-                      ? format(new Date(photo.dateTaken), 'PPP p')
+                      ? format(new Date(photo.dateTaken), 'PPP p', { locale: i18n.language === 'no' ? nb : undefined })
                       : photo.dateTaken.toDate
-                      ? format(photo.dateTaken.toDate(), 'PPP p')
+                      ? format(photo.dateTaken.toDate(), 'PPP p', { locale: i18n.language === 'no' ? nb : undefined })
                       : t('common:unknown')}
                   </div>
                 </div>
@@ -983,16 +984,16 @@ export default function PhotoPage() {
                     className="mb-1 text-xs"
                     style={{ color: 'var(--text-muted)' }}
                   >
-                    {t('common:uploaded') || 'Uploaded'}
+                    {t('common:uploaded')}
                   </div>
                   <div
                     className="text-xs"
                     style={{ color: 'var(--text-secondary)' }}
                   >
                     {typeof photo.uploadedAt === 'string'
-                      ? format(new Date(photo.uploadedAt), 'PPP')
+                      ? format(new Date(photo.uploadedAt), 'PPP', { locale: i18n.language === 'no' ? nb : undefined })
                       : photo.uploadedAt.toDate
-                      ? format(photo.uploadedAt.toDate(), 'PPP')
+                      ? format(photo.uploadedAt.toDate(), 'PPP', { locale: i18n.language === 'no' ? nb : undefined })
                       : t('common:unknown')}
                   </div>
                 </div>
@@ -1007,7 +1008,7 @@ export default function PhotoPage() {
                       className="mb-1"
                       style={{ color: 'var(--text-muted)' }}
                     >
-                      {t('common:location') || 'Location'}
+                      {t('common:location')}
                     </div>
                     <div
                       className="font-mono text-xs"
@@ -1021,7 +1022,7 @@ export default function PhotoPage() {
                         className="text-xs mt-1"
                         style={{ color: 'var(--text-secondary)' }}
                       >
-                        {t('common:altitude') || 'Altitude'}:{' '}
+                        {t('common:altitude')}:{' '}
                         {Math.round(photo.location.altitude)}m
                       </div>
                     )}
@@ -1032,7 +1033,7 @@ export default function PhotoPage() {
               {photo.camera && (photo.camera.make || photo.camera.model) && (
                 <div>
                   <div className="mb-1" style={{ color: 'var(--text-muted)' }}>
-                    {t('common:camera') || 'Camera'}
+                    {t('common:camera')}
                   </div>
                   <div style={{ color: 'var(--text-primary)' }}>
                     {photo.camera.make && photo.camera.model
@@ -1044,7 +1045,7 @@ export default function PhotoPage() {
                       className="text-xs mt-1"
                       style={{ color: 'var(--text-secondary)' }}
                     >
-                      {t('common:lens') || 'Lens'}: {photo.camera.lens}
+                      {t('common:lens')}: {photo.camera.lens}
                     </div>
                   )}
                 </div>
@@ -1061,7 +1062,7 @@ export default function PhotoPage() {
                       className="mb-1"
                       style={{ color: 'var(--text-muted)' }}
                     >
-                      {t('common:technicalDetails') || 'Technical Details'}
+                      {t('common:technicalDetails')}
                     </div>
                     <div className="text-primary space-y-1 text-xs">
                       {photo.technicalDetails.iso && (
@@ -1069,7 +1070,7 @@ export default function PhotoPage() {
                       )}
                       {photo.technicalDetails.shutterSpeed && (
                         <div>
-                          {t('common:shutterSpeed') || 'Shutter'}:{' '}
+                          {t('common:shutterSpeed')}:{' '}
                           {photo.technicalDetails.shutterSpeed < 1
                             ? `1/${Math.round(
                                 1 / photo.technicalDetails.shutterSpeed
@@ -1104,7 +1105,7 @@ export default function PhotoPage() {
               {(photo.width || photo.height) && (
                 <div>
                   <div className="text-muted mb-1">
-                    {t('common:video.resolution') || 'Resolution'}
+                    {t('common:resolution')}
                   </div>
                   <div className="text-primary">
                     {photo.width} × {photo.height}
@@ -1115,7 +1116,7 @@ export default function PhotoPage() {
               {/* File type */}
               {photo.type && (
                 <div>
-                  <div className="text-muted mb-1">Type</div>
+                  <div className="text-muted mb-1">{t('common:type')}</div>
                   <div className="text-primary">{photo.type}</div>
                 </div>
               )}
@@ -1124,7 +1125,7 @@ export default function PhotoPage() {
               <div>
                 <div className="text-muted mb-1">{t('common:favorite')}</div>
                 <div className="text-primary">
-                  {photo.favorite ? '⭐ Yes' : 'No'}
+                  {photo.favorite ? '⭐ ' + t('common:yes') : t('common:no')}
                 </div>
               </div>
 
@@ -1145,14 +1146,14 @@ export default function PhotoPage() {
                   style={{ color: 'var(--text-muted)' }}
                 >
                   <TagIcon className="w-4 h-4" />
-                  <span>Tags</span>
+                  <span>{t('common:tags')}</span>
                 </div>
                 <TagInput
                   tags={photo.tags || []}
                   onAddTag={(tag) => addTag(photo.id, tag)}
                   onRemoveTag={(tag) => removeTag(photo.id, tag)}
                   suggestions={tagSuggestions}
-                  placeholder="Legg til tag (f.eks. familie, sommer, hytta)"
+                  placeholder={t('common:tagPlaceholder')}
                 />
               </div>
             </div>
@@ -1190,7 +1191,7 @@ export default function PhotoPage() {
               fill={photo.favorite ? 'currentColor' : 'none'}
             />
             <span className="text-xs mt-1" style={{ color: 'inherit' }}>
-              {photo.favorite ? 'Loved' : 'Love'}
+              {photo.favorite ? t('common:loved') : t('common:love')}
             </span>
           </button>
 
@@ -1238,7 +1239,7 @@ export default function PhotoPage() {
             aria-label={t('common:showInfo')}
           >
             <Info className="w-6 h-6" />
-            <span className="text-xs mt-1">{t('common:info') || 'Info'}</span>
+            <span className="text-xs mt-1">{t('common:info')}</span>
           </button>
         </div>
       </div>
