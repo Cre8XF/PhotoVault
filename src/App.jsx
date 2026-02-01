@@ -93,6 +93,7 @@ import useAuth from './hooks/useAuth'
 import usePhotoData from './hooks/usePhotoData'
 import useStore from './state/store'
 import { useToast } from './hooks/useToast'
+import useStartupWarmup from './hooks/useStartupWarmup'
 
 // P3-B: Browser Detection
 import {
@@ -470,6 +471,9 @@ function AppContent() {
 
   // Toast notifications
   const { toasts, removeToast } = useToast()
+
+  // Warm up cold resources (workers, chunks, image decoder) once per session
+  useStartupWarmup()
 
   // Zustand store
   const uploadModalOpen = useStore((state) => state.uploadModalOpen)
