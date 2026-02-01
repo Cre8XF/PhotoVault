@@ -19,7 +19,7 @@ import { useState, useEffect } from 'react';
 export const useStorageCalc = (userId, propStorageUsed, propStorageLimit) => {
   // Use prop values if provided, otherwise return zeros
   const [storageUsed] = useState(propStorageUsed || 0);
-  const [storageLimit] = useState(propStorageLimit || 5 * 1024 * 1024 * 1024); // 5GB default
+  const [storageLimit] = useState(propStorageLimit || 500 * 1024 * 1024); // 500 MB (FREE tier default)
   const [storageLoading] = useState(false);
 
   /**

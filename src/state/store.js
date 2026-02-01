@@ -393,7 +393,7 @@ const useStore = create(
         },
 
         isAdmin: () => {
-          return get().userProfile?.role === 'admin'
+          return get().userProfile?.role?.toLowerCase() === 'admin'
         },
 
         // =====================================================================
