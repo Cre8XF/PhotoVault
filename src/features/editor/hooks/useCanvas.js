@@ -48,18 +48,18 @@ export function useCanvas(imageUrl, adjustments = {}, filter = {}, rotation = 0,
 
     const ctx = canvas.getContext('2d')
 
-    // ✅ Set canvas size to actual image size (CSS handles visual scaling)
-    canvas.width = image.naturalWidth
-    canvas.height = image.naturalHeight
+    // Original image dimensions
+    const origWidth = image.naturalWidth
+    const origHeight = image.naturalHeight
 
-    // No inline styles - CSS handles display scaling
+    // Calculate canvas dimensions accounting for rotation
+    // For 90°/270° rotations, width and height are swapped
+    const rotatedDims = getRotatedDimensions(origWidth, origHeight, rotation)
+    canvas.width = rotatedDims.width
+    canvas.height = rotatedDims.height
 
-    // Use canvas dimensions (which are now image dimensions)
-    const width = canvas.width
-    const height = canvas.height
-
-    // Clear canvas
-    ctx.clearRect(0, 0, width, height)
+    // Clear canvas at rotated dimensions
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     // Merge filter preset with manual adjustments
     let finalAdjustments = { ...adjustments }
@@ -87,10 +87,11 @@ export function useCanvas(imageUrl, adjustments = {}, filter = {}, rotation = 0,
     ctx.filter = filterString
 
     // Apply rotation and flip transformations
-    applyRotationTransform(ctx, width, height, rotation, flipH, flipV)
+    // Pass both canvas dimensions (rotated) and original image dimensions
+    applyRotationTransform(ctx, canvas.width, canvas.height, origWidth, origHeight, rotation, flipH, flipV)
 
-    // Draw image at full size (canvas is already image size)
-    ctx.drawImage(image, 0, 0, width, height)
+    // Draw image at original dimensions (transform handles positioning)
+    ctx.drawImage(image, 0, 0, origWidth, origHeight)
 
     // Restore transformations
     restoreRotationTransform(ctx)
@@ -98,8 +99,8 @@ export function useCanvas(imageUrl, adjustments = {}, filter = {}, rotation = 0,
     // Reset filter
     ctx.filter = 'none'
 
-    // Store dimensions for crop overlay (visual dimensions will be scaled by CSS)
-    setDimensions({ width, height })
+    // Store dimensions for crop overlay (use rotated canvas dimensions)
+    setDimensions({ width: canvas.width, height: canvas.height })
   }, [adjustments, filter, rotation, flipH, flipV])
 
   /**

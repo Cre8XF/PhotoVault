@@ -7,19 +7,27 @@
  * Apply rotation and flip to canvas context
  * Must be called before drawing image
  *
+ * When rotation is 90° or 270°, the canvas dimensions (canvasWidth/canvasHeight)
+ * differ from the original image dimensions (imageWidth/imageHeight) because
+ * width and height are swapped. The first translate centers on the canvas,
+ * and the second translate offsets by the original image dimensions so the
+ * image is drawn correctly in the rotated coordinate space.
+ *
  * @param {CanvasRenderingContext2D} ctx - Canvas context
- * @param {number} width - Canvas width
- * @param {number} height - Canvas height
+ * @param {number} canvasWidth - Canvas width (post-rotation dimensions)
+ * @param {number} canvasHeight - Canvas height (post-rotation dimensions)
+ * @param {number} imageWidth - Original image width (pre-rotation)
+ * @param {number} imageHeight - Original image height (pre-rotation)
  * @param {number} rotation - Rotation in degrees (0, 90, 180, 270)
  * @param {boolean} flipH - Flip horizontal
  * @param {boolean} flipV - Flip vertical
  */
-export function applyRotationTransform(ctx, width, height, rotation, flipH, flipV) {
+export function applyRotationTransform(ctx, canvasWidth, canvasHeight, imageWidth, imageHeight, rotation, flipH, flipV) {
   // Save current state
   ctx.save()
 
-  // Translate to center
-  ctx.translate(width / 2, height / 2)
+  // Translate to canvas center
+  ctx.translate(canvasWidth / 2, canvasHeight / 2)
 
   // Apply rotation (convert degrees to radians)
   if (rotation !== 0) {
@@ -31,8 +39,9 @@ export function applyRotationTransform(ctx, width, height, rotation, flipH, flip
   const scaleY = flipV ? -1 : 1
   ctx.scale(scaleX, scaleY)
 
-  // Translate back (drawing will be centered)
-  ctx.translate(-width / 2, -height / 2)
+  // Translate back using original image dimensions
+  // This ensures the image origin is correctly positioned in rotated space
+  ctx.translate(-imageWidth / 2, -imageHeight / 2)
 }
 
 /**
