@@ -86,8 +86,20 @@ export default function EditorPage() {
     navigate(-1)
   }
 
+  // Zustand store updater for syncing after save
+  const updatePhotoInStore = useStore((state) => state.updatePhoto)
+
   /**
-   * Save edited image
+   * Save edited image — atomic pipeline:
+   * 1. Render final canvas (rotation baked in)
+   * 2. Generate thumbnail
+   * 3. Upload both → await success
+   * 4. Receive final URLs
+   * 5. Update Firestore (inside uploadEditedPhoto)
+   * 6. Update local Zustand store
+   * 7. Navigate away
+   *
+   * If any step fails → error shown, NO state change, NO navigation.
    */
   const handleSave = async () => {
     if (!photo || !user) {
@@ -110,7 +122,7 @@ export default function EditorPage() {
       return
     }
 
-    // 🆕 FREEMIUM: Block save for FREE users with filters/adjustments
+    // FREEMIUM: Block save for FREE users with filters/adjustments
     if (tier === 'FREE') {
       const hasFilterOrAdjustments =
         (transform.filter?.active && transform.filter.active !== 'none') ||
@@ -118,7 +130,7 @@ export default function EditorPage() {
 
       if (hasFilterOrAdjustments) {
         showNotification(
-          '💎 Upgrade to LITE to save filters and adjustments',
+          'Upgrade to LITE to save filters and adjustments',
           'error'
         )
         return
@@ -128,14 +140,14 @@ export default function EditorPage() {
     try {
       setProcessing(true)
 
-      // Step 1: Export from active canvas
-      if (import.meta.env.DEV) console.log('💾 Exporting from editor canvas...')
+      // Step 1: Export from active canvas (rotation is already baked into canvas pixels)
+      if (import.meta.env.DEV) console.log('Exporting from editor canvas...')
 
       if (!canvasRef) {
         throw new Error('Editor canvas not found. Cannot save.')
       }
 
-      if (import.meta.env.DEV) console.log('✅ Using active editor canvas', {
+      if (import.meta.env.DEV) console.log('Using active editor canvas', {
         width: canvasRef.width,
         height: canvasRef.height,
         hasCrop: !!transform.crop,
@@ -146,7 +158,7 @@ export default function EditorPage() {
 
       // If crop is active, create offscreen canvas with cropped region
       if (transform.crop) {
-        if (import.meta.env.DEV) console.log('🔪 Applying crop before export:', transform.crop)
+        if (import.meta.env.DEV) console.log('Applying crop before export:', transform.crop)
 
         const crop = transform.crop
         const cropX = crop.x1 * canvasRef.width
@@ -154,7 +166,7 @@ export default function EditorPage() {
         const cropWidth = (crop.x2 - crop.x1) * canvasRef.width
         const cropHeight = (crop.y2 - crop.y1) * canvasRef.height
 
-        if (import.meta.env.DEV) console.log('   Crop region (pixels):', {
+        if (import.meta.env.DEV) console.log('Crop region (pixels):', {
           x: Math.round(cropX),
           y: Math.round(cropY),
           width: Math.round(cropWidth),
@@ -181,17 +193,18 @@ export default function EditorPage() {
         )
 
         canvasToExport = offscreenCanvas
-        if (import.meta.env.DEV) console.log('✅ Cropped canvas ready', {
+        if (import.meta.env.DEV) console.log('Cropped canvas ready', {
           width: offscreenCanvas.width,
           height: offscreenCanvas.height,
         })
       }
 
+      // Step 1a: Export full-resolution edited image
       const editedBlob = await new Promise((resolve, reject) => {
         canvasToExport.toBlob(
           (blob) => {
             if (blob) {
-              if (import.meta.env.DEV) console.log('✅ Canvas exported successfully', {
+              if (import.meta.env.DEV) console.log('Canvas exported successfully', {
                 size: blob.size,
                 type: blob.type,
               })
@@ -205,24 +218,74 @@ export default function EditorPage() {
         )
       })
 
-      // Step 2: Upload to storage and update Firestore
+      // Step 1b: Generate thumbnail from the edited canvas
+      let thumbnailBlob = null
+      try {
+        const MAX_THUMB = 400
+        const thumbScale = Math.min(
+          MAX_THUMB / canvasToExport.width,
+          MAX_THUMB / canvasToExport.height,
+          1
+        )
+        const thumbCanvas = document.createElement('canvas')
+        thumbCanvas.width = Math.round(canvasToExport.width * thumbScale)
+        thumbCanvas.height = Math.round(canvasToExport.height * thumbScale)
+        const thumbCtx = thumbCanvas.getContext('2d')
+        thumbCtx.drawImage(canvasToExport, 0, 0, thumbCanvas.width, thumbCanvas.height)
+
+        thumbnailBlob = await new Promise((resolve) => {
+          thumbCanvas.toBlob(
+            (blob) => resolve(blob),
+            'image/jpeg',
+            0.7
+          )
+        })
+        if (import.meta.env.DEV) console.log('Thumbnail generated', {
+          size: thumbnailBlob?.size,
+          width: thumbCanvas.width,
+          height: thumbCanvas.height,
+        })
+      } catch (thumbError) {
+        // Thumbnail generation failure is non-fatal
+        console.warn('Thumbnail generation failed, continuing without:', thumbError)
+      }
+
+      // Step 2: Upload to storage and update Firestore (atomic — awaited)
       if (import.meta.env.DEV) console.log('Uploading to storage...')
       const filterName = transform.filter?.active || 'none'
-      await uploadEditedPhoto(
+      const result = await uploadEditedPhoto(
         user.uid,
         photoId,
         editedBlob,
         transform,
         filterName,
-        null // thumbnailBlob - can be added later
+        thumbnailBlob
       )
 
-      // Step 3: Success notification
-      showNotification('Photo saved successfully!', 'success')
+      // Step 3: Update local Zustand store immediately (no waiting for Firestore listener)
+      // This ensures grid, viewer, slideshow, and share all use the same URL
+      const storeUpdate = {
+        url: result.editedUrl,
+        displayUrl: result.editedUrl,
+        editedUrl: result.editedUrl,
+        thumbnailUrl: result.thumbnailUrl || result.editedUrl,
+        edited: true,
+        editedAt: new Date().toISOString(),
+        transforms: transform,
+        filter: filterName,
+      }
+      updatePhotoInStore(photoId, storeUpdate)
 
-      // Step 4: Navigate back
+      if (import.meta.env.DEV) console.log('Local store updated with edited URLs', {
+        editedUrl: result.editedUrl,
+        thumbnailUrl: result.thumbnailUrl,
+      })
+
+      // Step 4: Only now — notify success and navigate
+      showNotification('Photo saved successfully!', 'success')
       navigate(-1)
     } catch (error) {
+      // Save failed — NO state change, NO navigation
       console.error('Save failed:', error)
 
       showNotification(
@@ -253,29 +316,35 @@ export default function EditorPage() {
     try {
       setProcessing(true)
 
-      if (import.meta.env.DEV) console.log('🔄 Reverting to original photo:', {
+      if (import.meta.env.DEV) console.log('Reverting to original photo:', {
         photoId: photo.id,
         currentUrl: photo.url,
         originalUrl: photo.originalUrl,
       })
 
-      // Update Firestore: Reset to original URL
-      await updatePhoto(photo.id, {
+      // Update Firestore: Reset to original URL (including displayUrl + thumbnailUrl)
+      const revertUpdates = {
         url: photo.originalUrl,
+        displayUrl: photo.originalUrl,
+        thumbnailUrl: photo.originalUrl,
         edited: false,
         editedUrl: null,
         editedAt: null,
         transforms: null,
         filter: null,
-      })
+      }
+      await updatePhoto(photo.id, revertUpdates)
 
-      if (import.meta.env.DEV) console.log('✅ Reverted to original successfully')
+      // Update local store immediately
+      updatePhotoInStore(photoId, revertUpdates)
+
+      if (import.meta.env.DEV) console.log('Reverted to original successfully')
       showNotification('Reverted to original image', 'success')
 
       // Navigate back
       navigate(-1)
     } catch (error) {
-      console.error('❌ Revert failed:', error)
+      console.error('Revert failed:', error)
       showNotification('Failed to revert. Please try again.', 'error')
     } finally {
       setProcessing(false)

@@ -1619,12 +1619,21 @@ export async function uploadEditedPhoto(
     // ✅ Preserve originalUrl on first edit
     const updates = {
       url: editedUrl, // Active image is now the edited version
+      displayUrl: editedUrl, // Grid/viewer must use same URL as url
       editedUrl: editedUrl,
       editedAt: new Date().toISOString(),
       transforms: transform,
       filter: filter,
       edited: true,
       updatedAt: new Date().toISOString(),
+    }
+
+    // Update thumbnailUrl: use uploaded thumbnail or fall back to edited image
+    if (thumbnailUrl) {
+      updates.thumbnailUrl = thumbnailUrl
+    } else {
+      // No separate thumbnail — use edited image so grid doesn't show stale original
+      updates.thumbnailUrl = editedUrl
     }
 
     // Set originalUrl only if it doesn't exist (first time editing)
@@ -1637,7 +1646,7 @@ export async function uploadEditedPhoto(
 
     devLog(`✅ [EditedPhoto] Firestore updated for ${photoId}`)
 
-    return { editedUrl, thumbnailUrl, storagePath }
+    return { editedUrl, thumbnailUrl: updates.thumbnailUrl, storagePath }
   } catch (error) {
     console.error('🔥 uploadEditedPhoto error:', error)
     throw new Error(`Edited photo upload failed: ${error.message}`)
