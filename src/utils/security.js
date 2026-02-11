@@ -496,7 +496,7 @@ export const isValidFirebaseStorageUrl = (url) => {
 
   try {
     const urlObj = new URL(url)
-    return firebaseStorageDomains.some(domain => urlObj.hostname.includes(domain))
+    return firebaseStorageDomains.some(domain => urlObj.hostname === domain)
   } catch (e) {
     if (import.meta.env.DEV) console.warn('Invalid URL format:', url)
     return false
