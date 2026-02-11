@@ -1,0 +1,115 @@
+{
+  "title": "Personvernerklæring",
+  "lastUpdated": "Sist oppdatert: februar 2026",
+  "intro": "Pixtr (\"vi\", \"vår\" eller \"oss\") er en bildebehandlingsapplikasjon drevet av Cre8XF. Denne personvernerklæringen forklarer hvilke data vi samler inn, hvordan vi bruker dem, hvem som behandler dem, og hvilke rettigheter du har. Den gjelder for brukere av Pixtr mobil- og nettapplikasjoner.",
+  "dataCollection": {
+    "title": "1. Informasjon vi samler inn",
+    "account": "Kontoinformasjon",
+    "accountDesc": "Når du oppretter en konto, samler vi inn e-postadressen din, visningsnavn og profilbilde (hvis oppgitt). Firebase Authentication administrerer påloggingsinformasjonen din.",
+    "content": "Brukerinnhold",
+    "contentDesc": "Bilder, videoer og dokumenter du laster opp til Pixtr, samt albumtitler, beskrivelser og tagger du oppretter.",
+    "metadata": "Bildemetadata (EXIF)",
+    "metadataDesc": "Når du laster opp bilder, henter og lagrer vi EXIF-metadata inkludert: dato tatt, GPS-posisjon (breddegrad, lengdegrad, høyde), kameramerke og -modell, og tekniske innstillinger (ISO, blenderåpning, lukkerhastighet, brennvidde). Disse dataene brukes til å organisere bildene dine etter dato og sted.",
+    "payment": "Betalingsinformasjon",
+    "paymentDesc": "Hvis du abonnerer på en betalt plan, behandles betalingen av Stripe. Vi lagrer ikke kredittkortnummeret ditt. Vi mottar og lagrer din Stripe kunde-ID, abonnements-ID, abonnementsstatus og valgt plantier fra Stripe.",
+    "device": "Enhets- og tekniske data",
+    "deviceDesc": "Vi samler inn grunnleggende teknisk informasjon som kreves for at tjenesten skal fungere, som autentiseringstokens, lagringsbruk og funksjonsbegrensninger per tier. Vi bruker ikke tredjeparts analyse-, reklame-SDK-er eller krasjrapporteringstjenester."
+  },
+  "dataUse": {
+    "title": "2. Hvordan vi bruker dataene dine",
+    "service": "For å levere kjernefunksjonaliteten i Pixtr: lagring, organisering og visning av bilder og album",
+    "sync": "For å synkronisere innholdet ditt på tvers av enheter",
+    "subscription": "For å administrere abonnementet ditt, håndheve planbegrensninger og behandle betalinger",
+    "security": "For å autentisere identiteten din og beskytte kontoen din",
+    "vault": "For å aktivere Vault-funksjoner, inkludert kryptering på klientsiden av private bilder",
+    "sharing": "For å aktivere albumdelingsfunksjoner (QR-koder, offentlige albumlenker) når du velger å dele",
+    "noSell": "Vi selger, leier eller deler ikke dine personopplysninger med tredjeparter for reklame- eller markedsføringsformål."
+  },
+  "legalBasis": {
+    "title": "3. Rettslig grunnlag for behandling (GDPR)",
+    "intro": "Hvis du befinner deg i EU/EØS, behandler vi dataene dine under følgende rettslige grunnlag:",
+    "contract": "Oppfyllelse av kontrakt",
+    "contractDesc": "– Levering av Pixtr-tjenesten, administrasjon av kontoen din, lagring og levering av bildene dine, og behandling av abonnementer.",
+    "consent": "Samtykke",
+    "consentDesc": "– Behandling av GPS-posisjonsdata fra EXIF-metadata i bilder (du kontrollerer dette via enhetens kamerainnstillinger). Aktivering av valgfrie funksjoner som offentlig albumdeling.",
+    "legitimate": "Berettiget interesse",
+    "legitimateDesc": "– Opprettholdelse av sikkerhet, forebygging av svindel og forbedring av tjenesteens pålitelighet."
+  },
+  "storage": {
+    "title": "4. Datalagring og sikkerhet",
+    "intro": "Vi bruker følgende infrastruktur for å lagre og beskytte dataene dine:",
+    "r2": "Bilder og videoer lagres på Cloudflare R2 objektlagring. Alle data er kryptert under transport via HTTPS.",
+    "firestore": "Bildemetadata, albumdata og brukerprofiler lagres i Google Cloud Firestore. Firestore krypterer data i hvile automatisk.",
+    "auth": "Autentisering administreres av Firebase Authentication (Google). Passord hashes av Firebase og lagres aldri i klartekst av Pixtr.",
+    "local": "Nettleseren din kan bufre bildemetadata og miniatyrbilder lokalt ved hjelp av IndexedDB for frakoblet tilgang og ytelse. Disse dataene forblir på enheten din.",
+    "vaultTitle": "Vault (Private bilder)",
+    "vaultDesc": "Bilder plassert i Vault krypteres på enheten din før opplasting med AES-256-GCM med en nøkkel avledet fra vault-passordet ditt (PBKDF2, 100 000 iterasjoner). Kryptering og dekryptering skjer helt i nettleseren din. Pixtr-servere mottar aldri vault-passordet ditt eller dekrypteringsnøkkelen. Hvis du mister vault-passordet ditt, kan krypterte bilder ikke gjenopprettes."
+  },
+  "thirdParty": {
+    "title": "5. Tredjeparts tjenesteleverandører",
+    "intro": "Vi bruker følgende tredjepartstjenester for å drifte Pixtr. Hver behandler data kun som nødvendig for å levere sin tjeneste:",
+    "provider": "Leverandør",
+    "purpose": "Formål",
+    "dataProcessed": "Data behandlet",
+    "firebasePurpose": "Autentisering, database",
+    "firebaseData": "E-post, brukerprofil, bildemetadata, albumdata",
+    "cloudflarePurpose": "Fillagring (R2), CDN, Workers",
+    "cloudflareData": "Bilder, videoer, krypterte vault-filer",
+    "stripePurpose": "Betalingsbehandling",
+    "stripeData": "E-post, betalingskortdetaljer, faktureringsadresse",
+    "netlifyPurpose": "Backend serverløse funksjoner",
+    "netlifyData": "Autentiseringstokens, abonnementshendelser",
+    "noAnalytics": "Vi bruker ingen tredjeparts analyse-, reklame- eller krasjrapporteringstjenester."
+  },
+  "transfers": {
+    "title": "6. Internasjonale dataoverføringer",
+    "desc": "Dataene dine kan behandles og lagres i USA og andre land der våre tjenesteleverandører opererer (Google, Cloudflare, Stripe, Netlify). Disse leverandørene bruker Standard Contractual Clauses (SCC-er) eller tilsvarende sikkerhetstiltak for å beskytte data overført fra EU/EØS. Ved å bruke Pixtr erkjenner du at dataene dine kan overføres internasjonalt."
+  },
+  "retention": {
+    "title": "7. Datalagring",
+    "active": "Bildene, albumene og kontodataene dine beholdes så lenge kontoen din er aktiv.",
+    "trash": "Slettede bilder flyttes til Papirkurven og fjernes permanent etter 30 dager.",
+    "account": "Hvis du sletter kontoen din, slettes alle tilknyttede data (bilder, album, metadata, vault-filer) permanent fra serverne våre, med unntak av der vi er lovpålagt å beholde dem.",
+    "stripe": "Stripe kan beholde betalingsregistre uavhengig i samsvar med finansielle forskrifter og deres egen personvernerklæring."
+  },
+  "payment": {
+    "title": "8. Betalingsbehandling",
+    "desc": "Betalte abonnementer (Lite, Pro) behandles gjennom Stripe. Når du abonnerer, blir du omdirigert til en Stripe-hostet betalingsside. Pixtr mottar eller lagrer ikke hele kredittkortnummeret ditt. Stripe varsler Pixtr om abonnementsstatusen din via sikre webhooks. For mer informasjon, se Stripes personvernerklæring på stripe.com/privacy."
+  },
+  "biometric": {
+    "title": "9. Biometrisk autentisering",
+    "desc": "Pixtr kan tilby biometrisk autentisering (fingeravtrykk, Face ID) for å låse opp Vault. All biometrisk behandling håndteres av enhetens operativsystem. Pixtr får aldri tilgang til, samler inn eller lagrer biometriske data."
+  },
+  "rights": {
+    "title": "10. Dine rettigheter",
+    "intro": "Avhengig av hvor du befinner deg, har du følgende rettigheter angående dine personopplysninger:",
+    "accessLabel": "Innsyn",
+    "accessDesc": "– Be om en kopi av personopplysningene vi har om deg.",
+    "rectificationLabel": "Retting",
+    "rectificationDesc": "– Korrigere unøyaktige eller ufullstendige personopplysninger.",
+    "erasureLabel": "Sletting",
+    "erasureDesc": "– Be om sletting av kontoen din og alle tilknyttede data.",
+    "restrictionLabel": "Begrensning",
+    "restrictionDesc": "– Be om at vi begrenser behandlingen av dataene dine.",
+    "portabilityLabel": "Dataportabilitet",
+    "portabilityDesc": "– Last ned bildene og metadataene dine i et portabelt format.",
+    "objectLabel": "Innsigelse",
+    "objectDesc": "– Protestere mot behandling basert på berettiget interesse.",
+    "complaintLabel": "Klage",
+    "complaintDesc": "– Du har rett til å sende inn en klage til ditt lokale datatilsyn.",
+    "howTo": "For å utøve noen av disse rettighetene, kontakt oss på e-postadressen nedenfor. Du kan også slette kontoen din direkte fra appinnstillingene."
+  },
+  "children": {
+    "title": "11. Barns personvern",
+    "desc": "Pixtr er ikke rettet mot barn under 13 år (eller gjeldende minimumsalder i ditt land). Vi samler ikke bevisst inn personopplysninger fra barn. Hvis vi blir oppmerksomme på at et barn har oppgitt personopplysninger, vil vi slette kontoen og tilknyttede data omgående. Hvis du tror et barn har opprettet en konto, vennligst kontakt oss."
+  },
+  "changes": {
+    "title": "12. Endringer i denne erklæringen",
+    "desc": "Vi kan oppdatere denne personvernerklæringen fra tid til annen. Når vi gjør vesentlige endringer, vil vi oppdatere «Sist oppdatert»-datoen øverst og, der det er hensiktsmessig, varsle deg i appen. Fortsatt bruk av Pixtr etter at endringer er publisert, utgjør aksept av den reviderte erklæringen."
+  },
+  "contact": {
+    "title": "13. Kontakt oss",
+    "desc": "Hvis du har spørsmål om denne personvernerklæringen eller ønsker å utøve dine datarettigheter, kontakt oss på:",
+    "operator": "Drevet av Cre8XF"
+  }
+}

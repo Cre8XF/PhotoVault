@@ -99,6 +99,9 @@ import publicEN from './locales/en/public.json'
 import trashNO from './locales/no/trash.json'
 import trashEN from './locales/en/trash.json'
 
+import privacyNO from './locales/no/privacy.json'
+import privacyEN from './locales/en/privacy.json'
+
 const resources = {
   no: {
     translation: translationNO,
@@ -131,6 +134,7 @@ const resources = {
     qrshare: qrshareNO,
     public: publicNO,
     trash: trashNO,
+    privacy: privacyNO,
   },
   en: {
     translation: translationEN,
@@ -163,6 +167,7 @@ const resources = {
     qrshare: qrshareEN,
     public: publicEN,
     trash: trashEN,
+    privacy: privacyEN,
   },
 }
 
@@ -204,6 +209,7 @@ i18n
       'qrshare',
       'public',
       'trash',
+      'privacy',
     ],
 
     interpolation: {
