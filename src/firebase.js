@@ -33,6 +33,7 @@ import {
 } from 'firebase/storage'
 import * as exifr from 'exifr'
 import {
+  uploadToR2,
   uploadWithFallback,
   isR2Enabled,
   extractStoragePathFromR2Url,
@@ -1536,7 +1537,7 @@ export async function uploadThumbnail(blob, userId, photoId, size = 'small') {
 }
 
 /**
- * Upload edited photo to R2 enhanced bucket and update Firestore (Phase 3)
+ * Upload edited photo to R2 and update Firestore (Phase 3)
  * @param {string} userId - User ID
  * @param {string} photoId - Original photo ID
  * @param {Blob} blob - Edited image blob (JPEG)
@@ -1566,46 +1567,45 @@ export async function uploadEditedPhoto(
       throw new Error('No blob provided to uploadEditedPhoto')
     }
 
+    // Get Firebase token for R2 authentication
+    const currentUser = auth.currentUser
+    if (!currentUser) {
+      throw new Error('User not authenticated - cannot upload edited photo')
+    }
+    const firebaseToken = await currentUser.getIdToken()
+
     const timestamp = Date.now()
 
-    // 1. Upload edited image to enhanced bucket
+    // 1. Upload edited image to R2
     const fileName = `edited_${photoId}_${timestamp}.jpg`
     const storagePath = `users/${userId}/enhanced/${fileName}`
-    const storageRef = ref(storage, storagePath)
 
-    await uploadBytes(storageRef, blob, {
-      contentType: 'image/jpeg',
-      customMetadata: {
-        userId: userId,
-        sourcePhotoId: photoId,
-        editedAt: new Date().toISOString(),
-        hasTransforms: 'true',
-      },
-    })
-
-    const editedUrl = await getDownloadURL(storageRef)
+    const editedUrl = await uploadToR2(
+      blob,
+      storagePath,
+      'image/jpeg',
+      { sourcePhotoId: photoId },
+      userId,
+      firebaseToken
+    )
     devLog('✅ [EditedPhoto] Uploaded to R2:', editedUrl)
 
-    // 2. Upload thumbnail if provided
+    // 2. Upload thumbnail to R2 if provided
     let thumbnailUrl = null
     if (thumbnailBlob) {
       try {
         const thumbFileName = `edited_${photoId}_${timestamp}_thumb.jpg`
         const thumbPath = `users/${userId}/thumbnails/${thumbFileName}`
-        const thumbRef = ref(storage, thumbPath)
 
-        await uploadBytes(thumbRef, thumbnailBlob, {
-          contentType: 'image/jpeg',
-          customMetadata: {
-            userId: userId,
-            sourcePhotoId: photoId,
-            editedThumbnail: 'true',
-            generatedAt: new Date().toISOString(),
-          },
-        })
-
-        thumbnailUrl = await getDownloadURL(thumbRef)
-        devLog('✅ [EditedPhoto] Thumbnail uploaded:', thumbnailUrl)
+        thumbnailUrl = await uploadToR2(
+          thumbnailBlob,
+          thumbPath,
+          'image/jpeg',
+          { sourcePhotoId: photoId },
+          userId,
+          firebaseToken
+        )
+        devLog('✅ [EditedPhoto] Thumbnail uploaded to R2:', thumbnailUrl)
       } catch (thumbError) {
         console.error('⚠️ [EditedPhoto] Thumbnail upload failed:', thumbError)
         // Continue without thumbnail
@@ -1621,6 +1621,8 @@ export async function uploadEditedPhoto(
       url: editedUrl, // Active image is now the edited version
       displayUrl: editedUrl, // Grid/viewer must use same URL as url
       editedUrl: editedUrl,
+      r2Url: editedUrl, // Track R2 URL for edited image
+      storageBackend: 'r2',
       editedAt: new Date().toISOString(),
       transforms: transform,
       filter: filter,
@@ -1638,8 +1640,8 @@ export async function uploadEditedPhoto(
 
     // Set originalUrl only if it doesn't exist (first time editing)
     if (!currentPhotoData.originalUrl) {
-      updates.originalUrl = currentPhotoData.url // Backup the original
-      devLog('✅ [EditedPhoto] Preserving originalUrl:', currentPhotoData.url)
+      updates.originalUrl = currentPhotoData.r2Url || currentPhotoData.url // Backup the original R2 URL
+      devLog('✅ [EditedPhoto] Preserving originalUrl:', updates.originalUrl)
     }
 
     await updateDoc(doc(db, 'photos', photoId), updates)

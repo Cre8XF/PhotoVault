@@ -30,12 +30,12 @@ import { deletePhoto as firebaseDeletePhoto } from '../firebase'
 import { usePhotoData } from '../hooks/usePhotoData'
 import ConfirmModal from '../components/ConfirmModal'
 import { sanitizeImageUrl, PLACEHOLDER_IMAGE } from '../utils/security'
+import { resolvePhotoUrl } from '../utils/photoHelpers'
 import DocumentCard from '../components/DocumentCard'
 import TagInput from '../components/TagInput'
 import EmptyState from '../components/EmptyState'
 
-const getPhotoUrl = (photo) =>
-  photo.url || photo.displayUrl || photo.thumbnailUrl
+const getPhotoUrl = (photo) => resolvePhotoUrl(photo)
 
 export default function PhotoPage() {
   const { id } = useParams()
@@ -438,7 +438,7 @@ export default function PhotoPage() {
       navigator
         .share({
           title: photo.name || 'Photo',
-          url: photo.url || photo.displayUrl,
+          url: resolvePhotoUrl(photo),
         })
         .catch((err) => {
           if (err.name !== 'AbortError') {
@@ -824,7 +824,7 @@ export default function PhotoPage() {
           </div>
         ) : photo.type === 'video' ? (
           <video
-            src={photo.url}
+            src={resolvePhotoUrl(photo)}
             controls
             preload="metadata"
             poster={photo.thumbnailUrl || undefined}
@@ -840,14 +840,14 @@ export default function PhotoPage() {
         ) : (
           <img
             src={sanitizeImageUrl(
-              photo.displayUrl || photo.url,
+              resolvePhotoUrl(photo),
               PLACEHOLDER_IMAGE
             )}
             alt={photo.caption || photo.name || 'Photo'}
             onError={(e) => {
               console.error(
                 '❌ Failed to load photo:',
-                photo.displayUrl || photo.url
+                resolvePhotoUrl(photo)
               )
               e.target.src = PLACEHOLDER_IMAGE
             }}

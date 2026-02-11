@@ -7,6 +7,7 @@ import useEditorStore from '../store/editorStore'
 import { uploadEditedPhoto, updatePhoto } from '../../../firebase'
 import useStore from '../../../state/store'
 import useAuth from '../../../hooks/useAuth'
+import { resolvePhotoUrl } from '../../../utils/photoHelpers'
 
 export default function EditorPage() {
   const { photoId } = useParams()
@@ -36,16 +37,19 @@ export default function EditorPage() {
   // Get photo from data layer
   const photo = getPhotoById(photoId)
 
-  // ✅ Image loading state (Firebase Storage CORS fix)
+  // ✅ Image loading state
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(null)
 
-  // ✅ Preload image with crossOrigin for Firebase Storage
-  useEffect(() => {
-    if (!photo?.url) return
+  // Resolve the correct image URL (R2-aware)
+  const imageUrl = resolvePhotoUrl(photo)
 
-    if (import.meta.env.DEV) console.log('🔍 Preloading image from Firebase Storage')
-    if (import.meta.env.DEV) console.log('   URL:', photo.url.substring(0, 80) + '...')
+  // ✅ Preload image with crossOrigin for canvas export
+  useEffect(() => {
+    if (!imageUrl) return
+
+    if (import.meta.env.DEV) console.log('🔍 Preloading image for editor')
+    if (import.meta.env.DEV) console.log('   URL:', imageUrl.substring(0, 80) + '...')
 
     const img = new Image()
 
@@ -59,13 +63,13 @@ export default function EditorPage() {
       })
       setImageLoaded(true)
       setImageError(null)
-      setOriginalUrl(photo.url)
+      setOriginalUrl(imageUrl)
       setPreloadedImage(img) // ✅ Store HTMLImageElement for canvas
     }
 
     img.onerror = (e) => {
       console.error('❌ Image load failed:', {
-        url: photo.url,
+        url: imageUrl,
         error: e,
       })
       setImageError(true)
@@ -74,13 +78,13 @@ export default function EditorPage() {
     }
 
     // ✅ Set src AFTER crossOrigin
-    img.src = photo.url
+    img.src = imageUrl
 
     // Cleanup on unmount
     return () => {
       cleanup()
     }
-  }, [photo?.url, setOriginalUrl, setPreloadedImage, cleanup])
+  }, [imageUrl, setOriginalUrl, setPreloadedImage, cleanup])
 
   const handleClose = () => {
     navigate(-1)
@@ -417,7 +421,7 @@ export default function EditorPage() {
   // ✅ Render editor (image loaded successfully)
   return (
     <EditorShell
-      imageUrl={photo.url}
+      imageUrl={imageUrl}
       photoName={photo.name || t('editor:untitled')}
       onClose={handleClose}
       onSave={handleSave}
