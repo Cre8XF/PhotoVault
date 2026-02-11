@@ -18,7 +18,19 @@
  */
 function isFirebaseStorageUrl(url) {
   if (!url || typeof url !== 'string') return false
-  return url.includes('firebasestorage.googleapis.com') || url.includes('storage.googleapis.com')
+
+  try {
+    const parsed = new URL(url)
+    const hostname = parsed.hostname.toLowerCase()
+
+    return (
+      hostname === 'firebasestorage.googleapis.com' ||
+      hostname === 'storage.googleapis.com'
+    )
+  } catch {
+    // Invalid URL strings are not treated as Firebase Storage URLs
+    return false
+  }
 }
 
 /**
