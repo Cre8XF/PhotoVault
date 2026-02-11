@@ -35,7 +35,9 @@ const PrivacyPage = () => {
         {/* Introduction */}
         <section className="glass-card p-6 mb-6">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            {t('privacy:lastUpdated', { defaultValue: 'Last updated: December 2024' })}
+            {t('privacy:lastUpdated', {
+              defaultValue: 'Last updated: December 2024',
+            })}
           </p>
           <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
             {t('privacy:intro', {
@@ -59,21 +61,36 @@ const PrivacyPage = () => {
           </div>
           <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
             <p>
-              <strong>{t('privacy:dataCollection.account', { defaultValue: 'Account Information:' })}</strong>{' '}
+              <strong>
+                {t('privacy:dataCollection.account', {
+                  defaultValue: 'Account Information:',
+                })}
+              </strong>{' '}
               {t('privacy:dataCollection.accountDesc', {
-                defaultValue: 'Email address, display name, and authentication details.',
+                defaultValue:
+                  'Email address, display name, and authentication details.',
               })}
             </p>
             <p>
-              <strong>{t('privacy:dataCollection.content', { defaultValue: 'Content:' })}</strong>{' '}
+              <strong>
+                {t('privacy:dataCollection.content', {
+                  defaultValue: 'Content:',
+                })}
+              </strong>{' '}
               {t('privacy:dataCollection.contentDesc', {
-                defaultValue: 'Photos, videos, and metadata you upload to Pixtr.',
+                defaultValue:
+                  'Photos, videos, and metadata you upload to Pixtr.',
               })}
             </p>
             <p>
-              <strong>{t('privacy:dataCollection.usage', { defaultValue: 'Usage Data:' })}</strong>{' '}
+              <strong>
+                {t('privacy:dataCollection.usage', {
+                  defaultValue: 'Usage Data:',
+                })}
+              </strong>{' '}
               {t('privacy:dataCollection.usageDesc', {
-                defaultValue: 'How you interact with the app to improve our service.',
+                defaultValue:
+                  'How you interact with the app to improve our service.',
               })}
             </p>
           </div>
@@ -86,14 +103,32 @@ const PrivacyPage = () => {
               <Eye className="w-5 h-5 text-blue-400" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              {t('privacy:dataUse.title', { defaultValue: 'How We Use Your Data' })}
+              {t('privacy:dataUse.title', {
+                defaultValue: 'How We Use Your Data',
+              })}
             </h2>
           </div>
           <ul className="list-disc list-inside space-y-2 text-sm text-gray-700 dark:text-gray-300">
-            <li>{t('privacy:dataUse.service', { defaultValue: 'To provide and maintain the Pixtr service' })}</li>
-            <li>{t('privacy:dataUse.improve', { defaultValue: 'To improve and personalize your experience' })}</li>
-            <li>{t('privacy:dataUse.support', { defaultValue: 'To provide customer support' })}</li>
-            <li>{t('privacy:dataUse.security', { defaultValue: 'To monitor and enhance security' })}</li>
+            <li>
+              {t('privacy:dataUse.service', {
+                defaultValue: 'To provide and maintain the Pixtr service',
+              })}
+            </li>
+            <li>
+              {t('privacy:dataUse.improve', {
+                defaultValue: 'To improve and personalize your experience',
+              })}
+            </li>
+            <li>
+              {t('privacy:dataUse.support', {
+                defaultValue: 'To provide customer support',
+              })}
+            </li>
+            <li>
+              {t('privacy:dataUse.security', {
+                defaultValue: 'To monitor and enhance security',
+              })}
+            </li>
           </ul>
         </section>
 
@@ -104,7 +139,9 @@ const PrivacyPage = () => {
               <Lock className="w-5 h-5 text-green-400" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              {t('privacy:protection.title', { defaultValue: 'Data Protection' })}
+              {t('privacy:protection.title', {
+                defaultValue: 'Data Protection',
+              })}
             </h2>
           </div>
           <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
@@ -115,10 +152,23 @@ const PrivacyPage = () => {
               })}
             </p>
             <ul className="list-disc list-inside space-y-2">
-              <li>{t('privacy:protection.encryption', { defaultValue: 'End-to-end encryption for Vault photos' })}</li>
-              <li>{t('privacy:protection.secure', { defaultValue: 'Secure cloud storage with Firebase' })}</li>
-              <li>{t('privacy:protection.access', { defaultValue: 'Strict access controls and authentication' })}</li>
-              <li>{t('privacy:protection.monitoring', { defaultValue: 'Regular security audits and monitoring' })}</li>
+              <li>
+                {t('privacy:protection.encryption', {
+                  defaultValue: 'End-to-end encryption for Vault photos',
+                })}
+              </li>
+              <li>Secure cloud storage using Cloudflare R2</li>
+              <li>Authentication and database services provided by Firebase</li>
+              <li>
+                {t('privacy:protection.access', {
+                  defaultValue: 'Strict access controls and authentication',
+                })}
+              </li>
+              <li>
+                {t('privacy:protection.monitoring', {
+                  defaultValue: 'Regular security audits and monitoring',
+                })}
+              </li>
             </ul>
           </div>
         </section>
@@ -134,10 +184,26 @@ const PrivacyPage = () => {
             </h2>
           </div>
           <ul className="list-disc list-inside space-y-2 text-sm text-gray-700 dark:text-gray-300">
-            <li>{t('privacy:rights.access', { defaultValue: 'Access and download your data at any time' })}</li>
-            <li>{t('privacy:rights.update', { defaultValue: 'Update or correct your personal information' })}</li>
-            <li>{t('privacy:rights.delete', { defaultValue: 'Request deletion of your account and data' })}</li>
-            <li>{t('privacy:rights.export', { defaultValue: 'Export your photos and metadata' })}</li>
+            <li>
+              {t('privacy:rights.access', {
+                defaultValue: 'Access and download your data at any time',
+              })}
+            </li>
+            <li>
+              {t('privacy:rights.update', {
+                defaultValue: 'Update or correct your personal information',
+              })}
+            </li>
+            <li>
+              {t('privacy:rights.delete', {
+                defaultValue: 'Request deletion of your account and data',
+              })}
+            </li>
+            <li>
+              {t('privacy:rights.export', {
+                defaultValue: 'Export your photos and metadata',
+              })}
+            </li>
           </ul>
         </section>
 
@@ -148,7 +214,8 @@ const PrivacyPage = () => {
           </h2>
           <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
             {t('privacy:contact.desc', {
-              defaultValue: 'If you have questions about this privacy policy, contact us at:',
+              defaultValue:
+                'If you have questions about this privacy policy, contact us at:',
             })}
           </p>
           <a

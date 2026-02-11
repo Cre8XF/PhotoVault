@@ -1,12 +1,12 @@
-import { CapacitorConfig } from '@capacitor/cli';
+import { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
   appId: 'com.cre8web.photovault',
   appName: 'PhotoVault',
-  webDir: 'build',
+  webDir: 'dist',
   server: {
     androidScheme: 'https',
-    iosScheme: 'https'
+    iosScheme: 'https',
   },
   plugins: {
     SplashScreen: {
@@ -17,23 +17,23 @@ const config: CapacitorConfig = {
       androidScaleType: 'CENTER_CROP',
       showSpinner: false,
       splashFullScreen: true,
-      splashImmersive: true
+      splashImmersive: true,
     },
     StatusBar: {
       style: 'dark',
-      backgroundColor: '#0A0E1A'
+      backgroundColor: '#0A0E1A',
     },
     Keyboard: {
       resize: 'body',
       style: 'dark',
-      resizeOnFullScreen: true
+      resizeOnFullScreen: true,
     },
     Camera: {
-      presentationStyle: 'fullscreen'
-    }
+      presentationStyle: 'fullscreen',
+    },
   },
   ios: {
-    contentInset: 'always'
+    contentInset: 'always',
   },
   android: {
     buildOptions: {
@@ -41,9 +41,9 @@ const config: CapacitorConfig = {
       keystorePassword: undefined,
       keystoreAlias: undefined,
       keystoreAliasPassword: undefined,
-      releaseType: 'APK'
-    }
-  }
-};
+      releaseType: 'APK',
+    },
+  },
+}
 
-export default config;
+export default config
