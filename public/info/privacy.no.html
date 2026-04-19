@@ -1,96 +1,149 @@
 <!DOCTYPE html>
 <html lang="no">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Personvernerklæring – PhotoVault</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personvernerklæring – Pixtr</title>
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-          Oxygen, Ubuntu, Cantarell, sans-serif;
-        line-height: 1.6;
-        color: #333;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 20px;
-        min-height: 100vh;
-      }
-      .container {
-        max-width: 800px;
-        margin: 0 auto;
-        background: white;
-        border-radius: 16px;
-        padding: 40px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      }
-      h1 {
-        color: #667eea;
-        margin-bottom: 20px;
-        font-size: 2.5em;
-      }
-      h2 {
-        color: #764ba2;
-        margin-top: 30px;
-        margin-bottom: 15px;
-      }
-      p {
-        margin-bottom: 15px;
-        color: #555;
-      }
-      ul {
-        margin-left: 20px;
-      }
-      .btn {
-        display: inline-block;
-        padding: 12px 24px;
-        background: #667eea;
-        color: white;
-        text-decoration: none;
-        border-radius: 8px;
-        margin-top: 20px;
-        transition: background 0.3s;
-      }
-      .btn:hover {
-        background: #764ba2;
-      }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 { color: #667eea; margin-bottom: 10px; font-size: 2.2em; }
+        h2 { color: #764ba2; margin-top: 30px; margin-bottom: 12px; font-size: 1.3em; }
+        p { margin-bottom: 12px; color: #555; }
+        ul { margin-left: 20px; margin-bottom: 12px; color: #555; }
+        li { margin-bottom: 6px; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #e0e0e0; font-size: 0.95em; color: #555; }
+        th { font-weight: 600; color: #333; background: #f8f8fc; }
+        .updated { color: #888; font-style: italic; margin-bottom: 20px; }
+        .vault-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px; margin: 16px 0; }
+        .vault-box p { color: #166534; margin-bottom: 0; }
+        .vault-box strong { color: #14532d; }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        .btn:hover { background: #764ba2; }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <div class="container">
-      <h1>🔒 Personvernerklæring</h1>
-      <p><em>Sist oppdatert: Oktober 2025</em></p>
+        <h1>Personvernerklæring</h1>
+        <p class="updated">Sist oppdatert: februar 2026</p>
+        <p>Pixtr ("vi", "vår" eller "oss") er en bildebehandlingsapplikasjon drevet av Cre8XF. Denne personvernerklæringen forklarer hvilke data vi samler inn, hvordan vi bruker dem, hvem som behandler dem, og hvilke rettigheter du har.</p>
 
-      <h2>Hvilken data samler vi inn?</h2>
-      <p>
-        Vi samler kun inn informasjon som er nødvendig for å levere tjenesten:
-      </p>
-      <ul>
-        <li>E-postadresse for autentisering</li>
-        <li>Bilder du laster opp</li>
-        <li>Bruksanalyse (anonymisert)</li>
-      </ul>
+        <h2>1. Informasjon vi samler inn</h2>
+        <p><strong>Kontoinformasjon:</strong> E-postadresse, visningsnavn og profilbilde (hvis oppgitt). Firebase Authentication administrerer påloggingsinformasjonen din.</p>
+        <p><strong>Brukerinnhold:</strong> Bilder, videoer og dokumenter du laster opp, samt albumtitler, beskrivelser og tagger.</p>
+        <p><strong>Bildemetadata (EXIF):</strong> Dato tatt, GPS-posisjon, kameramerke/-modell og tekniske innstillinger (ISO, blenderåpning, lukkerhastighet, brennvidde). Brukes til å organisere bilder etter dato og sted.</p>
+        <p><strong>Betalingsinformasjon:</strong> Hvis du abonnerer, behandles betalingen av Stripe. Vi lagrer ikke kredittkortnummeret ditt. Vi lagrer Stripe kunde-ID, abonnementsstatus og plantier.</p>
+        <p><strong>Enhets- og tekniske data:</strong> Autentiseringstokens, lagringsbruk og funksjonsbegrensninger. Vi bruker ikke tredjeparts analyse-, reklame- eller krasjrapporteringstjenester.</p>
 
-      <h2>Hvordan bruker vi dataen?</h2>
-      <p>
-        Data brukes kun for å levere og forbedre PhotoVault. Vi selger aldri din
-        informasjon.
-      </p>
+        <h2>2. Hvordan vi bruker dataene dine</h2>
+        <ul>
+            <li>For å lagre, organisere og vise bildene og albumene dine</li>
+            <li>For å synkronisere innhold på tvers av enheter</li>
+            <li>For å administrere abonnementer og behandle betalinger</li>
+            <li>For å autentisere identiteten din og beskytte kontoen</li>
+            <li>For å aktivere Vault-funksjoner og kryptering på klientsiden</li>
+            <li>For å aktivere albumdeling når du velger å dele</li>
+        </ul>
+        <p>Vi selger, leier eller deler ikke personopplysningene dine med tredjeparter for reklameformål.</p>
 
-      <h2>Databehandling og lagring</h2>
-      <p>
-        Alle bilder lagres sikkert på Firebase Cloud Storage med kryptering.
-      </p>
+        <h2>3. Rettslig grunnlag (GDPR)</h2>
+        <ul>
+            <li><strong>Oppfyllelse av kontrakt</strong> &ndash; Levering av tjenesten, kontoadministrasjon, lagring av bilder, abonnementer.</li>
+            <li><strong>Samtykke</strong> &ndash; Behandling av GPS-data fra EXIF-metadata. Offentlig albumdeling.</li>
+            <li><strong>Berettiget interesse</strong> &ndash; Sikkerhet, svindelforebygging, pålitelighet.</li>
+        </ul>
 
-      <h2>Dine rettigheter</h2>
-      <p>
-        Du har rett til innsyn, endring eller sletting av dine data når som
-        helst.
-      </p>
+        <h2>4. Datalagring og sikkerhet</h2>
+        <ul>
+            <li>Bilder og videoer lagres på <strong>Cloudflare R2</strong>, kryptert under transport via HTTPS.</li>
+            <li>Metadata og profiler lagres i <strong>Google Cloud Firestore</strong>, kryptert i hvile.</li>
+            <li>Autentisering administreres av <strong>Firebase Authentication</strong> (Google).</li>
+            <li>Nettleseren kan bufre data lokalt med <strong>IndexedDB</strong> for frakoblet tilgang.</li>
+        </ul>
+        <div class="vault-box">
+            <strong>Vault (Private bilder)</strong>
+            <p>Bilder i Vault krypteres på enheten din før opplasting med AES-256-GCM med en passordavledet nøkkel (PBKDF2, 100 000 iterasjoner). Kryptering og dekryptering skjer helt i nettleseren din. Pixtr-servere mottar aldri vault-passordet eller dekrypteringsnøkkelen. Mister du vault-passordet, kan krypterte bilder ikke gjenopprettes.</p>
+        </div>
 
-      <a href="#" onclick="window.close(); return false;" class="btn">Lukk</a>
+        <h2>5. Tredjeparts tjenesteleverandører</h2>
+        <table>
+            <thead>
+                <tr><th>Leverandør</th><th>Formål</th><th>Data behandlet</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Google Firebase</td><td>Autentisering, database</td><td>E-post, profil, metadata</td></tr>
+                <tr><td>Cloudflare</td><td>Fillagring (R2), CDN</td><td>Bilder, videoer, vault-filer</td></tr>
+                <tr><td>Stripe</td><td>Betalingsbehandling</td><td>E-post, kortdetaljer, fakturering</td></tr>
+                <tr><td>Netlify</td><td>Backend-funksjoner</td><td>Auth-tokens, abonnementer</td></tr>
+            </tbody>
+        </table>
+        <p>Vi bruker ingen tredjeparts analyse-, reklame- eller krasjrapporteringstjenester.</p>
+
+        <h2>6. Internasjonale dataoverføringer</h2>
+        <p>Dataene dine kan behandles i USA og andre land der leverandørene våre opererer. Disse bruker Standard Contractual Clauses (SCC-er) for EU/EØS-dataoverføringer.</p>
+
+        <h2>7. Datalagring</h2>
+        <ul>
+            <li>Data beholdes så lenge kontoen er aktiv.</li>
+            <li>Slettede bilder fjernes permanent etter 30 dager i Papirkurven.</li>
+            <li>Kontosletting fjerner alle tilknyttede data fra serverne.</li>
+            <li>Stripe kan beholde betalingsregistre per finansielle forskrifter.</li>
+        </ul>
+
+        <h2>8. Betalingsbehandling</h2>
+        <p>Betalte abonnementer behandles gjennom Stripe. Du omdirigeres til Stripes betalingsside. Vi mottar ikke hele kortnummeret. Se <a href="https://stripe.com/privacy">Stripes personvernerklæring</a>.</p>
+
+        <h2>9. Biometrisk autentisering</h2>
+        <p>Pixtr kan tilby biometrisk autentisering for å låse opp Vault. All behandling håndteres av enhetens OS. Pixtr får aldri tilgang til biometriske data.</p>
+
+        <h2>10. Dine rettigheter</h2>
+        <ul>
+            <li><strong>Innsyn</strong> &ndash; Be om kopi av personopplysningene dine.</li>
+            <li><strong>Retting</strong> &ndash; Korrigere unøyaktige data.</li>
+            <li><strong>Sletting</strong> &ndash; Be om sletting av konto og data.</li>
+            <li><strong>Begrensning</strong> &ndash; Begrense behandlingen av dataene dine.</li>
+            <li><strong>Dataportabilitet</strong> &ndash; Last ned bilder og metadata.</li>
+            <li><strong>Innsigelse</strong> &ndash; Protestere mot behandling basert på berettiget interesse.</li>
+            <li><strong>Klage</strong> &ndash; Sende klage til ditt lokale datatilsyn.</li>
+        </ul>
+        <p>Kontakt oss nedenfor eller slett kontoen fra appinnstillingene.</p>
+
+        <h2>11. Barns personvern</h2>
+        <p>Pixtr er ikke rettet mot barn under 13 år. Vi samler ikke bevisst inn data fra barn.</p>
+
+        <h2>12. Endringer</h2>
+        <p>Vi kan oppdatere denne erklæringen. Vesentlige endringer reflekteres i «Sist oppdatert»-datoen.</p>
+
+        <h2>13. Kontakt oss</h2>
+        <p><strong>Pixtr</strong> &ndash; Drevet av Cre8XF<br>
+        E-post: <a href="mailto:cre8xf@gmail.com">cre8xf@gmail.com</a></p>
+
+        <a href="#" onclick="window.close(); return false;" class="btn">Lukk</a>
     </div>
-  </body>
+</body>
 </html>

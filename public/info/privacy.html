@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy - PhotoVault</title>
+    <title>Privacy Policy - Pixtr</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -22,9 +22,19 @@
             padding: 40px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-        h1 { color: #667eea; margin-bottom: 20px; font-size: 2.5em; }
-        h2 { color: #764ba2; margin-top: 30px; margin-bottom: 15px; }
-        p { margin-bottom: 15px; color: #555; }
+        h1 { color: #667eea; margin-bottom: 10px; font-size: 2.2em; }
+        h2 { color: #764ba2; margin-top: 30px; margin-bottom: 12px; font-size: 1.3em; }
+        h3 { color: #555; margin-top: 16px; margin-bottom: 8px; font-size: 1.1em; }
+        p { margin-bottom: 12px; color: #555; }
+        ul { margin-left: 20px; margin-bottom: 12px; color: #555; }
+        li { margin-bottom: 6px; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #e0e0e0; font-size: 0.95em; color: #555; }
+        th { font-weight: 600; color: #333; background: #f8f8fc; }
+        .updated { color: #888; font-style: italic; margin-bottom: 20px; }
+        .vault-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px; margin: 16px 0; }
+        .vault-box p { color: #166534; margin-bottom: 0; }
+        .vault-box strong { color: #14532d; }
         .btn {
             display: inline-block;
             padding: 12px 24px;
@@ -40,25 +50,99 @@
 </head>
 <body>
     <div class="container">
-        <h1>🔒 Privacy Policy</h1>
-        <p><em>Last updated: October 2025</em></p>
+        <h1>Privacy Policy</h1>
+        <p class="updated">Last updated: February 2026</p>
+        <p>Pixtr ("we", "our", or "us") is a photo management application operated by Cre8XF. This Privacy Policy explains what data we collect, how we use it, who processes it, and what rights you have. It applies to users of the Pixtr mobile and web applications.</p>
 
-        <h2>Data Collection</h2>
-        <p>We collect only the information necessary to provide our services:</p>
+        <h2>1. Information We Collect</h2>
+        <p><strong>Account Information:</strong> Email address, display name, and profile photo (if provided). Firebase Authentication manages your sign-in credentials.</p>
+        <p><strong>User Content:</strong> Photos, videos, and documents you upload, along with album titles, descriptions, and tags.</p>
+        <p><strong>Photo Metadata (EXIF):</strong> Date taken, GPS location, camera make/model, and technical settings (ISO, aperture, shutter speed, focal length). Used to organise photos by date and location.</p>
+        <p><strong>Payment Information:</strong> If you subscribe to a paid plan, payment is processed by Stripe. We do not store your credit card number. We store your Stripe customer ID, subscription status, and plan tier.</p>
+        <p><strong>Device and Technical Data:</strong> Authentication tokens, storage usage, and feature-tier limits. We do not use third-party analytics, advertising SDKs, or crash reporting services.</p>
+
+        <h2>2. How We Use Your Data</h2>
         <ul>
-            <li>Email address for authentication</li>
-            <li>Photos you upload</li>
-            <li>Usage analytics (anonymized)</li>
+            <li>To store, organise, and display your photos and albums</li>
+            <li>To synchronise content across devices</li>
+            <li>To manage subscriptions, enforce plan limits, and process payments</li>
+            <li>To authenticate your identity and protect your account</li>
+            <li>To enable Vault features and client-side encryption</li>
+            <li>To enable album sharing when you choose to share</li>
+        </ul>
+        <p>We do not sell, rent, or share your personal data with third parties for advertising or marketing purposes.</p>
+
+        <h2>3. Legal Basis for Processing (GDPR)</h2>
+        <ul>
+            <li><strong>Performance of contract</strong> &ndash; Providing the service, managing your account, storing photos, processing subscriptions.</li>
+            <li><strong>Consent</strong> &ndash; Processing GPS location data from EXIF metadata. Enabling public album sharing.</li>
+            <li><strong>Legitimate interest</strong> &ndash; Maintaining security, preventing fraud, improving reliability.</li>
         </ul>
 
-        <h2>Data Usage</h2>
-        <p>Your data is used solely to provide and improve PhotoVault services. We never sell your personal information.</p>
+        <h2>4. Data Storage and Security</h2>
+        <ul>
+            <li>Photos and videos are stored on <strong>Cloudflare R2</strong> object storage, encrypted in transit via HTTPS.</li>
+            <li>Metadata and profiles are stored in <strong>Google Cloud Firestore</strong>, encrypted at rest.</li>
+            <li>Authentication is managed by <strong>Firebase Authentication</strong> (Google).</li>
+            <li>Your browser may cache data locally using <strong>IndexedDB</strong> for offline access.</li>
+        </ul>
+        <div class="vault-box">
+            <strong>Vault (Private Photos)</strong>
+            <p>Photos in the Vault are encrypted on your device before upload using AES-256-GCM with a password-derived key (PBKDF2, 100,000 iterations). Encryption and decryption happen entirely in your browser. Pixtr servers never receive your vault password or decryption key. If you lose your vault password, encrypted photos cannot be recovered.</p>
+        </div>
 
-        <h2>Data Storage</h2>
-        <p>Photos are stored securely on Firebase Cloud Storage with encryption.</p>
+        <h2>5. Third-Party Service Providers</h2>
+        <table>
+            <thead>
+                <tr><th>Provider</th><th>Purpose</th><th>Data Processed</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Google Firebase</td><td>Authentication, database</td><td>Email, profile, metadata</td></tr>
+                <tr><td>Cloudflare</td><td>File storage (R2), CDN</td><td>Photos, videos, vault files</td></tr>
+                <tr><td>Stripe</td><td>Payment processing</td><td>Email, card details, billing</td></tr>
+                <tr><td>Netlify</td><td>Backend functions</td><td>Auth tokens, subscriptions</td></tr>
+            </tbody>
+        </table>
+        <p>We do not use any third-party analytics, advertising, or crash reporting services.</p>
 
-        <h2>Your Rights</h2>
-        <p>You have the right to access, modify, or delete your data at any time.</p>
+        <h2>6. International Data Transfers</h2>
+        <p>Your data may be processed in the United States and other countries where our providers operate. These providers use Standard Contractual Clauses (SCCs) or equivalent safeguards for EU/EEA data transfers.</p>
+
+        <h2>7. Data Retention</h2>
+        <ul>
+            <li>Data is retained while your account is active.</li>
+            <li>Deleted photos are permanently removed after 30 days in Trash.</li>
+            <li>Account deletion removes all associated data from our servers.</li>
+            <li>Stripe may retain payment records per financial regulations.</li>
+        </ul>
+
+        <h2>8. Payment Processing</h2>
+        <p>Paid subscriptions are processed through Stripe. You are redirected to Stripe's hosted checkout. We do not receive your full card number. See <a href="https://stripe.com/privacy">Stripe's Privacy Policy</a>.</p>
+
+        <h2>9. Biometric Authentication</h2>
+        <p>Pixtr may offer biometric authentication to unlock the Vault. All biometric processing is handled by your device OS. Pixtr never accesses or stores biometric data.</p>
+
+        <h2>10. Your Rights</h2>
+        <ul>
+            <li><strong>Access</strong> &ndash; Request a copy of your personal data.</li>
+            <li><strong>Rectification</strong> &ndash; Correct inaccurate data.</li>
+            <li><strong>Erasure</strong> &ndash; Request deletion of your account and data.</li>
+            <li><strong>Restriction</strong> &ndash; Limit processing of your data.</li>
+            <li><strong>Data Portability</strong> &ndash; Download your photos and metadata.</li>
+            <li><strong>Objection</strong> &ndash; Object to processing based on legitimate interest.</li>
+            <li><strong>Complaint</strong> &ndash; File a complaint with your local data protection authority.</li>
+        </ul>
+        <p>To exercise these rights, contact us below or delete your account from app settings.</p>
+
+        <h2>11. Children's Privacy</h2>
+        <p>Pixtr is not directed at children under 13. We do not knowingly collect data from children. If we learn a child has provided data, we will delete the account promptly.</p>
+
+        <h2>12. Changes to This Policy</h2>
+        <p>We may update this policy. Material changes will be reflected in the "Last updated" date and may be notified in-app.</p>
+
+        <h2>13. Contact Us</h2>
+        <p><strong>Pixtr</strong> &ndash; Operated by Cre8XF<br>
+        Email: <a href="mailto:cre8xf@gmail.com">cre8xf@gmail.com</a></p>
 
         <a href="#" onclick="window.close(); return false;" class="btn">Close</a>
     </div>
