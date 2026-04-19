@@ -65,11 +65,11 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^7.4.3",
-    "@vitejs/plugin-react": "^4.2.0",
+    "@vitejs/plugin-react": "^4.7.0",
     "ajv": "^8.12.0",
     "ajv-keywords": "^5.1.0",
     "firebase-tools": "^15.1.0",
     "typescript": "^4.9.5",
-    "vite": "^5.2.0"
+    "vite": "^6.4.2"
   }
 }
