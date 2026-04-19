@@ -154,7 +154,7 @@ export const useAuth = () => {
    * Check if user is admin
    */
   const isAdmin = useCallback(() => {
-    return userProfile?.role?.toLowerCase() === 'admin' || user?.email === 'rogsor80@gmail.com'
+    return userProfile?.role?.toLowerCase() === 'admin'
   }, [userProfile, user])
 
   /**
