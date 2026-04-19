@@ -22,3 +22,6 @@ photovault-*.json
 Thumbs.db
 firebase-service-account.json
 *.service-account.json
+
+# 🔍 Audit reports
+audit_report.json
