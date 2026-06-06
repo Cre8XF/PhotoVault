@@ -1,5 +1,5 @@
 // ============================================================================
-// SecurityContext.jsx - Global sikkerhetshåndtering for PhotoVault
+// SecurityContext.jsx - Global sikkerhetshåndtering for Pixtr
 // FASE 3 - Sikkerhet & Privacy
 // ============================================================================
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
@@ -283,7 +283,7 @@ export const SecurityProvider = ({ children }) => {
     }
 
     try {
-      const result = await authenticateWithBiometric('Lås opp PhotoVault');
+      const result = await authenticateWithBiometric('Lås opp Pixtr');
       
       if (result.success) {
         setIsLocked(false);

@@ -22,9 +22,9 @@ export const verifyBiometric = async (reason = 'Authenticate to access your phot
   try {
     const result = await NativeBiometric.verifyIdentity({
       reason,
-      title: 'PhotoVault Authentication',
+      title: 'Pixtr Authentication',
       subtitle: 'Secure access required',
-      description: 'Use your biometrics to unlock PhotoVault'
+      description: 'Use your biometrics to unlock Pixtr'
     });
 
     return result;
@@ -39,7 +39,7 @@ export const setCredentials = async (username, password) => {
     await NativeBiometric.setCredentials({
       username,
       password,
-      server: 'com.cre8web.photovault'
+      server: 'com.cre8web.pixtr'
     });
     return true;
   } catch (error) {
@@ -51,7 +51,7 @@ export const setCredentials = async (username, password) => {
 export const getCredentials = async () => {
   try {
     const credentials = await NativeBiometric.getCredentials({
-      server: 'com.cre8web.photovault'
+      server: 'com.cre8web.pixtr'
     });
     return credentials;
   } catch (error) {
@@ -63,7 +63,7 @@ export const getCredentials = async () => {
 export const deleteCredentials = async () => {
   try {
     await NativeBiometric.deleteCredentials({
-      server: 'com.cre8web.photovault'
+      server: 'com.cre8web.pixtr'
     });
     return true;
   } catch (error) {

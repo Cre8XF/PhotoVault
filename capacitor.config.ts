@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
-  appId: 'com.cre8web.photovault',
-  appName: 'PhotoVault',
+  appId: 'com.cre8web.pixtr',
+  appName: 'Pixtr',
   webDir: 'dist',
   server: {
     androidScheme: 'https',

@@ -4,7 +4,7 @@
   "albumUnavailable": "Album ikke tilgjengelig",
   "callToAction": {
     "createAccount": "Lag din egen konto gratis",
-    "likePhotoVault": "Liker du PhotoVault?",
+    "likePixtr": "Liker du Pixtr?",
     "signUp": "Registrer deg"
   },
   "downloadAlbum": "Last ned album",
@@ -15,7 +15,7 @@
   "name": "Navn",
   "next": "Neste",
   "noPhotosInAlbum": "Ingen bilder i dette albumet ennå",
-  "openInPhotoVault": "Åpne i PhotoVault",
+  "openInPixtr": "Åpne i Pixtr",
   "photosCount": "{{count}} bilde",
   "photosCount_other": "{{count}} bilder",
   "previous": "Forrige",

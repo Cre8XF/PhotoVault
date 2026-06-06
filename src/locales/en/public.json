@@ -4,7 +4,7 @@
   "albumUnavailable": "Album not available",
   "callToAction": {
     "createAccount": "Create your own account for free",
-    "likePhotoVault": "Like PhotoVault?",
+    "likePixtr": "Like Pixtr?",
     "signUp": "Sign Up"
   },
   "downloadAlbum": "Download album",
@@ -15,7 +15,7 @@
   "name": "Name",
   "next": "Next",
   "noPhotosInAlbum": "No photos in this album yet",
-  "openInPhotoVault": "Open in PhotoVault",
+  "openInPixtr": "Open in Pixtr",
   "photosCount": "{{count}} photo",
   "photosCount_other": "{{count}} photos",
   "previous": "Previous",

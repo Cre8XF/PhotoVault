@@ -66,9 +66,9 @@ const missing = Object.entries(firebaseConfig)
 
 // Simple error logging for missing variables
 if (missing.length > 0) {
-  console.error('❌ Firebase config missing:', missing)
+  if (import.meta.env.DEV) console.error('❌ Firebase config missing:', missing)
   if (isDev) {
-    console.error('⚠️  Check .env.local file')
+    if (import.meta.env.DEV) console.error('⚠️  Check .env.local file')
   }
 }
 
@@ -152,13 +152,15 @@ export async function adjustUserAlbumCount(userId, delta) {
 
     devLog(`✅ Counter adjusted: userId=${userId}, delta=${delta}`)
   } catch (error) {
-    console.error(`❌ Counter adjustment FAILED:`, {
-      userId,
-      delta,
-      error: error.message,
-      stack: error.stack,
-      timestamp: new Date().toISOString(),
-    })
+    if (import.meta.env.DEV) {
+      console.error(`❌ Counter adjustment FAILED:`, {
+        userId,
+        delta,
+        error: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString(),
+      })
+    }
 
     // CRITICAL: Log to external service (optional)
     // TODO: Integrate with Sentry or similar logging service
@@ -183,7 +185,7 @@ export async function adjustAlbumPhotoCount(albumId, delta) {
       devLog(`✅ Photo count adjusted by ${delta} for album ${albumId}`)
     }
   } catch (error) {
-    console.error('❌ Failed to adjust photo count:', error)
+    if (import.meta.env.DEV) console.error('❌ Failed to adjust photo count:', error)
     throw error
   }
 }
@@ -205,7 +207,7 @@ export async function getAlbumsByUser(userId) {
       return { id: d.id, ...data }
     })
   } catch (err) {
-    console.error('🔥 getAlbumsByUser:', err)
+    if (import.meta.env.DEV) console.error('🔥 getAlbumsByUser:', err)
     return []
   }
 }
@@ -271,7 +273,7 @@ export async function addAlbum(data) {
       await adjustUserAlbumCount(userId, 1)
     } catch (counterError) {
       // ROLLBACK: Delete the album we just created
-      console.error('Counter increment failed, rolling back album creation')
+      if (import.meta.env.DEV) console.error('Counter increment failed, rolling back album creation')
       await deleteDoc(albumRef)
       throw counterError
     }
@@ -284,7 +286,7 @@ export async function addAlbum(data) {
 
     return albumId
   } catch (err) {
-    console.error('🔥 addAlbum:', err)
+    if (import.meta.env.DEV) console.error('🔥 addAlbum:', err)
 
     // Show appropriate error message
     if (err.code === 'ALBUM_LIMIT_REACHED') {
@@ -316,7 +318,7 @@ export async function deleteAlbum(albumId, userId) {
       devLog(`✅ Album ${albumId} deleted`)
     }
   } catch (error) {
-    console.error('deleteAlbum failed:', error)
+    if (import.meta.env.DEV) console.error('deleteAlbum failed:', error)
     throw error
   }
 }
@@ -331,7 +333,7 @@ export async function updateAlbum(albumId, updates) {
     })
     devLog(`📝 Album updated: ${albumId}`)
   } catch (err) {
-    console.error('🔥 updateAlbum:', err)
+    if (import.meta.env.DEV) console.error('🔥 updateAlbum:', err)
   }
 }
 
@@ -345,7 +347,7 @@ export async function setAlbumCover(albumId, photoUrl) {
     })
     devLog(`🖼️ Cover updated: ${albumId}`)
   } catch (err) {
-    console.error('🔥 setAlbumCover:', err)
+    if (import.meta.env.DEV) console.error('🔥 setAlbumCover:', err)
     throw err
   }
 }
@@ -384,7 +386,7 @@ export async function getPhotosByUser(userId) {
       return { id: d.id, ...data, tags, aiTags }
     })
   } catch (err) {
-    console.error('🔥 getPhotosByUser:', err)
+    if (import.meta.env.DEV) console.error('🔥 getPhotosByUser:', err)
     return []
   }
 }
@@ -475,7 +477,7 @@ export async function getAlbum(albumId) {
 
     return { id: docSnap.id, ...data }
   } catch (error) {
-    console.error('🔥 getAlbum:', error)
+    if (import.meta.env.DEV) console.error('🔥 getAlbum:', error)
     throw error
   }
 }
@@ -515,7 +517,7 @@ export async function getPhoto(photoId) {
 
     return { id: docSnap.id, ...data, tags, aiTags }
   } catch (error) {
-    console.error('🔥 getPhoto:', error)
+    if (import.meta.env.DEV) console.error('🔥 getPhoto:', error)
     throw error
   }
 }
@@ -567,7 +569,7 @@ export async function updatePhoto(photoId, updates) {
       updatedAt: new Date().toISOString(),
     })
   } catch (err) {
-    console.error('🔥 updatePhoto:', err)
+    if (import.meta.env.DEV) console.error('🔥 updatePhoto:', err)
     throw err // ✅ BUGFIX: Properly throw errors so callers can handle them
   }
 }
@@ -604,7 +606,7 @@ export async function updatePhotoCaption(photoId, caption, userId) {
     devLog(`📝 Caption updated for photo ${photoId}`)
     return { success: true }
   } catch (err) {
-    console.error('🔥 updatePhotoCaption error:', err)
+    if (import.meta.env.DEV) console.error('🔥 updatePhotoCaption error:', err)
     throw err
   }
 }
@@ -628,7 +630,7 @@ export async function toggleFavorite(photoId, currentStatus) {
     devLog(`⭐ Favorite toggled: ${photoId} → ${newStatus}`)
     return newStatus
   } catch (error) {
-    console.error('❌ toggleFavorite error:', error.message, { photoId, currentStatus })
+    if (import.meta.env.DEV) console.error('❌ toggleFavorite error:', error.message, { photoId, currentStatus })
     throw error
   }
 }
@@ -665,7 +667,7 @@ export async function deletePhoto(photoId, photoData) {
     devLog(`🗑️ Photo deleted: ${photoId}`)
     return true
   } catch (err) {
-    console.error('❌ deletePhoto error:', err.message, { photoId })
+    if (import.meta.env.DEV) console.error('❌ deletePhoto error:', err.message, { photoId })
     throw err
   }
 }
@@ -703,7 +705,7 @@ export async function softDeletePhoto(photoId) {
 
     devLog(`🗑️ Photo soft deleted: ${photoId}`)
   } catch (err) {
-    console.error('❌ softDeletePhoto error:', err.message, { photoId })
+    if (import.meta.env.DEV) console.error('❌ softDeletePhoto error:', err.message, { photoId })
     throw err
   }
 }
@@ -743,7 +745,7 @@ export async function softDeletePhotos(photoIds) {
     await batch.commit()
     devLog(`🗑️ ${photoIds.length} photos soft deleted`)
   } catch (err) {
-    console.error('❌ softDeletePhotos error:', err.message)
+    if (import.meta.env.DEV) console.error('❌ softDeletePhotos error:', err.message)
     throw err
   }
 }
@@ -765,7 +767,7 @@ export async function restorePhoto(photoId) {
 
     devLog(`♻️ Photo restored: ${photoId}`)
   } catch (err) {
-    console.error('❌ restorePhoto error:', err.message, { photoId })
+    if (import.meta.env.DEV) console.error('❌ restorePhoto error:', err.message, { photoId })
     throw err
   }
 }
@@ -793,7 +795,7 @@ export async function restorePhotos(photoIds) {
     await batch.commit()
     devLog(`♻️ ${photoIds.length} photos restored`)
   } catch (err) {
-    console.error('❌ restorePhotos error:', err.message)
+    if (import.meta.env.DEV) console.error('❌ restorePhotos error:', err.message)
     throw err
   }
 }
@@ -872,7 +874,7 @@ export async function permanentlyDeletePhoto(photoId) {
 
     devLog(`💀 Photo permanently deleted: ${photoId}`)
   } catch (err) {
-    console.error('❌ permanentlyDeletePhoto error:', err.message, { photoId })
+    if (import.meta.env.DEV) console.error('❌ permanentlyDeletePhoto error:', err.message, { photoId })
     throw err
   }
 }
@@ -890,7 +892,7 @@ export async function permanentlyDeletePhotos(photoIds) {
     }
     devLog(`💀 ${photoIds.length} photos permanently deleted`)
   } catch (err) {
-    console.error('❌ permanentlyDeletePhotos error:', err.message)
+    if (import.meta.env.DEV) console.error('❌ permanentlyDeletePhotos error:', err.message)
     throw err
   }
 }
@@ -927,7 +929,7 @@ export async function getDeletedPhotos(userId) {
       return { id: d.id, ...data }
     })
   } catch (err) {
-    console.error('🔥 getDeletedPhotos:', err)
+    if (import.meta.env.DEV) console.error('🔥 getDeletedPhotos:', err)
     return []
   }
 }
@@ -941,7 +943,7 @@ export async function updateAlbumPhotoCount(albumId, newCount) {
       updatedAt: new Date().toISOString(),
     })
   } catch (err) {
-    console.error('🔥 updateAlbumPhotoCount:', err)
+    if (import.meta.env.DEV) console.error('🔥 updateAlbumPhotoCount:', err)
   }
 }
 
@@ -954,7 +956,7 @@ export async function updatePhotoAlbum(photoId, targetAlbumId) {
       updatedAt: new Date().toISOString(),
     })
   } catch (err) {
-    console.error('🔥 updatePhotoAlbum:', err)
+    if (import.meta.env.DEV) console.error('🔥 updatePhotoAlbum:', err)
     throw err
   }
 }
@@ -982,7 +984,7 @@ export async function updatePhotoOrder(photoIds) {
   })
 
   await batch.commit()
-  console.log(`✅ Updated order for ${photoIds.length} photos`)
+  if (import.meta.env.DEV) console.log(`✅ Updated order for ${photoIds.length} photos`)
 }
 
 // ============================================================================
@@ -1004,12 +1006,12 @@ export async function uploadPhoto(
   try {
     // Validate inputs
     if (!userId) {
-      console.error('❌ uploadPhoto: No userId provided')
+      if (import.meta.env.DEV) console.error('❌ uploadPhoto: No userId provided')
       throw new Error('No user ID provided to uploadPhoto')
     }
 
     if (!file) {
-      console.error('❌ uploadPhoto: No file provided')
+      if (import.meta.env.DEV) console.error('❌ uploadPhoto: No file provided')
       throw new Error('No file provided to uploadPhoto')
     }
 
@@ -1098,7 +1100,7 @@ export async function uploadPhoto(
         thumbnailUrl = thumbUrl
         devLog('✅ [Upload] Thumbnail uploaded:', thumbnailUrl)
       } catch (thumbError) {
-        console.error('❌ [Upload] Thumbnail upload failed:', thumbError)
+        if (import.meta.env.DEV) console.error('❌ [Upload] Thumbnail upload failed:', thumbError)
         // Continue without thumbnail
       }
     }
@@ -1176,13 +1178,13 @@ export async function uploadPhoto(
             exifFailed = true // ✅ Mark as failed for user notification
           }
         } catch (exifError) {
-          console.error('═══════════════════════════════════════')
-          console.error('❌ EXIF EXTRACTION FAILED')
-          console.error('═══════════════════════════════════════')
-          console.error('Error name:', exifError.name)
-          console.error('Error message:', exifError.message)
-          console.error('Error stack:', exifError.stack)
-          console.error('═══════════════════════════════════════')
+          if (import.meta.env.DEV) console.error('═══════════════════════════════════════')
+          if (import.meta.env.DEV) console.error('❌ EXIF EXTRACTION FAILED')
+          if (import.meta.env.DEV) console.error('═══════════════════════════════════════')
+          if (import.meta.env.DEV) console.error('Error name:', exifError.name)
+          if (import.meta.env.DEV) console.error('Error message:', exifError.message)
+          if (import.meta.env.DEV) console.error('Error stack:', exifError.stack)
+          if (import.meta.env.DEV) console.error('═══════════════════════════════════════')
           exifFailed = true // ✅ Mark as failed for user notification
         }
       }
@@ -1239,7 +1241,7 @@ export async function uploadPhoto(
                 devWarn('   ⚠️ Could not parse date string')
               }
             } catch (parseError) {
-              console.error('   ❌ Date parsing error:', parseError.message)
+              if (import.meta.env.DEV) console.error('   ❌ Date parsing error:', parseError.message)
             }
           }
         }
@@ -1476,7 +1478,7 @@ export async function uploadPhoto(
         devLog(`📂 Album photoCount incremented: ${albumId}`)
       } catch (counterError) {
         // ROLLBACK: Delete photo document and storage file
-        console.error('Counter increment failed, rolling back photo upload')
+        if (import.meta.env.DEV) console.error('Counter increment failed, rolling back photo upload')
 
         // Delete Firestore document
         await deleteDoc(doc(db, 'photos', photoId))
@@ -1490,7 +1492,7 @@ export async function uploadPhoto(
               await deleteObject(ref(storage, storagePath))
             }
           } catch (storageErr) {
-            console.error('Failed to delete storage file during rollback:', storageErr)
+            if (import.meta.env.DEV) console.error('Failed to delete storage file during rollback:', storageErr)
           }
         }
 
@@ -1509,7 +1511,7 @@ export async function uploadPhoto(
       exifWarning: exifFailed && !isVideo && !isDocument // Only warn for photos
     }
   } catch (error) {
-    console.error('🔥 uploadPhoto error:', error)
+    if (import.meta.env.DEV) console.error('🔥 uploadPhoto error:', error)
     throw new Error(`Upload feilet: ${error.message}`)
   }
 }
@@ -1531,7 +1533,7 @@ export async function uploadThumbnail(blob, userId, photoId, size = 'small') {
     const downloadURL = await getDownloadURL(storageRef)
     return { downloadURL, storagePath }
   } catch (error) {
-    console.error('🔥 uploadThumbnail:', error)
+    if (import.meta.env.DEV) console.error('🔥 uploadThumbnail:', error)
     throw new Error(error.message)
   }
 }
@@ -1607,7 +1609,7 @@ export async function uploadEditedPhoto(
         )
         devLog('✅ [EditedPhoto] Thumbnail uploaded to R2:', thumbnailUrl)
       } catch (thumbError) {
-        console.error('⚠️ [EditedPhoto] Thumbnail upload failed:', thumbError)
+        if (import.meta.env.DEV) console.error('⚠️ [EditedPhoto] Thumbnail upload failed:', thumbError)
         // Continue without thumbnail
       }
     }
@@ -1650,7 +1652,7 @@ export async function uploadEditedPhoto(
 
     return { editedUrl, thumbnailUrl: updates.thumbnailUrl, storagePath }
   } catch (error) {
-    console.error('🔥 uploadEditedPhoto error:', error)
+    if (import.meta.env.DEV) console.error('🔥 uploadEditedPhoto error:', error)
     throw new Error(`Edited photo upload failed: ${error.message}`)
   }
 }
@@ -1721,7 +1723,7 @@ export async function getPhotosByUserPaginated(
 
     return { photos, lastDoc: newLastDoc, hasMore }
   } catch (err) {
-    console.error('🔥 getPhotosByUserPaginated:', err)
+    if (import.meta.env.DEV) console.error('🔥 getPhotosByUserPaginated:', err)
     return { photos: [], lastDoc: null, hasMore: false }
   }
 }
@@ -1771,7 +1773,7 @@ export async function getAlbumsByUserPaginated(
 
     return { albums, lastDoc: newLastDoc, hasMore }
   } catch (err) {
-    console.error('🔥 getAlbumsByUserPaginated:', err)
+    if (import.meta.env.DEV) console.error('🔥 getAlbumsByUserPaginated:', err)
     return { albums: [], lastDoc: null, hasMore: false }
   }
 }
@@ -1839,7 +1841,7 @@ export async function getPhotosInAlbumPaginated(
 
     return { photos, lastDoc: newLastDoc, hasMore }
   } catch (err) {
-    console.error('🔥 getPhotosInAlbumPaginated:', err)
+    if (import.meta.env.DEV) console.error('🔥 getPhotosInAlbumPaginated:', err)
     return { photos: [], lastDoc: null, hasMore: false }
   }
 }
@@ -1888,7 +1890,7 @@ export async function migrateAlbumsAddUserId() {
     )
     return { fixed, skipped, total: albumsSnapshot.docs.length }
   } catch (error) {
-    console.error('❌ Migration failed:', error)
+    if (import.meta.env.DEV) console.error('❌ Migration failed:', error)
     throw error
   }
 }
@@ -1935,7 +1937,7 @@ export async function migratePhotosAddUserId() {
     )
     return { fixed, skipped, total: photosSnapshot.docs.length }
   } catch (error) {
-    console.error('❌ Migration failed:', error)
+    if (import.meta.env.DEV) console.error('❌ Migration failed:', error)
     throw error
   }
 }

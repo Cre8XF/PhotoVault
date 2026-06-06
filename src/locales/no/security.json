@@ -102,7 +102,7 @@
     },
     "prompts": {
       "enable": "Aktiver biometrisk autentisering",
-      "unlock": "Lås opp PhotoVault"
+      "unlock": "Lås opp Pixtr"
     },
     "notifications": {
       "enabled": "{{type}} aktivert",
@@ -144,7 +144,7 @@
     "enterPin": "Skriv inn PIN for å låse opp",
     "pinMinLength": "PIN må være minst {{min}} siffer",
     "subtitle": "Skriv inn PIN-kode",
-    "title": "PhotoVault",
+    "title": "Pixtr",
     "unlocking": "Låser opp...",
     "unlockWith": "Lås opp med {{type}}",
     "unlockWithBiometric": "Lås opp med biometri",
@@ -152,7 +152,7 @@
   },
   "info": {
     "title": "Om sikkerhet",
-    "description": "Hvordan PhotoVault beskytter dine bilder",
+    "description": "Hvordan Pixtr beskytter dine bilder",
     "items": [
       "PIN-koden lagres kryptert lokalt på enheten din",
       "Biometrisk data lagres aldri - kun systemets API brukes",

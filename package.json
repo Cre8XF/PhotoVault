@@ -1,6 +1,6 @@
 {
   "name": "photovault",
-  "version": "1.0.0-mvp",
+  "version": "1.0.0",
   "private": true,
   "engines": {
     "node": "20"
@@ -50,7 +50,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "cap:init": "cap init PhotoVault com.cre8web.photovault",
+    "cap:init": "cap init Pixtr com.cre8web.pixtr",
     "cap:add:ios": "cap add ios",
     "cap:add:android": "cap add android",
     "cap:sync": "cap sync",
