@@ -20,7 +20,7 @@ import {
 } from 'firebase/firestore'
 import { devLog } from '../utils/log'
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
-import { db, storage, auth } from '../firebase'
+import { db, auth, getStorageInstance } from '../firebase'
 import useStore from '../state/store'
 import { renderCollageThumbnail, renderCollageToCanvas } from '../utils/renderCollageToCanvas'
 import { uploadWithFallback, deleteFromR2, extractStoragePathFromR2Url } from '../utils/r2Upload'
@@ -374,7 +374,7 @@ export const useCollageData = () => {
               const filename = collageData.thumbnailUrl.split('/').pop().split('?')[0]
               const fullPath = thumbnailPath + decodeURIComponent(filename)
 
-              const thumbnailRef = ref(storage, fullPath)
+              const thumbnailRef = ref(getStorageInstance(), fullPath)
               await deleteObject(thumbnailRef)
               console.log('🗑️ Thumbnail deleted from Storage')
             } catch (storageError) {

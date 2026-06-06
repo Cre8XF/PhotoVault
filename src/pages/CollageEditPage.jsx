@@ -7,7 +7,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Save, AlertCircle, Loader } from 'lucide-react'
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
-import { auth, db, storage } from '../firebase'
+import { auth, db, getStorageInstance } from '../firebase'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import useStore from '../state/store'
 import useCollageStore from '../features/collage/collageStore'
@@ -279,7 +279,7 @@ const CollageEditPage = () => {
       const storagePath = `users/${user.uid}/${
         albumId || 'collages'
       }/collage_${timestamp}.jpg`
-      const storageRef = ref(storage, storagePath)
+      const storageRef = ref(getStorageInstance(), storagePath)
 
       await uploadBytes(storageRef, collageBlob, {
         contentType: 'image/jpeg',
@@ -301,7 +301,7 @@ const CollageEditPage = () => {
       })
 
       const thumbnailPath = `users/${user.uid}/thumbnails/collage_${timestamp}_thumb.jpg`
-      const thumbnailRef = ref(storage, thumbnailPath)
+      const thumbnailRef = ref(getStorageInstance(), thumbnailPath)
       await uploadBytes(thumbnailRef, thumbnailBlob, {
         contentType: 'image/jpeg',
       })

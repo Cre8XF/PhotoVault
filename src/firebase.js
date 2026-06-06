@@ -7,6 +7,7 @@ import { getAuth } from 'firebase/auth'
 import { getFunctions } from 'firebase/functions'
 import {
   getFirestore,
+  enableIndexedDbPersistence,
   collection,
   getDocs,
   addDoc,
@@ -80,9 +81,18 @@ devLog('✅ Firebase initialized:', firebaseConfig.projectId)
 
 // Eksporter Firebase-tjenestene
 export const db = getFirestore(app)
-export const storage = getStorage(app)
+
+// Enable offline persistence — must be called before any other Firestore operations
+enableIndexedDbPersistence(db).catch(err => {
+  if (err.code === 'failed-precondition') { /* multiple tabs open — skip silently */ }
+  if (err.code === 'unimplemented')       { /* browser/WebView doesn't support it  */ }
+})
+
 export const auth = getAuth(app)
-export const functions = getFunctions(app, 'europe-west1') // Use european region for functions
+
+// Lazy getters — storage and functions are not needed at startup
+export const getStorageInstance   = () => getStorage(app)
+export const getFunctionsInstance = () => getFunctions(app, 'europe-west1')
 
 // ============================================================================
 // 🛠️ Firebase Auth Configuration for Local Development
@@ -653,7 +663,7 @@ export async function deletePhoto(photoId, photoData) {
         devLog('🗑️ Deleted from R2:', storagePath)
       }
     } else if (photoData?.storagePath) {
-      const storageRef = ref(storage, photoData.storagePath)
+      const storageRef = ref(getStorage(app), photoData.storagePath)
       await deleteObject(storageRef).catch(err => {
         devLog('⚠️ Storage delete warning:', err.message)
       })
@@ -827,7 +837,7 @@ export async function permanentlyDeletePhoto(photoId) {
       await deleteFromR2(photoData.storagePath, token)
       devLog('🗑️ Deleted from R2:', photoData.storagePath)
     } else if (photoData.storagePath) {
-      const storageRef = ref(storage, photoData.storagePath)
+      const storageRef = ref(getStorage(app), photoData.storagePath)
       await deleteObject(storageRef).catch((err) => {
         devLog('⚠️ Storage delete warning:', err.message)
       })
@@ -845,7 +855,7 @@ export async function permanentlyDeletePhoto(photoId) {
             const token = await user.getIdToken()
             await deleteFromR2(thumbnailPath, token)
           } else {
-            const thumbRef = ref(storage, thumbnailPath)
+            const thumbRef = ref(getStorage(app), thumbnailPath)
             await deleteObject(thumbRef).catch((err) => {
               devLog('⚠️ Thumbnail delete warning:', err.message)
             })
@@ -1082,7 +1092,7 @@ export async function uploadPhoto(
           },
           // Firebase fallback for thumbnail
           async () => {
-            const thumbRef = ref(storage, thumbPath)
+            const thumbRef = ref(getStorage(app), thumbPath)
             await uploadBytes(thumbRef, thumbnailBlob, {
               contentType: 'image/jpeg',
               customMetadata: {
@@ -1352,7 +1362,7 @@ export async function uploadPhoto(
       },
       // Firebase fallback function
       async () => {
-        const storageRef = ref(storage, storagePath)
+        const storageRef = ref(getStorage(app), storagePath)
         await uploadBytes(storageRef, file, { contentType: fileType })
         return await getDownloadURL(storageRef)
       },
@@ -1489,7 +1499,7 @@ export async function uploadPhoto(
             if (isR2Enabled()) {
               await deleteFromR2(storagePath, firebaseToken)
             } else {
-              await deleteObject(ref(storage, storagePath))
+              await deleteObject(ref(getStorage(app), storagePath))
             }
           } catch (storageErr) {
             if (import.meta.env.DEV) console.error('Failed to delete storage file during rollback:', storageErr)
@@ -1520,7 +1530,7 @@ export async function uploadPhoto(
 export async function uploadThumbnail(blob, userId, photoId, size = 'small') {
   try {
     const storagePath = `users/${userId}/thumbnails/${photoId}_${size}.jpg`
-    const storageRef = ref(storage, storagePath)
+    const storageRef = ref(getStorage(app), storagePath)
     await uploadBytes(storageRef, blob, {
       contentType: 'image/jpeg',
       customMetadata: {

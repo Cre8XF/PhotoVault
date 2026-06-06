@@ -64,7 +64,7 @@ import { httpsCallable } from 'firebase/functions'
 
 import {
   db,
-  functions,
+  getFunctionsInstance,
   migrateAlbumsAddUserId,
   migratePhotosAddUserId,
   getPhotosByUser,
@@ -690,7 +690,7 @@ const MorePage = ({
     setReconcileResult(null)
 
     try {
-      const manualReconcile = httpsCallable(functions, 'manualReconcile')
+      const manualReconcile = httpsCallable(getFunctionsInstance(), 'manualReconcile')
       const result = await manualReconcile()
 
       if (import.meta.env.DEV) console.log('✅ Manual reconciliation result:', result.data)

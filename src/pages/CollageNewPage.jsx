@@ -13,7 +13,7 @@ import {
   doc,
   serverTimestamp,
 } from 'firebase/firestore'
-import { auth, db, storage } from '../firebase'
+import { auth, db, getStorageInstance } from '../firebase'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import useStore from '../state/store'
 import useCollageStore from '../features/collage/collageStore'
@@ -284,7 +284,7 @@ const CollageNewPage = () => {
       const storagePath = `users/${user.uid}/${
         albumId || 'collages'
       }/${collageFileName}`
-      const storageRef = ref(storage, storagePath)
+      const storageRef = ref(getStorageInstance(), storagePath)
 
       console.log('☁️ Uploading collage image...')
       await uploadBytes(storageRef, collageBlob, {
@@ -310,7 +310,7 @@ const CollageNewPage = () => {
       })
 
       const thumbnailPath = `users/${user.uid}/thumbnails/collage_${timestamp}_thumb.jpg`
-      const thumbnailRef = ref(storage, thumbnailPath)
+      const thumbnailRef = ref(getStorageInstance(), thumbnailPath)
 
       await uploadBytes(thumbnailRef, thumbnailBlob, {
         contentType: 'image/jpeg',
