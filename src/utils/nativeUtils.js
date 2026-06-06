@@ -5,7 +5,7 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 
-export const shareImage = async (imageUrl, title = 'Photo from PhotoVault') => {
+export const shareImage = async (imageUrl, title = 'Photo from Pixtr') => {
   if (!Capacitor.isNativePlatform()) {
     // Web fallback
     if (navigator.share) {

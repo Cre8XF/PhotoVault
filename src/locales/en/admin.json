@@ -2,7 +2,7 @@
   "additionalFeaturesInfo": "Additional admin features (user management, database tools) can be added later.",
   "backToMore": "Back to More",
   "dashboard": {
-    "subtitle": "PhotoVault System Overview",
+    "subtitle": "Pixtr System Overview",
     "title": "Admin Dashboard"
   },
   "loadingData": "Loading admin data...",

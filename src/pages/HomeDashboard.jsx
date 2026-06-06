@@ -249,7 +249,7 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
       // Album already created by UploadModal - just refresh UI
       if (refreshData) await refreshData();
     } catch (error) {
-      console.error(t("home:albumCreationError"), error);
+      if (import.meta.env.DEV) console.error(t("home:albumCreationError"), error);
       alert(t("home:couldNotCreateAlbum"));
     }
   };
@@ -358,38 +358,38 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
       {!isInitialLoading && (
         <QuickActionsBar
           onUpload={() => {
-            console.log('📤 QUICK ACTION: LAST OPP');
+            if (import.meta.env.DEV) console.log('📤 QUICK ACTION: LAST OPP');
             setUploadMode('upload');
             setUploadOpen(true);
           }}
           onNewAlbum={() => {
-            console.log('═══════════════════════════════════════');
-            console.log('📁 QUICK ACTION: NYTT ALBUM');
-            console.log('═══════════════════════════════════════');
-            console.log('Setting upload mode to: album');
-            console.log('Opening UploadModal with AlbumModal auto-open');
-            console.log('═══════════════════════════════════════');
+            if (import.meta.env.DEV) console.log('═══════════════════════════════════════');
+            if (import.meta.env.DEV) console.log('📁 QUICK ACTION: NYTT ALBUM');
+            if (import.meta.env.DEV) console.log('═══════════════════════════════════════');
+            if (import.meta.env.DEV) console.log('Setting upload mode to: album');
+            if (import.meta.env.DEV) console.log('Opening UploadModal with AlbumModal auto-open');
+            if (import.meta.env.DEV) console.log('═══════════════════════════════════════');
             setUploadMode('album');
             setUploadOpen(true);
           }}
           onCreateCollage={() => {
-            console.log('═══════════════════════════════════════');
-            console.log('🎨 QUICK ACTION: LAG KOLLASJ');
-            console.log('═══════════════════════════════════════');
-            console.log('Starting from:', window.location.pathname);
-            console.log('History length:', window.history.length);
-            console.log('Navigating to: /tools/collage/templates');
-            console.log('═══════════════════════════════════════');
+            if (import.meta.env.DEV) console.log('═══════════════════════════════════════');
+            if (import.meta.env.DEV) console.log('🎨 QUICK ACTION: LAG KOLLASJ');
+            if (import.meta.env.DEV) console.log('═══════════════════════════════════════');
+            if (import.meta.env.DEV) console.log('Starting from:', window.location.pathname);
+            if (import.meta.env.DEV) console.log('History length:', window.history.length);
+            if (import.meta.env.DEV) console.log('Navigating to: /tools/collage/templates');
+            if (import.meta.env.DEV) console.log('═══════════════════════════════════════');
             navigate('/tools/collage/templates', {
               state: { returnPath: '/' }
             });
           }}
           onSearchFaces={() => {
-            console.log('═══════════════════════════════════════');
-            console.log('👤 QUICK ACTION: SØK ANSIKTER');
-            console.log('═══════════════════════════════════════');
-            console.log('Navigating to: /search?faces=true');
-            console.log('═══════════════════════════════════════');
+            if (import.meta.env.DEV) console.log('═══════════════════════════════════════');
+            if (import.meta.env.DEV) console.log('👤 QUICK ACTION: SØK ANSIKTER');
+            if (import.meta.env.DEV) console.log('═══════════════════════════════════════');
+            if (import.meta.env.DEV) console.log('Navigating to: /search?faces=true');
+            if (import.meta.env.DEV) console.log('═══════════════════════════════════════');
             navigate('/search?faces=true');
           }}
         />
@@ -427,12 +427,12 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
                 </h2>
                 <button
                   onClick={() => {
-                    console.log('═══════════════════════════════════════');
-                    console.log('⭐ SE ALLE FAVORITTER');
-                    console.log('═══════════════════════════════════════');
-                    console.log('Total favorites:', stats.favorites);
-                    console.log('Navigating to: /search?favorites=true');
-                    console.log('═══════════════════════════════════════');
+                    if (import.meta.env.DEV) console.log('═══════════════════════════════════════');
+                    if (import.meta.env.DEV) console.log('⭐ SE ALLE FAVORITTER');
+                    if (import.meta.env.DEV) console.log('═══════════════════════════════════════');
+                    if (import.meta.env.DEV) console.log('Total favorites:', stats.favorites);
+                    if (import.meta.env.DEV) console.log('Navigating to: /search?favorites=true');
+                    if (import.meta.env.DEV) console.log('═══════════════════════════════════════');
                     navigate('/search?favorites=true');
                   }}
                   className="ripple-effect text-sm text-purple hover:text-purple transition whitespace-nowrap flex items-center"
@@ -510,13 +510,13 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
             <button
               onClick={() => {
                 const totalRecentPhotos = timeGroups.reduce((sum, g) => sum + g.photos.length, 0);
-                console.log('═══════════════════════════════════════');
-                console.log('📸 SE ALLE SISTE OPPLASTNINGER');
-                console.log('═══════════════════════════════════════');
-                console.log('Total recent photos:', totalRecentPhotos);
-                console.log('Navigating to: /search?recent=true&limit=50');
-                console.log('This should show ONLY recent photos, not all photos');
-                console.log('═══════════════════════════════════════');
+                if (import.meta.env.DEV) console.log('═══════════════════════════════════════');
+                if (import.meta.env.DEV) console.log('📸 SE ALLE SISTE OPPLASTNINGER');
+                if (import.meta.env.DEV) console.log('═══════════════════════════════════════');
+                if (import.meta.env.DEV) console.log('Total recent photos:', totalRecentPhotos);
+                if (import.meta.env.DEV) console.log('Navigating to: /search?recent=true&limit=50');
+                if (import.meta.env.DEV) console.log('This should show ONLY recent photos, not all photos');
+                if (import.meta.env.DEV) console.log('═══════════════════════════════════════');
                 navigate('/search?recent=true&limit=50');
               }}
               className="ripple-effect text-sm text-purple hover:text-purple transition whitespace-nowrap flex items-center"
@@ -543,12 +543,12 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
                 onPhotoClick={handlePhotoClickWithLock}
                 capabilities={capabilities}
                 onHeaderClick={(group) => {
-                  console.log('═══════════════════════════════════════');
-                  console.log('📅 TIME GROUP CLICKED');
-                  console.log('═══════════════════════════════════════');
-                  console.log('Group:', group.label || group.labelEN);
-                  console.log('Key:', group.key);
-                  console.log('Photos:', group.photos.length);
+                  if (import.meta.env.DEV) console.log('═══════════════════════════════════════');
+                  if (import.meta.env.DEV) console.log('📅 TIME GROUP CLICKED');
+                  if (import.meta.env.DEV) console.log('═══════════════════════════════════════');
+                  if (import.meta.env.DEV) console.log('Group:', group.label || group.labelEN);
+                  if (import.meta.env.DEV) console.log('Key:', group.key);
+                  if (import.meta.env.DEV) console.log('Photos:', group.photos.length);
 
                   // Map time group keys to SearchPage URL params (FIXED - Issue 2)
                   let searchUrl = '/search';
@@ -556,24 +556,24 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
                   switch(group.key) {
                     case 'today':
                       searchUrl = '/search?day=today';
-                      console.log('✅ Using day=today filter');
+                      if (import.meta.env.DEV) console.log('✅ Using day=today filter');
                       break;
                     case 'yesterday':
                       searchUrl = '/search?day=yesterday';
-                      console.log('✅ Using day=yesterday filter');
+                      if (import.meta.env.DEV) console.log('✅ Using day=yesterday filter');
                       break;
                     case 'thisWeek':
                       searchUrl = '/search?week=true';
-                      console.log('✅ Using week=true filter');
+                      if (import.meta.env.DEV) console.log('✅ Using week=true filter');
                       break;
                     default:
                       // If somehow we get a different key, default to month
                       searchUrl = '/search?range=month';
-                      console.log('⚠️ Unknown key, using range=month fallback');
+                      if (import.meta.env.DEV) console.log('⚠️ Unknown key, using range=month fallback');
                   }
 
-                  console.log('Navigating to:', searchUrl);
-                  console.log('═══════════════════════════════════════');
+                  if (import.meta.env.DEV) console.log('Navigating to:', searchUrl);
+                  if (import.meta.env.DEV) console.log('═══════════════════════════════════════');
 
                   navigate(searchUrl);
                 }}
@@ -586,7 +586,7 @@ const HomeDashboard = ({ albums, photos, colors, user, refreshData, onUpload, on
       {/* Upload Button - Moved here for FREE users (primary action) */}
       <Button
         onClick={() => {
-          console.log('📤 LARGE UPLOAD BUTTON CLICKED');
+          if (import.meta.env.DEV) console.log('📤 LARGE UPLOAD BUTTON CLICKED');
           setUploadMode('upload');
           setUploadOpen(true);
         }}

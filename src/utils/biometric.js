@@ -56,7 +56,7 @@ export async function registerBiometric(userId, userName) {
     const publicKeyOptions = {
       challenge: challenge,
       rp: {
-        name: 'PhotoVault',
+        name: 'Pixtr',
         id: window.location.hostname
       },
       user: {

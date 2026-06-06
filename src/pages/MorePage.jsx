@@ -126,11 +126,13 @@ const MorePage = ({
   // 🔒 SIKRE AT PROPS ER ARRAYS
   const safePhotos = React.useMemo(() => {
     if (!Array.isArray(photos)) {
-      console.warn(
-        '⚠️ MorePage received non-array photos:',
-        typeof photos,
-        photos
-      )
+      if (import.meta.env.DEV) {
+        console.warn(
+          '⚠️ MorePage received non-array photos:',
+          typeof photos,
+          photos
+        )
+      }
       return []
     }
     return photos
@@ -138,11 +140,13 @@ const MorePage = ({
 
   const safeAlbums = React.useMemo(() => {
     if (!Array.isArray(albums)) {
-      console.warn(
-        '⚠️ MorePage received non-array albums:',
-        typeof albums,
-        albums
-      )
+      if (import.meta.env.DEV) {
+        console.warn(
+          '⚠️ MorePage received non-array albums:',
+          typeof albums,
+          albums
+        )
+      }
       return []
     }
     return albums
@@ -182,10 +186,12 @@ const MorePage = ({
 
   // MVP: Show "Coming Soon" modal for AI features
   const showAIFeatureModal = (featureName, description) => {
-    console.log(
-      'AI feature disabled - Phase 2 activation required:',
-      featureName
-    )
+    if (import.meta.env.DEV) {
+      console.log(
+        'AI feature disabled - Phase 2 activation required:',
+        featureName
+      )
+    }
     setAIFeatureName(featureName)
     setAIFeatureDescription(description)
     setShowAIModal(true)
@@ -202,7 +208,7 @@ const MorePage = ({
       await sendVerificationEmail(user)
       showNotification(t('auth:verificationEmailSent'), 'success')
     } catch (error) {
-      console.error('Failed to send verification email:', error)
+      if (import.meta.env.DEV) console.error('Failed to send verification email:', error)
       // Silent failure - no blocking toast, just log
       if (import.meta.env.DEV) {
         showNotification(t('auth:verificationEmailFailed'), 'info')
@@ -219,14 +225,14 @@ const MorePage = ({
     const exportUrl = import.meta.env.VITE_EXPORT_URL
 
     if (!exportUrl) {
-      console.warn('Export URL not configured')
+      if (import.meta.env.DEV) console.warn('Export URL not configured')
       showNotification(t('more.export.unavailable'), 'error')
       return
     }
 
     try {
       setLoading(true)
-      console.log('Exporting user data for:', user.uid)
+      if (import.meta.env.DEV) console.log('Exporting user data for:', user.uid)
 
       const response = await fetch(exportUrl, {
         method: 'POST',
@@ -255,7 +261,7 @@ const MorePage = ({
 
       showNotification(t('notifications.exported'), 'success')
     } catch (error) {
-      console.error('Error exporting data:', error)
+      if (import.meta.env.DEV) console.error('Error exporting data:', error)
       showNotification(t('more.export.failed'), 'error')
     } finally {
       setLoading(false)
@@ -272,14 +278,14 @@ const MorePage = ({
     if (!file) return
 
     if (!importUrl) {
-      console.warn('Import URL not configured')
+      if (import.meta.env.DEV) console.warn('Import URL not configured')
       showNotification(t('more.import.unavailable'), 'error')
       return
     }
 
     try {
       setLoading(true)
-      console.log('Importing user data:', file.name)
+      if (import.meta.env.DEV) console.log('Importing user data:', file.name)
 
       const formData = new FormData()
       formData.append('file', file)
@@ -296,13 +302,13 @@ const MorePage = ({
       }
 
       const result = await response.json()
-      console.log('Import result:', result)
+      if (import.meta.env.DEV) console.log('Import result:', result)
 
       showNotification(t('notifications.imported'), 'success')
 
       setTimeout(() => window.location.reload(), 1500)
     } catch (error) {
-      console.error('Error importing data:', error)
+      if (import.meta.env.DEV) console.error('Error importing data:', error)
       showNotification(t('more.import.failed'), 'error')
     } finally {
       setLoading(false)
@@ -353,22 +359,22 @@ const MorePage = ({
 
     try {
       setLoading(true)
-      console.log('═══════════════════════════════════════════════')
-      console.log('🗑️ SAFE DELETE ACCOUNT STARTED')
-      console.log('═══════════════════════════════════════════════')
-      console.log('User ID:', user.uid)
-      console.log('Email:', user.email)
-      console.log('Timestamp:', new Date().toISOString())
+      if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
+      if (import.meta.env.DEV) console.log('🗑️ SAFE DELETE ACCOUNT STARTED')
+      if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
+      if (import.meta.env.DEV) console.log('User ID:', user.uid)
+      if (import.meta.env.DEV) console.log('Email:', user.email)
+      if (import.meta.env.DEV) console.log('Timestamp:', new Date().toISOString())
 
       // ============================================================
       // STEP 1: RE-AUTHENTICATE (REQUIRED BY FIREBASE)
       // ============================================================
-      console.log('🔐 STEP 1: Re-authenticating user...')
+      if (import.meta.env.DEV) console.log('🔐 STEP 1: Re-authenticating user...')
       try {
         await reauthenticateUser(deletePassword)
-        console.log('✅ STEP 1 COMPLETE: User re-authenticated successfully')
+        if (import.meta.env.DEV) console.log('✅ STEP 1 COMPLETE: User re-authenticated successfully')
       } catch (error) {
-        console.error('❌ STEP 1 FAILED: Re-authentication failed')
+        if (import.meta.env.DEV) console.error('❌ STEP 1 FAILED: Re-authentication failed')
         throw error // Abort - do NOT proceed if re-auth fails
       }
 
@@ -379,38 +385,40 @@ const MorePage = ({
       // ============================================================
       // STEP 2: DELETE ALL R2 OBJECTS
       // ============================================================
-      console.log('🗑️ STEP 2: Deleting all R2 objects...')
+      if (import.meta.env.DEV) console.log('🗑️ STEP 2: Deleting all R2 objects...')
       try {
         // Fetch all user photos to get R2 URLs
         const userPhotos = await getPhotosByUser(user.uid)
-        console.log(`Found ${userPhotos.length} photos to delete from R2`)
+        if (import.meta.env.DEV) console.log(`Found ${userPhotos.length} photos to delete from R2`)
 
         if (userPhotos.length > 0) {
           const r2Result = await deleteAllUserR2Objects(
             userPhotos,
             firebaseToken
           )
-          console.log('✅ STEP 2 COMPLETE: R2 deletion result:', r2Result)
+          if (import.meta.env.DEV) console.log('✅ STEP 2 COMPLETE: R2 deletion result:', r2Result)
 
           if (r2Result.failed > 0) {
-            console.warn(
-              `⚠️ Warning: ${r2Result.failed} R2 objects failed to delete`
-            )
+            if (import.meta.env.DEV) {
+              console.warn(
+                `⚠️ Warning: ${r2Result.failed} R2 objects failed to delete`
+              )
+            }
             // Continue anyway - Firestore is the source of truth
           }
         } else {
-          console.log('✅ STEP 2 COMPLETE: No R2 objects to delete')
+          if (import.meta.env.DEV) console.log('✅ STEP 2 COMPLETE: No R2 objects to delete')
         }
       } catch (error) {
-        console.error('❌ STEP 2 FAILED: R2 deletion error:', error)
+        if (import.meta.env.DEV) console.error('❌ STEP 2 FAILED: R2 deletion error:', error)
         // Continue anyway - Firestore cleanup is more critical
-        console.warn('⚠️ Continuing with Firestore deletion despite R2 errors')
+        if (import.meta.env.DEV) console.warn('⚠️ Continuing with Firestore deletion despite R2 errors')
       }
 
       // ============================================================
       // STEP 3: DELETE FIRESTORE DATA
       // ============================================================
-      console.log('🗑️ STEP 3: Deleting Firestore data...')
+      if (import.meta.env.DEV) console.log('🗑️ STEP 3: Deleting Firestore data...')
       try {
         const db = getFirestore()
 
@@ -426,36 +434,38 @@ const MorePage = ({
           )
           const snapshot = await getDocs(collectionRef)
 
-          console.log(
-            `Deleting ${snapshot.size} documents from users/${user.uid}/${collectionName}`
-          )
+          if (import.meta.env.DEV) {
+            console.log(
+              `Deleting ${snapshot.size} documents from users/${user.uid}/${collectionName}`
+            )
+          }
 
           await Promise.all(snapshot.docs.map((doc) => deleteDoc(doc.ref)))
         }
 
         // Delete main user document
         await deleteDoc(doc(db, 'users', user.uid))
-        console.log('✅ STEP 3 COMPLETE: All Firestore data deleted')
+        if (import.meta.env.DEV) console.log('✅ STEP 3 COMPLETE: All Firestore data deleted')
       } catch (error) {
-        console.error('❌ STEP 3 FAILED: Firestore deletion error:', error)
+        if (import.meta.env.DEV) console.error('❌ STEP 3 FAILED: Firestore deletion error:', error)
         throw error // Abort - Firestore is critical
       }
 
       // ============================================================
       // STEP 4: DELETE FIREBASE AUTH USER
       // ============================================================
-      console.log('🗑️ STEP 4: Deleting Firebase Auth user...')
+      if (import.meta.env.DEV) console.log('🗑️ STEP 4: Deleting Firebase Auth user...')
       try {
         await deleteAuthUser()
-        console.log('✅ STEP 4 COMPLETE: Firebase Auth user deleted')
+        if (import.meta.env.DEV) console.log('✅ STEP 4 COMPLETE: Firebase Auth user deleted')
       } catch (error) {
-        console.error('❌ STEP 4 FAILED: Auth deletion error:', error)
+        if (import.meta.env.DEV) console.error('❌ STEP 4 FAILED: Auth deletion error:', error)
         throw error // Critical failure - user should retry
       }
 
-      console.log('═══════════════════════════════════════════════')
-      console.log('🎉 ACCOUNT DELETION COMPLETE - SUCCESS')
-      console.log('═══════════════════════════════════════════════')
+      if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
+      if (import.meta.env.DEV) console.log('🎉 ACCOUNT DELETION COMPLETE - SUCCESS')
+      if (import.meta.env.DEV) console.log('═══════════════════════════════════════════════')
 
       // ============================================================
       // STEP 5: LOG OUT AND REDIRECT
@@ -474,10 +484,10 @@ const MorePage = ({
         window.location.href = '/'
       }, 1500)
     } catch (error) {
-      console.error('═══════════════════════════════════════════════')
-      console.error('💥 ACCOUNT DELETION FAILED')
-      console.error('═══════════════════════════════════════════════')
-      console.error('Error:', error)
+      if (import.meta.env.DEV) console.error('═══════════════════════════════════════════════')
+      if (import.meta.env.DEV) console.error('💥 ACCOUNT DELETION FAILED')
+      if (import.meta.env.DEV) console.error('═══════════════════════════════════════════════')
+      if (import.meta.env.DEV) console.error('Error:', error)
 
       // Show user-friendly error message
       let errorMessage = 'Failed to delete account. Please try again.'
@@ -507,11 +517,11 @@ const MorePage = ({
     try {
       setMigrating(true)
       setMigrationResult(null)
-      console.log('🔧 Starting album migration...')
+      if (import.meta.env.DEV) console.log('🔧 Starting album migration...')
 
       const result = await migrateAlbumsAddUserId()
 
-      console.log('✅ Migration complete:', result)
+      if (import.meta.env.DEV) console.log('✅ Migration complete:', result)
       setMigrationResult({
         type: 'albums',
         ...result,
@@ -527,7 +537,7 @@ const MorePage = ({
         window.location.reload()
       }, 2000)
     } catch (error) {
-      console.error('❌ Migration failed:', error)
+      if (import.meta.env.DEV) console.error('❌ Migration failed:', error)
       showNotification('Migration failed: ' + error.message, 'error')
     } finally {
       setMigrating(false)
@@ -542,11 +552,11 @@ const MorePage = ({
     try {
       setMigrating(true)
       setMigrationResult(null)
-      console.log('🔧 Starting photo migration...')
+      if (import.meta.env.DEV) console.log('🔧 Starting photo migration...')
 
       const result = await migratePhotosAddUserId()
 
-      console.log('✅ Migration complete:', result)
+      if (import.meta.env.DEV) console.log('✅ Migration complete:', result)
       setMigrationResult({
         type: 'photos',
         ...result,
@@ -562,7 +572,7 @@ const MorePage = ({
         window.location.reload()
       }, 2000)
     } catch (error) {
-      console.error('❌ Migration failed:', error)
+      if (import.meta.env.DEV) console.error('❌ Migration failed:', error)
       showNotification('Migration failed: ' + error.message, 'error')
     } finally {
       setMigrating(false)
@@ -581,11 +591,11 @@ const MorePage = ({
     try {
       setMigrating(true)
       setMigrationResult(null)
-      console.log('🔧 Starting deleted field migration...')
+      if (import.meta.env.DEV) console.log('🔧 Starting deleted field migration...')
 
       const result = await migratePhotosAddDeletedField()
 
-      console.log('✅ Migration complete:', result)
+      if (import.meta.env.DEV) console.log('✅ Migration complete:', result)
       setMigrationResult({
         type: 'deleted-field',
         ...result,
@@ -601,7 +611,7 @@ const MorePage = ({
         window.location.reload()
       }, 2000)
     } catch (error) {
-      console.error('❌ Migration failed:', error)
+      if (import.meta.env.DEV) console.error('❌ Migration failed:', error)
       showNotification('Migration failed: ' + error.message, 'error')
     } finally {
       setMigrating(false)
@@ -618,11 +628,11 @@ const MorePage = ({
     try {
       setMigrating(true)
       setMigrationResult(null)
-      console.log('🔧 Starting order field migration...')
+      if (import.meta.env.DEV) console.log('🔧 Starting order field migration...')
 
       const result = await migratePhotosAddOrderField()
 
-      console.log('✅ Migration complete:', result)
+      if (import.meta.env.DEV) console.log('✅ Migration complete:', result)
       setMigrationResult({
         type: 'order-field',
         ...result,
@@ -638,7 +648,7 @@ const MorePage = ({
         window.location.reload()
       }, 2000)
     } catch (error) {
-      console.error('❌ Migration failed:', error)
+      if (import.meta.env.DEV) console.error('❌ Migration failed:', error)
       showNotification('Migration failed: ' + error.message, 'error')
     } finally {
       setMigrating(false)
@@ -660,7 +670,7 @@ const MorePage = ({
           setLastReconciliation(reportDoc.data())
         }
       } catch (error) {
-        console.error('Error fetching reconciliation report:', error)
+        if (import.meta.env.DEV) console.error('Error fetching reconciliation report:', error)
       }
     }
 
@@ -683,7 +693,7 @@ const MorePage = ({
       const manualReconcile = httpsCallable(functions, 'manualReconcile')
       const result = await manualReconcile()
 
-      console.log('✅ Manual reconciliation result:', result.data)
+      if (import.meta.env.DEV) console.log('✅ Manual reconciliation result:', result.data)
 
       const { success, message, usersProcessed, issuesFound, issuesFixed } =
         result.data
@@ -707,7 +717,7 @@ const MorePage = ({
         setLastReconciliation(reportDoc.data())
       }
     } catch (error) {
-      console.error('❌ Manual reconciliation error:', error)
+      if (import.meta.env.DEV) console.error('❌ Manual reconciliation error:', error)
 
       setReconcileResult({
         success: false,
@@ -1287,7 +1297,7 @@ const MorePage = ({
           <div className="grid md:grid-cols-2 gap-3">
             <button
               onClick={() => {
-                console.log('🔍 User management clicked')
+                if (import.meta.env.DEV) console.log('🔍 User management clicked')
                 navigate('/admin')
               }}
               className="ripple-effect bg-yellow-600/10 hover:bg-yellow-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-yellow-500/30"
@@ -1302,7 +1312,7 @@ const MorePage = ({
 
             <button
               onClick={() => {
-                console.log('🔍 Database tools clicked')
+                if (import.meta.env.DEV) console.log('🔍 Database tools clicked')
                 navigate('/admin')
               }}
               className="ripple-effect bg-yellow-600/10 hover:bg-yellow-600/20 p-4 rounded-xl transition flex items-center gap-3 text-left border border-yellow-500/30"

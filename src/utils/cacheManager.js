@@ -2,7 +2,7 @@
 // cacheManager.js - IndexedDB cache system for thumbnails and images
 // ============================================================================
 
-const DB_NAME = 'PhotoVaultCache';
+const DB_NAME = 'PixtrCache';
 const DB_VERSION = 1;
 const STORES = {
   THUMBNAILS: 'thumbnails',

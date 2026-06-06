@@ -1,4 +1,4 @@
-package com.cre8web.photovault;
+package com.cre8web.pixtr;
 
 import com.getcapacitor.BridgeActivity;
 

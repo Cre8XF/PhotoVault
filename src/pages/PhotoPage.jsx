@@ -97,41 +97,47 @@ export default function PhotoPage() {
   // 🐛 DEBUG: Log when photo changes (especially tags)
   useEffect(() => {
     if (photo) {
-      console.log('📸 PhotoPage - photo updated:', {
-        id: photo.id,
-        tags: photo.tags,
-        tagsLength: photo.tags?.length,
-        isArray: Array.isArray(photo.tags),
-        fullPhoto: photo,
-      })
+      if (import.meta.env.DEV) {
+        console.log('📸 PhotoPage - photo updated:', {
+          id: photo.id,
+          tags: photo.tags,
+          tagsLength: photo.tags?.length,
+          isArray: Array.isArray(photo.tags),
+          fullPhoto: photo,
+        })
+      }
     }
   }, [photo])
 
   // 📍 DIAGNOSTIC: Log component mount
   useEffect(() => {
-    console.log('📍 [PhotoPage] mounted', {
-      pathname: location.pathname,
-      params: { id },
-      state: location.state,
-      photoContext,
-      photoOrder: photoOrder?.slice(0, 5), // First 5 IDs
-      photoIndex,
-      timestamp: new Date().toISOString(),
-    })
+    if (import.meta.env.DEV) {
+      console.log('📍 [PhotoPage] mounted', {
+        pathname: location.pathname,
+        params: { id },
+        state: location.state,
+        photoContext,
+        photoOrder: photoOrder?.slice(0, 5), // First 5 IDs
+        photoIndex,
+        timestamp: new Date().toISOString(),
+      })
+    }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 🔍 NAV DEBUG: Log navigation state changes
   useEffect(() => {
-    console.log('🔍 [NAV DEBUG] Navigation state:', {
-      photoId: id,
-      photoOrder,
-      photoOrderLength: photoOrder?.length,
-      photoIndex,
-      hasMultipleItems: photoOrder?.length > 1,
-      canNavigate: Array.isArray(photoOrder) && photoOrder.length > 1,
-      prevAvailable: photoIndex > 0,
-      nextAvailable: photoIndex < photoOrder?.length - 1,
-    })
+    if (import.meta.env.DEV) {
+      console.log('🔍 [NAV DEBUG] Navigation state:', {
+        photoId: id,
+        photoOrder,
+        photoOrderLength: photoOrder?.length,
+        photoIndex,
+        hasMultipleItems: photoOrder?.length > 1,
+        canNavigate: Array.isArray(photoOrder) && photoOrder.length > 1,
+        prevAvailable: photoIndex > 0,
+        nextAvailable: photoIndex < photoOrder?.length - 1,
+      })
+    }
   }, [id, photoOrder, photoIndex])
 
   // Set world view on mount
@@ -179,20 +185,22 @@ export default function PhotoPage() {
 
   // Handle navigation
   const handleNext = useCallback(() => {
-    console.log('🔍 [NAV DEBUG] handleNext called', {
-      photoOrder,
-      photoOrderLength: photoOrder?.length,
-      photoIndex,
-      nextIndex: photoIndex + 1,
-      nextId: photoOrder?.[photoIndex + 1],
-    })
+    if (import.meta.env.DEV) {
+      console.log('🔍 [NAV DEBUG] handleNext called', {
+        photoOrder,
+        photoOrderLength: photoOrder?.length,
+        photoIndex,
+        nextIndex: photoIndex + 1,
+        nextId: photoOrder?.[photoIndex + 1],
+      })
+    }
 
     if (!Array.isArray(photoOrder) || photoOrder.length === 0) {
-      console.warn('⚠️ [NAV DEBUG] handleNext blocked: photoOrder invalid')
+      if (import.meta.env.DEV) console.warn('⚠️ [NAV DEBUG] handleNext blocked: photoOrder invalid')
       return
     }
     if (photoIndex >= photoOrder.length - 1) {
-      console.warn('⚠️ [NAV DEBUG] handleNext blocked: at end of sequence')
+      if (import.meta.env.DEV) console.warn('⚠️ [NAV DEBUG] handleNext blocked: at end of sequence')
       return // Hard boundary
     }
 
@@ -200,11 +208,13 @@ export default function PhotoPage() {
     const nextId = photoOrder[nextIndex]
     const nextRoute = getViewerRouteForId(nextId)
 
-    console.log('✅ [NAV DEBUG] Navigating to next:', {
-      nextIndex,
-      nextId,
-      nextRoute,
-    })
+    if (import.meta.env.DEV) {
+      console.log('✅ [NAV DEBUG] Navigating to next:', {
+        nextIndex,
+        nextId,
+        nextRoute,
+      })
+    }
 
     setPhotoIndex(nextIndex)
     setCurrentPhotoId(nextId)
@@ -222,20 +232,22 @@ export default function PhotoPage() {
   ])
 
   const handlePrev = useCallback(() => {
-    console.log('🔍 [NAV DEBUG] handlePrev called', {
-      photoOrder,
-      photoOrderLength: photoOrder?.length,
-      photoIndex,
-      prevIndex: photoIndex - 1,
-      prevId: photoOrder?.[photoIndex - 1],
-    })
+    if (import.meta.env.DEV) {
+      console.log('🔍 [NAV DEBUG] handlePrev called', {
+        photoOrder,
+        photoOrderLength: photoOrder?.length,
+        photoIndex,
+        prevIndex: photoIndex - 1,
+        prevId: photoOrder?.[photoIndex - 1],
+      })
+    }
 
     if (!Array.isArray(photoOrder) || photoOrder.length === 0) {
-      console.warn('⚠️ [NAV DEBUG] handlePrev blocked: photoOrder invalid')
+      if (import.meta.env.DEV) console.warn('⚠️ [NAV DEBUG] handlePrev blocked: photoOrder invalid')
       return
     }
     if (photoIndex <= 0) {
-      console.warn('⚠️ [NAV DEBUG] handlePrev blocked: at start of sequence')
+      if (import.meta.env.DEV) console.warn('⚠️ [NAV DEBUG] handlePrev blocked: at start of sequence')
       return // Hard boundary
     }
 
@@ -243,11 +255,13 @@ export default function PhotoPage() {
     const prevId = photoOrder[prevIndex]
     const prevRoute = getViewerRouteForId(prevId)
 
-    console.log('✅ [NAV DEBUG] Navigating to prev:', {
-      prevIndex,
-      prevId,
-      prevRoute,
-    })
+    if (import.meta.env.DEV) {
+      console.log('✅ [NAV DEBUG] Navigating to prev:', {
+        prevIndex,
+        prevId,
+        prevRoute,
+      })
+    }
 
     setPhotoIndex(prevIndex)
     setCurrentPhotoId(prevId)
@@ -278,28 +292,30 @@ export default function PhotoPage() {
     if (!photo) return
 
     if (import.meta.env.DEV)
-      console.log('🎯 PhotoPage.handleToggleFavorite called:', {
-        photoId: photo.id,
-        currentFavorite: photo.favorite,
-        timestamp: new Date().toISOString(),
-      })
+      if (import.meta.env.DEV) {
+        console.log('🎯 PhotoPage.handleToggleFavorite called:', {
+          photoId: photo.id,
+          currentFavorite: photo.favorite,
+          timestamp: new Date().toISOString(),
+        })
+      }
 
     const newFavoriteStatus = !photo.favorite
 
     // Optimistic update in Zustand
     if (import.meta.env.DEV)
-      console.log('⚡ Optimistically updating Zustand store...')
+      if (import.meta.env.DEV) console.log('⚡ Optimistically updating Zustand store...')
     updatePhotoInStore(photo.id, { favorite: newFavoriteStatus })
 
     try {
       // Sync to Firestore using toggleFavorite
       if (import.meta.env.DEV)
-        console.log('🔥 Calling firebase.toggleFavorite()...')
+        if (import.meta.env.DEV) console.log('🔥 Calling firebase.toggleFavorite()...')
       const result = await firebaseToggleFavorite(photo.id, photo.favorite)
       if (import.meta.env.DEV)
-        console.log('✅ firebase.toggleFavorite() returned:', result)
+        if (import.meta.env.DEV) console.log('✅ firebase.toggleFavorite() returned:', result)
     } catch (err) {
-      console.error('❌ PhotoPage favorite toggle failed:', err)
+      if (import.meta.env.DEV) console.error('❌ PhotoPage favorite toggle failed:', err)
       // Revert UI state on error
       if (import.meta.env.DEV) console.log('↩️ Reverting optimistic update...')
       updatePhotoInStore(photo.id, { favorite: !newFavoriteStatus })
@@ -330,7 +346,7 @@ export default function PhotoPage() {
     if (!photo) return
 
     if (import.meta.env.DEV)
-      console.log('🗑️ PhotoPage: Delete button clicked, showing confirm modal')
+      if (import.meta.env.DEV) console.log('🗑️ PhotoPage: Delete button clicked, showing confirm modal')
     setShowDeleteConfirm(true)
     resetUiTimer()
   }, [photo, resetUiTimer])
@@ -341,18 +357,20 @@ export default function PhotoPage() {
 
     if (import.meta.env.DEV) console.log('✅ Delete confirmed, executing...')
     if (import.meta.env.DEV)
-      console.log('🗑️ Deleting photo:', {
-        photoId: photo.id,
-        storagePath: photo.storagePath,
-        filename: photo.name,
-      })
+      if (import.meta.env.DEV) {
+        console.log('🗑️ Deleting photo:', {
+          photoId: photo.id,
+          storagePath: photo.storagePath,
+          filename: photo.name,
+        })
+      }
 
     // CRITICAL: Navigate away IMMEDIATELY to prevent "Photo not found" error
     // The usePhotoById hook will try to re-fetch the photo after deletion,
     // causing a "not found" error. By navigating first, we unmount the component
     // before that can happen.
     if (import.meta.env.DEV)
-      console.log('🚀 Navigating away immediately to prevent re-fetch')
+      if (import.meta.env.DEV) console.log('🚀 Navigating away immediately to prevent re-fetch')
 
     // Close confirmation modal first
     setShowDeleteConfirm(false)
@@ -367,10 +385,10 @@ export default function PhotoPage() {
     // This happens after navigation, so any errors won't affect the user
     try {
       if (import.meta.env.DEV)
-        console.log('🗑️ Deleting photo from Firebase + R2 in background...')
+        if (import.meta.env.DEV) console.log('🗑️ Deleting photo from Firebase + R2 in background...')
       await firebaseDeletePhoto(photo.id, photo)
       if (import.meta.env.DEV)
-        console.log('✅ Photo deleted successfully from Firebase + R2')
+        if (import.meta.env.DEV) console.log('✅ Photo deleted successfully from Firebase + R2')
 
       // Show success notification (user already on Home page)
       setNotification({
@@ -378,7 +396,7 @@ export default function PhotoPage() {
         type: 'success',
       })
     } catch (error) {
-      console.error('❌ Background delete failed:', error)
+      if (import.meta.env.DEV) console.error('❌ Background delete failed:', error)
 
       // Show error notification (user already on Home page)
       setNotification({
@@ -403,10 +421,12 @@ export default function PhotoPage() {
   // Toggle info panel
   const handleToggleInfo = useCallback(() => {
     if (import.meta.env.DEV)
-      console.log('ℹ️ PhotoPage: Info toggled', {
-        photoId: photo?.id,
-        currentState: showInfo,
-      })
+      if (import.meta.env.DEV) {
+        console.log('ℹ️ PhotoPage: Info toggled', {
+          photoId: photo?.id,
+          currentState: showInfo,
+        })
+      }
     setShowInfo(!showInfo)
     resetUiTimer()
   }, [photo, showInfo, resetUiTimer])
@@ -416,7 +436,7 @@ export default function PhotoPage() {
     if (!photo) return
 
     if (import.meta.env.DEV)
-      console.log('📥 PhotoPage: Download clicked', { photoId: photo.id })
+      if (import.meta.env.DEV) console.log('📥 PhotoPage: Download clicked', { photoId: photo.id })
 
     const link = document.createElement('a')
     link.href = getPhotoUrl(photo)
@@ -432,7 +452,7 @@ export default function PhotoPage() {
     if (!photo) return
 
     if (import.meta.env.DEV)
-      console.log('🔗 PhotoPage: Share clicked', { photoId: photo.id })
+      if (import.meta.env.DEV) console.log('🔗 PhotoPage: Share clicked', { photoId: photo.id })
 
     if (navigator.share) {
       navigator
@@ -442,7 +462,7 @@ export default function PhotoPage() {
         })
         .catch((err) => {
           if (err.name !== 'AbortError') {
-            console.error('Share failed:', err)
+            if (import.meta.env.DEV) console.error('Share failed:', err)
           }
         })
     } else {
@@ -481,11 +501,13 @@ export default function PhotoPage() {
     f: handleToggleFavorite,
   }
 
-  console.log('🔍 [NAV DEBUG] Keyboard shortcuts registered:', {
-    shortcutsType: typeof keyboardShortcuts,
-    shortcutsCount: Object.keys(keyboardShortcuts).length,
-    shortcuts: keyboardShortcuts,
-  })
+  if (import.meta.env.DEV) {
+    console.log('🔍 [NAV DEBUG] Keyboard shortcuts registered:', {
+      shortcutsType: typeof keyboardShortcuts,
+      shortcutsCount: Object.keys(keyboardShortcuts).length,
+      shortcuts: keyboardShortcuts,
+    })
+  }
 
   useKeyboardShortcuts(keyboardShortcuts)
 
@@ -599,12 +621,14 @@ export default function PhotoPage() {
 
   // Loading state
   if (loading) {
-    console.log('⏳ [PhotoPage] Loading state', {
-      id,
-      loading,
-      photo: !!photo,
-      timestamp: new Date().toISOString(),
-    })
+    if (import.meta.env.DEV) {
+      console.log('⏳ [PhotoPage] Loading state', {
+        id,
+        loading,
+        photo: !!photo,
+        timestamp: new Date().toISOString(),
+      })
+    }
     return (
       <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center">
         <div className="spinner" />
@@ -614,15 +638,17 @@ export default function PhotoPage() {
 
   // Error state
   if (error || !photo) {
-    console.warn('⛔ [PhotoPage] render blocked', {
-      reason: error || 'Photo not found',
-      id,
-      photo: !!photo,
-      loading,
-      error,
-      availablePhotosCount: photos?.length,
-      timestamp: new Date().toISOString(),
-    })
+    if (import.meta.env.DEV) {
+      console.warn('⛔ [PhotoPage] render blocked', {
+        reason: error || 'Photo not found',
+        id,
+        photo: !!photo,
+        loading,
+        error,
+        availablePhotosCount: photos?.length,
+        timestamp: new Date().toISOString(),
+      })
+    }
     return (
       <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center">
         <EmptyState
@@ -708,9 +734,11 @@ export default function PhotoPage() {
                 <button
                   onClick={() => {
                     if (import.meta.env.DEV)
-                      console.log(
-                        '✏️ Edit button clicked, navigating to editor'
-                      )
+                      if (import.meta.env.DEV) {
+                        console.log(
+                          '✏️ Edit button clicked, navigating to editor'
+                        )
+                      }
                     navigate(`/edit/${id}`)
                   }}
                   className="text-white hover:bg-blue-500/10 hover:text-blue-400 p-2 rounded-full transition active:scale-95"
@@ -747,7 +775,7 @@ export default function PhotoPage() {
             <button
               onClick={() => {
                 if (import.meta.env.DEV)
-                  console.log('📋 PhotoPage: More menu toggled')
+                  if (import.meta.env.DEV) console.log('📋 PhotoPage: More menu toggled')
                 setShowMoreMenu(!showMoreMenu)
                 resetUiTimer()
               }}
@@ -800,7 +828,7 @@ export default function PhotoPage() {
                 <button
                   onClick={() => {
                     if (import.meta.env.DEV)
-                      console.log('📁 Move to album - TODO')
+                      if (import.meta.env.DEV) console.log('📁 Move to album - TODO')
                     alert(t('common:comingSoon.title') || 'Coming soon')
                     setShowMoreMenu(false)
                     resetUiTimer()
@@ -845,10 +873,12 @@ export default function PhotoPage() {
             )}
             alt={photo.caption || photo.name || 'Photo'}
             onError={(e) => {
-              console.error(
-                '❌ Failed to load photo:',
-                resolvePhotoUrl(photo)
-              )
+              if (import.meta.env.DEV) {
+                console.error(
+                  '❌ Failed to load photo:',
+                  resolvePhotoUrl(photo)
+                )
+              }
               e.target.src = PLACEHOLDER_IMAGE
             }}
             className={`max-w-full max-h-[100vh] object-contain transition-opacity duration-300 cursor-pointer ${
@@ -1202,9 +1232,11 @@ export default function PhotoPage() {
               <button
                 onClick={() => {
                   if (import.meta.env.DEV)
-                    console.log(
-                      '✏️ Edit button clicked (mobile), navigating to editor'
-                    )
+                    if (import.meta.env.DEV) {
+                      console.log(
+                        '✏️ Edit button clicked (mobile), navigating to editor'
+                      )
+                    }
                   navigate(`/edit/${id}`)
                 }}
                 className="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] rounded-lg transition active:scale-95"

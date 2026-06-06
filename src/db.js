@@ -1,9 +1,9 @@
 // ============================================================================
-// PhotoVault Local Cache – IndexedDB for album, bilder og sikkerhet
+// Pixtr Local Cache – IndexedDB for album, bilder og sikkerhet
 // v4.0 – FASE 3: Sikkerhet & Privacy
 // ============================================================================
 
-const DB_NAME = "PhotoVaultDB";
+const DB_NAME = "PixtrDB";
 const DB_VERSION = 4; // Updated for FASE 3
 
 const STORES = {

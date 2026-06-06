@@ -102,7 +102,7 @@
     },
     "prompts": {
       "enable": "Enable biometric authentication",
-      "unlock": "Unlock PhotoVault"
+      "unlock": "Unlock Pixtr"
     },
     "notifications": {
       "enabled": "{{type}} enabled",
@@ -144,7 +144,7 @@
     "enterPin": "Enter PIN to unlock",
     "pinMinLength": "PIN must be at least {{min}} digits",
     "subtitle": "Enter PIN code",
-    "title": "PhotoVault",
+    "title": "Pixtr",
     "unlocking": "Unlocking...",
     "unlockWith": "Unlock with {{type}}",
     "unlockWithBiometric": "Unlock with biometrics",
@@ -152,7 +152,7 @@
   },
   "info": {
     "title": "About security",
-    "description": "How PhotoVault protects your photos",
+    "description": "How Pixtr protects your photos",
     "items": [
       "PIN code is stored encrypted locally on your device",
       "Biometric data is never stored - only the system's API is used",

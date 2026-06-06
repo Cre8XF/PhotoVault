@@ -6,7 +6,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>PhotoVault</string>
+	<string>Pixtr</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -14,23 +14,23 @@
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
 	<key>CFBundleShortVersionString</key>
-	<string>4.0.0</string>
+	<string>1.0.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	
 	<!-- Camera Permission -->
 	<key>NSCameraUsageDescription</key>
-	<string>PhotoVault needs access to your camera to take photos directly in the app.</string>
+	<string>Pixtr needs access to your camera to take photos directly in the app.</string>
 	
 	<!-- Photo Library Permission -->
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>PhotoVault needs access to your photo library to import and save photos.</string>
+	<string>Pixtr needs access to your photo library to import and save photos.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>PhotoVault needs permission to save photos to your library.</string>
+	<string>Pixtr needs permission to save photos to your library.</string>
 	
 	<!-- Face ID Permission -->
 	<key>NSFaceIDUsageDescription</key>
-	<string>PhotoVault uses Face ID to securely protect your private photos.</string>
+	<string>Pixtr uses Face ID to securely protect your private photos.</string>
 	
 	<!-- Supported Orientations -->
 	<key>UISupportedInterfaceOrientations</key>
@@ -74,7 +74,7 @@
 	
 	<!-- Privacy - Files and Folders -->
 	<key>NSDocumentsFolderUsageDescription</key>
-	<string>PhotoVault needs access to your documents to save and load photos.</string>
+	<string>Pixtr needs access to your documents to save and load photos.</string>
 	
 	<!-- Background Modes (for future features) -->
 	<key>UIBackgroundModes</key>

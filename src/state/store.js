@@ -6,7 +6,7 @@ import { devtools, persist } from 'zustand/middleware'
 import { createVaultSlice } from './vaultSlice'
 
 /**
- * PhotoVault Global Store
+ * Pixtr Global Store
  * Centralizes all application state to eliminate prop drilling
  *
  * 🔒 PHASE 2.1 UPDATE: All setters now validate arrays to prevent object corruption
@@ -456,7 +456,7 @@ const useStore = create(
         },
       }
     ),
-    { name: 'PhotoVault Store' }
+    { name: 'Pixtr Store' }
   )
 )
 
